@@ -36,3 +36,6 @@ See our `netify_introduction` for more information. To get started, supply a dya
 
       icews_conflict
 
+## Contributors 
+
+Cassy Dorff (Vanderbilt University) and Shahryar Minhas (Michigan State University) are co-PI's on the collaborative NSF grant funding this work, as such, they acknowledge support from National Science Foundation (NSF) Awards #2017162 and #2017180. Additional contributors include Ha Eun Choi (Ph.D. Candidate, Michigan State University) and Colin Henry (Ph.D. Candidate, Vanderbilt University). 
