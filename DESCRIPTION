@@ -1,0 +1,41 @@
+Package: netify
+Title: network stuff
+Version: 0.1.0
+Authors@R: c(
+  person("Ha Eun", "Choi", email = "choiha3@msu.edu", role = c("aut")),
+  person("Cassy", "Dorff", email = "cassy.dorff@vanderbilt.edu", role = c("aut")),
+  person("Colin", "Henry", email = "colin.henry@vanderbilt.edu", role = c("aut")),
+  person("Shahryar", "Minhas", email = "minhassh@msu.edu", role = c("aut", "cre"))
+  )
+Description: we get the nets from the things.
+Depends:
+  R (>= 3.5.0)
+Imports:
+    Rcpp,
+    abind,
+    reshape2,    
+    stats,
+    cli,
+    checkmate,
+    generics,
+    methods
+LinkingTo:
+  Rcpp
+Suggests:
+    tidyr,
+    igraph,
+    network,
+    ggplot2 (>= 2.2.1),
+    knitr,
+    testthat (>= 3.0.0),
+    rmarkdown,
+    markdown,
+    dplyr,
+    peacesciencer
+License: GPL-3 + file LICENSE
+Encoding: UTF-8
+LazyData: false
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+VignetteBuilder: knitr
+Config/testthat/edition: 3
