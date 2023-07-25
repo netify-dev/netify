@@ -6,11 +6,7 @@ Netify makes networks!
 
 You supply data and `netify` transforms it into easy to work with network data.  The goal of netify is to provide R functions that simplify and facilitate common tasks related to network creation, summary, visualization, and modeling. Although our package was built with social scientists (especially peace science scholars) in mind, anyone can use it!
 
-## Installation
-
-      install.packages("netify")
-
-or via devtools + github
+## Installation via devtools + github
 
       # install devtools
       if (!require(devtools)) {
