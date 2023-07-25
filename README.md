@@ -1,6 +1,6 @@
 # netify
 
-## Overview <img src="https://github.com/netify-dev/netify/assets/1364446/857a09e1-4549-46e2-80bd-6dab32570abc" align = "right" alt="hex" width="200px">
+## Overview <img src="https://github.com/netify-dev/netify/man/figures/hex.png" align = "right" alt="hex" width="200px">
 
 Netify makes networks!
 
