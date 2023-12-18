@@ -60,38 +60,41 @@
 <div class="page-header"><h1 id="netify">netify<a class="anchor" aria-label="anchor" href="#netify"></a>
 </h1></div>
 <div class="section level2">
-<h2 id="overview-">Overview <img src="https://github.com/netify-dev/netify/assets/1364446/3186de64-9917-4b29-a67e-7f88b25d0848" align="right" alt="hex" width="200px"><a class="anchor" aria-label="anchor" href="#overview-"></a>
+<h2 id="overview-">Overview <img src="https://raw.githubusercontent.com/netify-dev/netify/main/man/figures/hex.png" align="right" alt="hex" width="200px"><a class="anchor" aria-label="anchor" href="#overview-"></a>
 </h2>
 <p>Netify makes networks!</p>
-<p>You supply data and netify transforms it into easy to work with network data. The goal of netify is to provide R functions that simplify and facilitate common tasks related to network creation, summary, visualization, and modeling. Although our package was built with social scientists (especially peace science scholars) in mind, anyone can use it!</p>
+<p>You supply data and <code>netify</code> transforms it into easy to work with network data. The goal of netify is to provide R functions that simplify and facilitate common tasks related to network creation, summary, visualization, and modeling. Although our package was built with social scientists (especially peace science scholars) in mind, anyone can use it!</p>
 </div>
 <div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+<h2 id="installation-via-devtools--github">Installation via devtools + github<a class="anchor" aria-label="anchor" href="#installation-via-devtools--github"></a>
 </h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"netify"</span>)</span></code></pre></div>
-<p>or via devtools + github</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>  <span class="co"># install devtools</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(devtools)) {</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">"devtools"</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  }</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="fu">library</span>(devtools)</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="fu">install_github</span>(<span class="st">"netify-dev/netify"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>  <span class="co"># install devtools</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(devtools)) {</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">"devtools"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  }</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="fu">library</span>(devtools)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="fu">install_github</span>(<span class="st">"netify-dev/netify"</span>)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
-<p>See our <code>netify_introduction</code> for more information. To get started, supply a dyadic data set (or edgelist) to netify. You can add information such as nodal or dyadic covariates, time, as well as specify weights for the edges of the network. For example, to generate a longitudional, directed and weighted network use the code below:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>  <span class="fu">library</span>(netify)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="fu">data</span>(icews)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  icews_conflict <span class="ot">&lt;-</span> <span class="fu">netify</span>(</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    <span class="at">dyad_data=</span>icews,</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>    <span class="at">actor1=</span><span class="st">'i'</span>, <span class="at">actor2=</span><span class="st">'j'</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>    <span class="at">time=</span><span class="st">'year'</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>    <span class="at">symmetric=</span><span class="cn">FALSE</span>, <span class="at">weight=</span><span class="st">'matlConf'</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  icews_conflict</span></code></pre></div>
+<p>See our <code>netify_introduction</code> for more information. To get started, supply a dyadic data set (or edgelist) to netify. You can add information such as nodal or dyadic covariates, time, as well as specify weights for the edges of the network. For example, to generate a longitudinal, directed and weighted network use the code below:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>  <span class="fu">library</span>(netify)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="fu">data</span>(icews)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  icews_conflict <span class="ot">&lt;-</span> <span class="fu">netify</span>(</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>    <span class="at">dyad_data=</span>icews,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>    <span class="at">actor1=</span><span class="st">'i'</span>, <span class="at">actor2=</span><span class="st">'j'</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>    <span class="at">time=</span><span class="st">'year'</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>    <span class="at">symmetric=</span><span class="cn">FALSE</span>, <span class="at">weight=</span><span class="st">'matlConf'</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  icews_conflict</span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="contributors">Contributors<a class="anchor" aria-label="anchor" href="#contributors"></a>
+</h2>
+<p>Cassy Dorff (Vanderbilt University) and Shahryar Minhas (Michigan State University) are co-PI’s on the collaborative NSF grant funding this work, as such, they acknowledge support from National Science Foundation (NSF) Awards #2017162 and #2017180. Additional contributors include Ha Eun Choi (Ph.D. Candidate, Michigan State University) and Colin Henry (Ph.D. Candidate, Vanderbilt University).</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">

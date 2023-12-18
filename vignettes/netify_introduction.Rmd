@@ -72,9 +72,9 @@ To learn more about network analysis (with an emphasis on conflict networks) see
 
 We include data examples drawn from the `peacesciencer` package and the ICEWS data. 
 
-The *`peacesciencer`* package provides tools for constructing datasets for peace science scholarship. 
+The *peacesciencer* package provides tools for constructing datasets for peace science scholarship. 
 
-- See \url{https://svmiller.com/peacesciencer/ms.html} for more information. Users will need to install this package to run the examples below.
+- See (https://svmiller.com/peacesciencer/ms.html) for more information. Users will need to install this package to run the examples below.
 
 The *ICEWS* (Integrated Crisis Early Warning Systems) data example is a sample of interstate conflict and cooperation counts between 2002 to 2014. The dataset is for illustration purposes only. It is not to be used for research or inference. 
 
@@ -82,7 +82,7 @@ The *ICEWS* (Integrated Crisis Early Warning Systems) data example is a sample o
 - Boschee, Elizabeth; Lautenschlager, Jennifer; O'Brien, Sean; Shellman, Steve; Starz, James, 2018, "ICEWS Weekly Event Data", https://doi.org/10.7910/DVN/QI2T9A, Harvard Dataverse, V359.
 
 
-To begin, let's create a dyadic dataset to work with. 
+To begin, let's create a dyadic dataset to work with using *peacesciencer*. 
 
 ```{r, eval=TRUE, echo=FALSE}
 library(peacesciencer)

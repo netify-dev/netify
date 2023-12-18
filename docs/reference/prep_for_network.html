@@ -91,9 +91,26 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># convert to network object</span></span></span>
 <span class="r-in"><span><span class="va">ntwk</span> <span class="op">&lt;-</span> <span class="fu">prep_for_network</span><span class="op">(</span><span class="va">verbCoop_net</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in prep_for_network(verbCoop_net):</span> Assertion on '"network"' failed: Please install the `network` package..</span>
 <span class="r-in"><span><span class="va">ntwk</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'ntwk' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Network attributes:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   vertices = 152 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   directed = TRUE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   hyper = FALSE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   loops = FALSE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   multiple = FALSE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   bipartite = FALSE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   verbCoop: 152x152 matrix</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   matlCoop: 152x152 matrix</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   verbConf: 152x152 matrix</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   matlConf: 152x152 matrix</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   total edges= 9976 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     missing edges= 0 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     non-missing edges= 9976 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Vertex attribute names: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     i_log_gdp i_log_pop i_polity2 vertex.names </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Edge attribute names not shown </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># longitudinal case</span></span></span>
 <span class="r-in"><span><span class="va">verbCoop_longit_net</span> <span class="op">=</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
@@ -107,16 +124,34 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># convert to network object</span></span></span>
 <span class="r-in"><span><span class="va">ntwk_longit</span> <span class="op">&lt;-</span> <span class="fu">prep_for_network</span><span class="op">(</span><span class="va">verbCoop_longit_net</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in prep_for_network(verbCoop_longit_net):</span> Assertion on '"network"' failed: Please install the `network` package..</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># output in the longitudinal case is </span></span></span>
 <span class="r-in"><span><span class="co"># a list of network objects</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">ntwk_longit</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'ntwk_longit' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "list"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ntwk_longit</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'ntwk_longit' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2002" "2003" "2004" "2005" "2006" "2007" "2008" "2009" "2010" "2011"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11] "2012" "2013" "2014"</span>
 <span class="r-in"><span><span class="va">ntwk_longit</span><span class="op">[[</span><span class="st">'2002'</span><span class="op">]</span><span class="op">]</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'ntwk_longit' not found</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Network attributes:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   vertices = 152 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   directed = TRUE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   hyper = FALSE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   loops = FALSE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   multiple = FALSE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   bipartite = FALSE </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   verbCoop: 152x152 matrix</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   matlCoop: 152x152 matrix</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   verbConf: 152x152 matrix</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   matlConf: 152x152 matrix</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   total edges= 8692 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     missing edges= 0 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     non-missing edges= 8692 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Vertex attribute names: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     i_log_gdp i_log_pop i_polity2 vertex.names </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  Edge attribute names not shown </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
