@@ -1,5 +1,5 @@
 Package: netify
-Title: network stuff
+Title: netify
 Version: 0.1.0
 Authors@R: c(
   person("Ha Eun", "Choi", email = "choiha3@msu.edu", role = c("aut")),

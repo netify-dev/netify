@@ -4,7 +4,7 @@ development:
   mode: auto
 
 home:
-  title: Build smart networks
+  title: network data
 
 authors:
   Ha Eun Choi:
@@ -18,7 +18,7 @@ authors:
 
 template:
   bootstrap: 5
-  bootswatch: flatly
+  bootswatch: lux
 
 navbar:
   structure:
@@ -35,7 +35,6 @@ navbar:
 #  desc: >-
 #    Functions for loading datasets included in the netify package
 #  contents:
-#    - acled
 #    - event_data
 #    - icews
 #    - ucdp
