@@ -1,8 +1,9 @@
-# netify
 
-## Overview <img src="https://raw.githubusercontent.com/netify-dev/netify/main/man/figures/hex.png" align = "right" alt="hex" width="200px">
+## Netify Overview
 
 Netify makes networks!
+
+<img src="https://raw.githubusercontent.com/netify-dev/netify/main/man/figures/hex.png" align = "right" alt="hex" width="200px">
 
 You supply data and `netify` transforms it into easy to work with network data.  The goal of netify is to provide R functions that simplify and facilitate common tasks related to network creation, summary, visualization, and modeling. Although our package was built with social scientists (especially peace science scholars) in mind, anyone can use it!
 
