@@ -1,0 +1,77 @@
+url: ~
+
+development:
+  mode: auto
+
+home:
+  title: Build smart networks
+
+authors:
+  Ha Eun Choi:
+    href: https://polisci.msu.edu/people/directory/choi-ha-eun.html
+  Cassy Dorff:
+    href: https://www.cassydorff.com/
+  Colin Henry:
+    href: https://henryhenryhenry.com
+  Shahryar Minhas:
+    href: https://s7minhas.com/
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+
+navbar:
+  structure:
+    left: [intro, articles, reference, news]
+    right: [search, github]
+  components:
+   articles:
+     text: Vignettes
+     menu:
+       - text: "Introduction to the netify Package"
+         href: articles/netify_introduction.html
+#reference:
+#- title: "Loading package data"
+#  desc: >-
+#    Functions for loading datasets included in the netify package
+#  contents:
+#    - acled
+#    - event_data
+#    - icews
+#    - ucdp
+#- title: "Unsorted functions"
+#  desc: >-
+#    These functions need to be sorted for the reference page
+#  contents:
+#    - actor_years_to_frame
+#    - add_dyad
+#    - add_nodal
+#    - array_to_list
+#    - char
+#    - get_actor_time_info
+#    - get_adjacency
+#    - get_adjacency_array
+#    - get_adjacency_list
+#    - get_matrix
+#    - get_netlet
+#    - get_nodes
+#    - get_raw
+#    - is_cnet
+#    - netify
+#    - new_netlet
+#    - num
+#    - peek
+#    - plot.conflictNet
+#    - plot_actorStats
+#    - plot_networkStats
+#    - prep
+#    - prep_for_amen
+#    - prep_for_igraph
+#    - prep_for_network
+#    - print.conflictNet
+#    - raw_list
+#    - raw_matrix
+#    - summary.conflictNet
+#    - summary_actor
+#    - unnetify
+#    - validate_netlet
