@@ -393,20 +393,20 @@ Netify provides prep functions that allow users to reshape the `netlet` object t
 You can simply provide a netlet object into these prep functions to get your data ready for `igraph` and network functions. 
 
 ```{r}
-library(igraph)
-# return to***
-# do i have to subset and then make a netify again? or can peek do that?
-# netplot is a matrix not netlet obj
-net_plot <- peek(mid_network, 20)
+#library(igraph)
+## return to***
+## do i have to subset and then make a netify again? or can peek do that?
+## netplot is a matrix not netlet obj
+#net_plot <- peek(mid_network, 20)
 
-igraph_obj <- prep_for_igraph(net_plot)
-igraph_obj
+#igraph_obj <- prep_for_igraph(net_plot)
+#igraph_obj
 
-rm_iso = which(degree(igraph_obj)==0)
-igraph_obj = delete.vertices(igraph_obj, rm_iso)
-graph_attr(igraph_obj, "layout") <- layout.random
+#rm_iso = which(degree(igraph_obj)==0)
+#igraph_obj = delete.vertices(igraph_obj, rm_iso)
+#graph_attr(igraph_obj, "layout") <- layout.random
 
-plot(igraph_obj, edge.arrow.size=.1,vertex.label=NA)
+#plot(igraph_obj, edge.arrow.size=.1,vertex.label=NA)
 ```
 
 Many researchers and users will want to use the network package to do analysis using `statnet` or `ERGM` models and packages. The netify package includes functions that take the network object (`netlet`) and quickly prepare the data for use in these other packages. See `network` and related packages documentation for more information. 
