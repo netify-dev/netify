@@ -1,0 +1,191 @@
+---
+title: "Netify and Conflict Event Data"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries}
+library(devtools)
+library(ggplot2)
+library(igraph)
+library(netify)
+library(ggraph)
+library(patchwork)
+library(dplyr)
+```
+
+## Data Load
+
+In this tutorial, we show how to use `netify` and UCDP data as just one example of potential applications to intrastate event data. The first step is to go to https://ucdp.uu.se/downloads/ and download the data you want to use. For this tutorial we have downloaded UCDP GED event data version 23.1 and subsetted the data for the case of Mexico. 
+
+Citations:
+
+-  Davies, Shawn, Therese Pettersson & Magnus Öberg (2023). Organized violence 1989-2022 and the return of conflicts between states?. Journal of Peace Research 60(4).
+
+- Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP Georeferenced Event Dataset. Journal of Peace Research 50(4).
+
+`
+```{r}
+load(file="ucdp_ged_mexico.rda")
+```
+
+## Create netify object
+
+First, we create an aggregated, weighted network of conflict between actors in Mexico. 
+
+```{r}
+mex_network <- netify(
+  dyad_data = mexico,
+  actor1 = 'side_a',
+  actor2 = 'side_b',
+  symmetric = TRUE,
+  sum_dyads = TRUE,
+  diag_to_NA = TRUE,
+  missing_to_zero = TRUE
+)
+
+# Display a summary of the network object
+summary(mex_network)
+```
+
+## Quick visualization and inspection
+
+`prep_for_igraph` allows us to quickly examine the network using igraph. 
+```{r}
+igraph_mex_network <- prep_for_igraph(mex_network)
+plot(igraph_mex_network, layout = layout_nicely(igraph_mex_network), edge.arrow.size = 0.1)
+```
+
+We can also inspect basic measures, like centrality, to see if the information is in line with our knowledge about specific actors in the. network. Inspecting the network in different ways also provides researchers with information to decide if they need to further clean or modify the input data to meet their needs, such as by removing actors irrelevant to their study.
+
+```{r}
+degree_centrality <- degree(igraph_mex_network)
+degree_centrality
+```
+
+`ggraph` is also available for plotting the `igraph` object: 
+
+```{r}
+ggraph(igraph_mex_network, layout = 'fr') +
+  geom_edge_link() +
+  geom_node_point() +
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+  theme_minimal()
+```
+## Weight by variable
+
+Next, we create a network where the ties between actors are weighted by a specific variable, in this case civilian deaths. 
+
+```{r}
+mex_network_weight <- netify(
+  dyad_data = mexico,
+  actor1 = 'side_a',
+  actor2 = 'side_b',
+  weight = 'deaths_civilians',
+  symmetric = TRUE,
+  sum_dyads = TRUE,
+  diag_to_NA = TRUE,
+  missing_to_zero = TRUE
+)
+```
+
+We can examine the new network object by using the `summary` function and visual inspection. 
+
+```{r}
+summary(mex_network_weight)
+
+igraph_mex_network <- prep_for_igraph(mex_network)
+plot(igraph_mex_network, layout = layout_nicely(igraph_mex_network), edge.arrow.size = 0.1)
+```
+
+
+```{r}
+ggraph(igraph_mex_network, layout = 'fr') +
+  geom_edge_link() +
+  geom_node_point() +
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+  theme_minimal()
+```
+## Longitudinal Network
+
+We might want to incorporate time into our network analysis so that we can see how the network changes overtime. Below we create a binary matrix where `year` is used to indicate the time points for each network. We can see that our `summary` output changes slightly now that we have a network that represents each year of the data. 
+
+```{r}
+mex_long <- netify(
+  dyad_data = mexico,
+  actor1 = 'side_a',
+  actor2 = 'side_b',
+  time = 'year',
+  symmetric = TRUE,
+  sum_dyads = FALSE,
+  diag_to_NA = TRUE,
+  missing_to_zero = TRUE,
+  output_format = "longit_list"
+)
+
+summary(mex_long)
+```
+We can further inspect the network. Given the object is now slightly more complex, using the `peek` function allows us to specify which output we'd like to see.
+
+```{r}
+peek(mex_long, when_to_peek = 6)
+```
+
+Again, we can turn to visualization to assess our network.
+
+```{r}
+igraph_network_list <- lapply(mex_long, prep_for_igraph)
+
+# Create a list to hold the plots
+network_plots <- list()
+
+# Loop through each igraph network and create a plot
+for (i in seq_along(igraph_network_list)) {
+  network_plots[[i]] <- plot(igraph_network_list[[i]], layout = layout_nicely(igraph_network_list[[i]]), edge.arrow.size = 0.1)
+}
+
+# Display the plots for all scenes
+lapply(network_plots, print)
+```
+
+Num actors the same for each year, how to remove isolates?
+
+```{r}
+for (i in seq_along(igraph_network_list)) {
+  # Remove isolates from the network
+  network_without_isolates <- delete.vertices(igraph_network_list[[i]], which(degree(igraph_network_list[[i]]) == 0))
+  network_plots[[i]] <- plot(network_without_isolates, layout = layout_nicely(network_without_isolates), edge.arrow.size = 0.1)
+}
+
+lapply(network_plots, print)
+```
+
+We also might want to begin investigating summary statistics. 
+
+
+```{r, echo=FALSE}
+# note: needs another look
+nets_time_sum <- summary(mex_long)
+```
+
+Next, we can use ggplot to visualize these statistics by grabbing them from the `summary` function.
+
+```{r}
+plot_networkStats(nets_time_sum, longitudinal = TRUE, net_stat=c("sdSendEff", "dens")) +
+  labs(title = "Network-level Statistics") +
+  theme_bw()
+```
+
+We can also apply functions from `igraph`:
+
+```{r}
+#stats <- as_data_frame(igraph_mex_network, what = "vertices")
+#closeness <- stats$closeness
+#sum_mex_mat <- summary(mex_network, closeness=closeness)
+```
