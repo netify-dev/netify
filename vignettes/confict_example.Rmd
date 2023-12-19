@@ -185,7 +185,9 @@ plot_networkStats(nets_time_sum, longitudinal = TRUE, net_stat=c("sdSendEff", "d
 We can also apply functions from `igraph`:
 
 ```{r}
-#stats <- as_data_frame(igraph_mex_network, what = "vertices")
-#closeness <- stats$closeness
-#sum_mex_mat <- summary(mex_network, closeness=closeness)
+i_close = function(x){ ig = prep_for_igraph(x) ; closeness(ig) }
+closeness = i_close(mex_network)
+
+# add to summary
+sum_mex <- summary_actor(mex_network, closeness = closeness)
 ```
