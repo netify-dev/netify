@@ -19,15 +19,13 @@ Imports:
     checkmate,
     generics,
     methods,
-    tidygraph,
-    ggraph
+    igraph,
+    ggplot2 (>= 2.2.1)      
 LinkingTo:
   Rcpp
 Suggests:
     tidyr,
-    igraph,
     network,
-    ggplot2 (>= 2.2.1),
     knitr,
     testthat (>= 3.0.0),
     rmarkdown,

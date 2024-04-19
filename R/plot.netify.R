@@ -11,15 +11,49 @@
 #' @return ggraph object
 #' @author Cassy Dorff, Shahryar Minhas
 #'
-#' @import tidygraph
-#' @import ggraph
+#' @import igraph
+#' @import ggplot2
 #' 
 #' @export plot.netify
 
-plot.netify <- function(x, ...){
+###notes to sm and cd int he documentation for this or vignette: 
+### tel users that these are the igraph options
+		# choices = c(
+		# 	"nicely", "fruchterman.reingold", 
+		# 	"kamada.kawai", "random", "circle", 
+		# 	"star", "grid", "graphopt", 
+		# 	"sugiyama", "drl", "lgl")
 
-	# check if netify object
-	netify_check(x)	
+library(netify)
+library(igraph)
+library(ggplot2)
+
+example(decompose_netlet)
+x = netlet
+
+x = subset_netlet(
+	x, 
+	# when_to_subset=c('2008','2009')
+	when_to_subset=c('2009')
+)
+
+plot_args = list(
+	layout='kamada.kawai'
+)
+
+# layout: user has selected a layout algo from igraph 
+# based on the choices in the documentatoin
+# layout_matrix : user has made a matrix already inwhich 
+# they describe the nodal positions of actors
+# static_actors: default is TRUE
+
+# plot.netify <- function(x, ...){
+
+# 	# check if netify object
+# 	netify_check(x)	
+
+# 	# get plot args
+# 	plot_args = list(...)	
 
 	#
 	netlet <- x ; rm(x)
@@ -30,62 +64,234 @@ plot.netify <- function(x, ...){
 	# pull out msrmnts
 	msrmnts <- netify_measurements(netlet)
 
-    # decompose netlet
-	net_dfs = decompose_netlet( netlet )
+	# define default behaviors in plot_args
+	if(is.null(plot_args$static_actors)){
+		plot_args$static_actors <- TRUE }
 
-	# convert to tidygraph object
-	gg = tbl_graph(
-		nodes = net_dfs$nodal_data, 
-		edges = net_dfs$edge_data, 
-		directed = !obj_attrs$symmetric
-	)
+	# first step is convert to igraph and
+	g = prep_for_igraph(netlet)
 
-	# get plot args
-	plot_args = list(...)	
+	# get node positions
+    # define the layout function based on the user's choice
 
-	# assign layout if none provided
-	if(!is.null(plot_args$layout)){
-		plot_args$layout <- 'kk' }
+	# first check to see if the user supplied their own
+	# layout_matrix
+	if(is.null(plot_args$layout_matrix)){
 
+		# check to see if the user has a desired layout
+		# algo from igraph, if not default to nicely
+		if(is.null(plot_args$layout)){
 
-	# create the ggraph plot
-	viz <- ggraph(gg, layout = plot_args$layout)
+			# if bipartite then we need to use 
+			# bipartite layout otherwise use nicely
+			if(obj_attrs$mode == 'bipartite'){
+				layout_fun = 'bipartite'
+			} else { layout_fun <- 'nicely' }
 
-	# initialize empty aesthetic lists
-	edge_aes <- aes()
-	node_aes <- aes()
+		# if the user has specified a layout
+		# then match it using the code below
+		} else {
+		layout_fun <- match.arg(
+			plot_args$layout, 
+			choices = c(
+				"nicely", "fruchterman.reingold", 
+				"kamada.kawai", "random", "circle", 
+				"star", "grid", "graphopt", 
+				"sugiyama", "drl", "lgl", 'bipartite') )
+		}
 
-	# dynamically add edge aesthetics
-	if (!is.null(plot_args$edge_alpha_var)) {
-		edge_aes <- modifyList(edge_aes, aes(alpha = !!sym(plot_args$edge_alpha_var))) }
+		# based on layout choice or default get the relevant
+		# layout function from igraph and assign it to layout_fun
+		layout_fun <- switch(
+			layout_fun,
+			nicely = layout_nicely,
+			bipartite = layout_bipartite,
+			fruchterman.reingold = layout_with_fr,
+			kamada.kawai = layout_with_kk,
+			random = layout_randomly,
+			circle = layout_in_circle,
+			star = layout_in_star,
+			grid = layout_as_grid,
+			graphopt = layout_with_graphopt,
+			sugiyama = layout_with_sugiyama,
+			drl = layout_with_drl,
+			lgl = layout_with_lgl)
 
-	# dynamically add node aesthetics
-	if (!is.null(plot_args$node_size_var)) {
-		node_aes <- modifyList(node_aes, aes(size = !!sym(plot_args$node_size_var))) }
-	if (!is.null(plot_args$node_color_var)) {
-		node_aes <- modifyList(node_aes, aes(color = !!sym(plot_args$node_color_var))) }
+		# Calculate node positions using the specified layout
+		# if this is a longit list and the user has 
+		# specified that they want actor positions to change
+		# then create a list of layout matrices
+		if(obj_attrs$netify_type != 'cross_sec'){
+			layout_matrix <- lapply(g, function(g_slice){
+				l_matrix_slice = layout_fun(g_slice)
+				rownames(l_matrix_slice) <- V(g_slice)$name
+				return(l_matrix_slice) })
+			names(layout_matrix) = names(g)
+		} else {
+			layout_matrix <- layout_fun(g)
+			rownames(layout_matrix) <- msrmnts$row_actors }
+	} # end of if block to assign layouts
 
-	# Add edges to the plot using do.call
-	viz <- viz + do.call(
-		geom_edge_link, list(mapping = edge_aes))
+	# index to actor bridge
+	nodes = data.frame(
+		index = 1:nrow(layout_matrix),
+		actor = rownames(layout_matrix) )
+	nodes = cbind(nodes, layout_matrix)
+	 names(nodes)[3:4] = c("x", "y")
 
-	# Add nodes to the plot using do.call
-	viz <- viz + do.call(
-		geom_node_point, list(mapping = node_aes))
+	# pull out edgelist from igraph object created in previous section
+	# so edgelist tells us which actor (by index #) is connected to
+	# which other actor. NOTE that the index #s given in edgelist
+	# correspond to the ordering of the actors in the nodes object
+	edges = get.edgelist(g, names=FALSE)
+	edges = data.frame(edges)
+	names(edges) = c("from", "to")
+	edges$from = nodes$actor[match(edges$from, nodes$index)]
+	edges$to = nodes$actor[match(edges$to, nodes$index)]
 
-	# decide whether or not to facet
-	# based on netify_type
-	if( obj_attrs$netify_type != 'cross_sec' ){
-		viz = viz + 
-			facet_edges(~time) +
-			facet_nodes(~time) }
+	# next, lets create a df called edges, in which we have all edge info and
+	# we pull in the node position info as well
+	edges = cbind(
+		edges, 
+		nodes[edgelist[,1],c("x", "y")],
+		nodes[edgelist[,2],c("x", "y")] )
+	names(edges)[3:ncol(edges)] = c("x1", "y1", "x2", "y2")
+	rownames(edges) = NULL
+	######################
 
-	# finalize the plot
-	viz = viz + theme_netify()
+	######################
+	# org the netlet into a  and dyadic df with all the
+	# relev attributes so that we can plot
+	net_dfs = decompose_netlet( netlet ) 
 
-	#
-	return(viz)
+	# in the nodal part of net_dfs add in the
+	# xy pos of actors
+	net_dfs$nodal_data = merge(
+		net_dfs$nodal_data, nodes, by.x='name', by.y='actor' )
+	
+	# now do the same for the edge data
+	net_dfs$edge_data = merge(
+		net_dfs$edge_data, edges, by.x=c('from', 'to'), by.y=c('from', 'to') )
+	######################
+
+	######################
+	# plot
+
+# user parameters for plot
+
+# nodes:
+	# color
+	# size
+	# alpha
+
+# edges:
+	# alpha
+	# color
+	# linewidth
+
+net_dfs$edge_data$matlConfBin = ifelse(
+	net_dfs$edge_data$matlConf > mean(net_dfs$edge_data$matlConf, na.rm=TRUE), 
+	1, 0
+)
+
+	ggplot() +
+		geom_point(
+			data=net_dfs$nodal_data,
+			aes(
+				x = x, 
+				y = y,
+				color = i_polity2,
+				size = i_log_pop
+			)
+		) + 
+		geom_text(
+			data=net_dfs$nodal_data,
+			aes(
+				x = x, 
+				y = y,
+				label = name
+			),
+			check_overlap = TRUE
+		) +
+		geom_segment(
+			data=net_dfs$edge_data,
+			aes(
+				x = x1, 
+				y = y1,
+				xend = x2,
+				yend = y2,
+				alpha = verbCoop,
+				linewidth = factor(matlConfBin)
+				# color = factor(matlConfBin)
+			),
+			arrow = arrow(length = unit(0.3, "cm"))
+		) +
+		theme_netify()
+	######################
+
 }
+
+# }
+
+# 	# get node positions
+# 	layout_positions <- create_layout(g, layout = "kk")
+
+#     # decompose netlet
+# 	net_dfs = decompose_netlet( netlet )
+
+# 	# convert to tidygraph object
+# 	gg = tbl_graph(
+# 		nodes = net_dfs$nodal_data, 
+# 		edges = net_dfs$edge_data, 
+# 		directed = !obj_attrs$symmetric
+# 	)
+
+# 	# get plot args
+# 	plot_args = list(...)	
+
+# 	# assign layout if none provided
+# 	if(!is.null(plot_args$layout)){
+# 		plot_args$layout <- 'kk' }
+
+
+# 	# create the ggraph plot
+# 	viz <- ggraph(gg, layout = plot_args$layout)
+
+# 	# initialize empty aesthetic lists
+# 	edge_aes <- aes()
+# 	node_aes <- aes()
+
+# 	# dynamically add edge aesthetics
+# 	if (!is.null(plot_args$edge_alpha_var)) {
+# 		edge_aes <- modifyList(edge_aes, aes(alpha = !!sym(plot_args$edge_alpha_var))) }
+
+# 	# dynamically add node aesthetics
+# 	if (!is.null(plot_args$node_size_var)) {
+# 		node_aes <- modifyList(node_aes, aes(size = !!sym(plot_args$node_size_var))) }
+# 	if (!is.null(plot_args$node_color_var)) {
+# 		node_aes <- modifyList(node_aes, aes(color = !!sym(plot_args$node_color_var))) }
+
+# 	# Add edges to the plot using do.call
+# 	viz <- viz + do.call(
+# 		geom_edge_link, list(mapping = edge_aes))
+
+# 	# Add nodes to the plot using do.call
+# 	viz <- viz + do.call(
+# 		geom_node_point, list(mapping = node_aes))
+
+# 	# decide whether or not to facet
+# 	# based on netify_type
+# 	if( obj_attrs$netify_type != 'cross_sec' ){
+# 		viz = viz + 
+# 			facet_edges(~time) +
+# 			facet_nodes(~time) }
+
+# 	# finalize the plot
+# 	viz = viz + theme_netify()
+
+# 	#
+# 	return(viz)
+# }
 
 
 #' theme_netify function
@@ -109,53 +315,80 @@ theme_netify = function(){
 	)
 }
 
-library(netify)
+# library(netify)
 
-example(decompose_netlet)
+# example(decompose_netlet)
 
-sub_net = subset_netlet(
-	netlet, 
-	when_to_subset=c('2008','2009')
-)
+# netify_measurements(
+# 	netlet
+# )$row_actors
 
-# netlet = sub_net
+# cntries = c(
+# 	'United States', 'China', 'Russian Federation', 'India', 'Germany', 'France', 'United Kingdom'
+# )
 
-plot_args = list(
-	layout='kk',
-	node_size_var='i_log_gdp',
-	node_color_var='i_polity2',
-	edge_alpha_var='verbCoop'
-)
+# sub_net = subset_netlet(
+# 	netlet, 
+# 	what_to_subset=cntries,
+# 	when_to_subset=c('2008')
+# )
 
-sub_08 = subset_netlet(
-	netlet, 
-	when_to_subset=c('2008')
-)
+# plot.netify(
+# 	sub_net,
+# 	layout='kk',
+# 	node_size_var='i_log_gdp',
+# 	node_color_var='i_polity2',
+# 	edge_alpha_var='verbCoop'
+# 	)
 
-sub_09 = subset_netlet(
-	netlet, 
-	when_to_subset=c('2009')
-)
+# # netlet = sub_net
 
-library(gridExtra)
+# plot_args = list(
+# 	layout='kk',
+# 	node_size_var='i_log_gdp',
+# 	node_color_var='i_polity2',
+# 	edge_alpha_var='verbCoop'
+# )
 
-viz08 = plot.netify(
-	sub_08,
-	layout='kk',
-	node_size_var='i_log_gdp',
-	node_color_var='i_polity2',
-	edge_alpha_var='verbCoop'
-	)
+# sub_08 = subset_netlet(
+# 	netlet, 
+# 	when_to_subset=c('2008')
+# )
 
-viz09 = plot.netify(
-	sub_09,
-	layout='kk',
-	node_size_var='i_log_gdp',
-	node_color_var='i_polity2',
-	edge_alpha_var='verbCoop'
-	)
+# sub_09 = subset_netlet(
+# 	netlet, 
+# 	when_to_subset=c('2009')
+# )
 
-grid.arrange(viz08, viz09, ncol=1)
+# library(gridExtra)
+
+
+# viz08 = plot.netify(
+# 	sub_net,
+# 	layout='kk',
+# 	node_size_var='i_log_gdp',
+# 	node_color_var='i_polity2',
+# 	edge_alpha_var='verbCoop'
+# 	)
+
+
+# viz08 = plot.netify(
+# 	sub_08,
+# 	layout='kk',
+# 	node_size_var='i_log_gdp',
+# 	node_color_var='i_polity2',
+# 	edge_alpha_var='verbCoop'
+# 	)
+
+# viz09 = plot.netify(
+# 	sub_09,
+# 	layout='kk',
+# 	node_size_var='i_log_gdp',
+# 	node_color_var='i_polity2',
+# 	edge_alpha_var='verbCoop'
+# 	)
+
+# grid.arrange(viz08, viz09, ncol=1)
 
 # library(tidygraph)
 # library(ggraph)
@@ -198,66 +431,66 @@ grid.arrange(viz08, viz09, ncol=1)
 
 
 
-# manual walk through
-# pull out attrs
-obj_attrs <- attributes(sub_net)
-# decompose netlet
-net_dfs = decompose_netlet( sub_net )
+# # manual walk through
+# # pull out attrs
+# obj_attrs <- attributes(sub_net)
+# # decompose netlet
+# net_dfs = decompose_netlet( sub_net )
 
-net_dfs$nodal_data$time = as.numeric(net_dfs$nodal_data$time)
-net_dfs$edge_data$time = as.numeric(net_dfs$edge_data$time)
+# net_dfs$nodal_data$time = as.numeric(net_dfs$nodal_data$time)
+# net_dfs$edge_data$time = as.numeric(net_dfs$edge_data$time)
 
-# convert to tidygraph object
-library(tidygraph)
-library(ggraph)
-gg = tbl_graph(
-	nodes = net_dfs$nodal_data, 
-	edges = net_dfs$edge_data, 
-	directed = !obj_attrs$symmetric
-)
+# # convert to tidygraph object
+# library(tidygraph)
+# library(ggraph)
+# gg = tbl_graph(
+# 	nodes = net_dfs$nodal_data, 
+# 	edges = net_dfs$edge_data, 
+# 	directed = !obj_attrs$symmetric
+# )
 
-# First, ensure that node indices are properly set for joining
-gg <- gg %>%
-  activate(nodes) %>%
-  mutate(node_id = row_number())  # Ensure there's a column to join on that matches the edge indices
+# # First, ensure that node indices are properly set for joining
+# gg <- gg %>%
+#   activate(nodes) %>%
+#   mutate(node_id = row_number())  # Ensure there's a column to join on that matches the edge indices
 
-# Now join node attributes to edges considering the time attribute
-gg <- gg %>%
-  activate(edges) %>%
-  left_join(as_tibble(activate(gg, nodes)), by = c("from" = "node_id", "time" = "time")) %>%
-  left_join(as_tibble(activate(gg, nodes)), by = c("to" = "node_id", "time" = "time"), suffix = c(".from", ".to"))
+# # Now join node attributes to edges considering the time attribute
+# gg <- gg %>%
+#   activate(edges) %>%
+#   left_join(as_tibble(activate(gg, nodes)), by = c("from" = "node_id", "time" = "time")) %>%
+#   left_join(as_tibble(activate(gg, nodes)), by = c("to" = "node_id", "time" = "time"), suffix = c(".from", ".to"))
 
 
-# Plotting with ggraph
-ggraph(gg, layout = 'fr') +
-	geom_edge_link(aes(alpha=verbCoop)) +
-	geom_node_point(aes(size=i_log_gdp, color=i_polity2)) +
-	geom_node_text(aes(label = name),  colour = 'black', show.legend = FALSE, repel=TRUE)	 +
-  facet_wrap(~time) +
-  scale_color_viridis_d() +
-  theme_minimal()
+# # Plotting with ggraph
+# ggraph(gg, layout = 'fr') +
+# 	geom_edge_link(aes(alpha=verbCoop)) +
+# 	geom_node_point(aes(size=i_log_gdp, color=i_polity2)) +
+# 	geom_node_text(aes(label = name),  colour = 'black', show.legend = FALSE, repel=TRUE)	 +
+#   facet_wrap(~time) +
+#   scale_color_viridis_d() +
+#   theme_minimal()
 
-gg <- gg %>%
-  activate(edges) %>%
-  left_join(as_tibble(activate(gg, nodes)), by = c("from" = "row_number", "time" = "time")) %>%
-  left_join(as_tibble(activate(gg, nodes)), by = c("to" = "row_number", "time" = "time"))
+# gg <- gg %>%
+#   activate(edges) %>%
+#   left_join(as_tibble(activate(gg, nodes)), by = c("from" = "row_number", "time" = "time")) %>%
+#   left_join(as_tibble(activate(gg, nodes)), by = c("to" = "row_number", "time" = "time"))
 
-# Use tidygraph to add node time to edges
-gg <- gg %>%
-  activate(edges) %>%
-  left_join(as_tibble(activate(graph, nodes)), by = c("from" = "name")) %>%
-  mutate(edge_facet = paste(time.x, time.y, sep = "-")) %>%
-  select(-time.x, -time.y, -group)
+# # Use tidygraph to add node time to edges
+# gg <- gg %>%
+#   activate(edges) %>%
+#   left_join(as_tibble(activate(graph, nodes)), by = c("from" = "name")) %>%
+#   mutate(edge_facet = paste(time.x, time.y, sep = "-")) %>%
+#   select(-time.x, -time.y, -group)
 
-ggraph(gg, layout = 'kk') +
-	geom_edge_link(aes(alpha=verbCoop)) +
-	geom_node_point(aes(size=i_log_gdp, color=i_polity2)) +
-	geom_node_text(aes(label = name),  colour = 'black', show.legend = FALSE, repel=TRUE)	 +
-	theme_netify() +
-	# facet_graph(time~time)
-	facet_wrap(~time) +
-	facet_nodes(~time) +
-	theme_netify()
+# ggraph(gg, layout = 'kk') +
+# 	geom_edge_link(aes(alpha=verbCoop)) +
+# 	geom_node_point(aes(size=i_log_gdp, color=i_polity2)) +
+# 	geom_node_text(aes(label = name),  colour = 'black', show.legend = FALSE, repel=TRUE)	 +
+# 	theme_netify() +
+# 	# facet_graph(time~time)
+# 	facet_wrap(~time) +
+# 	facet_nodes(~time) +
+# 	theme_netify()
 
 
 
