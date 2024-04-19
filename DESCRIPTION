@@ -13,12 +13,14 @@ Depends:
 Imports:
     Rcpp,
     abind,
-    reshape2,    
+    reshape2 (>= 1.4.4),
     stats,
     cli,
     checkmate,
     generics,
-    methods
+    methods,
+    tidygraph,
+    ggraph
 LinkingTo:
   Rcpp
 Suggests:

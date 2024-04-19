@@ -210,36 +210,72 @@ time_check <- function(time, dyad_data){
 }
 
 
-#' repeat_dyads_check
-#' 
-#' Check whether dyadic observations are 
-#' repeating in the data.frame object
-#' @param dyad_data user inputted data.frame object
-#' @param actor1 character value denoting actor1 in the data.frame object
-#' @param actor2 character value denoting actor2 in the data.frame object
-#' @param time optoinal character value denoting time in the data.frame object
-#' @return returns a count of the number of repeating dyads in the
-#' data.frame object
-#' @author Ha Eun Choi, Shahryar Minhas
+# #' repeat_dyads_check
+# #' 
+# #' Check whether dyadic observations are 
+# #' repeating in the data.frame object
+# #' @param dyad_data user inputted data.frame object
+# #' @param actor1 character value denoting actor1 in the data.frame object
+# #' @param actor2 character value denoting actor2 in the data.frame object
+# #' @param time optoinal character value denoting time in the data.frame object
+# #' @return returns a count of the number of repeating dyads in the
+# #' data.frame object
+# #' @author Ha Eun Choi, Shahryar Minhas
 
-repeat_dyads_check <- function(dyad_data, actor1, actor2, time=NULL){
+# repeat_dyads_check <- function(dyad_data, actor1, actor2, time=NULL){
 
-    # use table to get a count of dyadic ids
-    if(is.null(time)){ 
-        dyad_data = cbind(dyad_data, time=1)
-        time = 'time' }
-    dyad_counts <- table( 
-        paste( dyad_data[,actor1], dyad_data[,actor2], dyad_data[,time], sep='_'  ) )
+#     # use table to get a count of dyadic ids
+#     if(is.null(time)){ 
+#         dyad_data = cbind(dyad_data, time=1)
+#         time = 'time' }
+#     dyad_counts <- table( 
+#         paste( dyad_data[,actor1], dyad_data[,actor2], dyad_data[,time], sep='_'  ) )
 
-    # subset to those that repeat
-    repeat_dyads <- dyad_counts[ dyad_counts > 1 ]
+#     # subset to those that repeat
+#     repeat_dyads <- dyad_counts[ dyad_counts > 1 ]
 
-    # get count
-    num_repeat_dyads <- length(repeat_dyads)    
+#     # get count
+#     num_repeat_dyads <- length(repeat_dyads)    
 
-    #
-    return(num_repeat_dyads)
+#     #
+#     return(num_repeat_dyads)
+# }
+
+# repeat_dyads_check
+# 
+#' Check whether dyadic observations are repeating in the data.frame object
+#'
+#' This function checks for repeating dyadic observations in a data.frame,
+#' possibly considering a time dimension. It leverages fast C++ code for improved
+#' performance.
+#'
+#' @param dyad_data A data.frame containing the dyadic data.
+#' @param actor1 Character string specifying the column name for actor1.
+#' @param actor2 Character string specifying the column name for actor2.
+#' @param time Optional character string specifying the column name for time.
+#'             If not provided, dyads are considered without regard to time.
+#' @return An integer count of the number of repeating dyads in the data.frame.
+#' @author Shahryar Minhas
+
+repeat_dyads_check <- function(dyad_data, actor1, actor2, time = NULL) {
+
+    # Convert parameters for C++ function
+    if (!is.null(time)) {
+    timeVec <- dyad_data[[time]]
+    } else {
+    timeVec <- rep(1, nrow(dyad_data))  # Default time vector if none provided
+    }
+
+    actor1Vec <- dyad_data[[actor1]]
+    actor2Vec <- dyad_data[[actor2]]
+
+    # call c++ fn
+    out <- repeat_dyads_check_cpp(actor1Vec, actor2Vec, timeVec)
+
+    # 
+    return(out)
 }
+
 
 #' edge_value_check
 #' 

@@ -70,3 +70,45 @@ agg_across_units <- function(
     #
     return(dyad_data)
 }
+
+# # # same using data.table
+# ### #' @import data.table
+# agg_across_units <- function(
+#     dyad_data, 
+#     actor1, 
+#     actor2, 
+#     time = NULL, 
+#     weight, 
+#     symmetric, 
+#     ignore_missing = TRUE
+
+# ){
+
+#     # convert dyad_data to a data.table and make a copy to work on
+#     dyad_data_dt <- copy(setDT(dyad_data))
+
+#     # if symmetric, then duplicate the data with actor1 and actor2 flipped, and bind them together
+#     if (symmetric) {
+#         flipped_data <- copy(dyad_data_dt)[, c((actor1), (actor2)) := .(get(actor2), get(actor1))]
+#     dyad_data_dt <- rbindlist(
+#         list(dyad_data_dt, flipped_data), use.names = TRUE)
+#     }
+
+#     # handling of missing values
+#     na_rm = ignore_missing
+
+#     # aggregate based on the presence of the 'time' column
+#     if (is.null(time)) {
+
+#         # Aggregate without considering time
+#         agg_dyad_data <- dyad_data_dt[, .(sum_weight = sum(get(weight), na.rm = na_rm)), 
+#         by = .(actor1 = get(actor1), actor2 = get(actor2))]
+#     } else {
+#         # Aggregate considering time
+#         agg_dyad_data <- dyad_data_dt[, .(sum_weight = sum(get(weight), na.rm = na_rm)), 
+#         by = .(actor1 = get(actor1), actor2 = get(actor2), time = get(time))]
+#     }
+
+#     # Return the aggregated df
+#     return(as.data.frame(agg_dyad_data))
+# }

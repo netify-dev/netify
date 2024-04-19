@@ -2,27 +2,28 @@
 % Please edit documentation in R/input_checks.R
 \name{repeat_dyads_check}
 \alias{repeat_dyads_check}
-\title{repeat_dyads_check}
+\title{Check whether dyadic observations are repeating in the data.frame object}
 \usage{
 repeat_dyads_check(dyad_data, actor1, actor2, time = NULL)
 }
 \arguments{
-\item{dyad_data}{user inputted data.frame object}
+\item{dyad_data}{A data.frame containing the dyadic data.}
 
-\item{actor1}{character value denoting actor1 in the data.frame object}
+\item{actor1}{Character string specifying the column name for actor1.}
 
-\item{actor2}{character value denoting actor2 in the data.frame object}
+\item{actor2}{Character string specifying the column name for actor2.}
 
-\item{time}{optoinal character value denoting time in the data.frame object}
+\item{time}{Optional character string specifying the column name for time.
+If not provided, dyads are considered without regard to time.}
 }
 \value{
-returns a count of the number of repeating dyads in the
-data.frame object
+An integer count of the number of repeating dyads in the data.frame.
 }
 \description{
-Check whether dyadic observations are
-repeating in the data.frame object
+This function checks for repeating dyadic observations in a data.frame,
+possibly considering a time dimension. It leverages fast C++ code for improved
+performance.
 }
 \author{
-Ha Eun Choi, Shahryar Minhas
+Shahryar Minhas
 }

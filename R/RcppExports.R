@@ -19,3 +19,16 @@ get_matrix <- function(n_rows, n_cols, actors_rows, actors_cols, matRowIndices, 
     .Call(`_netify_get_matrix`, n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric)
 }
 
+#' Determine number of repeating dyad-time obs
+#'
+#' @param actor1 character vector for actor1
+#' @param actor2 character vector for actor2
+#' @param time numeric vector for time
+#' @return an integer count of number of repeating dyads
+#' @author Shahryar Minhas
+#'
+#' @export repeat_dyads_check_cpp
+repeat_dyads_check_cpp <- function(actor1, actor2, time) {
+    .Call(`_netify_repeat_dyads_check_cpp`, actor1, actor2, time)
+}
+

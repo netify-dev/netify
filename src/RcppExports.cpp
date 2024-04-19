@@ -28,9 +28,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// repeat_dyads_check_cpp
+int repeat_dyads_check_cpp(CharacterVector actor1, CharacterVector actor2, NumericVector time);
+RcppExport SEXP _netify_repeat_dyads_check_cpp(SEXP actor1SEXP, SEXP actor2SEXP, SEXP timeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type actor1(actor1SEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type actor2(actor2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type time(timeSEXP);
+    rcpp_result_gen = Rcpp::wrap(repeat_dyads_check_cpp(actor1, actor2, time));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_netify_get_matrix", (DL_FUNC) &_netify_get_matrix, 8},
+    {"_netify_repeat_dyads_check_cpp", (DL_FUNC) &_netify_repeat_dyads_check_cpp, 3},
     {NULL, NULL, 0}
 };
 

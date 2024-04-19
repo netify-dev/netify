@@ -76,4 +76,6 @@ get_raw <- function(netlet){
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #' @export
 
-unnetify <- function(netlet){ get_raw(netlet) }
+unnetify <- function(netlet){ 
+    get_raw(netlet)
+    }

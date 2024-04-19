@@ -133,14 +133,20 @@ get_adjacency_list <- function(
   if(mode=='bipartite'){
       if( length(intersect(dyad_data[,actor1], dyad_data[,actor2]))>0 ){
           cli::cli_alert_warning(
-              "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes.") } }    
+              "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes."
+    ) } }    
 
   # check if user supplied actor_pds
-  if(!is.null(actor_pds)){ user_actor_pds <- TRUE } else { user_actor_pds <- FALSE }
+  if(!is.null(actor_pds)){ 
+    user_actor_pds <- TRUE 
+    } else { 
+    user_actor_pds <- FALSE }
 
   # check to make sure time variable actually is numeric
   if(!is.numeric(dyad_data[,time])){
-    cli::cli_alert_danger('Values in the time variable must be numeric.')
+    cli::cli_alert_danger(
+      'Values in the time variable must be numeric.'
+      )
     stop() }
 
   # add weight if not supplied
@@ -183,7 +189,9 @@ get_adjacency_list <- function(
 
     # make sure every actor has only been entered once
     if(length(unique(actor_pds$actor))!=nrow(actor_pds)){
-      cli::cli_alert_danger("Actors are repeating in `actor_pds`. Every actor must show up only once with a unique `min_time` and `max_time`.")
+      cli::cli_alert_danger(
+        "Actors are repeating in `actor_pds`. Every actor must show up only once with a unique `min_time` and `max_time`."
+        )
       stop() }
 
     # rename first col to actor, second to min_time, third to max_time
@@ -206,7 +214,9 @@ get_adjacency_list <- function(
 
     # stop process if no dyads remain
     if(nrow(dyad_data)==0){
-      cli::cli_alert_danger("No dyads remain after subsetting to the actors and years defined in `actor_pds`.")
+      cli::cli_alert_danger(
+        "No dyads remain after subsetting to the actors and years defined in `actor_pds`."
+        )
       stop() }
 
     # further pair down data to ensure that we are only including observations

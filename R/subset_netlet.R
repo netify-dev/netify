@@ -55,10 +55,13 @@ subset_netlet <- function(
 	what_layers_to_subset=NULL
 ){
 
+    # check if netify object
+    netify_check(netlet)    
+
 	# pull out attrs and msrmnts of original
-	objAttrs <- attributes(netlet)
+	obj_attrs <- attributes(netlet)
     msrmnts <- netify_measurements(netlet)
-    nlayers <- length(objAttrs$layers)
+    nlayers <- length(obj_attrs$layers)
 
     # check if output should be multilayer
     nlayers_subset <- ifelse(
@@ -81,18 +84,18 @@ subset_netlet <- function(
 
     # longit check, if data is longitudinal and one time
     # period was subsetted then need to extract out of list
-    # and also adjust objAttrs to reflect that the 
+    # and also adjust obj_attrs to reflect that the 
     # subsetted element is now a matrix instead of a list
-    if( objAttrs$netify_type!='cross_sec' ){
+    if( obj_attrs$netify_type!='cross_sec' ){
         if( class(sub_net)=='list' & length(sub_net)==1 ){
             
             # extract out of list
             sub_net <- sub_net[[1]]
 
-            # adjust objAttrs
-            objAttrs <- objAttrs[-1]
-            objAttrs <- append(
-                objAttrs, 
+            # adjust obj_attrs
+            obj_attrs <- obj_attrs[-1]
+            obj_attrs <- append(
+                obj_attrs, 
                 attributes(sub_net),
                 after=0
                 )
@@ -129,93 +132,86 @@ subset_netlet <- function(
     # is longit then change when_to_subset to all
     # time points
     if( is.null(when_to_subset) & 
-        objAttrs$netify_type!='cross_sec' ){
+        obj_attrs$netify_type!='cross_sec' ){
         when_to_subset <- msrmnts$time }
 
     # add back in netify attributes
-    objAttrs2 <- objAttrs
+    obj_attrs2 <- obj_attrs
 
     # new object: longit list
     if(is.list(sub_net)){
 
         # pull attributes from a cross-sec in the list
-        crossSec_objAttrs <- attributes(netlet[[1]])
+        crossSec_obj_attrs <- attributes(netlet[[1]])
         sub_dims <- attributes(sub_net[[1]])
 
         # adjust actor composition
-        crossSec_objAttrs[1:2] <- sub_dims[1:2]
+        crossSec_obj_attrs[1:2] <- sub_dims[1:2]
 
         # apply change to each element in subsetted list
         sub_net <- lapply(sub_net, function(x){
-            attributes(x) <- crossSec_objAttrs ; return(x) })
+            attributes(x) <- crossSec_obj_attrs ; return(x) })
 
         # list level attributes
         # adjust years
-        objAttrs2$names <- names(sub_net)
+        obj_attrs2$names <- names(sub_net)
     }
 
     # new object: cross-sectional/longit array/multilayer
     if(!is.list(sub_net)){
     
         # adjust dimensions
-        objAttrs2[1:2] <- attributes(sub_net)[1:2]
+        obj_attrs2[1:2] <- attributes(sub_net)[1:2]
 
         # adjust netify_type
         if( length(dim(sub_net))==2 & !multilayer_logic ){
-            objAttrs2$netify_type <- 'cross_sec' }
+            obj_attrs2$netify_type <- 'cross_sec' }
 
         # related mod for multilayer net
         if( length(dim(sub_net))==3 & multilayer_logic ){
-            objAttrs2$netify_type <- 'cross_sec' }  
+            obj_attrs2$netify_type <- 'cross_sec' }  
     }
 
-    # deal with NULL entries for row/col selections
-    # before moving towards adjusting actor
-    # related attributes
-    row_actors <- unlist(msrmnts$row_actors)
-    col_actors <- unlist(msrmnts$col_actors)
-    row_sel <- ifelse(
-        is.null(what_rows_to_subset),
-        row_actors, what_rows_to_subset )
-    col_sel <- ifelse(
-        is.null(what_cols_to_subset),
-        col_actors, what_cols_to_subset )
-    sub_actors <- unique(
-        c(row_sel, col_sel))
+    # get actors in subsetted netlet
+    if(class(sub_net)[1] == 'list'){
+        sub_actors <- unlist(lapply(sub_net, rownames)) }
+    if(class(sub_net)[1] != 'list'){
+        sub_actors <- rownames(sub_net) }
+    names(sub_actors) <- NULL
 
     # adjust actor periods
-    objAttrs2$actor_pds <- objAttrs$actor_pds[
-        objAttrs$actor_pds$actor %in% sub_actors,]
-    if(objAttrs2$netify_type != 'cross_sec'){
-        objAttrs2$actor_pds$min_time <- apply(
-            objAttrs2$actor_pds, 1, function(x){
+    obj_attrs2$actor_pds <- obj_attrs$actor_pds[
+        obj_attrs$actor_pds$actor %in% sub_actors,]
+    if(obj_attrs2$netify_type != 'cross_sec'){
+        obj_attrs2$actor_pds$min_time <- apply(
+            obj_attrs2$actor_pds, 1, function(x){
                 max( x['min_time'], min(when_to_subset)) } )
-        objAttrs2$actor_pds$max_time <- apply(
-            objAttrs2$actor_pds, 1, function(x){
+        obj_attrs2$actor_pds$max_time <- apply(
+            obj_attrs2$actor_pds, 1, function(x){
                 min( x['max_time'], max(when_to_subset)) } ) 
     }
 
     # adjust nodal_data
-    if(!is.null(objAttrs$nodal_data)){
-        objAttrs2$nodal_data <- objAttrs$nodal_data[
-            objAttrs$nodal_data$actor %in% sub_actors &
-            objAttrs$nodal_data$time %in% when_to_subset,] }
+    if(!is.null(obj_attrs$nodal_data)){
+        obj_attrs2$nodal_data <- obj_attrs$nodal_data[
+            obj_attrs$nodal_data$actor %in% sub_actors &
+            obj_attrs$nodal_data$time %in% when_to_subset,] }
 
     # adjust dyad_data
-    if(!is.null(objAttrs$dyad_data)){
+    if(!is.null(obj_attrs$dyad_data)){
 
         # first subset time
-        objAttrs2$dyad_data <- objAttrs2$dyad_data[when_to_subset]
+        obj_attrs2$dyad_data <- obj_attrs2$dyad_data[when_to_subset]
         
         # then iterate through and subset actors
-        objAttrs2$dyad_data <- lapply(
-            objAttrs2$dyad_data, function(dd){
+        obj_attrs2$dyad_data <- lapply(
+            obj_attrs2$dyad_data, function(dd){
                 toKeep_rows <- intersect(rownames(dd), sub_actors)
                 toKeep_cols <- intersect(colnames(dd), sub_actors)
                 dd[toKeep_rows, toKeep_cols,] } ) }
 
     # add back in netify attributes
-    attributes(sub_net) <- objAttrs2
+    attributes(sub_net) <- obj_attrs2
 
     # return object
     return(sub_net)
