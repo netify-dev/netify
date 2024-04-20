@@ -33,8 +33,8 @@ x = netlet
 
 x = subset_netlet(
 	x, 
-	# when_to_subset=c('2008','2009')
-	when_to_subset=c('2009')
+	when_to_subset=c('2008','2009') 
+	# when_to_subset=c('2009')
 )
 
 plot_args = list(
@@ -55,6 +55,7 @@ plot_args = list(
 # 	# get plot args
 # 	plot_args = list(...)	
 
+	######################
 	#
 	netlet <- x ; rm(x)
 
@@ -66,14 +67,16 @@ plot_args = list(
 
 	# define default behaviors in plot_args
 	if(is.null(plot_args$static_actors)){
-		plot_args$static_actors <- TRUE }
+		plot_args$static_actors <- FALSE }
 
 	# first step is convert to igraph and
 	g = prep_for_igraph(netlet)
+	######################
 
 	# get node positions
-    # define the layout function based on the user's choice
+    # define the layout function based on the user's choice	
 
+	######################
 	# first check to see if the user supplied their own
 	# layout_matrix
 	if(is.null(plot_args$layout_matrix)){
@@ -131,47 +134,142 @@ plot_args = list(
 			layout_matrix <- layout_fun(g)
 			rownames(layout_matrix) <- msrmnts$row_actors }
 	} # end of if block to assign layouts
+	######################	
 
-	# index to actor bridge
-	nodes = data.frame(
-		index = 1:nrow(layout_matrix),
-		actor = rownames(layout_matrix) )
-	nodes = cbind(nodes, layout_matrix)
-	 names(nodes)[3:4] = c("x", "y")
-
-	# pull out edgelist from igraph object created in previous section
-	# so edgelist tells us which actor (by index #) is connected to
-	# which other actor. NOTE that the index #s given in edgelist
-	# correspond to the ordering of the actors in the nodes object
-	edges = get.edgelist(g, names=FALSE)
-	edges = data.frame(edges)
-	names(edges) = c("from", "to")
-	edges$from = nodes$actor[match(edges$from, nodes$index)]
-	edges$to = nodes$actor[match(edges$to, nodes$index)]
-
-	# next, lets create a df called edges, in which we have all edge info and
-	# we pull in the node position info as well
-	edges = cbind(
-		edges, 
-		nodes[edgelist[,1],c("x", "y")],
-		nodes[edgelist[,2],c("x", "y")] )
-	names(edges)[3:ncol(edges)] = c("x1", "y1", "x2", "y2")
-	rownames(edges) = NULL
 	######################
+	# if static layout then choose first
+	if(plot_args$static_actors){
+		layout_matrix = layout_matrix[[1]] }
+	######################		
+
+	######################
+	# if layout_matrix and g are not lists then
+	# wrap them in one so we can have one
+	# set of code for getting positions for 
+	# longit and cross_sec
+	if(!is.list(layout_matrix)){
+		layout_matrix = list(layout_matrix)  }
+	if(class(g)=='igraph'){
+		g = list(g) }
+
+	# set up nodes
+	nodes_list = lapply(layout_matrix, function(layout_slice){
+
+		# set up nodes df
+		nodes = data.frame(
+			index = 1:nrow(layout_slice),
+			actor = rownames(layout_slice) )
+		nodes = cbind(nodes, layout_slice)
+		names(nodes)[3:4] = c("x", "y")
+
+		#
+		return(nodes) })
+
+	# set up edges
+	edges_list = lapply(1:length(g), function(ii){
+
+		#
+		g_slice = g[[ii]]
+
+		# get edges
+		edges = get.edgelist(g_slice, names=TRUE)
+		edges = data.frame(edges)
+		names(edges) = c("from", "to")
+
+		#
+		nodes = nodes_list[[ii]]
+
+		# get info to make segments
+		edges = cbind(
+			edges, 
+			nodes[edges$from,c("x", "y")],
+			nodes[edges$to,c("x", "y")] )
+		names(edges)[3:ncol(edges)] = c("x1", "y1", "x2", "y2")
+		rownames(edges) = NULL
+
+		#
+		return(edges) })
+	names(edges_list) = names(g)
+	######################	
+
+	# ######################
+	# # set up nodes and edges
+	# nodes = data.frame(
+	# 	index = 1:nrow(layout_matrix),
+	# 	actor = rownames(layout_matrix) )
+	# nodes = cbind(nodes, layout_matrix)
+	#  names(nodes)[3:4] = c("x", "y")
+
+	# # pull out edgelist from igraph object created in previous section
+	# # so edgelist tells us which actor (by index #) is connected to
+	# # which other actor. NOTE that the index #s given in edgelist
+	# # correspond to the ordering of the actors in the nodes object
+	# edges = get.edgelist(g, names=FALSE)
+	# edges = data.frame(edges)
+	# names(edges) = c("from", "to")
+	# edges$from = nodes$actor[match(edges$from, nodes$index)]
+	# edges$to = nodes$actor[match(edges$to, nodes$index)]
+
+	# # next, lets create a df called edges, in which we have all edge info and
+	# # we pull in the node position info as well
+	# edges = cbind(
+	# 	edges, 
+	# 	nodes[edgelist[,1],c("x", "y")],
+	# 	nodes[edgelist[,2],c("x", "y")] )
+	# names(edges)[3:ncol(edges)] = c("x1", "y1", "x2", "y2")
+	# rownames(edges) = NULL
+	# ######################
 
 	######################
 	# org the netlet into a  and dyadic df with all the
 	# relev attributes so that we can plot
 	net_dfs = decompose_netlet( netlet ) 
 
-	# in the nodal part of net_dfs add in the
-	# xy pos of actors
-	net_dfs$nodal_data = merge(
-		net_dfs$nodal_data, nodes, by.x='name', by.y='actor' )
-	
-	# now do the same for the edge data
-	net_dfs$edge_data = merge(
-		net_dfs$edge_data, edges, by.x=c('from', 'to'), by.y=c('from', 'to') )
+	# cross_sec
+	if(obj_attrs$netify_type == 'cross_sec'){
+
+		# pull out nodes and edges from list format
+		nodes = nodes_list[[1]]
+		edges = edges_list[[1]]
+
+		# in the nodal part of net_dfs add in the
+		# xy pos of actors
+		net_dfs$nodal_data = merge(
+			net_dfs$nodal_data, nodes, 
+			by.x='name', by.y='actor' )
+		
+		# now do the same for the edge data
+		net_dfs$edge_data = merge(
+			net_dfs$edge_data, edges, 
+			by.x=c('from', 'to'), 
+			by.y=c('from', 'to') ) }
+
+	# longit
+	if(obj_attrs$netify_type != 'cross_sec'){
+
+		# pull out nodes and edges from list format
+		nodes = lapply(1:length(nodes_list), function(ii){
+			nodes = nodes_list[[ii]]
+			nodes$time = names(nodes_list)[ii]
+			return(nodes) })
+		nodes = do.call('rbind', nodes)
+		edges = lapply(1:length(edges_list), function(ii){
+			edges = edges_list[[ii]]
+			edges$time = names(edges_list)[ii]
+			return(edges) })
+		edges = do.call('rbind', edges) 
+
+		# in the nodal part of net_dfs add in the
+		# xy pos of actors
+		net_dfs$nodal_data = merge(
+			net_dfs$nodal_data, nodes, 
+			by.x=c('name','time'), by.y=c('actor','time') )
+		
+		# now do the same for the edge data
+		net_dfs$edge_data = merge(
+			net_dfs$edge_data, edges, 
+			by.x=c('from', 'to', 'time'), 
+			by.y=c('from', 'to', 'time') ) }
 	######################
 
 	######################
@@ -188,11 +286,6 @@ plot_args = list(
 	# alpha
 	# color
 	# linewidth
-
-net_dfs$edge_data$matlConfBin = ifelse(
-	net_dfs$edge_data$matlConf > mean(net_dfs$edge_data$matlConf, na.rm=TRUE), 
-	1, 0
-)
 
 	ggplot() +
 		geom_point(
@@ -220,12 +313,13 @@ net_dfs$edge_data$matlConfBin = ifelse(
 				y = y1,
 				xend = x2,
 				yend = y2,
-				alpha = verbCoop,
-				linewidth = factor(matlConfBin)
+				alpha = verbCoop
 				# color = factor(matlConfBin)
 			),
+			size=1.5,
 			arrow = arrow(length = unit(0.3, "cm"))
 		) +
+		facet_wrap(~time) +
 		theme_netify()
 	######################
 
