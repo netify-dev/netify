@@ -1,0 +1,112 @@
+---
+title: "Netify Workshop"
+author: "Cassy Dorff and Shahryar Minhas"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Netify Workshop}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##  Package Overview
+
+This vignette is a high level overview of our package from start to finish. The best use of this vignette is to introduce the package to larger audiences. This overview covers our main goals with data examples and minimal writing. 
+
+`netify` goals: 
+
+  (1) Create: Make it easy for the user to turn their data into a network object in $R$ as well as add additional data, such as nodal data, to your network.
+  (2) Inspect: Print the network object for a quick view about the network's features and easily access summary statistics about the network. Make a beautiful plot of the network!
+  (3) Explore:  Take your network object and get it ready to use in other network packages and modeling appraoches. 
+  
+`netify` provides a suite of primary functions to help achieve these goals:
+
+| Create  | Inspect | Explore |
+|---------|---------|---------|
+| `netify()`  | `peek()`  | `prep_for_amen()`  |
+| `add_nodal()` | `summary()`   | `prep_for_igraph()`  |
+| `add_dyad()`  | `summary_actor()`  | `prep_for_network()`  |
+| `subset_netlet()`  | `plot.network()`  |   | 
+
+`netify` can take dyadic data or edgelists to get started. The package can also create different types of networks including:
+
+- cross sectional (with static and varying actor composition)
+- multilayer networks
+- bipartite networks
+
+With different edge types:
+
+- weight
+- binary
+- symmetric or non-symmetric 
+
+## Step 1: Create
+
+Begin by supplying the data.
+
+Outline:
+
+ - make a long weighted network
+    + add nodal 
+ - basic info
+ - summary stats
+
+
+```{r, eval=TRUE, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+# load packages
+library(netify)
+library(peacesciencer)
+library(tidyverse)
+
+# create dyadic data set over time using peacesciencer
+cow_dyads <- create_dyadyears( 
+     subset_years = c(1995:2014)
+     ) %>%
+    # add mids
+    add_cow_mids() %>%
+    # add capital distance
+    add_capital_distance() %>%
+    # add democracy
+    add_democracy()
+```
+
+Next, create a `netlet` object! using the package's core function `netify.` 
+
+dyad_data` is a dyadic data.frame that should have at least the following variables used to specify actors:
+
+  - `actor1`: character indicating actor 1 variable in the data
+  - `actor2`: character indicating actor 2 variable in the data
+
+`netify_type` is a type of netlet object ('cross-sec', 'longit_list', or 'longit_array').
+
+```{r, eval=TRUE}
+mid_long_network <- netify(
+  cow_dyads,
+  actor1='ccode1', actor2='ccode2', time='year',
+  weight='cowmidonset', 
+  actor_time_uniform=FALSE,
+  sum_dyads=FALSE, symmetric=TRUE,
+  diag_to_NA=TRUE, missing_to_zero=FALSE,
+  nodal_vars = c('v2x_polyarchy1', 'v2x_polyarchy2'),
+  dyad_vars = c('capdist'),
+  dyad_vars_symmetric = c(TRUE, FALSE)
+  )
+```
+
+## Step 2: Inspect
+
+- peek
+- summary
+- plot
+
+```{r}
+peek(mid_long_network, when_to_peek = c('2012'), what_to_peek = 30)
+```
+
+## Step 3: Explore
