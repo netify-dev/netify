@@ -73,8 +73,8 @@ test_that('prep_for_network: weighted cross-sec, asymmetric', {
 	expect_identical(ng[,], g1[,])
 	# compare actual edge weights
 	expect_identical(
-		get.edge.attribute(g1, 'value'),
-		get.edge.attribute(ng, 'value') )
+		network::get.edge.attribute(g1, 'value'),
+		network::get.edge.attribute(ng, 'value') )
 })
 
 test_that('prep_for_network: unweighted cross-sec, symmetric', {
@@ -155,8 +155,8 @@ test_that('prep_for_network: weighted cross-sec, symmetric', {
 	expect_identical(ng[,], g1[,])
 	# compare actual edge weights
 	expect_identical(
-		get.edge.attribute(g1, 'value'),
-		get.edge.attribute(ng, 'value') )
+		network::get.edge.attribute(g1, 'value'),
+		network::get.edge.attribute(ng, 'value') )
 })
 
 test_that('prep_for_network, bipartite: unweighted cross-sec, asymmetric', {
@@ -236,8 +236,8 @@ test_that('prep_for_network, bipartite: weighted cross-sec, asymmetric', {
     expect_identical(ng[,], g1[,])
 	# compare actual edge weights
 	expect_identical(
-		get.edge.attribute(g1, 'value'),
-		get.edge.attribute(ng, 'value') )	
+		network::get.edge.attribute(g1, 'value'),
+		network::get.edge.attribute(ng, 'value') )	
 })
 
 test_that(
@@ -311,10 +311,10 @@ test_that(
 		# check nodal variables
 		expect_identical(
 			attributes(a_matrix)$nodal_data$var1,
-			get.vertex.attribute(prepped_n, 'var1') ) 
+			network::get.vertex.attribute(prepped_n, 'var1') ) 
 		expect_identical(
 			attributes(a_matrix)$nodal_data$var2,
-			get.vertex.attribute(prepped_n, 'var2') ) 
+			network::get.vertex.attribute(prepped_n, 'var2') ) 
 		###################################
 })
 
@@ -372,7 +372,7 @@ test_that(
 		# check original variable
 		expect_identical(
 			get_raw(a_matrix), 
-			get.network.attribute(prepped_n, 'weight')
+			network::get.network.attribute(prepped_n, 'weight')
 		)
 
 		# check dyadic variables
@@ -381,20 +381,20 @@ test_that(
 			return(dvar) })
 		expect_identical(
 		  dVarL[[1]],
-		  get.network.attribute(prepped_n, 'var2') )
+		  network::get.network.attribute(prepped_n, 'var2') )
 		expect_identical(
 		  dVarL[[2]],
-		  get.network.attribute(prepped_n, 'var3') )
+		  network::get.network.attribute(prepped_n, 'var3') )
 		expect_identical(
 		  dVarL[[3]],
-		  get.network.attribute(prepped_n, 'var4') )
+		  network::get.network.attribute(prepped_n, 'var4') )
 
 		# check nodal variables
 		expect_identical(
 			attributes(a_matrix)$nodal_data$var1,
-			get.vertex.attribute(prepped_n, 'var1') ) 
+			network::get.vertex.attribute(prepped_n, 'var1') ) 
 		expect_identical(
 			attributes(a_matrix)$nodal_data$var2,
-			get.vertex.attribute(prepped_n, 'var2') ) 
+			network::get.vertex.attribute(prepped_n, 'var2') ) 
 		###################################
 })
