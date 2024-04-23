@@ -1,5 +1,5 @@
 set.seed(6886)
-library(igraph)
+# library(igraph)
 library(reshape2)
 
 test_that('prep_for_igraph: unweighted cross-sec, asymmetric', {
@@ -9,7 +9,7 @@ test_that('prep_for_igraph: unweighted cross-sec, asymmetric', {
         as.numeric(sample(0:1, 100, replace=TRUE, prob=c(0.5, .5))), 
         ncol=10)
      rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
-     g1 <- graph_from_adjacency_matrix( adjm )
+     g1 <- igraph::graph_from_adjacency_matrix( adjm )
 
     # convert to dyadic so we can pass into netify
     df <- melt(adjm)
@@ -36,7 +36,7 @@ test_that('prep_for_igraph: weighted cross-sec, asymmetric', {
     # use igraph example to generate some data
      adjm <- matrix( rnorm(10^2), ncol=10)
      rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
-     g1 <- graph_from_adjacency_matrix( adjm, weighted=TRUE )
+     g1 <- igraph::graph_from_adjacency_matrix( adjm, weighted=TRUE )
 
     # convert to dyadic so we can pass into netify
     df <- melt(adjm)
@@ -66,7 +66,7 @@ test_that('prep_for_igraph: unweighted cross-sec, symmetric', {
      adjm[adjm<0] <- 0
      diag(adjm) <- NA
      rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
-     g1 <- graph_from_adjacency_matrix( adjm, diag=FALSE )
+     g1 <- igraph::graph_from_adjacency_matrix( adjm, diag=FALSE )
 
     # convert to dyadic so we can pass into netify
     df <- melt(adjm)
@@ -96,7 +96,7 @@ test_that('prep_for_igraph: weighted cross-sec, symmetric', {
      adjm <- (adjm + t(adjm))/2
      diag(adjm) <- NA
      rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
-     g1 <- graph_from_adjacency_matrix( adjm, weighted=TRUE, diag=FALSE )
+     g1 <- igraph::graph_from_adjacency_matrix( adjm, weighted=TRUE, diag=FALSE )
 
     # convert to dyadic so we can pass into netify
     df <- melt(adjm)
@@ -128,9 +128,9 @@ test_that('prep_for_igraph, bipartite: unweighted cross-sec, asymmetric', {
     colnames(adjm) = letters[(length(letters)-9):length(letters)]
 
     # create igraph object that we'll compare with
-    g1 <- graph_from_incidence_matrix( adjm )
+    g1 <- igraph::graph_from_biadjacency_matrix( adjm )
     g1_raw <- data.matrix(g1[,])
-    vtype <- V(g1)$type
+    vtype <- igraph::V(g1)$type
     g1_raw <- g1_raw[!vtype,vtype]
 
     # convert to dyadic so we can pass into netify
@@ -149,7 +149,7 @@ test_that('prep_for_igraph, bipartite: unweighted cross-sec, asymmetric', {
     # convert to igraph object
     ng <- prep_for_igraph(a_matrix)
     ng_raw <- data.matrix(ng[,])
-    vtype <- V(ng)$type
+    vtype <- igraph::V(ng)$type
     ng_raw <- ng_raw[!vtype,vtype]
 
     # compare
@@ -165,9 +165,9 @@ test_that('prep_for_igraph, bipartite: weighted cross-sec, asymmetric', {
     colnames(adjm) = letters[(length(letters)-9):length(letters)]
 
     # create igraph object that we'll compare with
-    g1 <- graph_from_incidence_matrix( adjm, weighted=TRUE )
+    g1 <- igraph::graph_from_biadjacency_matrix( adjm, weighted=TRUE )
     g1_raw <- data.matrix(g1[,])
-    vtype <- V(g1)$type
+    vtype <- igraph::V(g1)$type
     g1_raw <- g1_raw[!vtype,vtype]
 
     # convert to dyadic so we can pass into netify
@@ -185,7 +185,7 @@ test_that('prep_for_igraph, bipartite: weighted cross-sec, asymmetric', {
     # convert to igraph object
     ng <- prep_for_igraph(a_matrix)
     ng_raw <- data.matrix(ng[,])
-    vtype <- V(ng)$type
+    vtype <- igraph::V(ng)$type
     ng_raw <- ng_raw[!vtype,vtype]
 
     # compare
@@ -232,36 +232,36 @@ test_that(
 		###################################
 		# gen igraph versions
 		prepped_g <- prep_for_igraph(a_matrix)
-		g <- graph_from_data_frame(fakeDyads, directed = TRUE, vertices = fakeNodes)
+		g <- igraph::graph_from_data_frame(fakeDyads, directed = TRUE, vertices = fakeNodes)
 		###################################        
 
 		###################################
 		# check nodes
-        nNames = V(g)$name ; npNames = V(prepped_g)$name
-        nv1 = V(g)$var1 ; names(nv1) = nNames
-        nv2 = V(g)$var2 ; names(nv2) = nNames
-        npv1 = V(prepped_g)$var1 ; names(npv1) = npNames
-        npv2 = V(prepped_g)$var2 ; names(npv2) = npNames
-        expect_identical(npv1[nNames], nv1)
-        expect_identical(npv2[nNames], nv2)
+    nNames = igraph::V(g)$name ; npNames = igraph::V(prepped_g)$name
+    nv1 = igraph::V(g)$var1 ; names(nv1) = nNames
+    nv2 = igraph::V(g)$var2 ; names(nv2) = nNames
+    npv1 = igraph::V(prepped_g)$var1 ; names(npv1) = npNames
+    npv2 = igraph::V(prepped_g)$var2 ; names(npv2) = npNames
+    expect_identical(npv1[nNames], nv1)
+    expect_identical(npv2[nNames], nv2)
 
-        # check edges
-        # extract edge names
-        gvecs = attributes(igraph::E(g ))$vnames
-        pgvecs = attributes(igraph::E(prepped_g))$vnames
-        
-        # pull out edge vars
-        pvar2 <- E(prepped_g)$var2 ; names(pvar2) <- pgvecs
-        pvar3 <- E(prepped_g)$var3 ; names(pvar3) <- pgvecs
-        pvar4 <- E(prepped_g)$var4 ; names(pvar4) <- pgvecs
-        var2 <- E(g)$var2 ; names(var2) <- gvecs
-        var3 <- E(g)$var3 ; names(var3) <- gvecs
-        var4 <- E(g)$var4 ; names(var4) <- gvecs
+    # check edges
+    # extract edge names
+    gvecs = attributes(igraph::E(g ))$vnames
+    pgvecs = attributes(igraph::E(prepped_g))$vnames
+    
+    # pull out edge vars
+    pvar2 <- igraph::E(prepped_g)$var2 ; names(pvar2) <- pgvecs
+    pvar3 <- igraph::E(prepped_g)$var3 ; names(pvar3) <- pgvecs
+    pvar4 <- igraph::E(prepped_g)$var4 ; names(pvar4) <- pgvecs
+    var2 <- igraph::E(g)$var2 ; names(var2) <- gvecs
+    var3 <- igraph::E(g)$var3 ; names(var3) <- gvecs
+    var4 <- igraph::E(g)$var4 ; names(var4) <- gvecs
 
-        # check identical
-        expect_identical(pvar2[names(var2)], var2)
-        expect_identical(pvar3[names(var3)], var3)
-        expect_identical(pvar4[names(var4)], var4)
+    # check identical
+    expect_identical(pvar2[names(var2)], var2)
+    expect_identical(pvar3[names(var3)], var3)
+    expect_identical(pvar4[names(var4)], var4)
 		###################################
 })
 
@@ -307,39 +307,39 @@ test_that(
 		###################################
 		# gen igraph versions
 		prepped_g <- prep_for_igraph(a_matrix)
-		g <- graph_from_data_frame(fakeDyads, directed = TRUE, vertices = fakeNodes)
+		g <- igraph::graph_from_data_frame(fakeDyads, directed = TRUE, vertices = fakeNodes)
 		###################################        
 
 		###################################
 		# check nodes
-        nNames = V(g)$name ; npNames = V(prepped_g)$name
-        nv1 = V(g)$var1 ; names(nv1) = nNames
-        nv2 = V(g)$var2 ; names(nv2) = nNames
-        npv1 = V(prepped_g)$var1 ; names(npv1) = npNames
-        npv2 = V(prepped_g)$var2 ; names(npv2) = npNames
-        expect_identical(npv1[nNames], nv1)
-        expect_identical(npv2[nNames], nv2)
+    nNames = igraph::V(g)$name ; npNames = igraph::V(prepped_g)$name
+    nv1 = igraph::V(g)$var1 ; names(nv1) = nNames
+    nv2 = igraph::V(g)$var2 ; names(nv2) = nNames
+    npv1 = igraph::V(prepped_g)$var1 ; names(npv1) = npNames
+    npv2 = igraph::V(prepped_g)$var2 ; names(npv2) = npNames
+    expect_identical(npv1[nNames], nv1)
+    expect_identical(npv2[nNames], nv2)
 
-        # check edges
-        # extract edge names
-        gvecs = attributes(igraph::E(g ))$vnames
-        pgvecs = attributes(igraph::E(prepped_g))$vnames
-        
-        # pull out edge vars
-        pvar1 <- E(prepped_g)$var1 ; names(pvar1) <- pgvecs
-        pvar2 <- E(prepped_g)$var2 ; names(pvar2) <- pgvecs
-        pvar3 <- E(prepped_g)$var3 ; names(pvar3) <- pgvecs
-        pvar4 <- E(prepped_g)$var4 ; names(pvar4) <- pgvecs
-        var1 <- E(g)$var1 ; names(var1) <- gvecs
-        var2 <- E(g)$var2 ; names(var2) <- gvecs
-        var3 <- E(g)$var3 ; names(var3) <- gvecs
-        var4 <- E(g)$var4 ; names(var4) <- gvecs
+    # check edges
+    # extract edge names
+    gvecs = attributes(igraph::E(g ))$vnames
+    pgvecs = attributes(igraph::E(prepped_g))$vnames
+    
+    # pull out edge vars
+    pvar1 <- igraph::E(prepped_g)$var1 ; names(pvar1) <- pgvecs
+    pvar2 <- igraph::E(prepped_g)$var2 ; names(pvar2) <- pgvecs
+    pvar3 <- igraph::E(prepped_g)$var3 ; names(pvar3) <- pgvecs
+    pvar4 <- igraph::E(prepped_g)$var4 ; names(pvar4) <- pgvecs
+    var1 <- igraph::E(g)$var1 ; names(var1) <- gvecs
+    var2 <- igraph::E(g)$var2 ; names(var2) <- gvecs
+    var3 <- igraph::E(g)$var3 ; names(var3) <- gvecs
+    var4 <- igraph::E(g)$var4 ; names(var4) <- gvecs
 
-        # check identical
-        expect_identical(pvar1[names(var1)], var1)
-        expect_identical(pvar2[names(var2)], var2)
-        expect_identical(pvar3[names(var3)], var3)
-        expect_identical(pvar4[names(var4)], var4)
+    # check identical
+    expect_identical(pvar1[names(var1)], var1)
+    expect_identical(pvar2[names(var2)], var2)
+    expect_identical(pvar3[names(var3)], var3)
+    expect_identical(pvar4[names(var4)], var4)
 		###################################
 })
 
@@ -391,36 +391,36 @@ test_that(
 		prepped_g <- prep_for_igraph(a_matrix)
 
         # from raw data
-		g <- graph_from_data_frame(fakeDyads, directed = TRUE, vertices = fakeNodes)
+		g <- igraph::graph_from_data_frame(fakeDyads, directed = TRUE, vertices = fakeNodes)
 		###################################        
 
 		###################################
 		# check nodes
-        nNames = V(g)$name ; npNames = V(prepped_g)$name
-        nv1 = V(g)$var1 ; names(nv1) = nNames
-        nv2 = V(g)$var2 ; names(nv2) = nNames
-        npv1 = V(prepped_g)$var1 ; names(npv1) = npNames
-        npv2 = V(prepped_g)$var2 ; names(npv2) = npNames
-        expect_identical(npv1[nNames], nv1)
-        expect_identical(npv2[nNames], nv2)
+    nNames = igraph::V(g)$name ; npNames = igraph::V(prepped_g)$name
+    nv1 = igraph::V(g)$var1 ; names(nv1) = nNames
+    nv2 = igraph::V(g)$var2 ; names(nv2) = nNames
+    npv1 = igraph::V(prepped_g)$var1 ; names(npv1) = npNames
+    npv2 = igraph::V(prepped_g)$var2 ; names(npv2) = npNames
+    expect_identical(npv1[nNames], nv1)
+    expect_identical(npv2[nNames], nv2)
 
-        # check edges
-        # extract edge names
-        gvecs = attributes(igraph::E(g ))$vnames
-        pgvecs = attributes(igraph::E(prepped_g))$vnames
-        
-        # pull out edge vars
-        pvar2 <- E(prepped_g)$var2 ; names(pvar2) <- pgvecs
-        pvar3 <- E(prepped_g)$var3 ; names(pvar3) <- pgvecs
-        pvar4 <- E(prepped_g)$var4 ; names(pvar4) <- pgvecs
-        var2 <- E(g)$var2 ; names(var2) <- gvecs
-        var3 <- E(g)$var3 ; names(var3) <- gvecs
-        var4 <- E(g)$var4 ; names(var4) <- gvecs
+    # check edges
+    # extract edge names
+    gvecs = attributes(igraph::E(g ))$vnames
+    pgvecs = attributes(igraph::E(prepped_g))$vnames
+    
+    # pull out edge vars
+    pvar2 <- igraph::E(prepped_g)$var2 ; names(pvar2) <- pgvecs
+    pvar3 <- igraph::E(prepped_g)$var3 ; names(pvar3) <- pgvecs
+    pvar4 <- igraph::E(prepped_g)$var4 ; names(pvar4) <- pgvecs
+    var2 <- igraph::E(g)$var2 ; names(var2) <- gvecs
+    var3 <- igraph::E(g)$var3 ; names(var3) <- gvecs
+    var4 <- igraph::E(g)$var4 ; names(var4) <- gvecs
 
-        # check identical
-        expect_identical(pvar2[names(var2)], var2)
-        expect_identical(pvar3[names(var3)], var3)
-        expect_identical(pvar4[names(var4)], var4)
+    # check identical
+    expect_identical(pvar2[names(var2)], var2)
+    expect_identical(pvar3[names(var3)], var3)
+    expect_identical(pvar4[names(var4)], var4)
 		###################################
 })
 

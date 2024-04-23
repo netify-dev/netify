@@ -163,7 +163,7 @@ netify_to_igraph <- function(netlet){
 
   # bipartite case
   if(bipartite_logical){
-    igraph_object <- igraph::graph_from_incidence_matrix(
+    igraph_object <- igraph::graph_from_biadjacency_matrix(
       raw_net,
       directed = FALSE,
       weighted = weight_logical ) }
