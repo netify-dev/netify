@@ -49,6 +49,12 @@ decompose_netlet <- function(
 	# check if netify object
 	netify_check(netlet)	
 
+	# pull out attrs
+	obj_attrs <- attributes(netlet)
+
+	# pull out msrmnts
+	msrmnts <- netify_measurements(netlet)
+
     # edge data
     edge_data = reshape2::melt( unnetify( netlet ) )
     edge_data = edge_data[
@@ -60,10 +66,12 @@ decompose_netlet <- function(
     }
 
     # add weight label
-    names(edge_data)[3] = attr(netlet, 'weight')
+    if(!is.null(attr(netlet, 'weight'))){
+        names(edge_data)[3] = attr(netlet, 'weight')
+    } else { names(edge_data)[3] = 'net_value'}
 
     # other dyad data
-    if( !is.null(attr(netlet, 'dyad_data'))){
+    if( !is.null(attr(netlet, 'dyad_data')) ){
 
         # melt dyad data
         dyad_data = reshape2::melt( attr(netlet, 'dyad_data') )
@@ -96,10 +104,19 @@ decompose_netlet <- function(
 
     # other nodal data
     if( !is.null(attr(netlet, 'nodal_data'))){
-        nodal_data = attr(netlet, 'nodal_data') }
+        nodal_data = attr(netlet, 'nodal_data')
+    } else {
+        nodal_data = data.frame(
+            actor = unique(c(
+                msrmnts$row_actors, msrmnts$col_actors)),
+        stringsAsFactors=FALSE)
+    }
 
     # reorder vars
-    vars = c('Var1', 'Var2', 'L1')
+    if(obj_attrs$netify_type == 'cross_sec'){
+        vars = c('Var1', 'Var2')
+    } else {
+        vars = c('Var1', 'Var2', 'L1') }
     vars = c(vars, setdiff(
         names(edge_data), vars))
     edge_data = edge_data[,vars]
@@ -107,10 +124,14 @@ decompose_netlet <- function(
     # add time if missing in nodal_data
     if(!'time' %in% names(nodal_data)){
         nodal_data = cbind(
-            nodal_data[,1], 
-            time = rep(1, nrow(nodal_data)),
-            nodal_data[,2:ncol(nodal_data)]
-        )
+            nodal_data, time = rep(1, nrow(nodal_data)))
+        nodal_data = nodal_data[
+            ,c(
+                'actor', 'time', 
+                setdiff(
+                    names(nodal_data), 
+                    c('actor', 'time')))
+                    ]
     }
 
     # relabel id cols

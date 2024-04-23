@@ -114,7 +114,7 @@ get_node_layout <- function(
 		names(layout_matrix) = names(g)
 	} else {
 		layout_matrix <- layout_fun(g)
-		rownames(layout_matrix) <- msrmnts$row_actors }
+		rownames(layout_matrix) <- V(g)$name }
 
 	# if static layout then choose first
 	if(static_actor_positions){
@@ -196,7 +196,7 @@ get_edge_layout <- function(netlet, nodes_layout) {
     g <- prep_for_igraph(netlet)
 
 	# make sure igraph object is in the right format
-	if(!is.list(g)){ g = list(g) }
+	if(class(g)=='igraph'){ g = list(g) }
 
     # make sure nodes_layout is in the right format
     if(!is.list(nodes_layout)){
@@ -229,3 +229,5 @@ get_edge_layout <- function(netlet, nodes_layout) {
     #    
     return(edges_list)
 }
+
+

@@ -26,28 +26,28 @@
 		# 	'tree', 'randomly'
 		# )
 
-# library(netify)
+library(netify)
 # library(igraph)
-# library(ggplot2)
+library(ggplot2)
 
-# example(decompose_netlet)
-# x = netlet
+example(decompose_netlet)
+x = netlet
 
-# x = subset_netlet(
-# 	x, 
-# 	when_to_subset=c('2008','2009') 
-# )
+x = subset_netlet(
+	x, 
+	when_to_subset=c('2008','2009') 
+)
 
-# x1= subset_netlet(
-# 	x, 
-# 	when_to_subset=c('2009')
-# )
+x1= subset_netlet(
+	x, 
+	when_to_subset=c('2009')
+)
 
-# plot_args = list()
+plot_args = list()
 
-# plot_args = list(
-# 	layout='fr'
-# )
+plot_args = list(
+	layout='fr'
+)
 
 # layout: user has selected a layout algo from igraph 
 	# based on the choices in the documentatoin
@@ -65,8 +65,6 @@
 # edge_linewidth_var:
 # edge_arrow: logical
 # edge_arrow_size:
-
-
 
 plot.netify <- function(x, ...){
 
@@ -114,54 +112,8 @@ plot.netify <- function(x, ...){
 	######################
 	# org the netlet into a  and dyadic df with all the
 	# relev attributes so that we can plot
-	net_dfs = decompose_netlet( netlet ) 
-
-	# cross_sec
-	if(obj_attrs$netify_type == 'cross_sec'){
-
-		# pull out nodes and edges from list format
-		nodes = nodes_list[[1]]
-		edges = edges_list[[1]]
-
-		# in the nodal part of net_dfs add in the
-		# xy pos of actors
-		net_dfs$nodal_data = merge(
-			net_dfs$nodal_data, nodes, 
-			by.x='name', by.y='actor' )
-		
-		# now do the same for the edge data
-		net_dfs$edge_data = merge(
-			net_dfs$edge_data, edges, 
-			by.x=c('from', 'to'), 
-			by.y=c('from', 'to') ) }
-
-	# longit
-	if(obj_attrs$netify_type != 'cross_sec'){
-
-		# pull out nodes and edges from list format
-		nodes = lapply(1:length(nodes_list), function(ii){
-			nodes = nodes_list[[ii]]
-			nodes$time = names(nodes_list)[ii]
-			return(nodes) })
-		nodes = do.call('rbind', nodes)
-		edges = lapply(1:length(edges_list), function(ii){
-			edges = edges_list[[ii]]
-			edges$time = names(edges_list)[ii]
-			return(edges) })
-		edges = do.call('rbind', edges) 
-
-		# in the nodal part of net_dfs add in the
-		# xy pos of actors
-		net_dfs$nodal_data = merge(
-			net_dfs$nodal_data, 
-			nodes[,c("actor","time","x","y")], 
-			by.x=c('name','time'), by.y=c('actor','time') )
-		
-		# now do the same for the edge data
-		net_dfs$edge_data = merge(
-			net_dfs$edge_data, edges, 
-			by.x=c('from', 'to', 'time'), 
-			by.y=c('from', 'to', 'time') ) }
+	net_dfs <- merge_layout_attribs(
+		netlet, nodes_list, edges_list)
 	######################	
 
 	######################
@@ -225,8 +177,29 @@ plot.netify <- function(x, ...){
 			plot_args$edge_arrow = NULL }
 	}
 
+	# if network is undirected
+	# then only include one side
+	# of edge observations
+	if(obj_attrs$symmetric){
+
+		# Create a new column 'edge' with sorted 'from' and 'to' values
+		net_dfs$edge_data$edge <- apply(
+			net_dfs$edge_data[, c("from", "to")], 1, function(x){
+				paste(sort(x), collapse = "-")} )
+
+		# add time var if cross_sec
+		if(obj_attrs$netify_type == 'cross_sec'){
+			net_dfs$edge_data$time = 1 }
+
+		# Remove duplicates based on 'edge', 'time' and keep the first occurrence
+		net_dfs$edge_data <- net_dfs$edge_data[
+			!duplicated(
+				net_dfs$edge_data[c("edge", "time")]), ]
+	}
+
 	# if network is weighted and users did not
-	# 
+	# specify alpha level choose for them
+	
 	######################
 
 	######################	
@@ -384,7 +357,7 @@ plot.netify <- function(x, ...){
 		# ) +
 
 # ggplot() +
-# 		geom_segment(
+# 		geom_curve(
 # 			data=net_dfs$edge_data,
 # 			aes(
 # 				x = x1, 
