@@ -8,7 +8,8 @@ get_node_layout(
   netlet,
   layout = NULL,
   static_actor_positions = FALSE,
-  which_static = 1
+  which_static = 1,
+  seed = 6886
 )
 }
 \arguments{

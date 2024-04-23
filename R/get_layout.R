@@ -29,7 +29,8 @@ get_node_layout <- function(
 	netlet,
 	layout=NULL,
 	static_actor_positions=FALSE,
-	which_static=1
+	which_static=1, 
+	seed=6886
 	){
 
 	# check if netify object
@@ -39,6 +40,7 @@ get_node_layout <- function(
     # be adjusted if they are set to NULL
     if(is.null(static_actor_positions)){ static_actor_positions = FALSE }
     if(is.null(which_static)){ which_static = 1 }
+	if(is.null(seed)){ seed = 6886 }
 
 	# pull out attrs
 	obj_attrs <- attributes(netlet)
@@ -193,6 +195,9 @@ get_edge_layout <- function(netlet, nodes_layout) {
     # Get the igraph object from netlet
     g <- prep_for_igraph(netlet)
 
+	# make sure igraph object is in the right format
+	if(!is.list(g)){ g = list(g) }
+
     # make sure nodes_layout is in the right format
     if(!is.list(nodes_layout)){
         nodes_layout = list(nodes_layout) }
@@ -209,14 +214,14 @@ get_edge_layout <- function(netlet, nodes_layout) {
         
         # Bind coordinates to edges
         edges <- merge(
-            edges, nodes, 
+            edges, nodes[,c('actor','x','y')], 
             by.x = "from", by.y = "actor", 
-            all.x = TRUE)
+            all.x = TRUE, all.y=FALSE)
         edges <- merge(
-            edges, nodes, 
+            edges, nodes[,c('actor','x','y')], 
             by.x = "to", by.y = "actor", 
-            all.x = TRUE)
-        names(edges)[c(4, 5, 6, 7)] <- c("x1", "y1", "x2", "y2")
+            all.x = TRUE, all.y=FALSE)
+        names(edges)[c(3:6)] <- c("x1", "y1", "x2", "y2")
         
         return(edges) })
     names(edges_list) = names(g)

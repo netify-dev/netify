@@ -43,6 +43,8 @@
 # 	when_to_subset=c('2009')
 # )
 
+# plot_args = list()
+
 # plot_args = list(
 # 	layout='fr'
 # )
@@ -93,7 +95,9 @@ plot.netify <- function(x, ...){
 			netlet, 
 			layout=plot_args$layout, 
 			static_actor_positions=plot_args$static_actor_positions,
-			which_static=plot_args$which_static )
+			which_static=plot_args$which_static,
+			seed=plot_args$seed
+			)
 	} else { 
 		nodes_list = plot_args$node_layout
 		if(!is.list(nodes_list)){
@@ -149,7 +153,8 @@ plot.netify <- function(x, ...){
 		# in the nodal part of net_dfs add in the
 		# xy pos of actors
 		net_dfs$nodal_data = merge(
-			net_dfs$nodal_data, nodes, 
+			net_dfs$nodal_data, 
+			nodes[,c("actor","time","x","y")], 
 			by.x=c('name','time'), by.y=c('actor','time') )
 		
 		# now do the same for the edge data
@@ -368,25 +373,17 @@ plot.netify <- function(x, ...){
 # 	# color
 # 	# linewidth
 
+		# geom_text(
+		# 	data=net_dfs$nodal_data,
+		# 	aes(
+		# 		x = x, 
+		# 		y = y,
+		# 		label = name
+		# 	),
+		# 	check_overlap = TRUE
+		# ) +
+
 # ggplot() +
-# 		geom_point(
-# 			data=net_dfs$nodal_data,
-# 			aes(
-# 				x = x, 
-# 				y = y,
-# 				color = i_polity2,
-# 				size = i_log_pop
-# 			)
-# 		) + 
-# 		geom_text(
-# 			data=net_dfs$nodal_data,
-# 			aes(
-# 				x = x, 
-# 				y = y,
-# 				label = name
-# 			),
-# 			check_overlap = TRUE
-# 		) +
 # 		geom_segment(
 # 			data=net_dfs$edge_data,
 # 			aes(
@@ -396,10 +393,21 @@ plot.netify <- function(x, ...){
 # 				yend = y2
 # 				# alpha = verbCoop
 # 				# color = factor(matlConfBin)
-# 			)
-# 			# size=1.5,
+# 			),
+# 			linewidth=.1
+# 			# color='grey',
+# 			# alpha=.1
 # 			# arrow = arrow(length = unit(0.1, "cm"))
 # 		) +
+# 		geom_point(
+# 			data=net_dfs$nodal_data,
+# 			aes(
+# 				x = x, 
+# 				y = y,
+# 				color = i_polity2,
+# 				size = i_log_pop
+# 			)
+# 		) + 
 # 		facet_wrap(~time, scales='free') +
 # 		theme_netify()
 
