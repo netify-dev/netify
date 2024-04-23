@@ -4,12 +4,37 @@
 \alias{get_edge_layout}
 \title{Generate edge layout for netify object}
 \usage{
-get_edge_layout(netlet, nodes_list)
+get_edge_layout(netlet, nodes_layout)
 }
 \arguments{
 \item{netlet}{A \code{netify} object used to derive the graph and edges.}
 
-\item{nodes}{A matrix of node layouts or list of matrices produced by \code{get_node_layout}.}
+\item{nodes_layout}{A matrix or a list of matrices representing node layouts for visualization.
+Each matrix should include the following columns:
+- \code{actor}: A character string identifying each node.
+- \code{x}: Numeric, the x-coordinate of the node in the layout.
+- \code{y}: Numeric, the y-coordinate of the node in the layout.
+In longitudinal studies, \code{nodes} should be a list where each element is a matrix
+corresponding to a specific time point, named with the respective year or time label
+(e.g., '2008', '2009'). Each matrix must maintain consistent structure and naming
+conventions for time points.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{         Example structure for `nodes`:
+         ```
+         $`2008`
+         actor          x             y
+         Afghanistan  0.5852844  0.4633507
+         Albania      0.0976207  0.8473642
+         ...
+
+         $`2009`
+         actor          x             y
+         Afghanistan -0.7392849  0.5709252
+         Albania     -1.1160445  1.0141463
+         ...
+         ```
+         Each matrix uses the `actor` names for row identification.
+}\if{html}{\out{</div>}}}
 }
 \value{
 A matrix with edge layout information or list of the same
