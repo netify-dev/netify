@@ -27,7 +27,7 @@ This vignette is a high level overview of our package from start to finish. The 
   
 `netify` provides a suite of primary functions to help achieve these goals:
 
-| Create  | Inspect | Explore |
+| Create  | Inspect  | Explore |
 |---------|---------|---------|
 | `netify()`  | `peek()`  | `prep_for_amen()`  |
 | `add_nodal()` | `summary()`   | `prep_for_igraph()`  |
@@ -55,7 +55,6 @@ Outline:
  - make a long weighted network
     + add nodal 
  - basic info
- - summary stats
 
 
 ```{r, eval=TRUE, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
@@ -103,6 +102,8 @@ mid_long_network <- netify(
 
 - peek
 - summary
+- summary_actor
+- subsetnetlet
 - plot
 
 ```{r}
