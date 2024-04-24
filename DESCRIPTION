@@ -20,7 +20,7 @@ Imports:
     generics,
     methods,
     igraph,
-    ggplot2 (>= 2.2.1)      
+    ggplot2 (>= 2.2.1)
 LinkingTo:
   Rcpp
 Suggests:

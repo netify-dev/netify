@@ -144,6 +144,10 @@ decompose_netlet <- function(
 
     # relabel id cols
     names(nodal_data)[1:2] = c('name', 'time')
+    
+    # convert node time to char if not already
+    nodal_data$time = char(nodal_data$time)
+    ######################
 
     # 
     out = list(
@@ -152,4 +156,5 @@ decompose_netlet <- function(
     
     #
     return(out)
+
 }
