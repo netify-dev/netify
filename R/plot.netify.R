@@ -26,28 +26,28 @@
 		# 	'tree', 'randomly'
 		# )
 
-library(netify)
-# library(igraph)
-library(ggplot2)
+# library(netify)
+# # library(igraph)
+# library(ggplot2)
 
-example(decompose_netlet)
-x = netlet
+# example(decompose_netlet)
+# x = netlet
 
-x = subset_netlet(
-	x, 
-	when_to_subset=c('2008','2009') 
-)
+# x = subset_netlet(
+# 	x, 
+# 	when_to_subset=c('2008','2009') 
+# )
 
-x1= subset_netlet(
-	x, 
-	when_to_subset=c('2009')
-)
+# x1= subset_netlet(
+# 	x, 
+# 	when_to_subset=c('2009')
+# )
 
-plot_args = list()
+# plot_args = list()
 
-plot_args = list(
-	layout='fr'
-)
+# plot_args = list(
+# 	layout='fr'
+# )
 
 # layout: user has selected a layout algo from igraph 
 	# based on the choices in the documentatoin
@@ -177,9 +177,10 @@ plot.netify <- function(x, ...){
 			plot_args$edge_arrow = NULL }
 	}
 
-	# if network is undirected
-	# then only include one side
-	# of edge observations
+	# if network is undirected then only include 
+	# one side of edge observations this is a bit 
+	# redundant since the merging step takes care 
+	# of this in merge_layout_attribs.R
 	if(obj_attrs$symmetric){
 
 		# Create a new column 'edge' with sorted 'from' and 'to' values

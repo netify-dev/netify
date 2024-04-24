@@ -55,8 +55,11 @@ decompose_netlet <- function(
 	# pull out msrmnts
 	msrmnts <- netify_measurements(netlet)
 
+    # build edge data from dv #####################
     # edge data
     edge_data = reshape2::melt( unnetify( netlet ) )
+    edge_data$Var1 = char(edge_data$Var1)
+    edge_data$Var2 = char(edge_data$Var2)
     edge_data = edge_data[
         edge_data$Var1 != edge_data$Var2, ]
 
@@ -69,8 +72,10 @@ decompose_netlet <- function(
     if(!is.null(attr(netlet, 'weight'))){
         names(edge_data)[3] = attr(netlet, 'weight')
     } else { names(edge_data)[3] = 'net_value'}
+    ######################
 
-    # other dyad data
+    # add other dyad attribs #####################
+    # merge dyad attribs with dv edge data
     if( !is.null(attr(netlet, 'dyad_data')) ){
 
         # melt dyad data
@@ -81,7 +86,7 @@ decompose_netlet <- function(
         dyad_data = reshape2::dcast( 
             dyad_data, Var1 + Var2 + L1 ~ Var3, value.var='value' )
 
-        # set likely ids based on netify_type
+        # set ids based on netify_type
         if (attr(netlet, 'netify_type') == 'cross_sec') {
             merge_by_vars <- c('Var1', 'Var2')
         } else {
@@ -100,42 +105,44 @@ decompose_netlet <- function(
         # merge to edge_data
         edge_data = merge(
             edge_data, dyad_data, by=merge_by_vars )
+
+        # cleanup
+        rm(dyad_data)
     }
 
+    # id vars for cross-sec and longit case
+    if(obj_attrs$netify_type == 'cross_sec'){
+        edge_data$L1 = 1 }
+    edge_id_vars = c('Var1', 'Var2', 'L1')
+    
+    # reorder vars
+    edge_vars = c(
+        edge_id_vars, 
+        setdiff(names(edge_data), edge_id_vars))
+    edge_data = edge_data[,edge_vars]
+
+    # relabel id cols
+    names(edge_data)[1:3] = c('from', 'to', 'time')
+    ######################
+
+    # org nodal attrib data #####################
     # other nodal data
     if( !is.null(attr(netlet, 'nodal_data'))){
         nodal_data = attr(netlet, 'nodal_data')
     } else {
-        nodal_data = data.frame(
-            actor = unique(c(
-                msrmnts$row_actors, msrmnts$col_actors)),
-        stringsAsFactors=FALSE)
+        nodal_data = actor_pds_to_frame(
+            obj_attrs$actor_pds
+        )
     }
 
     # reorder vars
-    if(obj_attrs$netify_type == 'cross_sec'){
-        vars = c('Var1', 'Var2')
-    } else {
-        vars = c('Var1', 'Var2', 'L1') }
-    vars = c(vars, setdiff(
-        names(edge_data), vars))
-    edge_data = edge_data[,vars]
-
-    # add time if missing in nodal_data
-    if(!'time' %in% names(nodal_data)){
-        nodal_data = cbind(
-            nodal_data, time = rep(1, nrow(nodal_data)))
-        nodal_data = nodal_data[
-            ,c(
-                'actor', 'time', 
-                setdiff(
-                    names(nodal_data), 
-                    c('actor', 'time')))
-                    ]
-    }
+    node_id_vars = c('actor', 'time')
+    node_vars = c(
+        node_id_vars, 
+        setdiff(names(nodal_data), node_id_vars))
+    nodal_data = nodal_data[,node_vars]
 
     # relabel id cols
-    names(edge_data)[1:3] = c('from', 'to', 'time')
     names(nodal_data)[1:2] = c('name', 'time')
 
     # 

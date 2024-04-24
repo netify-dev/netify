@@ -24,7 +24,7 @@ merge_layout_attribs <- function(
     ){
 
 	# check if netify object
-	netify_check(x)	
+	netify_check(netlet)	
 
 	# pull out attrs
 	obj_attrs <- attributes(netlet)

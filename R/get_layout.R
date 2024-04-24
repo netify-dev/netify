@@ -34,7 +34,7 @@ get_node_layout <- function(
 	){
 
 	# check if netify object
-	netify_check(x)		
+	netify_check(netlet)		
 
     # clean up some inputs that need to 
     # be adjusted if they are set to NULL
