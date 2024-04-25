@@ -1,30 +1,33 @@
-#' Plot method for netify objects
+#' Plotting method for 'netify' objects
 #'
-#' `plot.netify` takes in a netify object
-#' and produces a network visualization
-#' using the `tidygraph` and `ggraph` packages.
+#' This function provides a comprehensive tool to visualize 'netify' objects through various graphical representations including points, edges, texts, and labels. It leverages the capabilities of the 'igraph' and 'ggplot' packages to create customizable network visualizations.
 #'
-#' @param x object of class netify, produced by netify()
-#' @param ... Additional arguments passed to geom functions within 'ggraph'.
-#'           This can include aesthetics mappings such as alpha, size, and color,
-#'           or any other graphical parameters supported by 'geom_edge_link' and 'geom_node_point'.
-#' @return ggraph object
-#' @author Cassy Dorff, Shahryar Minhas
+#' @param x A 'netify' object, which contains the network data structured for analysis and visualization.
+#' @param node_layout Optional, user-provided node layout; if not provided, layout will be generated based on `layout` parameter.
+#' @param layout Specifies the layout algorithm from 'igraph' to position the nodes if `node_layout` is not provided.
+#' @param add_edges Logical; if TRUE, edges will be added to the plot.
+#' @param curve_edges Logical; if TRUE, edges will be curved.
+#' @param add_points Logical; if TRUE, points (nodes) will be plotted.
+#' @param add_text Logical; if TRUE, text annotations will be added.
+#' @param add_label Logical; if TRUE, labels will be added.
+#' @param select_text A vector of node names to specifically add text to; others will not have text.
+#' @param select_label A vector of node names to specifically add labels to; others will not have labels.
+#' @param ... Additional arguments passed to 'geom' functions within 'ggplot' for further customization.
 #'
-#' @import igraph
-#' @import ggplot2
-#' 
-#' @export plot.netify
+#' @return A 'ggplot' plot object that can be further modified or printed.
+#'
+#' @details
+#' `plot.netify` creates a network plot with flexible options for customization. It allows the user to specify:
+#' - Whether or not to include edges and how they are rendered (straight or curved).
+#' - Whether nodes are displayed as points.
+#' - Whether to annotate nodes with text or labels.
+#' - Specific nodes to annotate, allowing selective emphasis within the network.
+#' - Custom layouts if the automatic placement does not suffice.
+#' It uses a combination of node and edge data to construct the visualization, handling both aesthetic mappings and graphical parameters dynamically based on user input and the characteristics of the 'netify' object.
+#'
+#'
+#' @export
 
-###notes to sm and cd int he documentation for this or vignette: 
-### tel users that these are the igraph options
-		# choices = c(
-		# 	"nicely", "fruchterman.reingold", 
-		# 	"kamada.kawai", "random", "circle", 
-		# 	"star", "grid", "graphopt", 
-		# 	"sugiyama", "drl", "lgl", 'bipartite',
-		# 	'tree', 'randomly'
-		# )
 
 # library(netify)
 
@@ -44,7 +47,6 @@
 
 # plot.netify(netlet, node_color_var='i_polity2', node_size_var='i_log_pop', node_alpha=.1)
 # plot.netify(x2, node_color_var='i_polity2', node_size_var='i_log_pop', node_alpha=.1)
-
 
 plot.netify <- function(x, ...){
 

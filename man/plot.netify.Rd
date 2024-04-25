@@ -2,25 +2,47 @@
 % Please edit documentation in R/plot.netify.R
 \name{plot.netify}
 \alias{plot.netify}
-\title{Plot method for netify objects}
+\title{Plotting method for 'netify' objects}
 \usage{
 \method{plot}{netify}(x, ...)
 }
 \arguments{
-\item{x}{object of class netify, produced by netify()}
+\item{x}{A 'netify' object, which contains the network data structured for analysis and visualization.}
 
-\item{...}{Additional arguments passed to geom functions within 'ggraph'.
-This can include aesthetics mappings such as alpha, size, and color,
-or any other graphical parameters supported by 'geom_edge_link' and 'geom_node_point'.}
+\item{...}{Additional arguments passed to 'geom' functions within 'ggplot' for further customization.}
+
+\item{node_layout}{Optional, user-provided node layout; if not provided, layout will be generated based on \code{layout} parameter.}
+
+\item{layout}{Specifies the layout algorithm from 'igraph' to position the nodes if \code{node_layout} is not provided.}
+
+\item{add_edges}{Logical; if TRUE, edges will be added to the plot.}
+
+\item{curve_edges}{Logical; if TRUE, edges will be curved.}
+
+\item{add_points}{Logical; if TRUE, points (nodes) will be plotted.}
+
+\item{add_text}{Logical; if TRUE, text annotations will be added.}
+
+\item{add_label}{Logical; if TRUE, labels will be added.}
+
+\item{select_text}{A vector of node names to specifically add text to; others will not have text.}
+
+\item{select_label}{A vector of node names to specifically add labels to; others will not have labels.}
 }
 \value{
-ggraph object
+A 'ggplot' plot object that can be further modified or printed.
 }
 \description{
-\code{plot.netify} takes in a netify object
-and produces a network visualization
-using the \code{tidygraph} and \code{ggraph} packages.
+This function provides a comprehensive tool to visualize 'netify' objects through various graphical representations including points, edges, texts, and labels. It leverages the capabilities of the 'igraph' and 'ggplot' packages to create customizable network visualizations.
 }
-\author{
-Cassy Dorff, Shahryar Minhas
+\details{
+\code{plot.netify} creates a network plot with flexible options for customization. It allows the user to specify:
+\itemize{
+\item Whether or not to include edges and how they are rendered (straight or curved).
+\item Whether nodes are displayed as points.
+\item Whether to annotate nodes with text or labels.
+\item Specific nodes to annotate, allowing selective emphasis within the network.
+\item Custom layouts if the automatic placement does not suffice.
+It uses a combination of node and edge data to construct the visualization, handling both aesthetic mappings and graphical parameters dynamically based on user input and the characteristics of the 'netify' object.
+}
 }
