@@ -109,12 +109,12 @@ get_node_layout <- function(
 	if(obj_attrs$netify_type != 'cross_sec'){
 		layout_matrix <- lapply(g, function(g_slice){
 			l_matrix_slice = layout_fun(g_slice)
-			rownames(l_matrix_slice) <- V(g_slice)$name
+			rownames(l_matrix_slice) <- igraph::V(g_slice)$name
 			return(l_matrix_slice) })
 		names(layout_matrix) = names(g)
 	} else {
 		layout_matrix <- layout_fun(g)
-		rownames(layout_matrix) <- V(g)$name }
+		rownames(layout_matrix) <- igraph::V(g)$name }
 
 	# if static layout then choose first
 	if(static_actor_positions){
