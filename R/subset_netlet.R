@@ -195,7 +195,7 @@ subset_netlet <- function(
     if(!is.null(obj_attrs$nodal_data)){
         obj_attrs2$nodal_data <- obj_attrs$nodal_data[
             obj_attrs$nodal_data$actor %in% sub_actors &
-            obj_attrs$nodal_data$time %in% when_to_subset,] }
+            obj_attrs$nodal_data$time %in% when_to_subset,,drop=FALSE] }
 
     # adjust dyad_data
     if(!is.null(obj_attrs$dyad_data)){
@@ -208,7 +208,7 @@ subset_netlet <- function(
             obj_attrs2$dyad_data, function(dd){
                 toKeep_rows <- intersect(rownames(dd), sub_actors)
                 toKeep_cols <- intersect(colnames(dd), sub_actors)
-                dd[toKeep_rows, toKeep_cols,] } ) }
+                dd[toKeep_rows, toKeep_cols,,drop=FALSE] } ) }
 
     # add back in netify attributes
     attributes(sub_net) <- obj_attrs2
