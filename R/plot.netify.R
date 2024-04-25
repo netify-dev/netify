@@ -225,23 +225,23 @@ plot.netify <- function(x, ...){
 }
 
 
-library(netify)
+# library(netify)
 
-example(decompose_netlet)
+# example(decompose_netlet)
 
-x2 = subset_netlet(
-	netlet, 
-	when_to_subset=c('2008','2009') 
-)
+# x2 = subset_netlet(
+# 	netlet, 
+# 	when_to_subset=c('2008','2009') 
+# )
 
-x1= subset_netlet(
-	netlet, 
-	when_to_subset=c('2009')
-)
+# x1= subset_netlet(
+# 	netlet, 
+# 	when_to_subset=c('2009')
+# )
 
-plot.netify(x1)
+# plot.netify(x1)
 
-plot.netify(netlet, node_color='red')
+# plot.netify(netlet, node_color='red')
 
-plot.netify(netlet, node_color_var='i_polity2', node_size_var='i_log_pop', node_alpha=.1)
-plot.netify(x2, node_color_var='i_polity2', node_size_var='i_log_pop', node_alpha=.1)
+# plot.netify(netlet, node_color_var='i_polity2', node_size_var='i_log_pop', node_alpha=.1)
+# plot.netify(x2, node_color_var='i_polity2', node_size_var='i_log_pop', node_alpha=.1)
