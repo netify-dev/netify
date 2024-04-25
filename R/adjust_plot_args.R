@@ -47,7 +47,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		plot_args$curve_edges = FALSE }		
 	######################		
 	
-	# label specific nodes #####################
+	# label specific nodes via text #####################
 	# if users chose to label specific nodes
 	# then replace name column
 	if(!is.null(plot_args$select_text)){
@@ -68,6 +68,28 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		plot_args$add_text = TRUE 	
 	}
 	######################
+
+	# label specific nodes via label #####################
+	# if users chose to label specific nodes
+	# then replace name column
+	if(!is.null(plot_args$select_label)){
+
+		# pull out groups to highlight
+		to_label = unique(plot_args$select_label)
+
+		# save old
+		net_dfs$nodal_data$name_old = net_dfs$nodal_data$name
+
+		# replace name label in net_dfs$nodal_data
+		# with NA if not in to_label
+		net_dfs$nodal_data$name = ifelse(
+			net_dfs$nodal_data$name %in% to_label,
+			net_dfs$nodal_data$name, NA )
+
+		# set add_text to TRUE
+		plot_args$add_label = TRUE 	
+	}
+	######################	
 
 	# set up static geom_point defaults #####################
 	if(is.null(plot_args$node_alpha)){  plot_args$node_alpha = NA }
@@ -172,6 +194,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	}
 	######################
 
+	######################
     #
     return(
         list(
@@ -179,4 +202,5 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
             net_dfs=net_dfs
         )
     )
+	######################
 }

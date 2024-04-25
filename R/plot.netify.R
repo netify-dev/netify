@@ -27,12 +27,8 @@
 		# )
 
 # library(netify)
-# library(igraph)
-# library(ggplot2)
-# # library(rlang)
 
 # example(decompose_netlet)
-# # x = netlet
 
 # x2 = subset_netlet(
 # 	netlet, 
@@ -44,14 +40,11 @@
 # 	when_to_subset=c('2009')
 # )
 
+# plot.netify(netlet, node_color='red')
+
 # plot.netify(netlet, node_color_var='i_polity2', node_size_var='i_log_pop', node_alpha=.1)
 # plot.netify(x2, node_color_var='i_polity2', node_size_var='i_log_pop', node_alpha=.1)
 
-# plot_args = list()
-
-# plot_args = list(
-# 	layout='fr'
-# )
 
 plot.netify <- function(x, ...){
 
@@ -112,9 +105,7 @@ plot.netify <- function(x, ...){
 
 	######################	
 	# get aesthetic parameters
-	ggnet_params = gg_params(
-		plot_args
-	)
+	ggnet_params = gg_params( plot_args )
 	######################	
 
 	######################	
@@ -247,30 +238,3 @@ plot.netify <- function(x, ...){
 	#
 	return(viz)
 }
-
-#' theme_netify function
-#'
-#' This function returns a customized theme for netify plots.
-#' It is based on the `theme_minimal` function from the `ggplot2` package.
-#' It removes axis text and titles from the plot.
-#'
-#' @return A customized theme object for netify plots.
-#' @author Cassy Dorff, Shahryar Minhas
-#' @import ggplot2
-#' @export theme_netify
-#'
-#'
-theme_netify = function(){
-	theme_minimal() + 
-	theme(
-		axis.text = element_blank(),
-		axis.title = element_blank(),
-		legend.position='top'
-	)
-}
-
-
-
-
-
-
