@@ -81,7 +81,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	# set up static geom_text defaults #####################	
 	if(is.null(plot_args$text_alpha)){ plot_args$text_alpha = NA }
 	if(is.null(plot_args$text_color)){ plot_args$text_color = 'black' }
-	if(is.null(plot_args$text_fill)){ plot_args$text_color = 'white' }		
+	if(is.null(plot_args$text_fill)){ plot_args$text_fill = 'white' }		
 	if(is.null(plot_args$text_size)){ plot_args$text_size = 3.88 }
 	if(is.null(plot_args$text_family)){ plot_args$text_family = '' }
 	if(is.null(plot_args$text_fontface)){ plot_args$text_fontface = 1 }
@@ -94,7 +94,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	# set up static geom_label defaults #####################	
 	if(is.null(plot_args$label_alpha)){ plot_args$label_alpha = NA }
 	if(is.null(plot_args$label_color)){ plot_args$label_color = 'black' }
-	if(is.null(plot_args$label_fill)){ plot_args$label_color = 'white' }		
+	if(is.null(plot_args$label_fill)){ plot_args$label_fill = 'white' }		
 	if(is.null(plot_args$label_size)){ plot_args$label_size = 3.88 }
 	if(is.null(plot_args$label_family)){ plot_args$label_family = '' }
 	if(is.null(plot_args$label_fontface)){ plot_args$label_fontface = 1 }

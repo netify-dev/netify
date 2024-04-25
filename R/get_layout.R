@@ -67,7 +67,7 @@ get_node_layout <- function(
     # then match it using the code below
     } else {
     layout_fun <- match.arg(
-        plot_args$layout, 
+        layout, 
         choices = c(
             "nicely", "fruchterman.reingold", 
             "kamada.kawai", "random", "circle", 
