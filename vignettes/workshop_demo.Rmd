@@ -9,55 +9,51 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 editor_options:
   chunk_output_type: console
+  
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-##  Package Overview
+##  Package Overview 
 
-This vignette is a high level overview of our package from start to finish. The best use of this vignette is to introduce the package to larger audiences. This overview covers our main goals with data examples and minimal writing. 
+This vignette is a high level overview of our package from start to finish. The best use of this vignette is to introduce the main components of the package to larger audiences. This overview covers our primary functions with data examples using minimal writing. 
 
 `netify` goals: 
 
-  (1) Create: Make it easy for the user to turn their data into a network object in $R$ as well as add additional data, such as nodal data, to your network.
-  (2) Inspect: Print the network object for a quick view about the network's features and easily access summary statistics about the network. Make a beautiful plot of the network!
-  (3) Explore:  Take your network object and get it ready to use in other network packages and modeling appraoches. 
+  (1) Create: Make it easy for users to create networks from raw data in $R$ as well as add additional features, such as nodal variables, to your network object.
+  (2) Explore: Explore features of the network you created, like summary statistics and visualization. 
+  (3) Advance:  Advance your network analysis to the next stage by preparing it to use in other network packages and modeling approaches. 
   
 `netify` provides a suite of primary functions to help achieve these goals:
 
-| Create  | Inspect  | Explore |
+| Create💡  | Explore 🔎 | Advance ️🚀|
 |---------|---------|---------|
 | `netify()`  | `peek()`  | `prep_for_amen()`  |
 | `add_nodal()` | `summary()`   | `prep_for_igraph()`  |
 | `add_dyad()`  | `summary_actor()`  | `prep_for_network()`  |
 | `subset_netlet()`  | `plot.network()`  |   | 
 
-`netify` can take dyadic data or edgelists to get started. The package can also create different types of networks including:
+`netify` can take dyadic data or edgelists to get started. 
 
-- cross sectional (with static and varying actor composition)
-- multilayer networks
-- bipartite networks
+- The package can also create different types of networks including:
 
-With different edge types:
+  - cross sectional networks(with static and varying actor composition)
+  - multilayer networks
+  - bipartite networks
 
-- weight
-- binary
-- symmetric or non-symmetric 
+- As well as create networks with different edge types:
+  - weighted 
+  - binary 
+  - symmetric or non-symmetric 
 
-## Step 1: Create
+## Step 1: Create 💡
 
-Begin by supplying the data.
-
-Outline:
-
- - make a long weighted network
-    + add nodal 
- - basic info
+Begin by loading packages and supplying the data.
 
 
-```{r, eval=TRUE, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
+```{r, eval=TRUE, results='hide', warning=FALSE, message=FALSE}
 # load packages
 library(netify)
 library(peacesciencer)
@@ -75,14 +71,14 @@ cow_dyads <- create_dyadyears(
     add_democracy()
 ```
 
-Next, create a `netlet` object! using the package's core function `netify.` 
+Next, create a `netlet` object from the above COW data frame using our package's core function `netify.` There are many parameters, but the most important ones to highlight are:
 
-dyad_data` is a dyadic data.frame that should have at least the following variables used to specify actors:
+- `dyad_data` is a dyadic data.frame that should have at least the following variables used to specify actors:
 
   - `actor1`: character indicating actor 1 variable in the data
   - `actor2`: character indicating actor 2 variable in the data
-
-`netify_type` is a type of netlet object ('cross-sec', 'longit_list', or 'longit_array').
+  
+- `netify_type` is a type of netlet object (`cross-sec`, `longit_list`, or `longit_array`).
 
 ```{r, eval=TRUE}
 mid_long_network <- netify(
@@ -98,16 +94,55 @@ mid_long_network <- netify(
   )
 ```
 
-## Step 2: Inspect
+*Congratulations* you have created a network object! 🎉
 
-- peek
-- summary
-- summary_actor
-- subsetnetlet
-- plot
+## Step 2: Explore 🔎
+
+We made a network, so let's look at it. First, we might want to take a `peek` at the network object to see if the matrix looks the way we'd expect it to look. This function lets you glance at a specific slice of the network, if it is longitudinal, as well as a set range of actors.
 
 ```{r}
 peek(mid_long_network, when_to_peek = c('2012'), what_to_peek = 30)
 ```
 
-## Step 3: Explore
+Next, let's examine a few basic summary components of the network. 
+
+- summary
+- summary_actor (how to do only one year)
+- subsetnetlet
+- plot
+
+```{r}
+# entire object
+summary(mid_long_network)
+
+# every year & every actor (messy!)
+summary_actor_mids <- summary_actor(mid_long_network)
+
+# cannot pass this data frame to plot_actorStats
+
+# top 3 Latin American countries with the largest GDP
+latin_am_top10 <- c(140, 70, 160)
+
+# Convert numeric codes to character type 
+latin_am_top10 <- as.character(latin_am_top10)
+
+plot_actorStats(summary_actor_mids, 
+                longitudinal = TRUE,
+                actor_names = latin_am_top10)
+```
+
+We can also subset the network to zoom in and explore only a few time periods (or actors).
+
+```{r}
+mid_subset <-subset_netlet(mid_long_network, 
+                    what_to_subset = 190,
+                    when_to_subset = c('2012', '2013', '2014'))
+
+summary(mid_subset)
+
+plot_actorStats(mid_subset$'2012')
+
+plot(test)
+```
+
+## Step 3: Advance 🚀
