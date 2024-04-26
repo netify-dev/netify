@@ -35,16 +35,11 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		plot_args$use_theme_netify = TRUE }
 
 	# process geom choices #####################
-	if(is.null(plot_args$add_points)){
-		plot_args$add_points = TRUE }
-	if(is.null(plot_args$add_text)){
-		plot_args$add_text = FALSE }
-	if(is.null(plot_args$add_label)){
-		plot_args$add_label = FALSE }
-	if(is.null(plot_args$add_edges)){
-		plot_args$add_edges = TRUE }
-	if(is.null(plot_args$curve_edges)){
-		plot_args$curve_edges = FALSE }		
+	if(is.null(plot_args$add_points)){ plot_args$add_points = TRUE }
+	if(is.null(plot_args$add_text)){ plot_args$add_text = FALSE }
+	if(is.null(plot_args$add_label)){ plot_args$add_label = FALSE }
+	if(is.null(plot_args$add_edges)){ plot_args$add_edges = TRUE }
+	if(is.null(plot_args$curve_edges)){ plot_args$curve_edges = FALSE }		
 	######################		
 	
 	# label specific nodes via text #####################

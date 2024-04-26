@@ -27,6 +27,7 @@
 #'
 #' @import ggplot2
 #' @import igraph
+#' @import ggnewscale
 #' 
 #' @export plot.netify
 #' @export
@@ -149,6 +150,12 @@ plot.netify <- function(x, ...){
 		# node var param list
 		node_aes_list <- ggnet_params$node$var
 
+		# make room for new scales
+		viz <- viz + 
+			ggnewscale::new_scale_color() + 
+			ggnewscale::new_scale_fill() +
+			ggnewscale::new_scale('alpha')
+
 		# create geom_point
 		viz <- viz + layer(
 			data = net_dfs$nodal_data, 
@@ -170,6 +177,12 @@ plot.netify <- function(x, ...){
 
 		# Prepare a list to conditionally build the aes()
 		text_aes_list <- ggnet_params$text$var
+
+		# make room for new scales
+		viz <- viz + 
+			ggnewscale::new_scale_color() + 
+			ggnewscale::new_scale('alpha') +
+			ggnewscale::new_scale('size')
 
 		# create geom_point
 		viz <- viz + layer(
@@ -193,6 +206,13 @@ plot.netify <- function(x, ...){
 
 		# Prepare a list to conditionally build the aes()
 		label_aes_list <- ggnet_params$label$var
+
+		# make room for new scales
+		viz <- viz + 
+			ggnewscale::new_scale_color() + 
+			ggnewscale::new_scale('alpha') +
+			ggnewscale::new_scale_fill() +
+			ggnewscale::new_scale('size')
 
 		# create geom_label
 		viz <- viz + layer(
@@ -226,6 +246,8 @@ plot.netify <- function(x, ...){
 
 
 # library(netify)
+# library(ggplot2)
+
 
 # example(decompose_netlet)
 
@@ -239,7 +261,20 @@ plot.netify <- function(x, ...){
 # 	when_to_subset=c('2009')
 # )
 
-# plot.netify(x1)
+# plot.netify(
+# 	x1, 
+# 	node_color_var = 'i_polity2', 
+# 	edge_color_var = 'matlCoop',
+# 	node_size = 10
+# 	) +
+# 	guides(fill=guide_legend(nrow=2))
+
+# netlet = x1
+# plot_args = list(
+# 	node_color_var = 'i_polity2', 
+# 	edge_color_var = 'matlCoop',
+# 	node_size = 10	
+# )
 
 # plot.netify(netlet, node_color='red')
 

@@ -46,37 +46,37 @@ gg_params <- function(
         node_aes_list$alpha = formula(
             paste0('~', plot_args$node_alpha_var))
         node_static_params = node_static_params[
-            -which(names(node_static_params)=='node_alpha')]
+            -which(names(node_static_params)=='alpha')]
     }
     if(!is.null(plot_args$node_color_var)){
         node_aes_list$color = formula(
             paste0('~', plot_args$node_color_var))
         node_static_params = node_static_params[
-            -which(names(node_static_params)=='node_color')]
+            -which(names(node_static_params)=='color')]
     }
     if(!is.null(plot_args$node_fill_var)){
         node_aes_list$fill = formula(
             paste0('~', plot_args$node_fill_var))
         node_static_params = node_static_params[
-            -which(names(node_static_params)=='node_fill')]
+            -which(names(node_static_params)=='fill')]
     }
     if(!is.null(plot_args$node_shape_var)){
         node_aes_list$shape = formula(
             paste0('~', plot_args$node_shape_var))
         node_static_params = node_static_params[
-            -which(names(node_static_params)=='node_shape')]
+            -which(names(node_static_params)=='shape')]
     }
     if(!is.null(plot_args$node_size_var)){
         node_aes_list$size = formula(
             paste0('~', plot_args$node_size_var))
         node_static_params = node_static_params[
-            -which(names(node_static_params)=='node_size')]
+            -which(names(node_static_params)=='size')]
     }
     if(!is.null(plot_args$node_stroke_var)){
         node_aes_list$stroke = formula(
             paste0('~', plot_args$node_stroke_var))
         node_static_params = node_static_params[
-            -which(names(node_static_params)=='node_stroke')]
+            -which(names(node_static_params)=='stroke')]
     }
     ######################
 
@@ -102,19 +102,19 @@ gg_params <- function(
         text_aes_list$alpha <- formula(
             paste0('~', plot_args$text_alpha_var))
         text_static_params = text_static_params[
-            -which(names(text_static_params)=='text_alpha')]
+            -which(names(text_static_params)=='alpha')]
     }
     if(!is.null(plot_args$text_color_var)){
         text_aes_list$color <- formula(
             paste0('~', plot_args$text_color_var))
         text_static_params = text_static_params[
-            -which(names(text_static_params)=='text_color')]
+            -which(names(text_static_params)=='color')]
     }
     if(!is.null(plot_args$text_size_var)){
         text_aes_list$size <- formula(
             paste0('~', plot_args$text_size_var))
         text_static_params = text_static_params[
-            -which(names(text_static_params)=='text_size')]
+            -which(names(text_static_params)=='size')]
     }
     ######################
 
@@ -144,25 +144,25 @@ gg_params <- function(
         label_aes_list$alpha <- formula(
             paste0('~', plot_args$label_alpha_var) )
         label_static_params = label_static_params[
-            -which(names(label_static_params)=='label_alpha')]
+            -which(names(label_static_params)=='alpha')]
     }
     if(!is.null(plot_args$label_color_var)){
         label_aes_list$color <- formula(
             paste0('~', plot_args$label_color_var) )
         label_static_params = label_static_params[
-            -which(names(label_static_params)=='label_color')]
+            -which(names(label_static_params)=='color')]
     }
     if(!is.null(plot_args$label_fill_var)){
         label_aes_list$fill <- formula(
             paste0('~', plot_args$label_fill_var) )
         label_static_params = label_static_params[
-            -which(names(label_static_params)=='label_fill')]
+            -which(names(label_static_params)=='fill')]
     }
     if(!is.null(plot_args$label_size_var)){
         label_aes_list$size <- formula(
             paste0('~', plot_args$label_size_var) )
         label_static_params = label_static_params[
-            -which(names(label_static_params)=='label_size')]
+            -which(names(label_static_params)=='size')]
     }
     ######################
 
@@ -197,25 +197,25 @@ gg_params <- function(
         edge_aes_list$alpha <- formula(
             paste0('~', plot_args$edge_alpha_var) )
         edge_static_params = edge_static_params[
-            -which(names(edge_static_params)=='edge_alpha')]
+            -which(names(edge_static_params)=='alpha')]
     }
     if(!is.null(plot_args$edge_color_var)){
         edge_aes_list$color <- formula(
             paste0('~', plot_args$edge_color_var) )
         edge_static_params = edge_static_params[
-            -which(names(edge_static_params)=='edge_color')]
+            -which(names(edge_static_params)=='color')]
     }
     if(!is.null(plot_args$edge_linetype_var)){
         edge_aes_list$linetype <- formula(
             paste0('~', plot_args$edge_linetype_var) )
         edge_static_params = edge_static_params[
-            -which(names(edge_static_params)=='edge_linetype')]
+            -which(names(edge_static_params)=='linetype')]
     }
     if(!is.null(plot_args$edge_linewidth_var)){
         edge_aes_list$linewidth <- formula(
             paste0('~', plot_args$edge_linewidth_var) )
         edge_static_params = edge_static_params[
-            -which(names(edge_static_params)=='edge_linewidth')]
+            -which(names(edge_static_params)=='linewidth')]
     }
     ######################
 
