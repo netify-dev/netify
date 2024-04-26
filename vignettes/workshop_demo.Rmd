@@ -18,13 +18,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ##  Package Overview 
 
-This vignette is a high level overview of our package from start to finish. The best use of this vignette is to introduce the main components of the package to larger audiences. This overview covers our primary functions with data examples using minimal writing. 
+This vignette provides a high level overview of our package from start to finish. The best use of this vignette is to introduce the main components of the package to larger audiences. This overview covers our primary functions with data examples and minimal writing. 
 
 `netify` goals: 
 
-  (1) Create: Make it easy for users to create networks from raw data in $R$ as well as add additional features, such as nodal variables, to your network object.
-  (2) Explore: Explore features of the network you created, like summary statistics and visualization. 
-  (3) Advance:  Advance your network analysis to the next stage by preparing it to use in other network packages and modeling approaches. 
+  (1) Create: Netify your data! We Make it easy for users to create networks from raw data in $R$ as well as add additional features, such as nodal and dyadic variables, to the network object.
+  (2) Explore: Explore characteristics of the network you created, like summary statistics at both the network and actor levels. Visualize your network.
+  (3) Advance:  Advance your network analysis to the next stage by preparing it for use in other network packages and modeling approaches. 
   
 `netify` provides a suite of primary functions to help achieve these goals:
 
@@ -33,7 +33,8 @@ This vignette is a high level overview of our package from start to finish. The 
 | `netify()`  | `peek()`  | `prep_for_amen()`  |
 | `add_nodal()` | `summary()`   | `prep_for_igraph()`  |
 | `add_dyad()`  | `summary_actor()`  | `prep_for_network()`  |
-| `subset_netlet()`  | `plot.network()`  |   | 
+| `subset_netlet()`  | `plot_actorStats()`  |   | 
+|              |   `plot.network()`|        |
 
 `netify` can take dyadic data or edgelists to get started. 
 
@@ -68,10 +69,12 @@ cow_dyads <- create_dyadyears(
     # add capital distance
     add_capital_distance() %>%
     # add democracy
-    add_democracy()
+    add_democracy() %>%
+    # add gdp
+    add_sdp_gdp()
 ```
 
-Next, create a `netlet` object from the above COW data frame using our package's core function `netify.` There are many parameters, but the most important ones to highlight are:
+Next, create a `netlet` object from the above COW data frame using our package's core function `netify.` There are a number of useful parameters, but the most important ones to highlight are:
 
 - `dyad_data` is a dyadic data.frame that should have at least the following variables used to specify actors:
 
@@ -94,55 +97,82 @@ mid_long_network <- netify(
   )
 ```
 
-*Congratulations* you have created a network object! 🎉
+**Congratulations** you have created a network object! 🎉
+
+We can also add nodal and dyadic data after we've created the network via the `add_nodal()` and `add_dyad()` functions. 
+
+Let's assume that we had information about each actor in the network that we'd like to add as a nodal variable after we already made the network object. For example, lets add a variable measuring gdp for each node in the network over time:
+
+```{r, eval=TRUE}
+# create a vector of nodal data
+node_data <- unique(cow_dyads[,c("ccode1", "year", "wbgdppc2011est2")])
+
+# add nodal variable to netlet object
+mid_long_network <- add_nodal(
+    netlet = mid_long_network,
+    node_data = node_data,
+    actor = "ccode1",
+    time = "year"
+)
+
+```
 
 ## Step 2: Explore 🔎
 
-We made a network, so let's look at it. First, we might want to take a `peek` at the network object to see if the matrix looks the way we'd expect it to look. This function lets you glance at a specific slice of the network, if it is longitudinal, as well as a set range of actors.
+We made a network, so let's look at it. First, we might want to take a `peek` at the network object to see if the matrix looks the way we'd expect it to look. This function lets you glance at a specific slice of the network if it is longitudinal or the entire network if it is cross-sectional.
 
 ```{r}
 peek(mid_long_network, when_to_peek = c('2012'), what_to_peek = 30)
 ```
 
-Next, let's examine a few basic summary components of the network. 
-
-- summary
-- summary_actor (how to do only one year)
-- subsetnetlet
-- plot
+Next, let's examine a few basic summary statistics about the network using our  `summary()` function.
 
 ```{r}
-# entire object
+# create data.frame that provides network-level summary stats 
+# for each year of the network
 summary(mid_long_network)
+```
 
+We might also want to look at a specific set of actors' statistics overtime. Our built-in function, `summary_actor` will calculate in-degree, out-degree, average degree, and eigenvector centrality for each actor in each time period.
+
+```{r}
 # every year & every actor (messy!)
 summary_actor_mids <- summary_actor(mid_long_network)
 
-# cannot pass this data frame to plot_actorStats
-
-# top 3 Latin American countries with the largest GDP
-latin_am_top10 <- c(140, 70, 160)
-
-# Convert numeric codes to character type 
-latin_am_top10 <- as.character(latin_am_top10)
-
-plot_actorStats(summary_actor_mids, 
-                longitudinal = TRUE,
-                actor_names = latin_am_top10)
+# cannot pass this data frame to plot_actorStats?
+# code below not interesting for symmetric?
 ```
 
-We can also subset the network to zoom in and explore only a few time periods (or actors).
+```{r, fig.width=6, fig.height=6}
 
-```{r}
+# top 5 GDP countries
+top_5 <-c("2", "710", "740", "750", "200")
+
+# zoom in on specific parts of the network for actor viz
 mid_subset <-subset_netlet(mid_long_network, 
+                    what_to_subset = top_5,
+                    when_to_subset = c('2010', '2011', '2012', '2013', '2014'))
+
+mid_subset_summary <- (summary_actor(mid_subset))
+
+plot_actorStats(mid_subset_summary, 
+                longitudinal = TRUE)
+```
+
+Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. Or we can first subset the object so that we plot only select time periods.
+
+```{r, fig.width=6, fig.height=6}
+# need to remove isolates
+plot.netify(mid_long_network)
+```
+
+```{r, fig.width=6, fig.height=2}
+# subset 
+mids_three_years <-subset_netlet(mid_long_network, 
                     what_to_subset = 190,
-                    when_to_subset = c('2012', '2013', '2014'))
+                    when_to_subset = c('2010', '2013', '2014'))
 
-summary(mid_subset)
-
-plot_actorStats(mid_subset$'2012')
-
-plot(test)
+plot(mids_three_years)
 ```
 
 ## Step 3: Advance 🚀
