@@ -34,13 +34,13 @@ This vignette provides a high level overview of our package from start to finish
 | `add_nodal()` | `summary()`   | `prep_for_igraph()`  |
 | `add_dyad()`  | `summary_actor()`  | `prep_for_network()`  |
 | `subset_netlet()`  | `plot_actorStats()`  |   | 
-|              |   `plot.network()`|        |
+|              |   `plot.netify()`|        |
 
 `netify` can take dyadic data or edgelists to get started. 
 
 - The package can also create different types of networks including:
 
-  - cross sectional networks(with static and varying actor composition)
+  - cross sectional networks (with static and varying actor composition)
   - multilayer networks
   - bipartite networks
 
@@ -114,7 +114,6 @@ mid_long_network <- add_nodal(
     actor = "ccode1",
     time = "year"
 )
-
 ```
 
 ## Step 2: Explore 🔎
