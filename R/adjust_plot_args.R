@@ -38,6 +38,10 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if(is.null(plot_args$remove_isolates)){
 		plot_args$remove_isolates = TRUE }
 
+	# by default set check overlap for text/label to TRUE
+	if(is.null(plot_args$check_overlap)){
+		plot_args$check_overlap = TRUE }
+
 	# process geom choices #####################
 	if(is.null(plot_args$add_points)){ plot_args$add_points = TRUE }
 	if(is.null(plot_args$add_text)){ plot_args$add_text = FALSE }
@@ -56,14 +60,18 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	# then replace name column for text
 	if(!is.null(plot_args$select_text)){
 
-		# pull out groups to highlight
-		to_label = unique(plot_args$select_text)
-
 		# replace name label in net_dfs$nodal_data
 		# with NA if not in to_label
 		net_dfs$nodal_data$name_text = ifelse(
-			net_dfs$nodal_data$name %in% to_label,
-			net_dfs$nodal_data$name, NA )
+			net_dfs$nodal_data$name %in% plot_args$select_text,
+			net_dfs$nodal_data$name, '' )
+
+		# if user supplied alternative text in 
+		# select_text_display then use that instead of 
+		# the name in the df
+		if(!is.null(plot_args$select_text_display)){
+			net_dfs$nodal_data$name_text = plot_args$select_text_display[match(
+				net_dfs$nodal_data$name_text, plot_args$select_text)] }
 
 		# set add_text to TRUE
 		plot_args$add_text = TRUE 	
@@ -73,14 +81,18 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	# then replace name column for label
 	if(!is.null(plot_args$select_label)){
 
-		# pull out groups to highlight
-		to_label = unique(plot_args$select_label)
-
 		# replace name label in net_dfs$nodal_data
 		# with NA if not in to_label
 		net_dfs$nodal_data$name_label = ifelse(
-			net_dfs$nodal_data$name %in% to_label,
-			net_dfs$nodal_data$name, NA )
+			net_dfs$nodal_data$name %in% plot_args$select_label,
+			net_dfs$nodal_data$name, '' )
+
+		# if user supplied alternative label in 
+		# select_label_display then use that instead of 
+		# the name in the df
+		if(!is.null(plot_args$select_label_display)){
+		net_dfs$nodal_data$name_label = plot_args$select_label_display[match(
+			net_dfs$nodal_data$name_label, plot_args$select_label)] }
 
 		# set add_text to TRUE
 		plot_args$add_label = TRUE 	
@@ -147,29 +159,6 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		} else {
 			plot_args$edge_arrow = NULL
 	} }
-	######################
-
-	# adjust data for symmetryic #####################
-	# if network is undirected then only include 
-	# one side of edge observations this is a bit 
-	# redundant since the merging step takes care 
-	# of this in merge_layout_attribs.R
-	if(obj_attrs$symmetric){
-
-		# Create a new column 'edge' with sorted 'from' and 'to' values
-		net_dfs$edge_data$edge <- apply(
-			net_dfs$edge_data[, c("from", "to")], 1, function(x){
-				paste(sort(x), collapse = "-")} )
-
-		# add time var if cross_sec
-		if(obj_attrs$netify_type == 'cross_sec'){
-			net_dfs$edge_data$time = 1 }
-
-		# Remove duplicates based on 'edge', 'time' and keep the first occurrence
-		net_dfs$edge_data <- net_dfs$edge_data[
-			!duplicated(
-				net_dfs$edge_data[c("edge", "time")]), ]
-	}
 	######################
 
 	# choose weight var #####################
