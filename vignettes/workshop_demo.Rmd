@@ -201,9 +201,9 @@ dim(mids_longit_prep$Xcol)
 
 # core amen modeling function (how best longit?)
 # get apply error
-ame_repL(Y = mids_longit_prep$Y, 
-         Xdyad = mids_longit_prep$Xdyad,
-         Xrow = mids_long_prep$Xrow,
-         model="bin")
+#ame_repL(Y = mids_longit_prep$Y, 
+     #    Xdyad = mids_longit_prep$Xdyad,
+     #    Xrow = mids_long_prep$Xrow,
+      #   model="bin")
 ```
 
