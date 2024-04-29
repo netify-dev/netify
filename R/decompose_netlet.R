@@ -149,6 +149,15 @@ decompose_netlet <- function(
     nodal_data$time = char(nodal_data$time)
     ######################
 
+    ######################
+    # if cross-sectional make sure that time value
+    # in edge_data is the same as time value
+    # in nodal_data
+    if(obj_attrs$netify_type == 'cross_sec'){
+        edge_data$time = nodal_data$time[1]
+    }
+    ######################
+
     # 
     out = list(
         edge_data = edge_data,

@@ -151,6 +151,14 @@ get_adjacency <- function(
   # assign cross-section value for adjmat depending on user inputs
   value <- dyad_data[,weight]
 
+  # create logical value that is TRUE if weight is just 0/1
+  # and false otherwise
+  weight_binary <- TRUE
+  weight_vals <- unique(value)
+  if(any(weight_vals != 0 & weight_vals != 1)){
+    weight_binary <- FALSE }
+  rm(weight_vals)
+
   # convert to adjacency matrix
   adj_out <- get_matrix(
       n_rows=length(actors_rows),
@@ -183,6 +191,7 @@ get_adjacency <- function(
   attr(adj_out, 'actor_pds') <- actor_pds
   attr(adj_out, 'weight') <- weight
   attr(adj_out, 'detail_weight') <- weight_label
+  attr(adj_out, 'weight_binary') <- weight_binary
   attr(adj_out, 'symmetric') <- user_symmetric
   attr(adj_out, 'mode') <- mode
   attr(adj_out, 'layers') <- layer_label

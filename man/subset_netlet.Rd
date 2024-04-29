@@ -6,7 +6,7 @@
 \usage{
 subset_netlet(
   netlet,
-  what_to_subset = 20,
+  what_to_subset = NULL,
   what_rows_to_subset = what_to_subset,
   what_cols_to_subset = what_to_subset,
   when_to_subset = NULL,

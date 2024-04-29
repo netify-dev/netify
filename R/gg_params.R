@@ -95,7 +95,7 @@ gg_params <- function(
     # Prepare a list to conditionally build the aes()
     text_aes_list <- list(
         x = ~x, y = ~y,
-        label = ~name )
+        label = ~name_text )
 
     # Add conditional aesthetics based on non-NULL entries
     if(!is.null(plot_args$text_alpha_var)){
@@ -137,7 +137,7 @@ gg_params <- function(
     # Prepare a list to conditionally build the aes()
     label_aes_list <- list(
         x = ~x, y = ~y,
-        label = ~name )
+        label = ~name_label )
 
     # Add conditional aesthetics based on non-NULL entries
     if(!is.null(plot_args$label_alpha_var)){

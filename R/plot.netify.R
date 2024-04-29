@@ -5,11 +5,12 @@
 #' @param x A 'netify' object, which contains the network data structured for analysis and visualization.
 #' @param node_layout Optional, user-provided node layout; if not provided, layout will be generated based on `layout` parameter.
 #' @param layout Specifies the layout algorithm from 'igraph' to position the nodes if `node_layout` is not provided.
-#' @param add_edges Logical; if TRUE, edges will be added to the plot.
-#' @param curve_edges Logical; if TRUE, edges will be curved.
-#' @param add_points Logical; if TRUE, points (nodes) will be plotted.
-#' @param add_text Logical; if TRUE, text annotations will be added.
-#' @param add_label Logical; if TRUE, labels will be added.
+#' @param remove_isolates Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
+#' @param add_edges Logical; if TRUE, edges will be added to the plot. Default is TRUE.
+#' @param curve_edges Logical; if TRUE, edges will be curved. Default is FALSE. 
+#' @param add_points Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.
+#' @param add_text Logical; if TRUE, text annotations will be added. Default is FALSE.
+#' @param add_label Logical; if TRUE, labels will be added. Default is FALSE.
 #' @param select_text A vector of node names to specifically add text to; others will not have text.
 #' @param select_label A vector of node names to specifically add labels to; others will not have labels.
 #' @param ... Additional arguments passed to 'geom' functions within 'ggplot' for further customization.
@@ -36,6 +37,14 @@ plot.netify <- function(x, ...){
 
 	# check if netify object
 	netify_check(x)	
+
+	# if more than one layer tell user they must specify a single layer
+	if(length(attributes(x)$layers) > 1){
+		cli::cli_alert_danger(
+			'Error: This object has multiple layers. 
+			`plot` does not currently support multilayer `netify` inputs.
+			Please use the `filter_layers` function to create a `netify` object with a single layer.' )
+		stop() }
 
 	# get plot args
 	plot_args = list(...)	
@@ -72,7 +81,7 @@ plot.netify <- function(x, ...){
 	# get info for drawing edge segments
 	edges_list = get_edge_layout(
 		netlet,  nodes_layout=nodes_list )
-	######################	
+	######################		
 
 	######################
 	# org the netlet into a  and dyadic df with all the
@@ -93,6 +102,35 @@ plot.netify <- function(x, ...){
 	# get aesthetic parameters
 	ggnet_params = gg_params( plot_args )
 	######################	
+
+	######################	
+	# remove isolates
+	if(plot_args$remove_isolates){
+
+		# get actor summary
+		actor_summ <- summary_actor(netlet)
+
+		# figure out what to keep and need to 
+		# do separate for symmetric and asymmetric
+		if(obj_attrs$symmetric){
+			to_keep <- actor_summ[actor_summ$degree > 0,]
+		} else {
+			to_keep <- actor_summ[actor_summ$degree_total > 0 ,]}
+
+		# add time var to to_keep if cross_sec
+		if(obj_attrs$netify_type == 'cross_sec'){
+			to_keep$time = net_dfs$nodal_data$time[1] }
+
+		# create id vars
+		to_keep$id = with(to_keep, paste(actor, time, sep='_'))
+		net_dfs$nodal_data$id = with(net_dfs$nodal_data, paste(name, time, sep='_'))
+		# net_dfs$edge_data$from_id = with(net_dfs$edge_data, paste(from, time, sep='_'))
+		# net_dfs$edge_data$to_id = with(net_dfs$edge_data, paste(to, time, sep='_'))
+
+		# subset
+		net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$id %in% to_keep$id,]
+	}
+	######################		
 
 	######################	
 	# plot
@@ -243,40 +281,3 @@ plot.netify <- function(x, ...){
 	#
 	return(viz)
 }
-
-
-# library(netify)
-# library(ggplot2)
-
-
-# example(decompose_netlet)
-
-# x2 = subset_netlet(
-# 	netlet, 
-# 	when_to_subset=c('2008','2009') 
-# )
-
-# x1= subset_netlet(
-# 	netlet, 
-# 	when_to_subset=c('2009')
-# )
-
-# plot.netify(
-# 	x1, 
-# 	node_color_var = 'i_polity2', 
-# 	edge_color_var = 'matlCoop',
-# 	node_size = 10
-# 	) +
-# 	guides(fill=guide_legend(nrow=2))
-
-# netlet = x1
-# plot_args = list(
-# 	node_color_var = 'i_polity2', 
-# 	edge_color_var = 'matlCoop',
-# 	node_size = 10	
-# )
-
-# plot.netify(netlet, node_color='red')
-
-# plot.netify(netlet, node_color_var='i_polity2', node_size_var='i_log_pop', node_alpha=.1)
-# plot.netify(x2, node_color_var='i_polity2', node_size_var='i_log_pop', node_alpha=.1)

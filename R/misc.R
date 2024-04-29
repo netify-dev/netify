@@ -116,6 +116,40 @@ array_to_list <- function(arr, preserveAttr=TRUE){
 	return(l)
 }
 
+#' list_to_array
+#' 
+#' This function converts a list of matrices
+#' into a three dimensional array
+#' @param list_of_mats list object
+#' @return three dimensional array
+#' @author Shahryar Minhas
+#' @export
+
+list_to_array <- function(list_of_mats){
+
+	# get dim info to create array
+	row_actors = unique(unlist(lapply(list_of_mats, rownames)))
+	col_actors = unique(unlist(lapply(list_of_mats, colnames)))
+	time_points = names(list_of_mats)
+
+	# create array
+	arr = array(NA, 
+		dim = c(length(row_actors), length(col_actors), length(time_points)),
+		dimnames = list(row_actors, col_actors, time_points))
+
+	# fill array
+	for(ii in 1:length(list_of_mats)){
+		list_of_mats_slice = list_of_mats[[ii]]
+		rows_sl = rownames(list_of_mats_slice)
+		cols_sl = colnames(list_of_mats_slice)
+		arr[rows_sl, cols_sl, ii] = list_of_mats_slice
+		}
+
+	#
+	return(arr)
+}
+
+
 #' gen_symm_id
 #' 
 #' This function creates a symmetric id 

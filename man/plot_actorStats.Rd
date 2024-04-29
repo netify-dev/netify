@@ -6,8 +6,8 @@
 \usage{
 plot_actorStats(
   summary_df,
+  net_stat,
   longitudinal = FALSE,
-  net_stat = NULL,
   actor_names = NULL,
   toplist_n = NULL
 )
@@ -15,14 +15,11 @@ plot_actorStats(
 \arguments{
 \item{summary_df}{dataframe produced by summary_actor}
 
+\item{net_stat}{character: actor-level statistic to be plotted (e.g., 'degree')}
+
 \item{longitudinal}{logical: TRUE if longitudinal network, default is FALSE}
 
-\item{net_stat}{character: actor-level network statistics, default is "average_degree_total"}
-
 \item{actor_names}{character: actor name(s) in the network, default is NULL}
-
-\item{toplist_n}{numeric: the number of actors to be listed as top n actors,
-default is 20}
 }
 \value{
 a graph object summarizing actor level stats of the network(s)

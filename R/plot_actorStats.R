@@ -4,11 +4,9 @@
 #' and outputs a graph with actor level statistics.
 #'
 #' @param summary_df dataframe produced by summary_actor
+#' @param net_stat character: actor-level statistic to be plotted (e.g., 'degree')
 #' @param longitudinal logical: TRUE if longitudinal network, default is FALSE
-#' @param net_stat character: actor-level network statistics, default is "average_degree_total"
 #' @param actor_names character: actor name(s) in the network, default is NULL
-#' @param toplist_n numeric: the number of actors to be listed as top n actors,
-#' default is 20
 #' @return a graph object summarizing actor level stats of the network(s)
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
@@ -17,7 +15,7 @@
 
 
 plot_actorStats <- function(
-  summary_df, longitudinal=FALSE, net_stat=NULL,
+  summary_df, net_stat, longitudinal=FALSE,
   actor_names=NULL, toplist_n=NULL) {
 
   # assert dependencies for plotting and reshaping data
@@ -36,8 +34,6 @@ plot_actorStats <- function(
       summary_df <- summary_df[, c("actor", net_stat)]
       summary_df <- data.frame(tidyr::pivot_longer(summary_df, !actor))
       splits <- split(summary_df, summary_df$name)
-      order_topList <- function(x){ 
-        head(x[order(x$value, decreasing = TRUE),], n=toplist_n )}
       heads <- lapply(splits, order_topList)
       summary_df <- do.call(rbind, heads)
       summary_df$value <- as.numeric(summary_df$value)

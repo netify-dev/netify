@@ -34,6 +34,10 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if(is.null(plot_args$use_theme_netify)){
 		plot_args$use_theme_netify = TRUE }
 
+	# by default remove isolates
+	if(is.null(plot_args$remove_isolates)){
+		plot_args$remove_isolates = TRUE }
+
 	# process geom choices #####################
 	if(is.null(plot_args$add_points)){ plot_args$add_points = TRUE }
 	if(is.null(plot_args$add_text)){ plot_args$add_text = FALSE }
@@ -42,42 +46,39 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if(is.null(plot_args$curve_edges)){ plot_args$curve_edges = FALSE }		
 	######################		
 	
-	# label specific nodes via text #####################
+	# label specific nodes via text or label #####################
+
+	# add columns for text and label
+	net_dfs$nodal_data$name_text = net_dfs$nodal_data$name
+	net_dfs$nodal_data$name_label = net_dfs$nodal_data$name
+
 	# if users chose to label specific nodes
-	# then replace name column
+	# then replace name column for text
 	if(!is.null(plot_args$select_text)){
 
 		# pull out groups to highlight
 		to_label = unique(plot_args$select_text)
 
-		# save old
-		net_dfs$nodal_data$name_old = net_dfs$nodal_data$name
-
 		# replace name label in net_dfs$nodal_data
 		# with NA if not in to_label
-		net_dfs$nodal_data$name = ifelse(
+		net_dfs$nodal_data$name_text = ifelse(
 			net_dfs$nodal_data$name %in% to_label,
 			net_dfs$nodal_data$name, NA )
 
 		# set add_text to TRUE
 		plot_args$add_text = TRUE 	
 	}
-	######################
 
-	# label specific nodes via label #####################
 	# if users chose to label specific nodes
-	# then replace name column
+	# then replace name column for label
 	if(!is.null(plot_args$select_label)){
 
 		# pull out groups to highlight
 		to_label = unique(plot_args$select_label)
 
-		# save old
-		net_dfs$nodal_data$name_old = net_dfs$nodal_data$name
-
 		# replace name label in net_dfs$nodal_data
 		# with NA if not in to_label
-		net_dfs$nodal_data$name = ifelse(
+		net_dfs$nodal_data$name_label = ifelse(
 			net_dfs$nodal_data$name %in% to_label,
 			net_dfs$nodal_data$name, NA )
 

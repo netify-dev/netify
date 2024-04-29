@@ -48,7 +48,7 @@
 
 subset_netlet <- function(
     netlet, 
-	what_to_subset=20,
+	what_to_subset=NULL,
 	what_rows_to_subset=what_to_subset,
 	what_cols_to_subset=what_to_subset,
 	when_to_subset=NULL,
@@ -143,14 +143,16 @@ subset_netlet <- function(
 
         # pull attributes from a cross-sec in the list
         crossSec_obj_attrs <- attributes(netlet[[1]])
-        sub_dims <- attributes(sub_net[[1]])
+        # sub_dims <- attributes(sub_net[[1]])
 
-        # adjust actor composition
-        crossSec_obj_attrs[1:2] <- sub_dims[1:2]
+        # # adjust actor composition
+        # crossSec_obj_attrs[1:2] <- sub_dims[1:2]
 
         # apply change to each element in subsetted list
         sub_net <- lapply(sub_net, function(x){
-            attributes(x) <- crossSec_obj_attrs ; return(x) })
+            new_attribs <- append(attributes(x), crossSec_obj_attrs[-(1:2)])
+            attributes(x) <- new_attribs
+            return(x) })
 
         # list level attributes
         # adjust years

@@ -269,6 +269,14 @@ get_adjacency_list <- function(
     # assign cross-section value for adjmat depending on user inputs
     value <- slice[,weight]
 
+    # create logical value that is TRUE if weight is just 0/1
+    # and false otherwise
+    weight_binary <- TRUE
+    weight_vals <- unique(value)
+    if(any(weight_vals != 0 & weight_vals != 1)){
+      weight_binary <- FALSE }
+    rm(weight_vals)
+
     # get adj mat filled in
     adj_mat <- get_matrix(
       n_rows=length(actors_rows),
@@ -304,6 +312,7 @@ get_adjacency_list <- function(
     attr(adj_mat, 'actor_pds') <- NULL
     attr(adj_mat, 'weight') <- weight
     attr(adj_mat, 'detail_weight') <- weight_label
+    attr(adj_mat, 'weight_binary') <- weight_binary    
     attr(adj_mat, 'symmetric') <- user_symmetric
     attr(adj_mat, 'mode') <- mode
     attr(adj_mat, 'layers') <- layer_label
@@ -333,6 +342,9 @@ get_adjacency_list <- function(
   # layer label
   if(is.null(weight)){ layer_label <- 'weight1' } else{ layer_label <- weight }
 
+  # get info on binary weights
+  bin_check <- unlist(lapply(adj_out, function(x){ attr(x, 'weight_binary') }))
+
   # add attributes to list
   class(adj_out) <- 'netify'
   attr(adj_out, 'netify_type') <- 'longit_list'
@@ -340,6 +352,7 @@ get_adjacency_list <- function(
   attr(adj_out, 'actor_pds') <- actor_pds
   attr(adj_out, 'weight') <- weight
   attr(adj_out, 'detail_weight') <- weight_label
+  attr(adj_out, 'weight_binary') <- all(bin_check)
   attr(adj_out, 'symmetric') <- user_symmetric
   attr(adj_out, 'mode') <- mode
   attr(adj_out, 'layers') <- layer_label

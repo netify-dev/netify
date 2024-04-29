@@ -15,15 +15,17 @@
 
 \item{layout}{Specifies the layout algorithm from 'igraph' to position the nodes if \code{node_layout} is not provided.}
 
-\item{add_edges}{Logical; if TRUE, edges will be added to the plot.}
+\item{remove_isolates}{Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.}
 
-\item{curve_edges}{Logical; if TRUE, edges will be curved.}
+\item{add_edges}{Logical; if TRUE, edges will be added to the plot. Default is TRUE.}
 
-\item{add_points}{Logical; if TRUE, points (nodes) will be plotted.}
+\item{curve_edges}{Logical; if TRUE, edges will be curved. Default is FALSE.}
 
-\item{add_text}{Logical; if TRUE, text annotations will be added.}
+\item{add_points}{Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.}
 
-\item{add_label}{Logical; if TRUE, labels will be added.}
+\item{add_text}{Logical; if TRUE, text annotations will be added. Default is FALSE.}
+
+\item{add_label}{Logical; if TRUE, labels will be added. Default is FALSE.}
 
 \item{select_text}{A vector of node names to specifically add text to; others will not have text.}
 
