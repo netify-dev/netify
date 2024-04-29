@@ -137,9 +137,6 @@ We might also want to look at a specific set of actors' statistics overtime. Our
 ```{r}
 # every year & every actor (messy!)
 summary_actor_mids <- summary_actor(mid_long_network)
-
-# cannot pass this data frame to plot_actorStats?
-# code below not interesting for symmetric?
 ```
 
 ```{r, fig.width=6, fig.height=6}
@@ -148,30 +145,19 @@ summary_actor_mids <- summary_actor(mid_long_network)
 top_5 <-c("2", "710", "740", "750", "200")
 
 # zoom in on specific parts of the network for actor viz
-mid_subset <-subset_netlet(mid_long_network, 
-                    what_to_subset = top_5,
-                    when_to_subset = c('2010', '2011', '2012', '2013', '2014'))
+mid_subset <- summary_actor_mids %>%
+              filter(actor %in% top_5)
 
-mid_subset_summary <- (summary_actor(mid_subset))
-
-plot_actorStats(mid_subset_summary, 
-                longitudinal = TRUE)
+plot_actorStats(mid_subset, 
+                net_stat = "degree",
+                longitudinal = TRUE) +
+                facet_wrap(~actor)
 ```
 
 Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. Or we can first subset the object so that we plot only select time periods.
 
 ```{r, fig.width=6, fig.height=6}
-# need to remove isolates
 plot.netify(mid_long_network)
-```
-
-```{r, fig.width=6, fig.height=2}
-# subset 
-mids_three_years <-subset_netlet(mid_long_network, 
-                    what_to_subset = 190,
-                    when_to_subset = c('2010', '2013', '2014'))
-
-plot(mids_three_years)
 ```
 
 ## Step 3: Advance 🚀
@@ -200,9 +186,9 @@ dim(mids_longit_prep$Xcol)
 
 # core amen modeling function (how best longit?)
 # get apply error
-#ame_repL(Y = mids_longit_prep$Y, 
-     #    Xdyad = mids_longit_prep$Xdyad,
-     #    Xrow = mids_long_prep$Xrow,
-      #   model="bin")
+# ame_repL(Y = mids_longit_prep$Y, 
+#         Xdyad = mids_longit_prep$Xdyad,
+#         Xrow = mids_long_prep$Xrow,
+#         model="bin")
 ```
 
