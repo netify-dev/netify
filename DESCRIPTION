@@ -33,7 +33,11 @@ Suggests:
     markdown,
     dplyr,
     peacesciencer,
-    tidyverse
+    tidyverse, 
+    amen, 
+    ergm,
+    latentnet,
+    RSiena
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false

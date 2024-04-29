@@ -177,30 +177,17 @@ plot.netify(mid_long_network)
 Once we have created and explored our network object, we might want to continue analyzing the data using different modeling approaches. `netify` makes this simple!
 
 ```{r}
-# install SM's version of AMEN
-# install_github("s7minhas/amen")
+# install (if necessary) and load amen
+if('amen' %in% rownames(installed.packages())){
+  install.packages('amen', repos='https://cloud.r-project.org') }
 library(amen)
 
-# convert to amen structure for modeling
-mids_longit_prep <- prep_for_amen(mid_long_network)
+# install (if necessary) and load ergm
+if('ergm' %in% rownames(installed.packages())){
+  install.packages('ergm', repos='https://cloud.r-project.org') }
+library(ergm)
 
-# dyadic weights
-dim(mids_longit_prep$Y)
+# lets take a cross-section of the network object
 
-# array of dyadic attributes
-dim(mids_longit_prep$Xdyad)
-
-# array of nodal attributes for rows
-dim(mids_longit_prep$Xrow)
-
-# array of nodal attributes for columns
-dim(mids_longit_prep$Xcol)
-
-# core amen modeling function (how best longit?)
-# get apply error
-# ame_repL(Y = mids_longit_prep$Y, 
-#         Xdyad = mids_longit_prep$Xdyad,
-#         Xrow = mids_long_prep$Xrow,
-#         model="bin")
 ```
 
