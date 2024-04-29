@@ -4,13 +4,7 @@
 \alias{plot_actorStats}
 \title{Plotting function for actor level statistics for netify objects}
 \usage{
-plot_actorStats(
-  summary_df,
-  net_stat,
-  longitudinal = FALSE,
-  actor_names = NULL,
-  toplist_n = NULL
-)
+plot_actorStats(summary_df, net_stat, longitudinal = FALSE, actor_names = NULL)
 }
 \arguments{
 \item{summary_df}{dataframe produced by summary_actor}

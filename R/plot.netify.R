@@ -3,17 +3,18 @@
 #' This function provides a comprehensive tool to visualize 'netify' objects through various graphical representations including points, edges, texts, and labels. It leverages the capabilities of the 'igraph' and 'ggplot' packages to create customizable network visualizations.
 #'
 #' @param x A 'netify' object, which contains the network data structured for analysis and visualization.
-#' @param point_layout Optional, user-provided node layout; if not provided, layout will be generated based on `layout` parameter.
-#' @param layout Specifies the layout algorithm from 'igraph' to position the nodes if `point_layout` is not provided.
-#' @param remove_isolates Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
-#' @param add_edges Logical; if TRUE, edges will be added to the plot. Default is TRUE.
-#' @param curve_edges Logical; if TRUE, edges will be curved. Default is FALSE. 
-#' @param add_points Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.
-#' @param add_text Logical; if TRUE, text annotations will be added. Default is FALSE.
-#' @param add_label Logical; if TRUE, labels will be added. Default is FALSE.
-#' @param select_text A vector of node names to specifically add text to; others will not have text.
-#' @param select_label A vector of node names to specifically add labels to; others will not have labels.
-#' @param ... Additional arguments passed to 'geom' functions within 'ggplot' for further customization.
+#' @param ... Additional arguments, which can include but are not limited to:
+#'        - `point_layout`: Optional, user-provided node layout; if not provided, layout will be generated based on `layout` parameter.
+#'        - `layout`: Specifies the layout algorithm from 'igraph' to position the nodes if `point_layout` is not provided.
+#'        - `remove_isolates`: Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
+#'        - `add_edges`: Logical; if TRUE, edges will be added to the plot. Default is TRUE.
+#'        - `curve_edges`: Logical; if TRUE, edges will be curved. Default is FALSE.
+#'        - `add_points`: Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.
+#'        - `add_text`: Logical; if TRUE, text annotations will be added. Default is FALSE.
+#'        - `add_label`: Logical; if TRUE, labels will be added. Default is FALSE.
+#'        - `select_text`: A vector of node names to specifically add text to; others will not have text.
+#'        - `select_label`: A vector of node names to specifically add labels to; others will not have labels.
+#'        These arguments control various aspects of the plot's appearance and functionality.
 #'
 #' @return A 'ggplot' plot object that can be further modified or printed.
 #'
@@ -32,6 +33,7 @@
 #' 
 #' @export plot.netify
 #' @export
+
 
 plot.netify <- function(x, ...){
 

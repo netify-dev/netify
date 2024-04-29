@@ -16,7 +16,7 @@
 
 plot_actorStats <- function(
   summary_df, net_stat, longitudinal=FALSE,
-  actor_names=NULL, toplist_n=NULL) {
+  actor_names=NULL) {
 
   # assert dependencies for plotting and reshaping data
   assert_dependency("ggplot2")

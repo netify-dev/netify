@@ -9,27 +9,18 @@
 \arguments{
 \item{x}{A 'netify' object, which contains the network data structured for analysis and visualization.}
 
-\item{...}{Additional arguments passed to 'geom' functions within 'ggplot' for further customization.}
-
-\item{point_layout}{Optional, user-provided node layout; if not provided, layout will be generated based on \code{layout} parameter.}
-
-\item{layout}{Specifies the layout algorithm from 'igraph' to position the nodes if \code{point_layout} is not provided.}
-
-\item{remove_isolates}{Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.}
-
-\item{add_edges}{Logical; if TRUE, edges will be added to the plot. Default is TRUE.}
-
-\item{curve_edges}{Logical; if TRUE, edges will be curved. Default is FALSE.}
-
-\item{add_points}{Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.}
-
-\item{add_text}{Logical; if TRUE, text annotations will be added. Default is FALSE.}
-
-\item{add_label}{Logical; if TRUE, labels will be added. Default is FALSE.}
-
-\item{select_text}{A vector of node names to specifically add text to; others will not have text.}
-
-\item{select_label}{A vector of node names to specifically add labels to; others will not have labels.}
+\item{...}{Additional arguments, which can include but are not limited to:
+- \code{point_layout}: Optional, user-provided node layout; if not provided, layout will be generated based on \code{layout} parameter.
+- \code{layout}: Specifies the layout algorithm from 'igraph' to position the nodes if \code{point_layout} is not provided.
+- \code{remove_isolates}: Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
+- \code{add_edges}: Logical; if TRUE, edges will be added to the plot. Default is TRUE.
+- \code{curve_edges}: Logical; if TRUE, edges will be curved. Default is FALSE.
+- \code{add_points}: Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.
+- \code{add_text}: Logical; if TRUE, text annotations will be added. Default is FALSE.
+- \code{add_label}: Logical; if TRUE, labels will be added. Default is FALSE.
+- \code{select_text}: A vector of node names to specifically add text to; others will not have text.
+- \code{select_label}: A vector of node names to specifically add labels to; others will not have labels.
+These arguments control various aspects of the plot's appearance and functionality.}
 }
 \value{
 A 'ggplot' plot object that can be further modified or printed.

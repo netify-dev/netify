@@ -43,37 +43,37 @@ gg_params <- function(
 
     # Add conditional aesthetics based on non-NULL entries
     if(!is.null(plot_args$point_alpha_var)){
-        point_aes_list$alpha = formula(
+        point_aes_list$alpha = stats::formula(
             paste0('~', plot_args$point_alpha_var))
         point_static_params = point_static_params[
             -which(names(point_static_params)=='alpha')]
     }
     if(!is.null(plot_args$point_color_var)){
-        point_aes_list$color = formula(
+        point_aes_list$color = stats::formula(
             paste0('~', plot_args$point_color_var))
         point_static_params = point_static_params[
             -which(names(point_static_params)=='color')]
     }
     if(!is.null(plot_args$point_fill_var)){
-        point_aes_list$fill = formula(
+        point_aes_list$fill = stats::formula(
             paste0('~', plot_args$point_fill_var))
         point_static_params = point_static_params[
             -which(names(point_static_params)=='fill')]
     }
     if(!is.null(plot_args$point_shape_var)){
-        point_aes_list$shape = formula(
+        point_aes_list$shape = stats::formula(
             paste0('~', plot_args$point_shape_var))
         point_static_params = point_static_params[
             -which(names(point_static_params)=='shape')]
     }
     if(!is.null(plot_args$point_size_var)){
-        point_aes_list$size = formula(
+        point_aes_list$size = stats::formula(
             paste0('~', plot_args$point_size_var))
         point_static_params = point_static_params[
             -which(names(point_static_params)=='size')]
     }
     if(!is.null(plot_args$point_stroke_var)){
-        point_aes_list$stroke = formula(
+        point_aes_list$stroke = stats::formula(
             paste0('~', plot_args$point_stroke_var))
         point_static_params = point_static_params[
             -which(names(point_static_params)=='stroke')]
@@ -99,19 +99,19 @@ gg_params <- function(
 
     # Add conditional aesthetics based on non-NULL entries
     if(!is.null(plot_args$text_alpha_var)){
-        text_aes_list$alpha <- formula(
+        text_aes_list$alpha <- stats::formula(
             paste0('~', plot_args$text_alpha_var))
         text_static_params = text_static_params[
             -which(names(text_static_params)=='alpha')]
     }
     if(!is.null(plot_args$text_color_var)){
-        text_aes_list$color <- formula(
+        text_aes_list$color <- stats::formula(
             paste0('~', plot_args$text_color_var))
         text_static_params = text_static_params[
             -which(names(text_static_params)=='color')]
     }
     if(!is.null(plot_args$text_size_var)){
-        text_aes_list$size <- formula(
+        text_aes_list$size <- stats::formula(
             paste0('~', plot_args$text_size_var))
         text_static_params = text_static_params[
             -which(names(text_static_params)=='size')]
@@ -141,25 +141,25 @@ gg_params <- function(
 
     # Add conditional aesthetics based on non-NULL entries
     if(!is.null(plot_args$label_alpha_var)){
-        label_aes_list$alpha <- formula(
+        label_aes_list$alpha <- stats::formula(
             paste0('~', plot_args$label_alpha_var) )
         label_static_params = label_static_params[
             -which(names(label_static_params)=='alpha')]
     }
     if(!is.null(plot_args$label_color_var)){
-        label_aes_list$color <- formula(
+        label_aes_list$color <- stats::formula(
             paste0('~', plot_args$label_color_var) )
         label_static_params = label_static_params[
             -which(names(label_static_params)=='color')]
     }
     if(!is.null(plot_args$label_fill_var)){
-        label_aes_list$fill <- formula(
+        label_aes_list$fill <- stats::formula(
             paste0('~', plot_args$label_fill_var) )
         label_static_params = label_static_params[
             -which(names(label_static_params)=='fill')]
     }
     if(!is.null(plot_args$label_size_var)){
-        label_aes_list$size <- formula(
+        label_aes_list$size <- stats::formula(
             paste0('~', plot_args$label_size_var) )
         label_static_params = label_static_params[
             -which(names(label_static_params)=='size')]
@@ -194,25 +194,25 @@ gg_params <- function(
 
     # Add conditional aesthetics based on non-NULL entries
     if(!is.null(plot_args$edge_alpha_var)){
-        edge_aes_list$alpha <- formula(
+        edge_aes_list$alpha <- stats::formula(
             paste0('~', plot_args$edge_alpha_var) )
         edge_static_params = edge_static_params[
             -which(names(edge_static_params)=='alpha')]
     }
     if(!is.null(plot_args$edge_color_var)){
-        edge_aes_list$color <- formula(
+        edge_aes_list$color <- stats::formula(
             paste0('~', plot_args$edge_color_var) )
         edge_static_params = edge_static_params[
             -which(names(edge_static_params)=='color')]
     }
     if(!is.null(plot_args$edge_linetype_var)){
-        edge_aes_list$linetype <- formula(
+        edge_aes_list$linetype <- stats::formula(
             paste0('~', plot_args$edge_linetype_var) )
         edge_static_params = edge_static_params[
             -which(names(edge_static_params)=='linetype')]
     }
     if(!is.null(plot_args$edge_linewidth_var)){
-        edge_aes_list$linewidth <- formula(
+        edge_aes_list$linewidth <- stats::formula(
             paste0('~', plot_args$edge_linewidth_var) )
         edge_static_params = edge_static_params[
             -which(names(edge_static_params)=='linewidth')]

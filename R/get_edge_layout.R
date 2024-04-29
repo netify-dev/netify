@@ -47,7 +47,7 @@ get_edge_layout <- function(netlet, nodes_layout) {
     g <- prep_for_igraph(netlet)
 
 	# make sure igraph object is in the right format
-	if(class(g)=='igraph'){ g = list(g) }
+	if(igraph::is_igraph(g)){ g = list(g) }
 
     # make sure nodes_layout is in the right format
     if(!is.list(nodes_layout)){

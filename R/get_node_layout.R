@@ -193,7 +193,7 @@ get_node_layout <- function(
 		layout_matrix = list(layout_matrix) } # end of if block for cross_sec case
 
 	# convert g to list if not already for easier processing
-	if(class(g)=='igraph'){ g = list(g) }
+	if(igraph::is_igraph(g)){ g = list(g) }
 
 	# set up dfs of node layouts into a list with a numeric
 	# index column, actor name column, and relabel the layout
