@@ -58,8 +58,19 @@ Begin by loading packages and supplying the data.
 ```{r, eval=TRUE, results='hide', warning=FALSE, message=FALSE}
 # load packages
 library(netify)
+
+# install extra packages for this vignette
+if('tidyverse' %in% rownames(installed.packages())){
+  install.packages('tidyverse', repos='https://cloud.r-project.org') }
+if('peacesciencer' %in% rownames(installed.packages())){
+  install.packages('peacesciencer', repos='https://cloud.r-project.org') }
+
+# load necessary packages for this vignette
 library(peacesciencer)
 library(tidyverse)
+
+# organize external data for peacesciencer
+peacesciencer::download_extdata()
 
 # create dyadic data set over time using peacesciencer
 cow_dyads <- create_dyadyears( 
