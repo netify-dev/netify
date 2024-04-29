@@ -19,7 +19,7 @@
 #'
 #' Dynamic or variable-dependent parameters are set based on a mapping from data columns specified in `plot_args`.
 #' The function checks for non-null entries in `plot_args` and assigns these to the appropriate aesthetic
-#' if the entry exists. For example, if `plot_args$node_color_var` is not null, it will create a dynamic color 
+#' if the entry exists. For example, if `plot_args$point_color_var` is not null, it will create a dynamic color 
 #' mapping for nodes and remove any static color setting.
 #'@export 
 
@@ -30,53 +30,53 @@ gg_params <- function(
     # node params #####################
 
     # node static param list
-    node_static_params = list(
-        alpha = plot_args$node_alpha,
-        color = plot_args$node_color,
-        fill = plot_args$node_fill,
-        shape = plot_args$node_shape,
-        size = plot_args$node_size,
-        stroke = plot_args$node_stroke )
+    point_static_params = list(
+        alpha = plot_args$point_alpha,
+        color = plot_args$point_color,
+        fill = plot_args$point_fill,
+        shape = plot_args$point_shape,
+        size = plot_args$point_size,
+        stroke = plot_args$point_stroke )
 
     # Prepare a list to conditionally build the aes()
-    node_aes_list <- list(x = ~x, y = ~y)
+    point_aes_list <- list(x = ~x, y = ~y)
 
     # Add conditional aesthetics based on non-NULL entries
-    if(!is.null(plot_args$node_alpha_var)){
-        node_aes_list$alpha = formula(
-            paste0('~', plot_args$node_alpha_var))
-        node_static_params = node_static_params[
-            -which(names(node_static_params)=='alpha')]
+    if(!is.null(plot_args$point_alpha_var)){
+        point_aes_list$alpha = formula(
+            paste0('~', plot_args$point_alpha_var))
+        point_static_params = point_static_params[
+            -which(names(point_static_params)=='alpha')]
     }
-    if(!is.null(plot_args$node_color_var)){
-        node_aes_list$color = formula(
-            paste0('~', plot_args$node_color_var))
-        node_static_params = node_static_params[
-            -which(names(node_static_params)=='color')]
+    if(!is.null(plot_args$point_color_var)){
+        point_aes_list$color = formula(
+            paste0('~', plot_args$point_color_var))
+        point_static_params = point_static_params[
+            -which(names(point_static_params)=='color')]
     }
-    if(!is.null(plot_args$node_fill_var)){
-        node_aes_list$fill = formula(
-            paste0('~', plot_args$node_fill_var))
-        node_static_params = node_static_params[
-            -which(names(node_static_params)=='fill')]
+    if(!is.null(plot_args$point_fill_var)){
+        point_aes_list$fill = formula(
+            paste0('~', plot_args$point_fill_var))
+        point_static_params = point_static_params[
+            -which(names(point_static_params)=='fill')]
     }
-    if(!is.null(plot_args$node_shape_var)){
-        node_aes_list$shape = formula(
-            paste0('~', plot_args$node_shape_var))
-        node_static_params = node_static_params[
-            -which(names(node_static_params)=='shape')]
+    if(!is.null(plot_args$point_shape_var)){
+        point_aes_list$shape = formula(
+            paste0('~', plot_args$point_shape_var))
+        point_static_params = point_static_params[
+            -which(names(point_static_params)=='shape')]
     }
-    if(!is.null(plot_args$node_size_var)){
-        node_aes_list$size = formula(
-            paste0('~', plot_args$node_size_var))
-        node_static_params = node_static_params[
-            -which(names(node_static_params)=='size')]
+    if(!is.null(plot_args$point_size_var)){
+        point_aes_list$size = formula(
+            paste0('~', plot_args$point_size_var))
+        point_static_params = point_static_params[
+            -which(names(point_static_params)=='size')]
     }
-    if(!is.null(plot_args$node_stroke_var)){
-        node_aes_list$stroke = formula(
-            paste0('~', plot_args$node_stroke_var))
-        node_static_params = node_static_params[
-            -which(names(node_static_params)=='stroke')]
+    if(!is.null(plot_args$point_stroke_var)){
+        point_aes_list$stroke = formula(
+            paste0('~', plot_args$point_stroke_var))
+        point_static_params = point_static_params[
+            -which(names(point_static_params)=='stroke')]
     }
     ######################
 
@@ -221,9 +221,9 @@ gg_params <- function(
 
     # org #####################
     out = list(
-        node = list(
-            static = node_static_params,
-            var = node_aes_list
+        point = list(
+            static = point_static_params,
+            var = point_aes_list
         ),
         text = list(
             static = text_static_params,

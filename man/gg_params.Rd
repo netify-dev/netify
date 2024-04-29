@@ -26,7 +26,7 @@ If a variable-dependent parameter is set, the static parameter is excluded to al
 
 Dynamic or variable-dependent parameters are set based on a mapping from data columns specified in \code{plot_args}.
 The function checks for non-null entries in \code{plot_args} and assigns these to the appropriate aesthetic
-if the entry exists. For example, if \code{plot_args$node_color_var} is not null, it will create a dynamic color
+if the entry exists. For example, if \code{plot_args$point_color_var} is not null, it will create a dynamic color
 mapping for nodes and remove any static color setting.
 }
 \author{

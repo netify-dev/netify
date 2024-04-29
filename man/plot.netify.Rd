@@ -11,9 +11,9 @@
 
 \item{...}{Additional arguments passed to 'geom' functions within 'ggplot' for further customization.}
 
-\item{node_layout}{Optional, user-provided node layout; if not provided, layout will be generated based on \code{layout} parameter.}
+\item{point_layout}{Optional, user-provided node layout; if not provided, layout will be generated based on \code{layout} parameter.}
 
-\item{layout}{Specifies the layout algorithm from 'igraph' to position the nodes if \code{node_layout} is not provided.}
+\item{layout}{Specifies the layout algorithm from 'igraph' to position the nodes if \code{point_layout} is not provided.}
 
 \item{remove_isolates}{Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.}
 

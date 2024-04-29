@@ -100,12 +100,12 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	######################	
 
 	# set up static geom_point defaults #####################
-	if(is.null(plot_args$node_alpha)){  plot_args$node_alpha = NA }
-	if(is.null(plot_args$node_color)){ plot_args$node_color = 'black' }
-	if(is.null(plot_args$node_fill)){ plot_args$node_fill = NA }
-	if(is.null(plot_args$node_shape)){ plot_args$node_shape = 19 }		
-	if(is.null(plot_args$node_size)){ plot_args$node_size = 1.5 }
-	if(is.null(plot_args$node_stroke)){ plot_args$node_stroke = 0.5 }
+	if(is.null(plot_args$point_alpha)){  plot_args$point_alpha = NA }
+	if(is.null(plot_args$point_color)){ plot_args$point_color = 'black' }
+	if(is.null(plot_args$point_fill)){ plot_args$point_fill = NA }
+	if(is.null(plot_args$point_shape)){ plot_args$point_shape = 19 }		
+	if(is.null(plot_args$point_size)){ plot_args$point_size = 1.5 }
+	if(is.null(plot_args$point_stroke)){ plot_args$point_stroke = 0.5 }
 	######################
 
 	# set up static geom_text defaults #####################	

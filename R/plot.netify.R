@@ -3,8 +3,8 @@
 #' This function provides a comprehensive tool to visualize 'netify' objects through various graphical representations including points, edges, texts, and labels. It leverages the capabilities of the 'igraph' and 'ggplot' packages to create customizable network visualizations.
 #'
 #' @param x A 'netify' object, which contains the network data structured for analysis and visualization.
-#' @param node_layout Optional, user-provided node layout; if not provided, layout will be generated based on `layout` parameter.
-#' @param layout Specifies the layout algorithm from 'igraph' to position the nodes if `node_layout` is not provided.
+#' @param point_layout Optional, user-provided node layout; if not provided, layout will be generated based on `layout` parameter.
+#' @param layout Specifies the layout algorithm from 'igraph' to position the nodes if `point_layout` is not provided.
 #' @param remove_isolates Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
 #' @param add_edges Logical; if TRUE, edges will be added to the plot. Default is TRUE.
 #' @param curve_edges Logical; if TRUE, edges will be curved. Default is FALSE. 
@@ -63,7 +63,7 @@ plot.netify <- function(x, ...){
 	######################
 	# get layouts of nodes after checking
 	# whether user has supplied their own
-	if(is.null(plot_args$node_layout)){
+	if(is.null(plot_args$point_layout)){
 		nodes_list = get_node_layout(
 			netlet, 
 			layout=plot_args$layout, 
@@ -72,7 +72,7 @@ plot.netify <- function(x, ...){
 			seed=plot_args$seed
 			)
 	} else { 
-		nodes_list = plot_args$node_layout
+		nodes_list = plot_args$point_layout
 		if(!is.list(nodes_list)){
 			nodes_list = list(nodes_list)
 		}
@@ -182,11 +182,11 @@ plot.netify <- function(x, ...){
 	# geom_point
 	if(plot_args$add_points){
 
-		# node static param list
-		node_static_params = ggnet_params$node$static
+		# point static param list
+		point_static_params = ggnet_params$point$static
 
-		# node var param list
-		node_aes_list <- ggnet_params$node$var
+		# point var param list
+		point_aes_list <- ggnet_params$point$var
 
 		# make room for new scales
 		viz <- viz + 
@@ -197,11 +197,11 @@ plot.netify <- function(x, ...){
 		# create geom_point
 		viz <- viz + layer(
 			data = net_dfs$nodal_data, 
-			mapping = aes(!!!node_aes_list),  
+			mapping = aes(!!!point_aes_list),  
 			geom = GeomPoint,  
 			stat = "identity", 
 			position = "identity",  
-			params = node_static_params,
+			params = point_static_params,
 			inherit.aes = TRUE,  
 			show.legend = NA  
 		)

@@ -2,9 +2,9 @@ Package: netify
 Title: network stuff
 Version: 0.1.0
 Authors@R: c(
-  person("Ha Eun", "Choi", email = "choiha3@msu.edu", role = c("aut")),
+  person("Ha Eun", "Choi", email = "choiha3@msu.edu", role = c("ctb")),
   person("Cassy", "Dorff", email = "cassy.dorff@vanderbilt.edu", role = c("aut")),
-  person("Colin", "Henry", email = "colin.henry@vanderbilt.edu", role = c("aut")),
+  person("Colin", "Henry", email = "colin.henry@vanderbilt.edu", role = c("ctb")),
   person("Shahryar", "Minhas", email = "minhassh@msu.edu", role = c("aut", "cre"))
   )
 Description: we get the nets from the things.
