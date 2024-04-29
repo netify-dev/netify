@@ -41,8 +41,9 @@ This vignette provides a high level overview of our package from start to finish
 - The package can also create different types of networks including:
 
   - cross sectional networks (with static and varying actor composition)
-  - multilayer networks
+  - longitudinal 
   - bipartite networks
+  - multilayer
 
 - As well as create networks with different edge types:
   - weighted 
