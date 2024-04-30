@@ -3,18 +3,19 @@
 #' This function provides a comprehensive tool to visualize 'netify' objects through various graphical representations including points, edges, texts, and labels. It leverages the capabilities of the 'igraph' and 'ggplot' packages to create customizable network visualizations.
 #'
 #' @param x A 'netify' object, which contains the network data structured for analysis and visualization.
-#' @param ... Additional arguments, which can include but are not limited to:
-#'        - `point_layout`: Optional, user-provided node layout; if not provided, layout will be generated based on `layout` parameter.
-#'        - `layout`: Specifies the layout algorithm from 'igraph' to position the nodes if `point_layout` is not provided.
-#'        - `remove_isolates`: Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
-#'        - `add_edges`: Logical; if TRUE, edges will be added to the plot. Default is TRUE.
-#'        - `curve_edges`: Logical; if TRUE, edges will be curved. Default is FALSE.
-#'        - `add_points`: Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.
-#'        - `add_text`: Logical; if TRUE, text annotations will be added. Default is FALSE.
-#'        - `add_label`: Logical; if TRUE, labels will be added. Default is FALSE.
-#'        - `select_text`: A vector of node names to specifically add text to; others will not have text.
-#'        - `select_label`: A vector of node names to specifically add labels to; others will not have labels.
-#'        These arguments control various aspects of the plot's appearance and functionality.
+#' @param point_layout Optional, user-provided node layout; if not provided, layout will be generated based on the `layout` parameter.
+#' @param layout Specifies the layout algorithm from 'igraph' to position the nodes if `point_layout` is not provided.
+#' @param remove_isolates Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
+#' @param add_edges Logical; if TRUE, edges will be added to the plot. Default is TRUE.
+#' @param curve_edges Logical; if TRUE, edges will be curved. Default is FALSE. 
+#' @param add_points Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.
+#' @param add_text Logical; if TRUE, text annotations will be added. Default is FALSE.
+#' @param add_label Logical; if TRUE, labels will be added. Default is FALSE.
+#' @param select_text A vector of node names to specifically add text to; others will not have text.
+#' @param select_label A vector of node names to specifically add labels to; others will not have labels.
+#' @param point_size A fixed size for all points, equivalent to `geom_point(size = point_size)` in `ggplot2`.
+#' @param point_size_var A variable from the node data to dynamically size points, equivalent to `geom_point(aes(size = point_size_var))` in `ggplot2`.
+#' @param ... Additional arguments passed to 'geom' functions (i.e., geom_text, geom_label for nodes and geom_segment for edges) within 'ggplot' for further customization.
 #'
 #' @return A 'ggplot' plot object that can be further modified or printed.
 #'
@@ -25,7 +26,13 @@
 #' - Whether to annotate nodes with text or labels.
 #' - Specific nodes to annotate, allowing selective emphasis within the network.
 #' - Custom layouts if the automatic placement does not suffice.
-#' It uses a combination of node and edge data to construct the visualization, handling both aesthetic mappings and graphical parameters dynamically based on user input and the characteristics of the 'netify' object.
+#' Additional customization options like `point_size` and `point_size_var` allow users to apply typical `ggplot2` methods directly to network visualizations, facilitating easy integration of familiar graphical adjustments.
+#'
+#' Example usage:
+#' \dontrun{
+#' plot(netlet, add_points = TRUE, point_size = 3) # Applies a fixed size to all nodes
+#' plot(netlet, add_points = TRUE, point_size_var = "degree") # Sizes nodes based on their 'degree' attribute
+#' }
 #'
 #' @import ggplot2
 #' @import igraph
@@ -33,6 +40,7 @@
 #' 
 #' @export plot.netify
 #' @export
+
 
 
 plot.netify <- function(x, ...){

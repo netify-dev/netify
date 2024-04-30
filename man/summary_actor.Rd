@@ -4,20 +4,47 @@
 \alias{summary_actor}
 \title{Summary method to get actor level statistics for netify objects}
 \usage{
-summary_actor(netlet, ...)
+summary_actor(netlet, invert_weights_for_igraph = TRUE, other_stats = NULL)
 }
 \arguments{
-\item{netlet}{object of class netify, produced by get_adjacency}
+\item{netlet}{Object of class \code{netify}, typically produced by \code{get_adjacency} or other network creation functions within the package.}
 
-\item{...}{additional parameters not used}
+\item{invert_weights_for_igraph}{Logical; if TRUE, the weights of the edges are inverted before
+being used in the calculation of closeness or betweenness centrality. This is because
+igraph treats edge weights as distances. Inverting weights can be crucial when higher weights
+should imply stronger (or more valuable) connections rather than longer distances. Default is TRUE.}
+
+\item{other_stats}{A named list of functions that take a matrix and return additional actor-level statistics to be included in the output. Each function should accept a matrix as input and return a vector or single value per actor. This allows for the inclusion of custom metrics in the summary output.}
 }
 \value{
-a data.frame object summarizing actor level stats of the network(s)
+A \code{data.frame} object summarizing actor-level statistics of the network(s). Depending on the structure and attributes of the \code{netify} object, the output includes:
+\itemize{
+\item \strong{Symmetric Unweighted}: Degree, proportion of ties, closeness, betweenness, and eigenvector centrality.
+\item \strong{Symmetric Weighted}: Degree, proportion of ties, sum and average of strengths, closeness (weighted and normalized), betweenness (weighted and normalized), and eigenvector centrality.
+\item \strong{Asymmetric Unweighted}: In-degree, out-degree, total degree, in-propensity of ties, out-propensity of ties, total propensity of ties, in-closeness, out-closeness, total closeness, in-betweenness, out-betweenness, total betweenness, authority scores, and hub scores.
+\item \strong{Asymmetric Weighted}: Similar metrics as asymmetric unweighted but includes strength sums and averages, and all closeness and betweenness measures are weighted.
+Metrics are calculated based on the network type (symmetric or asymmetric) and whether the network is weighted.
+}
 }
 \description{
-\code{summary_actor} takes in a netify object
-and outputs a data.frame with actor level statistics.
+\code{summary_actor} provides detailed actor-level statistics for \code{netify} objects, handling different network structures and weight conditions. It produces a data frame summarizing various network metrics like degree, strength, closeness, betweenness, and centrality measures.
+}
+\details{
+The function automatically adjusts calculations based on network symmetry and weight attributes, offering tailored statistical outputs for comprehensive network analysis.
+It supports handling of both cross-sectional and longitudinal network data, ensuring that each actor's metrics are accurately computed over time if applicable.
+Examples of additional computations (like authority or hub scores) are provided only for asymmetric networks.
+}
+\examples{
+\dontrun{
+# Assuming 'netlet' is a prepared netify object:
+actor_stats <- summary_actor(netlet)
+
+# Adding a custom metric for maximum value per row
+max_actor_val <- function(mat) { apply(mat, 1, max, na.rm = TRUE) }
+actor_stats_custom <- summary_actor(netlet, other_stats = list(max_val = max_actor_val))
+}
+
 }
 \author{
-Ha Eun Choi, Shahryar Minhas
+Cassy Dorff, Shahryar Minhas
 }

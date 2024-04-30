@@ -1,17 +1,41 @@
 #' Summary method to get actor level statistics for netify objects
 #'
-#' `summary_actor` takes in a netify object
-#' and outputs a data.frame with actor level statistics.
+#' `summary_actor` provides detailed actor-level statistics for `netify` objects, handling different network structures and weight conditions. It produces a data frame summarizing various network metrics like degree, strength, closeness, betweenness, and centrality measures.
 #'
-#' @param netlet object of class netify, produced by get_adjacency
-#' @param ... additional parameters not used
-#' @return a data.frame object summarizing actor level stats of the network(s)
-#' @author Ha Eun Choi, Shahryar Minhas
+#' @param netlet Object of class `netify`, typically produced by `get_adjacency` or other network creation functions within the package.
+#' @param invert_weights_for_igraph Logical; if TRUE, the weights of the edges are inverted before
+#'        being used in the calculation of closeness or betweenness centrality. This is because
+#'        igraph treats edge weights as distances. Inverting weights can be crucial when higher weights
+#'        should imply stronger (or more valuable) connections rather than longer distances. Default is TRUE.
+#' @param other_stats A named list of functions that take a matrix and return additional actor-level statistics to be included in the output. Each function should accept a matrix as input and return a vector or single value per actor. This allows for the inclusion of custom metrics in the summary output.
+#' @return A `data.frame` object summarizing actor-level statistics of the network(s). Depending on the structure and attributes of the `netify` object, the output includes:
+#' - **Symmetric Unweighted**: Degree, proportion of ties, closeness, betweenness, and eigenvector centrality.
+#' - **Symmetric Weighted**: Degree, proportion of ties, sum and average of strengths, closeness (weighted and normalized), betweenness (weighted and normalized), and eigenvector centrality.
+#' - **Asymmetric Unweighted**: In-degree, out-degree, total degree, in-propensity of ties, out-propensity of ties, total propensity of ties, in-closeness, out-closeness, total closeness, in-betweenness, out-betweenness, total betweenness, authority scores, and hub scores.
+#' - **Asymmetric Weighted**: Similar metrics as asymmetric unweighted but includes strength sums and averages, and all closeness and betweenness measures are weighted.
+#' Metrics are calculated based on the network type (symmetric or asymmetric) and whether the network is weighted.
+#' @details The function automatically adjusts calculations based on network symmetry and weight attributes, offering tailored statistical outputs for comprehensive network analysis.
+#' It supports handling of both cross-sectional and longitudinal network data, ensuring that each actor's metrics are accurately computed over time if applicable.
+#' Examples of additional computations (like authority or hub scores) are provided only for asymmetric networks.
+#' @author Cassy Dorff, Shahryar Minhas
 #'
-#' @export summary_actor
+#' @examples
+#' \dontrun{
+#' # Assuming 'netlet' is a prepared netify object:
+#' actor_stats <- summary_actor(netlet)
+#'
+#' # Adding a custom metric for maximum value per row
+#' max_actor_val <- function(mat) { apply(mat, 1, max, na.rm = TRUE) }
+#' actor_stats_custom <- summary_actor(netlet, other_stats = list(max_val = max_actor_val))
+#' }
+#' 
+#' @importFrom igraph closeness betweenness eigen_centrality authority_score hub_score
+#' @importFrom cli cli_alert_danger
+#' 
 #' @export
+#' @export summary_actor
 
-summary_actor <- function( netlet, ...) {
+summary_actor <- function( netlet, invert_weights_for_igraph=TRUE, other_stats=NULL) {
 
   # check if netify object
   netify_check(netlet)
@@ -23,12 +47,6 @@ summary_actor <- function( netlet, ...) {
 			`summary_actor` does not currently support multilayer `netify` inputs.
 			Please use the `filter_layers` function to create a `netify` object with a single layer.' )
 		stop() }
-
-  # get summary args
-  summary_args <- list(...)
-
-  # check if invert weights
-  if(is.null(summary_args$invert_weights)){ summary_args$invert_weights = TRUE }
 
   # pull out attrs
   obj_attrs <- attributes(netlet)
@@ -52,7 +70,7 @@ summary_actor <- function( netlet, ...) {
     g_wgts = igraph::E(g)$weight
     if(any(g_wgts < 0)){
       g_wgts = g_wgts - min(g_wgts) + 1 }
-    if(summary_args$invert_weights){
+    if(invert_weights_for_igraph){
       g_wgts = 1 / g_wgts
       g_wgts = ifelse(is.infinite(g_wgts), 0, g_wgts) }
 
@@ -223,8 +241,8 @@ summary_actor <- function( netlet, ...) {
         hub_score=hub_score ) } # not symmetric / weighted case done
 
     # calculate any userstats
-    if( 'other_stats' %in% names(summary_args) ){
-      other_out <- lapply(summary_args$'other_stats', function(stat){ stat(mat) })
+    if( !is.null(other_stats) ){
+      other_out <- lapply(other_stats, function(stat){ stat(mat) })
       out <- cbind(out, do.call('cbind', other_out)) }
 
     # 
@@ -266,7 +284,7 @@ summary_actor <- function( netlet, ...) {
 #   apply(mat, 1, min, na.rm=TRUE)
 # }
 
-# summary_args$other_stats = list(
+# other_stats = list(
 #   max_actor_val  = max_actor_val,
 #   min_actor_val  = min_actor_val
 #   )
@@ -280,7 +298,7 @@ summary_actor <- function( netlet, ...) {
 #   return(closeness)
 # }
 
-# summary_args = list(other_stats=list(closeness=closeness_igraph))
+# other_stats=list(closeness=closeness_igraph)
 
     # stats
     # degree, prop_ties, strength_sum, strength_avg, 
