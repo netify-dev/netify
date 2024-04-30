@@ -147,7 +147,7 @@ mid_long_summary <- summary(mid_long_network)
 
 We can also make a quick visualization of network statistics over time using the summary statistics data frame.
 
-```{r}
+```{r, fig.width=6, fig.height=6}
 plot_networkStats(mid_long_summary,
                   longitudinal = TRUE,
                   net_stat = "dens") 
@@ -205,15 +205,16 @@ A common data type used to create networks is in the structure of event data, wh
 
 We show how to use `netify` and UCDP data as just one example of potential applications to intrastate event data. The first step is to go to https://ucdp.uu.se/downloads/ and download the data you want to use. For this tutorial we have downloaded UCDP GED event data version 23.1 and subset the data for the case of Mexico. 
 
-Citations:
+UCDP Data Citations:
 
 -  Davies, Shawn, Therese Pettersson & Magnus Öberg (2023). Organized violence 1989-2022 and the return of conflicts between states?. Journal of Peace Research 60(4).
 
 - Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP Georeferenced Event Dataset. Journal of Peace Research 50(4).
 
-`
+-  Högbladh Stina, 2023, “UCDP GED Codebook version 23.1”, Department of Peace and Conflict Research, Uppsala University
+
 ```{r}
-load(file="~/Desktop/ucdp_ged_mexico.rda")
+load("ucdp_ged_mexico.rda")
 ```
 
 (1) Create an aggregated, weighted network of conflict between actors in Mexico. 
@@ -250,9 +251,8 @@ summary(mex_network_civ)
 
 (2) Explore
 
-```{r}
-select_names <- c("Autodefensas Unidas de Michoacán", "Beltrán Leyva Cartel",
-                  "Sinaloa Cartel")
+```{r, fig.width=6, fig.height=6}
+select_names <- c("EZLN", "Jalisco Cartel New Generation", "Los Caballeros Templarios", "Autodefensas Unidas de Michoacán", "Gulf Cartel", "Los Zetas", "Beltrán Leyva Cartel", "Government of Mexico")
 
 plot(mex_network,
      add_text = TRUE)
@@ -267,6 +267,7 @@ plot(mex_network_civ,
 We can also apply functions from `igraph`:
 
 ```{r}
+library(igraph)
 i_close = function(x){ ig = prep_for_igraph(x) ; closeness(ig) }
 closeness = i_close(mex_network)
 
