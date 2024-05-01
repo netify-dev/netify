@@ -350,8 +350,7 @@ centrality for each actor in each time period.</p>
 <p><img src="workshop_demo_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
 <p>Instead of looking at summary statistics, we also might want to
 simply visualize the entire network. We can do this by plotting the
-netify object. Or we can first subset the object so that we plot only
-select time periods. (Isolates removed by default).</p>
+netify object. (Isolates removed by default).</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># default plot</span></span>
 <span><span class="fu"><a href="../reference/plot.netify.html">plot.netify</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span></code></pre></div>
@@ -381,7 +380,7 @@ summary statistics in the network graph.</p>
 <span>    edge_color<span class="op">=</span><span class="st">'grey'</span>,</span>
 <span>    node_size_var<span class="op">=</span><span class="st">'degree'</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-10-1.png" width="576"></p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># vary node color by polyarchy</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
@@ -391,7 +390,7 @@ summary statistics in the network graph.</p>
 <span>    node_color_var<span class="op">=</span><span class="st">'v2x_polyarchy1'</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span> </span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient2</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-10-2.png" width="700"></p>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-10-2.png" width="576"></p>
 <p>We might also prefer to add labels, but only a select few:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vincentarelbundock.github.io/countrycode/" class="external-link">countrycode</a></span><span class="op">)</span></span>
@@ -412,7 +411,7 @@ summary statistics in the network graph.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient2</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Removed 839 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_text()`).</span></span></code></pre>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-11-1.png" width="576"></p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
@@ -426,7 +425,7 @@ summary statistics in the network graph.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient2</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning in plot(mid_long_network, edge_color = "grey", add_points = FALSE, :</span></span>
 <span><span class="co">## Ignoring unknown parameters: `check_overlap`</span></span></code></pre>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-11-2.png" width="700"></p>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-11-2.png" width="576"></p>
 </div>
 <div class="section level2">
 <h2 id="step-3-advance">Step 3: Advance 🚀<a class="anchor" aria-label="anchor" href="#step-3-advance"></a>
@@ -564,38 +563,8 @@ Mexico.</li>
 <p><img src="workshop_demo_files/figure-html/unnamed-chunk-15-3.png" width="576"></p>
 <p>We can also apply functions from <code>igraph</code>:</p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r.igraph.org/" class="external-link">igraph</a></span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## </span></span>
-<span><span class="co">## Attaching package: 'igraph'</span></span></code></pre>
-<pre><code><span><span class="co">## The following objects are masked from 'package:network':</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">##     %c%, %s%, add.edges, add.vertices, delete.edges, delete.vertices,</span></span>
-<span><span class="co">##     get.edge.attribute, get.edges, get.vertex.attribute, is.bipartite,</span></span>
-<span><span class="co">##     is.directed, list.edge.attributes, list.vertex.attributes,</span></span>
-<span><span class="co">##     set.edge.attribute, set.vertex.attribute</span></span></code></pre>
-<pre><code><span><span class="co">## The following objects are masked from 'package:lubridate':</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">##     %--%, union</span></span></code></pre>
-<pre><code><span><span class="co">## The following objects are masked from 'package:dplyr':</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">##     as_data_frame, groups, union</span></span></code></pre>
-<pre><code><span><span class="co">## The following objects are masked from 'package:purrr':</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">##     compose, simplify</span></span></code></pre>
-<pre><code><span><span class="co">## The following object is masked from 'package:tidyr':</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">##     crossing</span></span></code></pre>
-<pre><code><span><span class="co">## The following object is masked from 'package:tibble':</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">##     as_data_frame</span></span></code></pre>
-<pre><code><span><span class="co">## The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">##     decompose, spectrum</span></span></code></pre>
-<pre><code><span><span class="co">## The following object is masked from 'package:base':</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">##     union</span></span></code></pre>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">i_close</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">{</span> <span class="va">ig</span> <span class="op">=</span> <span class="fu"><a href="../reference/prep_for_igraph.html">prep_for_igraph</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> ; <span class="fu">igraph</span><span class="fu">::</span><span class="fu"><a href="https://r.igraph.org/reference/closeness.html" class="external-link">closeness</a></span><span class="op">(</span><span class="va">ig</span><span class="op">)</span> <span class="op">}</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r.igraph.org/" class="external-link">igraph</a></span><span class="op">)</span></span>
+<span><span class="va">i_close</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">{</span> <span class="va">ig</span> <span class="op">=</span> <span class="fu"><a href="../reference/prep_for_igraph.html">prep_for_igraph</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> ; <span class="fu">igraph</span><span class="fu">::</span><span class="fu"><a href="https://r.igraph.org/reference/closeness.html" class="external-link">closeness</a></span><span class="op">(</span><span class="va">ig</span><span class="op">)</span> <span class="op">}</span></span>
 <span><span class="va">closeness</span> <span class="op">=</span> <span class="fu">i_close</span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># add to summary</span></span>
