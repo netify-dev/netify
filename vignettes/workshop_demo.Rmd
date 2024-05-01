@@ -173,7 +173,7 @@ plot_actorStats(mid_subset,
                 facet_wrap(~actor)
 ```
 
-Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. Or we can first subset the object so that we plot only select time periods. (Isolates removed by default).
+Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default).
 
 ```{r, fig.width=6, fig.height=6}
 
@@ -190,7 +190,7 @@ plot(
 
 We can also use `netify` functions to explore actor level summary statistics in the network graph. 
 
-```{r}
+```{r, fig.width=6, fig.height=6}
 # add actor variables
 mid_long_network = add_nodal(
     mid_long_network, 
@@ -218,7 +218,7 @@ plot(
 
 We might also prefer to add labels, but only a select few:
 
-```{r}
+```{r, fig.width=6, fig.height=6}
 library(countrycode)
 cowns = countrycode(
     c('United States', 'China', 'Russia', 'France', 'Germany', 'United Kingdom'), 
@@ -344,7 +344,7 @@ plot(mex_network_civ,
 
 We can also apply functions from `igraph`:
 
-```{r}
+```{r, warning=FALSE, message = FALSE}
 library(igraph)
 i_close = function(x){ ig = prep_for_igraph(x) ; igraph::closeness(ig) }
 closeness = i_close(mex_network)
