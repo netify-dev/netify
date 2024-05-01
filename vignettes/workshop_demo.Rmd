@@ -203,15 +203,15 @@ mid_long_network = add_nodal(
 plot(
     mid_long_network,
     edge_color='grey',
-    node_size_var='degree'
+    point_size_var='degree'
 )
 
 # vary node color by polyarchy
 plot(
     mid_long_network,
     edge_color='grey',
-    node_size_var='degree',
-    node_color_var='v2x_polyarchy1'
+    point_size_var='degree',
+    point_color_var='v2x_polyarchy1'
     ) + 
     scale_color_gradient2()
 ```
@@ -228,11 +228,11 @@ cabbs = countrycode(cowns, 'cown', 'iso3c')
 plot(
     mid_long_network,
     edge_color='grey',
-    node_size_var='degree',
-    node_color_var='v2x_polyarchy1',
+    point_size_var='degree',
+    point_color_var='v2x_polyarchy1',
     select_text = cowns,
     select_text_display = cabbs,
-    text_size = 5
+    text_size = 3
     ) + 
     scale_color_gradient2()
 
@@ -252,7 +252,7 @@ plot(
 
 Once we have created and explored our network object, we might want to continue analyzing the data using different modeling approaches. `netify` makes this simple!
 
-```{r}
+```{r, warning=FALSE, message = FALSE}
 # install (if necessary) and load amen
 if('amen' %in% rownames(installed.packages())){
   install.packages('amen', repos='https://cloud.r-project.org') }
