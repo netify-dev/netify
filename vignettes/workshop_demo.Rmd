@@ -60,11 +60,10 @@ Begin by loading packages and supplying the data.
 library(netify)
 
 # install extra packages for this vignette
-#if('tidyverse' %in% rownames(installed.packages())){
-#  install.packages('tidyverse', repos='https://cloud.r-project.org') }
-#if('peacesciencer' %in% rownames(installed.packages())){
-#  install.packages('peacesciencer', repos='https://cloud.r-project.org') }
-
+if('tidyverse' %in% rownames(installed.packages())){
+if('peacesciencer' %in% rownames(installed.packages())){
+  install.packages('peacesciencer', repos='https://cloud.r-project.org') }
+}
 # load necessary packages for this vignette
 library(peacesciencer)
 library(tidyverse)
@@ -177,7 +176,76 @@ plot_actorStats(mid_subset,
 Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. Or we can first subset the object so that we plot only select time periods. (Isolates removed by default).
 
 ```{r, fig.width=6, fig.height=6}
+
+# default plot
 plot.netify(mid_long_network)
+
+# a little cleaner
+plot(
+    mid_long_network,
+    edge_color='grey',
+    node_size=2
+)
+```
+
+We can also use `netify` functions to explore actor level summary statistics in the network graph. 
+
+```{r}
+# add actor variables
+mid_long_network = add_nodal(
+    mid_long_network, 
+    summary_actor(mid_long_network),
+    actor='actor', time='time',
+    node_vars = c('degree', 'prop_ties', 'eigen_vector'),
+)
+
+# vary node size by degree
+plot(
+    mid_long_network,
+    edge_color='grey',
+    node_size_var='degree'
+)
+
+# vary node color by polyarchy
+plot(
+    mid_long_network,
+    edge_color='grey',
+    node_size_var='degree',
+    node_color_var='v2x_polyarchy1'
+    ) + 
+    scale_color_gradient2()
+```
+
+We might also prefer to add labels, but only a select few:
+
+```{r}
+library(countrycode)
+cowns = countrycode(
+    c('United States', 'China', 'Russia', 'France', 'Germany', 'United Kingdom'), 
+    'country.name', 'cown')
+cabbs = countrycode(cowns, 'cown', 'iso3c')
+
+plot(
+    mid_long_network,
+    edge_color='grey',
+    node_size_var='degree',
+    node_color_var='v2x_polyarchy1',
+    select_text = cowns,
+    select_text_display = cabbs,
+    text_size = 5
+    ) + 
+    scale_color_gradient2()
+
+plot(
+    mid_long_network,
+    edge_color='grey',
+    add_points = FALSE, 
+    add_label = TRUE,
+    label_size_var='degree',
+    label_color = 'white',
+    label_fill_var='v2x_polyarchy1'
+    ) + 
+    scale_color_gradient2()
 ```
 
 ## Step 3: Advance 🚀
