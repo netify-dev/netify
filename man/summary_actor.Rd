@@ -35,14 +35,29 @@ It supports handling of both cross-sectional and longitudinal network data, ensu
 Examples of additional computations (like authority or hub scores) are provided only for asymmetric networks.
 }
 \examples{
-\dontrun{
-# Assuming 'netlet' is a prepared netify object:
-actor_stats <- summary_actor(netlet)
+# load icews data
+data(icews)
 
-# Adding a custom metric for maximum value per row
-max_actor_val <- function(mat) { apply(mat, 1, max, na.rm = TRUE) }
-actor_stats_custom <- summary_actor(netlet, other_stats = list(max_val = max_actor_val))
-}
+# create a netify object
+netlet = netify(
+    dyad_data=icews, actor1='i', actor2='j',
+    time = 'year',
+    symmetric=FALSE, weight='verbCoop',
+    mode='unipartite', sum_dyads=FALSE,
+    actor_time_uniform=TRUE, actor_pds=NULL,
+    diag_to_NA=TRUE, missing_to_zero=TRUE
+)
+
+# get actor-level statistics
+actor_stats <- summary_actor(netlet)
+head(actor_stats)
+
+# add statistic that get 
+# the max incoming and outgoing tie
+max_out <- function(mat){ apply(mat, 1, max, na.rm=TRUE) }
+max_in <- function(mat){ apply(mat, 2, max, na.rm=TRUE) }
+actor_stats_custom <- summary_actor(netlet, other_stats = list(max_out = max_out, max_in = max_in))
+head(actor_stats_custom)
 
 }
 \author{

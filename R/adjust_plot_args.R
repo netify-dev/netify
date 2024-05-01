@@ -155,7 +155,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	plot_args$edge_arrow_fill = NULL
 	if(!obj_attrs$symmetric){
 		if(is.null(plot_args$edge_arrow)){
-			plot_args$edge_arrow = arrow(length = unit(0.3, "cm"))
+			plot_args$edge_arrow = arrow(length = unit(0.2, "cm"))
 		} else {
 			plot_args$edge_arrow = NULL
 	} }

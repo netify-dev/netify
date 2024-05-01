@@ -268,9 +268,9 @@ We can also apply functions from `igraph`:
 
 ```{r}
 library(igraph)
-i_close = function(x){ ig = prep_for_igraph(x) ; closeness(ig) }
+i_close = function(x){ ig = prep_for_igraph(x) ; igraph::closeness(ig) }
 closeness = i_close(mex_network)
 
 # add to summary
-sum_mex <- summary_actor(mex_network, closeness = closeness)
+sum_mex <- summary_actor(mex_network, other_stats = list(closeness=closeness))
 ```

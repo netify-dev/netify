@@ -10,33 +10,37 @@
 #' @param time character: time in the data
 #' 
 #' @return a dataframe with three columns:
-#' 1) \item{actor}{a column indicating actors in the data}
-#' 2) \item{min_time}{a column indicating the first time
-#' point in which the actor should be considered a part of the network}
-#' 3) \item{max_time}{a column indicating the last time point in
-#' which the actor should be considered a part of the network}
-#' 
+#' \describe{
+#'   \item{actor}{a column indicating actors in the data}
+#'   \item{min_time}{a column indicating the first time
+#'     point in which the actor should be considered a part of the network}
+#'   \item{max_time}{a column indicating the last time point in
+#'     which the actor should be considered a part of the network}
+#' }
+#'
 #' @author Shahryar Minhas, Ha Eun Choi
 #' 
 #' @examples
-#'
+#' \dontrun{
 #' library(peacesciencer)
 #' library(dplyr)
-
+#'
 #' cow_dyads <- create_dyadyears(
 #'   subset_years = c(1980:2001)
 #'   ) %>%
 #'   # add mids
 #'   add_cow_mids()
-
+#'
 #' actor_time <- get_actor_time_info(
 #'   dyad_data = cow_dyads, 
 #'   actor1 = 'ccode1', 
 #'   actor2 = 'ccode2', 
 #'   time = 'year'
 #' )
+#' }
 #'
 #' @export get_actor_time_info
+#' 
 
 get_actor_time_info <- function(
   dyad_data,

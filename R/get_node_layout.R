@@ -20,12 +20,13 @@
 #'         representing the nodes and edges for each time point in the netify object.
 #'         Each node data frame contains columns for node indices, actor names, and their x, y coordinates.
 #'         Each edge data frame includes from and to node names, along with start and end coordinates for drawing edges.
-#'#' @author Cassy Dorff, Shahryar Minhas
+#' @author Cassy Dorff, Shahryar Minhas
 #' 
 #'
 #' @importFrom igraph layout_nicely layout_with_fr layout_with_kk layout_randomly
 #'             layout_in_circle layout_as_star layout_on_grid layout_with_graphopt
 #'             layout_with_sugiyama layout_with_drl layout_with_lgl layout_as_bipartite
+#'             V
 #' @export get_node_layout
 #'
 

@@ -17,11 +17,11 @@ get_actor_time_info(dyad_data, actor1, actor2, time)
 }
 \value{
 a dataframe with three columns:
-\enumerate{
-\item \item{actor}{a column indicating actors in the data}
-\item \item{min_time}{a column indicating the first time
+\describe{
+\item{actor}{a column indicating actors in the data}
+\item{min_time}{a column indicating the first time
 point in which the actor should be considered a part of the network}
-\item \item{max_time}{a column indicating the last time point in
+\item{max_time}{a column indicating the last time point in
 which the actor should be considered a part of the network}
 }
 }
@@ -31,20 +31,23 @@ actors entered and exited the network. Entering will be determined by the
 first period the actor had an interaction and exiting by the last period.
 }
 \examples{
-
+\dontrun{
 library(peacesciencer)
 library(dplyr)
+
 cow_dyads <- create_dyadyears(
   subset_years = c(1980:2001)
   ) \%>\%
   # add mids
   add_cow_mids()
+
 actor_time <- get_actor_time_info(
   dyad_data = cow_dyads, 
   actor1 = 'ccode1', 
   actor2 = 'ccode2', 
   time = 'year'
 )
+}
 
 }
 \author{

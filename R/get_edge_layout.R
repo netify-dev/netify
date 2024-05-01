@@ -35,6 +35,7 @@
 #'         with their start and end coordinates ('x1', 'y1' for the 'from' node and 'x2', 'y2' for the 'to' node).
 #' @author Cassy Dorff, Shahryar Minhas 
 #'
+#' @importFrom igraph as_edgelist
 #'
 #' @export get_edge_layout
 
@@ -56,7 +57,7 @@ get_edge_layout <- function(netlet, nodes_layout) {
     # Generate edges list
     edges_list <- lapply(1:length(g), function(ii) {
         g_slice <- g[[ii]]
-        edges <- as_edgelist(g_slice, names = TRUE)
+        edges <- igraph::as_edgelist(g_slice, names = TRUE)
         edges <- data.frame(edges, stringsAsFactors = FALSE)
         names(edges) <- c("from", "to")
         

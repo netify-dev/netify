@@ -34,10 +34,12 @@ A list containing two elements: \code{nodes} and \code{edges}. Each of these is 
 representing the nodes and edges for each time point in the netify object.
 Each node data frame contains columns for node indices, actor names, and their x, y coordinates.
 Each edge data frame includes from and to node names, along with start and end coordinates for drawing edges.
-#' @author Cassy Dorff, Shahryar Minhas
 }
 \description{
 This function converts a netify object into an igraph object to compute layout positions
 using various igraph layout algorithms. It supports both cross-sectional and longitudinal
 data, with an option for static positioning of actors.
+}
+\author{
+Cassy Dorff, Shahryar Minhas
 }

@@ -9,31 +9,20 @@
 \arguments{
 \item{x}{A 'netify' object, which contains the network data structured for analysis and visualization.}
 
-\item{...}{Additional arguments passed to 'geom' functions (i.e., geom_text, geom_label for nodes and geom_segment for edges) within 'ggplot' for further customization.}
-
-\item{point_layout}{Optional, user-provided node layout; if not provided, layout will be generated based on the \code{layout} parameter.}
-
-\item{layout}{Specifies the layout algorithm from 'igraph' to position the nodes if \code{point_layout} is not provided.}
-
-\item{remove_isolates}{Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.}
-
-\item{add_edges}{Logical; if TRUE, edges will be added to the plot. Default is TRUE.}
-
-\item{curve_edges}{Logical; if TRUE, edges will be curved. Default is FALSE.}
-
-\item{add_points}{Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.}
-
-\item{add_text}{Logical; if TRUE, text annotations will be added. Default is FALSE.}
-
-\item{add_label}{Logical; if TRUE, labels will be added. Default is FALSE.}
-
-\item{select_text}{A vector of node names to specifically add text to; others will not have text.}
-
-\item{select_label}{A vector of node names to specifically add labels to; others will not have labels.}
-
-\item{point_size}{A fixed size for all points, equivalent to \code{geom_point(size = point_size)} in \code{ggplot2}.}
-
-\item{point_size_var}{A variable from the node data to dynamically size points, equivalent to \code{geom_point(aes(size = point_size_var))} in \code{ggplot2}.}
+\item{...}{Additional arguments, which can include but are not limited to:
+- \code{point_layout}: Optional, user-provided node layout; if not provided, layout will be generated based on \code{layout} parameter.
+- \code{layout}: Specifies the layout algorithm from 'igraph' to position the nodes if \code{point_layout} is not provided.
+- \code{remove_isolates}: Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
+- \code{add_edges}: Logical; if TRUE, edges will be added to the plot. Default is TRUE.
+- \code{curve_edges}: Logical; if TRUE, edges will be curved. Default is FALSE.
+- \code{add_points}: Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.
+- \code{add_text}: Logical; if TRUE, text annotations will be added. Default is FALSE.
+- \code{add_label}: Logical; if TRUE, labels will be added. Default is FALSE.
+- \code{select_text}: A vector of node names to specifically add text to; others will not have text.
+- \code{select_label}: A vector of node names to specifically add labels to; others will not have labels.
+- \code{point_size}: A fixed size for all points, equivalent to \code{geom_point(size = point_size)} in \code{ggplot2}.
+- \code{point_size_var}: A variable from the node data to dynamically size points, equivalent to \code{geom_point(aes(size = point_size_var))} in \code{ggplot2}.
+These arguments control various aspects of the plot's appearance and functionality.}
 }
 \value{
 A 'ggplot' plot object that can be further modified or printed.
@@ -51,10 +40,38 @@ This function provides a comprehensive tool to visualize 'netify' objects throug
 \item Custom layouts if the automatic placement does not suffice.
 Additional customization options like \code{point_size} and \code{point_size_var} allow users to apply typical \code{ggplot2} methods directly to network visualizations, facilitating easy integration of familiar graphical adjustments.
 }
-
-Example usage:
-\dontrun{
-plot(netlet, add_points = TRUE, point_size = 3) # Applies a fixed size to all nodes
-plot(netlet, add_points = TRUE, point_size_var = "degree") # Sizes nodes based on their 'degree' attribute
 }
+\examples{
+# load icews data
+data(icews)
+
+# choose attributes
+nvars = c( 'i_polity2', 'i_log_gdp', 'i_log_pop' )
+dvars = c( 'matlCoop', 'verbConf', 'matlConf' )
+
+# create a netify object
+netlet = netify(
+    dyad_data=icews, actor1='i', actor2='j',
+    time = 'year',
+    symmetric=FALSE, weight='verbCoop',
+    mode='unipartite', sum_dyads=FALSE,
+    actor_time_uniform=TRUE, actor_pds=NULL,
+    diag_to_NA=TRUE, missing_to_zero=TRUE,
+    nodal_vars = nvars, 
+    dyad_vars = dvars
+)
+
+# add basic summary network stats
+netlet = add_nodal(
+    netlet, 
+    summary_actor(netlet),
+    actor='actor', time='time')
+
+# plot the network
+plot(netlet, 
+     edge_color='lightgrey', 
+     point_size_var = 'degree_total',
+     point_color_var = 'i_polity2'
+     )
+
 }
