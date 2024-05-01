@@ -70,6 +70,8 @@
 - <code>add_label</code>: Logical; if TRUE, labels will be added. Default is FALSE.
 - <code>select_text</code>: A vector of node names to specifically add text to; others will not have text.
 - <code>select_label</code>: A vector of node names to specifically add labels to; others will not have labels.
+- <code>point_size</code>: A fixed size for all points, equivalent to <code>geom_point(size = point_size)</code> in <code>ggplot2</code>.
+- <code>point_size_var</code>: A variable from the node data to dynamically size points, equivalent to <code>geom_point(aes(size = point_size_var))</code> in <code>ggplot2</code>.
 These arguments control various aspects of the plot's appearance and functionality.</p></dd>
 
 </dl></div>
@@ -86,9 +88,46 @@ These arguments control various aspects of the plot's appearance and functionali
 <li><p>Whether to annotate nodes with text or labels.</p></li>
 <li><p>Specific nodes to annotate, allowing selective emphasis within the network.</p></li>
 <li><p>Custom layouts if the automatic placement does not suffice.
-It uses a combination of node and edge data to construct the visualization, handling both aesthetic mappings and graphical parameters dynamically based on user input and the characteristics of the 'netify' object.</p></li>
+Additional customization options like <code>point_size</code> and <code>point_size_var</code> allow users to apply typical <code>ggplot2</code> methods directly to network visualizations, facilitating easy integration of familiar graphical adjustments.</p></li>
 </ul></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># load icews data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># choose attributes</span></span></span>
+<span class="r-in"><span><span class="va">nvars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">'i_polity2'</span>, <span class="st">'i_log_gdp'</span>, <span class="st">'i_log_pop'</span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dvars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">'matlCoop'</span>, <span class="st">'verbConf'</span>, <span class="st">'matlConf'</span> <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># create a netify object</span></span></span>
+<span class="r-in"><span><span class="va">netlet</span> <span class="op">=</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    dyad_data<span class="op">=</span><span class="va">icews</span>, actor1<span class="op">=</span><span class="st">'i'</span>, actor2<span class="op">=</span><span class="st">'j'</span>,</span></span>
+<span class="r-in"><span>    time <span class="op">=</span> <span class="st">'year'</span>,</span></span>
+<span class="r-in"><span>    symmetric<span class="op">=</span><span class="cn">FALSE</span>, weight<span class="op">=</span><span class="st">'verbCoop'</span>,</span></span>
+<span class="r-in"><span>    mode<span class="op">=</span><span class="st">'unipartite'</span>, sum_dyads<span class="op">=</span><span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    actor_time_uniform<span class="op">=</span><span class="cn">TRUE</span>, actor_pds<span class="op">=</span><span class="cn">NULL</span>,</span></span>
+<span class="r-in"><span>    diag_to_NA<span class="op">=</span><span class="cn">TRUE</span>, missing_to_zero<span class="op">=</span><span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    nodal_vars <span class="op">=</span> <span class="va">nvars</span>, </span></span>
+<span class="r-in"><span>    dyad_vars <span class="op">=</span> <span class="va">dvars</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># add basic summary network stats</span></span></span>
+<span class="r-in"><span><span class="va">netlet</span> <span class="op">=</span> <span class="fu"><a href="add_nodal.html">add_nodal</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">netlet</span>, </span></span>
+<span class="r-in"><span>    <span class="fu"><a href="summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">netlet</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    actor<span class="op">=</span><span class="st">'actor'</span>, time<span class="op">=</span><span class="st">'time'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># plot the network</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">netlet</span>, </span></span>
+<span class="r-in"><span>     edge_color<span class="op">=</span><span class="st">'lightgrey'</span>, </span></span>
+<span class="r-in"><span>     point_size_var <span class="op">=</span> <span class="st">'degree_total'</span>,</span></span>
+<span class="r-in"><span>     point_color_var <span class="op">=</span> <span class="st">'i_polity2'</span></span></span>
+<span class="r-in"><span>     <span class="op">)</span></span></span>
+<span class="r-plt img"><img src="plot.netify-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

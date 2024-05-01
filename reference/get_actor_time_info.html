@@ -79,15 +79,19 @@ first period the actor had an interaction and exiting by the last period.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>a dataframe with three columns:</p><ol><li><p></p></li>
-<li><p>actora column indicating actors in the data</p></li>
-<li><p></p></li>
-<li><p>min_timea column indicating the first time
-point in which the actor should be considered a part of the network</p></li>
-<li><p></p></li>
-<li><p>max_timea column indicating the last time point in
-which the actor should be considered a part of the network</p></li>
-</ol></div>
+<p>a dataframe with three columns:</p><dl><dt>actor</dt>
+<dd><p>a column indicating actors in the data</p></dd>
+
+<dt>min_time</dt>
+<dd><p>a column indicating the first time
+point in which the actor should be considered a part of the network</p></dd>
+
+<dt>max_time</dt>
+<dd><p>a column indicating the last time point in
+which the actor should be considered a part of the network</p></dd>
+
+
+</dl></div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
     <p>Shahryar Minhas, Ha Eun Choi</p>
@@ -95,34 +99,23 @@ which the actor should be considered a part of the network</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/svmiller/peacesciencer/" class="external-link">peacesciencer</a></span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> {peacesciencer} includes additional remote data for separate download. Please type ?download_extdata() for more information.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> This message disappears on load when these data are downloaded and in the package's `extdata` directory.</span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘dplyr’</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:stats’:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>     filter, lag</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:base’:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>     intersect, setdiff, setequal, union</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">cow_dyads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/create_dyadyears.html" class="external-link">create_dyadyears</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  subset_years <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1980</span><span class="op">:</span><span class="fl">2001</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="co"># add mids</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/add_cow_mids.html" class="external-link">add_cow_mids</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(ccode1, ccode2, year)`</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(ccode1, ccode2, year)`</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> add_cow_mids() IMPORTANT MESSAGE: By default, this function whittles dispute-year data into dyad-year data by first selecting on unique onsets. Thereafter, where duplicates remain, it whittles dispute-year data into dyad-year data in the following order: 1) retaining highest `fatality`, 2) retaining highest `hostlev`, 3) retaining highest estimated `mindur`, 4) retaining highest estimated `maxdur`, 5) retaining reciprocated over non-reciprocated observations, 6) retaining the observation with the lowest start month, and, where duplicates still remained (and they don't), 7) forcibly dropping all duplicates for observations that are otherwise very similar.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> See: http://svmiller.com/peacesciencer/articles/coerce-dispute-year-dyad-year.html</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">actor_time</span> <span class="op">&lt;-</span> <span class="fu">get_actor_time_info</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  dyad_data <span class="op">=</span> <span class="va">cow_dyads</span>, </span></span>
 <span class="r-in"><span>  actor1 <span class="op">=</span> <span class="st">'ccode1'</span>, </span></span>
 <span class="r-in"><span>  actor2 <span class="op">=</span> <span class="st">'ccode2'</span>, </span></span>
 <span class="r-in"><span>  time <span class="op">=</span> <span class="st">'year'</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

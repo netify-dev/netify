@@ -65,7 +65,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2024-04-30</h4>
+            <h4 data-toc-skip class="date">2024-05-01</h4>
       
       
       <div class="d-none name"><code>workshop_demo.Rmd</code></div>
@@ -162,10 +162,10 @@ composition)</li>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/netify/">netify</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># install extra packages for this vignette</span></span>
-<span><span class="kw">if</span><span class="op">(</span><span class="st">'tidyverse'</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'tidyverse'</span>, repos<span class="op">=</span><span class="st">'https://cloud.r-project.org'</span><span class="op">)</span> <span class="op">}</span></span>
-<span><span class="kw">if</span><span class="op">(</span><span class="st">'peacesciencer'</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'peacesciencer'</span>, repos<span class="op">=</span><span class="st">'https://cloud.r-project.org'</span><span class="op">)</span> <span class="op">}</span></span>
+<span><span class="co">#if('tidyverse' %in% rownames(installed.packages())){</span></span>
+<span><span class="co">#  install.packages('tidyverse', repos='https://cloud.r-project.org') }</span></span>
+<span><span class="co">#if('peacesciencer' %in% rownames(installed.packages())){</span></span>
+<span><span class="co">#  install.packages('peacesciencer', repos='https://cloud.r-project.org') }</span></span>
 <span></span>
 <span><span class="co"># load necessary packages for this vignette</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/svmiller/peacesciencer/" class="external-link">peacesciencer</a></span><span class="op">)</span></span>
@@ -227,11 +227,13 @@ via the <code><a href="../reference/add_nodal.html">add_nodal()</a></code> and <
 functions.</p>
 <p>Let’s assume that we had information about each actor in the network
 that we’d like to add as a nodal variable after we already made the
-network object. For example, lets add a variable measuring gdp for each
-node in the network over time:</p>
+network object. This could be from our original data set or elsewhere.
+For example, lets add a logged variable measuring gdp for each node in
+the network over time:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># create a vector of nodal data</span></span>
 <span><span class="va">node_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">cow_dyads</span><span class="op">[</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ccode1"</span>, <span class="st">"year"</span>, <span class="st">"wbgdppc2011est2"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">node_data</span><span class="op">$</span><span class="va">wbgdppc2011est2_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">node_data</span><span class="op">$</span><span class="va">wbgdppc2011est2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># add nodal variable to netlet object</span></span>
 <span><span class="va">mid_long_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_nodal.html">add_nodal</a></span><span class="op">(</span></span>
@@ -315,32 +317,18 @@ is cross-sectional.</p>
 <span><span class="co">## 305   0   0   0   0   0   0   0   0   0  NA  0</span></span>
 <span><span class="co">## 31    0   0   0   0   0   0   0   0   0   0 NA</span></span></code></pre>
 <p>Next, let’s examine a few basic summary statistics about the network
-using our <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> function.</p>
+using our<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> function.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># create data.frame that provides network-level summary stats </span></span>
 <span><span class="co"># for each year of the network</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##     net numActors        dens recip   sdSendEff    sdRecEff srCov</span></span>
-<span><span class="co">## 1  1995       187 0.001955034     1 0.003682730 0.003682730     1</span></span>
-<span><span class="co">## 2  1996       187 0.002070036     1 0.004669017 0.004669017     1</span></span>
-<span><span class="co">## 3  1997       187 0.002415042     1 0.004635435 0.004635435     1</span></span>
-<span><span class="co">## 4  1998       187 0.003047553     1 0.009558454 0.009558454     1</span></span>
-<span><span class="co">## 5  1999       190 0.003063214     1 0.008328690 0.008328690     1</span></span>
-<span><span class="co">## 6  2000       191 0.003527142     1 0.015623411 0.015623411     1</span></span>
-<span><span class="co">## 7  2001       191 0.002314687     1 0.006798900 0.006798900     1</span></span>
-<span><span class="co">## 8  2002       192 0.002126963     1 0.004357630 0.004357630     1</span></span>
-<span><span class="co">## 9  2003       192 0.002290576     1 0.005660381 0.005660381     1</span></span>
-<span><span class="co">## 10 2004       192 0.001799738     1 0.004240794 0.004240794     1</span></span>
-<span><span class="co">## 11 2005       192 0.002017888     1 0.003963836 0.003963836     1</span></span>
-<span><span class="co">## 12 2006       193 0.001241364     1 0.002984306 0.002984306     1</span></span>
-<span><span class="co">## 13 2007       193 0.001025475     1 0.002723973 0.002723973     1</span></span>
-<span><span class="co">## 14 2008       194 0.001335399     1 0.003481020 0.003481020     1</span></span>
-<span><span class="co">## 15 2009       194 0.001121735     1 0.003095967 0.003095967     1</span></span>
-<span><span class="co">## 16 2010       194 0.001014903     1 0.002996641 0.002996641     1</span></span>
-<span><span class="co">## 17 2011       195 0.003912239     1 0.013606080 0.013606080     1</span></span>
-<span><span class="co">## 18 2012       195 0.001691779     1 0.004394395 0.004394395     1</span></span>
-<span><span class="co">## 19 2013       195 0.002220460     1 0.006078981 0.006078981     1</span></span>
-<span><span class="co">## 20 2014       195 0.002167592     1 0.007285231 0.007285231     1</span></span></code></pre>
+<span><span class="va">mid_long_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span></code></pre></div>
+<p>We can also make a quick visualization of network statistics over
+time using the summary statistics data frame.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_networkStats.html">plot_networkStats</a></span><span class="op">(</span><span class="va">mid_long_summary</span>,</span>
+<span>                  longitudinal <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                  net_stat <span class="op">=</span> <span class="st">"dens"</span><span class="op">)</span> </span></code></pre></div>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-6-1.png" width="576"></p>
 <p>We might also want to look at a specific set of actors’ statistics
 overtime. Our built-in function, <code>summary_actor</code> will
 calculate in-degree, out-degree, average degree, and eigenvector
@@ -349,8 +337,8 @@ centrality for each actor in each time period.</p>
 <code class="sourceCode R"><span><span class="co"># every year &amp; every actor (messy!)</span></span>
 <span><span class="va">summary_actor_mids</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># top 5 GDP countries</span></span>
-<span><span class="va">top_5</span> <span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span>, <span class="st">"710"</span>, <span class="st">"740"</span>, <span class="st">"750"</span>, <span class="st">"200"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># top 5 GDP countries (USA, China, Japan, Germany, India)</span></span>
+<span><span class="va">top_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span>, <span class="st">"710"</span>, <span class="st">"740"</span>, <span class="st">"255"</span>, <span class="st">"750"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># zoom in on specific parts of the network for actor viz</span></span>
 <span><span class="va">mid_subset</span> <span class="op">&lt;-</span> <span class="va">summary_actor_mids</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -360,14 +348,14 @@ centrality for each actor in each time period.</p>
 <span>                net_stat <span class="op">=</span> <span class="st">"degree"</span>,</span>
 <span>                longitudinal <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>                <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">actor</span><span class="op">)</span></span></code></pre></div>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-7-1.png" width="576"></p>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
 <p>Instead of looking at summary statistics, we also might want to
 simply visualize the entire network. We can do this by plotting the
 netify object. Or we can first subset the object so that we plot only
-select time periods.</p>
+select time periods. (Isolates removed by default).</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.netify.html">plot.netify</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span></code></pre></div>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-9-1.png" width="576"></p>
 </div>
 <div class="section level2">
 <h2 id="step-3-advance">Step 3: Advance 🚀<a class="anchor" aria-label="anchor" href="#step-3-advance"></a>
@@ -411,6 +399,123 @@ to continue analyzing the data using different modeling approaches.
 <span><span class="co">## changes.</span></span></code></pre>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># lets take a cross-section of the network object</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="bonus-examples">Bonus Examples<a class="anchor" aria-label="anchor" href="#bonus-examples"></a>
+</h3>
+<p>A common data type used to create networks is in the structure of
+event data, where actors are repeated across rows but there is no
+specific variable that denotes the ‘edge’ as shown in our previous
+example.</p>
+<p>We show how to use <code>netify</code> and UCDP data as just one
+example of potential applications to intrastate event data. The first
+step is to go to <a href="https://ucdp.uu.se/downloads/" class="external-link uri">https://ucdp.uu.se/downloads/</a> and download the data you
+want to use. For this tutorial we have downloaded UCDP GED event data
+version 23.1 and subset the data for the case of Mexico.</p>
+<p>UCDP Data Citations:</p>
+<ul>
+<li><p>Davies, Shawn, Therese Pettersson &amp; Magnus Öberg (2023).
+Organized violence 1989-2022 and the return of conflicts between
+states?. Journal of Peace Research 60(4).</p></li>
+<li><p>Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP
+Georeferenced Event Dataset. Journal of Peace Research 50(4).</p></li>
+<li><p>Högbladh Stina, 2023, “UCDP GED Codebook version 23.1”,
+Department of Peace and Conflict Research, Uppsala University</p></li>
+</ul>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"ucdp_ged_mexico.rda"</span><span class="op">)</span></span></code></pre></div>
+<ol style="list-style-type: decimal">
+<li>Create an aggregated, weighted network of conflict between actors in
+Mexico.</li>
+</ol>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># default to number of events</span></span>
+<span><span class="va">mex_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
+<span>  dyad_data <span class="op">=</span> <span class="va">mexico</span>,</span>
+<span>  actor1 <span class="op">=</span> <span class="st">'side_a'</span>,</span>
+<span>  actor2 <span class="op">=</span> <span class="st">'side_b'</span>,</span>
+<span>  symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  sum_dyads <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  diag_to_NA <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> Warning: there are repeating dyads within time periods in the dataset. When `sum_dyads = TRUE` and `weight` is not supplied, edges in the outputted adjacency matrix represent a count of interactions between actors.</span></span></code></pre>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># A summary of the network object</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   net numActors     dens recip sdSendEff sdRecEff srCov</span></span>
+<span><span class="co">## 1   1        72 5.608764     1  17.64839 17.64839     1</span></span></code></pre>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># weight using a variable</span></span>
+<span><span class="va">mex_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
+<span>  dyad_data <span class="op">=</span> <span class="va">mexico</span>,</span>
+<span>  actor1 <span class="op">=</span> <span class="st">'side_a'</span>,</span>
+<span>  actor2 <span class="op">=</span> <span class="st">'side_b'</span>,</span>
+<span>  weight <span class="op">=</span> <span class="st">'deaths_civilians'</span>,</span>
+<span>  symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  sum_dyads <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  diag_to_NA <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mex_network_civ</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   net numActors     dens recip sdSendEff sdRecEff srCov</span></span>
+<span><span class="co">## 1   1        72 0.458529     1   1.52567  1.52567     1</span></span></code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Explore</li>
+</ol>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">select_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"EZLN"</span>, <span class="st">"Jalisco Cartel New Generation"</span>, <span class="st">"Los Caballeros Templarios"</span>, <span class="st">"Autodefensas Unidas de Michoacán"</span>, <span class="st">"Gulf Cartel"</span>, <span class="st">"Los Zetas"</span>, <span class="st">"Beltrán Leyva Cartel"</span>, <span class="st">"Government of Mexico"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
+<span>     add_text <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-13-1.png" width="576"></p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
+<span>     select_text <span class="op">=</span> <span class="va">select_names</span><span class="op">)</span></span></code></pre></div>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-13-2.png" width="576"></p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network_civ</span>,</span>
+<span>     add_text <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-13-3.png" width="576"></p>
+<p>We can also apply functions from <code>igraph</code>:</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r.igraph.org/" class="external-link">igraph</a></span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">## Attaching package: 'igraph'</span></span></code></pre>
+<pre><code><span><span class="co">## The following objects are masked from 'package:network':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     %c%, %s%, add.edges, add.vertices, delete.edges, delete.vertices,</span></span>
+<span><span class="co">##     get.edge.attribute, get.edges, get.vertex.attribute, is.bipartite,</span></span>
+<span><span class="co">##     is.directed, list.edge.attributes, list.vertex.attributes,</span></span>
+<span><span class="co">##     set.edge.attribute, set.vertex.attribute</span></span></code></pre>
+<pre><code><span><span class="co">## The following objects are masked from 'package:lubridate':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     %--%, union</span></span></code></pre>
+<pre><code><span><span class="co">## The following objects are masked from 'package:dplyr':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     as_data_frame, groups, union</span></span></code></pre>
+<pre><code><span><span class="co">## The following objects are masked from 'package:purrr':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     compose, simplify</span></span></code></pre>
+<pre><code><span><span class="co">## The following object is masked from 'package:tidyr':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     crossing</span></span></code></pre>
+<pre><code><span><span class="co">## The following object is masked from 'package:tibble':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     as_data_frame</span></span></code></pre>
+<pre><code><span><span class="co">## The following objects are masked from 'package:stats':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     decompose, spectrum</span></span></code></pre>
+<pre><code><span><span class="co">## The following object is masked from 'package:base':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     union</span></span></code></pre>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">i_close</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">{</span> <span class="va">ig</span> <span class="op">=</span> <span class="fu"><a href="../reference/prep_for_igraph.html">prep_for_igraph</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> ; <span class="fu">igraph</span><span class="fu">::</span><span class="fu"><a href="https://r.igraph.org/reference/closeness.html" class="external-link">closeness</a></span><span class="op">(</span><span class="va">ig</span><span class="op">)</span> <span class="op">}</span></span>
+<span><span class="va">closeness</span> <span class="op">=</span> <span class="fu">i_close</span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># add to summary</span></span>
+<span><span class="va">sum_mex</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">mex_network</span>, other_stats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>closeness<span class="op">=</span><span class="va">closeness</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
