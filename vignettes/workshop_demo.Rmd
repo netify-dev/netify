@@ -14,7 +14,6 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = here::here())
 ```
 
 ##  Package Overview 
@@ -283,7 +282,7 @@ UCDP Data Citations:
 -  Högbladh Stina, 2023, “UCDP GED Codebook version 23.1”, Department of Peace and Conflict Research, Uppsala University
 
 ```{r}
-load("vignettes/ucdp_ged_mexico.rda")
+load("ucdp_ged_mexico.rda")
 ```
 
 (1) Create an aggregated, weighted network of conflict between actors in Mexico. 

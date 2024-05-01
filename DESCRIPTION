@@ -37,7 +37,8 @@ Suggests:
     amen, 
     ergm,
     latentnet,
-    RSiena
+    RSiena,
+    countrycode
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false
