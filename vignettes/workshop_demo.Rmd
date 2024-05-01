@@ -14,6 +14,7 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = here::here())
 ```
 
 ##  Package Overview 
@@ -282,7 +283,7 @@ UCDP Data Citations:
 -  Högbladh Stina, 2023, “UCDP GED Codebook version 23.1”, Department of Peace and Conflict Research, Uppsala University
 
 ```{r}
-load("ucdp_ged_mexico.rda")
+load("vignettes/ucdp_ged_mexico.rda")
 ```
 
 (1) Create an aggregated, weighted network of conflict between actors in Mexico. 
@@ -320,16 +321,26 @@ summary(mex_network_civ)
 (2) Explore
 
 ```{r, fig.width=6, fig.height=6}
-select_names <- c("EZLN", "Jalisco Cartel New Generation", "Los Caballeros Templarios", "Autodefensas Unidas de Michoacán", "Gulf Cartel", "Los Zetas", "Beltrán Leyva Cartel", "Government of Mexico")
+# select 10 random indices from 1 to the length of select_names
+select_names <- rownames(mex_network)
+
+set.seed(12345)
+random_indices <- sample(length(select_names), 10)
+
+# select 10 random names using the random indices
+random_names <- select_names[random_indices]
 
 plot(mex_network,
      add_text = TRUE)
-
+    
 plot(mex_network,
-     select_text = select_names)
+     select_text = random_names,
+     select_text_display = random_names)
 
+# different edges, highlight same actors, different netify object:
 plot(mex_network_civ,
-     add_text = TRUE)
+     select_text = random_names,
+     select_text_display = random_names)
 ```
 
 We can also apply functions from `igraph`:
