@@ -4,7 +4,13 @@
 \alias{plot_actorStats}
 \title{Plotting function for actor level statistics for netify objects}
 \usage{
-plot_actorStats(summary_df, net_stat, longitudinal = FALSE, actor_names = NULL)
+plot_actorStats(
+  summary_df,
+  net_stat,
+  longitudinal = FALSE,
+  actor_names = NULL,
+  toplist_n = NULL
+)
 }
 \arguments{
 \item{summary_df}{dataframe produced by summary_actor}
@@ -14,6 +20,9 @@ plot_actorStats(summary_df, net_stat, longitudinal = FALSE, actor_names = NULL)
 \item{longitudinal}{logical: TRUE if longitudinal network, default is FALSE}
 
 \item{actor_names}{character: actor name(s) in the network, default is NULL}
+
+\item{toplist_n}{numeric: the number of actors to be listed as top n actors,
+default is 20}
 }
 \value{
 a graph object summarizing actor level stats of the network(s)
