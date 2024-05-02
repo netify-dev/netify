@@ -51,7 +51,13 @@ and outputs a graph with actor level statistics.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_actorStats</span><span class="op">(</span><span class="va">summary_df</span>, <span class="va">net_stat</span>, longitudinal <span class="op">=</span> <span class="cn">FALSE</span>, actor_names <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_actorStats</span><span class="op">(</span></span>
+<span>  <span class="va">summary_df</span>,</span>
+<span>  <span class="va">net_stat</span>,</span>
+<span>  longitudinal <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  actor_names <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  toplist_n <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -70,6 +76,11 @@ and outputs a graph with actor level statistics.</p>
 
 <dt>actor_names</dt>
 <dd><p>character: actor name(s) in the network, default is NULL</p></dd>
+
+
+<dt>toplist_n</dt>
+<dd><p>numeric: the number of actors to be listed as top n actors,
+default is 20</p></dd>
 
 </dl></div>
     <div class="section level2">
