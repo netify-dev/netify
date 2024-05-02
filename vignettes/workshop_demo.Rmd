@@ -55,8 +55,6 @@ This vignette provides a high level overview of our package from start to finish
 
 Begin by loading packages and supplying the data. We will use the `peacesciencer` package to grab some familiar data.
 
-- Miller S (2022). “peacesciencer: An R Package for Quantitative Peace Science Research.” Conflict Management and Peace Science, 39(6), 755–779. doi: 10.1177/07388942221077926.
-
 
 ```{r, eval=TRUE, results='hide', warning=FALSE, message=FALSE}
 # load packages
@@ -378,18 +376,10 @@ A common data type used to create networks is in the structure of event data, wh
 
 We show how to use `netify` and UCDP data as just one example of potential applications to intrastate event data. The first step is to go to https://ucdp.uu.se/downloads/ and download the data you want to use. For this tutorial we have downloaded UCDP GED event data version 23.1 and subset the data for the case of Mexico. 
 
-UCDP Data Citations:
-
--  Davies, Shawn, Therese Pettersson & Magnus Öberg (2023). Organized violence 1989-2022 and the return of conflicts between states?. Journal of Peace Research 60(4).
-
-- Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP Georeferenced Event Dataset. Journal of Peace Research 50(4).
-
--  Högbladh Stina, 2023, “UCDP GED Codebook version 23.1”, Department of Peace and Conflict Research, Uppsala University
 
 ```{r}
 load("ucdp_ged_mexico.rda")
 ```
-
 
 (1) Create an aggregated, weighted network of conflict between actors in Mexico. 
 
@@ -462,3 +452,21 @@ sum_mex <- summary_actor(
   mex_network, 
   other_stats = list(i_opt_memb=i_opt_memb))
 ```
+
+## References
+
+- Csárdi G, Nepusz T, Traag V, Horvát S, Zanini F, Noom D, Müller K (2024). igraph: Network Analysis and Visualization in R. doi:10.5281/zenodo.7682609, R package version 2.0.3, https://CRAN.R-project.org/package=igraph.
+
+- Davies, Shawn, Therese Pettersson & Magnus Öberg (2023). Organized violence 1989-2022 and the return of conflicts between states?. Journal of Peace Research 60(4).
+
+- Handcock M, Hunter D, Butts C, Goodreau S, Krivitsky P, Morris M (2018). ergm: Fit, Simulate and Diagnose Exponential-Family Models for Networks. The Statnet Project (http://www.statnet.org). R package version 3.9.4, https://CRAN.R-project.org/package=ergm.
+
+- Hoff, Peter D. "Dyadic data analysis with amen." arXiv preprint arXiv:1506.08237 (2015).
+
+- Högbladh Stina, 2023, “UCDP GED Codebook version 23.1”, Department of Peace and Conflict Research, Uppsala University
+
+- Miller S (2022). “peacesciencer: An R Package for Quantitative Peace Science Research.” Conflict Management and Peace Science, 39(6), 755–779. doi: 10.1177/07388942221077926.
+
+- Statnet Development Team (Pavel N. Krivitsky, Mark S. Handcock, David R. Hunter, Carter T. Butts, Chad Klumb, Steven M. Goodreau, and Martina Morris) (2003-2023). statnet: Software tools for the Statistical Modeling of Network Data. URL http://statnet.org
+
+- Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP Georeferenced Event Dataset. Journal of Peace Research 50(4).
