@@ -305,7 +305,9 @@ mid_cross_network <- netify(
   weight='cowmidonset', 
   sum_dyads=FALSE, symmetric=TRUE,
   diag_to_NA=TRUE, missing_to_zero=FALSE,
-  nodal_vars = c('polity21', 'polity22', 'wbgdp2011est1', 'wbgdp2011est2', 'wbpopest1', 'wbpopest2'),
+  nodal_vars = c(
+    'polity21', 'polity22', 'wbgdp2011est1', 
+    'wbgdp2011est2', 'wbpopest1', 'wbpopest2'),
   dyad_vars = c('capdist'),
   dyad_vars_symmetric = c(TRUE)
   )
@@ -341,8 +343,6 @@ mid_amen_mod = ame(
 if(!'ergm' %in% rownames(installed.packages())){
   install.packages('ergm', repos='https://cloud.r-project.org') }
 library(ergm)
-library(network)
-library(statnet)
 
 # any harder for ergM?
 # called prep_for_network because it's a reference
@@ -357,20 +357,20 @@ mid_cross_ergm
 # plug and run
 # Fit the ERGM model (well not a real ergm)
 ergm_model <- ergm(
-  mid_cross_ergm ~ 
+  formula = mid_cross_ergm ~ 
     edges + edgecov(mid_cross_ergm, 'capdist_e') +
     nodecov("polity21") + 
     nodecov("polity22") +
     nodecov("wbgdp2011est1") + nodecov("wbgdp2011est2") +
-    nodematch("wbpopest1") + nodecov("wbpopest2")) +
-    edgecov(mid_cross_ergm, 'capdist_e')
+    nodematch("wbpopest1") + nodecov("wbpopest2")
+  )
 ```
 
 ### Bonus Examples
 
 A common data type used to create networks is in the structure of event data, where actors are repeated across rows but there is no specific variable that denotes the 'edge' as shown in our previous example.
 
-We show how to use `netify` and UCDP data as just one example of potential applications to intrastate event data. The first step is to go to https://ucdp.uu.se/downloads/ and download the data you want to use. For this tutorial we have downloaded UCDP GED event data version 23.1 and subset the data for the case of Mexico. 
+We show how to use `netify` and UCDP data as just one exaimple of potential applications to intrastate event data. The first step is to go to https://ucdp.uu.se/downloads/ and download the data you want to use. For this tutorial we have downloaded UCDP GED event data version 23.1 and subset the data for the case of Mexico. 
 
 UCDP Data Citations:
 
