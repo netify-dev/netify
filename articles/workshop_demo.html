@@ -119,7 +119,7 @@ achieve these goals:</p>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/subset_netlet.html">subset_netlet()</a></code></td>
-<td><code>plot_actor()</code></td>
+<td><code><a href="../reference/plot_actor.html">plot_actor()</a></code></td>
 <td></td>
 </tr>
 <tr class="odd">
@@ -285,7 +285,7 @@ using our<code><a href="https://rdrr.io/r/base/summary.html" class="external-lin
 <p>We can also make a quick visualization of network statistics over
 time using the summary statistics data frame.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_networkStats.html">plot_networkStats</a></span><span class="op">(</span><span class="va">mid_long_summary</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_graph.html">plot_graph</a></span><span class="op">(</span><span class="va">mid_long_summary</span>,</span>
 <span>                  longitudinal <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                  net_stat <span class="op">=</span> <span class="st">"dens"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>strip.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size<span class="op">=</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -305,7 +305,7 @@ centrality for each actor in each time period.</p>
 <span><span class="va">mid_subset</span> <span class="op">&lt;-</span> <span class="va">summary_actor_mids</span> <span class="op">|&gt;</span></span>
 <span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">actor</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">top_5</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/plot_actorStats.html">plot_actorStats</a></span><span class="op">(</span><span class="va">mid_subset</span>, </span>
+<span><span class="fu"><a href="../reference/plot_actor.html">plot_actor</a></span><span class="op">(</span><span class="va">mid_subset</span>, </span>
 <span>                net_stat <span class="op">=</span> <span class="st">"degree"</span>,</span>
 <span>                longitudinal <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>                <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">actor</span><span class="op">)</span></span></code></pre></div>
