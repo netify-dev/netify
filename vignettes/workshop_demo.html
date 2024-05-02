@@ -430,11 +430,6 @@ composition)</li>
 <h2>Step 1: Create 💡</h2>
 <p>Begin by loading packages and supplying the data. We will use the
 <code>peacesciencer</code> package to grab some familiar data.</p>
-<ul>
-<li>Miller S (2022). “peacesciencer: An R Package for Quantitative Peace
-Science Research.” Conflict Management and Peace Science, 39(6),
-755–779. doi: 10.1177/07388942221077926.</li>
-</ul>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># load packages</span></span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(netify)</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
@@ -541,7 +536,7 @@ using our<code>summary()</code> function.</p>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>mid_long_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(mid_long_network)</span></code></pre></div>
 <p>We can also make a quick visualization of network statistics over
 time using the summary statistics data frame.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">plot_networkStats</span>(mid_long_summary,</span>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">plot_graph</span>(mid_long_summary,</span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>                  <span class="at">longitudinal =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>                  <span class="at">net_stat =</span> <span class="st">&quot;dens&quot;</span>) <span class="sc">+</span></span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">strip.text.x =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">0</span>))</span></code></pre></div>
@@ -559,7 +554,7 @@ centrality for each actor in each time period.</p>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>mid_subset <span class="ot">&lt;-</span> summary_actor_mids <span class="sc">|&gt;</span></span>
 <span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>              <span class="fu">filter</span>(actor <span class="sc">%in%</span> top_5)</span>
 <span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a></span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="fu">plot_actorStats</span>(mid_subset, </span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="fu">plot_actor</span>(mid_subset, </span>
 <span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>                <span class="at">net_stat =</span> <span class="st">&quot;degree&quot;</span>,</span>
 <span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>                <span class="at">longitudinal =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
 <span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>                <span class="fu">facet_wrap</span>(<span class="sc">~</span>actor)</span></code></pre></div>
@@ -623,11 +618,11 @@ summary statistics in the network graph.</p>
 ## 5   100 1999          0.553          0.864          10.860            2.385086
 ## 6   100 2000          0.562          0.863          10.888            2.387661
 ##   degree   prop_ties eigen_vector
-## 1      1 0.005376344 0.000000e+00
-## 2      0 0.000000000 7.987541e-17
+## 1      1 0.005376344 1.054140e-16
+## 2      0 0.000000000 0.000000e+00
 ## 3      1 0.005376344 0.000000e+00
-## 4      0 0.000000000 0.000000e+00
-## 5      0 0.000000000 1.076466e-17
+## 4      0 0.000000000 4.931776e-17
+## 5      0 0.000000000 0.000000e+00
 ## 6      1 0.005263158 4.953675e-03</code></pre>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co">#i.e., </span></span>
 <span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">attributes</span>(mid_long_network)<span class="sc">$</span>nodal_data)</span></code></pre></div>
@@ -639,11 +634,11 @@ summary statistics in the network graph.</p>
 ## 5   100 1999          0.553          0.864          10.860            2.385086
 ## 6   100 2000          0.562          0.863          10.888            2.387661
 ##   degree   prop_ties eigen_vector
-## 1      1 0.005376344 0.000000e+00
-## 2      0 0.000000000 7.987541e-17
+## 1      1 0.005376344 1.054140e-16
+## 2      0 0.000000000 0.000000e+00
 ## 3      1 0.005376344 0.000000e+00
-## 4      0 0.000000000 0.000000e+00
-## 5      0 0.000000000 1.076466e-17
+## 4      0 0.000000000 4.931776e-17
+## 5      0 0.000000000 0.000000e+00
 ## 6      1 0.005263158 4.953675e-03</code></pre>
 <div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="co"># vary node size by degree</span></span>
 <span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a><span class="fu">plot</span>(</span>
@@ -798,9 +793,9 @@ cross-sectional networks.</p>
 <span id="cb42-20"><a href="#cb42-20" tabindex="-1"></a><span class="fu">library</span>(ergm)</span>
 <span id="cb42-21"><a href="#cb42-21" tabindex="-1"></a></span>
 <span id="cb42-22"><a href="#cb42-22" tabindex="-1"></a><span class="co"># any harder for ergm?</span></span>
-<span id="cb42-23"><a href="#cb42-23" tabindex="-1"></a><span class="co"># called prep_for_network because it&#39;s a reference</span></span>
+<span id="cb42-23"><a href="#cb42-23" tabindex="-1"></a><span class="co"># called prep_for_statnet because it&#39;s a reference</span></span>
 <span id="cb42-24"><a href="#cb42-24" tabindex="-1"></a><span class="co"># to the network library, which is what ergm uses</span></span>
-<span id="cb42-25"><a href="#cb42-25" tabindex="-1"></a>mid_cross_ergm <span class="ot">=</span> <span class="fu">prep_for_network</span>(mid_cross_network)</span>
+<span id="cb42-25"><a href="#cb42-25" tabindex="-1"></a>mid_cross_ergm <span class="ot">=</span> <span class="fu">prep_for_statnet</span>(mid_cross_network)</span>
 <span id="cb42-26"><a href="#cb42-26" tabindex="-1"></a></span>
 <span id="cb42-27"><a href="#cb42-27" tabindex="-1"></a><span class="co"># attributes should all be loaded into the </span></span>
 <span id="cb42-28"><a href="#cb42-28" tabindex="-1"></a><span class="co"># appropriate slot</span></span>
@@ -845,16 +840,6 @@ example of potential applications to intrastate event data. The first
 step is to go to <a href="https://ucdp.uu.se/downloads/" class="uri">https://ucdp.uu.se/downloads/</a> and download the data you
 want to use. For this tutorial we have downloaded UCDP GED event data
 version 23.1 and subset the data for the case of Mexico.</p>
-<p>UCDP Data Citations:</p>
-<ul>
-<li><p>Davies, Shawn, Therese Pettersson &amp; Magnus Öberg (2023).
-Organized violence 1989-2022 and the return of conflicts between
-states?. Journal of Peace Research 60(4).</p></li>
-<li><p>Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP
-Georeferenced Event Dataset. Journal of Peace Research 50(4).</p></li>
-<li><p>Högbladh Stina, 2023, “UCDP GED Codebook version 23.1”,
-Department of Peace and Conflict Research, Uppsala University</p></li>
-</ul>
 <div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a><span class="fu">load</span>(<span class="st">&quot;ucdp_ged_mexico.rda&quot;</span>)</span></code></pre></div>
 <ol style="list-style-type: decimal">
 <li>Create an aggregated, weighted network of conflict between actors in
@@ -930,6 +915,32 @@ Mexico.</li>
 <span id="cb57-9"><a href="#cb57-9" tabindex="-1"></a>  mex_network, </span>
 <span id="cb57-10"><a href="#cb57-10" tabindex="-1"></a>  <span class="at">other_stats =</span> <span class="fu">list</span>(<span class="at">i_opt_memb=</span>i_opt_memb))</span></code></pre></div>
 </div>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li><p>Csárdi G, Nepusz T, Traag V, Horvát S, Zanini F, Noom D, Müller K
+(2024). igraph: Network Analysis and Visualization in R. <a href="doi:10.5281/zenodo.7682609" class="uri">doi:10.5281/zenodo.7682609</a>, R package version 2.0.3, <a href="https://CRAN.R-project.org/package=igraph" class="uri">https://CRAN.R-project.org/package=igraph</a>.</p></li>
+<li><p>Davies, Shawn, Therese Pettersson &amp; Magnus Öberg (2023).
+Organized violence 1989-2022 and the return of conflicts between
+states?. Journal of Peace Research 60(4).</p></li>
+<li><p>Handcock M, Hunter D, Butts C, Goodreau S, Krivitsky P, Morris M
+(2018). ergm: Fit, Simulate and Diagnose Exponential-Family Models for
+Networks. The Statnet Project (<a href="http://www.statnet.org" class="uri">http://www.statnet.org</a>). R package version 3.9.4, <a href="https://CRAN.R-project.org/package=ergm" class="uri">https://CRAN.R-project.org/package=ergm</a>.</p></li>
+<li><p>Hoff, Peter D. “Dyadic data analysis with amen.” arXiv preprint
+arXiv:1506.08237 (2015).</p></li>
+<li><p>Högbladh Stina, 2023, “UCDP GED Codebook version 23.1”,
+Department of Peace and Conflict Research, Uppsala University</p></li>
+<li><p>Miller S (2022). “peacesciencer: An R Package for Quantitative
+Peace Science Research.” Conflict Management and Peace Science, 39(6),
+755–779. doi: 10.1177/07388942221077926.</p></li>
+<li><p>Statnet Development Team (Pavel N. Krivitsky, Mark S. Handcock,
+David R. Hunter, Carter T. Butts, Chad Klumb, Steven M. Goodreau, and
+Martina Morris) (2003-2023). statnet: Software tools for the Statistical
+Modeling of Network Data. URL <a href="http://statnet.org" class="uri">http://statnet.org</a></p></li>
+<li><p>Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP
+Georeferenced Event Dataset. Journal of Peace Research 50(4).</p></li>
+</ul>
 </div>
 
 
