@@ -148,7 +148,7 @@ mid_long_summary <- summary(mid_long_network)
 We can also make a quick visualization of network statistics over time using the summary statistics data frame.
 
 ```{r, fig.width=6, fig.height=6}
-plot_networkStats(mid_long_summary,
+plot_graph(mid_long_summary,
                   longitudinal = TRUE,
                   net_stat = "dens") +
   theme(strip.text.x = element_text(size=0))
@@ -169,7 +169,7 @@ top_5 <- c("2", "710", "740", "255", "750")
 mid_subset <- summary_actor_mids |>
               filter(actor %in% top_5)
 
-plot_actorStats(mid_subset, 
+plot_actor(mid_subset, 
                 net_stat = "degree",
                 longitudinal = TRUE) +
                 facet_wrap(~actor)

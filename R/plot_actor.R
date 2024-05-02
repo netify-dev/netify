@@ -1,6 +1,6 @@
 #' Plotting function for actor level statistics for netify objects
 #'
-#' `plot_actorStats` takes in the output from `summary_actor` function
+#' `plot_actor` takes in the output from `summary_actor` function
 #' and outputs a graph with actor level statistics.
 #'
 #' @param summary_df dataframe produced by summary_actor
@@ -12,11 +12,11 @@
 #' @return a graph object summarizing actor level stats of the network(s)
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
-#' @export plot_actorStats
+#' @export plot_actor
 #' @export
 
 
-plot_actorStats <- function(
+plot_actor <- function(
   summary_df, net_stat, longitudinal=FALSE,
   actor_names=NULL, toplist_n=NULL) {
 
