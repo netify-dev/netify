@@ -31,10 +31,11 @@ This vignette provides a high level overview of our package from start to finish
 | Create💡  | Explore 🔎 | Advance ️🚀|
 |---------|---------|---------|
 | `netify()`  | `peek()`  | `prep_for_amen()`  |
-| `add_nodal()` | `summary()`   | `prep_for_igraph()`  |
-| `add_dyad()`  | `summary_actor()`  | `prep_for_network()`  |
-| `subset_netlet()`  | `plot_actorStats()`  |   | 
-|              |   `plot.netify()`|        |
+| `add_nodal()` | `summary_actor()`   | `prep_for_igraph()`  |
+| `add_dyad()`  | `summary()`  | `prep_for_statnet()`  |
+| `subset_netlet()`  | `plot_actor()`  |   | 
+|              |   `plot_graph`|        |
+|              |   `plot()`|        |
 
 `netify` can take dyadic data or edgelists to get started. 
 
@@ -52,7 +53,9 @@ This vignette provides a high level overview of our package from start to finish
 
 ## Step 1: Create 💡
 
-Begin by loading packages and supplying the data.
+Begin by loading packages and supplying the data. We will use the `peacesciencer` package to grab some familiar data.
+
+- Miller S (2022). “peacesciencer: An R Package for Quantitative Peace Science Research.” Conflict Management and Peace Science, 39(6), 755–779. doi: 10.1177/07388942221077926.
 
 
 ```{r, eval=TRUE, results='hide', warning=FALSE, message=FALSE}
@@ -149,13 +152,14 @@ We can also make a quick visualization of network statistics over time using the
 ```{r, fig.width=6, fig.height=6}
 plot_networkStats(mid_long_summary,
                   longitudinal = TRUE,
-                  net_stat = "dens") 
+                  net_stat = "dens") +
+  theme(strip.text.x = element_text(size=0))
 ```
 
 We might also want to look at a specific set of actors' statistics overtime. Our built-in function, `summary_actor` will calculate in-degree, out-degree, average degree, and eigenvector centrality for each actor in each time period.
 
 ```{r}
-# every year & every actor (messy!)
+# every year & every actor (messy!) but check out help file
 summary_actor_mids <- summary_actor(mid_long_network)
 ```
 
@@ -164,7 +168,7 @@ summary_actor_mids <- summary_actor(mid_long_network)
 top_5 <- c("2", "710", "740", "255", "750")
 
 # zoom in on specific parts of the network for actor viz
-mid_subset <- summary_actor_mids %>%
+mid_subset <- summary_actor_mids |>
               filter(actor %in% top_5)
 
 plot_actorStats(mid_subset, 
@@ -174,6 +178,8 @@ plot_actorStats(mid_subset,
 ```
 
 Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default and seed set to 6886 for node layout).
+
+Our goal was to make this super easy for plotting time-varying attributes or actors. 
 
 ```{r, fig.width=6, fig.height=6}
 
@@ -344,7 +350,7 @@ if(!'ergm' %in% rownames(installed.packages())){
   install.packages('ergm', repos='https://cloud.r-project.org') }
 library(ergm)
 
-# any harder for ergM?
+# any harder for ergm?
 # called prep_for_network because it's a reference
 # to the network library, which is what ergm uses
 mid_cross_ergm = prep_for_network(mid_cross_network)
@@ -370,7 +376,7 @@ ergm_model <- ergm(
 
 A common data type used to create networks is in the structure of event data, where actors are repeated across rows but there is no specific variable that denotes the 'edge' as shown in our previous example.
 
-We show how to use `netify` and UCDP data as just one exaimple of potential applications to intrastate event data. The first step is to go to https://ucdp.uu.se/downloads/ and download the data you want to use. For this tutorial we have downloaded UCDP GED event data version 23.1 and subset the data for the case of Mexico. 
+We show how to use `netify` and UCDP data as just one example of potential applications to intrastate event data. The first step is to go to https://ucdp.uu.se/downloads/ and download the data you want to use. For this tutorial we have downloaded UCDP GED event data version 23.1 and subset the data for the case of Mexico. 
 
 UCDP Data Citations:
 
@@ -383,6 +389,7 @@ UCDP Data Citations:
 ```{r}
 load("ucdp_ged_mexico.rda")
 ```
+
 
 (1) Create an aggregated, weighted network of conflict between actors in Mexico. 
 
