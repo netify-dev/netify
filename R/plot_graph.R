@@ -1,7 +1,7 @@
-#' Plotting function for network level statistics for netify objects
+#' Plotting function for graph level statistics for netify objects
 #'
-#' `plot_networkStats` takes in the output from `summary.netify` function
-#' and outputs a graph with network level statistics.
+#' `plot_graph` takes in the output from `summary.netify` function
+#' and outputs a graph with graph level statistics.
 #'
 #' @param summary_df dataframe produced by summary
 #' @param longitudinal logical: TRUE if longitudinal network, default is TRUE
@@ -9,10 +9,10 @@
 #' @return a graph object summarizing network level stats
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
-#' @export plot_actorStats
+#' @export plot_graph
 #' @export
 
-plot_networkStats <- function(summary_df, longitudinal = TRUE, net_stat=net_stat) {
+plot_graph <- function(summary_df, longitudinal = TRUE, net_stat=net_stat) {
  
   # assert dependencies for plotting and reshaping data
   assert_dependency("ggplot2")
