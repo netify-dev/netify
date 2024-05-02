@@ -11,6 +11,8 @@
 #' @return aggregated data.frame object
 #' @author Shahryar Minhas
 #'
+#' @importFrom stats na.omit aggregate
+#' 
 #' @export agg_across_units
 
 agg_across_units <- function(

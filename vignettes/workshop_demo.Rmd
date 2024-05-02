@@ -60,10 +60,10 @@ Begin by loading packages and supplying the data.
 library(netify)
 
 # install extra packages for this vignette
-if('tidyverse' %in% rownames(installed.packages())){
-if('peacesciencer' %in% rownames(installed.packages())){
+if(!'tidyverse' %in% rownames(installed.packages())){
+  install.packages('tidyverse', repos='https://cloud.r-project.org') }
+if(!'peacesciencer' %in% rownames(installed.packages())){
   install.packages('peacesciencer', repos='https://cloud.r-project.org') }
-}
 # load necessary packages for this vignette
 library(peacesciencer)
 library(tidyverse)
@@ -74,13 +74,13 @@ peacesciencer::download_extdata()
 # create dyadic data set over time using peacesciencer
 cow_dyads <- create_dyadyears( 
      subset_years = c(1995:2014)
-     ) %>%
+     ) |>
     # add mids
-    add_cow_mids() %>%
+    add_cow_mids() |>
     # add capital distance
-    add_capital_distance() %>%
+    add_capital_distance() |>
     # add democracy
-    add_democracy() %>%
+    add_democracy() |>
     # add gdp
     add_sdp_gdp()
 ```
@@ -133,7 +133,7 @@ mid_long_network <- add_nodal(
 We made a network, so let's look at it. First, we might want to take a `peek` at the network object to see if the matrix looks the way we'd expect it to look. This function lets you glance at a specific slice of the network if it is longitudinal or the entire network if it is cross-sectional.
 
 ```{r}
-peek(mid_long_network, when_to_peek = c('2012'), what_to_peek = 30)
+peek(mid_long_network, when_to_peek = c('2012'), what_to_peek = c(13, 15:24))
 ```
 
 Next, let's examine a few basic summary statistics about the network using our`summary()` function.
@@ -173,7 +173,7 @@ plot_actorStats(mid_subset,
                 facet_wrap(~actor)
 ```
 
-Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default).
+Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default and seed set to 6886 for node layout).
 
 ```{r, fig.width=6, fig.height=6}
 
@@ -191,13 +191,27 @@ plot(
 We can also use `netify` functions to explore actor level summary statistics in the network graph. 
 
 ```{r, fig.width=6, fig.height=6}
-# add actor variables
+# add actor variables from summary_actor_mids
 mid_long_network = add_nodal(
     mid_long_network, 
-    summary_actor(mid_long_network),
+    summary_actor_mids,
     actor='actor', time='time',
     node_vars = c('degree', 'prop_ties', 'eigen_vector'),
 )
+
+# print netlet to make sure they got added to nodal features
+print(mid_long_network)
+
+# if you're curious as to where they live
+head(
+  attr(
+    mid_long_network, 
+    'nodal_data'
+  )
+)
+
+#i.e., 
+head(attributes(mid_long_network)$nodal_data)
 
 # vary node size by degree
 plot(
@@ -236,6 +250,8 @@ plot(
     ) + 
     scale_color_gradient2()
 
+# or we can go with labels only 
+# and remove points
 plot(
     mid_long_network,
     edge_color='grey',
@@ -250,21 +266,102 @@ plot(
 
 ## Step 3: Advance 🚀
 
-Once we have created and explored our network object, we might want to continue analyzing the data using different modeling approaches. `netify` makes this simple!
+Once we have created and explored our network object, we might want to continue analyzing the data using different modeling approaches. `netify` makes this simple even though those models aren't! And for the sake of convergence/degeneracy hell lets go with cross-sectional networks. 
 
 ```{r, warning=FALSE, message = FALSE}
+# prep data
+cow_cross = cow_dyads |> 
+  group_by(ccode1, ccode2) |>
+  summarize(
+    cowmidonset = ifelse(any(cowmidonset>0), 1, 0),
+    capdist = mean(capdist),
+    polity21 = mean(polity21, na.rm=TRUE),
+    polity22 = mean(polity22, na.rm=TRUE),
+    wbgdp2011est1 = mean(wbgdp2011est1, na.rm=TRUE),
+    wbgdp2011est2 = mean(wbgdp2011est2, na.rm=TRUE),
+    wbpopest1 = mean(wbpopest1, na.rm=TRUE),
+    wbpopest2 = mean(wbpopest2, na.rm=TRUE)
+  ) |>
+  ungroup() |>
+  mutate(
+    capdist = log(capdist+1)
+  )
+
+# subset set to actors with 10mil pop
+actor_to_keep = cow_cross |>
+  select(ccode1, wbpopest1) |>
+  filter(wbpopest1>log(10000000)) |>
+  distinct(ccode1)
+
+# filter cow_cross by actor_to_keep
+cow_cross = cow_cross |>
+  filter(ccode1 %in% actor_to_keep$ccode1) |>
+  filter(ccode2 %in% actor_to_keep$ccode1)
+
+# create netlet
+mid_cross_network <- netify(
+  cow_cross,
+  actor1='ccode1', actor2='ccode2',
+  weight='cowmidonset', 
+  sum_dyads=FALSE, symmetric=TRUE,
+  diag_to_NA=TRUE, missing_to_zero=FALSE,
+  nodal_vars = c('polity21', 'polity22', 'wbgdp2011est1', 'wbgdp2011est2', 'wbpopest1', 'wbpopest2'),
+  dyad_vars = c('capdist'),
+  dyad_vars_symmetric = c(TRUE)
+  )
+
 # install (if necessary) and load amen
-if('amen' %in% rownames(installed.packages())){
+if(!'amen' %in% rownames(installed.packages())){
   install.packages('amen', repos='https://cloud.r-project.org') }
 library(amen)
 
+# prep for amen
+mid_cross_amen <- prep_for_amen(mid_cross_network)
+
+# we got all the elements we need for amen! woohoO!
+str(mid_cross_amen)
+
+# plug and run
+mid_amen_mod = ame(
+  Y=mid_cross_amen$Y,
+  Xdyad=mid_cross_amen$Xdyad,
+  Xrow=mid_cross_amen$Xrow,
+  family='bin',
+  R=0,
+  symmetric=TRUE,
+  seed=6886,
+  nscan=50, 
+  burn=10, 
+  odens=1, 
+  plot=FALSE, 
+  print=FALSE
+)
+
 # install (if necessary) and load ergm
-if('ergm' %in% rownames(installed.packages())){
+if(!'ergm' %in% rownames(installed.packages())){
   install.packages('ergm', repos='https://cloud.r-project.org') }
 library(ergm)
 
-# lets take a cross-section of the network object
+# any harder for ergM?
+# called prep_for_network because it's a reference
+# to the network library, which is what ergm uses
+mid_cross_ergm = prep_for_network(mid_cross_network)
 
+# attributes should all be loaded into the 
+# appropriate slot
+# notice edge attribtues get a _e suffix added
+mid_cross_ergm
+
+# plug and run
+# Fit the ERGM model (well not a real ergm)
+ergm_model <- ergm(
+  mid_cross_ergm ~ 
+    edges + edgecov(mid_cross_ergm, 'capdist_e') +
+    nodecov("polity21") + 
+    nodecov("polity22") +
+    nodecov("wbgdp2011est1") + nodecov("wbgdp2011est2") +
+    nodematch("wbpopest1") + nodecov("wbpopest2")) +
+    edgecov(mid_cross_ergm, 'capdist_e')
 ```
 
 ### Bonus Examples
@@ -345,10 +442,14 @@ plot(mex_network_civ,
 We can also apply functions from `igraph`:
 
 ```{r, warning=FALSE, message = FALSE}
-library(igraph)
-i_close = function(x){ ig = prep_for_igraph(x) ; igraph::closeness(ig) }
-closeness = i_close(mex_network)
+i_opt_memb = function(x){
+  ig = prep_for_igraph(x)
+  memb = igraph::cluster_optimal(ig)$membership
+  return(memb)
+  }
 
 # add to summary
-sum_mex <- summary_actor(mex_network, other_stats = list(closeness=closeness))
+sum_mex <- summary_actor(
+  mex_network, 
+  other_stats = list(i_opt_memb=i_opt_memb))
 ```
