@@ -109,22 +109,27 @@ achieve these goals:</p>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/add_nodal.html">add_nodal()</a></code></td>
-<td><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code></td>
+<td><code><a href="../reference/summary_actor.html">summary_actor()</a></code></td>
 <td><code><a href="../reference/prep_for_igraph.html">prep_for_igraph()</a></code></td>
 </tr>
 <tr class="odd">
 <td><code><a href="../reference/add_dyad.html">add_dyad()</a></code></td>
-<td><code><a href="../reference/summary_actor.html">summary_actor()</a></code></td>
-<td><code><a href="../reference/prep_for_network.html">prep_for_network()</a></code></td>
+<td><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code></td>
+<td><code>prep_for_statnet()</code></td>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/subset_netlet.html">subset_netlet()</a></code></td>
-<td><code><a href="../reference/plot_actorStats.html">plot_actorStats()</a></code></td>
+<td><code>plot_actor()</code></td>
 <td></td>
 </tr>
 <tr class="odd">
 <td></td>
-<td><code><a href="../reference/plot.netify.html">plot.netify()</a></code></td>
+<td><code>plot_graph</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code></td>
 <td></td>
 </tr>
 </tbody>
@@ -156,7 +161,13 @@ composition)</li>
 <div class="section level2">
 <h2 id="step-1-create">Step 1: Create 💡<a class="anchor" aria-label="anchor" href="#step-1-create"></a>
 </h2>
-<p>Begin by loading packages and supplying the data.</p>
+<p>Begin by loading packages and supplying the data. We will use the
+<code>peacesciencer</code> package to grab some familiar data.</p>
+<ul>
+<li>Miller S (2022). “peacesciencer: An R Package for Quantitative Peace
+Science Research.” Conflict Management and Peace Science, 39(6),
+755–779. doi: 10.1177/07388942221077926.</li>
+</ul>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load packages</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/netify/">netify</a></span><span class="op">)</span></span>
@@ -276,21 +287,22 @@ time using the summary statistics data frame.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_networkStats.html">plot_networkStats</a></span><span class="op">(</span><span class="va">mid_long_summary</span>,</span>
 <span>                  longitudinal <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                  net_stat <span class="op">=</span> <span class="st">"dens"</span><span class="op">)</span> </span></code></pre></div>
+<span>                  net_stat <span class="op">=</span> <span class="st">"dens"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>strip.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size<span class="op">=</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="workshop_demo_files/figure-html/unnamed-chunk-6-1.png" width="576"></p>
 <p>We might also want to look at a specific set of actors’ statistics
 overtime. Our built-in function, <code>summary_actor</code> will
 calculate in-degree, out-degree, average degree, and eigenvector
 centrality for each actor in each time period.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># every year &amp; every actor (messy!)</span></span>
+<code class="sourceCode R"><span><span class="co"># every year &amp; every actor (messy!) but check out help file</span></span>
 <span><span class="va">summary_actor_mids</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># top 5 GDP countries (USA, China, Japan, Germany, India)</span></span>
 <span><span class="va">top_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span>, <span class="st">"710"</span>, <span class="st">"740"</span>, <span class="st">"255"</span>, <span class="st">"750"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># zoom in on specific parts of the network for actor viz</span></span>
-<span><span class="va">mid_subset</span> <span class="op">&lt;-</span> <span class="va">summary_actor_mids</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">mid_subset</span> <span class="op">&lt;-</span> <span class="va">summary_actor_mids</span> <span class="op">|&gt;</span></span>
 <span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">actor</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">top_5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot_actorStats.html">plot_actorStats</a></span><span class="op">(</span><span class="va">mid_subset</span>, </span>
@@ -302,6 +314,8 @@ centrality for each actor in each time period.</p>
 simply visualize the entire network. We can do this by plotting the
 netify object. (Isolates removed by default and seed set to 6886 for
 node layout).</p>
+<p>Our goal was to make this super easy for plotting time-varying
+attributes or actors.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># default plot</span></span>
 <span><span class="fu"><a href="../reference/plot.netify.html">plot.netify</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span></code></pre></div>
@@ -540,7 +554,7 @@ cross-sectional networks.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'ergm'</span>, repos<span class="op">=</span><span class="st">'https://cloud.r-project.org'</span><span class="op">)</span> <span class="op">}</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://statnet.org" class="external-link">ergm</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># any harder for ergM?</span></span>
+<span><span class="co"># any harder for ergm?</span></span>
 <span><span class="co"># called prep_for_network because it's a reference</span></span>
 <span><span class="co"># to the network library, which is what ergm uses</span></span>
 <span><span class="va">mid_cross_ergm</span> <span class="op">=</span> <span class="fu"><a href="../reference/prep_for_network.html">prep_for_network</a></span><span class="op">(</span><span class="va">mid_cross_network</span><span class="op">)</span></span>
@@ -586,7 +600,7 @@ event data, where actors are repeated across rows but there is no
 specific variable that denotes the ‘edge’ as shown in our previous
 example.</p>
 <p>We show how to use <code>netify</code> and UCDP data as just one
-exaimple of potential applications to intrastate event data. The first
+example of potential applications to intrastate event data. The first
 step is to go to <a href="https://ucdp.uu.se/downloads/" class="external-link uri">https://ucdp.uu.se/downloads/</a> and download the data you
 want to use. For this tutorial we have downloaded UCDP GED event data
 version 23.1 and subset the data for the case of Mexico.</p>
