@@ -2,7 +2,7 @@ set.seed(6886)
 library(network)
 library(reshape2)
 
-test_that('prep_for_network: unweighted cross-sec, asymmetric', {
+test_that('prep_for_statnet: unweighted cross-sec, asymmetric', {
 
 	# generate some data
 	adjm <- matrix(
@@ -10,7 +10,7 @@ test_that('prep_for_network: unweighted cross-sec, asymmetric', {
 		ncol=10)
 	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 	
-	# convert to network object
+	# convert to a statnet network object
 	g1 <- network::network(
 		adjm,
 		matrix.type = 'adjacency', 
@@ -31,20 +31,20 @@ test_that('prep_for_network: unweighted cross-sec, asymmetric', {
 		weight=NULL,
 		diag_to_NA=FALSE )
 
-	# convert to network object
-	ng <- prep_for_network(a_matrix)
+	# convert to a statnet network object
+	ng <- prep_for_statnet(a_matrix)
 
 	# compare
 	expect_identical(ng[,], g1[,])
 })
 
-test_that('prep_for_network: weighted cross-sec, asymmetric', {
+test_that('prep_for_statnet: weighted cross-sec, asymmetric', {
 
 	# use network example to generate some data
 	adjm <- matrix( rnorm(10^2), ncol=10)
 	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 
-	# convert to network object
+	# convert to a statnet network object
 	g1 <- network::network(
 		adjm,
 		matrix.type = 'adjacency', 
@@ -66,8 +66,8 @@ test_that('prep_for_network: weighted cross-sec, asymmetric', {
 		weight='value',
 		diag_to_NA=FALSE )
 
-	# convert to network object
-	ng <- prep_for_network(a_matrix)
+	# convert to a statnet network object
+	ng <- prep_for_statnet(a_matrix)
 
 	# compare top level objects
 	expect_identical(ng[,], g1[,])
@@ -77,7 +77,7 @@ test_that('prep_for_network: weighted cross-sec, asymmetric', {
 		network::get.edge.attribute(ng, 'value') )
 })
 
-test_that('prep_for_network: unweighted cross-sec, symmetric', {
+test_that('prep_for_statnet: unweighted cross-sec, symmetric', {
 
 	# use network example to generate some data
 	adjm <- matrix( rnorm(10^2), ncol=10)
@@ -87,7 +87,7 @@ test_that('prep_for_network: unweighted cross-sec, symmetric', {
 	diag(adjm) <- NA
 	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 
-	# convert to network object
+	# convert to a statnet network object
 	g1 <- network::network(
 		adjm,
 		matrix.type = 'adjacency',
@@ -110,14 +110,14 @@ test_that('prep_for_network: unweighted cross-sec, symmetric', {
 		weight=NULL,
 		diag_to_NA=TRUE )
 
-	# convert to network object
-	ng <- prep_for_network(a_matrix)
+	# convert to a statnet network object
+	ng <- prep_for_statnet(a_matrix)
 
 	# compare
 	expect_identical(ng[,], g1[,])
 })
 
-test_that('prep_for_network: weighted cross-sec, symmetric', {
+test_that('prep_for_statnet: weighted cross-sec, symmetric', {
 
 	# use network example to generate some data
 	adjm <- matrix( rnorm(10^2), ncol=10)
@@ -125,7 +125,7 @@ test_that('prep_for_network: weighted cross-sec, symmetric', {
 	diag(adjm) <- NA
 	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 
-	# convert to network object
+	# convert to a statnet network object
 	g1 <- network::network(
 		adjm,
 		matrix.type = 'adjacency',
@@ -148,8 +148,8 @@ test_that('prep_for_network: weighted cross-sec, symmetric', {
 		weight='value',
 		diag_to_NA=TRUE )
 
-	# convert to network object
-	ng <- prep_for_network(a_matrix)
+	# convert to a statnet network object
+	ng <- prep_for_statnet(a_matrix)
 
 	# compare top level objects
 	expect_identical(ng[,], g1[,])
@@ -159,7 +159,7 @@ test_that('prep_for_network: weighted cross-sec, symmetric', {
 		network::get.edge.attribute(ng, 'value') )
 })
 
-test_that('prep_for_network, bipartite: unweighted cross-sec, asymmetric', {
+test_that('prep_for_statnet, bipartite: unweighted cross-sec, asymmetric', {
 
     # use network example to generate some data
     adjm <- matrix(
@@ -168,7 +168,7 @@ test_that('prep_for_network, bipartite: unweighted cross-sec, asymmetric', {
     rownames(adjm) = letters[1:5]
     colnames(adjm) = letters[(length(letters)-9):length(letters)]
 
-	# convert to network object
+	# convert to a statnet network object
 	g1 <- network::network(
 		adjm,
 		matrix.type = 'adjacency',
@@ -191,14 +191,14 @@ test_that('prep_for_network, bipartite: unweighted cross-sec, asymmetric', {
       weight=NULL,
       mode='bipartite' )
 
-    # convert to network object
-    ng <- prep_for_network(a_matrix)
+    # convert to a statnet network object
+    ng <- prep_for_statnet(a_matrix)
 
     # compare
     expect_identical(ng[,], g1[,])
 })
 
-test_that('prep_for_network, bipartite: weighted cross-sec, asymmetric', {
+test_that('prep_for_statnet, bipartite: weighted cross-sec, asymmetric', {
 
     # use network example to generate some data
     adjm <- matrix( rnorm(10^2), ncol=10)
@@ -206,7 +206,7 @@ test_that('prep_for_network, bipartite: weighted cross-sec, asymmetric', {
     rownames(adjm) = letters[1:5]
     colnames(adjm) = letters[(length(letters)-9):length(letters)]
 
-	# convert to network object
+	# convert to a statnet network object
 	g1 <- network::network(
 		adjm,
 		matrix.type = 'adjacency',
@@ -229,8 +229,8 @@ test_that('prep_for_network, bipartite: weighted cross-sec, asymmetric', {
       weight='value',
       mode='bipartite' )
 
-    # convert to network object
-    ng <- prep_for_network(a_matrix)
+    # convert to a statnet network object
+    ng <- prep_for_statnet(a_matrix)
 
     # compare
     expect_identical(ng[,], g1[,])
@@ -241,7 +241,7 @@ test_that('prep_for_network, bipartite: weighted cross-sec, asymmetric', {
 })
 
 test_that(
-	'prep_for_network: weighted cross-sec, dyad and nodal attribs', {
+	'prep_for_statnet: weighted cross-sec, dyad and nodal attribs', {
 
 		###################################
 		# generate a fake un weighted cross-sec cnet
@@ -284,7 +284,7 @@ test_that(
 
 		###################################
 		# gen network versions
-		prepped_n <- prep_for_network(a_matrix)
+		prepped_n <- prep_for_statnet(a_matrix)
 		###################################
 
 		###################################
@@ -319,7 +319,7 @@ test_that(
 })
 
 test_that(
-	'prep_for_network, bipartite: weighted cross-sec, dyad and nodal attribs', {
+	'prep_for_statnet, bipartite: weighted cross-sec, dyad and nodal attribs', {
 
 		###################################
 		# generate a fake un weighted cross-sec cnet
@@ -365,7 +365,7 @@ test_that(
 
 		###################################
 		# gen network versions
-		prepped_n <- prep_for_network(a_matrix)
+		prepped_n <- prep_for_statnet(a_matrix)
 		###################################
 
 		###################################

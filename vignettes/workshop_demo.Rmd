@@ -351,9 +351,9 @@ if(!'ergm' %in% rownames(installed.packages())){
 library(ergm)
 
 # any harder for ergm?
-# called prep_for_network because it's a reference
+# called prep_for_statnet because it's a reference
 # to the network library, which is what ergm uses
-mid_cross_ergm = prep_for_network(mid_cross_network)
+mid_cross_ergm = prep_for_statnet(mid_cross_network)
 
 # attributes should all be loaded into the 
 # appropriate slot

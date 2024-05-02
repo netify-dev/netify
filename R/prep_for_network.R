@@ -1,8 +1,7 @@
-#' Convert conflictNet object to network object
+#' Convert conflictNet object to a statnet network object
 #'
-#' @aliases convert.to.network
 #' @param netlet An R object
-#' @return network object
+#' @return statnet network object
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
 #' @examples
@@ -25,8 +24,8 @@
 #'   dyad_vars_symmetric=rep(FALSE, length(dvars)),
 #'   nodal_vars = nvars )
 #' 
-#' # convert to network object
-#' ntwk <- prep_for_network(verbCoop_net)
+#' # convert to a statnet network object
+#' ntwk <- prep_for_statnet(verbCoop_net)
 #' ntwk
 #' 
 #' # longitudinal case
@@ -39,18 +38,18 @@
 #'   dyad_vars_symmetric=rep(FALSE, length(dvars)),
 #'   nodal_vars = nvars )
 #'
-#' # convert to network object
-#' ntwk_longit <- prep_for_network(verbCoop_longit_net)
+#' # convert to a statnet network object
+#' ntwk_longit <- prep_for_statnet(verbCoop_longit_net)
 #' 
 #' # output in the longitudinal case is 
-#' # a list of network objects
+#' # a list of statnet network objects
 #' class(ntwk_longit)
 #' names(ntwk_longit)
 #' ntwk_longit[['2002']]
 #'
-#' @export prep_for_network
+#' @export prep_for_statnet
 
-prep_for_network = function(netlet){
+prep_for_statnet = function(netlet){
 
   # check if netify object
   netify_check(netlet)
@@ -59,7 +58,7 @@ prep_for_network = function(netlet){
 	if(length(attributes(netlet)$layers) > 1){
 		cli::cli_alert_danger(
 			'Error: This object has multiple layers. 
-      `prep_for_network` does not currently support multilayer `netify` inputs. 
+      `prep_for_statnet` does not currently support multilayer `netify` inputs. 
       Please use the `filter_layers` function to create a `netify` object with a single layer.' )
 		stop() }
 	
@@ -83,17 +82,17 @@ prep_for_network = function(netlet){
   ## cross-sec case
   if(netlet_type == 'cross_sec'){
 
-    # convert to network object
-    ntwk <- netify_to_network(netlet)
+    # convert to a statnet network object
+    ntwk <- netify_to_statnet(netlet)
 
     # process nodal attributes if exist
     if(nodal_data_exist){
-      ntwk <- add_nodal_to_network(
+      ntwk <- add_nodal_to_statnet(
         netlet, attr(netlet, 'nodal_data'), ntwk) }
 
     # process dyadic attributes if exist
     if(dyad_data_exist) {
-      ntwk <- add_dyad_to_network(
+      ntwk <- add_dyad_to_statnet(
         netlet, attr(netlet, 'dyad_data'), ntwk) }
   } # done with cross-sec case
 
@@ -109,18 +108,18 @@ prep_for_network = function(netlet){
       # get time listing
       time_val = names(netlet)[ii]
 
-      # convert to network object
-      ntwk_slice <- netify_to_network(netlet_slice)
+      # convert to a statnet network object
+      ntwk_slice <- netify_to_statnet(netlet_slice)
 
       # process nodal attributes if exist
       if(nodal_data_exist){
-        ntwk_slice <- add_nodal_to_network(
+        ntwk_slice <- add_nodal_to_statnet(
           netlet_slice, attr(netlet, 'nodal_data'), 
           ntwk_slice, time_val) }
 
       # process dyadic attributes if exist
       if(dyad_data_exist) {
-        ntwk_slice <- add_dyad_to_network(
+        ntwk_slice <- add_dyad_to_statnet(
           netlet_slice, attr(netlet, 'dyad_data'),
           ntwk_slice, time_val) }
 
@@ -132,15 +131,15 @@ prep_for_network = function(netlet){
   #
   return(ntwk) }
 
-#' netify_to_network
+#' netify_to_statnet
 #' 
-#' Convert netify object to network object
+#' Convert netify object to a statnet network object
 #' 
 #' @param netlet netify object
-#' @return network object
+#' @return statnet network object
 #' @author Shahryar Minhas
 
-netify_to_network <- function(netlet){
+netify_to_statnet <- function(netlet){
 
   # check if bipartite
   bipartite_logical <- ifelse(attr(netlet, 'mode') == 'bipartite', TRUE, FALSE)  
@@ -149,8 +148,8 @@ netify_to_network <- function(netlet){
   if( is.null(attr(netlet, 'weight')) ){
     ignore_eval <- TRUE } else { ignore_eval <- FALSE }
 
-  # convert to network object
-  network_object <- network::network(
+  # convert to a statnet network object
+  statnet_object <- network::network(
     get_raw(netlet), 
     matrix.type = 'adjacency', 
     directed = !attr(netlet, 'symmetric'),
@@ -163,52 +162,52 @@ netify_to_network <- function(netlet){
   # set as network attribute as well if weight provided
   if( !is.null(attr(netlet, 'weight')) ){
     network::set.network.attribute(
-      network_object, attr(netlet, 'weight'), 
+      statnet_object, attr(netlet, 'weight'), 
       get_raw(netlet) ) }
 
   #
-  return(network_object) }
+  return(statnet_object) }
 
-#' add_nodal_to_network
+#' add_nodal_to_statnet
 #' 
 #' Add nodal attributes to a network object from netify object
 #' 
 #' @param netlet netify object
 #' @param node_data node data from netlet object
-#' @param network_object network object to modify
+#' @param statnet_object network object to modify
 #' @param time time indicator for longit case
-#' @return network object with nodal attributes added
+#' @return statnet network object with nodal attributes added
 #' @author Shahryar Minhas
 
-add_nodal_to_network <- function(
-  netlet, node_data, network_object, time=NULL){
+add_nodal_to_statnet <- function(
+  netlet, node_data, statnet_object, time=NULL){
 
   # slice by time if relevant
   if(!is.null(time)){
     node_data = node_data[node_data[,2] == time,] }
 
-  # loop through and add to network object
+  # loop through and add to a statnet network object
   node_var_start <- ifelse(is.null(time), 2, 3)
   for( ii in node_var_start:ncol(node_data) ){
     network::set.vertex.attribute(
-      network_object, names(node_data)[ii], node_data[,ii] ) }
+      statnet_object, names(node_data)[ii], node_data[,ii] ) }
 
   #
-  return(network_object) }
+  return(statnet_object) }
 
-#' add_dyad_to_network
+#' add_dyad_to_statnet
 #' 
 #' Add dyad attributes to a network object from netify object
 #' 
 #' @param netlet netify object
 #' @param dyad_data_list dyad data from netlet object
-#' @param network_object network object to modify
+#' @param statnet_object network object to modify
 #' @param time time indicator for longit case
-#' @return network object with dyad attributes added
+#' @return statnet network object with dyad attributes added
 #' @author Shahryar Minhas
 
-add_dyad_to_network <- function(
-  netlet, dyad_data_list, network_object, time=NULL){
+add_dyad_to_statnet <- function(
+  netlet, dyad_data_list, statnet_object, time=NULL){
 
   # get dyadic array
   if(is.null(time)){
@@ -237,12 +236,12 @@ add_dyad_to_network <- function(
     # that is not clear to me
     if(!bipartite_logical){
       network::set.edge.value(
-        network_object, paste0(vars[ii], '_e'), dData )
+        statnet_object, paste0(vars[ii], '_e'), dData )
     }
 
     # set as network attrib
     network::set.network.attribute(
-      network_object, vars[ii], dData ) }
+      statnet_object, vars[ii], dData ) }
 
   #
-  return(network_object) }
+  return(statnet_object) }
