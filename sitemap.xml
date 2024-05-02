@@ -34,7 +34,7 @@
     <loc>https://netify-dev.github.io/netify/reference/add_dyad_to_igraph.html</loc>
   </url>
   <url>
-    <loc>https://netify-dev.github.io/netify/reference/add_dyad_to_network.html</loc>
+    <loc>https://netify-dev.github.io/netify/reference/add_dyad_to_statnet.html</loc>
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/add_graph.html</loc>
@@ -46,7 +46,7 @@
     <loc>https://netify-dev.github.io/netify/reference/add_nodal_to_igraph.html</loc>
   </url>
   <url>
-    <loc>https://netify-dev.github.io/netify/reference/add_nodal_to_network.html</loc>
+    <loc>https://netify-dev.github.io/netify/reference/add_nodal_to_statnet.html</loc>
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/add_var_time_check.html</loc>
@@ -163,7 +163,7 @@
     <loc>https://netify-dev.github.io/netify/reference/netify_to_igraph.html</loc>
   </url>
   <url>
-    <loc>https://netify-dev.github.io/netify/reference/netify_to_network.html</loc>
+    <loc>https://netify-dev.github.io/netify/reference/netify_to_statnet.html</loc>
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/new_netify.html</loc>
@@ -190,7 +190,7 @@
     <loc>https://netify-dev.github.io/netify/reference/prep_for_igraph.html</loc>
   </url>
   <url>
-    <loc>https://netify-dev.github.io/netify/reference/prep_for_network.html</loc>
+    <loc>https://netify-dev.github.io/netify/reference/prep_for_statnet.html</loc>
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/print.netify.html</loc>
