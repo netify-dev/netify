@@ -12,7 +12,7 @@
 
 <meta name="author" content="Cassy Dorff and Shahryar Minhas" />
 
-<meta name="date" content="2024-05-02" />
+<meta name="date" content="2024-05-03" />
 
 <title>Netify Workshop</title>
 
@@ -340,7 +340,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Netify Workshop</h1>
 <h4 class="author">Cassy Dorff and Shahryar Minhas</h4>
-<h4 class="date">2024-05-02</h4>
+<h4 class="date">2024-05-03</h4>
 
 
 
@@ -412,9 +412,8 @@ started.</p>
 <li><p>The package can also create different types of networks
 including:</p>
 <ul>
-<li>cross sectional networks (with static and varying actor
-composition)</li>
-<li>longitudinal</li>
+<li>cross sectional networks</li>
+<li>longitudinal (with static and varying actor composition)</li>
 <li>bipartite networks</li>
 <li>multilayer</li>
 </ul></li>
@@ -618,10 +617,10 @@ summary statistics in the network graph.</p>
 ## 5   100 1999          0.553          0.864          10.860            2.385086
 ## 6   100 2000          0.562          0.863          10.888            2.387661
 ##   degree   prop_ties eigen_vector
-## 1      1 0.005376344 1.054140e-16
-## 2      0 0.000000000 0.000000e+00
+## 1      1 0.005376344 0.000000e+00
+## 2      0 0.000000000 1.354336e-16
 ## 3      1 0.005376344 0.000000e+00
-## 4      0 0.000000000 4.931776e-17
+## 4      0 0.000000000 8.202076e-18
 ## 5      0 0.000000000 0.000000e+00
 ## 6      1 0.005263158 4.953675e-03</code></pre>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co">#i.e., </span></span>
@@ -634,10 +633,10 @@ summary statistics in the network graph.</p>
 ## 5   100 1999          0.553          0.864          10.860            2.385086
 ## 6   100 2000          0.562          0.863          10.888            2.387661
 ##   degree   prop_ties eigen_vector
-## 1      1 0.005376344 1.054140e-16
-## 2      0 0.000000000 0.000000e+00
+## 1      1 0.005376344 0.000000e+00
+## 2      0 0.000000000 1.354336e-16
 ## 3      1 0.005376344 0.000000e+00
-## 4      0 0.000000000 4.931776e-17
+## 4      0 0.000000000 8.202076e-18
 ## 5      0 0.000000000 0.000000e+00
 ## 6      1 0.005263158 4.953675e-03</code></pre>
 <div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="co"># vary node size by degree</span></span>
