@@ -105,7 +105,7 @@ mid_long_network <- netify(
   diag_to_NA=TRUE, missing_to_zero=FALSE,
   nodal_vars = c('v2x_polyarchy1', 'v2x_polyarchy2'),
   dyad_vars = c('capdist'),
-  dyad_vars_symmetric = c(TRUE, FALSE)
+  dyad_vars_symmetric = c(TRUE)
   )
 ```
 
@@ -126,6 +126,20 @@ mid_long_network <- add_nodal(
     node_data = node_data,
     actor = "ccode1",
     time = "year"
+)
+
+# create another dyadic var in cow
+cow_dyads$log_capdist = log(cow_dyads$capdist + 1)
+
+# now lets add this to the netlet
+mid_long_network <- add_dyad(
+  netlet = mid_long_network, 
+  dyad_data= cow_dyads,
+  actor1= 'ccode1',
+  actor2='ccode2',
+  time='year',
+  dyad_vars = 'log_capdist',
+  dyad_vars_symmetric = TRUE
 )
 ```
 
@@ -170,7 +184,7 @@ mid_subset <- summary_actor_mids |>
               filter(actor %in% top_5)
 
 plot_actor(mid_subset, 
-                net_stat = "degree",
+                net_stat = "prop_ties",
                 longitudinal = TRUE) +
                 facet_wrap(~actor)
 ```
@@ -180,9 +194,10 @@ Instead of looking at summary statistics, we also might want to simply visualize
 Our goal was to make this super easy for plotting time-varying attributes or actors. 
 
 ```{r, fig.width=6, fig.height=6}
-
 # default plot
-plot.netify(mid_long_network)
+plot.netify(mid_long_network,
+            static_actor_positions = TRUE,
+            remove_isolates = FALSE)
 
 # a little cleaner
 plot(
@@ -221,6 +236,14 @@ head(attributes(mid_long_network)$nodal_data)
 plot(
     mid_long_network,
     edge_color='grey',
+    point_size_var='degree'
+)
+
+# vary node size by degree
+plot(
+    mid_long_network,
+    edge_color='grey',
+    edge_color_var='log_capdist',
     point_size_var='degree'
 )
 
