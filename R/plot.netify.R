@@ -7,6 +7,11 @@
 #'        - `point_layout`: Optional, user-provided node layout; if not provided, layout will be generated based on `layout` parameter.
 #'        - `layout`: Specifies the layout algorithm from 'igraph' to position the nodes if `point_layout` is not provided.
 #'        - `remove_isolates`: Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
+#'        - `static_actor_positions` Logical indicating whether to use static positions for actors.
+#'        Useful in longitudinal studies where node positions should remain consistent over time.
+#'        If TRUE, the layout by default is calculated based on a collapsed adjacency matrix across 
+#'        all time points. Users can also specify a specific time point to use as the static layout by 
+#'        setting `which_static` to the desired time point.
 #'        - `add_edges`: Logical; if TRUE, edges will be added to the plot. Default is TRUE.
 #'        - `curve_edges`: Logical; if TRUE, edges will be curved. Default is FALSE.
 #'        - `add_points`: Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.
