@@ -2,22 +2,35 @@
 % Please edit documentation in R/summary.netify.R
 \name{summary.netify}
 \alias{summary.netify}
+\alias{summary_graph}
 \title{Summary method to get graph level statistics for netify objects}
 \usage{
 \method{summary}{netify}(object, ...)
 }
 \arguments{
-\item{object}{object of class netify, produced by get_adjacency}
+\item{object}{An object of class netify, which should have been created using the function \code{get_adjacency}. This object contains the network data structured for analysis.}
 
-\item{...}{additional parameters not used}
+\item{...}{Additional parameters which can include user-defined statistical functions. These functions should take a matrix as input and return a scalar value. They will be applied to each network slice individually if the netify object represents longitudinal data.
+\itemize{
+\item \code{other_stats}: A named list of functions that take a matrix and return additional actor-level statistics to be included in the output. Each function should accept a matrix as input and return a vector or single value per actor. This allows for the inclusion of custom metrics in the summary output.
+}}
 }
 \value{
-a data.frame object summarizing graph level stats of the network(s)
+A data frame where each row represents the network-level statistics for a single network or a single time point in a longitudinal study. The columns include:
+\itemize{
+\item \code{numActors}: The number of actors in the network.
+\item \code{dens}: The density of the network.
+\item \code{recip}: The reciprocity of the network calculated as the correlation between the adjacency matrix and its transpose.
+\item \code{sdSendEff}: The standard deviation of the sending effects (row means).
+\item \code{sdRecEff}: The standard deviation of the receiving effects (column means).
+\item \code{srCov}: The sender-receiver covariance calculated as the correlation between row means and column means.
+Additional columns may appear if user-defined functions are passed in the \code{...} parameter.
+Each row is labeled with a network identifier in the \code{net} column, which is especially useful for longitudinal data.
+}
 }
 \description{
-\code{summary.netify} takes in a netify object
-and outputs a data.frame with graph level statistics.
+\code{summary.netify} processes a netify object to calculate and return a data frame of graph-level statistics. This function is designed to work with both cross-sectional and longitudinal netify data structures, providing a comprehensive overview of network characteristics such as density, reciprocity, and standard deviations of sending and receiving effects.
 }
-\author{
-Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+\details{
+This function simplifies the process of extracting key network statistics across potentially multiple networks within a netify object. It is capable of handling both weighted and unweighted networks and can adjust its calculations based on the nature of the network data (cross-sectional vs. longitudinal).
 }
