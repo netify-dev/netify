@@ -38,14 +38,20 @@ A data frame where each row represents the network-level statistics for a single
 This function simplifies the process of extracting key network statistics across potentially multiple networks within a netify object. It is capable of handling both weighted and unweighted networks and can adjust its calculations based on the nature of the network data (cross-sectional vs. longitudinal).
 }
 \examples{
+
+# load icews data
 data(icews)
 
+# create netlet
 netlet = netify(
     dyad_data=icews, actor1='i', actor2='j',
     time = 'year', symmetric=FALSE, weight='verbCoop' )
 
-summary(netlet)
+# calculate default summary stats
+summ_graph = summary(netlet)
+head(summ_graph)
 
+# add custom summary stat
 spinglass_ig = function(mat){
     g = prep_for_igraph(mat)
     comm = igraph::cluster_spinglass(g)
@@ -56,7 +62,12 @@ spinglass_ig = function(mat){
     ) )
 }
 
-summary(netlet, 
+# since calculating communities can be intensive
+# lets take subset of time periods
+sub_net = subset_netlet(netlet, when_to_subset = as.character(2013:2014))
+
+# feed custom summary stat into summary
+summary(sub_net, 
     other_stats=list(spinglass_ig=spinglass_ig)) 
 
 }
