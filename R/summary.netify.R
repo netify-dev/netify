@@ -25,14 +25,20 @@
 #' @author Cassy Dorff, Shahryar Minhas
 #'
 #' @examples
+#' 
+#' # load icews data
 #' data(icews)
 #'
+#' # create netlet
 #' netlet = netify(
 #'     dyad_data=icews, actor1='i', actor2='j',
 #'     time = 'year', symmetric=FALSE, weight='verbCoop' )
 #'
-#' summary(netlet)
+#' # calculate default summary stats
+#' summ_graph = summary(netlet)
+#' head(summ_graph)
 #'
+#' # add custom summary stat
 #' spinglass_ig = function(mat){
 #'     g = prep_for_igraph(mat)
 #'     comm = igraph::cluster_spinglass(g)
@@ -42,8 +48,13 @@
 #'         comm_modul = comm$modularity
 #'     ) )
 #' }
+#' 
+#' # since calculating communities can be intensive
+#' # lets take subset of time periods
+#' sub_net = subset_netlet(netlet, when_to_subset = as.character(2013:2014))
 #'
-#' summary(netlet, 
+#' # feed custom summary stat into summary
+#' summary(sub_net, 
 #'     other_stats=list(spinglass_ig=spinglass_ig)) 
 #' 
 #' @importFrom igraph transitivity
