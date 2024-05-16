@@ -65,7 +65,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2024-05-03</h4>
+            <h4 data-toc-skip class="date">2024-05-16</h4>
       
       
       <div class="d-none name"><code>workshop_demo.Rmd</code></div>
@@ -295,7 +295,7 @@ time using the summary statistics data frame.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_graph.html">plot_graph</a></span><span class="op">(</span><span class="va">mid_long_summary</span>,</span>
 <span>                  longitudinal <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                  net_stat <span class="op">=</span> <span class="st">"dens"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>                  net_stat <span class="op">=</span> <span class="st">"density"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>strip.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size<span class="op">=</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="workshop_demo_files/figure-html/unnamed-chunk-6-1.png" width="576"></p>
 <p>We might also want to look at a specific set of actors’ statistics
@@ -644,8 +644,12 @@ Mexico.</li>
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># A summary of the network object</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   net numActors     dens recip sdSendEff sdRecEff srCov</span></span>
-<span><span class="co">## 1   1        72 5.608764     1  17.64839 17.64839     1</span></span></code></pre>
+<pre><code><span><span class="co">##   net num_actors    density num_edges mean_edge_weight sd_edge_weight</span></span>
+<span><span class="co">## 1   1         72 0.02543036       130         5.608764       89.74295</span></span>
+<span><span class="co">##   prop_edges_missing min_edge_value max_edge_value competition competition_col</span></span>
+<span><span class="co">## 1         0.02777778              0           3076   0.8505081       0.8505081</span></span>
+<span><span class="co">##   sd_of_actor_means sd_of_col_means transitivity</span></span>
+<span><span class="co">## 1          17.64839        17.64839    0.1052632</span></span></code></pre>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># weight using a variable</span></span>
 <span><span class="va">mex_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
@@ -660,8 +664,12 @@ Mexico.</li>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mex_network_civ</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   net numActors     dens recip sdSendEff sdRecEff srCov</span></span>
-<span><span class="co">## 1   1        72 0.458529     1   1.52567  1.52567     1</span></span></code></pre>
+<pre><code><span><span class="co">##   net num_actors    density num_edges mean_edge_weight sd_edge_weight</span></span>
+<span><span class="co">## 1   1         72 0.01643192        84         0.458529       8.631244</span></span>
+<span><span class="co">##   prop_edges_missing min_edge_value max_edge_value competition competition_col</span></span>
+<span><span class="co">## 1         0.02777778              0            377   0.8344826       0.8344826</span></span>
+<span><span class="co">##   sd_of_actor_means sd_of_col_means transitivity</span></span>
+<span><span class="co">## 1           1.52567         1.52567        0.168</span></span></code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Explore</li>
 </ol>

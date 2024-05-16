@@ -103,7 +103,7 @@ layers them together to create a multilayer network</p>
 <span class="r-in"><span><span class="co"># dimensions of the multilayer network from the</span></span></span>
 <span class="r-in"><span><span class="co"># cross-sectional case will be a </span></span></span>
 <span class="r-in"><span><span class="co"># (number of actors) x (number of actors) x (number of layers)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="unnetify.html">unnetify</a></span><span class="op">(</span><span class="va">icews_verbCoop_matlCoop</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="get_raw.html">get_raw</a></span><span class="op">(</span><span class="va">icews_verbCoop_matlCoop</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 152 152   2</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># longitudinal array example</span></span></span>
@@ -129,7 +129,7 @@ layers them together to create a multilayer network</p>
 <span class="r-in"><span><span class="co"># longitudinal array case will be a </span></span></span>
 <span class="r-in"><span><span class="co"># (number of actors) x (number of actors) x (number of layers) x </span></span></span>
 <span class="r-in"><span><span class="co"># (number of time periods)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="unnetify.html">unnetify</a></span><span class="op">(</span><span class="va">icews_verbCoop_matlCoop_longit_a</span><span class="op">)</span><span class="op">)</span> </span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="get_raw.html">get_raw</a></span><span class="op">(</span><span class="va">icews_verbCoop_matlCoop_longit_a</span><span class="op">)</span><span class="op">)</span> </span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 152 152   2  13</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># longitudinal list example</span></span></span>
@@ -154,10 +154,10 @@ layers them together to create a multilayer network</p>
 <span class="r-in"><span><span class="co"># longitudinal list case will be a</span></span></span>
 <span class="r-in"><span><span class="co"># (number of time periods) list of </span></span></span>
 <span class="r-in"><span><span class="co"># (number of actors) x (number of actors) x (number of layers) arrays</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="unnetify.html">unnetify</a></span><span class="op">(</span><span class="va">icews_verbCoop_matlCoop_longit_l</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="get_raw.html">get_raw</a></span><span class="op">(</span><span class="va">icews_verbCoop_matlCoop_longit_l</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2002" "2003" "2004" "2005" "2006" "2007" "2008" "2009" "2010" "2011"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [11] "2012" "2013" "2014"</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="unnetify.html">unnetify</a></span><span class="op">(</span><span class="va">icews_verbCoop_matlCoop_longit_l</span><span class="op">)</span><span class="op">$</span><span class="st">'2010'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="get_raw.html">get_raw</a></span><span class="op">(</span><span class="va">icews_verbCoop_matlCoop_longit_l</span><span class="op">)</span><span class="op">$</span><span class="st">'2010'</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 152 152   2</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># information on layer labels can be accessed </span></span></span>

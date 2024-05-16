@@ -63,6 +63,11 @@
 - <code>point_layout</code>: Optional, user-provided node layout; if not provided, layout will be generated based on <code>layout</code> parameter.
 - <code>layout</code>: Specifies the layout algorithm from 'igraph' to position the nodes if <code>point_layout</code> is not provided.
 - <code>remove_isolates</code>: Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
+- <code>static_actor_positions</code> Logical indicating whether to use static positions for actors.
+Useful in longitudinal studies where node positions should remain consistent over time.
+If TRUE, the layout by default is calculated based on a collapsed adjacency matrix across
+all time points. Users can also specify a specific time point to use as the static layout by
+setting <code>which_static</code> to the desired time point.
 - <code>add_edges</code>: Logical; if TRUE, edges will be added to the plot. Default is TRUE.
 - <code>curve_edges</code>: Logical; if TRUE, edges will be curved. Default is FALSE.
 - <code>add_points</code>: Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.
@@ -90,6 +95,10 @@ These arguments control various aspects of the plot's appearance and functionali
 <li><p>Custom layouts if the automatic placement does not suffice.
 Additional customization options like <code>point_size</code> and <code>point_size_var</code> allow users to apply typical <code>ggplot2</code> methods directly to network visualizations, facilitating easy integration of familiar graphical adjustments.</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
+    <p>Cassy Dorff, Shahryar Minhas</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
