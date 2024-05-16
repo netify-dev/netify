@@ -27,14 +27,6 @@
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
-#' @details
-#' `plot.netify` creates a network plot with flexible options for customization. It allows the user to specify:
-#' - Whether or not to include edges and how they are rendered (straight or curved).
-#' - Whether nodes are displayed as points.
-#' - Whether to annotate nodes with text or labels.
-#' - Specific nodes to annotate, allowing selective emphasis within the network.
-#' - Custom layouts if the automatic placement does not suffice.
-#' Additional customization options like `point_size` and `point_size_var` allow users to apply typical `ggplot2` methods directly to network visualizations, facilitating easy integration of familiar graphical adjustments.
 #'
 #' @examples
 #' # load icews data

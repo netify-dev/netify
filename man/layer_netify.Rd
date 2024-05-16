@@ -45,7 +45,7 @@ icews_verbCoop_matlCoop <- layer_netify(
 # dimensions of the multilayer network from the
 # cross-sectional case will be a 
 # (number of actors) x (number of actors) x (number of layers)
-dim(unnetify(icews_verbCoop_matlCoop))
+dim(get_raw(icews_verbCoop_matlCoop))
 
 # longitudinal array example
 icews_verbCoop_longit_a <- netify(
@@ -70,7 +70,7 @@ icews_verbCoop_matlCoop_longit_a <- layer_netify(
 # longitudinal array case will be a 
 # (number of actors) x (number of actors) x (number of layers) x 
 # (number of time periods)
-dim(unnetify(icews_verbCoop_matlCoop_longit_a)) 
+dim(get_raw(icews_verbCoop_matlCoop_longit_a)) 
 
 # longitudinal list example
 # generate similar longitudinal list versions
@@ -94,8 +94,8 @@ icews_verbCoop_matlCoop_longit_l <- layer_netify(
 # longitudinal list case will be a
 # (number of time periods) list of 
 # (number of actors) x (number of actors) x (number of layers) arrays
-names(unnetify(icews_verbCoop_matlCoop_longit_l))
-dim(unnetify(icews_verbCoop_matlCoop_longit_l)$'2010')
+names(get_raw(icews_verbCoop_matlCoop_longit_l))
+dim(get_raw(icews_verbCoop_matlCoop_longit_l)$'2010')
 
 # information on layer labels can be accessed 
 # from  the `layer_labels` attribute 

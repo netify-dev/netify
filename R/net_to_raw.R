@@ -65,17 +65,3 @@ get_raw <- function(netlet){
         return( raw_list( netlet ) ) }
 }
 
-#' unnetify
-#'
-#' This function serves as a wrapper for
-#' get_raw and other conversion functions
-#' that convert a netify object back into 
-#' constituent parts
-#' @param netlet a netify object
-#' @return a list, matrix, or other object with netify attributes stripped
-#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
-#' @export
-
-unnetify <- function(netlet){ 
-    get_raw(netlet)
-    }

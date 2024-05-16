@@ -1,12 +1,19 @@
-#' Convert netify object into a dyadic data.frame
+#' unnetify
 #'
-#' Converts a netify object into a dyadic level data.frame
-#'
-#' @return A data.frame object
-#'
-#' @export 
+#' This function converts a netify object and
+#' any associated attributes into a dyadic level
+#' data.frame
+#' 
+#' @param netlet a netify object
+#' 
+#' @return a data.frame object
+#' 
+#' @author Cassy Dorff, Shahryar Minhas
+#' 
+#' @export unnetify
+#' 
 
-unnetify <- function(x){
+unnetify <- function(netlet){
 
 	######################
     # check if netify object

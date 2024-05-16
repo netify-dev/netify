@@ -2,7 +2,6 @@
 % Please edit documentation in R/summary.netify.R
 \name{summary.netify}
 \alias{summary.netify}
-\alias{summary_graph}
 \title{Summary method to get graph level statistics for netify objects}
 \usage{
 \method{summary}{netify}(object, ...)
@@ -16,16 +15,20 @@
 }}
 }
 \value{
-A data frame where each row represents the network-level statistics for a single network or a single time point in a longitudinal study. The columns include:
+A data frame where each row represents the network-level statistics for a single network or a single time point in a longitudinal study. Depending on the network type and data attributes, the columns can include:
 \itemize{
-\item \code{numActors}: The number of actors in the network.
-\item \code{dens}: The density of the network.
-\item \code{recip}: The reciprocity of the network calculated as the correlation between the adjacency matrix and its transpose.
-\item \code{sdSendEff}: The standard deviation of the sending effects (row means).
-\item \code{sdRecEff}: The standard deviation of the receiving effects (column means).
-\item \code{srCov}: The sender-receiver covariance calculated as the correlation between row means and column means.
-Additional columns may appear if user-defined functions are passed in the \code{...} parameter.
-Each row is labeled with a network identifier in the \code{net} column, which is especially useful for longitudinal data.
+\item \code{num_actors}: Number of actors in the network - for bipartite networks number of row and column actors are reported separately.
+\item \code{density}: The proportion of possible connections that are actual connections within the network.
+\item \code{num_edges}: The total number of edges in the network.
+\item \code{mean_edge_weight}: The average weight of edges in the network, provided only for weighted networks.
+\item \code{sd_edge_weight}: The standard deviation of edge weights in the network, provided only for weighted networks.
+\item \code{prop_edges_missing}: The proportion of potential edges that are missing or marked as NA.
+\item \code{min_edge_value} and \code{max_edge_value}: The minimum and maximum edge weights observed in the network, provided only for weighted networks.
+\item \code{competition_row} and \code{competition_col}: These statistics measure the competitiveness within the network, quantifying how evenly interactions are spread across actors. High values indicate a decentralized network where interactions are not dominated by a few actors, suggesting a diverse and competitive network structure. This measure is useful across various fields for analyzing the balance of influence or activity among participants in a network. See Dorff, Gallop, & Minhas (2023), "Network Competition and Civilian Targeting during Civil Conflict," British Journal of Political Science, 53(2):441-459 for further details.
+\item \code{sd_of_row_means} and \code{sd_of_col_means}: Standard deviations of the sending and receiving effects (row and column means).
+\item \code{covar_of_row_col_means}: The covariance between sending and receiving effects, calculated for unipartite networks.
+\item \code{reciprocity}: The reciprocity of the network, defined as the correlation between the adjacency matrix and its transpose, calculated for unipartite networks.
+\item \code{transitivity}: The overall transitivity or clustering coefficient of the network, reflecting the likelihood that two neighbors of a node are connected.
 }
 }
 \description{
@@ -33,4 +36,30 @@ Each row is labeled with a network identifier in the \code{net} column, which is
 }
 \details{
 This function simplifies the process of extracting key network statistics across potentially multiple networks within a netify object. It is capable of handling both weighted and unweighted networks and can adjust its calculations based on the nature of the network data (cross-sectional vs. longitudinal).
+}
+\examples{
+data(icews)
+
+netlet = netify(
+    dyad_data=icews, actor1='i', actor2='j',
+    time = 'year', symmetric=FALSE, weight='verbCoop' )
+
+summary(netlet)
+
+spinglass_ig = function(mat){
+    g = prep_for_igraph(mat)
+    comm = igraph::cluster_spinglass(g)
+    num_comm = length(comm$csize)
+    return( c(
+        num_comm=num_comm,
+        comm_modul = comm$modularity
+    ) )
+}
+
+summary(netlet, 
+    other_stats=list(spinglass_ig=spinglass_ig)) 
+
+}
+\author{
+Cassy Dorff, Shahryar Minhas
 }

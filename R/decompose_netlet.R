@@ -57,7 +57,7 @@ decompose_netlet <- function(
 
     # build edge data from dv #####################
     # edge data
-    edge_data = reshape2::melt( unnetify( netlet ) )
+    edge_data = reshape2::melt( get_raw( netlet ) )
     edge_data$Var1 = char(edge_data$Var1)
     edge_data$Var2 = char(edge_data$Var2)
     edge_data = edge_data[

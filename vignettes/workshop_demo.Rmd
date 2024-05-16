@@ -164,7 +164,7 @@ We can also make a quick visualization of network statistics over time using the
 ```{r, fig.width=6, fig.height=6}
 plot_graph(mid_long_summary,
                   longitudinal = TRUE,
-                  net_stat = "dens") +
+                  net_stat = "density") +
   theme(strip.text.x = element_text(size=0))
 ```
 
