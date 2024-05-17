@@ -14,7 +14,7 @@
 #' - `sd_edge_weight`: The standard deviation of edge weights in the network, provided only for weighted networks.
 #' - `prop_edges_missing`: The proportion of potential edges that are missing or marked as NA.
 #' - `min_edge_value` and `max_edge_value`: The minimum and maximum edge weights observed in the network, provided only for weighted networks.
-#' - `competition_row` and `competition_col`: These statistics measure the competitiveness within the network, quantifying how evenly interactions are spread across actors. High values indicate a decentralized network where interactions are not dominated by a few actors, suggesting a diverse and competitive network structure. This measure is useful across various fields for analyzing the balance of influence or activity among participants in a network. See Dorff, Gallop, & Minhas (2023), "Network Competition and Civilian Targeting during Civil Conflict," British Journal of Political Science, 53(2):441-459 for further details.
+#' - `competition_row` and `competition_col` (defaults to `competition` for undirected networks): Measures network competitiveness using the Herfindahl-Hirschman Index (HHI), defined as \eqn{1 - \sum_{i=1}^{n} (s_i)^2}, where \eqn{s_i} is the proportion of interactions by actor \eqn{i} and \eqn{n} is the total number of actors. The index ranges from 1/n (indicating high diversity and competitive interaction across actors) to 1 (one actor dominates all interactions). Refer to Dorff, Gallop, & Minhas (2023) for an application of this measure in conflict networks.
 #' - `sd_of_row_means` and `sd_of_col_means`: Standard deviations of the sending and receiving effects (row and column means).
 #' - `covar_of_row_col_means`: The covariance between sending and receiving effects, calculated for unipartite networks.
 #' - `reciprocity`: The reciprocity of the network, defined as the correlation between the adjacency matrix and its transpose, calculated for unipartite networks.
@@ -133,10 +133,13 @@ summary.netify <- function(object, ...){
 		num_edges <- sum(vec_bin_mat, na.rm=TRUE)
 
 		# competition measures
-		competition_row <- 1-sum(
-			(rowSums(mat, na.rm=TRUE)/sum(vec_mat, na.rm=TRUE))^2)
-		competition_col <- 1-sum(
-			(colSums(mat, na.rm=TRUE)/sum(vec_mat, na.rm=TRUE))^2)
+		row_sums = row_means * num_row_actors
+		col_sums = col_means * num_col_actors
+		competition_row = sum( (row_sums / sum(row_sums))^2 )
+		competition_col = sum( (col_sums / sum(col_sums))^2 )		
+
+		# symmetric case
+		competition <- row_sums
 		
 		# getting at actor variability
 		sd_of_row_means <- sd( row_means, na.rm=TRUE )
@@ -232,7 +235,7 @@ summary.netify <- function(object, ...){
 			'competition_col', 'sd_of_col_means',
 			'covar_of_row_col_means', 'reciprocity'
 		)
-		net_stats <- net_stats[,setdiff(names(net_stats), c('covar_of_row_col_means', 'reciprocity'))]
+		net_stats <- net_stats[,setdiff(names(net_stats), to_drop)]
 	}
 
 	# if not weighted then drop redundant stats
