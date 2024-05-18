@@ -3,7 +3,7 @@ pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
   workshop_demo: workshop_demo.html
-last_built: 2024-05-18T02:24Z
+last_built: 2024-05-18T02:34Z
 urls:
   reference: https://netify-dev.github.io/netify/reference
   article: https://netify-dev.github.io/netify/articles
