@@ -181,10 +181,10 @@
     <loc>https://netify-dev.github.io/netify/reference/plot.netify.html</loc>
   </url>
   <url>
-    <loc>https://netify-dev.github.io/netify/reference/plot_actor.html</loc>
+    <loc>https://netify-dev.github.io/netify/reference/plot_actor_stats.html</loc>
   </url>
   <url>
-    <loc>https://netify-dev.github.io/netify/reference/plot_graph.html</loc>
+    <loc>https://netify-dev.github.io/netify/reference/plot_graph_stats.html</loc>
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/prep_for_amen.html</loc>
@@ -233,6 +233,9 @@
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/theme_netify.html</loc>
+  </url>
+  <url>
+    <loc>https://netify-dev.github.io/netify/reference/theme_stat_netify.html</loc>
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/time_check.html</loc>
