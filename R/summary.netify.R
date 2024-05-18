@@ -73,7 +73,7 @@ summary.netify <- function(object, ...){
 	if(length(attributes(object)$layers) > 1){
 		cli::cli_alert_danger(
 			'Error: This object has multiple layers. 
-			`plot` does not currently support multilayer `netify` inputs.
+			`summary` does not currently support multilayer `netify` inputs.
 			Please use the `filter_layers` function to create a `netify` object with a single layer.' )
 		stop() }
 
