@@ -69,6 +69,14 @@ summary.netify <- function(object, ...){
 	# check if netify object
 	netify_check(object)
 
+	# if more than one layer tell user they must specify a single layer
+	if(length(attributes(x)$layers) > 1){
+		cli::cli_alert_danger(
+			'Error: This object has multiple layers. 
+			`plot` does not currently support multilayer `netify` inputs.
+			Please use the `filter_layers` function to create a `netify` object with a single layer.' )
+		stop() }
+
 	# get summary args
 	summary_args <- list(...)
 
