@@ -9,16 +9,16 @@
 #' @return A data frame where each row represents the network-level statistics for a single network or a single time point in a longitudinal study. Depending on the network type and data attributes, the columns can include:
 #' - `num_actors`: Number of actors in the network - for bipartite networks number of row and column actors are reported separately.
 #' - `density`: The proportion of possible connections that are actual connections within the network.
-#' - `num_edges`: The total number of edges in the network.
+#' - `num_edges`: The total number of edges in the network (does not take edge weight into account).
 #' - `mean_edge_weight`: The average weight of edges in the network, provided only for weighted networks.
 #' - `sd_edge_weight`: The standard deviation of edge weights in the network, provided only for weighted networks.
-#' - `prop_edges_missing`: The proportion of potential edges that are missing or marked as NA.
+#' - `prop_edges_missing`: The proportion of potential edges that are missing.
 #' - `min_edge_value` and `max_edge_value`: The minimum and maximum edge weights observed in the network, provided only for weighted networks.
-#' - `competition_row` and `competition_col` (defaults to `competition` for undirected networks): Measures network competitiveness using the Herfindahl-Hirschman Index (HHI), defined as \eqn{1 - \sum_{i=1}^{n} (s_i)^2}, where \eqn{s_i} is the proportion of interactions by actor \eqn{i} and \eqn{n} is the total number of actors. The index ranges from 1/n (indicating high diversity and competitive interaction across actors) to 1 (one actor dominates all interactions). Refer to Dorff, Gallop, & Minhas (2023) for an application of this measure in conflict networks.
-#' - `sd_of_row_means` and `sd_of_col_means`: Standard deviations of the sending and receiving effects (row and column means).
-#' - `covar_of_row_col_means`: The covariance between sending and receiving effects, calculated for unipartite networks.
-#' - `reciprocity`: The reciprocity of the network, defined as the correlation between the adjacency matrix and its transpose, calculated for unipartite networks.
-#' - `transitivity`: The overall transitivity or clustering coefficient of the network, reflecting the likelihood that two neighbors of a node are connected.
+#' - `competition_row` and `competition_col` (defaults to `competition` for undirected networks): Measures network competitiveness using the Herfindahl-Hirschman Index (HHI), defined as \eqn{\sum_{i=1}^{n} (s_i)^2}, where \eqn{s_i} is the proportion of interactions by actor \eqn{i} and \eqn{n} is the total number of actors. The index ranges from 1/n (indicating high diversity and competitive interaction across actors) to 1 (one actor dominates all interactions). Refer to Dorff, Gallop, & Minhas (2023) for an application of this measure in conflict networks.
+#' - `sd_of_row_means` and `sd_of_col_means`: Standard deviations of the sending and receiving effects (row and column means). These statistics are meant to describe the variability in actor behavior across the network.
+#' - `covar_of_row_col_means`: The covariance between sending and receiving effects, always takes weights into account and is only calculated for unipartite networks.
+#' - `reciprocity`: The reciprocity of the network, defined as the correlation between the adjacency matrix and its transpose, always takes weights into account and is only calculated for unipartite networks.
+#' - `transitivity`: The overall transitivity or clustering coefficient of the network, reflecting the likelihood that two neighbors of a node are connected (calculated using `transitivity` function from `igraph`).
 #'
 #' @details This function simplifies the process of extracting key network statistics across potentially multiple networks within a netify object. It is capable of handling both weighted and unweighted networks and can adjust its calculations based on the nature of the network data (cross-sectional vs. longitudinal).
 #' 
@@ -70,7 +70,7 @@ summary.netify <- function(object, ...){
 	netify_check(object)
 
 	# if more than one layer tell user they must specify a single layer
-	if(length(attributes(x)$layers) > 1){
+	if(length(attributes(object)$layers) > 1){
 		cli::cli_alert_danger(
 			'Error: This object has multiple layers. 
 			`plot` does not currently support multilayer `netify` inputs.
