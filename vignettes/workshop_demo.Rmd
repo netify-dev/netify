@@ -33,8 +33,8 @@ This vignette provides a high level overview of our package from start to finish
 | `netify()`  | `peek()`  | `prep_for_amen()`  |
 | `add_nodal()` | `summary_actor()`   | `prep_for_igraph()`  |
 | `add_dyad()`  | `summary()`  | `prep_for_statnet()`  |
-| `subset_netlet()`  | `plot_actor()`  |   | 
-|              |   `plot_graph`|        |
+| `subset_netlet()`  | `plot_actor_stats()`  |   | 
+|              |   `plot_graph_stats()`|        |
 |              |   `plot()`|        |
 
 `netify` can take dyadic data or edgelists to get started. 
@@ -102,7 +102,7 @@ mid_long_network <- netify(
   weight='cowmidonset', 
   actor_time_uniform=FALSE,
   sum_dyads=FALSE, symmetric=TRUE,
-  diag_to_NA=TRUE, missing_to_zero=FALSE,
+  diag_to_NA=TRUE, missing_to_zero=TRUE,
   nodal_vars = c('v2x_polyarchy1', 'v2x_polyarchy2'),
   dyad_vars = c('capdist'),
   dyad_vars_symmetric = c(TRUE)
@@ -162,10 +162,7 @@ mid_long_summary <- summary(mid_long_network)
 We can also make a quick visualization of network statistics over time using the summary statistics data frame.
 
 ```{r, fig.width=6, fig.height=6}
-plot_graph(mid_long_summary,
-                  longitudinal = TRUE,
-                  net_stat = "density") +
-  theme(strip.text.x = element_text(size=0))
+plot_graph_stats(mid_long_summary)
 ```
 
 We might also want to look at a specific set of actors' statistics overtime. Our built-in function, `summary_actor` will calculate in-degree, out-degree, average degree, and eigenvector centrality for each actor in each time period.
@@ -173,20 +170,32 @@ We might also want to look at a specific set of actors' statistics overtime. Our
 ```{r}
 # every year & every actor (messy!) but check out help file
 summary_actor_mids <- summary_actor(mid_long_network)
+
+# violin plot across all actors
+# and for each stat
+plot_actor_stats(
+  summary_actor_mids 
+  )
+
+# focus in on specific stat
+plot_actor_stats(
+  summary_actor_mids,
+  specific_stats='closeness'
+  )
 ```
+
+Say that we wanted to showcase actor-specific statistics over time. We can use the plot_actor_stats function for this as well, though it's recommended to subset to a few actors for a more legible plot.
 
 ```{r, fig.width=6, fig.height=6}
 # top 5 GDP countries (USA, China, Japan, Germany, India)
 top_5 <- c("2", "710", "740", "255", "750")
 
-# zoom in on specific parts of the network for actor viz
-mid_subset <- summary_actor_mids |>
-              filter(actor %in% top_5)
-
-plot_actor(mid_subset, 
-                net_stat = "prop_ties",
-                longitudinal = TRUE) +
-                facet_wrap(~actor)
+#
+plot_actor_stats(
+  summary_actor_mids, 
+  across_actor = FALSE, 
+  specific_actors = top_5
+)
 ```
 
 Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default and seed set to 6886 for node layout).

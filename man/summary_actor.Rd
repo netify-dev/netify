@@ -19,11 +19,23 @@ should imply stronger (or more valuable) connections rather than longer distance
 \value{
 A \code{data.frame} object summarizing actor-level statistics of the network(s). Depending on the structure and attributes of the \code{netify} object, the output includes:
 \itemize{
-\item \strong{Symmetric Unweighted}: Degree, proportion of ties, closeness, betweenness, and eigenvector centrality.
-\item \strong{Symmetric Weighted}: Degree, proportion of ties, sum and average of strengths, closeness (weighted and normalized), betweenness (weighted and normalized), and eigenvector centrality.
-\item \strong{Asymmetric Unweighted}: In-degree, out-degree, total degree, in-propensity of ties, out-propensity of ties, total propensity of ties, in-closeness, out-closeness, total closeness, in-betweenness, out-betweenness, total betweenness, authority scores, and hub scores.
-\item \strong{Asymmetric Weighted}: Similar metrics as asymmetric unweighted but includes strength sums and averages, and all closeness and betweenness measures are weighted.
-Metrics are calculated based on the network type (symmetric or asymmetric) and whether the network is weighted.
+\item \strong{Symmetric Unweighted}: Various network measures for actor \(i\) include:
+\itemize{
+\item \emph{Degree}: The count of unique actors that actor \(i\) is directly connected to -- calculated as \eqn{d_i = \sum_{j=1}^{n} a_{ij}}, where \eqn{a_{ij}} is the adjacency matrix element indicating the presence (1) or absence (0) of a tie between actors \(i\) and \(j\).
+\item \emph{Proportion of ties}: The percentage of actors in the network with whom actor \(i\) has a direct relationship -- calculated as \eqn{p_i = \frac{d_i}{n-1}}, where \eqn{d_i} is the degree of actor \(i\) and \(n\) is the total number of actors in the network.
+\item \emph{Network share}: The fraction of the network's total connections that include actor \(i\) -- calculated as \eqn{s_i = \frac{d_i}{\sum_{j=1}^{n} d_j}}, where \eqn{d_i} is the degree of actor \(i\) and \eqn{\sum_{j=1}^{n} d_j} is the total number of ties in the network.
+\item \emph{Closeness} (\(C_i\)): A measure of how close actor \(i\) is to all other actors in the network -- calculated as \eqn{C_i = \frac{1}{\sum_{j} d(i, j)}}, where \eqn{d(i, j)} is the distance to every other actor \(j\).
+\item \emph{Betweenness} (\(B_i\)): A measure of actor \(i\)'s importance in connecting different parts of the network -- calculated as \eqn{B_i = \sum_{s \neq i \neq t} \frac{\sigma_{st}(i)}{\sigma_{st}}}, where \eqn{\sigma_{st}} is the total number of shortest paths from node \(s\) to node \(t\) and \eqn{\sigma_{st}(i)} is the number of those paths that pass through \(i\).
+\item \emph{Eigenvector centrality} (\(EC_i\)): A measure of actor \(i\)'s influence based on their connections to other highly connected actors in the network, calculated using the principal eigenvector of the network's adjacency matrix.
+}
+\item \strong{Symmetric Weighted}: Includes the same statistics as the symmetric unweighted case, with additional measures accounting for the weight of connections:
+\itemize{
+\item \emph{Strength sum}: The total weight of the ties connected to actor \(i\) in the network -- calculated as \eqn{s_i^{sum} = \sum_{j=1}^{n} w_{ij}}, where \eqn{w_{ij}} is the weight of the tie between actors \(i\) and \(j\).
+\item \emph{Strength average}: The average weight of the ties connected to actor \(i\) -- calculated as \eqn{s_i^{avg} = \frac{s_i^{sum}}{d_i}}, where \eqn{s_i^{sum}} is the strength sum of actor \(i\) and \eqn{d_i} is the degree of actor \(i\).
+\item For \emph{closeness} and \emph{betweenness}, edge weights are typically inverted to treat them as distances, following the convention in \code{igraph}. This behavior can be modified by setting the \code{invert_weights_for_igraph} parameter in the \code{summary_actor} function to FALSE.
+}
+\item \strong{Asymmetric Unweighted}: Same as the symmetric case but now a statistics for the row and column are calculated separately; when relevant a total statistic is calculated as well.
+\item \strong{Asymmetric Weighted}: Same as the symmetric case but now a statistics for the row and column are calculated separately; when relevant a total statistic is calculated as well.
 }
 }
 \description{
