@@ -148,6 +148,13 @@ get_adjacency <- function(
     dyad_data <- agg_across_units(dyad_data, actor1, actor2, NULL, weight, symmetric, missing_to_zero)
   }
   
+  # dump zeros in df so we dont have to iterate through
+  # as many rows, but can only do this as long as we can
+  # assume that all dyads are present, so no possible NAs
+  # and then below we can set NAs to 0
+  if(missing_to_zero){
+    dyad_data <- dyad_data[dyad_data[,weight] != 0, ] }
+
   # assign cross-section value for adjmat depending on user inputs
   value <- dyad_data[,weight]
 

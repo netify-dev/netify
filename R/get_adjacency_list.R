@@ -248,6 +248,13 @@ get_adjacency_list <- function(
     dyad_data <- agg_across_units(dyad_data, actor1, actor2, time, weight, symmetric, missing_to_zero)
   }
 
+  # dump zeros in df so we dont have to iterate through
+  # as many rows, but can only do this as long as we can
+  # assume that all dyads are present, so no possible NAs
+  # and then below we can set NAs to 0
+  if(missing_to_zero){
+    dyad_data <- dyad_data[dyad_data[,weight] != 0, ] }
+
   # iterate through time periods
   adj_out <- lapply( time_pds, function(time_pd){
     
@@ -290,9 +297,6 @@ get_adjacency_list <- function(
     
     # add zeros for non-relationships (this should be a logical)
     if(missing_to_zero){ adj_mat[is.na(adj_mat)] <- 0 }
-
-    # if aggregating and symmetric chosen then make sure that
-    # 
 
     # set diagonals to NA
     if(diag_to_NA & mode=='unipartite' ){ diag(adj_mat) <- NA }
