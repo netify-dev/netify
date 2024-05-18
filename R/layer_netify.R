@@ -90,9 +90,9 @@
 #' dim(get_raw(icews_verbCoop_matlCoop_longit_l)$'2010')
 #' 
 #' # information on layer labels can be accessed 
-#' # from  the `layer_labels` attribute 
-#' attr(icews_verbCoop_matlCoop, 'layer_labels')
-#' attr(icews_verbCoop_matlCoop_longit_l, 'layer_labels')
+#' # from  the `layers` attribute 
+#' attr(icews_verbCoop_matlCoop, 'layers')
+#' attr(icews_verbCoop_matlCoop_longit_l, 'layers')
 #'
 #' @export
 
