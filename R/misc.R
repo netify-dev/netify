@@ -106,13 +106,34 @@ split_string <- function(
 #' @export
 
 array_to_list <- function(arr, preserveAttr=TRUE){
+
+	# convert to list elements along third mode
 	l <- lapply(1:dim(arr)[3], function(ii){ arr[,,ii] })
 	names(l) = dimnames(arr)[[3]]
+
+	# if we want to preserve attrs and keep netify object
 	if(preserveAttr){
+
+		# add back in netify attribs to top level list
 		class(l) = 'netify'
+		attr(l, 'netify_type') = 'longit_list'
 		arrAttr = attributes(arr)
-		for(ii in 3:length(arrAttr)){ attr(l, names(arrAttr)[ii]) = arrAttr[[ii]] }
+		for(ii in 5:length(arrAttr)){
+			attr(l, names(arrAttr)[ii]) = arrAttr[[ii]] }
+
+		# adjust array attributes for cross_sec
+		arrAttr_cross = arrAttr[1:15]
+		arrAttr_cross['dim']$dim = arrAttr_cross['dim']$dim[1:2]
+		arrAttr_cross['dimnames']$dimnames = arrAttr_cross['dimnames']$dimnames[1:2]
+		arrAttr_cross['netify_type'] = 'cross_sec'
+		arrAttr_cross['actor_pds'] = NULL
+
+		# add attributes to every element in list
+		for(ii in seq_along(l)){
+			attributes(l[[ii]]) = arrAttr_cross }
 	}
+
+	#
 	return(l)
 }
 
