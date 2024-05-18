@@ -21,7 +21,8 @@ Imports:
     methods,
     igraph,
     ggplot2 (>= 2.2.1),
-    ggnewscale
+    ggnewscale,
+    rlang
 LinkingTo:
   Rcpp
 Suggests:
