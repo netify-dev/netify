@@ -17,7 +17,6 @@ Imports:
     stats,
     cli,
     checkmate,
-    generics,
     methods,
     igraph,
     ggplot2 (>= 2.2.1),
