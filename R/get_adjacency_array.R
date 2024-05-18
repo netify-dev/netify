@@ -161,9 +161,6 @@ get_adjacency_array <- function(
   # layer label
   if(is.null(weight)){ layer_label <- 'weight1' } else{ layer_label <- weight }
 
-  # get info on binary weights
-  bin_check <- unlist(lapply(adj_out, function(x){ attr(x, 'weight_binary') }))
-
   # add attributes to list
   class(adj_out) <- 'netify'
   attr(adj_out, 'netify_type') <- 'longit_array'
@@ -171,7 +168,7 @@ get_adjacency_array <- function(
 	attr(adj_out, 'actor_pds') <- actor_pds
   attr(adj_out, 'weight') <- weight
   attr(adj_out, 'detail_weight') <- weight_label
-  attr(adj_out, 'weight_binary') <- all(bin_check)  
+  attr(adj_out, 'weight_binary') <- all(bin_check)
   attr(adj_out, 'symmetric') <- user_symmetric
   attr(adj_out, 'mode') <- mode
   attr(adj_out, 'layers') <- layer_label  
