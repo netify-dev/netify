@@ -19,16 +19,16 @@ A data frame where each row represents the network-level statistics for a single
 \itemize{
 \item \code{num_actors}: Number of actors in the network - for bipartite networks number of row and column actors are reported separately.
 \item \code{density}: The proportion of possible connections that are actual connections within the network.
-\item \code{num_edges}: The total number of edges in the network.
+\item \code{num_edges}: The total number of edges in the network (does not take edge weight into account).
 \item \code{mean_edge_weight}: The average weight of edges in the network, provided only for weighted networks.
 \item \code{sd_edge_weight}: The standard deviation of edge weights in the network, provided only for weighted networks.
-\item \code{prop_edges_missing}: The proportion of potential edges that are missing or marked as NA.
+\item \code{prop_edges_missing}: The proportion of potential edges that are missing.
 \item \code{min_edge_value} and \code{max_edge_value}: The minimum and maximum edge weights observed in the network, provided only for weighted networks.
-\item \code{competition_row} and \code{competition_col} (defaults to \code{competition} for undirected networks): Measures network competitiveness using the Herfindahl-Hirschman Index (HHI), defined as \eqn{1 - \sum_{i=1}^{n} (s_i)^2}, where \eqn{s_i} is the proportion of interactions by actor \eqn{i} and \eqn{n} is the total number of actors. The index ranges from 1/n (indicating high diversity and competitive interaction across actors) to 1 (one actor dominates all interactions). Refer to Dorff, Gallop, & Minhas (2023) for an application of this measure in conflict networks.
-\item \code{sd_of_row_means} and \code{sd_of_col_means}: Standard deviations of the sending and receiving effects (row and column means).
-\item \code{covar_of_row_col_means}: The covariance between sending and receiving effects, calculated for unipartite networks.
-\item \code{reciprocity}: The reciprocity of the network, defined as the correlation between the adjacency matrix and its transpose, calculated for unipartite networks.
-\item \code{transitivity}: The overall transitivity or clustering coefficient of the network, reflecting the likelihood that two neighbors of a node are connected.
+\item \code{competition_row} and \code{competition_col} (defaults to \code{competition} for undirected networks): Measures network competitiveness using the Herfindahl-Hirschman Index (HHI), defined as \eqn{\sum_{i=1}^{n} (s_i)^2}, where \eqn{s_i} is the proportion of interactions by actor \eqn{i} and \eqn{n} is the total number of actors. The index ranges from 1/n (indicating high diversity and competitive interaction across actors) to 1 (one actor dominates all interactions). Refer to Dorff, Gallop, & Minhas (2023) for an application of this measure in conflict networks.
+\item \code{sd_of_row_means} and \code{sd_of_col_means}: Standard deviations of the sending and receiving effects (row and column means). These statistics are meant to describe the variability in actor behavior across the network.
+\item \code{covar_of_row_col_means}: The covariance between sending and receiving effects, always takes weights into account and is only calculated for unipartite networks.
+\item \code{reciprocity}: The reciprocity of the network, defined as the correlation between the adjacency matrix and its transpose, always takes weights into account and is only calculated for unipartite networks.
+\item \code{transitivity}: The overall transitivity or clustering coefficient of the network, reflecting the likelihood that two neighbors of a node are connected (calculated using \code{transitivity} function from \code{igraph}).
 }
 }
 \description{
