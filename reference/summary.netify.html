@@ -69,16 +69,16 @@
 
 <p>A data frame where each row represents the network-level statistics for a single network or a single time point in a longitudinal study. Depending on the network type and data attributes, the columns can include:</p><ul><li><p><code>num_actors</code>: Number of actors in the network - for bipartite networks number of row and column actors are reported separately.</p></li>
 <li><p><code>density</code>: The proportion of possible connections that are actual connections within the network.</p></li>
-<li><p><code>num_edges</code>: The total number of edges in the network.</p></li>
+<li><p><code>num_edges</code>: The total number of edges in the network (does not take edge weight into account).</p></li>
 <li><p><code>mean_edge_weight</code>: The average weight of edges in the network, provided only for weighted networks.</p></li>
 <li><p><code>sd_edge_weight</code>: The standard deviation of edge weights in the network, provided only for weighted networks.</p></li>
-<li><p><code>prop_edges_missing</code>: The proportion of potential edges that are missing or marked as NA.</p></li>
+<li><p><code>prop_edges_missing</code>: The proportion of potential edges that are missing.</p></li>
 <li><p><code>min_edge_value</code> and <code>max_edge_value</code>: The minimum and maximum edge weights observed in the network, provided only for weighted networks.</p></li>
-<li><p><code>competition_row</code> and <code>competition_col</code>: These statistics measure the competitiveness within the network, quantifying how evenly interactions are spread across actors. High values indicate a decentralized network where interactions are not dominated by a few actors, suggesting a diverse and competitive network structure. This measure is useful across various fields for analyzing the balance of influence or activity among participants in a network. See Dorff, Gallop, &amp; Minhas (2023), "Network Competition and Civilian Targeting during Civil Conflict," British Journal of Political Science, 53(2):441-459 for further details.</p></li>
-<li><p><code>sd_of_row_means</code> and <code>sd_of_col_means</code>: Standard deviations of the sending and receiving effects (row and column means).</p></li>
-<li><p><code>covar_of_row_col_means</code>: The covariance between sending and receiving effects, calculated for unipartite networks.</p></li>
-<li><p><code>reciprocity</code>: The reciprocity of the network, defined as the correlation between the adjacency matrix and its transpose, calculated for unipartite networks.</p></li>
-<li><p><code>transitivity</code>: The overall transitivity or clustering coefficient of the network, reflecting the likelihood that two neighbors of a node are connected.</p></li>
+<li><p><code>competition_row</code> and <code>competition_col</code> (defaults to <code>competition</code> for undirected networks): Measures network competitiveness using the Herfindahl-Hirschman Index (HHI), defined as \(\sum_{i=1}^{n} (s_i)^2\), where \(s_i\) is the proportion of interactions by actor \(i\) and \(n\) is the total number of actors. The index ranges from 1/n (indicating high diversity and competitive interaction across actors) to 1 (one actor dominates all interactions). Refer to Dorff, Gallop, &amp; Minhas (2023) for an application of this measure in conflict networks.</p></li>
+<li><p><code>sd_of_row_means</code> and <code>sd_of_col_means</code>: Standard deviations of the sending and receiving effects (row and column means). These statistics are meant to describe the variability in actor behavior across the network.</p></li>
+<li><p><code>covar_of_row_col_means</code>: The covariance between sending and receiving effects, always takes weights into account and is only calculated for unipartite networks.</p></li>
+<li><p><code>reciprocity</code>: The reciprocity of the network, defined as the correlation between the adjacency matrix and its transpose, always takes weights into account and is only calculated for unipartite networks.</p></li>
+<li><p><code>transitivity</code>: The overall transitivity or clustering coefficient of the network, reflecting the likelihood that two neighbors of a node are connected (calculated using <code>transitivity</code> function from <code>igraph</code>).</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -111,19 +111,19 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5 2006        152 0.4108139      9429         21.09136       160.0782</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 2007        152 0.4243203      9739         21.89753       162.4166</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   prop_edges_missing min_edge_value max_edge_value competition_row</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1         0.01315789              0           6003       0.9590688</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2         0.01315789              0           5937       0.9580018</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3         0.01315789              0           5141       0.9651899</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4         0.01315789              0           6561       0.9593295</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5         0.01315789              0           7579       0.9584860</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6         0.01315789              0           7125       0.9611237</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1         0.01315789              0           6003      0.04093116</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2         0.01315789              0           5937      0.04199822</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         0.01315789              0           5141      0.03481011</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4         0.01315789              0           6561      0.04067046</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5         0.01315789              0           7579      0.04151400</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6         0.01315789              0           7125      0.03887627</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   competition_col sd_of_row_means sd_of_col_means covar_of_row_col_means</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0.9618638        44.91530        43.04935              0.9946888</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2       0.9606981        45.07759        43.32783              0.9872959</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3       0.9673701        41.25503        39.63005              0.9923809</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4       0.9637553        45.20964        42.17312              0.9932157</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5       0.9630250        48.76301        45.48502              0.9909337</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6       0.9648568        48.67808        45.77854              0.9940837</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      0.03813621        44.91530        43.04935              0.9946888</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      0.03930188        45.07759        43.32783              0.9872959</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3      0.03262993        41.25503        39.63005              0.9923809</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4      0.03624472        45.20964        42.17312              0.9932157</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      0.03697499        48.76301        45.48502              0.9909337</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6      0.03514325        48.67808        45.77854              0.9940837</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   reciprocity transitivity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   0.9778217    0.6058952</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   0.9632488    0.6072045</span>
@@ -154,11 +154,11 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 2013        152 0.4318142      9911         17.21301       130.4925</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 2014        152 0.4258452      9774         18.39291       136.5412</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   prop_edges_missing min_edge_value max_edge_value competition_row</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1         0.01315789              0           6320       0.9594113</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2         0.01315789              0           6327       0.9594158</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1         0.01315789              0           6320      0.04058869</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2         0.01315789              0           6327      0.04058415</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   competition_col sd_of_row_means sd_of_col_means covar_of_row_col_means</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0.9635761        39.26572        36.78299              0.9939394</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2       0.9647878        41.95447        38.49827              0.9904402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      0.03642385        39.26572        36.78299              0.9939394</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      0.03521224        41.95447        38.49827              0.9904402</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   reciprocity transitivity spinglass_ig.num_comm spinglass_ig.comm_modul</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   0.9782226    0.6314429                     7             0.003979870</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   0.9730745    0.6297063                     5             0.003912803</span>
