@@ -2,8 +2,9 @@ pandoc: 3.1.11
 pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
+  manual_plotting: manual_plotting.html
   workshop_demo: workshop_demo.html
-last_built: 2024-05-20T13:53Z
+last_built: 2024-05-20T14:48Z
 urls:
   reference: https://netify-dev.github.io/netify/reference
   article: https://netify-dev.github.io/netify/articles

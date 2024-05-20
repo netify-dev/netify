@@ -26,6 +26,7 @@ It processes network attributes and setups up layout and aesthetic parameters fo
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/manual_plotting.html">Netify: Manual Plotting with ggplot2</a>
     <a class="dropdown-item" href="../articles/workshop_demo.html">Netify Workshop</a>
   </div>
 </li>
@@ -63,7 +64,7 @@ It processes network attributes and setups up layout and aesthetic parameters fo
 <dt>plot_args</dt>
 <dd><p>A list of arguments that influence the layout and presentation of the network visualization, including:
 - <code>point_layout</code>: Optional, user-provided node layout; if not provided, layout will be generated based on <code>layout</code> parameter.
-- <code>layout</code>: Specifies the layout algorithm from 'igraph' to position the nodes if <code>point_layout</code> is not provided.
+- <code>layout</code>: Specifies the layout algorithm from 'igraph' to position the nodes if <code>point_layout</code> is not provided. Available options include "nicely", "fruchterman.reingold", "kamada.kawai", "random", "circle", "star", "grid", "graphopt", "sugiyama", "drl", "lgl", "bipartite", "tree", "randomly", "dh", "fr", "kk", "gem", and "mds".
 - <code>remove_isolates</code>: Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
 - <code>static_actor_positions</code>: Logical indicating whether to use static positions for actors.
 - <code>add_edges</code>: Logical; if TRUE, edges will be added to the plot. Default is TRUE.
