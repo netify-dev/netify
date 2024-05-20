@@ -16,7 +16,7 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This vignette provides an overview of how to create more customizable plots using `ggplot2` and just having `netify` serve as the data preparation engine. 
+This vignette provides an overview of how to create customizable plots using `ggplot2` while still using `netify` to prepare the data. 
 
 Lets load the necessary libraries.
 
@@ -25,7 +25,7 @@ library(netify)
 library(ggplot2)
 ```
 
-Additionally, we'll use the `ggnewscale` package to create multiple legends when necessary in the same plot (e.g., if you want to have legends for a color aesthetic for both nodes and edges).
+We'll also use the `ggnewscale` package to create multiple legends when necessary in the same plot (e.g., if you want to have legends for a color aesthetic for both nodes and edges).
 
 ```{r}
 if(!'ggnewscale' %in% rownames(installed.packages())){
@@ -35,7 +35,7 @@ library(ggnewscale)
 
 ##  Preparing data
 
-First lets create a netlet object from some dyadic data using the `netify` package.
+First lets create a `netlet` object from some dyadic data (ICEWS data) using the `netify` package.
 
 ```{r}
 # load icews data
@@ -44,7 +44,7 @@ data(icews)
 # choose attributes
 nvars = c( 'i_polity2', 'i_log_gdp', 'i_log_pop' )
 dvars = c( 'matlCoop', 'verbConf', 'matlConf' )
-#'
+
 # create a netify object
 netlet = netify(
     dyad_data=icews, actor1='i', actor2='j',
@@ -61,9 +61,9 @@ netlet = netify(
 print(netlet)
 ```
 
-This is a longitudinal, weighted network with nodal and dyadic attributes that we can use for coloring. 
+This is a longitudinal, weighted network with nodal and dyadic attributes. In a few more steps we will show how to highlight these attributes in the plot.
 
-We can use the `net_plot_data` function to create a data frame that can be used to create a plot using `ggplot2`. `net_plot_data` processes a netify object to extract and set up node and edge data according to specified plotting arguments. It returns a list of components the only necessary ones for users are in the `net_dfs` element. This element of the list contains two objects: `edge_data` and `nodal_data`. These are data frames that can be used to create a plot using `ggplot2`.
+Next, we use the `net_plot_data` function to create a data frame for `ggplot2`. `net_plot_data` extracts and sets up node and edge data from a `netify` object according to specified plotting arguments. It returns a list of different components but the most important one for users is the `net_dfs` element. This element contains two objects: `edge_data` and `nodal_data`. These are data frames that can be passed to `ggplot2`.
 
 ```{r}
 # create a data frame for plotting
@@ -83,22 +83,6 @@ head(net_dfs$nodal_data)
 ```
 
 The `x` and `y` in `nodal_data` and the `x1`, `y1`, `x2`, and `y2` in `edge_data` are the coordinates of the nodes and edges, respectively. These are the coordinates that will be used to plot the network. 
-
-### Changing the layout
-
-By default layouts for node positions are drawn from the `layout_nicely` algorithm in the `igraph` package. Users can specify other layouts as, for example, say that you wanted to use the `fruchterman.reingold` algorithm instead:
-
-```{r}
-# create a df using fr instead 
-plot_data_kk = net_plot_data(netlet, 
-    list(
-        layout='kamada.kawai'
-        )
-    )
-
-# see new x-y coordinates
-lapply(plot_data_kk$net_dfs, head)
-```
 
 ## Creating a plot
 
@@ -131,7 +115,56 @@ ggplot() +
 	theme_netify()
 ```
 
-Say that we wanted to add in some additonal edge information to the plot, say information about the `matlConf` dyadic attribute. Lets say that we wanted to highlight edges of verbal cooperation that were occurring at the same time that higher than average levels of material conflict were occurring. First lets create the variable in the edge data.
+### Changing the layout
+
+By default layouts for node positions are drawn from the `layout_nicely` algorithm in the `igraph` package. Users can specify other layouts as, for example, say that you wanted to use the `kamada.kawai` algorithm instead:
+
+```{r}
+# create a df using fr instead 
+plot_data_kk = net_plot_data(netlet, 
+    list(
+        layout='kamada.kawai'
+        )
+    )
+
+# see new x-y coordinates
+lapply(plot_data_kk$net_dfs, head)
+
+# get relevant dfs
+net_dfs_kk = plot_data_kk$net_dfs
+
+# plot
+ggplot() + 
+	geom_segment(
+		data = net_dfs_kk$edge_data,
+		aes(
+			x=x1, 
+			y=y1, 
+			xend=x2, 
+			yend=y2
+		),
+		color='lightgrey',
+		alpha=.2
+	) +
+	geom_point(
+		data = net_dfs_kk$nodal_data,
+		aes(
+			x=x, 
+			y=y,
+			size=i_log_pop, 
+			color=i_polity2
+		)
+	) +
+	scale_color_gradient(low='lightgreen', high='darkgreen') +
+	facet_wrap(~time, scales='free') +
+	theme_netify()
+#
+```
+
+
+### Add Edge Information
+
+So far, we have focused on using color to convey information about nodal attributes in the network. Now, let's add more edge information to the plot. For example, we can include information about the `matlConf` dyadic attribute. Imagine we want to highlight edges of verbal cooperation that occur at the same time as when higher than average levels of material conflict occur in the network. First, let's create the variable in the edge data.
 
 ```{r}
 if(!'dplyr' %in% rownames(installed.packages())){
@@ -151,7 +184,7 @@ net_dfs$edge_data = net_dfs$edge_data |>
 head(net_dfs$edge_data)
 ```    
 
-Now that we have the new varaible in the data.frame, we can plot by it but note that we will have a color aesthetic for points and segments, `ggplot2` by default only supports one legend by aesthetic. We can get around this by using the `new_scale_color` function from the ``ggnewscale` package.
+Now that we have the new variable in the data.frame, we can plot by it but note that we now need a color aesthetic for both points and segments, even though `ggplot2` only supports one legend by aesthetic by default. We can get around this by using the `new_scale_color` function from the ``ggnewscale` package.
 
 ```{r}
 # color line segments by this new variable
@@ -182,3 +215,11 @@ ggplot() +
 	facet_wrap(~time, scales='free') +
 	theme_netify()
 ```
+
+## References
+
+- Boschee, Elizabeth; Lautenschlager, Jennifer; O'Brien, Sean; Shellman, Steve; Starz, James; Ward, Michael, 2015, ``ICEWS Coded Event Data'', doi:10.7910/DVN/28075 , Harvard Dataverse.
+
+- Pedersen, T. L. (2020). ggnewscale: Multiple Fill and Colour Scales in 'ggplot2'. R package version 0.4.3. https://CRAN.R-project.org/package=ggnewscale
+
+- Wickham, H. (2016). ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York.
