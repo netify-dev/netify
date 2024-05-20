@@ -3,6 +3,8 @@ title: "Netify: Manual Plotting with ggplot2"
 author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
+chunk_options:
+  dpi: 100
 vignette: >
   %\VignetteEncoding{UTF-8}
   %\VignetteIndexEntry{Netify: Manual Plotting with ggplot2}
@@ -15,6 +17,7 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 
 This vignette provides an overview of how to create customizable plots using `ggplot2` while still using `netify` to prepare the data. 
 
@@ -88,7 +91,7 @@ The `x` and `y` in `nodal_data` and the `x1`, `y1`, `x2`, and `y2` in `edge_data
 
 Now that we have the data, we can create a plot using `ggplot2`. We'll use the `geom_segment` and `geom_point` (or, `geom_label`, `geom_text`, and the `ggrepel package equivalents) functions to plot the edges and nodes, respectively.
 
-```{r}
+```{r, fig.width=7, fig.height=6}
 ggplot() + 
 	geom_segment(
 		data = net_dfs$edge_data,
@@ -119,7 +122,7 @@ ggplot() +
 
 By default layouts for node positions are drawn from the `layout_nicely` algorithm in the `igraph` package. Users can specify other layouts as, for example, say that you wanted to use the `kamada.kawai` algorithm instead:
 
-```{r}
+```{r, fig.width=7, fig.height=6}
 # create a df using fr instead 
 plot_data_kk = net_plot_data(netlet, 
     list(
@@ -164,7 +167,7 @@ ggplot() +
 
 ### Add Edge Information
 
-So far, we have focused on using color to convey information about nodal attributes in the network. Now, let's add more edge information to the plot. For example, we can include information about the `matlConf` dyadic attribute. Imagine we want to highlight edges of verbal cooperation that occur at the same time as when higher than average levels of material conflict occur in the network. First, let's create the variable in the edge data.
+So far, we have focused on using color to convey information about nodal attributes in the network (population size and polity score). Now, let's add more edge information to the plot. For example, we can include information about the `matlConf` dyadic attribute. Imagine we want to highlight edges of verbal cooperation that occur at the same time as when higher than average levels of material conflict occur in the network. First, let's create the variable in the edge data.
 
 ```{r}
 if(!'dplyr' %in% rownames(installed.packages())){
@@ -186,7 +189,7 @@ head(net_dfs$edge_data)
 
 Now that we have the new variable in the data.frame, we can plot by it but note that we now need a color aesthetic for both points and segments, even though `ggplot2` only supports one legend by aesthetic by default. We can get around this by using the `new_scale_color` function from the ``ggnewscale` package.
 
-```{r}
+```{r, fig.width=7, fig.height=6}
 # color line segments by this new variable
 ggplot() + 
 	geom_segment(
