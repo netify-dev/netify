@@ -170,13 +170,23 @@ We might also want to look at a specific set of actors' statistics overtime. Our
 ```{r}
 # every year & every actor (messy!) but check out help file
 summary_actor_mids <- summary_actor(mid_long_network)
+```
 
+```{r, echo=TRUE, eval=FALSE}
 # violin plot across all actors
 # and for each stat
 plot_actor_stats(
   summary_actor_mids 
   )
+```
 
+```{r, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+plot_actor_stats(
+  summary_actor_mids 
+  )
+```
+
+```{r}
 # focus in on specific stat
 plot_actor_stats(
   summary_actor_mids,

@@ -30,7 +30,7 @@ and creates visualizations for actor level statistics. This function supports bo
 \details{
 This function is capable of generating different types of plots based on the structure of the input data:
 \itemize{
-\item For cross-sectional data, it can generate violin plots to show the distribution of statistics across actors or bar plots to compare specific actors.
-\item For longitudinal data, it can generate violin plots to show how statistics distribute over time across actors or line plots to track changes in statistics for specific actors over time.
+\item For cross-sectional data, it will show the distribution of statistics across actors or bar plots to compare specific actors.
+\item For longitudinal data, it will show how the distribution of statistics across change over time or line plots to track changes in statistics for specific actors over time.
 }
 }

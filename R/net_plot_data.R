@@ -24,7 +24,11 @@
 #'         - `ggnet_params`: Graphical parameters organized for nodes, edges, and labels.
 #'         - `net_dfs`: Data frames for nodes and edges prepared for plotting.
 #'
-#' @export 
+#' 
+#' @importFrom cli cli_alert_danger
+#' 
+#' @export net_plot_data
+#' @export
 
 net_plot_data <- function(netlet, plot_args=list()) {
 

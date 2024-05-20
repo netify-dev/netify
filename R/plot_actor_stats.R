@@ -11,11 +11,12 @@
 #' @return A `ggplot` object representing the requested visualization, which can be further customized or printed.
 #'
 #' @details This function is capable of generating different types of plots based on the structure of the input data:
-#' - For cross-sectional data, it can generate violin plots to show the distribution of statistics across actors or bar plots to compare specific actors.
-#' - For longitudinal data, it can generate violin plots to show how statistics distribute over time across actors or line plots to track changes in statistics for specific actors over time.
+#' - For cross-sectional data, it will show the distribution of statistics across actors or bar plots to compare specific actors.
+#' - For longitudinal data, it will show how the distribution of statistics across change over time or line plots to track changes in statistics for specific actors over time.
 #'
 #'
 #' @import ggplot2
+#' @importFrom ggridges geom_density_ridges
 #' @importFrom reshape2 melt
 #' @importFrom cli cli_alert_danger cli_alert_warning
 #' @import rlang
@@ -88,11 +89,11 @@ plot_actor_stats <- function(
     # prep data
     ggdata = reshape2::melt(summary_df, id='actor')
 
-    # across actor violin
+    # across actor density
     if(across_actor) {
-      # violin plots to showcase dist across actors by var
-      viz = ggplot( ggdata, aes(x=!!sym("variable"), y=!!sym("value")) ) + 
-        geom_violin() +
+      # density plots to showcase dist across actors by var
+      viz = ggplot( ggdata, aes(x=!!sym("value") )) + 
+        geom_density() +
         labs(x='', y='') +
         facet_wrap(~variable, scales='free') +
         theme_stat_netify()
@@ -117,14 +118,18 @@ plot_actor_stats <- function(
 
     # density across actors over time
     if(across_actor) {
-      # factor time for violin
+      # factor time for ridges
       ggdata$time = factor(ggdata$time)
-      # violins to showcase dist across actors over time by var
-      viz = ggplot( ggdata, aes(x=!!sym("time"), y=!!sym("value")) ) +
-        geom_violin() +
+      # ridges to showcase dist across actors over time by var
+      viz = ggplot( ggdata, aes( x=!!sym("value"), y=!!sym("time") ) ) +
+        # geom_violin() +
+        ggridges::geom_density_ridges() +
         labs(x='', y='') +        
-        facet_wrap(~variable, scales='free') +
-        theme_stat_netify()
+        facet_wrap(~variable, scales='free_x') +
+        theme_stat_netify() +
+        theme(
+          axis.text.x=element_text(size=8.8)
+        )
     }
 
     # actor changes over time
@@ -155,82 +160,3 @@ plot_actor_stats <- function(
   #
   return(viz)
 }
-
-
-# library(netify)
-
-# library(ggplot2)
-
-# example(decompose_netlet)
-
-# example(get_adjacency)
-
-# example(get_adjacency_list)
-
-
-# ####### cross sec case
-# cross_asym_wgt = icews_matlConf
-
-# s_mconf = summary_actor(cross_asym_wgt)
-
-# ggdata = reshape2::melt(s_mconf, id='actor')
-
-
-# #### violins across actors
-# ggplot(
-#   ggdata, aes(x=variable,y=value)
-# ) + 
-# geom_violin() +
-# facet_wrap(~variable, scales='free')
-
-# # top actor specific
-# s_mconf_a = s_mconf
-# s_mconf_a = s_mconf_a[order(s_mconf_a$degree_total,decreasing=TRUE),]
-# top10 = s_mconf_a$actor[1:10]
-# s_mconf_a = s_mconf_a[s_mconf_a$actor %in% top10,]
-# ggdata_a = reshape2::melt(s_mconf_a, id='actor')
-# ggplot(
-#   ggdata_a, aes(x=actor,y=value)
-# ) + 
-# geom_bar(stat='identity') +
-# facet_wrap(~variable, scales='free') +
-# theme(
-#   axis.text.x = element_text(angle = 90, hjust = 1, size=2)
-# )
-# ####### cross sec case
-
-# ####### longit case
-# longit_sym_bin = mid_network
-
-# s_mid = summary_actor(longit_sym_bin)
-
-# ggdata = reshape2::melt(s_mid, id=c('actor', 'time'))
-
-# ### density across actors over time
-
-
-# ### violins across actors over time
-# ggplot(
-#   ggdata, aes(x=factor(time),y=value)
-# ) +
-# geom_violin() +
-# facet_wrap(~variable, scales='free')
-
-# ### actor changes over time
-# s_mid_a = s_mid
-# s_mid_a = s_mid_a[order(s_mid_a$degree,decreasing=TRUE),]
-# top5 = s_mid_a$actor[1:5]
-# s_mid_a = s_mid_a[s_mid_a$actor %in% top5,]
-# ggdata_a = reshape2::melt(s_mid_a, id=c('actor', 'time'))
-# ggplot(
-#   ggdata_a, aes(x=time,y=value, group=actor, color=actor)
-# ) + 
-# geom_line() +
-# geom_point() +
-# scale_color_brewer(type='qual', palette=2) +
-# facet_wrap(~variable, scales='free') +
-# theme_bw() +
-# theme(
-#   legend.position = 'top'
-# )
-# ####### longit case
