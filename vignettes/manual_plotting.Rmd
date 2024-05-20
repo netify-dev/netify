@@ -91,7 +91,7 @@ The `x` and `y` in `nodal_data` and the `x1`, `y1`, `x2`, and `y2` in `edge_data
 
 Now that we have the data, we can create a plot using `ggplot2`. We'll use the `geom_segment` and `geom_point` (or, `geom_label`, `geom_text`, and the `ggrepel package equivalents) functions to plot the edges and nodes, respectively.
 
-```{r, fig.width=7, fig.height=6}
+```{r, dpi=100, fig.width=7, fig.height=6}
 ggplot() + 
 	geom_segment(
 		data = net_dfs$edge_data,
