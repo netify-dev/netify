@@ -5,7 +5,7 @@
 #' @param x A 'netify' object, which contains the network data structured for analysis and visualization.
 #' @param ... Additional arguments, which can include but are not limited to:
 #'        - `point_layout`: Optional, user-provided node layout; if not provided, layout will be generated based on `layout` parameter.
-#'        - `layout`: Specifies the layout algorithm from 'igraph' to position the nodes if `point_layout` is not provided.
+#'        - `layout`: Specifies the layout algorithm from 'igraph' to position the nodes if `point_layout` is not provided. Available options include "nicely", "fruchterman.reingold", "kamada.kawai", "random", "circle", "star", "grid", "graphopt", "sugiyama", "drl", "lgl", "bipartite", "tree", "randomly", "dh", "fr", "kk", "gem", and "mds".
 #'        - `remove_isolates`: Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
 #'        - `static_actor_positions` Logical indicating whether to use static positions for actors.
 #'        Useful in longitudinal studies where node positions should remain consistent over time.

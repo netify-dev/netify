@@ -70,6 +70,10 @@ get_node_layout <- function(
     # if the user has specified a layout
     # then match it using the code below
     } else {
+	# make sure layout is lowercase
+	layout = tolower(layout)
+
+	# match with avail choices
     layout_fun <- match.arg(
         layout, 
         choices = c(
