@@ -165,14 +165,27 @@ We can also make a quick visualization of network statistics over time using the
 plot_graph_stats(mid_long_summary)
 ```
 
-We might also want to look at a specific set of actors' statistics overtime. Our built-in function, `summary_actor` will calculate in-degree, out-degree, average degree, and eigenvector centrality for each actor in each time period.
+We might also want to look at a summary of actor statistics overtime. Our built-in function, `summary_actor` will calculate in-degree, out-degree, average degree, and eigenvector centrality for each actor in each time period.
 
 ```{r}
 # every year & every actor (messy!) but check out help file
 summary_actor_mids <- summary_actor(mid_long_network)
+head(summary_actor_mids)
 ```
 
-```{r, echo=TRUE, eval=FALSE}
+We can take a single actor and examine their statistic over time:
+
+```{r, fig.width=6, fig.height=6}
+actor_2 <- summary_actor_mids[summary_actor_mids$actor == 2, ]
+
+ggplot(actor_2, aes(x = time, y = closeness)) +
+  geom_line() +
+  labs(x = "Time", y = "Closeness Centrality")
+```
+
+Or we can look at the distribution of the statistic for all actors over time:
+
+```{r, fig.width=6, fig.height=6}
 # violin plot across all actors
 # and for each stat
 plot_actor_stats(
@@ -180,14 +193,9 @@ plot_actor_stats(
   )
 ```
 
-```{r, eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-plot_actor_stats(
-  summary_actor_mids 
-  )
-```
-
-```{r}
-# focus in on specific stat
+And then select a specific statistic to focus on:
+```{r, fig.width=6, fig.height=6}
+# focus on closeness
 plot_actor_stats(
   summary_actor_mids,
   specific_stats='closeness'
