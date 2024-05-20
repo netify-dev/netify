@@ -247,7 +247,7 @@ to plot the edges and nodes, respectively.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'lightgreen'</span>, high<span class="op">=</span><span class="st">'darkgreen'</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">time</span>, scales<span class="op">=</span><span class="st">'free'</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="../reference/theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="manual_plotting_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+<p><img src="manual_plotting_files/figure-html/unnamed-chunk-5-1.png" width="672"></p>
 <div class="section level3">
 <h3 id="changing-the-layout">Changing the layout<a class="anchor" aria-label="anchor" href="#changing-the-layout"></a>
 </h3>
@@ -325,7 +325,7 @@ use the <code>kamada.kawai</code> algorithm instead:</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'lightgreen'</span>, high<span class="op">=</span><span class="st">'darkgreen'</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">time</span>, scales<span class="op">=</span><span class="st">'free'</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="../reference/theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="manual_plotting_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+<p><img src="manual_plotting_files/figure-html/unnamed-chunk-6-1.png" width="672"></p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#</span></span></code></pre></div>
 </div>
@@ -333,12 +333,12 @@ use the <code>kamada.kawai</code> algorithm instead:</p>
 <h3 id="add-edge-information">Add Edge Information<a class="anchor" aria-label="anchor" href="#add-edge-information"></a>
 </h3>
 <p>So far, we have focused on using color to convey information about
-nodal attributes in the network. Now, let’s add more edge information to
-the plot. For example, we can include information about the
-<code>matlConf</code> dyadic attribute. Imagine we want to highlight
-edges of verbal cooperation that occur at the same time as when higher
-than average levels of material conflict occur in the network. First,
-let’s create the variable in the edge data.</p>
+nodal attributes in the network (population size and polity score). Now,
+let’s add more edge information to the plot. For example, we can include
+information about the <code>matlConf</code> dyadic attribute. Imagine we
+want to highlight edges of verbal cooperation that occur at the same
+time as when higher than average levels of material conflict occur in
+the network. First, let’s create the variable in the edge data.</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="st">'dplyr'</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'dplyr'</span>, repos<span class="op">=</span><span class="st">'https://cloud.r-project.org'</span><span class="op">)</span> <span class="op">}</span></span>
@@ -411,7 +411,7 @@ package.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'lightgreen'</span>, high<span class="op">=</span><span class="st">'darkgreen'</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">time</span>, scales<span class="op">=</span><span class="st">'free'</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="../reference/theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="manual_plotting_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
+<p><img src="manual_plotting_files/figure-html/unnamed-chunk-8-1.png" width="672"></p>
 </div>
 </div>
 <div class="section level2">
