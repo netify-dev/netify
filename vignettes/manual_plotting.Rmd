@@ -61,7 +61,7 @@ netlet = netify(
 )
 
 # print
-print(netlet)
+netlet
 ```
 
 This is a longitudinal, weighted network with nodal and dyadic attributes. In a few more steps we will show how to highlight these attributes in the plot.
@@ -91,7 +91,7 @@ The `x` and `y` in `nodal_data` and the `x1`, `y1`, `x2`, and `y2` in `edge_data
 
 Now that we have the data, we can create a plot using `ggplot2`. We'll use the `geom_segment` and `geom_point` (or, `geom_label`, `geom_text`, and the `ggrepel package equivalents) functions to plot the edges and nodes, respectively.
 
-```{r, dpi=100, fig.width=7, fig.height=6}
+```{r, dpi=100, fig.width=9, fig.height=8}
 ggplot() + 
 	geom_segment(
 		data = net_dfs$edge_data,
@@ -122,7 +122,7 @@ ggplot() +
 
 By default layouts for node positions are drawn from the `layout_nicely` algorithm in the `igraph` package. Users can specify other layouts as, for example, say that you wanted to use the `kamada.kawai` algorithm instead:
 
-```{r, fig.width=7, fig.height=6}
+```{r, dpi=100, fig.width=9, fig.height=8}
 # create a df using fr instead 
 plot_data_kk = net_plot_data(netlet, 
     list(
@@ -189,7 +189,7 @@ head(net_dfs$edge_data)
 
 Now that we have the new variable in the data.frame, we can plot by it but note that we now need a color aesthetic for both points and segments, even though `ggplot2` only supports one legend by aesthetic by default. We can get around this by using the `new_scale_color` function from the ``ggnewscale` package.
 
-```{r, fig.width=7, fig.height=6}
+```{r, dpi=100, fig.width=9, fig.height=8}
 # color line segments by this new variable
 ggplot() + 
 	geom_segment(
@@ -203,7 +203,7 @@ ggplot() +
 		),
 		alpha=.2
 	) +
-    scale_color_manual(values=c('lightgrey', 'red')) +
+    scale_color_manual(values=c('grey', 'red')) +
     new_scale_color() +
 	geom_point(
 		data = net_dfs$nodal_data,
@@ -216,7 +216,10 @@ ggplot() +
 	) +
 	scale_color_gradient(low='lightgreen', high='darkgreen') +
 	facet_wrap(~time, scales='free') +
-	theme_netify()
+	theme_netify() +
+  theme(
+    legend.position='right'
+  )
 ```
 
 ## References

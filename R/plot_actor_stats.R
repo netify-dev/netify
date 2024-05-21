@@ -137,11 +137,14 @@ plot_actor_stats <- function(
 
       # write a warning that if they have more than 10 actors
       # the plot will quickly become unreadable
-      if(length(unique(summary_df$actor)) > 10) {
+      if(length(unique(summary_df$actor)) > 8) {
         cli::cli_alert_warning(
-          'Warning: You have more than 10 actors in your data. 
+          'Warning: You have more than 8 actors in your data. 
           The plot may become unreadable.')
       }
+
+      # get actor count
+      plus_eight_actors = ifelse(length(unique(summary_df$actor))>8, TRUE, FALSE)
 
       # line plots to showcase change over time by actor
       viz = ggplot( ggdata, aes(
@@ -150,8 +153,13 @@ plot_actor_stats <- function(
           ) ) + 
         geom_line() +
         geom_point() +
-        labs(x='', y='') +        
-        scale_color_brewer(type='qual', palette=2) +
+        labs(x='', y='')
+
+      # use colorbrewer to color if 8 or fewer actors
+      if(!plus_eight_actors) { viz = viz + scale_color_brewer(type='qual', palette=2) } 
+        
+      # finish cleaning plot
+      viz = viz +
         facet_wrap(~variable, scales='free') +
         theme_stat_netify()
     }

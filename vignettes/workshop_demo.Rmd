@@ -186,7 +186,7 @@ ggplot(actor_2, aes(x = time, y = closeness)) +
 Or we can look at the distribution of the statistic for all actors over time:
 
 ```{r, fig.width=6, fig.height=6}
-# violin plot across all actors
+# density plot across all actors
 # and for each stat
 plot_actor_stats(
   summary_actor_mids 
@@ -194,6 +194,7 @@ plot_actor_stats(
 ```
 
 And then select a specific statistic to focus on:
+
 ```{r, fig.width=6, fig.height=6}
 # focus on closeness
 plot_actor_stats(
@@ -202,7 +203,7 @@ plot_actor_stats(
   )
 ```
 
-Say that we wanted to showcase actor-specific statistics over time. We can use the plot_actor_stats function for this as well, though it's recommended to subset to a few actors for a more legible plot.
+Say that we wanted to showcase actor-specific statistics over time. We can use the plot_actor_stats function for this as well, though it's **highly recommended** to subset to a few actors for a more legible plot.
 
 ```{r, fig.width=6, fig.height=6}
 # top 5 GDP countries (USA, China, Japan, Germany, India)
@@ -215,6 +216,18 @@ plot_actor_stats(
   specific_actors = top_5
 )
 ```
+
+Additionally, since the result of `plot_actor_stats` is a `ggplot2` object, users can also choose to facet the plot by actors and variables, as shown below:
+
+```{r}
+plot_actor_stats(
+  summary_actor_mids, 
+  across_actor = FALSE, 
+  specific_actors = top_5 
+  ) + 
+  facet_grid(variable~actor, scales='free')
+```
+
 
 Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default and seed set to 6886 for node layout).
 

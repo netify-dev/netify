@@ -18,7 +18,7 @@ theme_netify = function(){
 		legend.position='top',
         panel.border=element_blank(),
         axis.ticks=element_blank(),
-		strip.text.x = element_text(color='white'),
+		strip.text = element_text(color='white'),
 		strip.background = element_rect(fill = "#525252", color='#525252')        
 	)
 }
