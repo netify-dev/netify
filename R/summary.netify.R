@@ -20,7 +20,7 @@
 #' - `reciprocity`: The reciprocity of the network, defined as the correlation between the adjacency matrix and its transpose, always takes weights into account and is only calculated for unipartite networks.
 #' - `transitivity`: The overall transitivity or clustering coefficient of the network, reflecting the likelihood that two neighbors of a node are connected (calculated using `transitivity` function from `igraph`).
 #'
-#' @details This function simplifies the process of extracting key network statistics across potentially multiple networks within a netify object. It is capable of handling both weighted and unweighted networks and can adjust its calculations based on the nature of the network data (cross-sectional vs. longitudinal).
+#' @details This function is especially useful to simplify the process of extracting key network statistics across multiple networks in a netify object. It is capable of handling both weighted and unweighted networks and adjusts its calculations based on the nature of the network data (cross-sectional vs. longitudinal).
 #' 
 #' @author Cassy Dorff, Shahryar Minhas
 #'
