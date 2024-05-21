@@ -60,6 +60,27 @@ netlet = netify(
     dyad_vars = dvars
 )
 
+# subset to a few actors
+actors_to_keep = c(
+  'Australia', 'Brazil',
+  'Canada', 'Chile', 'China',
+  'Colombia', 'Egypt', 'Ethiopia',
+  'France', 'Germany', 'Ghana', 
+  'Hungary', 'India', 'Indonesia', 
+  'Iran, Islamic Republic Of', 
+  'Israel', 'Italy', 'Japan', 'Kenya', 
+  "Korea, Democratic People's Republic Of",
+  'Korea, Republic Of', 'Nigeria', 'Pakistan', 
+  'Qatar', 'Russian Federation', 'Saudi Arabia',
+  'South Africa', 'Spain', 'Sudan', 
+  'Syrian Arab Republic', 'Thailand', 
+  'United Kingdom', 'United States', 
+  'Zimbabwe' )
+netlet = subset_netlet(
+  netlet, 
+  what_to_subset = actors_to_keep
+)
+
 # print
 netlet
 ```
@@ -91,7 +112,7 @@ The `x` and `y` in `nodal_data` and the `x1`, `y1`, `x2`, and `y2` in `edge_data
 
 Now that we have the data, we can create a plot using `ggplot2`. We'll use the `geom_segment` and `geom_point` (or, `geom_label`, `geom_text`, and the `ggrepel package equivalents) functions to plot the edges and nodes, respectively.
 
-```{r, dpi=100, fig.width=9, fig.height=8}
+```{r, fig.width=9, fig.height=8}
 ggplot() + 
 	geom_segment(
 		data = net_dfs$edge_data,
@@ -113,28 +134,32 @@ ggplot() +
 			color=i_polity2
 		)
 	) +
-	scale_color_gradient(low='lightgreen', high='darkgreen') +
+  labs(
+    color='Polity', 
+    size='Log(Pop.)'
+  ) +
+	scale_color_gradient(low='#a6bddb', high='#014636') +
 	facet_wrap(~time, scales='free') +
 	theme_netify()
 ```
 
 ### Changing the layout
 
-By default layouts for node positions are drawn from the `layout_nicely` algorithm in the `igraph` package. Users can specify other layouts as, for example, say that you wanted to use the `kamada.kawai` algorithm instead:
+By default layouts for node positions are drawn from the `layout_nicely` algorithm in the `igraph` package. Users can specify other layouts as, for example, say that you wanted to use the `mds` algorithm instead:
 
-```{r, dpi=100, fig.width=9, fig.height=8}
+```{r, fig.width=9, fig.height=8}
 # create a df using fr instead 
-plot_data_kk = net_plot_data(netlet, 
+plot_data_mds = net_plot_data(netlet, 
     list(
-        layout='kamada.kawai'
+        layout='mds'
         )
     )
 
 # see new x-y coordinates
-lapply(plot_data_kk$net_dfs, head)
+lapply(plot_data_mds$net_dfs, head)
 
 # get relevant dfs
-net_dfs_kk = plot_data_kk$net_dfs
+net_dfs_kk = plot_data_mds$net_dfs
 
 # plot
 ggplot() + 
@@ -158,7 +183,11 @@ ggplot() +
 			color=i_polity2
 		)
 	) +
-	scale_color_gradient(low='lightgreen', high='darkgreen') +
+	scale_color_gradient(low='#a6bddb', high='#014636') +
+  labs(
+    size='Log(Pop.)',
+    color='Polity'
+  ) + 
 	facet_wrap(~time, scales='free') +
 	theme_netify()
 #
@@ -189,7 +218,7 @@ head(net_dfs$edge_data)
 
 Now that we have the new variable in the data.frame, we can plot by it but note that we now need a color aesthetic for both points and segments, even though `ggplot2` only supports one legend by aesthetic by default. We can get around this by using the `new_scale_color` function from the ``ggnewscale` package.
 
-```{r, dpi=100, fig.width=9, fig.height=8}
+```{r, fig.width=9, fig.height=8}
 # color line segments by this new variable
 ggplot() + 
 	geom_segment(
@@ -199,11 +228,15 @@ ggplot() +
 			y=y1, 
 			xend=x2, 
 			yend=y2,
-            color=factor(high_matlConf)
+            color=high_matlConf
 		),
 		alpha=.2
 	) +
-    scale_color_manual(values=c('grey', 'red')) +
+    scale_color_manual(
+      name='', 
+      values=c('grey', 'red'),
+      labels=c('Below Avg. Matl. Conf', 'Above Avg.')
+      ) +
     new_scale_color() +
 	geom_point(
 		data = net_dfs$nodal_data,
@@ -214,7 +247,12 @@ ggplot() +
 			color=i_polity2
 		)
 	) +
-	scale_color_gradient(low='lightgreen', high='darkgreen') +
+	scale_color_gradient(
+	  name='Polity',
+	  low='#a6bddb', high='#014636') +
+  labs(
+    size='Log(Pop.)'
+  ) +
 	facet_wrap(~time, scales='free') +
 	theme_netify() +
   theme(
