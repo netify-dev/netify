@@ -114,7 +114,7 @@ legends for a color aesthetic for both nodes and edges).</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># print</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">netlet</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">netlet</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span></span></code></pre>
 <pre><code><span><span class="co">## • Longitudinal</span></span></code></pre>
 <pre><code><span><span class="co">## • Unipartite</span></span></code></pre>
@@ -247,7 +247,7 @@ to plot the edges and nodes, respectively.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'lightgreen'</span>, high<span class="op">=</span><span class="st">'darkgreen'</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">time</span>, scales<span class="op">=</span><span class="st">'free'</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="../reference/theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="manual_plotting_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+<p><img src="manual_plotting_files/figure-html/unnamed-chunk-5-1.png" width="900"></p>
 <div class="section level3">
 <h3 id="changing-the-layout">Changing the layout<a class="anchor" aria-label="anchor" href="#changing-the-layout"></a>
 </h3>
@@ -325,7 +325,7 @@ use the <code>kamada.kawai</code> algorithm instead:</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'lightgreen'</span>, high<span class="op">=</span><span class="st">'darkgreen'</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">time</span>, scales<span class="op">=</span><span class="st">'free'</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="../reference/theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="manual_plotting_files/figure-html/unnamed-chunk-6-1.png" width="672"></p>
+<p><img src="manual_plotting_files/figure-html/unnamed-chunk-6-1.png" width="900"></p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#</span></span></code></pre></div>
 </div>
@@ -397,7 +397,7 @@ package.</p>
 <span>        <span class="op">)</span>,</span>
 <span>        alpha<span class="op">=</span><span class="fl">.2</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'lightgrey'</span>, <span class="st">'red'</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'grey'</span>, <span class="st">'red'</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://eliocamp.github.io/ggnewscale/reference/new_scale.html" class="external-link">new_scale_color</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span></span>
 <span>        data <span class="op">=</span> <span class="va">net_dfs</span><span class="op">$</span><span class="va">nodal_data</span>,</span>
@@ -410,8 +410,11 @@ package.</p>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'lightgreen'</span>, high<span class="op">=</span><span class="st">'darkgreen'</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">time</span>, scales<span class="op">=</span><span class="st">'free'</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="../reference/theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="manual_plotting_files/figure-html/unnamed-chunk-8-1.png" width="672"></p>
+<span>    <span class="fu"><a href="../reference/theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>    legend.position<span class="op">=</span><span class="st">'right'</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<p><img src="manual_plotting_files/figure-html/unnamed-chunk-8-1.png" width="900"></p>
 </div>
 </div>
 <div class="section level2">
