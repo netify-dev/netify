@@ -152,7 +152,7 @@ ggplot() +
 By default layouts for node positions are drawn from the `layout_nicely` algorithm in the `igraph` package. Users can specify other layouts as, for example, say that you wanted to use the `mds` algorithm instead:
 
 ```{r}
-# create a df using fr instead 
+# create a df using mds instead 
 plot_data_mds = net_plot_data(netlet, 
     list(
         layout='mds'
