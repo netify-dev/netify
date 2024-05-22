@@ -15,7 +15,11 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  dev = 'svg',
+  cache = FALSE,
+  echo = TRUE
+)
 ```
 
 
@@ -147,7 +151,7 @@ ggplot() +
 
 By default layouts for node positions are drawn from the `layout_nicely` algorithm in the `igraph` package. Users can specify other layouts as, for example, say that you wanted to use the `mds` algorithm instead:
 
-```{r, fig.width=9, fig.height=8}
+```{r}
 # create a df using fr instead 
 plot_data_mds = net_plot_data(netlet, 
     list(
@@ -157,40 +161,6 @@ plot_data_mds = net_plot_data(netlet,
 
 # see new x-y coordinates
 lapply(plot_data_mds$net_dfs, head)
-
-# get relevant dfs
-net_dfs_kk = plot_data_mds$net_dfs
-
-# plot
-ggplot() + 
-	geom_segment(
-		data = net_dfs_kk$edge_data,
-		aes(
-			x=x1, 
-			y=y1, 
-			xend=x2, 
-			yend=y2
-		),
-		color='lightgrey',
-		alpha=.2
-	) +
-	geom_point(
-		data = net_dfs_kk$nodal_data,
-		aes(
-			x=x, 
-			y=y,
-			size=i_log_pop, 
-			color=i_polity2
-		)
-	) +
-	scale_color_gradient(low='#a6bddb', high='#014636') +
-  labs(
-    size='Log(Pop.)',
-    color='Polity'
-  ) + 
-	facet_wrap(~time, scales='free') +
-	theme_netify()
-#
 ```
 
 

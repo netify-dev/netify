@@ -39,7 +39,7 @@ theme_stat_netify = function(){
 		panel.border =element_blank(),
 		axis.ticks = element_blank(),
 		axis.text.x = element_text(angle = 90, hjust = 1),
-		strip.text.x = element_text(color = "white"), 
+		strip.text = element_text(color = "white"), 
 		strip.background = element_rect(fill = "#525252", color = "#525252"),
 		legend.position = 'bottom'
 	)

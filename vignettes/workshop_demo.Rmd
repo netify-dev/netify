@@ -13,7 +13,11 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  dev = 'svg',
+  cache = FALSE,
+  echo = TRUE
+)
 ```
 
 ##  Package Overview 
@@ -148,7 +152,11 @@ mid_long_network <- add_dyad(
 We made a network, so let's look at it. First, we might want to take a `peek` at the network object to see if the matrix looks the way we'd expect it to look. This function lets you glance at a specific slice of the network if it is longitudinal or the entire network if it is cross-sectional.
 
 ```{r}
-peek(mid_long_network, when_to_peek = c('2012'), what_to_peek = c(13, 15:24))
+peek(
+  mid_long_network, 
+  when_to_peek = c('2012'), 
+  what_to_peek = c(13, 15:24)
+  )
 ```
 
 Next, let's examine a few basic summary statistics about the network using our`summary()` function.
@@ -219,7 +227,7 @@ plot_actor_stats(
 
 Additionally, since the result of `plot_actor_stats` is a `ggplot2` object, users can also choose to facet the plot by actors and variables, as shown below:
 
-```{r}
+```{r, fig.width=6, fig.height=6}
 plot_actor_stats(
   summary_actor_mids, 
   across_actor = FALSE, 
@@ -279,14 +287,6 @@ plot(
     point_size_var='degree'
 )
 
-# vary node size by degree
-plot(
-    mid_long_network,
-    edge_color='grey',
-    edge_color_var='log_capdist',
-    point_size_var='degree'
-)
-
 # vary node color by polyarchy
 plot(
     mid_long_network,
@@ -294,7 +294,11 @@ plot(
     point_size_var='degree',
     point_color_var='v2x_polyarchy1'
     ) + 
-    scale_color_gradient2()
+    scale_color_gradient2() +
+  labs(
+    size = 'Degree', 
+    color = 'Polyarchy'
+  )
 ```
 
 We might also prefer to add labels, but only a select few:
@@ -302,8 +306,11 @@ We might also prefer to add labels, but only a select few:
 ```{r, fig.width=6, fig.height=6}
 library(countrycode)
 cowns = countrycode(
-    c('United States', 'China', 'Russia', 'France', 'Germany', 'United Kingdom'), 
-    'country.name', 'cown')
+    c(
+      'United States', 'China', 'Russia', 
+      'France', 'Germany', 'United Kingdom'), 
+    'country.name', 'cown'
+    ) 
 cabbs = countrycode(cowns, 'cown', 'iso3c')
 
 plot(
@@ -315,7 +322,11 @@ plot(
     select_text_display = cabbs,
     text_size = 3
     ) + 
-    scale_color_gradient2()
+    scale_color_gradient2() +
+  labs(
+    size = 'Degree', 
+    color = 'Polyarchy'
+  ) 
 
 # or we can go with labels only 
 # and remove points
@@ -328,7 +339,11 @@ plot(
     label_color = 'white',
     label_fill_var='v2x_polyarchy1'
     ) + 
-    scale_color_gradient2()
+    scale_color_gradient2() +
+  labs(
+    size = 'Degree', 
+    color = 'Polyarchy'
+  )
 ```
 
 ## Step 3: Advance 🚀
