@@ -188,7 +188,8 @@ actor_2 <- summary_actor_mids[summary_actor_mids$actor == 2, ]
 
 ggplot(actor_2, aes(x = time, y = closeness)) +
   geom_line() +
-  labs(x = "Time", y = "Closeness Centrality")
+  labs(x = "Time", y = "Closeness Centrality") +
+  theme_netify()
 ```
 
 Or we can look at the distribution of the statistic for all actors over time:
@@ -203,7 +204,7 @@ plot_actor_stats(
 
 And then select a specific statistic to focus on:
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, `fig.height=6}
 # focus on closeness
 plot_actor_stats(
   summary_actor_mids,
