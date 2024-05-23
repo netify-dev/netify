@@ -225,18 +225,6 @@ plot_actor_stats(
 )
 ```
 
-Additionally, since the result of `plot_actor_stats` is a `ggplot2` object, users can also choose to facet the plot by actors and variables, as shown below:
-
-```{r, fig.width=6, fig.height=6}
-plot_actor_stats(
-  summary_actor_mids, 
-  across_actor = FALSE, 
-  specific_actors = top_5 
-  ) + 
-  facet_grid(variable~actor, scales='free')
-```
-
-
 Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default and seed set to 6886 for node layout).
 
 Our goal was to make this super easy for plotting time-varying attributes or actors. 

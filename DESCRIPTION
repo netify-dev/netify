@@ -22,7 +22,9 @@ Imports:
     ggplot2 (>= 2.2.1),
     ggnewscale,
     rlang, 
-    ggridges
+    ggridges,
+    ggbeeswarm, 
+    RColorBrewer
 LinkingTo:
   Rcpp
 Suggests:
