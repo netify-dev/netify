@@ -2,7 +2,7 @@
 #'
 #' `summary.netify` processes a netify object to calculate and return a data frame of graph-level statistics. This function is designed to work with both cross-sectional and longitudinal netify data structures, providing a comprehensive overview of network characteristics such as density, reciprocity, and standard deviations of sending and receiving effects.
 #'
-#' @param object An object of class netify, which should have been created using the function `get_adjacency`. This object contains the network data structured for analysis.
+#' @param object An object of class netify, which should have been created using the function `netify`. This object contains the network data structured for analysis.
 #' @param ... Additional parameters which can include user-defined statistical functions. These functions should take a matrix as input and return a scalar value. They will be applied to each network slice individually if the netify object represents longitudinal data.
 #'   - `other_stats`: A named list of functions that take a matrix and return additional actor-level statistics to be included in the output. Each function should accept a matrix as input and return a vector or single value per actor. This allows for the inclusion of custom metrics in the summary output.
 #'

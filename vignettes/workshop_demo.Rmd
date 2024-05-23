@@ -188,7 +188,8 @@ actor_2 <- summary_actor_mids[summary_actor_mids$actor == 2, ]
 
 ggplot(actor_2, aes(x = time, y = closeness)) +
   geom_line() +
-  labs(x = "Time", y = "Closeness Centrality")
+  labs(x = "Time", y = "Closeness Centrality") +
+  theme_netify()
 ```
 
 Or we can look at the distribution of the statistic for all actors over time:
@@ -203,7 +204,7 @@ plot_actor_stats(
 
 And then select a specific statistic to focus on:
 
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, `fig.height=6}
 # focus on closeness
 plot_actor_stats(
   summary_actor_mids,
@@ -336,7 +337,9 @@ plot(
 
 ## Step 3: Advance 🚀
 
-Once we have created and explored our network object, we might want to continue analyzing the data using different modeling approaches. `netify` makes this simple even though those models aren't! And for the sake of convergence/degeneracy hell lets go with cross-sectional networks. 
+Once we have created and explored our network object, we might want to continue analyzing the data using different modeling approaches. `netify` makes this simple even though those models aren't! And for the sake of convergence lets go with cross-sectional networks. 
+
+First, prep the data:
 
 ```{r, warning=FALSE, message = FALSE}
 # prep data
@@ -381,7 +384,11 @@ mid_cross_network <- netify(
   dyad_vars = c('capdist'),
   dyad_vars_symmetric = c(TRUE)
   )
+```
 
+Next, let's take a look at passing our netify object to the `amen` function:
+
+```{r}
 # install (if necessary) and load amen
 if(!'amen' %in% rownames(installed.packages())){
   install.packages('amen', repos='https://cloud.r-project.org') }
@@ -408,13 +415,16 @@ mid_amen_mod = ame(
   plot=FALSE, 
   print=FALSE
 )
+```
 
+We can apply the same process to ERGMs:
+
+```{r}
 # install (if necessary) and load ergm
 if(!'ergm' %in% rownames(installed.packages())){
   install.packages('ergm', repos='https://cloud.r-project.org') }
 library(ergm)
 
-# any harder for ergm?
 # called prep_for_statnet because it's a reference
 # to the network library, which is what ergm uses
 mid_cross_ergm = prep_for_statnet(mid_cross_network)
@@ -428,15 +438,14 @@ mid_cross_ergm
 # Fit the ERGM model (well not a real ergm)
 ergm_model <- ergm(
   formula = mid_cross_ergm ~ 
-    edges + edgecov(mid_cross_ergm, 'capdist_e') +
-    nodecov("polity21") + 
-    nodecov("polity22") +
-    nodecov("wbgdp2011est1") + nodecov("wbgdp2011est2") +
-    nodematch("wbpopest1") + nodecov("wbpopest2")
+     edges  +
+     nodecov("polity21") + 
+     nodecov("wbgdp2011est2") +
+     nodematch("wbpopest1") + nodecov("wbpopest2")
   )
 ```
 
-### Bonus Examples
+### Bonus Example
 
 A common data type used to create networks is in the structure of event data, where actors are repeated across rows but there is no specific variable that denotes the 'edge' as shown in our previous example.
 
