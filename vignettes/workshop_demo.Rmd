@@ -204,7 +204,7 @@ plot_actor_stats(
 
 And then select a specific statistic to focus on:
 
-```{r, fig.width=6, `fig.height=6}
+```{r, fig.width=6, fig.height=6}
 # focus on closeness
 plot_actor_stats(
   summary_actor_mids,
