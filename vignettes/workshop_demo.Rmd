@@ -219,7 +219,7 @@ plot_actor_stats(
 
 We can also zoom into a specific time slice of the network:
 
-```{r}
+```{r, fig.width=6, fig.height=6}
 summary_df_static = summary_actor_mids[summary_actor_mids$time == 2011,]
 #summary_df_static = summary_df_static %>% group_by(time)
 names(summary_df_static)[names(summary_df_static) == "time"] <- "temp"
@@ -262,7 +262,7 @@ plot(
 
 We can also use `netify` functions to explore actor level summary statistics in the network graph. 
 
-```{r, fig.width=6, fig.height=6}
+```{r}
 # add actor variables from summary_actor_mids
 mid_long_network = add_nodal(
     mid_long_network, 
@@ -270,10 +270,20 @@ mid_long_network = add_nodal(
     actor='actor', time='time',
     node_vars = c('degree', 'prop_ties', 'eigen_vector'),
 )
+```
 
+We can quickly inspect the object with the `print` function.
+
+
+```{r}
 # print netlet to make sure they got added to nodal features
 print(mid_long_network)
 
+```
+
+
+As well as look at the attributes of the data and specify showing the nodal data information.
+```{r}
 # if you're curious as to where they live
 head(
   attr(
@@ -284,7 +294,11 @@ head(
 
 #i.e., 
 head(attributes(mid_long_network)$nodal_data)
+```
 
+And now return to our network graph by highlighting specific nodal attributes:
+
+```{r, fig.width=6, fig.height=6}
 # vary node size by degree
 plot(
     mid_long_network,
