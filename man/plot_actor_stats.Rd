@@ -2,35 +2,34 @@
 % Please edit documentation in R/plot_actor_stats.R
 \name{plot_actor_stats}
 \alias{plot_actor_stats}
-\title{Plotting function for actor level statistics for netify objects}
+\title{Plot Actor-Level Statistics for Netify Objects}
 \usage{
 plot_actor_stats(
   summary_df,
   across_actor = TRUE,
-  specific_actors = NULL,
-  specific_stats = NULL
+  specific_stats = NULL,
+  specific_actors = NULL
 )
 }
 \arguments{
-\item{summary_df}{A dataframe produced by the \code{summary_actor} function containing actor-level or actor-time level statistics. The function expects the actor column to be labeled as "actor" and the time column to be labeled as "time" for longitudinal data.}
+\item{summary_df}{A dataframe from the \code{summary_actor} function containing actor-level or actor-time level statistics. The dataframe should have columns labeled "actor" and "time" for longitudinal data.}
 
-\item{across_actor}{Logical; if TRUE, visualizations will focus on the distribution of statistics across actors. If FALSE, visualizations will focus on specific actors. Default is TRUE. If setting across_actor to FALSE it is highly recommended to specify ten or fewer specific actors.}
+\item{across_actor}{Logical; if TRUE, visualizations will focus on the distribution of statistics across actors. If FALSE, visualizations will focus on specific actors. Default is TRUE. If setting across_actor to TRUE and specific actors are provided, the data will be subsetted to include only the specified actors.}
 
-\item{specific_actors}{Optional; a vector of specific actor names for which statistics will be plotted. When NULL, statistics for all actors are considered. This is only relevant if \code{across_actor} is set to FALSE.}
+\item{specific_stats}{Optional; a vector of specific statistics to plot. If NULL, all available statistics in the dataframe are used. If specified, the function will check if these statistics are present in the dataframe and will subset the data accordingly.}
 
-\item{specific_stats}{Optional; a vector of specific statistics to plot. If NULL, all available statistics in the dataframe are used. Given the number of statistics that are calculated by default for some network types, choosing a few will make the plot more readable.}
+\item{specific_actors}{Optional; a vector of specific actor names for which statistics will be plotted. When NULL, statistics for all actors are considered. If specified, the function will check if these actors are present in the dataframe and will subset the data accordingly. This parameter is relevant only if \code{across_actor} is set to FALSE.}
 }
 \value{
 A \code{ggplot} object representing the requested visualization, which can be further customized or printed.
 }
 \description{
-\code{plot_actor_stats} takes in the output from \code{summary_actor} function
-and creates visualizations for actor level statistics. This function supports both cross-sectional and longitudinal data, providing visual insights into the distribution of statistics either across all actors or focusing on specific actors over time.
+\code{plot_actor_stats} generates visualizations for actor-level statistics using the output from the \code{summary_actor} function. The function supports both cross-sectional and longitudinal data, offering insights into the distribution of statistics across actors or focusing on specific actors over time.
 }
 \details{
-This function is capable of generating different types of plots based on the structure of the input data:
+This function can generate different types of plots based on the structure of the input data:
 \itemize{
-\item For cross-sectional data, it will show the distribution of statistics across actors or bar plots to compare specific actors.
-\item For longitudinal data, it will show how the distribution of statistics across change over time or line plots to track changes in statistics for specific actors over time.
+\item For cross-sectional data, it will show the distribution of statistics across actors using density plots or compare specific actors using various plot types.
+\item For longitudinal data, it will show how the distribution of statistics changes over time using ridge density plots or track changes in statistics for specific actors over time using line plots.
 }
 }

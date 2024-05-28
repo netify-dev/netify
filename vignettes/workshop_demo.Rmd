@@ -217,6 +217,7 @@ plot_actor_stats(
 )
 ```
 
+<<<<<<< HEAD
 We can also zoom into a specific time slice of the network:
 
 ```{r, fig.width=6, fig.height=6}
@@ -243,6 +244,9 @@ plot_actor_stats(
 ```
 
 Instead of looking at summary statistics, it is useful to visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default and seed set to 6886 for node layout).
+=======
+Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default and seed set to 6886 for node layout).
+>>>>>>> 21ed6559aa44207d73e0100aebeb3b51cfe6f875
 
 Our goal was to make this super easy for plotting time-varying attributes or actors. 
 

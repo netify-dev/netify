@@ -1,24 +1,25 @@
-#' Plotting function for actor level statistics for netify objects
+#' Plot Actor-Level Statistics for Netify Objects
 #'
-#' `plot_actor_stats` takes in the output from `summary_actor` function
-#' and creates visualizations for actor level statistics. This function supports both cross-sectional and longitudinal data, providing visual insights into the distribution of statistics either across all actors or focusing on specific actors over time.
+#' `plot_actor_stats` generates visualizations for actor-level statistics using the output from the `summary_actor` function. The function supports both cross-sectional and longitudinal data, offering insights into the distribution of statistics across actors or focusing on specific actors over time.
 #'
-#' @param summary_df A dataframe produced by the `summary_actor` function containing actor-level or actor-time level statistics. The function expects the actor column to be labeled as "actor" and the time column to be labeled as "time" for longitudinal data.
-#' @param across_actor Logical; if TRUE, visualizations will focus on the distribution of statistics across actors. If FALSE, visualizations will focus on specific actors. Default is TRUE. If setting across_actor to FALSE it is highly recommended to specify ten or fewer specific actors.
-#' @param specific_actors Optional; a vector of specific actor names for which statistics will be plotted. When NULL, statistics for all actors are considered. This is only relevant if `across_actor` is set to FALSE.
-#' @param specific_stats Optional; a vector of specific statistics to plot. If NULL, all available statistics in the dataframe are used. Given the number of statistics that are calculated by default for some network types, choosing a few will make the plot more readable.
+#' @param summary_df A dataframe from the `summary_actor` function containing actor-level or actor-time level statistics. The dataframe should have columns labeled "actor" and "time" for longitudinal data.
+#' @param across_actor Logical; if TRUE, visualizations will focus on the distribution of statistics across actors. If FALSE, visualizations will focus on specific actors. Default is TRUE. If setting across_actor to TRUE and specific actors are provided, the data will be subsetted to include only the specified actors.
+#' @param specific_stats Optional; a vector of specific statistics to plot. If NULL, all available statistics in the dataframe are used. If specified, the function will check if these statistics are present in the dataframe and will subset the data accordingly.
+#' @param specific_actors Optional; a vector of specific actor names for which statistics will be plotted. When NULL, statistics for all actors are considered. If specified, the function will check if these actors are present in the dataframe and will subset the data accordingly. This parameter is relevant only if `across_actor` is set to FALSE.
 #'
 #' @return A `ggplot` object representing the requested visualization, which can be further customized or printed.
 #'
-#' @details This function is capable of generating different types of plots based on the structure of the input data:
-#' - For cross-sectional data, it will show the distribution of statistics across actors or bar plots to compare specific actors.
-#' - For longitudinal data, it will show how the distribution of statistics across change over time or line plots to track changes in statistics for specific actors over time.
-#'
+#' @details This function can generate different types of plots based on the structure of the input data:
+#' - For cross-sectional data, it will show the distribution of statistics across actors using density plots or compare specific actors using various plot types.
+#' - For longitudinal data, it will show how the distribution of statistics changes over time using ridge density plots or track changes in statistics for specific actors over time using line plots.
 #'
 #' @import ggplot2
-#' @importFrom ggridges geom_density_ridges
+#' @importFrom RColorBrewer brewer.pal
+#' @importFrom ggridges geom_density_ridges position_points_jitter
+#' @importFrom ggbeeswarm geom_quasirandom
 #' @importFrom reshape2 melt
 #' @importFrom cli cli_alert_danger cli_alert_warning
+#' @importFrom grDevices colors
 #' @import rlang
 #' 
 #' @export plot_actor_stats
@@ -27,16 +28,15 @@
 plot_actor_stats <- function(
   summary_df,
   across_actor=TRUE,
-  specific_actors=NULL,
-  specific_stats=NULL
+  specific_stats=NULL,
+  specific_actors=NULL
   ) {
 
   # check if summary object is longitudional
-  if('time' %in% colnames(summary_df)) {
-    longit = TRUE
-  } else {
-    longit = FALSE
-  }
+  longit = ifelse('time' %in% colnames(summary_df), TRUE, FALSE)
+
+  # check if summary object is layered
+  layer = ifelse('layer' %in% colnames(summary_df), TRUE, FALSE)
 
   # subset data to specific stats
   # if specified by the user
@@ -55,9 +55,7 @@ plot_actor_stats <- function(
 
     # keep whichever ids are
     # already there
-    ids = intersect(
-      c('actor', 'time'),
-      names(summary_df))
+    ids = intersect( c('actor', 'time', 'layer'), names(summary_df))
 
     # if present then subset
     summary_df <- summary_df[,
@@ -78,93 +76,208 @@ plot_actor_stats <- function(
           'Error: The following specified actors are not in the data: ', 
           paste(oops, collapse = ', '), '.'))
       stop() }
-
-    # if present then subset
-    summary_df <- summary_df[summary_df$actor %in% specific_actors,]
   }
 
-  # cross-sectional case
-  if(!longit){
+  # across actor case
+  if(across_actor){
 
-    # prep data
-    ggdata = reshape2::melt(summary_df, id='actor')
+    # if across actor and specific actors provided then 
+    # subset data by those actors
+    if(!is.null(specific_actors)){
 
-    # across actor density
-    if(across_actor) {
-      # density plots to showcase dist across actors by var
+      # warning about behavior when across_actor is TRUE and specific actors are provided
+      cli::cli_alert_warning(
+              'Warning: When specific actors are provided and `across_actor` is set to TRUE, the data will be subsetted to only include the specified actors.' )
+
+      # subset
+      summary_df = summary_df[summary_df$actor %in% specific_actors,]
+    }
+
+    # if not longit then construct simple density across stats
+    if(!longit){
+      ggdata = reshape2::melt(summary_df, id='actor')
       viz = ggplot( ggdata, aes(x=!!sym("value") )) + 
         geom_density() +
+        geom_rug(alpha=.3) +
         labs(x='', y='') +
         facet_wrap(~variable, scales='free') +
         theme_stat_netify()
-    }
-
-    # actor specific
-    if(!across_actor){
-      # barplots with actor on x axis and var on facet
-      viz = ggplot( ggdata, aes(x=!!sym("actor"), y=!!sym("value")) ) + 
-        geom_bar(stat='identity') +
-        labs(x='', y='') +        
-        facet_wrap(~variable, scales='free') +
-        theme_stat_netify()
-    }
-  }
-
-  # longitudinal case
-  if(longit){
-
-    # prep data
-    ggdata = reshape2::melt(summary_df, id=c('actor', 'time'))
-
-    # density across actors over time
-    if(across_actor) {
-      # factor time for ridges
+    } # end across actor non longit case
+    # if longit then use ridge densities
+    if(longit){
+      ggdata = reshape2::melt(summary_df, id=c('actor', 'time'))
       ggdata$time = factor(ggdata$time)
-      # ridges to showcase dist across actors over time by var
-      viz = ggplot( ggdata, aes( x=!!sym("value"), y=!!sym("time") ) ) +
-        # geom_violin() +
-        ggridges::geom_density_ridges() +
+      viz = ggplot( ggdata, aes( x=!!sym("value"), y=!!sym("time") )) +
+        ggridges::geom_density_ridges(
+          rel_min_height = 0.01,
+          jittered_points = TRUE,
+          position = ggridges::position_points_jitter(
+            width = 0.000001, height = 0
+            ),
+          point_shape = "|", point_size = 1.5,
+          alpha = 0.7
+          ) +
         labs(x='', y='') +        
         facet_wrap(~variable, scales='free_x') +
         theme_stat_netify() +
         theme(
           axis.text.x=element_text(size=8.8)
-        )
-    }
+        )      
+    } # end across actor longit case
+  } # end across actor case
 
-    # actor changes over time
-    if(!across_actor){
+  # specific actor case
+  if(!across_actor){
+    
+    # get actor count
+    if(is.null(specific_actors)){
+      n_actors = length(unique(summary_df$actor))
+    } else { n_actors = length(unique(specific_actors)) }
 
-      # write a warning that if they have more than 10 actors
-      # the plot will quickly become unreadable
-      if(length(unique(summary_df$actor)) > 8) {
-        cli::cli_alert_warning(
-          'Warning: You have more than 8 actors in your data. 
-          The plot may become unreadable.')
-      }
+    # set up logic for whether there are more than 9 actors
+    # if so then use random colors
+    plus_actors = ifelse(length(unique(specific_actors))>9, TRUE, FALSE)
 
-      # get actor count
-      plus_eight_actors = ifelse(length(unique(summary_df$actor))>8, TRUE, FALSE)
+    # write a warning that if they have "many" actors that
+    # the plot will quickly become unreadable
+    if(n_actors > 25) {
+      cli::cli_alert_warning(
+        'Warning: Consider providing some actors to the `specific_actors` argument so that actor patterns are more legible.'
+        ) }
 
-      # line plots to showcase change over time by actor
-      viz = ggplot( ggdata, aes(
+    # throw error if there are more than 657 actors because R only has 657 colors
+    if(n_actors > 657) {
+      cli::cli_alert_danger(
+        'Error: The `summary_df` you have provided has more than 657 actors, please provide some actors to the `specific_actors` argument.')
+      stop() }
+
+    # get complete vector of actors
+    acts = unique(summary_df$actor)
+    n_tot = length(acts)
+
+    # modify colors to highlight selected actors
+    set.seed(6886)
+    if(plus_actors){
+      cols = grDevices::colors()[sample(n_actors, replace=FALSE)]
+    } else { 
+      cols = RColorBrewer::brewer.pal(9, 'Set1')[sample(n_actors, replace=FALSE)] }
+
+    # set up color key for actors
+    colKey = rep('grey', n_tot)
+    names(colKey) = acts
+    colKey[match(specific_actors, names(colKey))] = cols
+
+    # set up border key for actors
+    borKey = rep('grey', n_tot)
+    names(borKey) = acts
+    borKey[match(specific_actors, names(borKey))] = 'black'
+
+    # add alpha scale
+    alphaKey = rep(.5, n_tot)
+    names(alphaKey) = acts
+    alphaKey[match(specific_actors, names(alphaKey))] = 1
+
+    #
+    alphaKey2 = rep(.4, n_tot)
+    names(alphaKey2) = acts
+    alphaKey2[match(specific_actors, names(alphaKey2))] = 1
+
+    # add size scale
+    sizeKey = rep(1, n_tot)
+    names(sizeKey) = acts
+    sizeKey[match(specific_actors, names(sizeKey))] = 2
+
+    # construct plot for non longit case
+    if(!longit){
+      ggdata = reshape2::melt(summary_df, id='actor')
+      # viz = ggplot(ggdata, aes(
+      #     reorder_within(!!sym("actor"), !!sym("value"), !!sym("variable")),
+      #     y=!!sym("value"), 
+      #     fill=!!sym("actor"), alpha=!!sym("actor") )) +
+      #   geom_bar(stat='identity') +
+      #   labs(x='', y='') +        
+      #   facet_wrap(~variable, scales='free') +        
+      #   # scale_x_discrete(breaks=specific_actors) +
+      #   scale_x_reordered(breaks=specific_actors) +        
+      #   scale_fill_manual(values=colKey, breaks=specific_actors) +
+      #   scale_alpha_manual(values=alphaKey) +
+      #   guides(alpha='none') +
+      #   theme_stat_netify()
+      # viz
+
+      viz = ggplot(ggdata, aes(
+          x=!!sym('variable'), y=!!sym('value'),
+          fill=!!sym('actor'),
+          color=!!sym('actor'),
+          alpha=!!sym('actor'),
+          size=!!sym('actor') )) +
+        # geom_jitter(width=.25, height=0, shape=21, color='black') +
+        # ggbeeswarm::geom_beeswarm(priority='density', shape=21, cex=4) +
+        ggbeeswarm::geom_quasirandom(shape=21) +        
+        facet_wrap(~variable, scales='free') +
+        scale_fill_manual(values=colKey, breaks=specific_actors) +
+        scale_color_manual(values=borKey) +          
+        scale_alpha_manual(values=alphaKey) +
+        scale_size_manual(values=sizeKey) +  
+        guides(color='none', alpha='none', size='none') +
+        labs(x='', y='', fill='') +
+        theme_stat_netify() +
+        theme(
+          axis.text.x=element_blank()
+        ) 
+    } # end non longit case
+
+    # construct plot for longit case
+    if(longit){
+      ggdata = reshape2::melt(summary_df, id=c('actor', 'time'))
+      viz = ggplot(ggdata, aes(
           x=!!sym("time"), y=!!sym("value"), 
-          group=!!sym("actor"), color=!!sym("actor")
-          ) ) + 
+          color=!!sym("actor"), alpha=!!sym("actor") )) +
         geom_line() +
         geom_point() +
-        labs(x='', y='')
-
-      # use colorbrewer to color if 8 or fewer actors
-      if(!plus_eight_actors) { viz = viz + scale_color_brewer(type='qual', palette=2) } 
-        
-      # finish cleaning plot
-      viz = viz +
-        facet_wrap(~variable, scales='free') +
-        theme_stat_netify()
-    }
-  }
+        facet_wrap(~variable, scales='free_y') +
+        scale_color_manual(values=colKey, breaks=specific_actors) +
+        scale_alpha_manual(values=alphaKey2) +
+        guides(alpha='none', size='none') +
+        theme_stat_netify()      
+    } # end longit case
+  } # end specific actor case
   
   #
   return(viz)
 }
+
+# library(netify)
+# example(decompose_netlet)
+
+# summary_df = summary_actor(netlet)
+# # across_actor = FALSE
+# # specific_stats = NULL
+# cntries = c(
+#   'United States', 'United Kingdom',
+#   'China', 'Russian Federation'
+# )
+# summary_df_static = summary_df[summary_df$time == 2002,]
+# summary_df_static = summary_df_static[,-2]
+
+# plot_actor_stats(
+#   summary_df_static,
+#   across_actor=FALSE,
+#   specific_actors=cntries
+# )
+
+# plot_actor_stats(
+#   summary_df_static,
+#   across_actor=TRUE
+# )
+
+# plot_actor_stats(
+#   summary_df,
+#   across_actor=FALSE,
+#   specific_actors=cntries
+# )
+
+# plot_actor_stats(
+#   summary_df,
+#   across_actor=TRUE
+# )
