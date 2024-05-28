@@ -66,7 +66,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2024-05-23</h4>
+            <h4 data-toc-skip class="date">2024-05-28</h4>
       
       
       <div class="d-none name"><code>workshop_demo.Rmd</code></div>
@@ -74,9 +74,9 @@ Shahryar Minhas</h4>
 
     
     
-<div class="section level2">
-<h2 id="package-overview">Package Overview<a class="anchor" aria-label="anchor" href="#package-overview"></a>
-</h2>
+<div class="section level3">
+<h3 id="package-overview">Package Overview<a class="anchor" aria-label="anchor" href="#package-overview"></a>
+</h3>
 <p>This vignette provides a high level overview of our package from
 start to finish. The best use of this vignette is to introduce the main
 components of the package to larger audiences. This overview covers our
@@ -158,9 +158,9 @@ including:</p>
 </li>
 </ul>
 </div>
-<div class="section level2">
-<h2 id="step-1-create">Step 1: Create 💡<a class="anchor" aria-label="anchor" href="#step-1-create"></a>
-</h2>
+<div class="section level3">
+<h3 id="step-1-create">Step 1: Create 💡<a class="anchor" aria-label="anchor" href="#step-1-create"></a>
+</h3>
 <p>Begin by loading packages and supplying the data. We will use the
 <code>peacesciencer</code> package to grab some familiar data.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -262,9 +262,9 @@ the network over time:</p>
 <span>  dyad_vars_symmetric <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="step-2-explore">Step 2: Explore 🔎<a class="anchor" aria-label="anchor" href="#step-2-explore"></a>
-</h2>
+<div class="section level3">
+<h3 id="step-2-explore">Step 2: Explore 🔎<a class="anchor" aria-label="anchor" href="#step-2-explore"></a>
+</h3>
 <p>We made a network, so let’s look at it. First, we might want to take
 a <code>peek</code> at the network object to see if the matrix looks the
 way we’d expect it to look. This function lets you glance at a specific
@@ -300,12 +300,15 @@ time using the summary statistics data frame.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_graph_stats.html">plot_graph_stats</a></span><span class="op">(</span><span class="va">mid_long_summary</span><span class="op">)</span></span></code></pre></div>
 <p><img src="workshop_demo_files/figure-html/unnamed-chunk-6-1.png" width="576"></p>
-<p>We might also want to look at a summary of actor statistics overtime.
-Our built-in function, <code>summary_actor</code> will calculate
-in-degree, out-degree, average degree, and eigenvector centrality for
-each actor in each time period.</p>
+<p>We might also want to look at a summary of actor-level statistics
+overtime. Our built-in function, <code>summary_actor</code> will
+calculate in-degree, out-degree, average degree, and eigenvector
+centrality for each actor in each time period. The
+<code>across_actors</code> function allows users to toggle whether they
+want a summary of a given statistic across all actors (shown in a
+density plot) or for specific actors:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># every year &amp; every actor (messy!) but check out help file</span></span>
+<code class="sourceCode R"><span><span class="co"># every year &amp; every actor </span></span>
 <span><span class="va">summary_actor_mids</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">summary_actor_mids</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   actor time degree   prop_ties network_share closeness betweenness</span></span>
@@ -322,48 +325,34 @@ each actor in each time period.</p>
 <span><span class="co">## 4 0.000000e+00</span></span>
 <span><span class="co">## 5 1.122847e-16</span></span>
 <span><span class="co">## 6 1.207292e-16</span></span></code></pre>
-<p>We can take a single actor and examine their statistic over time:</p>
+<p>We can look at the distribution of the statistic for all actors over
+time:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">actor_2</span> <span class="op">&lt;-</span> <span class="va">summary_actor_mids</span><span class="op">[</span><span class="va">summary_actor_mids</span><span class="op">$</span><span class="va">actor</span> <span class="op">==</span> <span class="fl">2</span>, <span class="op">]</span></span>
-<span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">actor_2</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">closeness</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Time"</span>, y <span class="op">=</span> <span class="st">"Closeness Centrality"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="../reference/theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
-<p>Or we can look at the distribution of the statistic for all actors
-over time:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># density plot across all actors</span></span>
-<span><span class="co"># and for each stat</span></span>
+<span><span class="co"># for each stat</span></span>
 <span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span></span>
-<span>  <span class="va">summary_actor_mids</span> </span>
+<span>  <span class="va">summary_actor_mids</span>,</span>
+<span>  across_actor<span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Picking joint bandwidth of 0.23</span></span></code></pre>
-<pre><code><span><span class="co">## Picking joint bandwidth of 0.0012</span></span></code></pre>
-<pre><code><span><span class="co">## Picking joint bandwidth of 0.00327</span></span></code></pre>
-<pre><code><span><span class="co">## Picking joint bandwidth of 0.114</span></span></code></pre>
-<pre><code><span><span class="co">## Picking joint bandwidth of 0.00038</span></span></code></pre>
-<pre><code><span><span class="co">## Picking joint bandwidth of 0.0301</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: Removed 2913 rows containing non-finite outside the scale range</span></span>
-<span><span class="co">## (`stat_density_ridges()`).</span></span></code></pre>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-9-1.png" width="576"></p>
-<p>And then select a specific statistic to focus on:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-8-1.png" width="576"></p>
+<p>Or we might like to select a specific statistic to focus on across
+actors over time:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># focus on closeness</span></span>
 <span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span></span>
 <span>  <span class="va">summary_actor_mids</span>,</span>
+<span>  across_actor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  specific_stats<span class="op">=</span><span class="st">'closeness'</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Picking joint bandwidth of 0.114</span></span></code></pre>
 <pre><code><span><span class="co">## Warning: Removed 2913 rows containing non-finite outside the scale range</span></span>
 <span><span class="co">## (`stat_density_ridges()`).</span></span></code></pre>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-10-1.png" width="576"></p>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-9-1.png" width="576"></p>
 <p>Say that we wanted to showcase actor-specific statistics over time.
 We can use the plot_actor_stats function for this as well, though it’s
 <strong>highly recommended</strong> to subset to a few actors for a more
 legible plot.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># top 5 GDP countries (USA, China, Japan, Germany, India)</span></span>
 <span><span class="va">top_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span>, <span class="st">"710"</span>, <span class="st">"740"</span>, <span class="st">"255"</span>, <span class="st">"750"</span><span class="op">)</span></span>
 <span></span>
@@ -375,39 +364,76 @@ legible plot.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Removed 2913 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_point()`).</span></span></code></pre>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-10-1.png" width="576"></p>
+<p>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD We can also zoom into a specific
+time slice of the network:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">summary_df_static</span> <span class="op">=</span> <span class="va">summary_actor_mids</span><span class="op">[</span><span class="va">summary_actor_mids</span><span class="op">$</span><span class="va">time</span> <span class="op">==</span> <span class="fl">2011</span>,<span class="op">]</span></span>
+<span><span class="co">#summary_df_static = summary_df_static %&gt;% group_by(time)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">summary_df_static</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">summary_df_static</span><span class="op">)</span> <span class="op">==</span> <span class="st">"time"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"temp"</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span></span>
+<span>  <span class="va">summary_df_static</span>,</span>
+<span>  across_actor<span class="op">=</span><span class="cn">FALSE</span>,</span>
+<span>  specific_actors<span class="op">=</span><span class="va">top_5</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Removed 123 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`position_quasirandom()`).</span></span></code></pre>
 <p><img src="workshop_demo_files/figure-html/unnamed-chunk-11-1.png" width="576"></p>
+<p>Additionally, since the result of <code>plot_actor_stats</code> is a
+<code>ggplot2</code> object, users can also choose to facet the plot by
+actors and variables, as shown below:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span></span>
+<span>  <span class="va">summary_actor_mids</span>, </span>
+<span>  across_actor <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>  specific_actors <span class="op">=</span> <span class="va">top_5</span> </span>
+<span>  <span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="va">variable</span><span class="op">~</span><span class="va">actor</span>, scales<span class="op">=</span><span class="st">'free'</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Removed 2913 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`geom_point()`).</span></span></code></pre>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-12-1.png" width="576"></p>
+</div>
+<div class="section level2">
+<h2 id="instead-of-looking-at-summary-statistics-it-is-useful-to-visualize-the-entire-network--we-can-do-this-by-plotting-the-netify-object--isolates-removed-by-default-and-seed-set-to-6886-for-node-layout-">Instead of looking at summary statistics, it is useful to visualize
+the entire network. We can do this by plotting the netify object.
+(Isolates removed by default and seed set to 6886 for node layout).<a class="anchor" aria-label="anchor" href="#instead-of-looking-at-summary-statistics-it-is-useful-to-visualize-the-entire-network--we-can-do-this-by-plotting-the-netify-object--isolates-removed-by-default-and-seed-set-to-6886-for-node-layout-"></a>
+</h2>
 <p>Instead of looking at summary statistics, we also might want to
 simply visualize the entire network. We can do this by plotting the
 netify object. (Isolates removed by default and seed set to 6886 for
-node layout).</p>
+node layout). &gt;&gt;&gt;&gt;&gt;&gt;&gt;
+21ed6559aa44207d73e0100aebeb3b51cfe6f875</p>
 <p>Our goal was to make this super easy for plotting time-varying
 attributes or actors.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># default plot</span></span>
 <span><span class="fu"><a href="../reference/plot.netify.html">plot.netify</a></span><span class="op">(</span><span class="va">mid_long_network</span>,</span>
 <span>            static_actor_positions <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>            remove_isolates <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-12-1.png" width="576"></p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-13-1.png" width="576"></p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># a little cleaner</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
 <span>    edge_color<span class="op">=</span><span class="st">'grey'</span>,</span>
 <span>    node_size<span class="op">=</span><span class="fl">2</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-12-2.png" width="576"></p>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-13-2.png" width="576"></p>
 <p>We can also use <code>netify</code> functions to explore actor level
 summary statistics in the network graph.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># add actor variables from summary_actor_mids</span></span>
 <span><span class="va">mid_long_network</span> <span class="op">=</span> <span class="fu"><a href="../reference/add_nodal.html">add_nodal</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>, </span>
 <span>    <span class="va">summary_actor_mids</span>,</span>
 <span>    actor<span class="op">=</span><span class="st">'actor'</span>, time<span class="op">=</span><span class="st">'time'</span>,</span>
 <span>    node_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'degree'</span>, <span class="st">'prop_ties'</span>, <span class="st">'eigen_vector'</span><span class="op">)</span>,</span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># print netlet to make sure they got added to nodal features</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>We can quickly inspect the object with the <code>print</code>
+function.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># print netlet to make sure they got added to nodal features</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span></span></code></pre>
 <pre><code><span><span class="co">## • Longitudinal</span></span></code></pre>
@@ -425,7 +451,9 @@ summary statistics in the network graph.</p>
 <span><span class="co">## wbgdppc2011est2_log, degree, prop_ties, eigen_vector</span></span></code></pre>
 <pre><code><span><span class="co">## • Dyad Features: capdist, log_capdist</span></span></code></pre>
 <pre><code><span><span class="co">## • Graph Features: None</span></span></code></pre>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<p>As well as look at the attributes of the data and specify showing the
+nodal data information.</p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># if you're curious as to where they live</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span></span>
@@ -447,7 +475,7 @@ summary statistics in the network graph.</p>
 <span><span class="co">## 4      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 5      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 6      1 0.005263158 4.953675e-03</span></span></code></pre>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#i.e., </span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span><span class="op">$</span><span class="va">nodal_data</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   actor time v2x_polyarchy1 v2x_polyarchy2 wbgdppc2011est2 wbgdppc2011est2_log</span></span>
@@ -464,15 +492,17 @@ summary statistics in the network graph.</p>
 <span><span class="co">## 4      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 5      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 6      1 0.005263158 4.953675e-03</span></span></code></pre>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<p>And now return to our network graph by highlighting specific nodal
+attributes:</p>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># vary node size by degree</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
 <span>    edge_color<span class="op">=</span><span class="st">'grey'</span>,</span>
 <span>    point_size_var<span class="op">=</span><span class="st">'degree'</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-13-1.png" width="576"></p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-17-1.png" width="576"></p>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># vary node color by polyarchy</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
@@ -485,9 +515,9 @@ summary statistics in the network graph.</p>
 <span>    size <span class="op">=</span> <span class="st">'Degree'</span>, </span>
 <span>    color <span class="op">=</span> <span class="st">'Polyarchy'</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-13-2.png" width="576"></p>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-17-2.png" width="576"></p>
 <p>We might also prefer to add labels, but only a select few:</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vincentarelbundock.github.io/countrycode/" class="external-link">countrycode</a></span><span class="op">)</span></span>
 <span><span class="va">cowns</span> <span class="op">=</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/reference/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -513,8 +543,8 @@ summary statistics in the network graph.</p>
 <span>  <span class="op">)</span> </span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Removed 839 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_text()`).</span></span></code></pre>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-14-1.png" width="576"></p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-18-1.png" width="576"></p>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># or we can go with labels only </span></span>
 <span><span class="co"># and remove points</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
@@ -533,18 +563,17 @@ summary statistics in the network graph.</p>
 <span>  <span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning in plot(mid_long_network, edge_color = "grey", add_points = FALSE, :</span></span>
 <span><span class="co">## Ignoring unknown parameters: `check_overlap`</span></span></code></pre>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-14-2.png" width="576"></p>
-</div>
-<div class="section level2">
-<h2 id="step-3-advance">Step 3: Advance 🚀<a class="anchor" aria-label="anchor" href="#step-3-advance"></a>
-</h2>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-18-2.png" width="576"></p>
+<div class="section level3">
+<h3 id="step-3-advance">Step 3: Advance 🚀<a class="anchor" aria-label="anchor" href="#step-3-advance"></a>
+</h3>
 <p>Once we have created and explored our network object, we might want
 to continue analyzing the data using different modeling approaches.
 <code>netify</code> makes this simple even though those models aren’t!
 And for the sake of convergence lets go with cross-sectional
 networks.</p>
 <p>First, prep the data:</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># prep data</span></span>
 <span><span class="va">cow_cross</span> <span class="op">=</span> <span class="va">cow_dyads</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ccode1</span>, <span class="va">ccode2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -589,7 +618,7 @@ networks.</p>
 <span>  <span class="op">)</span></span></code></pre></div>
 <p>Next, let’s take a look at passing our netify object to the
 <code>amen</code> function:</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install (if necessary) and load amen</span></span>
 <span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="st">'amen'</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'amen'</span>, repos<span class="op">=</span><span class="st">'https://cloud.r-project.org'</span><span class="op">)</span> <span class="op">}</span></span>
@@ -618,7 +647,7 @@ networks.</p>
 <span><span class="co">##   ..- attr(*, "dimnames")=List of 2</span></span>
 <span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
 <span><span class="co">##   .. ..$ : chr [1:6] "polity21" "polity22" "wbgdp2011est1" "wbgdp2011est2" ...</span></span></code></pre>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plug and run</span></span>
 <span><span class="va">mid_amen_mod</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/amen/man/ame.html" class="external-link">ame</a></span><span class="op">(</span></span>
 <span>  Y<span class="op">=</span><span class="va">mid_cross_amen</span><span class="op">$</span><span class="va">Y</span>,</span>
@@ -635,7 +664,7 @@ networks.</p>
 <span>  print<span class="op">=</span><span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>We can apply the same process to ERGMs:</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install (if necessary) and load ergm</span></span>
 <span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="st">'ergm'</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'ergm'</span>, repos<span class="op">=</span><span class="st">'https://cloud.r-project.org'</span><span class="op">)</span> <span class="op">}</span></span>
@@ -658,7 +687,7 @@ networks.</p>
 <pre><code><span><span class="co">## 'ergm' 4 is a major update that introduces some backwards-incompatible</span></span>
 <span><span class="co">## changes. Please type 'news(package="ergm")' for a list of major</span></span>
 <span><span class="co">## changes.</span></span></code></pre>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># called prep_for_statnet because it's a reference</span></span>
 <span><span class="co"># to the network library, which is what ergm uses</span></span>
 <span><span class="va">mid_cross_ergm</span> <span class="op">=</span> <span class="fu"><a href="../reference/prep_for_statnet.html">prep_for_statnet</a></span><span class="op">(</span><span class="va">mid_cross_network</span><span class="op">)</span></span>
@@ -685,7 +714,7 @@ networks.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">##  Edge attribute names: </span></span>
 <span><span class="co">##     capdist_e cowmidonset</span></span></code></pre>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plug and run</span></span>
 <span><span class="co"># Fit the ERGM model (well not a real ergm)</span></span>
 <span><span class="va">ergm_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm</a></span><span class="op">(</span></span>
@@ -693,18 +722,17 @@ networks.</p>
 <span>     <span class="va">edges</span>  <span class="op">+</span></span>
 <span>     <span class="fu">nodecov</span><span class="op">(</span><span class="st">"polity21"</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>     <span class="fu">nodecov</span><span class="op">(</span><span class="st">"wbgdp2011est2"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>     <span class="fu">nodematch</span><span class="op">(</span><span class="st">"wbpopest1"</span><span class="op">)</span> <span class="op">+</span> <span class="fu">nodecov</span><span class="op">(</span><span class="st">"wbpopest2"</span><span class="op">)</span></span>
+<span>     <span class="fu">nodecov</span><span class="op">(</span><span class="st">"wbpopest2"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Observed statistic(s) nodematch.wbpopest1 are at their smallest attainable values. Their coefficients will be fixed at -Inf.</span></span></code></pre>
 <pre><code><span><span class="co">## Starting maximum pseudolikelihood estimation (MPLE):</span></span></code></pre>
 <pre><code><span><span class="co">## Obtaining the responsible dyads.</span></span></code></pre>
 <pre><code><span><span class="co">## Evaluating the predictor and response matrix.</span></span></code></pre>
 <pre><code><span><span class="co">## Maximizing the pseudolikelihood.</span></span></code></pre>
 <pre><code><span><span class="co">## Finished MPLE.</span></span></code></pre>
 <pre><code><span><span class="co">## Evaluating log-likelihood at the estimate.</span></span></code></pre>
-<div class="section level3">
-<h3 id="bonus-example">Bonus Example<a class="anchor" aria-label="anchor" href="#bonus-example"></a>
-</h3>
+<div class="section level4">
+<h4 id="bonus-example">Bonus Example<a class="anchor" aria-label="anchor" href="#bonus-example"></a>
+</h4>
 <p>A common data type used to create networks is in the structure of
 event data, where actors are repeated across rows but there is no
 specific variable that denotes the ‘edge’ as shown in our previous
@@ -714,13 +742,13 @@ example of potential applications to intrastate event data. The first
 step is to go to <a href="https://ucdp.uu.se/downloads/" class="external-link uri">https://ucdp.uu.se/downloads/</a> and download the data you
 want to use. For this tutorial we have downloaded UCDP GED event data
 version 23.1 and subset the data for the case of Mexico.</p>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"ucdp_ged_mexico.rda"</span><span class="op">)</span></span></code></pre></div>
 <ol style="list-style-type: decimal">
 <li>Create an aggregated, weighted network of conflict between actors in
 Mexico.</li>
 </ol>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># default to number of events</span></span>
 <span><span class="va">mex_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>  dyad_data <span class="op">=</span> <span class="va">mexico</span>,</span>
@@ -732,7 +760,7 @@ Mexico.</li>
 <span>  missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> Warning: there are repeating dyads within time periods in the dataset. When `sum_dyads = TRUE` and `weight` is not supplied, edges in the outputted adjacency matrix represent a count of interactions between actors.</span></span></code></pre>
-<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># A summary of the network object</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   net num_actors    density num_edges mean_edge_weight sd_edge_weight</span></span>
@@ -741,7 +769,7 @@ Mexico.</li>
 <span><span class="co">## 1         0.02777778              0           3076   0.1494919</span></span>
 <span><span class="co">##   sd_of_actor_means transitivity</span></span>
 <span><span class="co">## 1          17.64839    0.1052632</span></span></code></pre>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># weight using a variable</span></span>
 <span><span class="va">mex_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>  dyad_data <span class="op">=</span> <span class="va">mexico</span>,</span>
@@ -764,7 +792,7 @@ Mexico.</li>
 <ol start="2" style="list-style-type: decimal">
 <li>Explore</li>
 </ol>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb75"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># select 10 random indices from 1 to the length of select_names</span></span>
 <span><span class="va">select_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span>
 <span></span>
@@ -776,24 +804,24 @@ Mexico.</li>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
 <span>     add_text <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-20-1.png" width="576"></p>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-24-1.png" width="576"></p>
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
 <span>     select_text <span class="op">=</span> <span class="va">random_names</span>,</span>
 <span>     select_text_display <span class="op">=</span> <span class="va">random_names</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Removed 62 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_text()`).</span></span></code></pre>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-20-2.png" width="576"></p>
-<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-24-2.png" width="576"></p>
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># different edges, highlight same actors, different netify object:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network_civ</span>,</span>
 <span>     select_text <span class="op">=</span> <span class="va">random_names</span>,</span>
 <span>     select_text_display <span class="op">=</span> <span class="va">random_names</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Removed 38 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_text()`).</span></span></code></pre>
-<p><img src="workshop_demo_files/figure-html/unnamed-chunk-20-3.png" width="576"></p>
+<p><img src="workshop_demo_files/figure-html/unnamed-chunk-24-3.png" width="576"></p>
 <p>We can also apply functions from <code>igraph</code>:</p>
-<div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">i_opt_memb</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="va">ig</span> <span class="op">=</span> <span class="fu"><a href="../reference/prep_for_igraph.html">prep_for_igraph</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span>  <span class="va">memb</span> <span class="op">=</span> <span class="fu">igraph</span><span class="fu">::</span><span class="fu"><a href="https://r.igraph.org/reference/cluster_optimal.html" class="external-link">cluster_optimal</a></span><span class="op">(</span><span class="va">ig</span><span class="op">)</span><span class="op">$</span><span class="va">membership</span></span>
@@ -806,9 +834,9 @@ Mexico.</li>
 <span>  other_stats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>i_opt_memb<span class="op">=</span><span class="va">i_opt_memb</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
-<div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h2>
+<div class="section level3">
+<h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h3>
 <ul>
 <li><p>Csárdi G, Nepusz T, Traag V, Horvát S, Zanini F, Noom D, Müller K
 (2024). igraph: Network Analysis and Visualization in R. <a href="doi:10.5281/zenodo.7682609" class="uri">doi:10.5281/zenodo.7682609</a>, R package version 2.0.3, <a href="https://CRAN.R-project.org/package=igraph" class="external-link uri">https://CRAN.R-project.org/package=igraph</a>.</p></li>
@@ -832,6 +860,7 @@ Modeling of Network Data. URL <a href="http://statnet.org" class="external-link 
 <li><p>Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP
 Georeferenced Event Dataset. Journal of Peace Research 50(4).</p></li>
 </ul>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
