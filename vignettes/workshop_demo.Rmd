@@ -173,41 +173,32 @@ We can also make a quick visualization of network statistics over time using the
 plot_graph_stats(mid_long_summary)
 ```
 
-We might also want to look at a summary of actor statistics overtime. Our built-in function, `summary_actor` will calculate in-degree, out-degree, average degree, and eigenvector centrality for each actor in each time period.
+We might also want to look at a summary of actor-level statistics overtime. Our built-in function, `summary_actor` will calculate in-degree, out-degree, average degree, and eigenvector centrality for each actor in each time period. The `across_actors` function allows users to toggle whether they want a summary of a given statistic across all actors (shown in a density plot) or for specific actors:
 
 ```{r}
-# every year & every actor (messy!) but check out help file
+# every year & every actor 
 summary_actor_mids <- summary_actor(mid_long_network)
 head(summary_actor_mids)
 ```
 
-We can take a single actor and examine their statistic over time:
+We can look at the distribution of the statistic for all actors over time:
 
-```{r, fig.width=6, fig.height=6}
-actor_2 <- summary_actor_mids[summary_actor_mids$actor == 2, ]
-
-ggplot(actor_2, aes(x = time, y = closeness)) +
-  geom_line() +
-  labs(x = "Time", y = "Closeness Centrality") +
-  theme_netify()
-```
-
-Or we can look at the distribution of the statistic for all actors over time:
-
-```{r, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6, warning = FALSE, message = FALSE}
 # density plot across all actors
-# and for each stat
+# for each stat
 plot_actor_stats(
-  summary_actor_mids 
+  summary_actor_mids,
+  across_actor= TRUE,
   )
 ```
 
-And then select a specific statistic to focus on:
+Or we might like to select a specific statistic to focus on across actors over time:
 
-```{r, fig.width=6, `fig.height=6}
+```{r, fig.width=6, fig.height=6}
 # focus on closeness
 plot_actor_stats(
   summary_actor_mids,
+  across_actor = TRUE,
   specific_stats='closeness'
   )
 ```
@@ -226,6 +217,20 @@ plot_actor_stats(
 )
 ```
 
+We can also zoom into a specific time slice of the network:
+
+```{r}
+summary_df_static = summary_actor_mids[summary_actor_mids$time == 2011,]
+#summary_df_static = summary_df_static %>% group_by(time)
+names(summary_df_static)[names(summary_df_static) == "time"] <- "temp"
+
+plot_actor_stats(
+  summary_df_static,
+  across_actor=FALSE,
+  specific_actors=top_5
+)
+```
+
 Additionally, since the result of `plot_actor_stats` is a `ggplot2` object, users can also choose to facet the plot by actors and variables, as shown below:
 
 ```{r, fig.width=6, fig.height=6}
@@ -237,8 +242,7 @@ plot_actor_stats(
   facet_grid(variable~actor, scales='free')
 ```
 
-
-Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default and seed set to 6886 for node layout).
+Instead of looking at summary statistics, it is useful to visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default and seed set to 6886 for node layout).
 
 Our goal was to make this super easy for plotting time-varying attributes or actors. 
 
@@ -453,7 +457,7 @@ ergm_model <- ergm(
      edges  +
      nodecov("polity21") + 
      nodecov("wbgdp2011est2") +
-     nodematch("wbpopest1") + nodecov("wbpopest2")
+     nodecov("wbpopest2")
   )
 ```
 
