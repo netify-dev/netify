@@ -7,7 +7,7 @@
 \method{summary}{netify}(object, ...)
 }
 \arguments{
-\item{object}{An object of class netify, which should have been created using the function \code{get_adjacency}. This object contains the network data structured for analysis.}
+\item{object}{An object of class netify, which should have been created using the function \code{netify}. This object contains the network data structured for analysis.}
 
 \item{...}{Additional parameters which can include user-defined statistical functions. These functions should take a matrix as input and return a scalar value. They will be applied to each network slice individually if the netify object represents longitudinal data.
 \itemize{

@@ -3,6 +3,7 @@
 #' `plot_actor_stats` generates visualizations for actor-level statistics using the output from the `summary_actor` function. The function supports both cross-sectional and longitudinal data, offering insights into the distribution of statistics across actors or focusing on specific actors over time.
 #'
 #' @param summary_df A dataframe from the `summary_actor` function containing actor-level or actor-time level statistics. The dataframe should have columns labeled "actor" and "time" for longitudinal data.
+#' @param longitudinal Logical; if TRUE, the data is considered longitudinal. Default is set to TRUE if there is a "time" column in the dataframe passed to summary_df. 
 #' @param across_actor Logical; if TRUE, visualizations will focus on the distribution of statistics across actors. If FALSE, visualizations will focus on specific actors. Default is TRUE. If setting across_actor to TRUE and specific actors are provided, the data will be subsetted to include only the specified actors.
 #' @param specific_stats Optional; a vector of specific statistics to plot. If NULL, all available statistics in the dataframe are used. If specified, the function will check if these statistics are present in the dataframe and will subset the data accordingly.
 #' @param specific_actors Optional; a vector of specific actor names for which statistics will be plotted. When NULL, statistics for all actors are considered. If specified, the function will check if these actors are present in the dataframe and will subset the data accordingly. This parameter is relevant only if `across_actor` is set to FALSE.
@@ -27,13 +28,14 @@
 
 plot_actor_stats <- function(
   summary_df,
+  longitudinal=ifelse('time' %in% colnames(summary_df), TRUE, FALSE),
   across_actor=TRUE,
   specific_stats=NULL,
   specific_actors=NULL
   ) {
 
-  # check if summary object is longitudional
-  longit = ifelse('time' %in% colnames(summary_df), TRUE, FALSE)
+  # check if summary object is longitudinal
+  longit = longitudinal
 
   # check if summary object is layered
   layer = ifelse('layer' %in% colnames(summary_df), TRUE, FALSE)

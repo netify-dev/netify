@@ -69,13 +69,13 @@ summary.netify <- function(object, ...){
 	# check if netify object
 	netify_check(object)
 
-	# if more than one layer tell user they must specify a single layer
-	if(length(attributes(object)$layers) > 1){
-		cli::cli_alert_danger(
-			'Error: This object has multiple layers. 
-			`summary` does not currently support multilayer `netify` inputs.
-			Please use the `filter_layers` function to create a `netify` object with a single layer.' )
-		stop() }
+	# # if more than one layer tell user they must specify a single layer
+	# if(length(attributes(object)$layers) > 1){
+	# 	cli::cli_alert_danger(
+	# 		'Error: This object has multiple layers. 
+	# 		`summary` does not currently support multilayer `netify` inputs.
+	# 		Please use the `filter_layers`  or `subset_netlet` function to create a `netify` object with a single layer.' )
+	# 	stop() }
 
 	# get summary args
 	summary_args <- list(...)
@@ -88,6 +88,10 @@ summary.netify <- function(object, ...){
 
 	# get type
 	netlet_type <- obj_attrs$netify_type
+
+	# # check if multilayer
+	# multilayer_logic <- ifelse(
+	# 	length(attributes(netlet)$layers) > 1, TRUE, FALSE)
 
 	# if cross sec convert to a list object so that
 	# we can use lapply
@@ -260,4 +264,57 @@ summary.netify <- function(object, ...){
 	#
 	return(net_stats)
 }
+
+# library(netify)
+# example(layer_netify)
+
+# v = subset_netlet(
+# 	icews_verbCoop_matlCoop, 
+# 	what_layers_to_subset = 'verbCoop'
+# )
+
+# v
+
+# vl = subset_netlet(
+# 	icews_verbCoop_matlCoop_longit_l, 
+# 	what_layers_to_subset = 'verbCoop'
+# )
+
+# vl
+
+# va = subset_netlet(
+# 	icews_verbCoop_matlCoop_longit_a, 
+# 	what_layers_to_subset = 'verbCoop'
+# )
+
+# va
+
+# ## cross sec multilayer
+# icews_verbCoop_matlCoop
+
+## longit list multilayer
+# icews_verbCoop_matlCoop_longit_l
+
+## longit list array
+# icews_verbCoop_matlCoop_longit_a
+
+## end target is a list of 
+## matrices where we concatenate
+## the time + layer info into
+## a label
+
+## can call this multilayer_to_list
+
+## 
+
+# multilayer_to_list = function(netlet){
+
+#### 
+# what if we just did layer_netify and ran the stats separately?
+
+# }
+
+
+
+
 

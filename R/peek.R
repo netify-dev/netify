@@ -11,7 +11,7 @@
 #' If the entry is a numeric value or vector then it will be used as an index to the time dimension. 
 #' If the entry is a character vector then it will be used to match the time dimension labels.
 #' If you want to peek at all time points then set this to NULL.
-#' @param what_layer_to_peek if the netlet object has multiple layers, then you must choose one layer to peek at.
+#' @param what_layers_to_peek if the netlet object has multiple layers, then you must choose one layer to peek at.
 #' @return slice of the network
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
@@ -57,7 +57,7 @@ peek <- function(
 	what_rows_to_peek=what_to_peek,
 	what_cols_to_peek=what_to_peek,
 	when_to_peek=1,
-	what_layer_to_peek=NULL
+	what_layers_to_peek=NULL
 	){
 
     # user input checks
@@ -66,28 +66,55 @@ peek <- function(
 	# pull out attrs
 	objAttrs <- attributes(netlet)
 
-	# if more than one layer tell user they must specify a single layer
-	if(length(objAttrs$layers) > 1 & is.null(what_layer_to_peek)){
-		cli::cli_alert_danger(
-			'This object has multiple layers. 
-			Please specify a single layer to peek at.' )
-		stop() }
+	# get measurements
+	msrmnts <- netify_measurements(netlet)
 
-	# filter to single layer
-	if(length(objAttrs$layers) > 1 ){
-		netlet <- filter_layers(netlet, what_layer_to_peek) }
+	# set n_layers in msrmnts to 1 if set to NULL
+	if(is.null(msrmnts$n_layers)){ msrmnts$n_layers <- 1 }
+
+	# get character vector of layers to keep or subset
+	multilayer_logic_input <- msrmnts$n_layers > 1
+	if(is.null(what_layers_to_peek)){
+
+		# if no subsetting then type in terms of multilayer or not
+		# is same in input and output
+		multilayer_logic_out <- multilayer_logic_input
+
+	} else {
+
+		# if user specifies layers then check if resulting number of 
+		# layers will constitute a multilayer object
+		multilayer_logic_out <- length(what_layers_to_peek) > 1
+		layer_labels <- what_layers_to_peek
+
+		# stop if they supply an argument to what_layers_to_peek but netlet is not multilayer
+		if(!multilayer_logic_input){
+			cli::cli_alert_danger("You have supplied an argument to what_layers_to_peek but the netlet object is not multilayer. Please remove the argument to what_layers_to_peek or provide a multilayer netlet object." )
+			stop() }
+
+		# make sure that user specified layers exist
+		layer_diffs = setdiff(layer_labels, msrmnts$layers)
+		if(length(layer_diffs) > 0){
+			cli::cli_alert_danger(
+				paste0("The following specified layers do not exist in the object: ", paste(layer_diffs, collapse=", "), ". You can check what layers exist in your object using the following code: attr(netlet, 'layers'), where netlet should be substituted with the name of your netify object." ) )
+			stop() }
+	}
 
 	# org when_to_peek info if longit data supplied
 	if(objAttrs$netify_type %in% c('longit_list', 'longit_array')){
 
 		# get time label
-		if(objAttrs$netify_type == 'longit_list'){ time_labels <- names(netlet) }
-		if(objAttrs$netify_type == 'longit_array'){ time_labels <- dimnames(netlet)[[3]] }
+		if(objAttrs$netify_type == 'longit_list'){ time_labels <- msrmnts$time }
+		if(objAttrs$netify_type == 'longit_array'){ time_labels <- msrmnts$time }
 
 		# if null supplied to when_to_peek create 
 		# numeric range corresponding to length of data
-		if(is.null(when_to_peek) & objAttrs$netify_type == 'longit_list'){ when_to_peek <- 1:length(netlet) }
-		if(is.null(when_to_peek) & objAttrs$netify_type == 'longit_array'){ when_to_peek <- 1:(dim(netlet)[3]) }
+		if(is.null(when_to_peek) & objAttrs$netify_type == 'longit_list'){ 
+			when_to_peek <- 1:length(netlet) }
+		if(is.null(when_to_peek) & objAttrs$netify_type == 'longit_array' & !multilayer_logic_input){ 
+			when_to_peek <- 1:(dim(netlet)[3]) }
+		if(is.null(when_to_peek) & objAttrs$netify_type == 'longit_array' & multilayer_logic_input){ 
+			when_to_peek <- 1:(dim(netlet)[4]) }
 
 		# org info about when_to_peek
 		# if character entry then match to numeric index of time dim
@@ -160,21 +187,73 @@ peek <- function(
 		row_col <- lapply(1:2, function(ii){
 			return( intersect(row_col[[ii]], 1:dim(netlet)[ii]) ) })
 
+		# so first check if the input is multilayer if not then just subset rows and cols
+		if(!multilayer_logic_input){
+			out = netlet[ row_col[[1]], row_col[[2]] , drop=FALSE ] }
+
+		# if it is multilayer then we need to check
+		# if user has supplied layers to subset to or not
+		if(multilayer_logic_input) {
+
+			# if what_layers_to_peek is NULL then just return with 
+			# third mode accounted for
+			if(is.null(what_layers_to_peek)){
+				out = netlet[ row_col[[1]], row_col[[2]] , , drop=FALSE ] }
+
+			# if what_layers_to_peek is supplied then subset by it
+			if(!is.null(what_layers_to_peek)){
+				out = netlet[ row_col[[1]], row_col[[2]] , layer_labels, drop=FALSE ] }
+		}
+
+		# if the input was multilayer but the output is not then drop the third mode
+		if(multilayer_logic_input & !multilayer_logic_out){ out <- out[,,,drop=TRUE] }
+
 		# 
-		return( netlet[ row_col[[1]], row_col[[2]] , drop=FALSE ] ) }
+		return( out )
+	} # close the cross-sectional block
 		
 	# if array print specified rows, cols and time
 	if(objAttrs$netify_type == 'longit_array'){
 
 		# make sure time range specified doesnt exceed dims of data
-		when_to_peek <- intersect(when_to_peek, 1:dim(netlet)[3])
+		# remember that position of time depends on if the input is 
+		# multilayer or not
+		if(!multilayer_logic_input){
+			when_to_peek <- intersect(when_to_peek, 1:dim(netlet)[3]) }
+		if(multilayer_logic_input){
+			when_to_peek <- intersect(when_to_peek, 1:dim(netlet)[4]) }
 
 		# make sure rows and cols selected dont exceed dims of data
 		row_col <- lapply(1:2, function(ii){
 			return( intersect(row_col[[ii]], 1:dim(netlet)[ii]) ) })
 
+		# so first check if the input is multilayer if not then just subset rows and cols
+		if(!multilayer_logic_input){
+			out = netlet[ row_col[[1]], row_col[[2]], when_to_peek , drop=FALSE ] }
+
+		# if it is multilayer then we need to check
+		# if user has supplied layers to subset to or not
+		if(multilayer_logic_input) {
+
+			# if what_layers_to_peek is NULL then just return with 
+			# third mode accounted for
+			if(is.null(what_layers_to_peek)){
+				out = netlet[ row_col[[1]], row_col[[2]] , , when_to_peek, drop=FALSE ] }
+
+			# if what_layers_to_peek is supplied then subset by it
+			if(!is.null(what_layers_to_peek)){
+				out = netlet[ row_col[[1]], row_col[[2]] , layer_labels, when_to_peek, drop=FALSE ] }
+		}
+
+
+		# drop unnecessary dimensions: 
+		# time periods if user subsetted down to one period
+		# layers if user subsetted down to one layer
+		out = drop(out)
+
 		# 
-		return( netlet[ row_col[[1]], row_col[[2]], when_to_peek , drop=FALSE ] ) }
+		return( out )
+	} # close the longit array block
 
 	# if list print specified rows, cols and time
 	if(objAttrs$netify_type == 'longit_list'){
@@ -210,14 +289,35 @@ peek <- function(
 				#
 				return(ids_slice) })
 
-			# subset
-			relev_slice <- slice[ row_col[[1]], row_col[[2]] , drop=FALSE ]
-			return(relev_slice) })
+			# so first check if the input is multilayer if not then just subset rows and cols
+			if(!multilayer_logic_input){
+				relev_slice = slice[ row_col[[1]], row_col[[2]] , drop=FALSE ] }
+
+			# if it is multilayer then we need to check
+			# if user has supplied layers to subset to or not
+			if(multilayer_logic_input) {
+
+				# if what_layers_to_peek is NULL then just return with 
+				# third mode accounted for
+				if(is.null(what_layers_to_peek)){
+					relev_slice = slice[ row_col[[1]], row_col[[2]] , , drop=FALSE ] }
+
+				# if what_layers_to_peek is supplied then subset by it
+				if(!is.null(what_layers_to_peek)){
+					relev_slice = slice[ row_col[[1]], row_col[[2]] , layer_labels, drop=FALSE ] }
+			}
+
+			# if the input was multilayer but the output is not then drop the third mode
+			if(multilayer_logic_input & !multilayer_logic_out){ relev_slice <- relev_slice[,,,drop=TRUE] }
+
+			#
+			return(relev_slice)
+			})
 		
 		# add names back
 		names(relev_netlet) <- names(netlet)
 
 		#
-		return(relev_netlet) }
+		return(relev_netlet) } # close longit list block
 }
 

@@ -70,7 +70,7 @@ netify_measurements <- function(netlet){
       msrmnts$layers <- attributes(netlet)$layers
       msrmnts$n_layers <- length(attributes(netlet)$layers)
       # time gets shifted to fourth dim if layers exist
-      msrmnts$time <- dimnames(netlet)[4]
+      msrmnts$time <- dimnames(netlet)[[4]]
       msrmnts$n_time <- dim(netlet)[4]
     } else {
       msrmnts$layers <- NULL

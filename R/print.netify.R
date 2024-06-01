@@ -235,7 +235,7 @@ cli::cli_li( obj_mode )
 if(n_layers>1){ cli::cli_li( obj_layer ) }
 cli::cli_li( obj_symm )
 cli::cli_li( detail_weight_label )
-cli::cli_li( loops_label )
+# cli::cli_li( loops_label )
 
 # print outnetwork measurements
 cli::cli_li(time_label)

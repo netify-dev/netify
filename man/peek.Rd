@@ -10,7 +10,7 @@ peek(
   what_rows_to_peek = what_to_peek,
   what_cols_to_peek = what_to_peek,
   when_to_peek = 1,
-  what_layer_to_peek = NULL
+  what_layers_to_peek = NULL
 )
 }
 \arguments{
@@ -27,7 +27,7 @@ If the entry is a numeric value or vector then it will be used as an index to th
 If the entry is a character vector then it will be used to match the time dimension labels.
 If you want to peek at all time points then set this to NULL.}
 
-\item{what_layer_to_peek}{if the netlet object has multiple layers, then you must choose one layer to peek at.}
+\item{what_layers_to_peek}{if the netlet object has multiple layers, then you must choose one layer to peek at.}
 }
 \value{
 slice of the network

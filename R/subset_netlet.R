@@ -62,31 +62,35 @@ subset_netlet <- function(
     obj_attrs <- attributes(netlet)
     msrmnts <- netify_measurements(netlet)
     nlayers <- length(obj_attrs$layers)
+    multilayer_logic_orig <- ifelse( nlayers==1, FALSE, TRUE )
 
     # check if output should be multilayer
     nlayers_subset <- ifelse( 
         !is.null(what_layers_to_subset), 
-        length(what_layers_to_subset), 
-        nlayers )
-    multilayer_logic <- ifelse( nlayers_subset==1, 
-        FALSE, TRUE )
+        length(what_layers_to_subset), nlayers )
+    multilayer_logic_out <- ifelse( nlayers_subset==1, FALSE, TRUE )
 
-    # when just one layer net or one layer
-    # selected we can just use peek
-    if( !multilayer_logic ){
-        sub_net <- peek(
-            netlet, 
-            what_to_peek=what_to_subset,
-            what_rows_to_peek=what_rows_to_subset,
-            what_cols_to_peek=what_cols_to_subset,
-            when_to_peek=when_to_subset,
-            what_layer_to_peek=what_layers_to_subset ) }
+    # check if input was longitudinal and if it's still longit after user input
+    longit_logic_in <- ifelse( obj_attrs$netify_type!='cross_sec', TRUE, FALSE )
+    if( longit_logic_in ){
+        new_pds = ifelse(is.null(when_to_subset), 2, length(when_to_subset))
+        longit_logic_out = ifelse( new_pds>1, TRUE, FALSE )        
+    } else { longit_logic_out = longit_logic_in }
 
-    # longit check, if data is longitudinal and one time
+    # use peek to subset data
+    sub_net <- peek(
+        netlet, 
+        what_to_peek=what_to_subset,
+        what_rows_to_peek=what_rows_to_subset,
+        what_cols_to_peek=what_cols_to_subset,
+        when_to_peek=when_to_subset,
+        what_layers_to_peek=what_layers_to_subset )
+
+    # longit check for list, if data is longitudinal and one time
     # period was subsetted then need to extract out of list
     # and also adjust obj_attrs to reflect that the 
     # subsetted element is now a matrix instead of a list
-    if( obj_attrs$netify_type!='cross_sec' ){
+    if( longit_logic_in ){
         if( is.list(sub_net) & length(sub_net)==1 ){
             
             # extract out of list
@@ -100,41 +104,43 @@ subset_netlet <- function(
         }
     }
 
-    # use peek function to generate subsetted 
-    # version of the netlet object, since
-    # peek doesnt support looking at multiple
-    # layers we need to iterate peek through
-    # layers and then combine back into
-    # multidimensional array    
-    if( multilayer_logic ){
-    
-        # iterate peek through layers
-        sub_net <- lapply(
-            what_layers_to_subset, 
-            function(x){
-            peek(
-                netlet, 
-                what_to_peek=what_to_subset,
-                what_rows_to_peek=what_rows_to_subset,
-                what_cols_to_peek=what_cols_to_subset,
-                when_to_peek=when_to_subset,
-                what_layer_to_peek=x ) } )
-        
-        # combine into multidimensional array
-        sub_net <- do.call(
-            'abind', 
-            c(sub_net, along=3) )
+    # longit check for array, if data is longitudional and one time
+    # period was subsetted then make necessary changes to obj_attrs
+    if( longit_logic_in ){
+        if( obj_attrs$netify_type == 'longit_array' & !longit_logic_out ){
+            # adjust netify_type
+            obj_attrs$netify_type <- 'cross_sec'
+        }
     }
 
     # if user puts NULL for time and object
-    # is longit then change when_to_subset to all
-    # time points
+    # is longit then change when_to_subset to all time points
     if( is.null(when_to_subset) & 
         obj_attrs$netify_type!='cross_sec' ){
         when_to_subset <- msrmnts$time }
 
     # add back in netify attributes
     obj_attrs2 <- obj_attrs
+
+    # modify layers label if new layers
+    # were provided, subsetting was 
+    # already done beforehand 
+    # additionally change weights label in attribs
+    if( !is.null(what_layers_to_subset)){
+        obj_attrs2$layers <- what_layers_to_subset
+
+        # orig weight
+        orig_weight = strsplit(obj_attrs2$weight, ', ')[[1]]
+        orig_detail = strsplit(obj_attrs2$detail_weight, ' | ', fixed=TRUE)[[1]]
+
+        # figure out which to keep based on input in what_layers_to_subset and 
+        # its index position in the original layers
+        toKeep = match(what_layers_to_subset, obj_attrs2$layers)
+
+        # reconstruct weight and detail_weight
+        obj_attrs2$weight = paste(orig_weight[toKeep], collapse=', ')
+        obj_attrs2$detail_weight = paste(orig_detail[toKeep], collapse=' | ')
+    }
 
     # new object: longit list
     if(is.list(sub_net)){
@@ -164,11 +170,11 @@ subset_netlet <- function(
         obj_attrs2[1:2] <- attributes(sub_net)[1:2]
         
         # adjust netify_type
-        if( length(dim(sub_net))==2 & !multilayer_logic ){
+        if( length(dim(sub_net))==2 & !multilayer_logic_out ){
             obj_attrs2$netify_type <- 'cross_sec' }
         
         # related mod for multilayer net
-        if( length(dim(sub_net))==3 & multilayer_logic ){
+        if( length(dim(sub_net))==3 & multilayer_logic_out ){
             obj_attrs2$netify_type <- 'cross_sec' }  
     }
 

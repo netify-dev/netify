@@ -76,7 +76,7 @@ prep_for_amen <- function(netlet){
 		cli::cli_alert_danger(
 			'Error: This object has multiple layers. 
       `prep_for_amen` does not currently support multilayer `netify` inputs. 
-      Please use the `filter_layers` function to create a `netify` object with a single layer.' )
+      Please use the `filter_layers`  or `subset_netlet` function to create a `netify` object with a single layer.' )
 		stop() }
 
   # check attributes

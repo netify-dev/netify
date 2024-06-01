@@ -8,8 +8,6 @@
 #' @return text information about the network
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
-#' @export tmpprint
-#' @export
 
 tmpprint <- function(x, ...){
 
