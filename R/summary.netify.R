@@ -265,32 +265,36 @@ summary.netify <- function(object, ...){
 	return(net_stats)
 }
 
-# library(netify)
-# example(layer_netify)
+library(netify)
+example(layer_netify)
 
-# v = subset_netlet(
-# 	icews_verbCoop_matlCoop, 
-# 	what_layers_to_subset = 'verbCoop'
-# )
+v = subset_netlet(
+	icews_verbCoop_matlCoop, 
+	what_layers_to_subset = 'verbCoop'
+)
 
-# v
+v
 
-# vl = subset_netlet(
-# 	icews_verbCoop_matlCoop_longit_l, 
-# 	what_layers_to_subset = 'verbCoop'
-# )
+vl = subset_netlet(
+	icews_verbCoop_matlCoop_longit_l, 
+	what_layers_to_subset = 'verbCoop'
+)
 
-# vl
+vl
 
-# va = subset_netlet(
-# 	icews_verbCoop_matlCoop_longit_a, 
-# 	what_layers_to_subset = 'verbCoop'
-# )
+va = subset_netlet(
+	icews_verbCoop_matlCoop_longit_a, 
+	what_layers_to_subset = 'verbCoop'
+)
 
-# va
+va
 
-# ##
-# summary(v)
+##
+summary(v)
+summary(vl)
+summary(va)
+
+# lapply(attr(icews_verbCoop_matlCoop))
 
 # ## cross sec multilayer
 # icews_verbCoop_matlCoop

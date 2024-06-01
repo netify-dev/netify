@@ -132,8 +132,9 @@ subset_netlet <- function(
         # orig values
         orig_weight = strsplit(obj_attrs2$weight, ', ')[[1]]
         orig_detail = strsplit(obj_attrs2$detail_weight, ' | ', fixed=TRUE)[[1]]
+        orig_weight_binary = obj_attrs2$weight_binary        
         orig_diag_to_NA = obj_attrs2$diag_to_NA
-        orig_weight_binary = obj_attrs2$weight_binary
+        orig_missing_to_zero = obj_attrs2$missing_to_zero
 
         # figure out which to keep based on input in what_layers_to_subset and 
         # its index position in the original layers
@@ -142,8 +143,9 @@ subset_netlet <- function(
         # reconstruct based on what layers selected
         obj_attrs2$weight = paste(orig_weight[toKeep], collapse=', ')
         obj_attrs2$detail_weight = paste(orig_detail[toKeep], collapse=' | ')
-        obj_attrs2$diag_to_NA = orig_diag_to_NA[toKeep]
         obj_attrs2$weight_binary = orig_weight_binary[toKeep]
+        obj_attrs2$diag_to_NA = orig_diag_to_NA[toKeep]
+        obj_attrs2$missing_to_zero = orig_missing_to_zero[toKeep]    
     }
 
     # new object: longit list
@@ -152,7 +154,15 @@ subset_netlet <- function(
         # pull attributes from a cross-sec in the list
         crossSec_obj_attrs <- attributes(netlet[[1]])
         # sub_dims <- attributes(sub_net[[1]])
-        
+
+        # modify crossSec_obj_attrs to account for new layers if relevant
+        crossSec_obj_attrs$layers <- obj_attrs2$layers
+        crossSec_obj_attrs$weight <- obj_attrs2$weight
+        crossSec_obj_attrs$detail_weight <- obj_attrs2$detail_weight
+        crossSec_obj_attrs$weight_binary <- obj_attrs2$weight_binary
+        crossSec_obj_attrs$diag_to_NA <- obj_attrs2$diag_to_NA
+        crossSec_obj_attrs$missing_to_zero <- obj_attrs2$missing_to_zero
+    
         # # adjust actor composition
         # crossSec_obj_attrs[1:2] <- sub_dims[1:2]
         
