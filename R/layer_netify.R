@@ -133,6 +133,10 @@ layer_netify <- function(netlet_list, layer_labels=NULL){
     weight_label_collapse <- paste(
         unlist(weight_label_collapse), collapse=' | ')
 
+    # pull out logical for whether we have binary weights
+    weight_binary_vec = unlist( lapply(attribs_list, function(x){
+        return(x$weight_binary) }) )
+
     # check to make sure that the networks can be layered
     # meaning that they share the same dimensions
     msrmnts_list <- lapply(netlet_list, netify_measurements)
@@ -209,6 +213,7 @@ layer_netify <- function(netlet_list, layer_labels=NULL){
             attr(arr, 'actor_pds') <- NULL
             attr(arr, 'weight') <- weight_collapse
             attr(arr, 'detail_weight') <- weight_label_collapse
+            attr(arr, 'weight_binary') <- weight_binary_vec
             attr(arr, 'symmetric') <- attribs_list[[1]]$symmetric
             attr(arr, 'mode') <- attribs_list[[1]]$mode
             attr(arr, 'layers') <- layer_labels
@@ -230,6 +235,7 @@ layer_netify <- function(netlet_list, layer_labels=NULL){
     attr(netlet, 'actor_pds') <- attribs_list[[1]]$actor_pds
     attr(netlet, 'weight') <- weight_collapse
     attr(netlet, 'detail_weight') <- weight_label_collapse
+    attr(netlet, 'weight_binary') <- weight_binary_vec
     attr(netlet, 'symmetric') <- attribs_list[[1]]$symmetric
     attr(netlet, 'mode') <- attribs_list[[1]]$mode
     attr(netlet, 'layers') <- layer_labels

@@ -289,6 +289,9 @@ summary.netify <- function(object, ...){
 
 # va
 
+# ##
+# summary(v)
+
 # ## cross sec multilayer
 # icews_verbCoop_matlCoop
 

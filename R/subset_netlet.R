@@ -129,17 +129,21 @@ subset_netlet <- function(
     if( !is.null(what_layers_to_subset)){
         obj_attrs2$layers <- what_layers_to_subset
 
-        # orig weight
+        # orig values
         orig_weight = strsplit(obj_attrs2$weight, ', ')[[1]]
         orig_detail = strsplit(obj_attrs2$detail_weight, ' | ', fixed=TRUE)[[1]]
+        orig_diag_to_NA = obj_attrs2$diag_to_NA
+        orig_weight_binary = obj_attrs2$weight_binary
 
         # figure out which to keep based on input in what_layers_to_subset and 
         # its index position in the original layers
         toKeep = match(what_layers_to_subset, obj_attrs2$layers)
 
-        # reconstruct weight and detail_weight
+        # reconstruct based on what layers selected
         obj_attrs2$weight = paste(orig_weight[toKeep], collapse=', ')
         obj_attrs2$detail_weight = paste(orig_detail[toKeep], collapse=' | ')
+        obj_attrs2$diag_to_NA = orig_diag_to_NA[toKeep]
+        obj_attrs2$weight_binary = orig_weight_binary[toKeep]
     }
 
     # new object: longit list
