@@ -19,7 +19,7 @@ You supply data and `netify` transforms it into easy to work with network data. 
 
 ## Usage
 
-See our (forthcoming) `netify_introduction` vignette or any of our other vignettes for more information. To get started, supply a dyadic data set (or edgelist) to netify. You can add information such as nodal or dyadic covariates, time, as well as specify weights for the edges of the network. For example, to generate a longitudinal, directed and weighted network use the code below:
+See our `workshop_demo` vignette for more information. To get started, supply a dyadic data set (or edgelist) to netify. You can add information such as nodal or dyadic covariates, time, as well as specify weights for the edges of the network. For example, to generate a longitudinal, directed and weighted network use the code below:
 
       library(netify)
       data(icews)

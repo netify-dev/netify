@@ -217,13 +217,10 @@ plot_actor_stats(
 )
 ```
 
-<<<<<<< HEAD
 We can also zoom into a specific time slice of the network:
 
 ```{r, fig.width=6, fig.height=6}
 summary_df_static = summary_actor_mids[summary_actor_mids$time == 2011,]
-#summary_df_static = summary_df_static %>% group_by(time)
-names(summary_df_static)[names(summary_df_static) == "time"] <- "temp"
 
 plot_actor_stats(
   summary_df_static,
@@ -232,21 +229,7 @@ plot_actor_stats(
 )
 ```
 
-Additionally, since the result of `plot_actor_stats` is a `ggplot2` object, users can also choose to facet the plot by actors and variables, as shown below:
-
-```{r, fig.width=6, fig.height=6}
-plot_actor_stats(
-  summary_actor_mids, 
-  across_actor = FALSE, 
-  specific_actors = top_5 
-  ) + 
-  facet_grid(variable~actor, scales='free')
-```
-
-Instead of looking at summary statistics, it is useful to visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default and seed set to 6886 for node layout).
-=======
 Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default and seed set to 6886 for node layout).
->>>>>>> 21ed6559aa44207d73e0100aebeb3b51cfe6f875
 
 Our goal was to make this super easy for plotting time-varying attributes or actors. 
 
@@ -282,7 +265,6 @@ We can quickly inspect the object with the `print` function.
 ```{r}
 # print netlet to make sure they got added to nodal features
 print(mid_long_network)
-
 ```
 
 
