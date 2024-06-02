@@ -82,9 +82,6 @@
     <loc>https://netify-dev.github.io/netify/reference/edge_value_check.html</loc>
   </url>
   <url>
-    <loc>https://netify-dev.github.io/netify/reference/filter_layers.html</loc>
-  </url>
-  <url>
     <loc>https://netify-dev.github.io/netify/reference/gen_symm_id.html</loc>
   </url>
   <url>
@@ -133,7 +130,7 @@
     <loc>https://netify-dev.github.io/netify/reference/is_netify.html</loc>
   </url>
   <url>
-    <loc>https://netify-dev.github.io/netify/reference/layer_netify.html</loc>
+    <loc>https://netify-dev.github.io/netify/reference/layer_netlet.html</loc>
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/list_to_array.html</loc>

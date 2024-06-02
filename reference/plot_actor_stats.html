@@ -52,6 +52,7 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plot_actor_stats</span><span class="op">(</span></span>
 <span>  <span class="va">summary_df</span>,</span>
 <span>  longitudinal <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="st">"time"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">summary_df</span><span class="op">)</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span>,</span>
+<span>  multilayer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="st">"layer"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">summary_df</span><span class="op">)</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  across_actor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  specific_stats <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  specific_actors <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -66,6 +67,10 @@
 
 <dt>longitudinal</dt>
 <dd><p>Logical; if TRUE, the data is considered longitudinal. Default is set to TRUE if there is a "time" column in the dataframe passed to summary_df.</p></dd>
+
+
+<dt>multilayer</dt>
+<dd><p>Logical; if TRUE, the data is considered to be multilayered. Default is set to TRUE if there is a "layer" column in the dataframe passed to summary_df.</p></dd>
 
 
 <dt>across_actor</dt>

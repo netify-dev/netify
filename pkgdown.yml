@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   manual_plotting: manual_plotting.html
   workshop_demo: workshop_demo.html
-last_built: 2024-06-02T00:34Z
+last_built: 2024-06-02T22:53Z
 urls:
   reference: https://netify-dev.github.io/netify/reference
   article: https://netify-dev.github.io/netify/articles
