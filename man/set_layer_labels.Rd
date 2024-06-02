@@ -2,7 +2,7 @@
 % Please edit documentation in R/layer_helpers.R
 \name{set_layer_labels}
 \alias{set_layer_labels}
-\title{Helper function for layer_netify to set layer labels}
+\title{Helper function for layer_netlet to set layer labels}
 \usage{
 set_layer_labels(netlet_list, layer_labels)
 }
@@ -15,5 +15,5 @@ set_layer_labels(netlet_list, layer_labels)
 character vector of layer labels
 }
 \description{
-Helper function for layer_netify to set layer labels
+Helper function for layer_netlet to set layer labels
 }

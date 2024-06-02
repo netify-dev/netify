@@ -7,6 +7,7 @@
 plot_actor_stats(
   summary_df,
   longitudinal = ifelse("time" \%in\% colnames(summary_df), TRUE, FALSE),
+  multilayer = ifelse("layer" \%in\% colnames(summary_df), TRUE, FALSE),
   across_actor = TRUE,
   specific_stats = NULL,
   specific_actors = NULL
@@ -16,6 +17,8 @@ plot_actor_stats(
 \item{summary_df}{A dataframe from the \code{summary_actor} function containing actor-level or actor-time level statistics. The dataframe should have columns labeled "actor" and "time" for longitudinal data.}
 
 \item{longitudinal}{Logical; if TRUE, the data is considered longitudinal. Default is set to TRUE if there is a "time" column in the dataframe passed to summary_df.}
+
+\item{multilayer}{Logical; if TRUE, the data is considered to be multilayered. Default is set to TRUE if there is a "layer" column in the dataframe passed to summary_df.}
 
 \item{across_actor}{Logical; if TRUE, visualizations will focus on the distribution of statistics across actors. If FALSE, visualizations will focus on specific actors. Default is TRUE. If setting across_actor to TRUE and specific actors are provided, the data will be subsetted to include only the specified actors.}
 

@@ -1,6 +1,6 @@
 #' Layer netify objects together to create a multilayer network
 #'
-#' `layer_netify` takes in two netify objects and 
+#' `layer_netlet` takes in two netify objects and 
 #' layers them together to create a multilayer network
 #' 
 #' 
@@ -30,7 +30,7 @@
 #'     dyad_vars=c('matlConf') )
 #' 
 #' # layer together cross-sec netify objects together
-#' icews_verbCoop_matlCoop <- layer_netify(
+#' icews_verbCoop_matlCoop <- layer_netlet(
 #'     netlet_list=list(icews_verbCoop, icews_matlCoop),
 #'     layer_labels=c('verbCoop', 'matlCoop') )
 #' 
@@ -54,7 +54,7 @@
 #'     output_format='longit_array' )
 #' 
 #' # layer together
-#' icews_verbCoop_matlCoop_longit_a <- layer_netify(
+#' icews_verbCoop_matlCoop_longit_a <- layer_netlet(
 #'     netlet_list=list(icews_verbCoop_longit_a, icews_matlCoop_longit_a),
 #'     layer_labels=c('verbCoop', 'matlCoop') )
 #' 
@@ -78,7 +78,7 @@
 #'     dyad_vars=c('matlConf') )
 #' 
 #' # layer together
-#' icews_verbCoop_matlCoop_longit_l <- layer_netify(
+#' icews_verbCoop_matlCoop_longit_l <- layer_netlet(
 #'     netlet_list=list(icews_verbCoop_longit_l, icews_matlCoop_longit_l),
 #'     layer_labels=c('verbCoop', 'matlCoop') )
 #' 
@@ -96,7 +96,7 @@
 #'
 #' @export
 
-layer_netify <- function(netlet_list, layer_labels=NULL){
+layer_netlet <- function(netlet_list, layer_labels=NULL){
 
     # user input checks
     invisible(lapply(netlet_list, netify_check))

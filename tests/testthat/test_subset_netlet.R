@@ -71,7 +71,7 @@ icews_matlConf_l <- netify(
     symmetric=FALSE, weight='matlConf', output_format='longit_list')
 
 # layer together cross-sec netify objects together
-icews_all_l <- layer_netify(
+icews_all_l <- layer_netlet(
     netlet_list=list(icews_verbCoop_l, icews_matlCoop_l, icews_verbConf_l, icews_matlConf_l),
     layer_labels=c('verbCoop', 'matlCoop', 'verbConf', 'matlConf') )
 
@@ -90,7 +90,7 @@ icews_matlConf_a <- netify(
     symmetric=FALSE, weight='matlConf', output_format='longit_array')
 
 # layer together cross-sec netify objects together
-icews_all_a <- layer_netify(
+icews_all_a <- layer_netlet(
     netlet_list=list(icews_verbCoop_a, icews_matlCoop_a, icews_verbConf_a, icews_matlConf_a),
     layer_labels=c('verbCoop', 'matlCoop', 'verbConf', 'matlConf') )
 
@@ -109,7 +109,7 @@ icews_matlConf_10 <- netify(
     symmetric=FALSE, weight='matlConf' )
 
 # layer together
-icews_all_10 <- layer_netify(
+icews_all_10 <- layer_netlet(
     netlet_list=list(icews_verbCoop_10, icews_matlCoop_10, icews_verbConf_10, icews_matlConf_10),
     layer_labels=c('verbCoop', 'matlCoop', 'verbConf', 'matlConf') )
 ################################################

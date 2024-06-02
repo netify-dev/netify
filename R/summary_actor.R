@@ -136,10 +136,10 @@ summary_actor <- function( netlet, invert_weights_for_igraph=TRUE, other_stats=N
 	# bind into one matrix and start cleaning
 	netStats_actor = do.call('rbind', net_stats_l_mutli)
 
-  # if cross-sectional then cleanup
-  if(netify_type == 'cross_sec'){
-    netStats_actor <- netStats_actor[,c('actor', setdiff(names(netStats_actor), 'actor'))]
-    return(netStats_actor)}
+	# drop layer column if only one layer
+	if(length(layers)==1){
+		netStats_actor = netStats_actor[
+      ,setdiff(names(netStats_actor), 'layer')] }
 
   # if longitudinal, `actor`` contains both year and name information
   if(netify_type != 'cross_sec'){
@@ -150,12 +150,9 @@ summary_actor <- function( netlet, invert_weights_for_igraph=TRUE, other_stats=N
 
   # cleanup
   vars <- c('actor', 'layer', "time")
-  netStats_actor <- netStats_actor[,c(vars, setdiff(names(netStats_actor), vars))]
-
-	# drop layer column if only one layer
-	if(length(layers)==1){
-		netStats_actor = netStats_actor[
-      ,setdiff(names(netStats_actor), 'layer')] }
+  vars = vars[vars %in% names(netStats_actor)]
+  netStats_actor <- netStats_actor[,
+    c(vars, setdiff(names(netStats_actor), vars))]
 
   #
   return(netStats_actor)

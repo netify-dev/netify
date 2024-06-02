@@ -1,4 +1,4 @@
-#' Helper function for layer_netify to set layer labels
+#' Helper function for layer_netlet to set layer labels
 #' 
 #' @param netlet_list list of netlet objects
 #' @param layer_labels character vector of layer labels
@@ -53,7 +53,7 @@ check_layer_compatible <- function(a_list, elems, msg){
                 paste0( msg[1], elem, msg[2] ) )
             stop() } } }
 
-#' Helper function for layer_netify to extract attributes
+#' Helper function for layer_netlet to extract attributes
 #' from listed netlet objects 
 #' 
 #' @param a_list named list object
@@ -75,7 +75,7 @@ get_attribs <- function(
 
 #' Reduce and combine multiple nodal attributes of netify objects
 #' into a single nodal attribute. Mainly for use within the
-#' layer_netify function
+#' layer_netlet function
 #' 
 #' @param attribs_list list of attributes from each netlet
 #' @param msrmnts_list list of msrmnts from each netlet
@@ -137,7 +137,7 @@ reduce_combine_nodal_attr <- function(
 
 #' Reduce and combine multiple dyadic attributes of netify objects
 #' into a single dyadic attribute. Mainly for use within the
-#' layer_netify function
+#' layer_netlet function
 #' 
 #' @param attribs_list list of attributes from each netlet
 #' @param msrmnts_list list of msrmnts from each netlet

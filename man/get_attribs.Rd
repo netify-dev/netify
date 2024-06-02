@@ -2,7 +2,7 @@
 % Please edit documentation in R/layer_helpers.R
 \name{get_attribs}
 \alias{get_attribs}
-\title{Helper function for layer_netify to extract attributes
+\title{Helper function for layer_netlet to extract attributes
 from listed netlet objects}
 \usage{
 get_attribs(a_list, attrib, list_format = FALSE, get_unique = FALSE)
@@ -20,6 +20,6 @@ get_attribs(a_list, attrib, list_format = FALSE, get_unique = FALSE)
 attribute values
 }
 \description{
-Helper function for layer_netify to extract attributes
+Helper function for layer_netlet to extract attributes
 from listed netlet objects
 }

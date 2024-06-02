@@ -4,7 +4,7 @@
 \alias{reduce_combine_nodal_attr}
 \title{Reduce and combine multiple nodal attributes of netify objects
 into a single nodal attribute. Mainly for use within the
-layer_netify function}
+layer_netlet function}
 \usage{
 reduce_combine_nodal_attr(attribs_list, msrmnts_list, netlet_type)
 }
@@ -21,5 +21,5 @@ nodal attribute data.frame
 \description{
 Reduce and combine multiple nodal attributes of netify objects
 into a single nodal attribute. Mainly for use within the
-layer_netify function
+layer_netlet function
 }
