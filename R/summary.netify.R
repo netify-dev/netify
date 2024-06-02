@@ -83,11 +83,15 @@ summary.netify <- function(object, ...){
 
 	# get type
 	netlet_type <- obj_attrs$netify_type
+	######################
 
+	######################
 	# iterate through each layer and recombine
 	net_stats_l_mutli = lapply(layers, function(layer){
 
-		# if just one layer then just ignore
+		######################
+		# if just one layer then just set netlet to user input,
+		# if more than one then subset
 		if(length(layers)==1){ netlet = netlet_base }
 		if(length(layers)>1){
 			netlet = subset_netlet(
@@ -98,109 +102,12 @@ summary.netify <- function(object, ...){
 		# we can use lapply
 		if(netlet_type == 'cross_sec'){ netlet <- list(netlet) }
 		if(netlet_type == 'longit_array'){ netlet <- array_to_list(netlet) }
+		######################		
 
 		######################
 		# calc stats across netlet(s)
 		net_stats_l <- lapply(netlet, function(mat){
-
-			######################
-			# prep some objects
-
-			# get igraph version
-			g = prep_for_igraph(mat)
-
-			# bin_mat
-			bin_mat = +(mat > 0)
-
-			# vectorized matrix
-			vec_mat <- c(mat)
-			vec_bin_mat <- c(bin_mat)
-			######################
-
-			######################
-			# start calcs
-
-			# actor variability
-			row_means <- rowMeans(mat, na.rm=TRUE)
-			col_means <- colMeans(mat, na.rm=TRUE)
-
-			# number of actors
-			num_row_actors <- nrow(mat)
-			num_col_actors <- ncol(mat)
-
-			# get proportion missing
-			if(obj_attrs$diag_to_NA){
-				prop_edges_missing = (sum(is.na(vec_mat))+num_row_actors)/length(vec_mat) }
-			if(!obj_attrs$diag_to_NA){
-				prop_edges_missing = sum(is.na(vec_mat))/length(vec_mat) }
-
-			# min/max scores
-			min_edge_value <- min(vec_mat, na.rm=TRUE)
-			max_edge_value <- max(vec_mat, na.rm=TRUE)
-
-			# graph level summary measures
-			density <- mean(vec_bin_mat, na.rm=TRUE)
-			mean_edge_weight <- mean(vec_mat, na.rm=TRUE)
-			sd_edge_weight <- sd(vec_mat, na.rm=TRUE)
-			num_edges <- sum(vec_bin_mat, na.rm=TRUE)
-
-			# competition measures
-			row_sums = row_means * num_row_actors
-			col_sums = col_means * num_col_actors
-			competition_row = sum( (row_sums / sum(row_sums))^2 )
-			competition_col = sum( (col_sums / sum(col_sums))^2 )		
-
-			# symmetric case
-			competition <- row_sums
-			
-			# getting at actor variability
-			sd_of_row_means <- sd( row_means, na.rm=TRUE )
-			sd_of_col_means <- sd( col_means, na.rm=TRUE )
-
-			# covar and recip calcs for one mode nets
-			if(obj_attrs$mode=='unipartite'){
-				covar_of_row_col_means <- cor(row_means, col_means, use='pairwise.complete.obs')
-				reciprocity <- cor(vec_mat, c(t(mat)), use='pairwise.complete.obs') }
-
-			# place holder val for bipartite
-			if(obj_attrs$mode=='bipartite'){
-				covar_of_row_col_means <- NA ; reciprocity <- NA }
-
-			# get igraph clustering coef
-			transitivity = igraph::transitivity(g)
-			######################
-
-			######################
-			# organize
-			out <- c(
-				num_row_actors = num_row_actors,
-				num_col_actors = num_col_actors,
-				density=density,
-				num_edges = num_edges,
-				mean_edge_weight=mean_edge_weight,
-				sd_edge_weight=sd_edge_weight,
-				prop_edges_missing = prop_edges_missing,			
-				min_edge_value = min_edge_value, 
-				max_edge_value = max_edge_value, 
-				competition_row=competition_row,
-				competition_col=competition_col,
-				sd_of_row_means=sd_of_row_means, 
-				sd_of_col_means=sd_of_col_means,
-				covar_of_row_col_means=covar_of_row_col_means,
-				reciprocity=reciprocity,
-				transitivity=transitivity
-				)
-			######################
-
-			######################
-			# calculate any user supplied stats
-			if( 'other_stats' %in% names(summary_args) ){
-			other_out <- lapply(summary_args$'other_stats', function(stat){ stat(mat) })
-			out <- append(out, unlist(other_out)) }
-			######################
-			
-			#
-			return(out) })
+			return( graph_stats_for_netlet(mat, obj_attrs, summary_args) ) })
 		######################
 
 		######################
@@ -217,23 +124,20 @@ summary.netify <- function(object, ...){
 
 		#
 		return(net_stats) })
+	######################
 
-	# bind into one matrix
+	######################
+	# bind into one matrix and start cleaning
 	net_stats = do.call('rbind', net_stats_l_mutli)
 
 	# reorder cols
 	net_stats <- net_stats[,
 		c( 'net', 'layer', 
-			setdiff(names(net_stats), c('net', 'layer')))
-		]
+			setdiff(names(net_stats), c('net', 'layer'))) ]
 
 	# drop layer column if only one layer
 	if(length(layers)==1){
 		net_stats = net_stats[,setdiff(names(net_stats), 'layer')] }
-	######################
-
-	######################
-	# clean up default stats based on netlet type
 
 	# if unipartite then collapse num_row_actors and num_col_actors
 	# into one column: num_actors
@@ -280,37 +184,3 @@ summary.netify <- function(object, ...){
 	#
 	return(net_stats)
 }
-
-# library(netify)
-# example(layer_netify)
-
-# v = subset_netlet(
-# 	icews_verbCoop_matlCoop, 
-# 	what_layers_to_subset = 'verbCoop'
-# )
-
-# v
-
-# vl = subset_netlet(
-# 	icews_verbCoop_matlCoop_longit_l, 
-# 	what_layers_to_subset = 'verbCoop'
-# )
-
-# vl
-
-# va = subset_netlet(
-# 	icews_verbCoop_matlCoop_longit_a, 
-# 	what_layers_to_subset = 'verbCoop'
-# )
-
-# va
-
-# ##
-# summary.netify(v)
-# summary.netify(vl)
-# summary.netify(va)
-
-# summary.netify(icews_verbCoop_matlCoop)
-# summary.netify(icews_verbCoop_matlCoop_longit_l)
-# summary.netify(icews_verbCoop_matlCoop_longit_a)
-
