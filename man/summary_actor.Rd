@@ -32,8 +32,10 @@ A \code{data.frame} object summarizing actor-level statistics of the network(s).
 \itemize{
 \item \emph{Strength sum}: The total weight of the ties connected to actor \(i\) in the network -- calculated as \eqn{s_i^{sum} = \sum_{j=1}^{n} w_{ij}}, where \eqn{w_{ij}} is the weight of the tie between actors \(i\) and \(j\).
 \item \emph{Strength average}: The average weight of the ties connected to actor \(i\) -- calculated as \eqn{s_i^{avg} = \frac{s_i^{sum}}{d_i}}, where \eqn{s_i^{sum}} is the strength sum of actor \(i\) and \eqn{d_i} is the degree of actor \(i\).
-\item For \emph{closeness} and \emph{betweenness}, edge weights are typically inverted to treat them as distances, following the convention in \code{igraph}. This behavior can be modified by setting the \code{invert_weights_for_igraph} parameter in the \code{summary_actor} function to FALSE.
 }
+\item \emph{Strength standard deviation}: The variability in the weights of ties connected to actor \(i\) -- calculated as \eqn{s_i^{sd} = \sqrt{\frac{1}{d_i} \sum_{j=1}^{n} (w_{ij} - s_i^{avg})^2}}, where \eqn{w_{ij}} is the weight of the tie between actors \(i\) and \(j\).
+\item \emph{Strength median}: The median weight of the ties connected to actor \(i\) -- calculated as the middle value of the sorted weights.
+\item For \emph{closeness} and \emph{betweenness}, edge weights are typically inverted to treat them as distances, following the convention in \code{igraph}. This behavior can be modified by setting the \code{invert_weights_for_igraph} parameter in the \code{summary_actor} function to FALSE.
 \item \strong{Asymmetric Unweighted}: Same as the symmetric case but now a statistics for the row and column are calculated separately; when relevant a total statistic is calculated as well.
 \item \strong{Asymmetric Weighted}: Same as the symmetric case but now a statistics for the row and column are calculated separately; when relevant a total statistic is calculated as well.
 }

@@ -12,8 +12,9 @@
 #' - `num_edges`: The total number of edges in the network (does not take edge weight into account).
 #' - `mean_edge_weight`: The average weight of edges in the network, provided only for weighted networks.
 #' - `sd_edge_weight`: The standard deviation of edge weights in the network, provided only for weighted networks.
+#' - `median_edge_weight`: The median edge weight in the network, provided only for weighted networks.
 #' - `prop_edges_missing`: The proportion of potential edges that are missing.
-#' - `min_edge_value` and `max_edge_value`: The minimum and maximum edge weights observed in the network, provided only for weighted networks.
+#' - `min_edge_weight` and `max_edge_weight`: The minimum and maximum edge weights observed in the network, provided only for weighted networks.
 #' - `competition_row` and `competition_col` (defaults to `competition` for undirected networks): Measures network competitiveness using the Herfindahl-Hirschman Index (HHI), defined as \eqn{\sum_{i=1}^{n} (s_i)^2}, where \eqn{s_i} is the proportion of interactions by actor \eqn{i} and \eqn{n} is the total number of actors. The index ranges from 1/n (indicating high diversity and competitive interaction across actors) to 1 (one actor dominates all interactions). Refer to Dorff, Gallop, & Minhas (2023) for an application of this measure in conflict networks.
 #' - `sd_of_row_means` and `sd_of_col_means`: Standard deviations of the sending and receiving effects (row and column means). These statistics are meant to describe the variability in actor behavior across the network.
 #' - `covar_of_row_col_means`: The covariance between sending and receiving effects, always takes weights into account and is only calculated for unipartite networks.
@@ -173,10 +174,11 @@ summary.netify <- function(object, ...){
 	# if not weighted then drop redundant stats
 	if(all(obj_attrs$weight_binary)){
 		# drop mean_edge_weight, sd_edge_weight,
-		# min_edge_value, max_edge_value
+		# min_edge_weight, max_edge_weight
 		to_drop = c(
 			'mean_edge_weight', 'sd_edge_weight', 
-			'min_edge_value', 'max_edge_value')
+			'min_edge_weight', 'max_edge_weight', 
+			'median_edge_weight')
 		net_stats <- net_stats[,setdiff(names(net_stats), to_drop)]
 	}
 	######################

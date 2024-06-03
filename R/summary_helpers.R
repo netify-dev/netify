@@ -10,6 +10,8 @@
 #'
 #' @details This function is not meant to be called directly by users but is instead used internally by the `summary.netify` function to process each netlet separately. It calculates a wide range of graph-level statistics based on the input matrix and the attributes of the netify object.
 #'
+#' @importFrom stats median
+#' 
 #' @noRd
 
 graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
@@ -27,14 +29,15 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
 
   # get proportion missing
   if (obj_attrs$diag_to_NA) {
-    prop_edges_missing <- (sum(is.na(vec_mat)) + num_row_actors) / length(vec_mat)
+    prop_edges_missing <- (sum(is.na(vec_mat)) - num_row_actors) / length(vec_mat)
   } else {
     prop_edges_missing <- sum(is.na(vec_mat)) / length(vec_mat)
   }
 
   # min/max scores
-  min_edge_value <- min(vec_mat, na.rm = TRUE)
-  max_edge_value <- max(vec_mat, na.rm = TRUE)
+  min_edge_weight <- min(vec_mat, na.rm = TRUE)
+  max_edge_weight <- max(vec_mat, na.rm = TRUE)
+  median_edge_weight <- median(vec_mat, na.rm = TRUE)  
 
   # graph level summary measures
   density <- mean(vec_bin_mat, na.rm = TRUE)
@@ -56,13 +59,13 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
   sd_of_col_means <- sd(col_means, na.rm = TRUE)
 
   # covar and recip calcs for one mode nets
-  if (obj_attrs$mode == 'unipartite') {
+  if (obj_attrs$mode == 'unipartite' & !obj_attrs$symmetric) {
     covar_of_row_col_means <- cor(row_means, col_means, use = 'pairwise.complete.obs')
     reciprocity <- cor(vec_mat, c(t(mat)), use = 'pairwise.complete.obs')
   }
 
   # place holder val for bipartite
-  if (obj_attrs$mode == 'bipartite') {
+  if (obj_attrs$mode == 'bipartite' | obj_attrs$symmetric) {
     covar_of_row_col_means <- NA
     reciprocity <- NA
   }
@@ -76,11 +79,12 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
     num_col_actors = num_col_actors,
     density = density,
     num_edges = num_edges,
+    prop_edges_missing = prop_edges_missing,    
     mean_edge_weight = mean_edge_weight,
     sd_edge_weight = sd_edge_weight,
-    prop_edges_missing = prop_edges_missing,
-    min_edge_value = min_edge_value,
-    max_edge_value = max_edge_value,
+    median_edge_weight = median_edge_weight,
+    min_edge_weight = min_edge_weight,
+    max_edge_weight = max_edge_weight,
     competition_row = competition_row,
     competition_col = competition_col,
     sd_of_row_means = sd_of_row_means,
@@ -161,6 +165,8 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
     prop_ties <- rowMeans(mat > 0, na.rm = TRUE)
     strength_sum <- rowSums(mat, na.rm = TRUE)
     strength_avg <- rowMeans(mat, na.rm = TRUE)
+    strength_std <- apply(mat, 1, sd, na.rm = TRUE)
+    strength_median <- apply(mat, 1, median, na.rm = TRUE)
 
     # network share
     network_share <- strength_sum / sum(strength_sum, na.rm = TRUE)
@@ -176,6 +182,8 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
       prop_ties = prop_ties,
       strength_sum = strength_sum,
       strength_avg = strength_avg,
+      strength_std = strength_std,
+      strength_median = strength_median,
       network_share = network_share,
       closeness = closeness,
       betweenness = betweenness,
@@ -267,6 +275,20 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
     } else {
       strength_avg_total <- c(strength_avg_in, strength_avg_out)
     }
+    strength_median_in <- apply(mat, 1, median, na.rm = TRUE)
+    strength_median_out <- apply(mat, 2, median, na.rm = TRUE)
+    if (obj_attrs$mode != 'bipartite') {
+      strength_median_total <- (strength_median_in + strength_median_out) / 2
+    } else {
+      strength_median_total <- c(strength_median_in, strength_median_out)
+    }
+    strength_std_in <- apply(mat, 1, sd, na.rm = TRUE)
+    strength_std_out <- apply(mat, 2, sd, na.rm = TRUE)
+    if (obj_attrs$mode != 'bipartite') {
+      strength_std_total <- (strength_std_in + strength_std_out) / 2
+    } else {
+      strength_std_total <- c(strength_std_in, strength_std_out)
+    }
 
     # network share
     network_share_in <- strength_sum_in / sum(strength_sum_in, na.rm = TRUE)
@@ -297,6 +319,12 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
       strength_avg_in = strength_avg_in,
       strength_avg_out = strength_avg_out,
       strength_avg_total = strength_avg_total,
+      strength_std_in = strength_std_in,
+      strength_std_out = strength_std_out,
+      strength_std_total = strength_std_total,
+      strength_median_in = strength_median_in,
+      strength_median_out = strength_median_out,
+      strength_median_total = strength_median_total,
       network_share_in = network_share_in,
       network_share_out = network_share_out,
       network_share_total = network_share_total,
