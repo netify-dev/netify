@@ -82,8 +82,10 @@ should imply stronger (or more valuable) connections rather than longer distance
 </ul></li>
 <li><p><strong>Symmetric Weighted</strong>: Includes the same statistics as the symmetric unweighted case, with additional measures accounting for the weight of connections:</p><ul><li><p><em>Strength sum</em>: The total weight of the ties connected to actor \(i\) in the network -- calculated as \(s_i^{sum} = \sum_{j=1}^{n} w_{ij}\), where \(w_{ij}\) is the weight of the tie between actors \(i\) and \(j\).</p></li>
 <li><p><em>Strength average</em>: The average weight of the ties connected to actor \(i\) -- calculated as \(s_i^{avg} = \frac{s_i^{sum}}{d_i}\), where \(s_i^{sum}\) is the strength sum of actor \(i\) and \(d_i\) is the degree of actor \(i\).</p></li>
-<li><p>For <em>closeness</em> and <em>betweenness</em>, edge weights are typically inverted to treat them as distances, following the convention in <code>igraph</code>. This behavior can be modified by setting the <code>invert_weights_for_igraph</code> parameter in the <code>summary_actor</code> function to FALSE.</p></li>
 </ul></li>
+<li><p><em>Strength standard deviation</em>: The variability in the weights of ties connected to actor \(i\) -- calculated as \(s_i^{sd} = \sqrt{\frac{1}{d_i} \sum_{j=1}^{n} (w_{ij} - s_i^{avg})^2}\), where \(w_{ij}\) is the weight of the tie between actors \(i\) and \(j\).</p></li>
+<li><p><em>Strength median</em>: The median weight of the ties connected to actor \(i\) -- calculated as the middle value of the sorted weights.</p></li>
+<li><p>For <em>closeness</em> and <em>betweenness</em>, edge weights are typically inverted to treat them as distances, following the convention in <code>igraph</code>. This behavior can be modified by setting the <code>invert_weights_for_igraph</code> parameter in the <code>summary_actor</code> function to FALSE.</p></li>
 <li><p><strong>Asymmetric Unweighted</strong>: Same as the symmetric case but now a statistics for the row and column are calculated separately; when relevant a total statistic is calculated as well.</p></li>
 <li><p><strong>Asymmetric Weighted</strong>: Same as the symmetric case but now a statistics for the row and column are calculated separately; when relevant a total statistic is calculated as well.</p></li>
 </ul></div>
@@ -130,34 +132,41 @@ Examples of additional computations (like authority or hub scores) are provided 
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4               1            1111             1311               2422</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5               1            1261             1427               2688</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6               1            2642             2665               5307</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   strength_avg_in strength_avg_out strength_avg_total network_share_in</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       57.576159        67.284768          62.430464      0.019334694</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2        6.245033         6.768212           6.506623      0.002097149</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3        7.437086         7.980132           7.708609      0.002497454</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        7.357616         8.682119           8.019868      0.002470767</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5        8.350993         9.450331           8.900662      0.002804354</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6       17.496689        17.649007          17.572848      0.005875577</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   network_share_out network_share_total closeness_in closeness_out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0.022594950         0.020964822     71.13409      68.44904</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2       0.002272838         0.002184994     42.48817      43.64733</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3       0.002679814         0.002588634     44.78256      39.95772</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4       0.002915549         0.002693158     51.35489      46.60123</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5       0.003173523         0.002988938     63.91481      61.26657</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6       0.005926727         0.005901152     65.51012      63.04273</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   closeness_all betweenness_in betweenness_out betweenness_all authority_score</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      78.06787   1.324503e-02    1.324503e-02    1.324503e-02      0.26866096</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      47.16201   0.000000e+00    0.000000e+00    0.000000e+00      0.01252200</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3      47.41426   0.000000e+00    0.000000e+00    0.000000e+00      0.01406673</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      54.85391   8.830022e-05    8.830022e-05    8.830022e-05      0.01905067</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      69.47750   0.000000e+00    0.000000e+00    0.000000e+00      0.03580770</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6      71.46157   0.000000e+00    0.000000e+00    0.000000e+00      0.05049222</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     hub_score</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.183233794</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.009730031</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.010671854</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.011275109</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 0.024732267</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 0.039622725</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   strength_avg_in strength_avg_out strength_avg_total strength_std_in</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       57.576159        67.284768          62.430464       198.98323</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        6.245033         6.768212           6.506623        21.17104</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        7.437086         7.980132           7.708609        17.00179</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        7.357616         8.682119           8.019868        20.18988</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        8.350993         9.450331           8.900662        39.54933</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       17.496689        17.649007          17.572848        62.13790</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   strength_std_out strength_std_total strength_median_in strength_median_out</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        227.24232          213.11277                  1                   2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2         22.27089           21.72096                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         18.93197           17.96688                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4         24.29633           22.24310                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5         45.34294           42.44614                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6         66.88569           64.51180                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   strength_median_total network_share_in network_share_out network_share_total</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                   1.5      0.019334694       0.022594950         0.020964822</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                   0.0      0.002097149       0.002272838         0.002184994</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                   0.0      0.002497454       0.002679814         0.002588634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                   0.0      0.002470767       0.002915549         0.002693158</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                   0.0      0.002804354       0.003173523         0.002988938</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                   0.0      0.005875577       0.005926727         0.005901152</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   closeness_in closeness_out closeness_all betweenness_in betweenness_out</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     71.13409      68.44904      78.06787   1.324503e-02    1.324503e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     42.48817      43.64733      47.16201   0.000000e+00    0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     44.78256      39.95772      47.41426   0.000000e+00    0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     51.35489      46.60123      54.85391   8.830022e-05    8.830022e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5     63.91481      61.26657      69.47750   0.000000e+00    0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6     65.51012      63.04273      71.46157   0.000000e+00    0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   betweenness_all authority_score   hub_score</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1.324503e-02      0.26866096 0.183233794</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    0.000000e+00      0.01252200 0.009730031</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    0.000000e+00      0.01406673 0.010671854</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    8.830022e-05      0.01905067 0.011275109</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    0.000000e+00      0.03580770 0.024732267</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    0.000000e+00      0.05049222 0.039622725</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># add statistic that get </span></span></span>
 <span class="r-in"><span><span class="co"># the max incoming and outgoing tie</span></span></span>
@@ -179,34 +188,41 @@ Examples of additional computations (like authority or hub scores) are provided 
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4               1            1111             1311               2422</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5               1            1261             1427               2688</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6               1            2642             2665               5307</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   strength_avg_in strength_avg_out strength_avg_total network_share_in</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       57.576159        67.284768          62.430464      0.019334694</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2        6.245033         6.768212           6.506623      0.002097149</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3        7.437086         7.980132           7.708609      0.002497454</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        7.357616         8.682119           8.019868      0.002470767</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5        8.350993         9.450331           8.900662      0.002804354</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6       17.496689        17.649007          17.572848      0.005875577</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   network_share_out network_share_total closeness_in closeness_out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       0.022594950         0.020964822     71.13409      68.44904</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2       0.002272838         0.002184994     42.48817      43.64733</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3       0.002679814         0.002588634     44.78256      39.95772</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4       0.002915549         0.002693158     51.35489      46.60123</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5       0.003173523         0.002988938     63.91481      61.26657</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6       0.005926727         0.005901152     65.51012      63.04273</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   closeness_all betweenness_in betweenness_out betweenness_all authority_score</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      78.06787   1.324503e-02    1.324503e-02    1.324503e-02      0.26866096</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      47.16201   0.000000e+00    0.000000e+00    0.000000e+00      0.01252200</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3      47.41426   0.000000e+00    0.000000e+00    0.000000e+00      0.01406673</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      54.85391   8.830022e-05    8.830022e-05    8.830022e-05      0.01905067</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      69.47750   0.000000e+00    0.000000e+00    0.000000e+00      0.03580770</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6      71.46157   0.000000e+00    0.000000e+00    0.000000e+00      0.05049222</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     hub_score max_out max_in</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.183233794    1516   1847</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.009730031     160    157</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.010671854      91    114</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.011275109     147    176</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 0.024732267     424    469</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 0.039622725     547    609</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   strength_avg_in strength_avg_out strength_avg_total strength_std_in</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       57.576159        67.284768          62.430464       198.98323</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        6.245033         6.768212           6.506623        21.17104</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        7.437086         7.980132           7.708609        17.00179</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        7.357616         8.682119           8.019868        20.18988</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        8.350993         9.450331           8.900662        39.54933</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       17.496689        17.649007          17.572848        62.13790</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   strength_std_out strength_std_total strength_median_in strength_median_out</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        227.24232          213.11277                  1                   2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2         22.27089           21.72096                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         18.93197           17.96688                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4         24.29633           22.24310                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5         45.34294           42.44614                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6         66.88569           64.51180                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   strength_median_total network_share_in network_share_out network_share_total</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                   1.5      0.019334694       0.022594950         0.020964822</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                   0.0      0.002097149       0.002272838         0.002184994</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                   0.0      0.002497454       0.002679814         0.002588634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                   0.0      0.002470767       0.002915549         0.002693158</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                   0.0      0.002804354       0.003173523         0.002988938</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                   0.0      0.005875577       0.005926727         0.005901152</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   closeness_in closeness_out closeness_all betweenness_in betweenness_out</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     71.13409      68.44904      78.06787   1.324503e-02    1.324503e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     42.48817      43.64733      47.16201   0.000000e+00    0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     44.78256      39.95772      47.41426   0.000000e+00    0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     51.35489      46.60123      54.85391   8.830022e-05    8.830022e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5     63.91481      61.26657      69.47750   0.000000e+00    0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6     65.51012      63.04273      71.46157   0.000000e+00    0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   betweenness_all authority_score   hub_score max_out max_in</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1.324503e-02      0.26866096 0.183233794    1516   1847</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    0.000000e+00      0.01252200 0.009730031     160    157</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    0.000000e+00      0.01406673 0.010671854      91    114</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    8.830022e-05      0.01905067 0.011275109     147    176</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    0.000000e+00      0.03580770 0.024732267     424    469</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    0.000000e+00      0.05049222 0.039622725     547    609</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
