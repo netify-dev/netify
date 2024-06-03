@@ -2,7 +2,7 @@
 
 Greetings! This list of resources is not meant to be exhaustive. There is a lot of great network research out there that is not included below! We have tried to share a brief list of resources relevant to quantitative political science researchers of two main types: (1) new(ish) to networks users and (2) researchers focused on studying networks and conflict.
 
-## New to networks:
+## New to networks
 
 ### Overview Books
 
