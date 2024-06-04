@@ -82,6 +82,9 @@
     <loc>https://netify-dev.github.io/netify/reference/edge_value_check.html</loc>
   </url>
   <url>
+    <loc>https://netify-dev.github.io/netify/reference/ego_netlet.html</loc>
+  </url>
+  <url>
     <loc>https://netify-dev.github.io/netify/reference/gen_symm_id.html</loc>
   </url>
   <url>
@@ -107,6 +110,9 @@
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/get_netify.html</loc>
+  </url>
+  <url>
+    <loc>https://netify-dev.github.io/netify/reference/get_ngbd_net_for_ego.html</loc>
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/get_node_layout.html</loc>
