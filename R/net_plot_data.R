@@ -57,30 +57,27 @@ net_plot_data <- function(netlet, plot_args=list()) {
     # get layouts of nodes after checking
     # whether user has supplied their own
     if(is.null(plot_args$point_layout)){
-    nodes_list = get_node_layout(
-        netlet, 
-        layout=plot_args$layout, 
-        static_actor_positions=plot_args$static_actor_positions,
-        which_static=plot_args$which_static,
-        seed=plot_args$seed
-        )
+        nodes_list = get_node_layout(
+            netlet, 
+            layout=plot_args$layout, 
+            static_actor_positions=plot_args$static_actor_positions,
+            which_static=plot_args$which_static,
+            seed=plot_args$seed
+            )
     } else { 
-    nodes_list = plot_args$point_layout
-    if(!is.list(nodes_list)){
-        nodes_list = list(nodes_list)
-    }
+        nodes_list = plot_args$point_layout
+        if(!is.list(nodes_list)){
+            nodes_list = list(nodes_list) }
     }
 
     # get info for drawing edge segments
-    edges_list = get_edge_layout(
-    netlet,  nodes_layout=nodes_list )
+    edges_list = get_edge_layout( netlet,  nodes_layout=nodes_list )
     ######################      
 
     ######################
     # org the netlet into a  and dyadic df with all the
     # relev attributes so that we can plot
-    net_dfs <- merge_layout_attribs(
-    netlet, nodes_list, edges_list)
+    net_dfs <- merge_layout_attribs( netlet, nodes_list, edges_list)
     ######################  
 
     ######################  

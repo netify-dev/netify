@@ -19,26 +19,40 @@ print.netify <- function(x, ...){
 	netlet <- x ; rm(x)
 
 	# pull out attrs
-	objAttrs <- attributes(netlet)
+	obj_attrs <- attributes(netlet)
 
 	# pull out msrmnts
 	msrmnts <- netify_measurements(netlet)
+
+	# pull out some ego info if it's there,
+	# assume FALSE
+	ego_netlet = FALSE ; ego_longit = FALSE
+	include_ego = FALSE
+	if(!is.null(obj_attrs$ego_netlet)){
+		if(obj_attrs$ego_netlet){
+			ego_netlet = TRUE
+			ego_vec = obj_attrs$ego_vec
+    		threshold = obj_attrs$threshold
+			ngbd_direction = obj_attrs$ngbd_direction
+			include_ego = obj_attrs$include_ego
+			ego_longit = obj_attrs$ego_longit	
+			} }
 	######################
 
 	######################
 	# info on netlet type
-	obj_time <- ifelse( grepl('longit', objAttrs$netify_type),
+	obj_time <- ifelse( grepl('longit', obj_attrs$netify_type),
 		'Longitudinal', 'Cross-Sectional' )
-	obj_mode <- ifelse( objAttrs$mode == 'unipartite', 
+	obj_mode <- ifelse( obj_attrs$mode == 'unipartite', 
 		'Unipartite', 'Bipartite' )
-	obj_layer <- ifelse( length(objAttrs$layers)>1, 
+	obj_layer <- ifelse( length(obj_attrs$layers)>1, 
 		'Multilayer',  'Single Layer' )
-	obj_symm <- ifelse( objAttrs$symmetric, 
+	obj_symm <- ifelse( obj_attrs$symmetric, 
 		'Symmetric', 'Asymmetric' )
 
 	# get information about cross-sections
-	detail_weight_label <- objAttrs$detail_weight
-	loops_label <- ifelse( objAttrs$diag_to_NA, 
+	detail_weight_label <- obj_attrs$detail_weight
+	loops_label <- ifelse( obj_attrs$diag_to_NA, 
 		'No Loops Allowed', 'Loops Preserved' )
 
 	# pull out msrmnt info about composition of network
@@ -48,7 +62,7 @@ print.netify <- function(x, ...){
 	n_col_actors <- msrmnts$n_col_actors
 
 	# pull out total number of unique actors
-	if(objAttrs$netify_type == 'longit_list'){
+	if(obj_attrs$netify_type == 'longit_list'){
 		n_row_actors <- length(unique(unlist(msrmnts$row_actors)))
 		n_col_actors <- length(unique(unlist(msrmnts$col_actors))) }
 
@@ -103,6 +117,16 @@ print.netify <- function(x, ...){
 		summ_stats = cbind(
 			layer=attr(netlet, 'layers'), summ_stats ) }
 
+	# # if ego netlet then move net to layer column
+	# if(ego_netlet){
+	# 	summ_stats$layer = summ_stats$net
+	# 	if(ego_longit){
+	# 		summ_stats$layer = unlist(
+	# 			lapply( strsplit(
+	# 				summ_stats$net, '__'), function(x){x[1]}))
+	# 	}
+	# }
+
 	# if longitudinal then avg across time
 	summ_stats = lapply(unique(summ_stats$layer), function(layer){
 		slice = summ_stats[summ_stats$layer==layer, to_keep]
@@ -119,15 +143,67 @@ print.netify <- function(x, ...){
 	######################
 
 	######################
+	# adjustments for info on ego_networks
+	if(ego_netlet){
+
+		# pull out ego net ids
+		ego_ids = names(netlet)
+
+		# pull out units
+		ego_units = ego_ids
+
+		# if longit separate year from unit
+		if(ego_longit){
+			ego_units = unique(
+				unlist( lapply( strsplit(
+					ego_ids, '__'), function(x){ x[1] })))
+			ego_pds = unique(
+				unlist( lapply( strsplit(
+					ego_ids, '__'), function(x){ x[2] })))
+		}
+
+		# count up number of egos
+		n_ego_units = length(ego_units)
+
+		# modify items being printed
+		time_label = ifelse(ego_longit, 
+			paste0('Longitudinal: ', length(ego_pds), ' Periods'), 
+			'Cross-Sectional')
+
+		# modify gen_row_col_label
+		gen_row_col_label = paste0(
+			'# Unique Egos: ', n_ego_units, ' | ',
+			'# Unique Alters: ', n_row_actors - n_ego_units)
+	}
+	######################	
+
+	######################
+	# intro message
+	if(ego_netlet){
+		intro = paste0(
+			'Hello, you have created a neighborhood network for ego(s) (', 
+			ego_vec, '), yay!')
+		stat_msg = 'Neighborhood Network Summary Statistics:'
+		if(obj_attrs$netify_type == 'longit_list' & ego_longit){
+			stat_msg = paste0(
+				'Neighborhood Network Summary Statistics (averaged across time):')}
+	} else {
+		intro = "Hello, you have created network data, yay!"
+		stat_msg = 'Network Summary Statistics:'
+		if(n_time > 1){
+			stat_msg = paste0(
+				'Network Summary Statistics (averaged across time):') }
+	}
+
 	# print out network type info
 	cli::cli({
-		cli::cli_alert_success("Hello, you have created network data, yay!")
+		cli::cli_alert_success(intro)
 
 		# org printing
 		ulid <- cli::cli_ul()
 
 		# print out network type info
-		cli::cli_li( obj_time )
+		# cli::cli_li( obj_time )
 		cli::cli_li( obj_mode )
 		if(n_layers>1){ cli::cli_li( obj_layer ) }
 		cli::cli_li( obj_symm )
@@ -135,12 +211,13 @@ print.netify <- function(x, ...){
 
 		# print out network measurements
 		cli::cli_li(time_label)
-		cli::cli_li(row_label)
-		cli::cli_li(col_label)
+		if(obj_attrs$mode == 'bipartite'){
+			cli::cli_li(row_label)
+			cli::cli_li(col_label) }
 		cli::cli_li(gen_row_col_label)
 
 		# print stats
-		cli::cli_text("Network Summary Statistics:")
+		cli::cli_text(stat_msg)
 		# tbl <- knitr::kable(summ_stats, align = "r", format = "pandoc")
 		tbl = capture.output(print(summ_stats, right = TRUE))
 		cli::cli_verbatim(tbl)

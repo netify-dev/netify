@@ -15,6 +15,8 @@
 #' - For cross-sectional data, it will show the distribution of statistics across actors using density plots or compare specific actors using various plot types.
 #' - For longitudinal data, it will show how the distribution of statistics changes over time using ridge density plots or track changes in statistics for specific actors over time using line plots.
 #'
+#' @author Cassy Dorff, Shahryar Minhas
+#' 
 #' @import ggplot2
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom ggridges geom_density_ridges position_points_jitter
@@ -289,7 +291,7 @@ plot_actor_stats <- function(
 
       # line plot by actor over time across stats
       viz = ggplot(ggdata, aes(
-          x=!!sym("time"), y=!!sym("value"), 
+          x=!!sym("time"), y=!!sym("value"), group=!!sym('actor'),
           color=!!sym("actor"), alpha=!!sym("actor") )) +
         geom_line() +
         geom_point() +

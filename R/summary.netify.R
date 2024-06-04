@@ -183,6 +183,59 @@ summary.netify <- function(object, ...){
 	}
 	######################
 
+	######################
+	# pull out some ego info if it's there,
+	# assume FALSE
+	ego_netlet = FALSE ; ego_longit = FALSE
+	include_ego = FALSE
+	if(!is.null(obj_attrs$ego_netlet)){
+		if(obj_attrs$ego_netlet){
+			ego_netlet = TRUE
+			ego_vec = obj_attrs$ego_vec			
+			ego_longit = obj_attrs$ego_longit } }
+
+	# if ego netlet then make some changes
+	# layer will be added and used for ego
+	# net will stand in for time if ego data is longit
+	if(ego_netlet){
+
+		# if no longit info for ego then need to modify id vars
+		if(!ego_longit){
+
+			# if just one time point and one ego then layer is just ego_vec
+			# otherwise the net column will have multiple egos
+			if(!ego_longit & obj_attrs$netify_type=='cross_sec'){
+				layer = ego_vec
+			} else {
+				layer = net_stats$net }
+			
+			# since this is nonlongit case set net to 1
+			net_stats$net = 1 }
+
+		# if longit info for ego
+		if(ego_longit){
+
+			# extract units and pds from net column
+			ego_units = unique(
+				unlist( lapply( strsplit(
+					net_stats$net, '__'), function(x){ x[1] })))
+			ego_pds = unique(
+				unlist( lapply( strsplit(
+					net_stats$net, '__'), function(x){ x[2] })))
+
+			# add relev vars
+			net_stats$net = ego_pds
+			layer = ego_units
+		}
+
+		# organize
+		net_stats = cbind(
+			net=net_stats[,'net'], layer=layer, net_stats[,-1])
+	}
+	######################	
+
+	######################	
 	#
 	return(net_stats)
+	######################		
 }

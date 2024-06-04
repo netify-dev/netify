@@ -5,7 +5,7 @@
 \alias{convert.to.igraph}
 \title{Convert conflictNet object to igraph object}
 \usage{
-prep_for_igraph(netlet)
+prep_for_igraph(netlet, add_nodal = TRUE, add_dyad = TRUE)
 }
 \arguments{
 \item{netlet}{An R object}

@@ -236,9 +236,7 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
       closeness_in = closeness_in,
       closeness_out = closeness_out,
       closeness_all = closeness_all,
-      betweenness_in = betweenness_in,
-      betweenness_out = betweenness_out,
-      betweenness_all = betweenness_all,
+      betweenness = betweenness,
       authority_score = authority_score,
       hub_score = hub_score
     )
@@ -299,9 +297,7 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
     closeness_in <- igraph::closeness(g, mode = 'in', normalized = TRUE, weights = g_wgts)
     closeness_out <- igraph::closeness(g, mode = 'out', normalized = TRUE, weights = g_wgts)
     closeness_all <- igraph::closeness(g, mode = 'all', normalized = TRUE, weights = g_wgts)
-    betweenness_in <- igraph::betweenness(g, normalized = TRUE, weights = g_wgts)
-    betweenness_out <- igraph::betweenness(g, normalized = TRUE, weights = g_wgts)
-    betweenness_all <- igraph::betweenness(g, normalized = TRUE, weights = g_wgts)
+    betweenness <- igraph::betweenness(g, normalized = TRUE, weights = g_wgts)
     authority_score <- igraph::authority_score(g)$vector
     hub_score <- igraph::hub_score(g)$vector
 
@@ -331,9 +327,7 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
       closeness_in = closeness_in,
       closeness_out = closeness_out,
       closeness_all = closeness_all,
-      betweenness_in = betweenness_in,
-      betweenness_out = betweenness_out,
-      betweenness_all = betweenness_all,
+      betweenness = betweenness,
       authority_score = authority_score,
       hub_score = hub_score
     )

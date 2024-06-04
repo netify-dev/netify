@@ -51,7 +51,7 @@
 #' 
 #' @export prep_for_igraph
  
-prep_for_igraph = function(netlet){
+prep_for_igraph = function(netlet, add_nodal=TRUE, add_dyad=TRUE){
 
   # check if netify object
   netify_check(netlet)
@@ -114,13 +114,13 @@ prep_for_igraph = function(netlet){
       igrph_slice <- netify_to_igraph(netlet_slice)
 
       # process nodal attributes if exist
-      if(nodal_data_exist){
+      if(nodal_data_exist & add_nodal){
         igrph_slice <- add_nodal_to_igraph(
           netlet_slice, attr(netlet, 'nodal_data'),
           igrph_slice, time_val) }
 
       # process dyadic attributes if exist
-      if(dyad_data_exist) {
+      if(dyad_data_exist & add_dyad) {
         igrph_slice <- add_dyad_to_igraph(
           netlet_slice, attr(netlet, 'dyad_data'),
           igrph_slice, time_val) }

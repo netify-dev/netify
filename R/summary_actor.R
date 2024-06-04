@@ -65,7 +65,7 @@
 
 summary_actor <- function( netlet, invert_weights_for_igraph=TRUE, other_stats=NULL) {
 
-	######################
+  ######################
   # check if netify object
   netify_check(netlet)
 
@@ -145,9 +145,11 @@ summary_actor <- function( netlet, invert_weights_for_igraph=TRUE, other_stats=N
 
   # if longitudinal, `actor`` contains both year and name information
   if(netify_type != 'cross_sec'){
-    netStats_actor$time = unlist(lapply(strsplit(netStats_actor$actor, '.', fixed=TRUE), function(x){ x[1] }))
-    netStats_actor$actor = unlist(lapply(strsplit(netStats_actor$actor, '.', fixed=TRUE), function(x){ x[2] }))
-    netStats_actor$time <- as.numeric(netStats_actor$time)
+    netStats_actor$time = unlist(lapply(strsplit(
+      netStats_actor$actor, '.', fixed=TRUE), function(x){ x[1] }))
+    netStats_actor$actor = unlist(lapply(strsplit(
+      netStats_actor$actor, '.', fixed=TRUE), function(x){ x[2] }))
+    # netStats_actor$time <- as.numeric(netStats_actor$time)
   }
 
   # cleanup
@@ -155,7 +157,67 @@ summary_actor <- function( netlet, invert_weights_for_igraph=TRUE, other_stats=N
   vars = vars[vars %in% names(netStats_actor)]
   netStats_actor <- netStats_actor[,
     c(vars, setdiff(names(netStats_actor), vars))]
+  ######################
 
+  ######################
+	# pull out some ego info if it's there,
+	# assume FALSE
+	ego_netlet = FALSE ; ego_longit = FALSE
+	include_ego = FALSE
+	if(!is.null(obj_attrs$ego_netlet)){
+		if(obj_attrs$ego_netlet){
+			ego_netlet = TRUE
+			ego_vec = obj_attrs$ego_vec			
+			ego_longit = obj_attrs$ego_longit } }
+
+	# if ego netlet then make some changes
+	# layer will be added and used for ego
+	# net will stand in for time if ego data is longit
+	if(ego_netlet){
+
+		# if no longit info for ego then need to modify id vars
+		if(!ego_longit){
+
+			# if just one time point and one ego then layer is just ego_vec
+			# otherwise the net column will have multiple egos
+			if(!ego_longit & obj_attrs$netify_type=='cross_sec'){
+				netStats_actor$layer = ego_vec
+			} else {
+				netStats_actor$layer = netStats_actor$time }
+			
+      # set id vars
+      vars = c('actor', 'layer')
+
+      # drop time var if present
+      if('time' %in% names(netStats_actor)){
+        toDrop = which(names(netStats_actor) == 'time')
+        netStats_actor = netStats_actor[,-toDrop] }
+		}
+
+		# if longit info for ego
+		if(ego_longit){
+
+			# extract units and pds from net column
+			ego_units = unlist( lapply( strsplit(
+					netStats_actor$time, '__'), function(x){ x[1] }))
+			ego_pds = unlist( lapply( strsplit(
+					netStats_actor$time, '__'), function(x){ x[2] }))
+
+			# add relev vars
+			netStats_actor$time = ego_pds
+			netStats_actor$layer = ego_units
+
+      # set id vars
+      vars = c('actor', 'layer', 'time')      
+		}
+
+		# organize
+    stat_vars = setdiff(names(netStats_actor), vars)
+		netStats_actor = netStats_actor[,c(vars, stat_vars)]
+	}      
+  ######################
+
+  ######################
   #
   return(netStats_actor)
 	######################  

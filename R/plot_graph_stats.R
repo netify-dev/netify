@@ -142,7 +142,7 @@ plot_graph_stats <- function(
 
   # choose geom based on user input
   if(type == 'line') { viz = viz + geom_line() + geom_point() }
-  if(type == 'bar') { viz = viz + geom_bar(stat='identity') }
+  if(type == 'bar') { viz = viz + geom_bar(stat='identity', position=position_dodge()) }
 
   # add facets
   viz = viz +

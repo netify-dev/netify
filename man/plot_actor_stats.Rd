@@ -39,3 +39,6 @@ This function can generate different types of plots based on the structure of th
 \item For longitudinal data, it will show how the distribution of statistics changes over time using ridge density plots or track changes in statistics for specific actors over time using line plots.
 }
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

@@ -135,6 +135,9 @@ decompose_netlet <- function(
         )
     }
 
+    # if time variable not present in nodal data add
+    if(!'time' %in% names(nodal_data)){ nodal_data$time = 1 }
+
     # reorder vars
     node_id_vars = c('actor', 'time')
     node_vars = c(
@@ -158,12 +161,15 @@ decompose_netlet <- function(
     }
     ######################
 
+    ######################
     # 
     out = list(
         edge_data = edge_data,
         nodal_data = nodal_data)
-    
+    ######################    
+
+    ######################
     #
     return(out)
-
+    ######################
 }
