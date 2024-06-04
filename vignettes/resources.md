@@ -1,0 +1,45 @@
+# Helpful Resources
+
+Greetings! This list of resources is not meant to be exhaustive. There is a lot of great network research out there that is not included below! We have tried to share a brief list of resources relevant to quantitative political science researchers of two main types: (1) new(ish) to networks users and (2) researchers focused on studying networks and conflict.
+
+## New to networks
+
+### Overview Books
+
+- Larson, J. M. (Forthcoming 2024). Designing empirical social networks research. Cambridge University Press.
+
+- Marin, A., & Wellman, B. (2011). Social network analysis: An introduction. The SAGE handbook of social network analysis, 11-25.
+
+- Victor, J. N., Montgomery, A. H., & Lubell, M. (Eds.). (2017). The Oxford handbook of political networks. Oxford University Press.
+
+- Wasserman, S., & Faust, K. (1994). Social network analysis: Methods and applications.
+
+### Academic Articles
+
+- Cranmer, S. J., & Desmarais, B. A. (2016). A critique of dyadic design. International studies quarterly, 60(2), 355-362.
+
+- Dorff, C., & Ward, M. D. (2013). Networks, dyads, and the social relations model. Political Science Research and Methods, 1(2), 159-178.
+
+- Larson, J. M., & Lewis, J. I. (2020). Measuring networks in the field. Political Science Research and Methods, 8(1), 123-135.
+
+- Minhas, S., Dorff, C., Gallop, M. B., Foster, M., Liu, H., Tellez, J., & Ward, M. D. (2022). Taking dyads seriously. Political Science Research and Methods, 10(4), 703-721.
+
+## Networks & Conflict
+
+- Dorff, C., Gallop, M., & Minhas, S. (2020). Networks of violence: Predicting conflict in Nigeria. The Journal of Politics, 82(2), 476-493.
+
+- Dorff, C., Gallop, M., & Minhas, S. (2023). Network competition and civilian targeting during civil conflict. British Journal of Political Science, 53(2), 441-459.
+
+- Larson, J. M. (2021). Networks of conflict and cooperation. Annual Review of Political Science, 24, 89-107.
+
+## Model/Approach Specific
+
+- Cranmer, S. J., & Desmarais, B. A. (2011). Inferential network analysis with exponential random graph models. Political analysis, 19(1), 66-86.
+
+- Csárdi G, Nepusz T, Traag V, Horvát S, Zanini F, Noom D, Müller K (2024). igraph: Network Analysis and Visualization in R. doi:10.5281/zenodo.7682609, R package version 2.0.3, https://CRAN.R-project.org/package=igraph.
+
+- Cranmer, S. J., Desmarais, B. A., & Morgan, J. W. (2020). Inferential network analysis. Cambridge University Press.
+
+- Minhas, S., Hoff, P. D., & Ward, M. D. (2019). Inferential approaches for network analysis: Amen for latent factor models. Political Analysis, 27(2), 208-222.
+
+- Statnet Development Team (Pavel N. Krivitsky, Mark S. Handcock, David R. Hunter, Carter T. Butts, Chad Klumb, Steven M. Goodreau, & Martina Morris). (2003-2023). statnet: Software tools for the Statistical Modeling of Network Data. http://statnet.org
