@@ -54,7 +54,9 @@ get_node_layout <- function(
 
 	# convert to igraph to get
 	# layout positions
-	g = prep_for_igraph(netlet)
+	g = prep_for_igraph(netlet, 
+		add_nodal_attribs = FALSE, 
+		add_dyad_attribs = FALSE )
 
 	# check to see if the user has a desired layout
 	# algo from igraph, if not default to nicely

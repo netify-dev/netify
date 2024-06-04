@@ -68,10 +68,27 @@ decompose_netlet <- function(
         edge_data = edge_data[edge_data$value != 0, ]
     }
 
+    # if starting with array change Var3 (time) to L1
+    if(attr(netlet, 'netify_type')=='longit_array'){
+        a_time_pos = which(names(edge_data)=='Var3')
+        names(edge_data)[a_time_pos] = 'L1' }
+
     # add weight label
+    value_pos = which(names(edge_data) == 'value')
     if(!is.null(attr(netlet, 'weight'))){
-        names(edge_data)[3] = attr(netlet, 'weight')
-    } else { names(edge_data)[3] = 'net_value'}
+        names(edge_data)[value_pos] = attr(netlet, 'weight')
+    } else { names(edge_data)[value_pos] = 'net_value'}
+
+    # if ego netlet then we need to rename time column
+    # since right now it is a concatenation of the ego
+    # and the time point
+    if(obj_attrs$netify_type != 'cross_sec'){
+        ego_netlet = obj_attrs$ego_netlet
+        if(!is.null(ego_netlet)){
+            if(ego_netlet){
+                edge_data$L1 = unlist( lapply( strsplit(
+                    edge_data$L1, '__'), function(x){x[2]}))
+    } } }
     ######################
 
     # add other dyad attribs #####################
@@ -111,8 +128,7 @@ decompose_netlet <- function(
     }
 
     # id vars for cross-sec and longit case
-    if(obj_attrs$netify_type == 'cross_sec'){
-        edge_data$L1 = 1 }
+    if(obj_attrs$netify_type == 'cross_sec'){ edge_data$L1 = 1 }
     edge_id_vars = c('Var1', 'Var2', 'L1')
     
     # reorder vars

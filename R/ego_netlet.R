@@ -145,15 +145,23 @@ ego_netlet = function(
     obj_attrs2$include_ego = include_ego
     obj_attrs2$ego_longit = longitudinal
     obj_attrs2$ego_vec = paste(ego, collapse = ', ')
+    obj_attrs2$ego_entry = ego
 
     # get sub netlet attribs
     # if longit list then use first element
     if(netlet_type == 'longit_list'){
-        subobj_attrs = attributes(netlet[[1]]) }
+        subobj_attrs = attributes(netlet[[1]])
+        subobj_attrs$ego_netlet = TRUE
+        subobj_attrs$threshold = threshold
+        subobj_attrs$ngbd_direction = ngbd_direction    
+        subobj_attrs$include_ego = include_ego
+        subobj_attrs$ego_longit = FALSE
+        subobj_attrs$ego_vec = paste(ego, collapse = ', ')
+        subobj_attrs$ego_entry = ego
+    }
     
     # if cross sec then use the entire thing
-    if(netlet_type == 'cross_sec'){
-        subobj_attrs = obj_attrs2 }
+    if(netlet_type == 'cross_sec'){ subobj_attrs = obj_attrs2 }
 
     # add back to each list element replacing the
     # first two attribute elements with ego_nets
@@ -163,9 +171,21 @@ ego_netlet = function(
         # get net
         net = ego_nets[[ii]]
 
-        # add ego id to subobj_attrs
-        subobj_attrs$ego_id = ego_list_ids[ii]
-
+        # add info about ego and pd if relev
+        if(longitudinal){
+            # add ego id to subobj_attrs
+            subobj_attrs$ego_id  = gsub(
+                '__', ': ', ego_list_ids[ii], fixed=TRUE)
+            # add ego id to subobj_attrs
+            subobj_attrs$ego_vec = subobj_attrs$ego_id
+            subobj_attrs$ego_entry = subobj_attrs$ego_id }
+                
+        # non longit case
+        if(!longitudinal){
+            subobj_attrs$ego_id = ego_list_ids[ii]
+            subobj_attrs$ego_vec = subobj_attrs$ego_id
+            subobj_attrs$ego_entry = subobj_attrs$ego_id }
+        
         # pull out new dim and dimnames for net
         new_dims = attributes(net)[c('dim', 'dimnames')]
 

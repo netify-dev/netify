@@ -32,6 +32,7 @@ print.netify <- function(x, ...){
 		if(obj_attrs$ego_netlet){
 			ego_netlet = TRUE
 			ego_vec = obj_attrs$ego_vec
+			ego_entry = obj_attrs$ego_entry
     		threshold = obj_attrs$threshold
 			ngbd_direction = obj_attrs$ngbd_direction
 			include_ego = obj_attrs$include_ego
@@ -163,7 +164,7 @@ print.netify <- function(x, ...){
 		}
 
 		# count up number of egos
-		n_ego_units = length(ego_units)
+		n_ego_units = length(ego_entry)
 
 		# modify items being printed
 		time_label = ifelse(ego_longit, 

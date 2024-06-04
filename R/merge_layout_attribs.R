@@ -54,15 +54,26 @@ merge_layout_attribs <- function(
 	# longit
 	if(obj_attrs$netify_type != 'cross_sec'){
 
+		# if it is an ego longit list
+		# then clean up time names since they
+		# contain ego
+        ego_netlet = obj_attrs$ego_netlet
+        if(!is.null(ego_netlet)){
+			# pull out time periods
+			list_names = names(netlet)
+			list_names = unlist(lapply(strsplit(
+				list_names, '__'), function(x){x[2]}))
+		} else { list_names = names(nodes_list) }
+
 		# pull out nodes and edges from list format
 		nodes = lapply(1:length(nodes_list), function(ii){
 			nodes = nodes_list[[ii]]
-			nodes$time = names(nodes_list)[ii]
+			nodes$time = list_names[ii]
 			return(nodes) })
 		nodes = do.call('rbind', nodes)
 		edges = lapply(1:length(edges_list), function(ii){
 			edges = edges_list[[ii]]
-			edges$time = names(edges_list)[ii]
+			edges$time = list_names[ii]
 			return(edges) })
 		edges = do.call('rbind', edges) 
 

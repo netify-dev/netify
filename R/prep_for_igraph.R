@@ -2,6 +2,8 @@
 #'
 #' @aliases convert.to.igraph
 #' @param netlet An R object
+#' @param add_nodal_attribs Add any nodal attributes from netlet to igraph object, default is TRUE.
+#' @param add_dyad_attribs Add any dyad attributes from netlet to igraph object, default is TRUE.
 #' @return igraph object
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
@@ -51,7 +53,8 @@
 #' 
 #' @export prep_for_igraph
  
-prep_for_igraph = function(netlet, add_nodal=TRUE, add_dyad=TRUE){
+prep_for_igraph = function(
+  netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE){
 
   # check if netify object
   netify_check(netlet)
@@ -114,13 +117,13 @@ prep_for_igraph = function(netlet, add_nodal=TRUE, add_dyad=TRUE){
       igrph_slice <- netify_to_igraph(netlet_slice)
 
       # process nodal attributes if exist
-      if(nodal_data_exist & add_nodal){
+      if(nodal_data_exist & add_nodal_attribs){
         igrph_slice <- add_nodal_to_igraph(
           netlet_slice, attr(netlet, 'nodal_data'),
           igrph_slice, time_val) }
 
       # process dyadic attributes if exist
-      if(dyad_data_exist & add_dyad) {
+      if(dyad_data_exist & add_dyad_attribs) {
         igrph_slice <- add_dyad_to_igraph(
           netlet_slice, attr(netlet, 'dyad_data'),
           igrph_slice, time_val) }
@@ -200,7 +203,18 @@ add_nodal_to_igraph <- function(
 
   # slice by time if relevant
   if(!is.null(time)){
-    node_data <- node_data[node_data[,2] == time,] }
+
+    # # if ego network, then time variable includes ego name
+    # # modify to pull out year only since that' the only 
+    # # thing that will match with the name of dyad_data_list
+    # ego_netlet = attr(netlet, 'ego_netlet')
+    # if(!is.null(ego_netlet)){
+    #   if(ego_netlet){
+    #     time = strsplit(time, '__')[[1]][2] } }
+
+    #
+    node_data <- node_data[node_data[,2] == time,]
+  }
 
   # make sure order of nodes is the same
   igrph_nodes <- names(igraph::V(igraph_object))
@@ -235,7 +249,19 @@ add_dyad_to_igraph <- function(
   # get dyadic array
   if(is.null(time)){
     dyad_data <- dyad_data_list[[1]]
-  } else { dyad_data <- dyad_data_list[[time]] }
+  } else {
+
+    # # if ego network, then time variable includes ego name
+    # # modify to pull out year only since that' the only 
+    # # thing that will match with the name of dyad_data_list
+    # ego_netlet = attr(netlet, 'ego_netlet')
+    # if(!is.null(ego_netlet)){
+    #   if(ego_netlet){
+    #     time = strsplit(time, '__')[[1]][2] } }
+
+    # subset
+    dyad_data <- dyad_data_list[[time]]
+  }
 
   # get var names
   vars <- dimnames(dyad_data)[[3]]

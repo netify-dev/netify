@@ -35,15 +35,38 @@ net_plot_data <- function(netlet, plot_args=list()) {
 	######################
     # check if netify object
     netify_check(netlet)  
+	######################    
 
+	######################    
     # if more than one layer tell user they must specify a single layer
     if(length(attributes(netlet)$layers) > 1){
     cli::cli_alert_danger(
         'Error: This object has multiple layers. 
         `plot` does not currently support multilayer `netify` inputs.
-        Please use the subset_netlet` function to create a `netify` object with a single layer.' )
+        Please use the `subset_netlet` function to create a `netify` object with a single layer.' )
     stop() }
 	######################    
+
+	######################	
+	# if ego net modify names and stop if more than one ego
+    ego_netlet = attr(netlet, 'ego_netlet') ; ego_longit = FALSE
+    if(!is.null(ego_netlet)){
+        
+        # get info on ego network
+        ego_longit = attr(netlet, 'ego_longit')
+        ego_entry = attr(netlet, 'ego_entry')
+
+        # stop if more than one ego
+        if(length(ego_entry) > 1){
+            cli::cli_alert_danger(
+                'Error: This object has multiple egos.
+                `plot` does not currently support multiple ego inputs.
+                For plotting purposes please create a `netify` object with a single ego,
+                and consider just patching (via `patchwork`, for example) the plots
+                together.' )
+            stop() }
+    }
+	######################		
 
     ######################
     # pull out attrs
