@@ -17,7 +17,7 @@ ego_netlet(
 
 \item{ego}{A character vector specifying the name(s) of the ego(s) for whom to create the ego networks.}
 
-\item{threshold}{A numeric value specifying the threshold for including alters in the ego network. The threshold is used to define the neighborhood of the ego in weighted networks. Default for unweighted networks is 0 and default for weighted networks is the average edge weight.}
+\item{threshold}{A numeric value or vector specifying the threshold for including alters in the ego network. The threshold is used to define the neighborhood of the ego in weighted networks. If a vector is provided, its length should correspond to the number of time points, allowing for a different threshold to be applied for each time period. For unweighted networks, the default is 0. For weighted networks, the default is the average edge weight.}
 
 \item{ngbd_direction}{For directed networks users can provide a character string specifying the type of relationship that the ego should have with alters to be considered neighbors. Options are that the neighborhood for an ego will be alters that it has an outgoing tie with ("out"), incoming tie from ("in"), or any tie ("any"). Default is "any".}
 

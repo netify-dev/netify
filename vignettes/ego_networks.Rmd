@@ -1,0 +1,90 @@
+---
+title: "Netify: Ego Networks"
+author: "Cassy Dorff and Shahryar Minhas"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Netify: Ego Networks}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette provides an overview of how to create ego networks using `netify`.
+
+Let's load the necessary libraries.
+
+```{r}
+library(netify)
+```
+
+First lets create a `netlet` object from some dyadic data (ICEWS data) using the `netify` package.
+
+```{r}
+# load icews data
+data(icews)
+
+# choose attributes
+nvars = c( 'i_polity2', 'i_log_gdp', 'i_log_pop' )
+dvars = c( 'matlCoop', 'verbConf', 'matlConf' )
+
+# create a netify object
+netlet = netify(
+    dyad_data=icews, actor1='i', actor2='j',
+    time = 'year',
+    symmetric=FALSE, weight='verbCoop',
+    mode='unipartite', sum_dyads=FALSE,
+    actor_time_uniform=TRUE, actor_pds=NULL,
+    diag_to_NA=TRUE, missing_to_zero=TRUE,
+    nodal_vars = nvars, 
+    dyad_vars = dvars
+)
+
+# print
+netlet
+```
+
+This is a longitudinal, weighted network with nodal and dyadic attributes. In a few more steps we will show how to highlight these attributes in the plot.
+
+Now say that we want to extract the ego network for Pakistan. We can do this using the `ego_netlet` function. This function has the following arguments: 
+
+- `netlet`: A 'netify' object, which contains the network data structured for analysis and visualization.
+- `ego`: A character vector specifying the name(s) of the ego(s) for whom to create the ego networks.
+- `threshold`: A numeric value or vector specifying the threshold for including alters in the ego network. The threshold is used to define the neighborhood of the ego in weighted networks. If a vector is provided, its length should correspond to the number of time points, allowing for a different threshold to be applied for each time period. For unweighted networks, the default is 0. For weighted networks, the default is the average edge weight. This default ensures that we include alters that have an edge weight greater than the average.
+- `ngbd_direction`: For directed networks, users can specify the type of relationship that the ego should have with alters to be considered neighbors. Options are 'out' (alters the ego has an outgoing tie with), 'in' (alters with an incoming tie to the ego), or 'any' (any tie). The default is 'any'.
+- `include_ego`: Logical; if TRUE, the ego node will be included in the ego network. Default is TRUE.
+
+Using these arguments, let's extract the ego network for Pakistan, keeping the default threshold.
+
+```{r}
+# extract ego network for Pakistan
+pakistan_ego_net = ego_netlet(netlet, ego = 'Pakistan')
+
+# print
+pakistan_ego_net
+```
+
+Across the time series we can see that Pakistan has 81 alters. If we wanted to look at a specific year we can just subset the object by that year (note that `subset_netlet` does not work with ego networks at this time): 
+
+```{r}
+# subset to a specific year
+pakistan_ego_net[[1]]
+```
+
+We can also obtain summary statistics for all of Pakistan's ego networks across the time series using the `summary` function:
+
+```{r}
+head(summary(pakistan_ego_net))
+```
+
+And last we can plot as well. 
+
+```{r}
+plot(pakistan_ego_net)
+```

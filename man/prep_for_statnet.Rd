@@ -4,10 +4,14 @@
 \alias{prep_for_statnet}
 \title{Convert conflictNet object to a statnet network object}
 \usage{
-prep_for_statnet(netlet)
+prep_for_statnet(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
 }
 \arguments{
 \item{netlet}{An R object}
+
+\item{add_nodal_attribs}{Add any nodal attributes from netlet to igraph object. Default is TRUE.}
+
+\item{add_dyad_attribs}{Add any dyad attributes from netlet to igraph object. Default is TRUE.}
 }
 \value{
 statnet network object

@@ -10,9 +10,9 @@ prep_for_igraph(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
 \arguments{
 \item{netlet}{An R object}
 
-\item{add_nodal_attribs}{Add any nodal attributes from netlet to igraph object, default is TRUE.}
+\item{add_nodal_attribs}{Add any nodal attributes from netlet to igraph object. Default is TRUE.}
 
-\item{add_dyad_attribs}{Add any dyad attributes from netlet to igraph object, default is TRUE.}
+\item{add_dyad_attribs}{Add any dyad attributes from netlet to igraph object. Default is TRUE.}
 }
 \value{
 igraph object

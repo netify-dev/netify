@@ -1,6 +1,8 @@
 #' Convert conflictNet object to a statnet network object
 #'
 #' @param netlet An R object
+#' @param add_nodal_attribs Add any nodal attributes from netlet to igraph object. Default is TRUE.
+#' @param add_dyad_attribs Add any dyad attributes from netlet to igraph object. Default is TRUE.
 #' @return statnet network object
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
@@ -49,7 +51,8 @@
 #'
 #' @export prep_for_statnet
 
-prep_for_statnet = function(netlet){
+prep_for_statnet = function(
+  netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE){
 
   # check if netify object
   netify_check(netlet)
@@ -86,12 +89,12 @@ prep_for_statnet = function(netlet){
     ntwk <- netify_to_statnet(netlet)
 
     # process nodal attributes if exist
-    if(nodal_data_exist){
+    if(nodal_data_exist & add_nodal_attribs){
       ntwk <- add_nodal_to_statnet(
         netlet, attr(netlet, 'nodal_data'), ntwk) }
 
     # process dyadic attributes if exist
-    if(dyad_data_exist) {
+    if(dyad_data_exist & add_dyad_attribs) {
       ntwk <- add_dyad_to_statnet(
         netlet, attr(netlet, 'dyad_data'), ntwk) }
   } # done with cross-sec case
@@ -112,13 +115,13 @@ prep_for_statnet = function(netlet){
       ntwk_slice <- netify_to_statnet(netlet_slice)
 
       # process nodal attributes if exist
-      if(nodal_data_exist){
+      if(nodal_data_exist & add_nodal_attribs){
         ntwk_slice <- add_nodal_to_statnet(
           netlet_slice, attr(netlet, 'nodal_data'), 
           ntwk_slice, time_val) }
 
       # process dyadic attributes if exist
-      if(dyad_data_exist) {
+      if(dyad_data_exist & add_dyad_attribs) {
         ntwk_slice <- add_dyad_to_statnet(
           netlet_slice, attr(netlet, 'dyad_data'),
           ntwk_slice, time_val) }

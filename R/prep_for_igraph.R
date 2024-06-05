@@ -2,8 +2,8 @@
 #'
 #' @aliases convert.to.igraph
 #' @param netlet An R object
-#' @param add_nodal_attribs Add any nodal attributes from netlet to igraph object, default is TRUE.
-#' @param add_dyad_attribs Add any dyad attributes from netlet to igraph object, default is TRUE.
+#' @param add_nodal_attribs Add any nodal attributes from netlet to igraph object. Default is TRUE.
+#' @param add_dyad_attribs Add any dyad attributes from netlet to igraph object. Default is TRUE.
 #' @return igraph object
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
