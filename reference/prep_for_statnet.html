@@ -24,6 +24,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/ego_networks.html">Netify: Ego Networks</a>
     <a class="dropdown-item" href="../articles/manual_plotting.html">Netify: Manual Plotting with ggplot2</a>
     <a class="dropdown-item" href="../articles/workshop_demo.html">Netify Workshop</a>
   </div>
@@ -49,13 +50,21 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">prep_for_statnet</span><span class="op">(</span><span class="va">netlet</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">prep_for_statnet</span><span class="op">(</span><span class="va">netlet</span>, add_nodal_attribs <span class="op">=</span> <span class="cn">TRUE</span>, add_dyad_attribs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>netlet</dt>
 <dd><p>An R object</p></dd>
+
+
+<dt>add_nodal_attribs</dt>
+<dd><p>Add any nodal attributes from netlet to igraph object. Default is TRUE.</p></dd>
+
+
+<dt>add_dyad_attribs</dt>
+<dd><p>Add any dyad attributes from netlet to igraph object. Default is TRUE.</p></dd>
 
 </dl></div>
     <div class="section level2">

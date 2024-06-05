@@ -24,6 +24,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/ego_networks.html">Netify: Ego Networks</a>
     <a class="dropdown-item" href="../articles/manual_plotting.html">Netify: Manual Plotting with ggplot2</a>
     <a class="dropdown-item" href="../articles/workshop_demo.html">Netify Workshop</a>
   </div>
@@ -69,7 +70,7 @@
 
 
 <dt>threshold</dt>
-<dd><p>A numeric value specifying the threshold for including alters in the ego network. The threshold is used to define the neighborhood of the ego in weighted networks. Default for unweighted networks is 0 and default for weighted networks is the average edge weight.</p></dd>
+<dd><p>A numeric value or vector specifying the threshold for including alters in the ego network. The threshold is used to define the neighborhood of the ego in weighted networks. If a vector is provided, its length should correspond to the number of time points, allowing for a different threshold to be applied for each time period. For unweighted networks, the default is 0. For weighted networks, the default is the average edge weight.</p></dd>
 
 
 <dt>ngbd_direction</dt>
