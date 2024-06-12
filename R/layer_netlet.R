@@ -222,7 +222,6 @@ layer_netlet <- function(netlet_list, layer_labels=NULL){
             attr(arr, 'sum_dyads') <- get_attribs(attribs_list, 'sum_dyads')
             attr(arr, 'nodal_data') <- NULL
             attr(arr, 'dyad_data') <- NULL
-            attr(arr, 'graph_data') <- NULL  
             return(arr) } )
         
         # assign names array elements of list object
@@ -244,7 +243,6 @@ layer_netlet <- function(netlet_list, layer_labels=NULL){
     attr(netlet, 'sum_dyads') <- get_attribs(attribs_list, 'sum_dyads')
     attr(netlet, 'nodal_data') <- NULL
     attr(netlet, 'dyad_data') <- NULL
-    attr(netlet, 'graph_data') <- NULL
 
     # combine nodal data attributes from each netlet
     # check if nodal data is identical across netlets

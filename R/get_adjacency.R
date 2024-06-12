@@ -207,7 +207,6 @@ get_adjacency <- function(
   attr(adj_out, 'sum_dyads') <- sum_dyads  
   attr(adj_out, 'nodal_data') <- NULL
   attr(adj_out, 'dyad_data') <- NULL
-  attr(adj_out, 'graph_data') <- NULL
 
   #
   return(adj_out)

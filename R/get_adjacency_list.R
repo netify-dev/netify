@@ -325,7 +325,6 @@ get_adjacency_list <- function(
     attr(adj_mat, 'sum_dyads') <- sum_dyads    
     attr(adj_mat, 'nodal_data') <- NULL
     attr(adj_mat, 'dyad_data') <- NULL
-    attr(adj_mat, 'graph_data') <- NULL
     
     #
     return(adj_mat)
@@ -365,7 +364,6 @@ get_adjacency_list <- function(
   attr(adj_out, 'sum_dyads') <- sum_dyads  
   attr(adj_out, 'nodal_data') <- NULL
   attr(adj_out, 'dyad_data') <- NULL
-  attr(adj_out, 'graph_data') <- NULL
   
   #
   return(adj_out)

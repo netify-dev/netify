@@ -43,7 +43,6 @@ test_that('add_nodal: cross_sec', {
   attr(adj_out, 'missing_to_zero') <- TRUE
   attr(adj_out, 'nodal_data') <- NULL
   attr(adj_out, 'dyad_data') <- NULL
-  attr(adj_out, 'graph_data') <-NULL
 
 
   # add_nodal()
@@ -119,7 +118,6 @@ test_that('add_nodal: longit_list', {
   attr(result, 'missing_to_zero') <- TRUE
   attr(result, 'nodal_data') <- NULL
   attr(result, 'dyad_data') <- NULL
-  attr(result, 'graph_data') <- NULL
 
   # add_nodal()
   add_nodal_result = add_nodal(
