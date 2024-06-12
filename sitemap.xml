@@ -43,9 +43,6 @@
     <loc>https://netify-dev.github.io/netify/reference/add_dyad_to_statnet.html</loc>
   </url>
   <url>
-    <loc>https://netify-dev.github.io/netify/reference/add_graph.html</loc>
-  </url>
-  <url>
     <loc>https://netify-dev.github.io/netify/reference/add_nodal.html</loc>
   </url>
   <url>
@@ -110,9 +107,6 @@
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/get_matrix.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/get_netify.html</loc>
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/get_ngbd_net_for_ego.html</loc>
@@ -257,9 +251,6 @@
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/unnetify.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/validate_netify.html</loc>
   </url>
   <url>
     <loc>https://netify-dev.github.io/netify/reference/weight_check.html</loc>
