@@ -91,6 +91,9 @@ We can also inspect the ego network via plot.
 
 #test<-subset_netlet(pakistan_ego_net,
     # when_to_subset='2013')
+
+#test2<-pakistan_ego_net[[1]]
+#plot(test2)
 ```
 
 ## References
