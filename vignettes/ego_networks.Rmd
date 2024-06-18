@@ -16,7 +16,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette provides an overview of how to create ego networks using `netify`.
+This vignette provides an overview of how to create ego networks using `netify`. Generally, ego networks are a kind of network that focuses on the network that surrounds a single individual actor within a larger network. These networks include information about the ego (central node or individual under study), the alters (nodes connected to the ego), and ties (relationships or connections between ego and alters and among alters).
+
 
 Let's load the necessary libraries.
 
@@ -24,7 +25,7 @@ Let's load the necessary libraries.
 library(netify)
 ```
 
-First lets create a `netlet` object from some dyadic data (ICEWS data) using the `netify` package.
+First, we can create a `netlet` object from some dyadic data (ICEWS data) using the `netify` package.
 
 ```{r}
 # load icews data
@@ -50,9 +51,9 @@ netlet = netify(
 netlet
 ```
 
-This is a longitudinal, weighted network with nodal and dyadic attributes. In a few more steps we will show how to highlight these attributes in the plot.
+This is a longitudinal, weighted network with nodal and dyadic attributes. In a few more steps we will show how to highlight these attributes in a plot.
 
-Now say that we want to extract the ego network for Pakistan. We can do this using the `ego_netlet` function. This function has the following arguments: 
+Let's say we want to extract the ego network specifically for Pakistan. We can do this using the `ego_netlet` function. This function has the following arguments: 
 
 - `netlet`: A 'netify' object, which contains the network data structured for analysis and visualization.
 - `ego`: A character vector specifying the name(s) of the ego(s) for whom to create the ego networks.
@@ -70,21 +71,28 @@ pakistan_ego_net = ego_netlet(netlet, ego = 'Pakistan')
 pakistan_ego_net
 ```
 
-Across the time series we can see that Pakistan has 81 alters. If we wanted to look at a specific year we can just subset the object by that year (note that `subset_netlet` does not work with ego networks at this time): 
+The print output tells us that across the entire time series, we can see that Pakistan has 81 unique alters. If we wanted to look at a specific year we can just subset the object by that year (note that `subset_netlet` does not work with ego networks at this time): 
 
 ```{r}
 # subset to a specific year
 pakistan_ego_net[[1]]
 ```
 
-We can also obtain summary statistics for all of Pakistan's ego networks across the time series using the `summary` function:
+We can also obtain summary statistics for all of Pakistan's ego networks across the time series using the netify `summary` function:
 
 ```{r}
 head(summary(pakistan_ego_net))
 ```
 
-And last we can plot as well. 
+We can also inspect the ego network via plot.
 
 ```{r}
-plot(pakistan_ego_net)
+#plot(pakistan_ego_net)
+
+#test<-subset_netlet(pakistan_ego_net,
+    # when_to_subset='2013')
 ```
+
+## References
+
+- Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP Georeferenced Event Dataset. Journal of Peace Research 50(4).
