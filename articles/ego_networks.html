@@ -67,7 +67,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2024-06-12</h4>
+            <h4 data-toc-skip class="date">2024-06-18</h4>
       
       
       <div class="d-none name"><code>ego_networks.Rmd</code></div>
@@ -76,12 +76,17 @@ Shahryar Minhas</h4>
     
     
 <p>This vignette provides an overview of how to create ego networks
-using <code>netify</code>.</p>
+using <code>netify</code>. Generally, ego networks are a kind of network
+that focuses on the network that surrounds a single individual actor
+within a larger network. These networks include information about the
+ego (central node or individual under study), the alters (nodes
+connected to the ego), and ties (relationships or connections between
+ego and alters and among alters).</p>
 <p>Let’s load the necessary libraries.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/netify/">netify</a></span><span class="op">)</span></span></code></pre></div>
-<p>First lets create a <code>netlet</code> object from some dyadic data
-(ICEWS data) using the <code>netify</code> package.</p>
+<p>First, we can create a <code>netlet</code> object from some dyadic
+data (ICEWS data) using the <code>netify</code> package.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load icews data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span>
@@ -117,10 +122,10 @@ using <code>netify</code>.</p>
 <span><span class="co">#&gt; • Dyad Features: matlCoop, verbConf, matlConf</span></span></code></pre></div>
 <p>This is a longitudinal, weighted network with nodal and dyadic
 attributes. In a few more steps we will show how to highlight these
-attributes in the plot.</p>
-<p>Now say that we want to extract the ego network for Pakistan. We can
-do this using the <code>ego_netlet</code> function. This function has
-the following arguments:</p>
+attributes in a plot.</p>
+<p>Let’s say we want to extract the ego network specifically for
+Pakistan. We can do this using the <code>ego_netlet</code> function.
+This function has the following arguments:</p>
 <ul>
 <li>
 <code>netlet</code>: A ‘netify’ object, which contains the network
@@ -166,10 +171,11 @@ keeping the default threshold.</p>
 <span><span class="co">#&gt; Pakistan 0.865    0 165.009 0.978 0.912</span></span>
 <span><span class="co">#&gt; • Nodal Features: i_polity2, i_log_gdp, i_log_pop</span></span>
 <span><span class="co">#&gt; • Dyad Features: matlCoop, verbConf, matlConf</span></span></code></pre></div>
-<p>Across the time series we can see that Pakistan has 81 alters. If we
-wanted to look at a specific year we can just subset the object by that
-year (note that <code>subset_netlet</code> does not work with ego
-networks at this time):</p>
+<p>The print output tells us that across the entire time series, we can
+see that Pakistan has 81 unique alters. If we wanted to look at a
+specific year we can just subset the object by that year (note that
+<code>subset_netlet</code> does not work with ego networks at this
+time):</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># subset to a specific year</span></span>
 <span><span class="va">pakistan_ego_net</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
@@ -185,7 +191,7 @@ networks at this time):</p>
 <span><span class="co">#&gt; • Nodal Features: None</span></span>
 <span><span class="co">#&gt; • Dyad Features: None</span></span></code></pre></div>
 <p>We can also obtain summary statistics for all of Pakistan’s ego
-networks across the time series using the <code>summary</code>
+networks across the time series using the netify <code>summary</code>
 function:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span><span class="op">)</span></span>
@@ -217,10 +223,20 @@ function:</p>
 <span><span class="co">#&gt; 4        158.1764              0.9931345   0.9839155    0.8959472</span></span>
 <span><span class="co">#&gt; 5        190.2663              0.9871813   0.9790556    0.9023721</span></span>
 <span><span class="co">#&gt; 6        221.8779              0.9907272   0.9765549    0.9267179</span></span></code></pre></div>
-<p>And last we can plot as well.</p>
+<p>We can also inspect the ego network via plot.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ego_networks_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+<code class="sourceCode R"><span><span class="co">#plot(pakistan_ego_net)</span></span>
+<span></span>
+<span><span class="co">#test&lt;-subset_netlet(pakistan_ego_net,</span></span>
+<span>    <span class="co"># when_to_subset='2013')</span></span></code></pre></div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<ul>
+<li>Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP
+Georeferenced Event Dataset. Journal of Peace Research 50(4).</li>
+</ul>
+</div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
 </div>
