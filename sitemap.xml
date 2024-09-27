@@ -1,261 +1,89 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://netify-dev.github.io/netify/404.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/articles/ego_networks.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/articles/manual_plotting.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/articles/workshop_demo.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/index.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/actor_check.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/actor_pds_from_netlet.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/actor_pds_to_frame.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/add_dyad.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/add_dyad_to_igraph.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/add_dyad_to_statnet.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/add_nodal.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/add_nodal_to_igraph.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/add_nodal_to_statnet.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/add_var_time_check.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/adj_igraph_positions.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/adjust_plot_args.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/agg_across_units.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/array_to_list.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/char.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/check_layer_compatible.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/decompose_netlet.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/df_check.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/edge_value_check.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/ego_netlet.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/gen_symm_id.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/get_actor_time_info.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/get_adjacency.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/get_adjacency_array.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/get_adjacency_list.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/get_attribs.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/get_edge_layout.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/get_matrix.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/get_ngbd_net_for_ego.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/get_node_layout.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/get_raw.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/gg_params.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/icews.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/identical_recursive.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/is_netify.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/layer_netlet.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/list_to_array.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/logical_check.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/longit_dv_to_arr.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/longit_dyad_to_arr.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/longit_nodal_to_arr.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/merge_layout_attribs.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/net_plot_data.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/netify.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/netify_check.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/netify_measurements.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/netify_to_igraph.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/netify_to_statnet.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/new_netify.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/num.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/peek.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/plot.netify.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/plot_actor_stats.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/plot_graph_stats.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/prep_for_amen.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/prep_for_igraph.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/prep_for_statnet.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/print.netify.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/raw_list.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/raw_matrix.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/reduce_combine_dyad_attr.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/reduce_combine_nodal_attr.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/repeat_dyads_check.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/repeat_dyads_check_cpp.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/set_layer_labels.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/split_string.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/subset_netlet.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/summary.netify.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/summary_actor.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/theme_netify.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/theme_stat_netify.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/time_check.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/tmpprint.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/unique_vector.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/unnetify.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/weight_check.html</loc>
-  </url>
-  <url>
-    <loc>https://netify-dev.github.io/netify/reference/weight_string_label.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://netify-dev.github.io/netify/404.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/LICENSE-text.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/articles/ego_networks.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/articles/index.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/articles/manual_plotting.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/articles/workshop_demo.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/authors.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/index.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/actor_check.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/actor_pds_from_netlet.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/actor_pds_to_frame.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/add_dyad.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/add_dyad_to_igraph.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/add_dyad_to_statnet.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/add_nodal.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/add_nodal_to_igraph.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/add_nodal_to_statnet.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/add_var_time_check.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/adj_igraph_positions.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/adjust_plot_args.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/agg_across_units.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/array_to_list.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/char.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/check_layer_compatible.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/decompose_netlet.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/df_check.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/edge_value_check.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/ego_netlet.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/gen_symm_id.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/get_actor_time_info.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/get_adjacency.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/get_adjacency_array.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/get_adjacency_list.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/get_attribs.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/get_edge_layout.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/get_matrix.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/get_ngbd_net_for_ego.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/get_node_layout.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/get_raw.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/gg_params.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/icews.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/identical_recursive.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/index.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/is_netify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/layer_netlet.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/list_to_array.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/logical_check.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/longit_dv_to_arr.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/longit_dyad_to_arr.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/longit_nodal_to_arr.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/merge_layout_attribs.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/net_plot_data.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/netify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/netify_check.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/netify_measurements.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/netify_to_igraph.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/netify_to_statnet.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/new_netify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/num.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/peek.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/plot.netify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/plot_actor_stats.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/plot_graph_stats.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/prep_for_amen.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/prep_for_igraph.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/prep_for_statnet.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/print.netify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/raw_list.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/raw_matrix.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/reduce_combine_dyad_attr.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/reduce_combine_nodal_attr.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/repeat_dyads_check.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/repeat_dyads_check_cpp.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/set_layer_labels.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/split_string.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/subset_netlet.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/summary.netify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/summary_actor.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/theme_netify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/theme_stat_netify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/time_check.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/tmpprint.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/unique_vector.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/unnetify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/weight_check.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/weight_string_label.html</loc></url>
 </urlset>
+
