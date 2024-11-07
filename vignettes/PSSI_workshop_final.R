@@ -48,7 +48,8 @@ library(ggpubr)
 
 # load GED data
 UCDP_GED <- read_excel("GEDEvent_v24_1.xlsx")
-mexico <- subset(UCDP_GED, country == "Mexico")
+mexico <- UCDP_GED |>
+  filter(country=='Mexico')
 
 # make 1st net: default to number of events
 mex_network <- netify(
@@ -68,9 +69,20 @@ summary(mex_network)
 get_stats<-summary_actor(mex_network)
 plot_actor_stats(get_stats)
 
+# lets say we want to not summarize 
+# across actors but instead 
+# see more info on specific actors
+plot_actor_stats(get_stats, across_actor = FALSE)
+
+# and lets say we want to highlight an actor
+plot_actor_stats(
+  get_stats, 
+  across_actor = FALSE, 
+  specific_actor = 'Sinaloa Cartel')
+
 # visualization
-plot(mex_network,
-     add_text = TRUE)
+plot(
+  mex_network, add_text = TRUE)
 
 # viz with less names
 # select 10 random indices from 1 to the length of select_names
@@ -147,22 +159,26 @@ mex_network_civ <- add_nodal(
   node_vars = c('size_by_source_count')
 )
 
-# node color/size based on sources
+# node color based on sources
 # edge color based on weight
 plot(mex_network_civ, 
-     point_size_var = 'size_by_source_count',
-     point_color_var = 'size_by_source_count'
+     point_color_var = 'size_by_source_count',
+     point_size=4
 )
 
 # only label points with number of sources > 1000 
 # filter
-large_nodes <- subset(size_by_source_count, 
-                      size_by_source_count >= 1000)$actor
+large_nodes <- size_by_source_count |> 
+  filter(
+    size_by_source_count >= 1000
+  ) |> 
+  select(actor) |> unlist()
 
 # plot (color gradient based on num sources)
 plot(
   mex_network_civ,
-  point_color_var = 'size_by_source_count',         
+  point_color_var = 'size_by_source_count',
+  point_size=4,
   select_text = large_nodes,                   
   select_text_display = large_nodes         
 )
@@ -205,7 +221,7 @@ plot_actor_stats(
 # create a data frame for plotting
 plot.netify(mex_network_long,
             static_actor_positions = TRUE,
-            remove_isolates = FALSE)
+            remove_isolates = TRUE)
 
 # good moment to use subset_netlet
 mex_network_short <- subset_netlet(mex_network_long,
@@ -221,7 +237,8 @@ plot(mex_network_short)
 #------------------------------------------------------------------
 
 # Load the Myanmar GED dataset
-myanmar <- subset(UCDP_GED, country == "Myanmar (Burma)")
+myanmar <- UCDP_GED |>
+  filter(country == "Myanmar (Burma)")
 
 # Create the network object for myanmar data
 my_network <- netify(
