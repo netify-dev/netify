@@ -73,7 +73,8 @@ merge_layout_attribs <- function(
 		nodes = do.call('rbind', nodes)
 		edges = lapply(1:length(edges_list), function(ii){
 			edges = edges_list[[ii]]
-			edges$time = list_names[ii]
+			if(nrow(edges)!=0){
+				edges$time = list_names[ii]	 }
 			return(edges) })
 		edges = do.call('rbind', edges) 
 

@@ -222,24 +222,39 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
     authority_score <- igraph::authority_score(g)$vector
     hub_score <- igraph::hub_score(g)$vector
 
-    # organize output
-    out <- data.frame(
-      degree_in = degree_in,
-      degree_out = degree_out,
-      degree_total = degree_total,
-      prop_ties_in = prop_ties_in,
-      prop_ties_out = prop_ties_out,
-      prop_ties_total = prop_ties_total,
-      network_share_in = network_share_in,
-      network_share_out = network_share_out,
-      network_share_total = network_share_total,
-      closeness_in = closeness_in,
-      closeness_out = closeness_out,
-      closeness_all = closeness_all,
-      betweenness = betweenness,
-      authority_score = authority_score,
-      hub_score = hub_score
-    )
+    # organize output for bipartite case
+    if(obj_attrs$mode=='bipartite'){
+      out <- data.frame(
+        degree_total = degree_total,
+        prop_ties_total = prop_ties_total,
+        network_share_total = network_share_total,
+        closeness_all = closeness_all,
+        betweenness = betweenness,
+        authority_score = authority_score,
+        hub_score = hub_score
+      )
+    } # bipartite
+
+    # organize output for non bipartite case
+    if(obj_attrs$mode!='bipartite'){
+      out <- data.frame(
+        degree_in = degree_in,
+        degree_out = degree_out,
+        degree_total = degree_total,
+        prop_ties_in = prop_ties_in,
+        prop_ties_out = prop_ties_out,
+        prop_ties_total = prop_ties_total,
+        network_share_in = network_share_in,
+        network_share_out = network_share_out,
+        network_share_total = network_share_total,
+        closeness_in = closeness_in,
+        closeness_out = closeness_out,
+        closeness_all = closeness_all,
+        betweenness = betweenness,
+        authority_score = authority_score,
+        hub_score = hub_score
+      )
+    } # not bipartite
   } # not symmetric / bin edge case done
 
   # not symmetric / weighted case start
@@ -301,36 +316,56 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
     authority_score <- igraph::authority_score(g)$vector
     hub_score <- igraph::hub_score(g)$vector
 
-    # organize output
-    out <- data.frame(
-      degree_in = degree_in,
-      degree_out = degree_out,
-      degree_total = degree_total,
-      prop_ties_in = prop_ties_in,
-      prop_ties_out = prop_ties_out,
-      prop_ties_total = prop_ties_total,
-      strength_sum_in = strength_sum_in,
-      strength_sum_out = strength_sum_out,
-      strength_sum_total = strength_sum_total,
-      strength_avg_in = strength_avg_in,
-      strength_avg_out = strength_avg_out,
-      strength_avg_total = strength_avg_total,
-      strength_std_in = strength_std_in,
-      strength_std_out = strength_std_out,
-      strength_std_total = strength_std_total,
-      strength_median_in = strength_median_in,
-      strength_median_out = strength_median_out,
-      strength_median_total = strength_median_total,
-      network_share_in = network_share_in,
-      network_share_out = network_share_out,
-      network_share_total = network_share_total,
-      closeness_in = closeness_in,
-      closeness_out = closeness_out,
-      closeness_all = closeness_all,
-      betweenness = betweenness,
-      authority_score = authority_score,
-      hub_score = hub_score
-    )
+    # organize output for bipartite case
+    if(obj_attrs$mode=='bipartite'){
+      out <- data.frame(
+        degree_total = degree_total,
+        prop_ties_total = prop_ties_total,
+        strength_sum_total = strength_sum_total,
+        strength_avg_total = strength_avg_total,
+        strength_std_total = strength_std_total,
+        strength_median_total = strength_median_total,
+        network_share_total = network_share_total,
+        closeness_all = closeness_all,
+        betweenness = betweenness,
+        authority_score = authority_score,
+        hub_score = hub_score
+      )
+    } # bipartite
+
+    # organize output for non bipartite case
+    if(obj_attrs$mode!='bipartite'){
+      out <- data.frame(
+        degree_in = degree_in,
+        degree_out = degree_out,
+        degree_total = degree_total,
+        prop_ties_in = prop_ties_in,
+        prop_ties_out = prop_ties_out,
+        prop_ties_total = prop_ties_total,
+        strength_sum_in = strength_sum_in,
+        strength_sum_out = strength_sum_out,
+        strength_sum_total = strength_sum_total,
+        strength_avg_in = strength_avg_in,
+        strength_avg_out = strength_avg_out,
+        strength_avg_total = strength_avg_total,
+        strength_std_in = strength_std_in,
+        strength_std_out = strength_std_out,
+        strength_std_total = strength_std_total,
+        strength_median_in = strength_median_in,
+        strength_median_out = strength_median_out,
+        strength_median_total = strength_median_total,
+        network_share_in = network_share_in,
+        network_share_out = network_share_out,
+        network_share_total = network_share_total,
+        closeness_in = closeness_in,
+        closeness_out = closeness_out,
+        closeness_all = closeness_all,
+        betweenness = betweenness,
+        authority_score = authority_score,
+        hub_score = hub_score
+      )
+    } # not bipartite
+
   } # not symmetric / weighted case done
 
   # calculate any user-supplied stats

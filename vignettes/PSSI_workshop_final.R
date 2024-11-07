@@ -108,7 +108,7 @@ mex_network_civ <- netify(
 # show summary and plot for weighted graph
 summary(mex_network_civ)
 
-# plot, see that color gradient of edge depends on weight variable
+# plot, see that linewidth gradient of edge depends on weight variable
 plot(mex_network_civ)
 
 plot(mex_network_civ,
@@ -118,7 +118,6 @@ plot(mex_network_civ,
      select_text = random_names,
      select_text_display = random_names)
 
-# check this ex w/ SM
 # community detection
 i_opt_memb = function(x){
   ig = prep_for_igraph(x)
@@ -148,7 +147,6 @@ mex_network_civ <- add_nodal(
   node_vars = c('size_by_source_count')
 )
 
-# Not the prettiest example (SM)
 # node color/size based on sources
 # edge color based on weight
 plot(mex_network_civ, 
@@ -205,7 +203,6 @@ plot_actor_stats(
 )
 
 # create a data frame for plotting
-# SM what if one of the years has missing data? seems to break?
 plot.netify(mex_network_long,
             static_actor_positions = TRUE,
             remove_isolates = FALSE)
@@ -369,7 +366,6 @@ bipartite_network <- netify(
   missing_to_zero = TRUE
 )
 
-# not working (SM?)
 # plot bipartite network with labels
 plot(
   bipartite_network,
