@@ -28,7 +28,7 @@
 #'
 #' @return a list of adjacency matrices of class netify
 #'
-#' @author Cassy Dorff, Ha Eun Choi, Shahryar Minhas
+#' @author Cassy Dorff, Ha Eun Choi, Shahryar Minhas, Tosin Salau
 #'
 #' @examples
 #' 
@@ -107,19 +107,51 @@
 #' 
 
 get_adjacency_list <- function(
-  dyad_data,
-  actor1=NULL, actor2=NULL, time=NULL, 
-  symmetric=TRUE, mode='unipartite',
-  weight=NULL, sum_dyads=FALSE,
-  actor_time_uniform=FALSE,
-  actor_pds=NULL,
-  diag_to_NA=TRUE, missing_to_zero=TRUE
+    dyad_data,
+    actor1=NULL, actor2=NULL, time=NULL, 
+    symmetric=TRUE, mode='unipartite',
+    weight=NULL, sum_dyads=FALSE,
+    actor_time_uniform=FALSE,
+    actor_pds=NULL,
+    diag_to_NA=TRUE, missing_to_zero=TRUE,
+    group_by=NULL  # NEW: Added group_by parameter
 ){
-
+  
+  if(!is.null(group_by)) {
+    # Get unique values of the grouping variable
+    groups <- unique(dyad_data[[group_by]])
+    
+    # Create a separate list of networks for each group
+    network_list <- lapply(groups, function(g) {
+      # Subset data for this group
+      group_data <- dyad_data[dyad_data[[group_by]] == g, ]
+      
+      # Call get_adjacency_list recursively (without group_by to avoid infinite recursion)
+      result <- get_adjacency_list(
+        group_data, actor1, actor2, time, symmetric, mode, 
+        weight, sum_dyads, actor_time_uniform, actor_pds,
+        diag_to_NA, missing_to_zero
+      )
+      
+      # Add group info as attributes
+      attr(result, "group") <- g
+      attr(result, "group_var") <- group_by
+      return(result)
+    })
+    
+    # Name the list elements by group
+    names(network_list) <- as.character(groups)
+    
+    # Set class to both netify_grouped and list for proper method dispatch
+    class(network_list) <- c("netify_grouped", "list")
+    
+    return(network_list)
+  }
+  
   # create weight string for storage as attribtue 
   # in netify object
   weight_label <- weight_string_label(weight, sum_dyads)
-
+  
   # if bipartite network then force diag_to_NA to be FALSE
   # and force asymmetric, create copy to preserve user choice
   # for use in prep_ fns
@@ -127,37 +159,37 @@ get_adjacency_list <- function(
   if(mode=='bipartite'){
     diag_to_NA <- FALSE
     symmetric <- FALSE }
-
+  
   # if mode bipartite is specified make sure that
   # actors in actor1 and actor2 columns are distinct
   if(mode=='bipartite'){
-      if( length(intersect(dyad_data[,actor1], dyad_data[,actor2]))>0 ){
-          cli::cli_alert_warning(
-              "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes."
-    ) } }    
-
+    if( length(intersect(dyad_data[,actor1], dyad_data[,actor2]))>0 ){
+      cli::cli_alert_warning(
+        "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes."
+      ) } }    
+  
   # check if user supplied actor_pds
   if(!is.null(actor_pds)){ 
     user_actor_pds <- TRUE 
-    } else { 
+  } else { 
     user_actor_pds <- FALSE }
-
+  
   # check to make sure time variable actually is numeric
   if(!is.numeric(dyad_data[,time])){
     cli::cli_alert_danger(
       'Values in the time variable must be numeric.'
-      )
+    )
     stop() }
-
+  
   # add weight if not supplied
   wOrig <- weight
   if(is.null(weight)){
     dyad_data$weight_var <- 1 ; weight <- 'weight_var' }
-
+  
   # subset to relevant vars
   dyad_data <- dyad_data[,c(actor1, actor2, time, weight)]
-
-	# get vector of time periods and convert to character
+  
+  # get vector of time periods and convert to character
   time_pds <- char(unique_vector(dyad_data[,time]))
   
   # if no actor_pds provided then calculate based on actor_time_uniform
@@ -175,50 +207,50 @@ get_adjacency_list <- function(
     # entry and exit based on min and max in data
     if(!actor_time_uniform){
       actor_pds <- get_actor_time_info(dyad_data, actor1, actor2, time) }
-  
-  # define all possible actor1s and actor2s
-  a1_all <- unique_vector(dyad_data[,actor1])
-  a2_all <- unique_vector(dyad_data[,actor2])
-
-  # else actor_pds is provided then subset data to only contain those actors
-  # and years those actors were active        
+    
+    # define all possible actor1s and actor2s
+    a1_all <- unique_vector(dyad_data[,actor1])
+    a2_all <- unique_vector(dyad_data[,actor2])
+    
+    # else actor_pds is provided then subset data to only contain those actors
+    # and years those actors were active        
   } else {
-
+    
     # make sure actor_pds is a data.frame
     actor_pds <- df_check(actor_pds)
-
+    
     # make sure every actor has only been entered once
     if(length(unique(actor_pds$actor))!=nrow(actor_pds)){
       cli::cli_alert_danger(
         "Actors are repeating in `actor_pds`. Every actor must show up only once with a unique `min_time` and `max_time`."
-        )
+      )
       stop() }
-
+    
     # rename first col to actor, second to min_time, third to max_time
     names(actor_pds) <- c('actor', 'min_time', 'max_time')
-
+    
     # create vector of time periods based on entry
     time_pds <- char(unique_vector(actor_pds$min_time, actor_pds$max_time))
-
+    
     # get vector of actors as explicitly defined by user
     actors_rows <- unique_vector(dyad_data[,actor1])
     actors_cols <- unique_vector(dyad_data[,actor2])
     actors <- unique_vector(actors_rows, actors_cols)
     if(mode=='unipartite'){ actors_rows <- actors_cols <- actors }  
-
+    
     # subset dyad data to only include relevant actors and time periods
     dyad_data <- dyad_data[
       dyad_data[,actor1] %in% actors_rows & 
-      dyad_data[,actor2] %in% actors_cols &
-      dyad_data[,time] %in% time_pds, ]
-
+        dyad_data[,actor2] %in% actors_cols &
+        dyad_data[,time] %in% time_pds, ]
+    
     # stop process if no dyads remain
     if(nrow(dyad_data)==0){
       cli::cli_alert_danger(
         "No dyads remain after subsetting to the actors and years defined in `actor_pds`."
-        )
+      )
       stop() }
-
+    
     # further pair down data to ensure that we are only including observations
     # for an actor in the years that they were defined as active by the user
     actor_yrs <- unlist(lapply(1:nrow(actor_pds), function(ii){
@@ -229,32 +261,32 @@ get_adjacency_list <- function(
     actor2_yr <- paste(dyad_data[,actor2], dyad_data[,time], sep='_')
     dyad_data <- dyad_data[
       actor1_yr %in% actor_yrs & 
-      actor2_yr %in% actor_yrs,]
-
+        actor2_yr %in% actor_yrs,]
+    
     # define all possible actor1s and actor2s based on user input and data availability
     a1_all <- unique_vector(dyad_data[,actor1])
     a2_all <- unique_vector(dyad_data[,actor2])
-
+    
     # cleanup
     rm(actor1_yr, actor2_yr, actor_yrs)
   }
-
+  
   # check if there are repeating dyads
   num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2, time)
   if(num_repeat_dyads>0){ edge_value_check(wOrig, sum_dyads, TRUE) }
-
+  
   # aggregate data if sum dyads selected
   if(sum_dyads){
     dyad_data <- agg_across_units(dyad_data, actor1, actor2, time, weight, symmetric, missing_to_zero)
   }
-
+  
   # dump zeros in df so we dont have to iterate through
   # as many rows, but can only do this as long as we can
   # assume that all dyads are present, so no possible NAs
   # and then below we can set NAs to 0
   if(missing_to_zero){
     dyad_data <- dyad_data[dyad_data[,weight] != 0, ] }
-
+  
   # iterate through time periods
   adj_out <- lapply( time_pds, function(time_pd){
     
@@ -266,16 +298,16 @@ get_adjacency_list <- function(
       actor_pds[,2:3], 1, function(x){ time_pd %in% x[1]:x[2] })
     actors <- actor_pds$actor[actor_present]
     actors <- actors_rows <- actors_cols <- sort(actors)
-
+    
     # break up into rows and cols 
     if(mode=='bipartite'){
       actors_rows <- sort( actor_pds$actor[actor_present & actor_pds$actor %in% a1_all] )
       actors_cols <- sort( actor_pds$actor[actor_present & actor_pds$actor %in% a2_all] )
     }
-
+    
     # assign cross-section value for adjmat depending on user inputs
     value <- slice[,weight]
-
+    
     # create logical value that is TRUE if weight is just 0/1
     # and false otherwise
     weight_binary <- TRUE
@@ -283,7 +315,7 @@ get_adjacency_list <- function(
     if(any(weight_vals != 0 & weight_vals != 1)){
       weight_binary <- FALSE }
     rm(weight_vals)
-
+    
     # get adj mat filled in
     adj_mat <- get_matrix(
       n_rows=length(actors_rows),
@@ -297,18 +329,18 @@ get_adjacency_list <- function(
     
     # add zeros for non-relationships (this should be a logical)
     if(missing_to_zero){ adj_mat[is.na(adj_mat)] <- 0 }
-
+    
     # set diagonals to NA
     if(diag_to_NA & mode=='unipartite' ){ diag(adj_mat) <- NA }
-
+    
     # if user left weight NULL and set sum_dyads
     # to FALSE then record weight as NULL for
     # attribute purposes
     if(!sum_dyads & is.null(wOrig)){ weight <- NULL }
-
+    
     # layer label
     if(is.null(weight)){ layer_label <- 'weight1' } else{ layer_label <- weight }
-
+    
     # add class info
     class(adj_mat) <- 'netify'
     attr(adj_mat, 'netify_type') <- 'cross_sec'
@@ -337,17 +369,17 @@ get_adjacency_list <- function(
   # to FALSE then record weight as NULL for
   # attribute purposes
   if(!sum_dyads & is.null(wOrig)){ weight <- NULL }
-
+  
   # if user supplied actor_pds then set 
   # actor_time_uniform to FALSE
   if(user_actor_pds){ actor_time_uniform <- FALSE }
-
+  
   # layer label
   if(is.null(weight)){ layer_label <- 'weight1' } else{ layer_label <- weight }
-
+  
   # get info on binary weights
   bin_check <- unlist(lapply(adj_out, function(x){ attr(x, 'weight_binary') }))
-
+  
   # add attributes to list
   class(adj_out) <- 'netify'
   attr(adj_out, 'netify_type') <- 'longit_list'

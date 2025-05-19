@@ -11,10 +11,11 @@
 #' @param sum_dyads logical: whether to sum up the `weight` value when there exists repeating dyads within the dataset
 #' @param diag_to_NA logical: whether diagonals should be set to NA, default is TRUE
 #' @param missing_to_zero logical: whether missing values should be set to zero, default is TRUE
+#' @param group_by character: name of the variable to group networks by, default is NULL 
 #'
-#' @return an adjacency matrix of class netify
+#' @return an adjacency matrix of class netify, or if group_by is specified, a list of adjacency matrices with class netify_grouped
 #'
-#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas, Tosin Salau
 #'
 #' @examples
 #'
@@ -31,13 +32,29 @@
 #' icews_verbCoop <- get_adjacency(
 #'   dyad_data=icews, actor1='i', actor2='j',
 #'   symmetric=FALSE, weight='verbCoop' )
-
+#'
 #' # generate a cross sectional, directed and weighted network
 #' # where the weights are matlConf
 #' icews_matlConf <- get_adjacency(
 #'   dyad_data=icews, actor1='i', actor2='j',
 #'   symmetric=FALSE, weight='matlConf' )
 #' 
+#' # create networks by groups
+#' # Create test data
+#'test_data <- data.frame(
+#'i = c("A", "A", "B", "C", "D", "E"),
+#'j = c("B", "C", "C", "D", "E", "F"),
+#'value = c(1, 2, 3, 4, 5, 6),
+#'group = c("group1", "group1", "group1", "group2", "group2", "group2"))
+#'
+#'# Test the function with group_by
+#'grouped_networks <- get_adjacency(
+#'dyad_data = test_data,
+#'actor1 = "i", actor2 = "j", 
+#'weight = "value",
+#'group_by = "group"
+#')
+
 #' # another example using cow data
 #' # gathered from the peacesciencer package
 #' library(peacesciencer)
@@ -93,13 +110,46 @@
 #' 
 
 get_adjacency <- function(
-  dyad_data,
-  actor1=NULL, actor2=NULL, 
-  symmetric=TRUE, mode='unipartite',
-  weight=NULL, sum_dyads=FALSE, 
-  diag_to_NA=TRUE, missing_to_zero=TRUE
+    dyad_data,
+    actor1=NULL, actor2=NULL, 
+    symmetric=TRUE, mode='unipartite',
+    weight=NULL, sum_dyads=FALSE, 
+    diag_to_NA=TRUE, missing_to_zero=TRUE,
+    group_by=NULL  # NEW: Added group_by parameter
 ){
-
+  # NEW: Added handling for group_by parameter
+  if(!is.null(group_by)) {
+    # Get unique values of the grouping variable
+    groups <- unique(dyad_data[[group_by]])
+    
+    # Create a separate network for each group
+    network_list <- lapply(groups, function(g) {
+      # Subset data for this group
+      group_data <- dyad_data[dyad_data[[group_by]] == g, ]
+      
+      #
+      result <- get_adjacency(
+        group_data, actor1, actor2, symmetric, mode, 
+        weight, sum_dyads, diag_to_NA, missing_to_zero
+        # group_by=NULL is not needed because we're not passing it
+      )
+      
+      # Add group info as attributes
+      attr(result, "group") <- g
+      attr(result, "group_var") <- group_by
+      return(result)
+    })
+    
+    # Name the list elements by group
+    names(network_list) <- as.character(groups)
+    
+    # Set class to both netify_grouped and list for proper method dispatch
+    class(network_list) <- c("netify_grouped", "list")
+    
+    return(network_list)
+  }
+  # END of new group_by handling
+  
   # if bipartite network then force diag_to_NA to be FALSE
   # and force asymmetric, create copy to preserve user choice
   # for use in prep_ fns
@@ -107,42 +157,42 @@ get_adjacency <- function(
   if(mode=='bipartite'){
     diag_to_NA <- FALSE
     symmetric <- FALSE }
-
+  
   # if mode bipartite is specified make sure that
   # actors in actor1 and actor2 columns are distinct
   if(mode=='bipartite'){
-      if( length(intersect(dyad_data[,actor1], dyad_data[,actor2]))>0 ){
-          cli::cli_alert_warning(
-              "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes.") } }
-
+    if( length(intersect(dyad_data[,actor1], dyad_data[,actor2]))>0 ){
+      cli::cli_alert_warning(
+        "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes.") } }
+  
   # create weight string for storage as attribtue 
   # in netify object
   weight_label <- weight_string_label(weight, sum_dyads)
-
+  
   # add weight if not supplied
   wOrig <- weight
   if(is.null(weight)){
     dyad_data$weight_var <- 1 ; weight <- 'weight_var' }
-
+  
   # subset to relevant vars
   dyad_data <- dyad_data[,c(actor1, actor2, weight)]
-
+  
   # get vector of actors
   actors_rows <- unique_vector(dyad_data[,actor1])
   actors_cols <- unique_vector(dyad_data[,actor2])
   actors <- unique_vector(actors_rows, actors_cols)
   if(mode=='unipartite'){ actors_rows <- actors_cols <- actors }
-
+  
   # actor year info
   actor_pds <- data.frame(
     actor=actors, stringsAsFactors=FALSE)
   actor_pds$min_time <- 1
   actor_pds$max_time <- 1
-
+  
   # check if there are repeating dyads
   num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2)
   if(num_repeat_dyads>0){ edge_value_check(wOrig, sum_dyads, TRUE) }
-   
+  
   # aggregate data if sum dyads selected
   if(sum_dyads){
     dyad_data <- agg_across_units(dyad_data, actor1, actor2, NULL, weight, symmetric, missing_to_zero)
@@ -154,10 +204,10 @@ get_adjacency <- function(
   # and then below we can set NAs to 0
   if(missing_to_zero){
     dyad_data <- dyad_data[dyad_data[,weight] != 0, ] }
-
+  
   # assign cross-section value for adjmat depending on user inputs
   value <- dyad_data[,weight]
-
+  
   # create logical value that is TRUE if weight is just 0/1
   # and false otherwise
   weight_binary <- TRUE
@@ -165,32 +215,32 @@ get_adjacency <- function(
   if(any(weight_vals != 0 & weight_vals != 1)){
     weight_binary <- FALSE }
   rm(weight_vals)
-
+  
   # convert to adjacency matrix
   adj_out <- get_matrix(
-      n_rows=length(actors_rows),
-      n_cols=length(actors_cols),
-      actors_rows=actors_rows,
-      actors_cols=actors_cols,
-      matRowIndices=match(dyad_data[,actor1], actors_rows),
-      matColIndices=match(dyad_data[,actor2], actors_cols),
-      value=value,
-      symmetric=symmetric)
-
+    n_rows=length(actors_rows),
+    n_cols=length(actors_cols),
+    actors_rows=actors_rows,
+    actors_cols=actors_cols,
+    matRowIndices=match(dyad_data[,actor1], actors_rows),
+    matColIndices=match(dyad_data[,actor2], actors_cols),
+    value=value,
+    symmetric=symmetric)
+  
   # add zeros for non-relationships (this should be a logical)
   if(missing_to_zero){ adj_out[is.na(adj_out)] <- 0 }
-
+  
   # set diagonals to NA
   if(diag_to_NA & mode=='unipartite' ){ diag(adj_out) <- NA }
-
+  
   # if user left weight NULL and set sum_dyads
   # to FALSE then record weight as NULL for
   # attribute purposes
   if(!sum_dyads & is.null(wOrig)){ weight <- NULL }
-
+  
   # layer label
   if(is.null(weight)){ layer_label <- 'weight1' } else{ layer_label <- weight }
-
+  
   # add class info
   class(adj_out) <- 'netify'
   attr(adj_out, 'netify_type') <- 'cross_sec'
@@ -207,8 +257,7 @@ get_adjacency <- function(
   attr(adj_out, 'sum_dyads') <- sum_dyads  
   attr(adj_out, 'nodal_data') <- NULL
   attr(adj_out, 'dyad_data') <- NULL
-
+  
   #
   return(adj_out)
 }
-
