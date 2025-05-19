@@ -2,3 +2,4 @@ docs
 /doc/
 /Meta/
 .DS_Store
+.Rproj.user
