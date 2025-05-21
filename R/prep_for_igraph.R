@@ -312,13 +312,16 @@ adj_igraph_positions <- function(adj_mat, igraph_object){
   acKey <- data.frame(
     id = 1:nc, lab=ac, stringsAsFactors=FALSE )
 
-  # get out edge ids from igraph, igraph
-  # wants you to merge in ids based on the
-  # order in which they show up
-  eVecIgraph = attributes(igraph::E(igraph_object))$vnames
+  # # get out edge ids from igraph, igraph
+  # # wants you to merge in ids based on the
+  # # order in which they show up
+  # eVecIgraph = attributes(igraph::E(igraph_object))$vnames
 
-  # organize into a matrix object
-  eLabIgraph = do.call('rbind', strsplit(eVecIgraph, '|', fixed=TRUE))
+  # # organize into a matrix object
+  # eLabIgraph = do.call('rbind', strsplit(eVecIgraph, '|', fixed=TRUE))
+
+  # can simplify the commented above via igraph::as_data_frame
+  eLabIgraph = igraph::as_data_frame(igraph_object, what='edges')
 
   # get positions of each actor in eLabIgraph
   # based on where they fall in aKey
