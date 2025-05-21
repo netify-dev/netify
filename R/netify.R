@@ -69,48 +69,6 @@
 #'     dyad_vars=c('matlCoop', 'verbCoop', 'verbConf'),
 #'     dyad_vars_symmetric=c(FALSE, FALSE, FALSE) )  
 #' 
-#' 
-#' # example using cow data
-#' # gathered from the peacesciencer package
-#' library(peacesciencer)
-#' library(dplyr)
-#' 
-#' # create dyadic data set over time
-#' cow_dyads <- create_dyadyears( 
-#'     subset_years = c(1992:2001)
-#'     ) %>%
-#'     # add mids
-#'     add_cow_mids() %>% 
-#'     # add capital distance
-#'     add_capital_distance() %>%
-#'     # add cow trade
-#'     add_cow_trade() %>%
-#'     # add democracy
-#'     add_democracy()
-#' 
-#' # now lets create a network object in which
-#' # we generate list of networks in which the
-#' # cross-sections represent mid onset
-#' # additionally note that the raw data involves
-#' # country years in which we saw countries go in
-#' # and out of existence so we set actor_time_uniform
-#' # to FALSE
-#' mid_network <- netify(
-#'   cow_dyads,
-#'   actor1='ccode1', actor2='ccode2', time='year',
-#'   # network of interest variable
-#'   weight='cowmidonset', 
-#'   actor_time_uniform=FALSE,
-#'   sum_dyads=FALSE, symmetric=TRUE,
-#'   diag_to_NA=TRUE, missing_to_zero=FALSE,
-#'   # nodal features/covariates
-#'   nodal_vars = c('v2x_polyarchy1', 'v2x_polyarchy2'),
-#'   # dyadic features/covariates
-#'   dyad_vars = c('capdist', 'flow1'),
-#'   dyad_vars_symmetric = c(TRUE, FALSE)
-#'   )
-#' mid_network
-#' 
 #'
 #' @export netify
 #' 
