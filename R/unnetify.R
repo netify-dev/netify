@@ -6,6 +6,8 @@
 #' 
 #' @param netlet a netify object
 #' 
+#' @param remove_zeros Logical. If TRUE, remove edges with zero values.
+#' 
 #' @return a data.frame object
 #' 
 #' @author Cassy Dorff, Shahryar Minhas
@@ -13,7 +15,7 @@
 #' @export unnetify
 #' 
 
-unnetify <- function(netlet){
+unnetify <- function(netlet, remove_zeros=FALSE){
 
 	######################
     # check if netify object
@@ -25,7 +27,7 @@ unnetify <- function(netlet){
 
 	######################
     # get to df format
-    net_dfs = decompose_netlet( netlet )
+    net_dfs = decompose_netlet( netlet, remove_zeros=remove_zeros )
     edge_data = net_dfs$edge_data
     nodal_data = net_dfs$nodal_data
     rm(net_dfs)
