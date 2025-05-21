@@ -8,8 +8,8 @@
 <title>Netify Workshop • netify</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Netify Workshop">
 </head>
 <body>
@@ -35,6 +35,8 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/ego_networks.html">Netify: Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Netify: Manual Plotting with ggplot2</a></li>
+    <li><a class="dropdown-item" href="../articles/PSSI_workshop_final.html">Netify: Workshop PSSI</a></li>
+    <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
     <li><a class="dropdown-item" href="../articles/workshop_demo.html">Netify Workshop</a></li>
   </ul>
 </li>
@@ -43,6 +45,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/netify-dev/netify/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -60,9 +63,9 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2024-11-07</h4>
+            <h4 data-toc-skip class="date">2025-05-21</h4>
       
-
+      <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/workshop_demo.Rmd" class="external-link"><code>vignettes/workshop_demo.Rmd</code></a></small>
       <div class="d-none name"><code>workshop_demo.Rmd</code></div>
     </div>
 
@@ -441,8 +444,8 @@ nodal data information.</p>
 <span><span class="co">## 1      1 0.005376344 0.000000e+00</span></span>
 <span><span class="co">## 2      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 3      1 0.005376344 0.000000e+00</span></span>
-<span><span class="co">## 4      0 0.000000000 3.110014e-20</span></span>
-<span><span class="co">## 5      0 0.000000000 4.945764e-19</span></span>
+<span><span class="co">## 4      0 0.000000000 5.137642e-20</span></span>
+<span><span class="co">## 5      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 6      1 0.005263158 4.953675e-03</span></span></code></pre>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#i.e., </span></span>
@@ -458,8 +461,8 @@ nodal data information.</p>
 <span><span class="co">## 1      1 0.005376344 0.000000e+00</span></span>
 <span><span class="co">## 2      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 3      1 0.005376344 0.000000e+00</span></span>
-<span><span class="co">## 4      0 0.000000000 3.110014e-20</span></span>
-<span><span class="co">## 5      0 0.000000000 4.945764e-19</span></span>
+<span><span class="co">## 4      0 0.000000000 5.137642e-20</span></span>
+<span><span class="co">## 5      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 6      1 0.005263158 4.953675e-03</span></span></code></pre>
 <p>And now return to our network graph by highlighting specific nodal
 attributes:</p>
@@ -641,7 +644,7 @@ networks.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://statnet.org" class="external-link">ergm</a></span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Loading required package: network</span></span></code></pre>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## 'network' 1.18.2 (2023-12-04), part of the Statnet Project</span></span>
+<span><span class="co">## 'network' 1.19.0 (2024-12-08), part of the Statnet Project</span></span>
 <span><span class="co">## * 'news(package="network")' for changes since last version</span></span>
 <span><span class="co">## * 'citation("network")' for citation information</span></span>
 <span><span class="co">## * 'https://statnet.org' for help, support, and other information</span></span></code></pre>
@@ -650,7 +653,7 @@ networks.</p>
 <span><span class="co">##   simulate.formula     lme4</span></span>
 <span><span class="co">##   simulate.formula_lhs lme4</span></span></code></pre>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## 'ergm' 4.7.1 (2024-10-07), part of the Statnet Project</span></span>
+<span><span class="co">## 'ergm' 4.8.1 (2025-01-20), part of the Statnet Project</span></span>
 <span><span class="co">## * 'news(package="ergm")' for changes since last version</span></span>
 <span><span class="co">## * 'citation("ergm")' for citation information</span></span>
 <span><span class="co">## * 'https://statnet.org' for help, support, and other information</span></span></code></pre>
@@ -713,7 +716,7 @@ step is to go to <a href="https://ucdp.uu.se/downloads/" class="external-link ur
 want to use. For this tutorial we have downloaded UCDP GED event data
 version 23.1 and subset the data for the case of Mexico.</p>
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">"ucdp_ged_mexico.rda"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mexico</span><span class="op">)</span></span></code></pre></div>
 <ol style="list-style-type: decimal">
 <li>Create an aggregated, weighted network of conflict between actors in
 Mexico.</li>
@@ -734,11 +737,11 @@ Mexico.</li>
 <code class="sourceCode R"><span><span class="co"># A summary of the network object</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   net num_actors    density num_edges prop_edges_missing mean_edge_weight</span></span>
-<span><span class="co">## 1   1         72 0.02543036       130                  0         5.608764</span></span>
+<span><span class="co">## 1   1         74 0.02554609       138                  0         7.018512</span></span>
 <span><span class="co">##   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition</span></span>
-<span><span class="co">## 1       89.74295                  0               0            3076   0.1494919</span></span>
+<span><span class="co">## 1        113.395                  0               0            3757   0.1371326</span></span>
 <span><span class="co">##   sd_of_actor_means transitivity</span></span>
-<span><span class="co">## 1          17.64839    0.1052632</span></span></code></pre>
+<span><span class="co">## 1          21.37264    0.1046512</span></span></code></pre>
 <div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># weight using a variable</span></span>
 <span><span class="va">mex_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
@@ -754,11 +757,11 @@ Mexico.</li>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mex_network_civ</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   net num_actors    density num_edges prop_edges_missing mean_edge_weight</span></span>
-<span><span class="co">## 1   1         72 0.01643192        84                  0         0.458529</span></span>
+<span><span class="co">## 1   1         74 0.01703073        92                  0        0.4813032</span></span>
 <span><span class="co">##   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition</span></span>
-<span><span class="co">## 1       8.631244                  0               0             377   0.1655174</span></span>
+<span><span class="co">## 1       8.809874                  0               0             380    0.159834</span></span>
 <span><span class="co">##   sd_of_actor_means transitivity</span></span>
-<span><span class="co">## 1           1.52567        0.168</span></span></code></pre>
+<span><span class="co">## 1          1.594563    0.1458333</span></span></code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Explore</li>
 </ol>
@@ -779,7 +782,7 @@ Mexico.</li>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
 <span>     select_text <span class="op">=</span> <span class="va">random_names</span>,</span>
 <span>     select_text_display <span class="op">=</span> <span class="va">random_names</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Removed 62 rows containing missing values or values outside the scale range</span></span>
+<pre><code><span><span class="co">## Warning: Removed 64 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_text()`).</span></span></code></pre>
 <p><img src="workshop_demo_files/figure-html/unnamed-chunk-23-2.png" width="576"></p>
 <div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
@@ -787,7 +790,7 @@ Mexico.</li>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network_civ</span>,</span>
 <span>     select_text <span class="op">=</span> <span class="va">random_names</span>,</span>
 <span>     select_text_display <span class="op">=</span> <span class="va">random_names</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Removed 38 rows containing missing values or values outside the scale range</span></span>
+<pre><code><span><span class="co">## Warning: Removed 40 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_text()`).</span></span></code></pre>
 <p><img src="workshop_demo_files/figure-html/unnamed-chunk-23-3.png" width="576"></p>
 <p>We can also apply functions from <code>igraph</code>:</p>
@@ -842,7 +845,7 @@ Georeferenced Event Dataset. Journal of Peace Research 50(4).</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>

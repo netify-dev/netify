@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>network tools in R • netify</title>
+<title>Network Tools • netify</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="network tools in R">
-<meta name="description" content="we get the nets from the things.">
-<meta property="og:description" content="we get the nets from the things.">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Network Tools">
+<meta name="description" content="Provides functions for building, analyzing, and visualizing network data.">
+<meta property="og:description" content="Provides functions for building, analyzing, and visualizing network data.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -37,6 +37,8 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/ego_networks.html">Netify: Ego Networks</a></li>
     <li><a class="dropdown-item" href="articles/manual_plotting.html">Netify: Manual Plotting with ggplot2</a></li>
+    <li><a class="dropdown-item" href="articles/PSSI_workshop_final.html">Netify: Workshop PSSI</a></li>
+    <li><a class="dropdown-item" href="articles/resources.html">Helpful Resources</a></li>
     <li><a class="dropdown-item" href="articles/workshop_demo.html">Netify Workshop</a></li>
   </ul>
 </li>
@@ -45,6 +47,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/netify-dev/netify/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -93,7 +96,15 @@
 <p>Cassy Dorff (Vanderbilt University) and Shahryar Minhas (Michigan State University) are co-PI’s on the collaborative NSF grant funding this work, as such, they acknowledge support from National Science Foundation (NSF) Awards #2017162 and #2017180. Additional contributors include Ha Eun Choi (Ph.D. Candidate, Michigan State University) and Colin Henry (Ph.D. Candidate, Vanderbilt University). We also thank Sophia Tannir (M.S. Data Science, Vanderbilt University) for important feedback.</p>
 </div>
 </div>
-  </main><aside class="col-md-3"><div class="license">
+  </main><aside class="col-md-3"><div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/netify-dev/netify/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/netify-dev/netify/issues" class="external-link">Report a bug</a></li>
+</ul>
+</div>
+
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li>
@@ -113,8 +124,8 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Cassy Dorff <br><small class="roles"> Author </small>  </li>
-<li>Shahryar Minhas <br><small class="roles"> Author, maintainer </small>  </li>
+<li>Cassy Dorff <br><small class="roles"> Author </small>   </li>
+<li>Shahryar Minhas <br><small class="roles"> Author, maintainer </small>   </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
@@ -130,7 +141,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>
