@@ -40,7 +40,7 @@ Suggests:
     latentnet,
     RSiena,
     countrycode
-VignetteBuilder: knitr    
+VignetteBuilder: knitr
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false

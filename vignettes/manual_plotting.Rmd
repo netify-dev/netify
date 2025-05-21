@@ -3,20 +3,15 @@ title: "Netify: Manual Plotting with ggplot2"
 author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
-chunk_options:
-  dpi: 100
 vignette: >
-  %\VignetteEncoding{UTF-8}
   %\VignetteIndexEntry{Netify: Manual Plotting with ggplot2}
   %\VignetteEngine{knitr::rmarkdown}
-editor_options:
-  
-  chunk_output_type: console
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
-  dev = 'svg',
+  dev = 'png', dpi = 150,
   cache = FALSE,
   echo = TRUE
 )

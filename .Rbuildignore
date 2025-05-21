@@ -4,6 +4,3 @@
 ^\.github$
 ^doc$
 ^Meta$
-^vignettes/ego_networks\.Rmd$
-^vignettes/manual_plotting\.Rmd$
-^vignettes/workshop_demo\.Rmd$

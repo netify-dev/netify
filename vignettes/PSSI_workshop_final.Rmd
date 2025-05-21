@@ -9,6 +9,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  dev = 'png', dpi = 150,
+  cache = FALSE,
+  echo = TRUE
+)
+```
+
 # Netify Workshop PSSI
 
 Below is a demonstration of how to use the **netify** R package to build and analyze various conflict networks. We will walk through data preparation, network construction, summary statistics, visualizations, and special use cases like weighted networks, longitudinal networks, and bipartite networks.
