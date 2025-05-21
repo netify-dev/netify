@@ -83,56 +83,6 @@ icews_verbConf <- get_adjacency_list(
   symmetric=FALSE, weight='verbConf' )
 icews_verbConf
 
-# another example using cow data
-# gathered from the peacesciencer package
-library(peacesciencer)
-library(dplyr)
-
-# create dyadic data set over time (NGOs)
-cow_dyads <- create_dyadyears( 
-    subset_years = c(1980:2001)
-    ) \%>\%
-    # add mids
-    add_cow_mids()
-
-# now lets create a network object in which
-# we generate list of networks in which the
-# cross-sections represent mid onset
-# additionally note that the raw data involves
-# country years in which we saw countries go in
-# and out of existence so we set actor_time_uniform
-# to FALSE
-mid_network <- netify(
-  cow_dyads,
-  actor1='ccode1', actor2='ccode2', time='year',
-  weight='cowmidonset', 
-  actor_time_uniform=FALSE,
-  sum_dyads=FALSE, symmetric=TRUE,
-  diag_to_NA=TRUE, missing_to_zero=TRUE)
-mid_network
-
-# you can also supply your own set of actors
-# with custom start and end years using the
-# actor_pds argument, to use this first you 
-# need to create a data.frame with information
-# about actor composition as follows
-actor_comp <- data.frame(
-    actor = c(2, 365, 220, 710),
-    min_time = c(1980, 1980, 1991, 1980),
-    max_time = c(2001, 2001, 2001, 2001)
-)
-
-# now pass this actor_comp object to the 
-# actor_pds argument
-mid_network_subset <- netify(
-  cow_dyads,
-  actor1='ccode1', actor2='ccode2', time='year',
-  weight='cowmidonset', 
-  actor_pds=actor_comp,
-  sum_dyads=FALSE, symmetric=TRUE,
-  diag_to_NA=TRUE, missing_to_zero=TRUE)
-mid_network_subset
-
 
 }
 \author{

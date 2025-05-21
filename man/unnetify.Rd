@@ -4,10 +4,12 @@
 \alias{unnetify}
 \title{unnetify}
 \usage{
-unnetify(netlet)
+unnetify(netlet, remove_zeros = FALSE)
 }
 \arguments{
 \item{netlet}{a netify object}
+
+\item{remove_zeros}{Logical. If TRUE, remove edges with zero values.}
 }
 \value{
 a data.frame object

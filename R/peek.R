@@ -51,6 +51,19 @@
 #'
 #' @export peek
 
+
+
+#         # create netify object and then subset
+#         netlet = icews_matlConf_l
+
+
+# what_to_peek=actors_to_keep
+# 	what_rows_to_peek=what_to_peek
+# 	what_cols_to_peek=what_to_peek
+# when_to_peek=c('2010', '2011')
+# 	what_layers_to_peek=NULL
+
+
 peek <- function(
 	netlet, 
 	what_to_peek=3,
@@ -177,6 +190,24 @@ peek <- function(
 		#
 		return(x) } )
 
+	# add char names to elems of row/col if missing
+	if(objAttrs$netify_type == 'longit_list'){
+	if( is.null(names(row_col[[1]])) | is.null(names(row_col[[2]])) ) {
+
+		# if when_to_peek is same length as netlet then 
+		# just add names from netlet
+		if(length(when_to_peek)==msrmnts$n_time){
+			names(row_col[[1]]) <- time_labels
+			names(row_col[[2]]) <- time_labels }
+		
+		# if when to peek is smaller then pull out
+		# corresponding names from netlet and add to row/col 
+		if(length(when_to_peek)<msrmnts$n_time){
+			names(row_col[[1]]) <- time_labels[when_to_peek]
+			names(row_col[[2]]) <- time_labels[when_to_peek] }
+	}
+	}
+
 	# get raw version of netlet to help with subsetting
 	netlet <- get_raw(netlet)
 
@@ -261,7 +292,9 @@ peek <- function(
 		# make sure time range specified doesnt exceed dims of data
 		when_to_peek <- intersect(when_to_peek, 1:length(netlet))
 		netlet <- netlet[when_to_peek]
-		row_col <- lapply(row_col, function(x){ x[when_to_peek] })
+		row_col <- lapply(row_col, function(x){
+			if(is.list(x)){ x <- x[time_labels[when_to_peek]] }
+			return(x) })
 
 		# iterate through time periods
 		relev_netlet <- lapply(1:length(netlet), function(tt){

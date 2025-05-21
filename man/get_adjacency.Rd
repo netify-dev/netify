@@ -62,56 +62,6 @@ icews_matlConf <- get_adjacency(
   dyad_data=icews, actor1='i', actor2='j',
   symmetric=FALSE, weight='matlConf' )
 
-# another example using cow data
-# gathered from the peacesciencer package
-library(peacesciencer)
-library(dplyr)
-
-# create dyadic data set over time
-cow_dyads <- create_dyadyears( 
-    subset_years = c(1992:2014)
-    ) \%>\%
-    # add mids
-    add_cow_mids()
-
-# the cross-sections refer to the number of 
-# conflict onsets between dyads during
-# the time period of the data 
-mid_network <- netify(
-  cow_dyads,
-  actor1='ccode1', actor2='ccode2',
-  weight='cowmidonset', 
-  sum_dyads=TRUE, symmetric=TRUE,
-  diag_to_NA=TRUE, missing_to_zero=TRUE)
-mid_network 
-
-# now lets say that we just want to 
-# see whether any conflict onset
-# occurred between a dyad during 
-# this period and generate
-# a network object that represents this
-
-# to generate this we need to first subset
-# the raw data into an edge list like format
-# this only involves subsetting the variable
-# that you are using to represent edges to be
-# a value above zero
-cow_dyad_conflict_onset <- cow_dyads \%>\%
-    filter(
-        cowmidonset > 0
-    )
-
-# then we use the netify function and 
-# we no longer supply a weight, since the
-# dyads themselves are giving information about
-# edges that occurred and in addition we leave
-# sum_dyads as FALSE
-any_mid_network <- netify(
-  cow_dyad_conflict_onset,
-  actor1='ccode1', actor2='ccode2',
-  sum_dyads=FALSE, symmetric=TRUE,
-  diag_to_NA=TRUE, missing_to_zero=TRUE)
-mid_network
 
 }
 \author{
