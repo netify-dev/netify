@@ -261,6 +261,7 @@ peek <- function(
 		# make sure time range specified doesnt exceed dims of data
 		when_to_peek <- intersect(when_to_peek, 1:length(netlet))
 		netlet <- netlet[when_to_peek]
+		row_col <- lapply(row_col, function(x){ x[when_to_peek] })
 
 		# iterate through time periods
 		relev_netlet <- lapply(1:length(netlet), function(tt){
