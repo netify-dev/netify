@@ -191,65 +191,6 @@ the symmetric argument</p></dd>
 <span class="r-in"><span>    dyad_vars_symmetric<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="cn">FALSE</span>, <span class="cn">FALSE</span><span class="op">)</span> <span class="op">)</span>  </span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># example using cow data</span></span></span>
-<span class="r-in"><span><span class="co"># gathered from the peacesciencer package</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/svmiller/peacesciencer/" class="external-link">peacesciencer</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># create dyadic data set over time</span></span></span>
-<span class="r-in"><span><span class="va">cow_dyads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/create_dyadyears.html" class="external-link">create_dyadyears</a></span><span class="op">(</span> </span></span>
-<span class="r-in"><span>    subset_years <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1992</span><span class="op">:</span><span class="fl">2001</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
-<span class="r-in"><span>    <span class="co"># add mids</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/add_cow_mids.html" class="external-link">add_cow_mids</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span></span>
-<span class="r-in"><span>    <span class="co"># add capital distance</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/add_capital_distance.html" class="external-link">add_capital_distance</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
-<span class="r-in"><span>    <span class="co"># add cow trade</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/add_cow_trade.html" class="external-link">add_cow_trade</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
-<span class="r-in"><span>    <span class="co"># add democracy</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/add_democracy.html" class="external-link">add_democracy</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(ccode1, ccode2, year)`</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(ccode1, ccode2, year)`</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> add_cow_mids() IMPORTANT MESSAGE: By default, this function whittles dispute-year data into dyad-year data by first selecting on unique onsets. Thereafter, where duplicates remain, it whittles dispute-year data into dyad-year data in the following order: 1) retaining highest `fatality`, 2) retaining highest `hostlev`, 3) retaining highest estimated `mindur`, 4) retaining highest estimated `maxdur`, 5) retaining reciprocated over non-reciprocated observations, 6) retaining the observation with the lowest start month, and, where duplicates still remained (and they don't), 7) forcibly dropping all duplicates for observations that are otherwise very similar.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> See: http://svmiller.com/peacesciencer/articles/coerce-dispute-year-dyad-year.html</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(ccode1, ccode2, year)`</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># now lets create a network object in which</span></span></span>
-<span class="r-in"><span><span class="co"># we generate list of networks in which the</span></span></span>
-<span class="r-in"><span><span class="co"># cross-sections represent mid onset</span></span></span>
-<span class="r-in"><span><span class="co"># additionally note that the raw data involves</span></span></span>
-<span class="r-in"><span><span class="co"># country years in which we saw countries go in</span></span></span>
-<span class="r-in"><span><span class="co"># and out of existence so we set actor_time_uniform</span></span></span>
-<span class="r-in"><span><span class="co"># to FALSE</span></span></span>
-<span class="r-in"><span><span class="va">mid_network</span> <span class="op">&lt;-</span> <span class="fu">netify</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">cow_dyads</span>,</span></span>
-<span class="r-in"><span>  actor1<span class="op">=</span><span class="st">'ccode1'</span>, actor2<span class="op">=</span><span class="st">'ccode2'</span>, time<span class="op">=</span><span class="st">'year'</span>,</span></span>
-<span class="r-in"><span>  <span class="co"># network of interest variable</span></span></span>
-<span class="r-in"><span>  weight<span class="op">=</span><span class="st">'cowmidonset'</span>, </span></span>
-<span class="r-in"><span>  actor_time_uniform<span class="op">=</span><span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  sum_dyads<span class="op">=</span><span class="cn">FALSE</span>, symmetric<span class="op">=</span><span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  diag_to_NA<span class="op">=</span><span class="cn">TRUE</span>, missing_to_zero<span class="op">=</span><span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  <span class="co"># nodal features/covariates</span></span></span>
-<span class="r-in"><span>  nodal_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'v2x_polyarchy1'</span>, <span class="st">'v2x_polyarchy2'</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  <span class="co"># dyadic features/covariates</span></span></span>
-<span class="r-in"><span>  dyad_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'capdist'</span>, <span class="st">'flow1'</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  dyad_vars_symmetric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Warning: Converting `actor1` and/or `actor2` to character vector(s).</span>
-<span class="r-in"><span><span class="va">mid_network</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> • Unipartite</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> • Symmetric</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> • Weights from `cowmidonset`</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> • Longitudinal: 10 Periods</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> • # Unique Actors: 192</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Network Summary Statistics (averaged across time):</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>              dens miss trans</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> cowmidonset 0.003    0  0.05</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> • Nodal Features: v2x_polyarchy1, v2x_polyarchy2</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> • Dyad Features: capdist, flow1</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
