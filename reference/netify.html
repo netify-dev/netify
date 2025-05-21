@@ -212,8 +212,7 @@ the symmetric argument</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(ccode1, ccode2, year)`</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> add_cow_mids() IMPORTANT MESSAGE: By default, this function whittles dispute-year data into dyad-year data by first selecting on unique onsets. Thereafter, where duplicates remain, it whittles dispute-year data into dyad-year data in the following order: 1) retaining highest `fatality`, 2) retaining highest `hostlev`, 3) retaining highest estimated `mindur`, 4) retaining highest estimated `maxdur`, 5) retaining reciprocated over non-reciprocated observations, 6) retaining the observation with the lowest start month, and, where duplicates still remained (and they don't), 7) forcibly dropping all duplicates for observations that are otherwise very similar.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> See: http://svmiller.com/peacesciencer/articles/coerce-dispute-year-dyad-year.html</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in add_cow_trade(.):</span> Dyadic CoW trade data are now stored remotely and must be downloaded separately.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> This error disappears after successfully running `download_extdata()`. Thereafter, the function works with no problem and the dyadic trade data (`cow_trade_ddy`) can be loaded for additional exploration.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Joining with `by = join_by(ccode1, ccode2, year)`</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># now lets create a network object in which</span></span></span>
 <span class="r-in"><span><span class="co"># we generate list of networks in which the</span></span></span>
@@ -236,9 +235,19 @@ the symmetric argument</p></dd>
 <span class="r-in"><span>  dyad_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'capdist'</span>, <span class="st">'flow1'</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  dyad_vars_symmetric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'cow_dyads' not found</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Warning: Converting `actor1` and/or `actor2` to character vector(s).</span>
 <span class="r-in"><span><span class="va">mid_network</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mid_network' not found</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • Unipartite</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • Symmetric</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • Weights from `cowmidonset`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • Longitudinal: 10 Periods</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • # Unique Actors: 192</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Network Summary Statistics (averaged across time):</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>              dens miss trans</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> cowmidonset 0.003    0  0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • Nodal Features: v2x_polyarchy1, v2x_polyarchy2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> • Dyad Features: capdist, flow1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
