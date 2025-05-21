@@ -1,5 +1,5 @@
 Package: netify
-Title: network tools in R
+Title: Network Tools
 Version: 0.1.0
 Authors@R: c(
   person("Ha Eun", "Choi", email = "choiha3@msu.edu", role = c("ctb")),
@@ -7,7 +7,7 @@ Authors@R: c(
   person("Colin", "Henry", email = "colin.henry@vanderbilt.edu", role = c("ctb")),
   person("Shahryar", "Minhas", email = "minhassh@msu.edu", role = c("aut", "cre"))
   )
-Description: we get the nets from the things.
+Description: Provides functions for building, analyzing, and visualizing network data.
 Depends:
   R (>= 3.5.0)
 Imports:
@@ -27,6 +27,8 @@ Imports:
 LinkingTo:
   Rcpp
 Suggests:
+    knitr,
+    rmarkdown,
     tidyr,
     network,
     testthat (>= 3.0.0),
@@ -38,9 +40,11 @@ Suggests:
     latentnet,
     RSiena,
     countrycode
+VignetteBuilder: knitr    
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 URL: https://netify-dev.github.io/netify/
+BugReports: https://github.com/netify-dev/netify/issues

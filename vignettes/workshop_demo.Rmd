@@ -469,7 +469,7 @@ We show how to use `netify` and UCDP data as just one example of potential appli
 
 
 ```{r}
-load("ucdp_ged_mexico.rda")
+data(mexico)
 ```
 
 (1) Create an aggregated, weighted network of conflict between actors in Mexico. 
