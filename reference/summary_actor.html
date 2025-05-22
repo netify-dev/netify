@@ -116,40 +116,40 @@ Examples of additional computations (like authority or hub scores) are provided 
 <span class="r-in"><span><span class="va">actor_stats</span> <span class="op">&lt;-</span> <span class="fu">summary_actor</span><span class="op">(</span><span class="va">netlet</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">actor_stats</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         actor time degree_in degree_out degree_total prop_ties_in prop_ties_out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Afghanistan 2002        81         92          173    0.5364238     0.6092715</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     Albania 2002        49         46           95    0.3245033     0.3046358</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     Algeria 2002        65         68          133    0.4304636     0.4503311</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      Angola 2002        67         64          131    0.4437086     0.4238411</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Afghanistan 2002        92         81          173    0.6092715     0.5364238</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     Albania 2002        46         49           95    0.3046358     0.3245033</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     Algeria 2002        68         65          133    0.4503311     0.4304636</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4      Angola 2002        64         67          131    0.4238411     0.4437086</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5   Argentina 2002        48         48           96    0.3178808     0.3178808</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6     Armenia 2002        66         71          137    0.4370861     0.4701987</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6     Armenia 2002        71         66          137    0.4701987     0.4370861</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   prop_ties_total strength_sum_in strength_sum_out strength_sum_total</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1               1            8694            10160              18854</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2               1             943             1022               1965</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3               1            1123             1205               2328</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4               1            1111             1311               2422</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5               1            1261             1427               2688</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6               1            2642             2665               5307</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1               1           10160             8694              18854</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2               1            1022              943               1965</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3               1            1205             1123               2328</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4               1            1311             1111               2422</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5               1            1427             1261               2688</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6               1            2665             2642               5307</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   strength_avg_in strength_avg_out strength_avg_total strength_std_in</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       57.576159        67.284768          62.430464       198.98323</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2        6.245033         6.768212           6.506623        21.17104</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3        7.437086         7.980132           7.708609        17.00179</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        7.357616         8.682119           8.019868        20.18988</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5        8.350993         9.450331           8.900662        39.54933</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6       17.496689        17.649007          17.572848        62.13790</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       67.284768        57.576159          62.430464       227.24232</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        6.768212         6.245033           6.506623        22.27089</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        7.980132         7.437086           7.708609        18.93197</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        8.682119         7.357616           8.019868        24.29633</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        9.450331         8.350993           8.900662        45.34294</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       17.649007        17.496689          17.572848        66.88569</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   strength_std_out strength_std_total strength_median_in strength_median_out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1        227.24232          213.11277                  1                   2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2         22.27089           21.72096                  0                   0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3         18.93197           17.96688                  0                   0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4         24.29633           22.24310                  0                   0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5         45.34294           42.44614                  0                   0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6         66.88569           64.51180                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        198.98323          213.11277                  2                   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2         21.17104           21.72096                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         17.00179           17.96688                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4         20.18988           22.24310                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5         39.54933           42.44614                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6         62.13790           64.51180                  0                   0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   strength_median_total network_share_in network_share_out network_share_total</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1                   1.5      0.019334694       0.022594950         0.020964822</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2                   0.0      0.002097149       0.002272838         0.002184994</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3                   0.0      0.002497454       0.002679814         0.002588634</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4                   0.0      0.002470767       0.002915549         0.002693158</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5                   0.0      0.002804354       0.003173523         0.002988938</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                   0.0      0.005875577       0.005926727         0.005901152</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                   1.5      0.022594950       0.019334694         0.020964822</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                   0.0      0.002272838       0.002097149         0.002184994</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                   0.0      0.002679814       0.002497454         0.002588634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                   0.0      0.002915549       0.002470767         0.002693158</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                   0.0      0.003173523       0.002804354         0.002988938</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                   0.0      0.005926727       0.005875577         0.005901152</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   closeness_in closeness_out closeness_all  betweenness authority_score</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1     71.13409      68.44904      78.06787 1.324503e-02      0.26866096</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2     42.48817      43.64733      47.16201 0.000000e+00      0.01252200</span>
@@ -172,40 +172,40 @@ Examples of additional computations (like authority or hub scores) are provided 
 <span class="r-in"><span><span class="va">actor_stats_custom</span> <span class="op">&lt;-</span> <span class="fu">summary_actor</span><span class="op">(</span><span class="va">netlet</span>, other_stats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>max_out <span class="op">=</span> <span class="va">max_out</span>, max_in <span class="op">=</span> <span class="va">max_in</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">actor_stats_custom</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         actor time degree_in degree_out degree_total prop_ties_in prop_ties_out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Afghanistan 2002        81         92          173    0.5364238     0.6092715</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     Albania 2002        49         46           95    0.3245033     0.3046358</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     Algeria 2002        65         68          133    0.4304636     0.4503311</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      Angola 2002        67         64          131    0.4437086     0.4238411</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Afghanistan 2002        92         81          173    0.6092715     0.5364238</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     Albania 2002        46         49           95    0.3046358     0.3245033</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     Algeria 2002        68         65          133    0.4503311     0.4304636</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4      Angola 2002        64         67          131    0.4238411     0.4437086</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5   Argentina 2002        48         48           96    0.3178808     0.3178808</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6     Armenia 2002        66         71          137    0.4370861     0.4701987</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6     Armenia 2002        71         66          137    0.4701987     0.4370861</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   prop_ties_total strength_sum_in strength_sum_out strength_sum_total</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1               1            8694            10160              18854</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2               1             943             1022               1965</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3               1            1123             1205               2328</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4               1            1111             1311               2422</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5               1            1261             1427               2688</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6               1            2642             2665               5307</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1               1           10160             8694              18854</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2               1            1022              943               1965</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3               1            1205             1123               2328</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4               1            1311             1111               2422</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5               1            1427             1261               2688</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6               1            2665             2642               5307</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   strength_avg_in strength_avg_out strength_avg_total strength_std_in</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       57.576159        67.284768          62.430464       198.98323</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2        6.245033         6.768212           6.506623        21.17104</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3        7.437086         7.980132           7.708609        17.00179</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        7.357616         8.682119           8.019868        20.18988</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5        8.350993         9.450331           8.900662        39.54933</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6       17.496689        17.649007          17.572848        62.13790</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       67.284768        57.576159          62.430464       227.24232</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        6.768212         6.245033           6.506623        22.27089</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        7.980132         7.437086           7.708609        18.93197</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        8.682119         7.357616           8.019868        24.29633</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        9.450331         8.350993           8.900662        45.34294</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       17.649007        17.496689          17.572848        66.88569</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   strength_std_out strength_std_total strength_median_in strength_median_out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1        227.24232          213.11277                  1                   2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2         22.27089           21.72096                  0                   0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3         18.93197           17.96688                  0                   0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4         24.29633           22.24310                  0                   0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5         45.34294           42.44614                  0                   0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6         66.88569           64.51180                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        198.98323          213.11277                  2                   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2         21.17104           21.72096                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         17.00179           17.96688                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4         20.18988           22.24310                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5         39.54933           42.44614                  0                   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6         62.13790           64.51180                  0                   0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   strength_median_total network_share_in network_share_out network_share_total</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1                   1.5      0.019334694       0.022594950         0.020964822</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2                   0.0      0.002097149       0.002272838         0.002184994</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3                   0.0      0.002497454       0.002679814         0.002588634</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4                   0.0      0.002470767       0.002915549         0.002693158</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5                   0.0      0.002804354       0.003173523         0.002988938</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                   0.0      0.005875577       0.005926727         0.005901152</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                   1.5      0.022594950       0.019334694         0.020964822</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                   0.0      0.002272838       0.002097149         0.002184994</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                   0.0      0.002679814       0.002497454         0.002588634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                   0.0      0.002915549       0.002470767         0.002693158</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                   0.0      0.003173523       0.002804354         0.002988938</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                   0.0      0.005926727       0.005875577         0.005901152</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   closeness_in closeness_out closeness_all  betweenness authority_score</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1     71.13409      68.44904      78.06787 1.324503e-02      0.26866096</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2     42.48817      43.64733      47.16201 0.000000e+00      0.01252200</span>
