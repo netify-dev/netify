@@ -46,8 +46,8 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
   num_edges <- sum(vec_bin_mat, na.rm = TRUE)
 
   # competition measures
-  row_sums <- row_means * num_row_actors
-  col_sums <- col_means * num_col_actors
+  row_sums <- row_means * num_col_actors
+  col_sums <- col_means * num_row_actors
   competition_row <- sum((row_sums / sum(row_sums))^2)
   competition_col <- sum((col_sums / sum(col_sums))^2)
 
@@ -194,15 +194,15 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
   # not symmetric / bin edge case start
   if (!obj_attrs$symmetric & obj_attrs$weight_binary) {
     # simple mat stats
-    degree_in <- rowSums(mat > 0, na.rm = TRUE)
-    degree_out <- colSums(mat > 0, na.rm = TRUE)
+    degree_out <- rowSums(mat > 0, na.rm = TRUE)
+    degree_in <- colSums(mat > 0, na.rm = TRUE)
     if (obj_attrs$mode != 'bipartite') {
       degree_total <- degree_in + degree_out
     } else {
       degree_total <- c(degree_in, degree_out)
     }
-    prop_ties_in <- rowMeans(mat > 0, na.rm = TRUE)
-    prop_ties_out <- colMeans(mat > 0, na.rm = TRUE)
+    prop_ties_out <- rowMeans(mat > 0, na.rm = TRUE)
+    prop_ties_in <- colMeans(mat > 0, na.rm = TRUE)
     if (obj_attrs$mode != 'bipartite') {
       prop_ties_total <- sum(degree_total > 0, na.rm = TRUE) / length(degree_total)
     } else {
@@ -260,43 +260,43 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
   # not symmetric / weighted case start
   if (!obj_attrs$symmetric & !obj_attrs$weight_binary) {
     # simple mat stats
-    degree_in <- rowSums(mat > 0, na.rm = TRUE)
-    degree_out <- colSums(mat > 0, na.rm = TRUE)
+    degree_out <- rowSums(mat > 0, na.rm = TRUE)
+    degree_in <- colSums(mat > 0, na.rm = TRUE)
     if (obj_attrs$mode != 'bipartite') {
       degree_total <- degree_in + degree_out
     } else {
       degree_total <- c(degree_in, degree_out)
     }
-    prop_ties_in <- rowMeans(mat > 0, na.rm = TRUE)
-    prop_ties_out <- colMeans(mat > 0, na.rm = TRUE)
+    prop_ties_out <- rowMeans(mat > 0, na.rm = TRUE)
+    prop_ties_in <- colMeans(mat > 0, na.rm = TRUE)
     if (obj_attrs$mode != 'bipartite') {
       prop_ties_total <- sum(degree_total > 0, na.rm = TRUE) / length(degree_total)
     } else {
       prop_ties_total <- c(prop_ties_in, prop_ties_out)
     }
-    strength_sum_in <- rowSums(mat, na.rm = TRUE)
-    strength_sum_out <- colSums(mat, na.rm = TRUE)
+    strength_sum_out <- rowSums(mat, na.rm = TRUE)
+    strength_sum_in <- colSums(mat, na.rm = TRUE)
     if (obj_attrs$mode != 'bipartite') {
       strength_sum_total <- strength_sum_in + strength_sum_out
     } else {
       strength_sum_total <- c(strength_sum_in, strength_sum_out)
     }
-    strength_avg_in <- rowMeans(mat, na.rm = TRUE)
-    strength_avg_out <- colMeans(mat, na.rm = TRUE)
+    strength_avg_out <- rowMeans(mat, na.rm = TRUE)
+    strength_avg_in <- colMeans(mat, na.rm = TRUE)
     if (obj_attrs$mode != 'bipartite') {
       strength_avg_total <- (strength_avg_in + strength_avg_out) / 2
     } else {
       strength_avg_total <- c(strength_avg_in, strength_avg_out)
     }
-    strength_median_in <- apply(mat, 1, median, na.rm = TRUE)
-    strength_median_out <- apply(mat, 2, median, na.rm = TRUE)
+    strength_median_out <- apply(mat, 1, median, na.rm = TRUE)
+    strength_median_in <- apply(mat, 2, median, na.rm = TRUE)
     if (obj_attrs$mode != 'bipartite') {
       strength_median_total <- (strength_median_in + strength_median_out) / 2
     } else {
       strength_median_total <- c(strength_median_in, strength_median_out)
     }
-    strength_std_in <- apply(mat, 1, sd, na.rm = TRUE)
-    strength_std_out <- apply(mat, 2, sd, na.rm = TRUE)
+    strength_std_out <- apply(mat, 1, sd, na.rm = TRUE)
+    strength_std_in <- apply(mat, 2, sd, na.rm = TRUE)
     if (obj_attrs$mode != 'bipartite') {
       strength_std_total <- (strength_std_in + strength_std_out) / 2
     } else {
