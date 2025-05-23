@@ -271,17 +271,32 @@ plot_actor_stats <- function(
             size=!!sym('actor') )) }
 
       # add geom_quasirandom, facet by variable, and thematic elements
-      viz = viz +
-        ggbeeswarm::geom_quasirandom(shape=21) +
-        scale_fill_manual(values=colKey, breaks=specific_actors) +
-        scale_color_manual(values=borKey) +          
-        scale_alpha_manual(values=alphaKey) +
-        scale_size_manual(values=sizeKey) +  
-        guides(color='none', alpha='none', size='none') +
-        labs(x='', y='') +
-        facet_wrap(~variable, scales='free') +
-        theme_stat_netify() +
-        theme( axis.text.x=element_text(angle=0) ) 
+      if(!multilayer){
+        viz = viz +
+          ggbeeswarm::geom_quasirandom(shape=21) +
+          scale_fill_manual(values=colKey, breaks=specific_actors) +
+          scale_color_manual(values=borKey) +          
+          scale_alpha_manual(values=alphaKey) +
+          scale_size_manual(values=sizeKey) +  
+          guides(color='none', alpha='none', size='none') +
+          facet_wrap(~variable, scales='free') +
+          theme_stat_netify() +
+          theme(axis.text.x=element_blank()) +
+          labs(x='', y='')
+      }
+      if(multilayer){
+        viz = viz +
+          ggbeeswarm::geom_quasirandom(shape=21) +
+          scale_fill_manual(values=colKey, breaks=specific_actors) +
+          scale_color_manual(values=borKey) +          
+          scale_alpha_manual(values=alphaKey) +
+          scale_size_manual(values=sizeKey) +  
+          guides(color='none', alpha='none', size='none') +
+          facet_wrap(~variable, scales='free_y') +
+          theme_stat_netify() +
+          labs(x='', y='') + 
+          theme(axis.text.x=element_text(angle=0, hjust=0.5))
+      }
     } # end non longit case
     ######################
 
@@ -298,8 +313,8 @@ plot_actor_stats <- function(
         scale_color_manual(values=colKey, breaks=specific_actors) +
         scale_alpha_manual(values=alphaKey2) +
         guides(alpha='none', size='none') +
-        theme_stat_netify() +
-        theme( axis.text.x=element_text(angle=0) )
+        labs(x='', y='') +
+        theme_stat_netify()
 
       # change facet based on multilayer or not
       if(multilayer){
@@ -369,7 +384,7 @@ plot_actor_stats <- function(
 
 # # longit multi layer variations
 # plot_actor_stats(l_mult)
-# plot_actor_stats(l_mult, across_actor=FALSE)
+# plot_actor_stats(l_mult, across_actor=FALSE, specific_stats=stats)
 # plot_actor_stats(l_mult, specific_stats=stats)
-# plot_actor_stats(l_mult, across_actor=FALSE, specific_actors=actors)
+# plot_actor_stats(l_mult, across_actor=FALSE, specific_actors=actors, specific_stats=stats)
 
