@@ -149,6 +149,11 @@ plot_graph_stats <- function(
     facet_wrap(~variable, scales='free_y') +
     labs( x='', y='' ) +
     theme_stat_netify()
+
+  # if multilayer and not longit
+  # then make x axis labels horizontal
+  if(multilayer & !longitudinal){
+    viz = viz + theme(axis.text.x = element_text(angle = 0, hjust = .5)) }
   ######################
   
   ######################  
