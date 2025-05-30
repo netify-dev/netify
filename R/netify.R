@@ -39,7 +39,7 @@
 #' @param dyad_vars_symmetric logical vector: whether ties are symmetric, default is to use the same choice as
 #' the symmetric argument
 #'
-#' @return a netlet object
+#' @return a netify object
 #'
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
@@ -181,85 +181,3 @@ netify <- function(
     return(netlet)
 }
 
-
-#' Constructs a generic netlet Object
-#'
-#' `new_netify` is a low-level constructor for efficiently creating new netlet objects
-#' Not visible to users.
-#'
-#' @param data data object
-#' @param ... additional parameters
-#'
-#' @return a netlet object
-#'
-#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
-
-new_netify <- function(data, ... ) {
-
-    # get list of default params
-    default_params <- list(...)
-
-    # append to existing attributes
-    attributes(data) <- c( attributes(data), default_params )
-    netify_type <- switch( class(data)[1],
-        "matrix" = "cross_sec",
-        "array" = "longit_array",
-        "list" = "longit_list" )
-
-    # if dealing with a list object then add attributes
-    # to every matrix object in list
-    if(netify_type == "longit_list"){
-        for(ii in 1:length(data)){
-            mat_slice <- data[[ii]]
-            attributes(mat_slice) <- c(
-                attributes(mat_slice), default_params )
-            attr(mat_slice, 'netify_type') <- 'cross_sec'
-            class(mat_slice) <- 'netify'            
-            data[[ii]] <- mat_slice
-        }
-    }
-
-    # convert structure of out to netify type
-    out <- structure( data,
-        netify_type = netify_type,
-        class = "netify" )
-
-    return(out)
-}
-
-#' Is this object a netify object?
-#' 
-#' @aliases is.netify
-#' @param x An R object
-#' @return Logical constant, \code{TRUE} if argument \code{object} is a netify
-#' object
-#' @author Colin Henry
-#' 
-#' @keywords netify
-#' 
-#' @export is_netify
-
-is_netify <- function(x){
-  "netify" %in% class(x)
-}
-
-#' netify_check
-#'
-#' Checks to make sure that object is of class netify
-#' and stops process if not
-#' @param netlet user inputted object to check
-#' @return NULL object but stops the process if there 
-#' is an error detected
-#' @author Ha Eun Choi, Colin Henry, Shahryar Minhas
-#' 
-#' @export netify_check
-
-netify_check <- function(netlet){
-
-    # check if `dyad_data` is df
-    if(!is_netify(netlet)) {
-        cli::cli_alert_danger("Error: check data type. Inputted object is not a `netify` object.")
-        stop() }
-
-    # 
-    return(invisible(NULL)) }
