@@ -1,3 +1,7 @@
+# library(testthat)
+# library(netify)
+# devtools::load_all('~/Research/netify_dev/netify/')
+
 set.seed(6886)
 
 test_that(
@@ -86,7 +90,7 @@ test_that("new_netify works with large array input", {
     expect_equal(
         msrs$col_actors, paste0('a', 1:10) )
     expect_equal(
-        msrs$time, paste0('t', 1:3) )
+        msrs$time, as.character(1:3) )
 
     # check for NAs in off-diagonal elements
     a_w_miss <- a
@@ -151,7 +155,7 @@ test_that(
     expect_false(attr(net_obj, "symmetric"))
 
     # check the naming of each element => t1, t2, t3
-    expect_equal(names(net_obj), paste0("t", 1:3))
+    expect_equal(names(net_obj), as.character(1:3))
 
     # check row/col naming => by default unipartite => "a1"... "a10"
     # check the first slice
@@ -266,3 +270,40 @@ test_that(
     net_obj <- new_netify(m, nodal_data=sample_nodal)
     expect_equal(attr(net_obj, "nodal_data"), sample_nodal)
 })
+
+test_that("new_netify handles longit_list with varying actor sets (dimensions) across slices", {
+  
+  # create a list with different sized matrices in each slice
+  # first slice 5x5, second 7x7, third 5x5 again
+  set.seed(6886)
+  mat_list_vary <- list(
+    matrix(sample(1:300, 25, replace=TRUE), nrow=5, ncol=5),
+    matrix(sample(1:300, 49, replace=TRUE), nrow=7, ncol=7),
+    matrix(sample(1:300, 25, replace=TRUE), nrow=5, ncol=5)
+  )
+
+  # pass it to new_netify
+  net_obj_vary <- new_netify(mat_list_vary)
+
+  # basic checks
+  expect_s3_class(net_obj_vary, "netify")
+  expect_equal(attr(net_obj_vary, "netify_type"), "longit_list")
+
+  # since slice sizes differ, we expect actor_time_uniform = FALSE
+  expect_false(attr(net_obj_vary, "actor_time_uniform"))
+
+  # check that the slices got named t1, t2, t3
+  expect_equal(names(net_obj_vary), as.character(1:3))
+
+  # ensure each slice is class netify with cross_sec type
+  # and has assigned row/col names
+  for (i in seq_along(net_obj_vary)) {
+    slice_i <- net_obj_vary[[i]]
+    expect_s3_class(slice_i, "netify")
+    expect_equal(attr(slice_i, "netify_type"), "cross_sec")
+    # row/col names should exist
+    expect_false(is.null(rownames(slice_i)))
+    expect_false(is.null(colnames(slice_i)))
+  }
+})
+
