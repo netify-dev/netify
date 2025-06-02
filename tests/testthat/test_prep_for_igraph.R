@@ -1,6 +1,6 @@
 set.seed(6886)
 # library(igraph)
-library(reshape2)
+# library(reshape2)
 
 test_that('prep_for_igraph: unweighted cross-sec, asymmetric', {
 

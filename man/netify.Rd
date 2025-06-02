@@ -77,7 +77,7 @@ default is to add all the variables from the extra_dyadic_data data.frame}
 the symmetric argument}
 }
 \value{
-a netlet object
+a netify object
 }
 \description{
 This function takes in a dyadic dataset and outputs a netlet object.

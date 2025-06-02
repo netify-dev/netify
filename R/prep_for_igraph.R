@@ -1,4 +1,4 @@
-#' Convert conflictNet object to igraph object
+#' Convert netify object to igraph object
 #'
 #' @aliases convert.to.igraph
 #' @param netlet An R object
@@ -7,7 +7,7 @@
 #' @return igraph object
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
-#' @keywords conflictNet
+#' @keywords netify
 #' @examples
 #'
 #' # load data

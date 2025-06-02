@@ -3,7 +3,7 @@
 \name{prep_for_igraph}
 \alias{prep_for_igraph}
 \alias{convert.to.igraph}
-\title{Convert conflictNet object to igraph object}
+\title{Convert netify object to igraph object}
 \usage{
 prep_for_igraph(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
 }
@@ -18,7 +18,7 @@ prep_for_igraph(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
 igraph object
 }
 \description{
-Convert conflictNet object to igraph object
+Convert netify object to igraph object
 }
 \examples{
 
@@ -67,4 +67,4 @@ igrph_longit[['2002']]
 \author{
 Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 }
-\keyword{conflictNet}
+\keyword{netify}

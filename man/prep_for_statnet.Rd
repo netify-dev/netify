@@ -2,7 +2,7 @@
 % Please edit documentation in R/prep_for_network.R
 \name{prep_for_statnet}
 \alias{prep_for_statnet}
-\title{Convert conflictNet object to a statnet network object}
+\title{Convert netify object to a statnet network object}
 \usage{
 prep_for_statnet(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
 }
@@ -17,7 +17,7 @@ prep_for_statnet(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
 statnet network object
 }
 \description{
-Convert conflictNet object to a statnet network object
+Convert netify object to a statnet network object
 }
 \examples{
 

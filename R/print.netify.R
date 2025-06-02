@@ -36,7 +36,7 @@ print.netify <- function(x, ...){
     		threshold = obj_attrs$threshold
 			ngbd_direction = obj_attrs$ngbd_direction
 			include_ego = obj_attrs$include_ego
-			ego_longit = obj_attrs$ego_longit	
+			ego_longit = obj_attrs$ego_longit
 			} }
 	######################
 

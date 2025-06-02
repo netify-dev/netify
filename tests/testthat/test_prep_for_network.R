@@ -1,6 +1,6 @@
 set.seed(6886)
-library(network)
-library(reshape2)
+# library(network)
+# library(reshape2)
 
 test_that('prep_for_statnet: unweighted cross-sec, asymmetric', {
 

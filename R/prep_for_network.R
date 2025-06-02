@@ -1,4 +1,4 @@
-#' Convert conflictNet object to a statnet network object
+#' Convert netify object to a statnet network object
 #'
 #' @param netlet An R object
 #' @param add_nodal_attribs Add any nodal attributes from netlet to igraph object. Default is TRUE.

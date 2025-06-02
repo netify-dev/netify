@@ -483,6 +483,8 @@ guess_diag_to_NA <- function(mat) {
 #' are \code{NA}. Sets diagonal to zero temporarily, then checks for \code{NA}.
 #'
 #' @param mat A matrix to examine.
+#' @param diag_NA Logical. If \code{TRUE}, treat diagonal entries as \code{0} for the
+#'  purpose of this check. If \code{FALSE}, diagonal entries are not considered.
 #'
 #' @return Logical. \code{TRUE} if no off-diagonal \code{NA}s are found,
 #'   otherwise \code{FALSE}.
