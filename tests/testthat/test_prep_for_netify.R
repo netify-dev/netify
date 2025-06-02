@@ -1,7 +1,7 @@
-library(netify)
-library(igraph)
-library(testthat)
-devtools::load_all('~/Research/netify_dev/netify')
+# library(netify)
+# library(igraph)
+# library(testthat)
+# devtools::load_all('~/Research/netify_dev/netify')
 
 set.seed(6886)
 

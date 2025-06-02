@@ -291,7 +291,7 @@ test_that(
 		# check original variable
 		expect_identical(
 			get_raw(a_matrix), 
-			get.network.attribute(prepped_n, 'weight')
+			network::get.network.attribute(prepped_n, 'weight')
 		)
 
 		# check dyadic variables
@@ -300,13 +300,13 @@ test_that(
 			diag(dvar) = 0; return(dvar) })
 		expect_identical(
 		  dVarL[[1]],
-		  get.network.attribute(prepped_n, 'var2') )
+		  network::get.network.attribute(prepped_n, 'var2') )
 		expect_identical(
 		  dVarL[[2]],
-		  get.network.attribute(prepped_n, 'var3') )
+		  network::get.network.attribute(prepped_n, 'var3') )
 		expect_identical(
 		  dVarL[[3]],
-		  get.network.attribute(prepped_n, 'var4') )
+		  network::get.network.attribute(prepped_n, 'var4') )
 
 		# check nodal variables
 		expect_identical(
