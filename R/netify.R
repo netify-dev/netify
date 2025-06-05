@@ -108,6 +108,9 @@ netify <- function(
         dyad_data[,actor1] <- char(dyad_data[,actor1])
         dyad_data[,actor2] <- char(dyad_data[,actor2]) }
 
+    # validate actors and mode-specific requirements
+    actor_mode_check(dyad_data, actor1, actor2, mode)
+
     # if sum_dyads is set to TRUE then users need to input nodal_vars and dyad_vars
     # themselves after the network is generated using add_nodal and add_dyad
     if( sum_dyads==TRUE ){

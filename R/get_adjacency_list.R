@@ -77,15 +77,15 @@ get_adjacency_list <- function(
     symmetric <- FALSE 
   }
 
-  # if mode bipartite is specified make sure that
-  # actors in actor1 and actor2 columns are distinct
-  if(mode=='bipartite'){
-    if(length(intersect(dyad_data[,actor1], dyad_data[,actor2])) > 0){
-      cli::cli_alert_warning(
-        "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes."
-      )
-    }
-  }
+  # # if mode bipartite is specified make sure that
+  # # actors in actor1 and actor2 columns are distinct
+  # if(mode=='bipartite'){
+  #   if(length(intersect(dyad_data[,actor1], dyad_data[,actor2])) > 0){
+  #     cli::cli_alert_warning(
+  #       "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes."
+  #     )
+  #   }
+  # }
 
   # check if user supplied actor_pds
   user_actor_pds <- !is.null(actor_pds)

@@ -1,6 +1,6 @@
-library(testthat)
-library(netify)
-devtools::load_all('~/Research/netify_dev/netify')
+# library(testthat)
+# library(netify)
+# devtools::load_all('~/Research/netify_dev/netify')
 
 set.seed(6886)
 
@@ -9,26 +9,26 @@ test_that(
 	'add_dyad: no time ID, asymmetric dyad vars', {
 
 	# create fake dyad data for cross-sectional case
-	fakeDyads <- expand.grid( actor1 = letters[1:3], actor2 = letters[1:3] )
-	fakeDyads$var1 <- rnorm(nrow(fakeDyads))
-	fakeDyads$var2 <- rnorm(nrow(fakeDyads))
-	fakeDyads$var3 <- rnorm(nrow(fakeDyads))
-	fakeDyads$var4 <- rnorm(nrow(fakeDyads))
-	fakeDyads$year <- 2312
-	fakeDyads$actor1 = as.character(fakeDyads$actor1)
-	fakeDyads$actor2 = as.character(fakeDyads$actor2)
-	fakeDyads <- fakeDyads[fakeDyads$actor1!=fakeDyads$actor2,]
+	fake_dyads <- expand.grid( actor1 = letters[1:3], actor2 = letters[1:3] )
+	fake_dyads$var1 <- rnorm(nrow(fake_dyads))
+	fake_dyads$var2 <- rnorm(nrow(fake_dyads))
+	fake_dyads$var3 <- rnorm(nrow(fake_dyads))
+	fake_dyads$var4 <- rnorm(nrow(fake_dyads))
+	fake_dyads$year <- 2312
+	fake_dyads$actor1 = as.character(fake_dyads$actor1)
+	fake_dyads$actor2 = as.character(fake_dyads$actor2)
+	fake_dyads <- fake_dyads[fake_dyads$actor1!=fake_dyads$actor2,]
 
 	# convert to conflictNet object
 	a_matrix <- get_adjacency(
-	  dyad_data=fakeDyads,
+	  dyad_data=fake_dyads,
 	  actor1='actor1', actor2='actor2', symmetric=TRUE,
 	  weight=NULL,
 	  diag_to_NA=FALSE )
 
 	# add dyad variables in fake data as a dyadic attribute
 	a_matrix = add_dyad(
-	  a_matrix, fakeDyads,
+	  a_matrix, fake_dyads,
 	  'actor1', 'actor2', NULL,
 	  c('var1', 'var2', 'var3', 'var4'),
 	  c(FALSE, FALSE, FALSE, FALSE))
@@ -46,10 +46,10 @@ test_that(
 	
 	# fill in matrices
 	for( v in paste0('var', 1:4) ){
-	  for( ii in 1:nrow(fakeDyads) ){
-	    a1 <- fakeDyads$actor1[ii]
-	    a2 <- fakeDyads$actor2[ii]
-	    val <- fakeDyads[ii,v]
+	  for( ii in 1:nrow(fake_dyads) ){
+	    a1 <- fake_dyads$actor1[ii]
+	    a2 <- fake_dyads$actor2[ii]
+	    val <- fake_dyads[ii,v]
 	    manualList[["1"]][[v]][a1, a2] <- val
 	  }
 	}
@@ -74,26 +74,26 @@ test_that(
 	}
 
 	# create fake dyad data for cross-sectional case
-	fakeDyads <- expand.grid( actor1 = letters[1:3], actor2 = letters[1:3] )
-	fakeDyads$actor1 = as.character(fakeDyads$actor1)
-	fakeDyads$actor2 = as.character(fakeDyads$actor2)
-	fakeDyads$var1 = genSymmVar()
-	fakeDyads$var2 = genSymmVar()
-	fakeDyads$var3 = genSymmVar()
-	fakeDyads$var4 = genSymmVar()
-	fakeDyads <- fakeDyads[fakeDyads$actor1!=fakeDyads$actor2,]
-	fakeDyads$year <- 2312
+	fake_dyads <- expand.grid( actor1 = letters[1:3], actor2 = letters[1:3] )
+	fake_dyads$actor1 = as.character(fake_dyads$actor1)
+	fake_dyads$actor2 = as.character(fake_dyads$actor2)
+	fake_dyads$var1 = genSymmVar()
+	fake_dyads$var2 = genSymmVar()
+	fake_dyads$var3 = genSymmVar()
+	fake_dyads$var4 = genSymmVar()
+	fake_dyads <- fake_dyads[fake_dyads$actor1!=fake_dyads$actor2,]
+	fake_dyads$year <- 2312
 
 	# convert to conflictNet object
 	a_matrix <- get_adjacency(
-	  dyad_data=fakeDyads,
+	  dyad_data=fake_dyads,
 	  actor1='actor1', actor2='actor2', symmetric=TRUE,
 	  weight=NULL,
 	  diag_to_NA=FALSE )
 
 	# add dyad variables in fake data as a dyadic attribute
 	a_matrix = add_dyad(
-	  a_matrix, fakeDyads,
+	  a_matrix, fake_dyads,
 	  'actor1', 'actor2', NULL,
 	  c('var1', 'var2', 'var3', 'var4'),
 	  c(TRUE, TRUE, TRUE, TRUE))
@@ -111,10 +111,10 @@ test_that(
 	
 	# fill in matrices (symmetric case)
 	for( v in paste0('var', 1:4) ){
-	  for( ii in 1:nrow(fakeDyads) ){
-	    a1 <- fakeDyads$actor1[ii]
-	    a2 <- fakeDyads$actor2[ii]
-	    val <- fakeDyads[ii,v]
+	  for( ii in 1:nrow(fake_dyads) ){
+	    a1 <- fake_dyads$actor1[ii]
+	    a2 <- fake_dyads$actor2[ii]
+	    val <- fake_dyads[ii,v]
 	    manualList[["1"]][[v]][a1, a2] <- val
 	    # For symmetric variables, also fill the transpose
 	    manualList[["1"]][[v]][a2, a1] <- val
@@ -130,24 +130,24 @@ test_that(
   'add_dyad: supplied time ID, asymmetric dyad vars', {
 
 	# create fake dyad data for longitudinal case
-	fakeDyads <- expand.grid(
+	fake_dyads <- expand.grid(
 	  actor1 = letters[1:3], actor2 = letters[1:3] )
 	timePds = 1:2
-	fakeDyads = lapply(1:2, function(t){
-	  fakeDyads$time = t
-		fakeDyads$var1 <- rnorm(nrow(fakeDyads))
-		fakeDyads$var2 <- rnorm(nrow(fakeDyads))
-		fakeDyads$var3 <- rnorm(nrow(fakeDyads))
-		fakeDyads$var4 <- rnorm(nrow(fakeDyads))
-	  return(fakeDyads) })
-	fakeDyads = do.call('rbind', fakeDyads)
-	fakeDyads$actor1 = as.character(fakeDyads$actor1)
-	fakeDyads$actor2 = as.character(fakeDyads$actor2)
-	fakeDyads <- fakeDyads[fakeDyads$actor1!=fakeDyads$actor2,]
+	fake_dyads = lapply(1:2, function(t){
+	  fake_dyads$time = t
+		fake_dyads$var1 <- rnorm(nrow(fake_dyads))
+		fake_dyads$var2 <- rnorm(nrow(fake_dyads))
+		fake_dyads$var3 <- rnorm(nrow(fake_dyads))
+		fake_dyads$var4 <- rnorm(nrow(fake_dyads))
+	  return(fake_dyads) })
+	fake_dyads = do.call('rbind', fake_dyads)
+	fake_dyads$actor1 = as.character(fake_dyads$actor1)
+	fake_dyads$actor2 = as.character(fake_dyads$actor2)
+	fake_dyads <- fake_dyads[fake_dyads$actor1!=fake_dyads$actor2,]
 
 	# convert to conflictNet object
 	a_matrix <- get_adjacency_list(
-	  dyad_data=fakeDyads,
+	  dyad_data=fake_dyads,
 	  actor1='actor1', actor2='actor2', time='time',
 	  symmetric=TRUE,
 	  weight=NULL,
@@ -155,13 +155,13 @@ test_that(
 
 	# add dyad variables in fake data as a dyadic attribute
 	a_matrix = add_dyad(
-	  a_matrix, fakeDyads,
+	  a_matrix, fake_dyads,
 	  'actor1', 'actor2', 'time',
 		c('var1', 'var2', 'var3', 'var4'),
 		c(FALSE, FALSE, FALSE, FALSE))
 
 	# manually convert dyadic variables into NEW list of matrices format
-	manualList <- lapply( unique(fakeDyads$time), function(timePd){
+	manualList <- lapply( unique(fake_dyads$time), function(timePd){
 
 	  # create list of individual matrices for this time period
 	  # Initialize with 0s to match get_matrix behavior when missing_to_zero=TRUE
@@ -173,7 +173,7 @@ test_that(
 	  )
 
 	  # subset inputted data by timepd
-	  slice <- fakeDyads[fakeDyads$time==timePd,]
+	  slice <- fake_dyads[fake_dyads$time==timePd,]
 
 	  # fill in via for loop (asymmetric case)
 	  for( v in paste0('var', 1:4) ){
@@ -187,7 +187,7 @@ test_that(
 
 	  return(time_matrices)
 	})
-	names(manualList) <- as.character(unique(fakeDyads$time))
+	names(manualList) <- as.character(unique(fake_dyads$time))
 
   # test if identical
 	expect_equal( manualList, attributes(a_matrix)$dyad_data )
@@ -210,24 +210,24 @@ test_that(
 	}
 
 	# create fake dyad data for longitudinal case
-	fakeDyads <- expand.grid(
+	fake_dyads <- expand.grid(
 	  actor1 = letters[1:3], actor2 = letters[1:3] )
 	timePds = 1:2
-	fakeDyads = lapply(1:2, function(t){
-	  fakeDyads$time = t
-	  fakeDyads$var1 <- genSymmVar()
-	  fakeDyads$var2 <- genSymmVar()
-	  fakeDyads$var3 <- genSymmVar()
-	  fakeDyads$var4 <- genSymmVar()
-	  return(fakeDyads) })
-	fakeDyads = do.call('rbind', fakeDyads)
-	fakeDyads$actor1 = as.character(fakeDyads$actor1)
-	fakeDyads$actor2 = as.character(fakeDyads$actor2)
-	fakeDyads <- fakeDyads[fakeDyads$actor1!=fakeDyads$actor2,]
+	fake_dyads = lapply(1:2, function(t){
+	  fake_dyads$time = t
+	  fake_dyads$var1 <- genSymmVar()
+	  fake_dyads$var2 <- genSymmVar()
+	  fake_dyads$var3 <- genSymmVar()
+	  fake_dyads$var4 <- genSymmVar()
+	  return(fake_dyads) })
+	fake_dyads = do.call('rbind', fake_dyads)
+	fake_dyads$actor1 = as.character(fake_dyads$actor1)
+	fake_dyads$actor2 = as.character(fake_dyads$actor2)
+	fake_dyads <- fake_dyads[fake_dyads$actor1!=fake_dyads$actor2,]
 
 	# convert to conflictNet object
 	a_matrix <- get_adjacency_list(
-	  dyad_data=fakeDyads,
+	  dyad_data=fake_dyads,
 	  actor1='actor1', actor2='actor2', time='time',
 	  symmetric=TRUE,
 	  weight=NULL,
@@ -235,13 +235,13 @@ test_that(
 
 	# add dyad variables in fake data as a dyadic attribute
 	a_matrix = add_dyad(
-	  a_matrix, fakeDyads,
+	  a_matrix, fake_dyads,
 	  'actor1', 'actor2', 'time',
 		c('var1', 'var2', 'var3', 'var4'),
 		c(TRUE, TRUE, TRUE, TRUE))
 
 	# manually convert dyadic variables into NEW list of matrices format
-	manualList <- lapply( unique(fakeDyads$time), function(timePd){
+	manualList <- lapply( unique(fake_dyads$time), function(timePd){
 
 	  # create list of individual matrices for this time period
 	  # Initialize with 0s to match get_matrix behavior when missing_to_zero=TRUE
@@ -253,7 +253,7 @@ test_that(
 	  )
 
 	  # subset inputted data by timepd
-	  slice <- fakeDyads[fakeDyads$time==timePd,]
+	  slice <- fake_dyads[fake_dyads$time==timePd,]
 
 	  # fill in via for loop (symmetric case)
 	  for( v in paste0('var', 1:4) ){
@@ -269,7 +269,7 @@ test_that(
 
 	  return(time_matrices)
 	})
-	names(manualList) <- as.character(unique(fakeDyads$time))
+	names(manualList) <- as.character(unique(fake_dyads$time))
 
   # test if identical
 	expect_equal( manualList, attributes(a_matrix)$dyad_data )
@@ -280,26 +280,26 @@ test_that(
 test_that('add_dyad: mixed variable types', {
   
   # create fake dyad data with different types
-  fakeDyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
-  fakeDyads$actor1 <- as.character(fakeDyads$actor1)
-  fakeDyads$actor2 <- as.character(fakeDyads$actor2)
-  fakeDyads <- fakeDyads[fakeDyads$actor1 != fakeDyads$actor2,]
+  fake_dyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads <- fake_dyads[fake_dyads$actor1 != fake_dyads$actor2,]
   
-  fakeDyads$numeric_var <- rnorm(nrow(fakeDyads))
-  fakeDyads$integer_var <- as.integer(round(runif(nrow(fakeDyads), 1, 10)))
-  fakeDyads$logical_var <- sample(c(TRUE, FALSE), nrow(fakeDyads), replace = TRUE)
-  fakeDyads$character_var <- sample(c("high", "low", "medium"), nrow(fakeDyads), replace = TRUE)
+  fake_dyads$numeric_var <- rnorm(nrow(fake_dyads))
+  fake_dyads$integer_var <- as.integer(round(runif(nrow(fake_dyads), 1, 10)))
+  fake_dyads$logical_var <- sample(c(TRUE, FALSE), nrow(fake_dyads), replace = TRUE)
+  fake_dyads$character_var <- sample(c("high", "low", "medium"), nrow(fake_dyads), replace = TRUE)
   
   # create netify object
   a_matrix <- get_adjacency(
-    dyad_data = fakeDyads,
+    dyad_data = fake_dyads,
     actor1 = 'actor1', actor2 = 'actor2', 
     symmetric = FALSE, weight = NULL, diag_to_NA = FALSE
   )
   
   # add mixed type variables
   a_matrix <- add_dyad(
-    a_matrix, fakeDyads,
+    a_matrix, fake_dyads,
     'actor1', 'actor2', NULL,
     c('numeric_var', 'integer_var', 'logical_var', 'character_var'),
     c(FALSE, FALSE, FALSE, FALSE)
@@ -316,22 +316,22 @@ test_that('add_dyad: mixed variable types', {
 # rplace existing variables
 test_that('add_dyad: replace existing variables', {
   
-  fakeDyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
-  fakeDyads$actor1 <- as.character(fakeDyads$actor1)
-  fakeDyads$actor2 <- as.character(fakeDyads$actor2)
-  fakeDyads <- fakeDyads[fakeDyads$actor1 != fakeDyads$actor2,]
-  fakeDyads$var1 <- 1:nrow(fakeDyads)
+  fake_dyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads <- fake_dyads[fake_dyads$actor1 != fake_dyads$actor2,]
+  fake_dyads$var1 <- 1:nrow(fake_dyads)
   
   # create netify object and add variable
-  a_matrix <- get_adjacency(dyad_data = fakeDyads, actor1 = 'actor1', actor2 = 'actor2', 
+  a_matrix <- get_adjacency(dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2', 
                            symmetric = FALSE, weight = NULL, diag_to_NA = FALSE)
-  a_matrix <- add_dyad(a_matrix, fakeDyads, 'actor1', 'actor2', NULL, 'var1', FALSE)
+  a_matrix <- add_dyad(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE)
   
   # create new data with different values
-  fakeDyads$var1 <- (1:nrow(fakeDyads)) * 100
+  fake_dyads$var1 <- (1:nrow(fake_dyads)) * 100
   
   # add again with replace_existing = TRUE
-  a_matrix <- add_dyad(a_matrix, fakeDyads, 'actor1', 'actor2', NULL, 'var1', FALSE, 
+  a_matrix <- add_dyad(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE, 
                       replace_existing = TRUE)
   
   # check that values were replaced
@@ -342,20 +342,20 @@ test_that('add_dyad: replace existing variables', {
 # merge with existing dyad data
 test_that('add_dyad: merge with existing dyad data', {
   
-  fakeDyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
-  fakeDyads$actor1 <- as.character(fakeDyads$actor1)
-  fakeDyads$actor2 <- as.character(fakeDyads$actor2)
-  fakeDyads <- fakeDyads[fakeDyads$actor1 != fakeDyads$actor2,]
-  fakeDyads$var1 <- rnorm(nrow(fakeDyads))
-  fakeDyads$var2 <- rnorm(nrow(fakeDyads))
+  fake_dyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads <- fake_dyads[fake_dyads$actor1 != fake_dyads$actor2,]
+  fake_dyads$var1 <- rnorm(nrow(fake_dyads))
+  fake_dyads$var2 <- rnorm(nrow(fake_dyads))
   
   # create netify object and add first variable
-  a_matrix <- get_adjacency(dyad_data = fakeDyads, actor1 = 'actor1', actor2 = 'actor2', 
+  a_matrix <- get_adjacency(dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2', 
                            symmetric = FALSE, weight = NULL, diag_to_NA = FALSE)
-  a_matrix <- add_dyad(a_matrix, fakeDyads, 'actor1', 'actor2', NULL, 'var1', FALSE)
+  a_matrix <- add_dyad(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE)
   
   # add second variable
-  a_matrix <- add_dyad(a_matrix, fakeDyads, 'actor1', 'actor2', NULL, 'var2', FALSE)
+  a_matrix <- add_dyad(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var2', FALSE)
   
   # check both variables exist
   dyad_data <- attr(a_matrix, 'dyad_data')
@@ -368,14 +368,14 @@ test_that('add_dyad: merge with existing dyad data', {
 test_that('add_dyad: empty data slices', {
   
   # create longitudinal data where some time periods have no data
-  fakeDyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3], time = c(1, 3))
-  fakeDyads$actor1 <- as.character(fakeDyads$actor1)
-  fakeDyads$actor2 <- as.character(fakeDyads$actor2)
-  fakeDyads <- fakeDyads[fakeDyads$actor1 != fakeDyads$actor2,]
-  fakeDyads$var1 <- rnorm(nrow(fakeDyads))
+  fake_dyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3], time = c(1, 3))
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads <- fake_dyads[fake_dyads$actor1 != fake_dyads$actor2,]
+  fake_dyads$var1 <- rnorm(nrow(fake_dyads))
   
   # create longitudinal netify object with times 1, 2, 3 (time 2 will be empty)
-  full_data <- rbind(fakeDyads, 
+  full_data <- rbind(fake_dyads, 
                      data.frame(actor1 = "a", actor2 = "b", time = 2, var1 = 0))
   full_data <- full_data[full_data$actor1 != full_data$actor2,]
   
@@ -386,7 +386,7 @@ test_that('add_dyad: empty data slices', {
   )
   
   # add dyad data (time 2 will have no entries)
-  a_matrix <- add_dyad(a_matrix, fakeDyads, 'actor1', 'actor2', 'time', 'var1', FALSE)
+  a_matrix <- add_dyad(a_matrix, fake_dyads, 'actor1', 'actor2', 'time', 'var1', FALSE)
   
   dyad_data <- attr(a_matrix, 'dyad_data')
   
@@ -403,20 +403,20 @@ test_that('add_dyad: empty data slices', {
 test_that('add_dyad: bipartite networks', {
   
   # create bipartite data (actors in actor1 different from actor2)
-  fakeDyads <- expand.grid(actor1 = paste0("A", 1:2), actor2 = paste0("B", 1:3))
-  fakeDyads$actor1 <- as.character(fakeDyads$actor1)
-  fakeDyads$actor2 <- as.character(fakeDyads$actor2)
-  fakeDyads$var1 <- rnorm(nrow(fakeDyads))
+  fake_dyads <- expand.grid(actor1 = paste0("A", 1:2), actor2 = paste0("B", 1:3))
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads$var1 <- rnorm(nrow(fake_dyads))
   
   # create bipartite netify object
   a_matrix <- get_adjacency(
-    dyad_data = fakeDyads,
+    dyad_data = fake_dyads,
     actor1 = 'actor1', actor2 = 'actor2', 
     symmetric = FALSE, mode = 'bipartite', weight = NULL, diag_to_NA = FALSE
   )
   
   # add dyad variables
-  a_matrix <- add_dyad(a_matrix, fakeDyads, 'actor1', 'actor2', NULL, 'var1', FALSE)
+  a_matrix <- add_dyad(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE)
   
   dyad_data <- attr(a_matrix, 'dyad_data')
   
@@ -431,24 +431,22 @@ test_that('add_dyad: sparse network efficiency', {
   
   # create sparse network data (only few edges in large network)
   actors <- paste0("actor", 1:100)
-  fakeDyads <- data.frame(
-    actor1 = sample(actors, 50, replace = TRUE),
-    actor2 = sample(actors, 50, replace = TRUE),
-    stringsAsFactors = FALSE
-  )
-  fakeDyads <- fakeDyads[fakeDyads$actor1 != fakeDyads$actor2,]
-  fakeDyads$var1 <- rnorm(nrow(fakeDyads))
+  fake_dyads <- expand.grid(actor1 = actors, actor2 = actors)
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads <- fake_dyads[fake_dyads$actor1 != fake_dyads$actor2,]
+  fake_dyads$var1 <- rnorm(nrow(fake_dyads))
   
   # this should run efficiently
   start_time <- Sys.time()
   
   a_matrix <- get_adjacency(
-    dyad_data = fakeDyads,
+    dyad_data = fake_dyads,
     actor1 = 'actor1', actor2 = 'actor2', 
     symmetric = FALSE, weight = NULL, diag_to_NA = FALSE
   )
   
-  a_matrix <- add_dyad(a_matrix, fakeDyads, 'actor1', 'actor2', NULL, 'var1', FALSE)
+  a_matrix <- add_dyad(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE)
   
   end_time <- Sys.time()
   
@@ -460,19 +458,19 @@ test_that('add_dyad: sparse network efficiency', {
 # automatic variable detection
 test_that('add_dyad: automatic variable detection', {
   
-  fakeDyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
-  fakeDyads$actor1 <- as.character(fakeDyads$actor1)
-  fakeDyads$actor2 <- as.character(fakeDyads$actor2)
-  fakeDyads <- fakeDyads[fakeDyads$actor1 != fakeDyads$actor2,]
-  fakeDyads$var1 <- rnorm(nrow(fakeDyads))
-  fakeDyads$var2 <- rnorm(nrow(fakeDyads))
-  fakeDyads$extra_col <- "ignore"
+  fake_dyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads <- fake_dyads[fake_dyads$actor1 != fake_dyads$actor2,]
+  fake_dyads$var1 <- rnorm(nrow(fake_dyads))
+  fake_dyads$var2 <- rnorm(nrow(fake_dyads))
+  fake_dyads$extra_col <- "ignore"
   
-  a_matrix <- get_adjacency(dyad_data = fakeDyads, actor1 = 'actor1', actor2 = 'actor2', 
+  a_matrix <- get_adjacency(dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2', 
                            symmetric = FALSE, weight = NULL, diag_to_NA = FALSE)
   
   # don't specify dyad_vars - should auto-detect
-  a_matrix <- add_dyad(a_matrix, fakeDyads, 'actor1', 'actor2', NULL, 
+  a_matrix <- add_dyad(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 
                       dyad_vars = NULL, dyad_vars_symmetric = NULL)
   
   dyad_data <- attr(a_matrix, 'dyad_data')

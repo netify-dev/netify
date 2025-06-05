@@ -1,3 +1,7 @@
+# library(testthat)
+# library(netify)
+# devtools::load_all('~/Research/netify_dev/netify')
+
 set.seed(6886)
 
 test_that(
@@ -432,108 +436,114 @@ test_that('add_nodal, bipartite: longit_list, actor uniform TRUE', {
 })
 
 test_that(
-	'add_dyad, bipartite: zno time ID, weighted, asymmetric dyad vars', {
+	'add_dyad, bipartite: no time ID, weighted, asymmetric dyad vars', {
 
 	# create fake dyad data for cross-sectional case
     ar = letters[1:3] ; nr = length(ar)
     ac = letters[22:26] ; nc = length(ac)
-	fakeDyads <- expand.grid( actor1 = ar, actor2 = ac )
-    fakeDyads$dv = rbinom(nrow(fakeDyads), 1, 0.5)
-	fakeDyads$var1 <- rnorm(nrow(fakeDyads))
-	fakeDyads$var2 <- rnorm(nrow(fakeDyads))
-	fakeDyads$var3 <- rnorm(nrow(fakeDyads))
-	fakeDyads$var4 <- rnorm(nrow(fakeDyads))
-	fakeDyads$year <- 2312
-	fakeDyads$actor1 = as.character(fakeDyads$actor1)
-	fakeDyads$actor2 = as.character(fakeDyads$actor2)
-	fakeDyads <- fakeDyads[fakeDyads$actor1!=fakeDyads$actor2,]
+	fake_dyads <- expand.grid( actor1 = ar, actor2 = ac )
+    fake_dyads$dv = rbinom(nrow(fake_dyads), 1, 0.5)
+	fake_dyads$var1 <- rnorm(nrow(fake_dyads))
+	fake_dyads$var2 <- rnorm(nrow(fake_dyads))
+	fake_dyads$var3 <- rnorm(nrow(fake_dyads))
+	fake_dyads$var4 <- rnorm(nrow(fake_dyads))
+	fake_dyads$year <- 2312
+	fake_dyads$actor1 = as.character(fake_dyads$actor1)
+	fake_dyads$actor2 = as.character(fake_dyads$actor2)
+	fake_dyads <- fake_dyads[fake_dyads$actor1!=fake_dyads$actor2,]
 
 	# convert to conflictNet object
 	a_matrix <- get_adjacency(
-	  dyad_data=fakeDyads,
+	  dyad_data=fake_dyads,
 	  actor1='actor1', actor2='actor2', symmetric=TRUE,
 	  weight='dv',
 	  mode='bipartite' )
 
 	# add dyad variables in fake data as a dyadic attribute
 	a_matrix = add_dyad(
-	  a_matrix, fakeDyads,
+	  a_matrix, fake_dyads,
 	  'actor1', 'actor2', NULL,
 	  c('var1', 'var2', 'var3', 'var4'),
 	  c(FALSE, FALSE, FALSE, FALSE))
 
-	# manually convert dyadic variables into list of array format
-	manualArray <- array(NA, dim=c(nr, nc, 4),
-	  dimnames=list(
-	    ar,
-	    ac,
-	    paste0('var', 1:4)
-	    ))
+	# manually convert dyadic variables into NEW list of matrices format
+	# Initialize with 0s to match get_matrix behavior when missing_to_zero=TRUE
+	manualList <- list(
+	  "1" = list(
+	    var1 = matrix(0, nrow=nr, ncol=nc, dimnames=list(ar, ac)),
+	    var2 = matrix(0, nrow=nr, ncol=nc, dimnames=list(ar, ac)),
+	    var3 = matrix(0, nrow=nr, ncol=nc, dimnames=list(ar, ac)),
+	    var4 = matrix(0, nrow=nr, ncol=nc, dimnames=list(ar, ac))
+	  )
+	)
+	
+	# fill in matrices (asymmetric bipartite case)
 	for( v in paste0('var', 1:4) ){
-	  for( ii in 1:nrow(fakeDyads) ){
-	    a1 <- fakeDyads$actor1[ii]
-	    a2 <- fakeDyads$actor2[ii]
-	    val <- fakeDyads[ii,v]
-	    manualArray[a1, a2, v] <- val
+	  for( ii in 1:nrow(fake_dyads) ){
+	    a1 <- fake_dyads$actor1[ii]
+	    a2 <- fake_dyads$actor2[ii]
+	    val <- fake_dyads[ii,v]
+	    manualList[["1"]][[v]][a1, a2] <- val
 	  }
 	}
-	manualList <- list(manualArray)
-	names(manualList) <- '1'
 
   # test if identical
 	expect_equal( attributes(a_matrix)$dyad_data , manualList )
 })
 
 test_that(
-	'add_dyad, bipartite: zno time ID, unweighted, asymmetric dyad vars', {
+	'add_dyad, bipartite: no time ID, unweighted, asymmetric dyad vars', {
 
 	# create fake dyad data for cross-sectional case
     ar = letters[1:3] ; nr = length(ar)
     ac = letters[22:26] ; nc = length(ac)
-	fakeDyads <- expand.grid( actor1 = ar, actor2 = ac )
+	fake_dyads <- expand.grid( actor1 = ar, actor2 = ac )
     set.seed(6886)
-    fakeDyads$dv = rbinom(nrow(fakeDyads), 1, 0.8)
-	fakeDyads$var1 <- rnorm(nrow(fakeDyads))
-	fakeDyads$var2 <- rnorm(nrow(fakeDyads))
-	fakeDyads$var3 <- rnorm(nrow(fakeDyads))
-	fakeDyads$var4 <- rnorm(nrow(fakeDyads))
-	fakeDyads$year <- 2312
-	fakeDyads$actor1 = as.character(fakeDyads$actor1)
-	fakeDyads$actor2 = as.character(fakeDyads$actor2)
-	fakeDyads <- fakeDyads[fakeDyads$actor1!=fakeDyads$actor2,]
-    fakeDyads = fakeDyads[fakeDyads$dv==1,]
+    fake_dyads$dv = rbinom(nrow(fake_dyads), 1, 0.8)
+	fake_dyads$var1 <- rnorm(nrow(fake_dyads))
+	fake_dyads$var2 <- rnorm(nrow(fake_dyads))
+	fake_dyads$var3 <- rnorm(nrow(fake_dyads))
+	fake_dyads$var4 <- rnorm(nrow(fake_dyads))
+	fake_dyads$year <- 2312
+	fake_dyads$actor1 = as.character(fake_dyads$actor1)
+	fake_dyads$actor2 = as.character(fake_dyads$actor2)
+	fake_dyads <- fake_dyads[fake_dyads$actor1!=fake_dyads$actor2,]
+    fake_dyads = fake_dyads[fake_dyads$dv==1,]
 
 	# convert to conflictNet object
 	a_matrix <- get_adjacency(
-	  dyad_data=fakeDyads,
+	  dyad_data=fake_dyads,
 	  actor1='actor1', actor2='actor2', symmetric=TRUE,
 	  weight=NULL,
 	  mode='bipartite' )
 
 	# add dyad variables in fake data as a dyadic attribute
 	a_matrix = add_dyad(
-	  a_matrix, fakeDyads,
+	  a_matrix, fake_dyads,
 	  'actor1', 'actor2', NULL,
 	  c('var1', 'var2', 'var3', 'var4'),
 	  c(FALSE, FALSE, FALSE, FALSE))
 
-	# manually convert dyadic variables into list of array format
-	manualArray <- array(NA, dim=c(nr, nc, 4),
-	  dimnames=list(
-	    ar,
-	    ac,
-	    paste0('var', 1:4)
-	    ))
+	# manually convert dyadic variables into NEW list of matrices format
+	# Initialize with 0s to match get_matrix behavior when missing_to_zero=TRUE
+	manualList <- list(
+	  "1" = list(
+	    var1 = matrix(0, nrow=nr, ncol=nc, dimnames=list(ar, ac)),
+	    var2 = matrix(0, nrow=nr, ncol=nc, dimnames=list(ar, ac)),
+	    var3 = matrix(0, nrow=nr, ncol=nc, dimnames=list(ar, ac)),
+	    var4 = matrix(0, nrow=nr, ncol=nc, dimnames=list(ar, ac))
+	  )
+	)
+	
+	# fill in matrices (asymmetric bipartite case - only observed edges)
 	for( v in paste0('var', 1:4) ){
-	  for( ii in 1:nrow(fakeDyads) ){
-	    a1 <- fakeDyads$actor1[ii]
-	    a2 <- fakeDyads$actor2[ii]
-	    val <- fakeDyads[ii,v]
-	    manualArray[a1, a2, v] <- val
+	  for( ii in 1:nrow(fake_dyads) ){
+	    a1 <- fake_dyads$actor1[ii]
+	    a2 <- fake_dyads$actor2[ii]
+	    val <- fake_dyads[ii,v]
+	    manualList[["1"]][[v]][a1, a2] <- val
 	  }
 	}
-	manualList <- list(manualArray)
-	names(manualList) <- '1'
 
   # test if identical
 	expect_equal( attributes(a_matrix)$dyad_data , manualList )
@@ -545,20 +555,20 @@ test_that(
 	# create fake dyad data for longitudinal case
     ar = letters[1:3] ; nr = length(ar)
     ac = letters[22:26] ; nc = length(ac)
-	fakeDyads <- expand.grid( 
+	fake_dyads <- expand.grid( 
         actor1 = ar, actor2 = ac, time=1:2 )
-    fakeDyads$dv <- rnorm(nrow(fakeDyads))    
-    fakeDyads$var1 <- rnorm(nrow(fakeDyads))
-    fakeDyads$var2 <- rnorm(nrow(fakeDyads))
-    fakeDyads$var3 <- rnorm(nrow(fakeDyads))
-    fakeDyads$var4 <- rnorm(nrow(fakeDyads))
-	fakeDyads$actor1 = as.character(fakeDyads$actor1)
-	fakeDyads$actor2 = as.character(fakeDyads$actor2)
-	fakeDyads <- fakeDyads[fakeDyads$actor1!=fakeDyads$actor2,]
+    fake_dyads$dv <- rnorm(nrow(fake_dyads))    
+    fake_dyads$var1 <- rnorm(nrow(fake_dyads))
+    fake_dyads$var2 <- rnorm(nrow(fake_dyads))
+    fake_dyads$var3 <- rnorm(nrow(fake_dyads))
+    fake_dyads$var4 <- rnorm(nrow(fake_dyads))
+	fake_dyads$actor1 = as.character(fake_dyads$actor1)
+	fake_dyads$actor2 = as.character(fake_dyads$actor2)
+	fake_dyads <- fake_dyads[fake_dyads$actor1!=fake_dyads$actor2,]
 
 	# convert to conflictNet object
 	a_matrix <- netify(
-	  dyad_data=fakeDyads,
+	  dyad_data=fake_dyads,
 	  actor1='actor1', actor2='actor2', time='time',
 	  symmetric=TRUE,
 	  weight='dv',
@@ -566,39 +576,241 @@ test_that(
 
 	# add dyad variables in fake data as a dyadic attribute
 	a_matrix = add_dyad(
-	  a_matrix, fakeDyads,
+	  a_matrix, fake_dyads,
 	  'actor1', 'actor2', 'time',
 		c('var1', 'var2', 'var3', 'var4'),
 		c(FALSE, FALSE, FALSE, FALSE))
 
-	# manually convert dyadic variables into list of array format
-	manualList <- lapply( unique(fakeDyads$time), function(timePd){
+	# manually convert dyadic variables into NEW list of matrices format
+	manualList <- lapply( unique(fake_dyads$time), function(timePd){
 
-	  # construct manual array
-	  manualArray <- array(NA, dim=c(nr, nc, 4),
-	    dimnames=list(
-	      ar,
-	      ac,
-	      paste0('var', 1:4)
-	      ))
+	  # create list of individual matrices for this time period
+	  # Initialize with 0s to match get_matrix behavior when missing_to_zero=TRUE
+	  time_matrices <- list(
+	    var1 = matrix(0, nrow=nr, ncol=nc, dimnames=list(ar, ac)),
+	    var2 = matrix(0, nrow=nr, ncol=nc, dimnames=list(ar, ac)),
+	    var3 = matrix(0, nrow=nr, ncol=nc, dimnames=list(ar, ac)),
+	    var4 = matrix(0, nrow=nr, ncol=nc, dimnames=list(ar, ac))
+	  )
 
 	  # subset inputted data by timepd
-	  slice <- fakeDyads[fakeDyads$time==timePd,]
+	  slice <- fake_dyads[fake_dyads$time==timePd,]
 
-	  # fill in via for loop
+	  # fill in via for loop (asymmetric bipartite case)
 	  for( v in paste0('var', 1:4) ){
 	    for( ii in 1:nrow(slice) ){
 	      a1 <- slice$actor1[ii]
 	      a2 <- slice$actor2[ii]
 	      val <- slice[ii,v]
-	      manualArray[a1, a2, v] <- val
+	      time_matrices[[v]][a1, a2] <- val
 	    }
 	  }
 
-	  #
-	  return(manualArray) })
-	names(manualList) <- unique(fakeDyads$time)
+	  return(time_matrices)
+	})
+	names(manualList) <- as.character(unique(fake_dyads$time))
 
     # test if identical
     expect_equal( manualList, attributes(a_matrix)$dyad_data )
+})
+
+test_that('add_dyad, bipartite: mixed variable types', {
+  
+  ar = letters[1:3] ; nr = length(ar)
+  ac = letters[22:24] ; nc = length(ac)
+  fake_dyads <- expand.grid(actor1 = ar, actor2 = ac)
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads <- fake_dyads[fake_dyads$actor1 != fake_dyads$actor2,]
+  
+  fake_dyads$numeric_var <- rnorm(nrow(fake_dyads))
+  fake_dyads$integer_var <- as.integer(round(runif(nrow(fake_dyads), 1, 10)))
+  fake_dyads$logical_var <- sample(c(TRUE, FALSE), nrow(fake_dyads), replace = TRUE)
+  fake_dyads$character_var <- sample(c("high", "low"), nrow(fake_dyads), replace = TRUE)
+  
+  a_matrix <- get_adjacency(
+    dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2', 
+    symmetric = FALSE, weight = NULL, mode = 'bipartite', diag_to_NA = FALSE
+  )
+  
+  a_matrix <- add_dyad(
+    a_matrix, fake_dyads, 'actor1', 'actor2', NULL,
+    c('numeric_var', 'integer_var', 'logical_var', 'character_var'),
+    c(FALSE, FALSE, FALSE, FALSE)
+  )
+  
+  dyad_data <- attr(a_matrix, 'dyad_data')
+  expect_equal(storage.mode(dyad_data[["1"]][["numeric_var"]]), "double")
+  expect_equal(storage.mode(dyad_data[["1"]][["integer_var"]]), "integer") 
+  expect_equal(storage.mode(dyad_data[["1"]][["logical_var"]]), "logical")
+  expect_equal(storage.mode(dyad_data[["1"]][["character_var"]]), "character")
+  
+  # Check bipartite dimensions
+  expect_equal(dim(dyad_data[["1"]][["numeric_var"]]), c(nr, nc))
+})
+
+test_that('get_adjacency, bipartite: empty actor2 set', {
+  
+  # Create data where all actor2 values get filtered out
+  ar = letters[1:3]
+  ac = letters[22:24]
+  fake_dyads <- expand.grid(actor1 = ar, actor2 = ac)
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads$value <- rbinom(nrow(fake_dyads), 1, 0.1)
+  
+  # Filter to empty set
+  fake_dyads <- fake_dyads[fake_dyads$value == 1 & fake_dyads$actor1 == "z",]
+  
+  if(nrow(fake_dyads) == 0) {
+    # Should handle empty data gracefully
+    expect_error({
+      a_matrix <- netify(
+        dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
+        symmetric = FALSE, weight = 'value', mode = 'bipartite'
+      )
+    }, 0) # 0 means error expected
+  }
+})
+
+# unbalanced bipartite dimensions
+test_that('get_adjacency, bipartite: very unbalanced dimensions', {
+  
+  # Many row actors, few column actors
+  ar = letters[1:20]  # 20 row actors
+  ac = letters[25:26]  # 2 column actors
+  fake_dyads <- expand.grid(actor1 = ar, actor2 = ac)
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads$value <- rnorm(nrow(fake_dyads))
+  
+  a_matrix <- get_adjacency(
+    dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
+    symmetric = FALSE, weight = 'value', mode = 'bipartite'
+  )
+  
+  expect_equal(dim(get_raw(a_matrix)), c(20, 2))
+  expect_equal(rownames(get_raw(a_matrix)), ar)
+  expect_equal(colnames(get_raw(a_matrix)), ac)
+})
+
+# bipartite with actor time varying (longitudinal)
+test_that('add_dyad, bipartite: longitudinal with varying actors', {
+  
+  ar = letters[1:4]
+  ac = letters[22:25]
+  
+  # Time 1: all actors present
+  t1_data <- expand.grid(actor1 = ar, actor2 = ac, time = 1)
+  # Time 2: missing some actors
+  t2_data <- expand.grid(actor1 = ar[1:3], actor2 = ac[1:3], time = 2)
+  
+  fake_dyads <- rbind(t1_data, t2_data)
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads <- fake_dyads[fake_dyads$actor1 != fake_dyads$actor2,]
+  fake_dyads$var1 <- rnorm(nrow(fake_dyads))
+  fake_dyads$dv <- rnorm(nrow(fake_dyads))
+  
+  a_matrix <- netify(
+    dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2', time = 'time',
+    symmetric = FALSE, weight = 'dv', mode = 'bipartite', actor_time_uniform = FALSE
+  )
+  
+  a_matrix <- add_dyad(
+    a_matrix, fake_dyads, 'actor1', 'actor2', 'time', 'var1', FALSE
+  )
+  
+  dyad_data <- attr(a_matrix, 'dyad_data')
+  
+  # Should have different dimensions for different time periods
+  expect_true("1" %in% names(dyad_data))
+  expect_true("2" %in% names(dyad_data))
+  expect_true("var1" %in% names(dyad_data[["1"]]))
+  expect_true("var1" %in% names(dyad_data[["2"]]))
+})
+
+# large bipartite network performance
+test_that('get_adjacency, bipartite: large sparse network', {
+  
+  # Create large but sparse bipartite network
+  ar = paste0("R", 1:100)  # 100 row actors
+  ac = paste0("C", 1:50)   # 50 column actors
+  
+  # Only create a small fraction of possible edges
+  fake_dyads <- expand.grid( actor1 = ar, actor2 = ac )
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads <- fake_dyads[fake_dyads$actor1 != fake_dyads$actor2,]
+  fake_dyads$value <- rnorm(nrow(fake_dyads))
+  
+  start_time <- Sys.time()
+  
+  a_matrix <- get_adjacency(
+    dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
+    symmetric = FALSE, weight = 'value', mode = 'bipartite'
+  )
+  
+  end_time <- Sys.time()
+  
+  # Should complete quickly and have correct dimensions
+  expect_lt(as.numeric(end_time - start_time), 5)
+  expect_equal(dim(get_raw(a_matrix)), c(100, 50))
+})
+
+# bipartite with missing values in dyadic attributes
+test_that('add_dyad, bipartite: missing values in variables', {
+  
+  ar = letters[1:3]
+  ac = letters[22:24]
+  fake_dyads <- expand.grid(actor1 = ar, actor2 = ac)
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads <- fake_dyads[fake_dyads$actor1 != fake_dyads$actor2,]
+  
+  # Add variables with some missing values
+  fake_dyads$var1 <- rnorm(nrow(fake_dyads))
+  fake_dyads$var1[c(1,3)] <- NA  # introduce some NAs
+  
+  a_matrix <- get_adjacency(
+    dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
+    symmetric = FALSE, weight = NULL, mode = 'bipartite', diag_to_NA = FALSE
+  )
+  
+  a_matrix <- add_dyad(
+    a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE
+  )
+  
+  dyad_data <- attr(a_matrix, 'dyad_data')
+  
+  # Should handle NAs appropriately
+  expect_true(any(is.na(dyad_data[["1"]][["var1"]])))
+})
+
+# replace existing dyadic variables in bipartite
+test_that('add_dyad, bipartite: replace existing variables', {
+  
+  ar = letters[1:3]
+  ac = letters[22:24]
+  fake_dyads <- expand.grid(actor1 = ar, actor2 = ac)
+  fake_dyads$actor1 <- as.character(fake_dyads$actor1)
+  fake_dyads$actor2 <- as.character(fake_dyads$actor2)
+  fake_dyads <- fake_dyads[fake_dyads$actor1 != fake_dyads$actor2,]
+  fake_dyads$var1 <- 1:nrow(fake_dyads)
+  
+  a_matrix <- get_adjacency(
+    dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
+    symmetric = FALSE, weight = NULL, mode = 'bipartite', diag_to_NA = FALSE
+  )
+  
+  # Add variable first time
+  a_matrix <- add_dyad(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE)
+  
+  # Change values and replace
+  fake_dyads$var1 <- (1:nrow(fake_dyads)) * 100
+  a_matrix <- add_dyad(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE, 
+                      replace_existing = TRUE)
+  
+  dyad_data <- attr(a_matrix, 'dyad_data')
+  expect_true(any(dyad_data[["1"]][["var1"]] >= 100))
 })

@@ -23,9 +23,17 @@ df_check <- function(
     # convert to base R data.frame since we rely on base subsetting
     df <- as.data.frame( df, stringsAsFactors=FALSE )
     
+    # check for empty dataset
+    if(nrow(df) == 0) {
+        cli::cli_abort(
+            c("x" = "Cannot create network from empty dataset.",
+              "i" = "dyad_data has {nrow(df)} rows.",
+              "!" = "Please provide a dataset with at least one dyadic observation.")
+        )
+    }
+    
     # return
     return(df) }
-
 #' logical_check
 #'
 #' Checks to make sure user has correctly inputted logicals
@@ -340,3 +348,113 @@ add_var_time_check <- function( netlet, time ){
         stop() }
 }
 
+
+#' Validate actor data for network creation
+#'
+#' This function validates that actor columns contain valid data and
+#' performs mode-specific checks (e.g., bipartite actor distinctness)
+#'
+#' @param dyad_data a data frame containing dyadic data
+#' @param actor1 character: name of the actor 1 variable in the data
+#' @param actor2 character: name of the actor 2 variable in the data
+#' @param mode character: whether the network is unipartite or bipartite
+#'
+#' @return invisible(TRUE) if validation passes, otherwise throws error
+#' 
+#' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @keywords internal
+actor_mode_check <- function(dyad_data, actor1, actor2, mode) {
+    
+    # Extract unique actors from each column
+    actors_1 <- unique(dyad_data[,actor1])
+    actors_2 <- unique(dyad_data[,actor2])
+    
+    # Check for empty actor sets
+    if(length(actors_1) == 0) {
+        cli::cli_abort(
+            c("x" = "No valid actors found in actor1 column '{actor1}'.",
+              "!" = "Please check your data and column specification.")
+        )
+    }
+    
+    if(length(actors_2) == 0) {
+        cli::cli_abort(
+            c("x" = "No valid actors found in actor2 column '{actor2}'.",
+              "!" = "Please check your data and column specification.")
+        )
+    }
+    
+    # Mode-specific validation
+    if(mode == 'bipartite') {
+        bipartite_actor_check(actors_1, actors_2)
+    } else if(mode == 'unipartite') {
+        unipartite_actor_check(actors_1, actors_2)
+    } else {
+        cli::cli_abort(
+            c("x" = "Unknown mode '{mode}'.",
+              "!" = "Mode must be either 'unipartite' or 'bipartite'.")
+        )
+    }
+    
+    invisible(TRUE)
+}
+
+#' Validate bipartite network actor requirements
+#'
+#' @param actors_1 character vector of unique actor1 values
+#' @param actors_2 character vector of unique actor2 values
+#'
+#' @return invisible(TRUE) if validation passes, otherwise throws error or warning
+#'
+#' 
+#' @author Cassy Dorff, Shahryar Minhas
+#' 
+#' @keywords internal
+bipartite_actor_check <- function(actors_1, actors_2) {
+    
+    # Check for overlapping actors (warning, not error)
+    overlap <- intersect(actors_1, actors_2)
+    if(length(overlap) > 0) {
+        cli::cli_alert_warning(
+            c("!" = "Mode specified as 'bipartite' but {length(overlap)} actor{?s} appear{?s/} in both actor1 and actor2:",
+              "i" = "Overlapping actors: {.val {head(overlap, 5)}}{if(length(overlap) > 5) ' ...'}")
+        )
+    }
+    
+    # Check for sufficient actors in each mode (error)
+    if(length(actors_1) < 1 || length(actors_2) < 1) {
+        cli::cli_abort(
+            c("x" = "Bipartite networks require actors in both modes.",
+              "i" = "Found {length(actors_1)} unique actor1 value{?s} and {length(actors_2)} unique actor2 value{?s}.")
+        )
+    }
+    
+    invisible(TRUE)
+}
+
+#' Validate unipartite network actor requirements
+#'
+#' @param actors_1 character vector of unique actor1 values
+#' @param actors_2 character vector of unique actor2 values
+#'
+#' @return invisible(TRUE) if validation passes, otherwise throws error or warning
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#' 
+#' @keywords internal
+unipartite_actor_check <- function(actors_1, actors_2) {
+    
+    # For unipartite networks, we might want to check other things
+    # For now, just ensure we have some actors
+    all_actors <- unique(c(actors_1, actors_2))
+    
+    if(length(all_actors) < 4) {
+        cli::cli_alert_warning(
+            c("!" = "Unipartite network has only {length(all_actors)} unique actor{?s}.",
+              "i" = "Networks with fewer than 4 actors may not be meaningful.")
+        )
+    }
+    
+    invisible(TRUE)
+}

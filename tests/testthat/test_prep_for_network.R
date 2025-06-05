@@ -1,6 +1,8 @@
+# library(testthat)
+# library(netify)
+# devtools::load_all('~/Research/netify_dev/netify')
+
 set.seed(6886)
-# library(network)
-# library(reshape2)
 
 test_that('prep_for_statnet: unweighted cross-sec, asymmetric', {
 
@@ -256,7 +258,7 @@ test_that(
 		fakeDyads$actor1 = as.character(fakeDyads$actor1)
 		fakeDyads$actor2 = as.character(fakeDyads$actor2)
 		fakeDyads <- fakeDyads[fakeDyads$actor1!=fakeDyads$actor2,]
-		
+
 		# add in random binary variable to fakeDyads
 		fakeDyads$dv <- rbinom(nrow(fakeDyads), 1, 0.5)
 
@@ -265,17 +267,17 @@ test_that(
 
 		# convert to conflictNet object
 		a_matrix <- netify(
-		  dyad_data=fakeDyads,
-		  actor1='actor1', actor2='actor2', symmetric=FALSE,
-		  weight='weight',
-		  diag_to_NA=TRUE )
+		dyad_data=fakeDyads,
+		actor1='actor1', actor2='actor2', symmetric=FALSE,
+		weight='weight',
+		diag_to_NA=TRUE )
 
 		# add dyad variables in fake data as a dyadic attribute
 		a_matrix = add_dyad(
-		  a_matrix, fakeDyads,
-		  'actor1', 'actor2', NULL,
-		  c('var2', 'var3', 'var4'),
-		  c(FALSE, FALSE, FALSE, FALSE))
+		a_matrix, fakeDyads,
+		'actor1', 'actor2', NULL,
+		c('var2', 'var3', 'var4'),
+		c(FALSE, FALSE, FALSE, FALSE))
 		# add node variables in fake data
 		a_matrix = add_nodal(
 			a_matrix, fakeNodes,
@@ -294,19 +296,20 @@ test_that(
 			network::get.network.attribute(prepped_n, 'weight')
 		)
 
-		# check dyadic variables
+		# check dyadic variables - UPDATED for new structure
 		dVarL = lapply(2:4, function(i){
-			dvar = attributes(a_matrix)$dyad_data[[1]][,,paste0('var',i)]
+			# NEW: Access individual matrices from list-of-lists structure
+			dvar = attributes(a_matrix)$dyad_data[["1"]][[paste0('var',i)]]
 			diag(dvar) = 0; return(dvar) })
 		expect_identical(
-		  dVarL[[1]],
-		  network::get.network.attribute(prepped_n, 'var2') )
+		dVarL[[1]],
+		network::get.network.attribute(prepped_n, 'var2') )
 		expect_identical(
-		  dVarL[[2]],
-		  network::get.network.attribute(prepped_n, 'var3') )
+		dVarL[[2]],
+		network::get.network.attribute(prepped_n, 'var3') )
 		expect_identical(
-		  dVarL[[3]],
-		  network::get.network.attribute(prepped_n, 'var4') )
+		dVarL[[3]],
+		network::get.network.attribute(prepped_n, 'var4') )
 
 		# check nodal variables
 		expect_identical(
@@ -314,7 +317,7 @@ test_that(
 			network::get.vertex.attribute(prepped_n, 'var1') ) 
 		expect_identical(
 			attributes(a_matrix)$nodal_data$var2,
-			network::get.vertex.attribute(prepped_n, 'var2') ) 
+			network::get.vertex.attribute(prepped_n, 'var2') )
 		###################################
 })
 
@@ -336,7 +339,7 @@ test_that(
 		fakeDyads$actor1 = as.character(fakeDyads$actor1)
 		fakeDyads$actor2 = as.character(fakeDyads$actor2)
 		fakeDyads <- fakeDyads[fakeDyads$actor1!=fakeDyads$actor2,]
-		
+
 		# add in random binary variable to fakeDyads
 		fakeDyads$dv <- rbinom(nrow(fakeDyads), 1, 0.5)
 
@@ -346,17 +349,17 @@ test_that(
 
 		# convert to conflictNet object
 		a_matrix <- netify(
-		  dyad_data=fakeDyads,
-		  actor1='actor1', actor2='actor2', 
-		  weight='weight',
-		  mode='bipartite' )
+		dyad_data=fakeDyads,
+		actor1='actor1', actor2='actor2', 
+		weight='weight',
+		mode='bipartite' )
 
 		# add dyad variables in fake data as a dyadic attribute
 		a_matrix = add_dyad(
-		  a_matrix, fakeDyads,
-		  'actor1', 'actor2', NULL,
-		  c('var2', 'var3', 'var4'),
-		  c(FALSE, FALSE, FALSE, FALSE))
+		a_matrix, fakeDyads,
+		'actor1', 'actor2', NULL,
+		c('var2', 'var3', 'var4'),
+		c(FALSE, FALSE, FALSE, FALSE))
 		# add node variables in fake data
 		a_matrix = add_nodal(
 			a_matrix, fakeNodes,
@@ -375,19 +378,20 @@ test_that(
 			network::get.network.attribute(prepped_n, 'weight')
 		)
 
-		# check dyadic variables
+		# check dyadic variables - UPDATED for new list-of-lists structure
 		dVarL = lapply(2:4, function(i){
-			dvar = attributes(a_matrix)$dyad_data[[1]][,,paste0('var',i)]
+			# NEW: Access individual matrices from list-of-lists structure
+			dvar = attributes(a_matrix)$dyad_data[["1"]][[paste0('var',i)]]
 			return(dvar) })
 		expect_identical(
-		  dVarL[[1]],
-		  network::get.network.attribute(prepped_n, 'var2') )
+		dVarL[[1]],
+		network::get.network.attribute(prepped_n, 'var2') )
 		expect_identical(
-		  dVarL[[2]],
-		  network::get.network.attribute(prepped_n, 'var3') )
+		dVarL[[2]],
+		network::get.network.attribute(prepped_n, 'var3') )
 		expect_identical(
-		  dVarL[[3]],
-		  network::get.network.attribute(prepped_n, 'var4') )
+		dVarL[[3]],
+		network::get.network.attribute(prepped_n, 'var4') )
 
 		# check nodal variables
 		expect_identical(
@@ -395,6 +399,6 @@ test_that(
 			network::get.vertex.attribute(prepped_n, 'var1') ) 
 		expect_identical(
 			attributes(a_matrix)$nodal_data$var2,
-			network::get.vertex.attribute(prepped_n, 'var2') ) 
+			network::get.vertex.attribute(prepped_n, 'var2') )
 		###################################
 })
