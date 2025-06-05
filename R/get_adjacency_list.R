@@ -66,255 +66,280 @@ get_adjacency_list <- function(
   diag_to_NA=TRUE, missing_to_zero=TRUE
 ){
 
-  # create weight string for storage as attribtue 
-  # in netify object
+  # create weight string for storage as attribute in netify object
   weight_label <- weight_string_label(weight, sum_dyads)
 
   # if bipartite network then force diag_to_NA to be FALSE
   # and force asymmetric, create copy to preserve user choice
-  # for use in prep_ fns
   user_symmetric <- symmetric  
   if(mode=='bipartite'){
     diag_to_NA <- FALSE
-    symmetric <- FALSE }
+    symmetric <- FALSE 
+  }
 
   # if mode bipartite is specified make sure that
   # actors in actor1 and actor2 columns are distinct
   if(mode=='bipartite'){
-      if( length(intersect(dyad_data[,actor1], dyad_data[,actor2]))>0 ){
-          cli::cli_alert_warning(
-              "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes."
-    ) } }    
+    if(length(intersect(dyad_data[,actor1], dyad_data[,actor2])) > 0){
+      cli::cli_alert_warning(
+        "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes."
+      )
+    }
+  }
 
   # check if user supplied actor_pds
-  if(!is.null(actor_pds)){ 
-    user_actor_pds <- TRUE 
-    } else { 
-    user_actor_pds <- FALSE }
+  user_actor_pds <- !is.null(actor_pds)
 
   # check to make sure time variable actually is numeric
   if(!is.numeric(dyad_data[,time])){
-    cli::cli_alert_danger(
-      'Values in the time variable must be numeric.'
-      )
-    stop() }
+    cli::cli_alert_danger('Values in the time variable must be numeric.')
+    stop()
+  }
 
   # add weight if not supplied
   wOrig <- weight
   if(is.null(weight)){
-    dyad_data$weight_var <- 1 ; weight <- 'weight_var' }
+    dyad_data$weight_var <- 1
+    weight <- 'weight_var'
+  }
 
-  # subset to relevant vars
+  # subset to relevant vars once
   dyad_data <- dyad_data[,c(actor1, actor2, time, weight)]
-
-	# get vector of time periods and convert to character
+  
+  # get vector of time periods and convert to character
   time_pds <- char(unique_vector(dyad_data[,time]))
+  time_pds_num <- as.numeric(time_pds)
+  
+  # Pre-compute all actors from data
+  a1_all <- unique_vector(dyad_data[,actor1])
+  a2_all <- unique_vector(dyad_data[,actor2])
   
   # if no actor_pds provided then calculate based on actor_time_uniform
   if(is.null(actor_pds)){
     
-    # if uniform and no actor_pds provided, then assume
-    # actors exist for duration of data
     if(actor_time_uniform){
-      actors <- unique_vector(dyad_data[,actor1], dyad_data[,actor2])
-      actor_pds <- data.frame(actor=actors, stringsAsFactors=FALSE)
-      actor_pds$min_time <- min(dyad_data[,time], na.rm=TRUE)
-      actor_pds$max_time <- max(dyad_data[,time], na.rm=TRUE) }
+      actors <- unique_vector(a1_all, a2_all)
+      min_time <- min(dyad_data[,time], na.rm=TRUE)
+      max_time <- max(dyad_data[,time], na.rm=TRUE)
+      actor_pds <- data.frame(
+        actor=actors, 
+        min_time=min_time,
+        max_time=max_time,
+        stringsAsFactors=FALSE
+      )
+    } else {
+      actor_pds <- get_actor_time_info(dyad_data, actor1, actor2, time)
+    }
     
-    # if not uniform and no actor_pds provided, then calculate
-    # entry and exit based on min and max in data
-    if(!actor_time_uniform){
-      actor_pds <- get_actor_time_info(dyad_data, actor1, actor2, time) }
-  
-  # define all possible actor1s and actor2s
-  a1_all <- unique_vector(dyad_data[,actor1])
-  a2_all <- unique_vector(dyad_data[,actor2])
-
-  # else actor_pds is provided then subset data to only contain those actors
-  # and years those actors were active        
   } else {
-
     # make sure actor_pds is a data.frame
     actor_pds <- df_check(actor_pds)
 
     # make sure every actor has only been entered once
-    if(length(unique(actor_pds$actor))!=nrow(actor_pds)){
+    if(length(unique(actor_pds$actor)) != nrow(actor_pds)){
       cli::cli_alert_danger(
         "Actors are repeating in `actor_pds`. Every actor must show up only once with a unique `min_time` and `max_time`."
-        )
-      stop() }
+      )
+      stop()
+    }
 
-    # rename first col to actor, second to min_time, third to max_time
+    # rename columns consistently
     names(actor_pds) <- c('actor', 'min_time', 'max_time')
 
-    # create vector of time periods based on entry
+    # update time periods based on actor_pds
     time_pds <- char(unique_vector(actor_pds$min_time, actor_pds$max_time))
+    time_pds_num <- as.numeric(time_pds)
 
-    # get vector of actors as explicitly defined by user
-    actors_rows <- unique_vector(dyad_data[,actor1])
-    actors_cols <- unique_vector(dyad_data[,actor2])
-    actors <- unique_vector(actors_rows, actors_cols)
-    if(mode=='unipartite'){ actors_rows <- actors_cols <- actors }  
+    # get actors present in data
+    actors_in_data <- unique_vector(a1_all, a2_all)
+    if(mode=='unipartite'){ 
+      a1_all <- a2_all <- actors_in_data
+    }
 
-    # subset dyad data to only include relevant actors and time periods
-    dyad_data <- dyad_data[
-      dyad_data[,actor1] %in% actors_rows & 
-      dyad_data[,actor2] %in% actors_cols &
-      dyad_data[,time] %in% time_pds, ]
+    # Vectorized filtering - more efficient than string operations
+    # Create logical vectors for filtering
+    actor1_valid <- dyad_data[,actor1] %in% actors_in_data
+    actor2_valid <- dyad_data[,actor2] %in% actors_in_data  
+    time_valid <- dyad_data[,time] %in% time_pds_num
+    
+    # Apply all filters at once
+    valid_rows <- actor1_valid & actor2_valid & time_valid
+    dyad_data <- dyad_data[valid_rows, ]
 
     # stop process if no dyads remain
-    if(nrow(dyad_data)==0){
+    if(nrow(dyad_data) == 0){
       cli::cli_alert_danger(
         "No dyads remain after subsetting to the actors and years defined in `actor_pds`."
-        )
-      stop() }
+      )
+      stop()
+    }
 
-    # further pair down data to ensure that we are only including observations
-    # for an actor in the years that they were defined as active by the user
-    actor_yrs <- unlist(lapply(1:nrow(actor_pds), function(ii){
-      paste( 
-        actor_pds$actor[ii], 
-        actor_pds$min_time[ii]:actor_pds$max_time[ii], sep='_'  ) }))
-    actor1_yr <- paste(dyad_data[,actor1], dyad_data[,time], sep='_')
-    actor2_yr <- paste(dyad_data[,actor2], dyad_data[,time], sep='_')
-    dyad_data <- dyad_data[
-      actor1_yr %in% actor_yrs & 
-      actor2_yr %in% actor_yrs,]
+    # More efficient actor-time filtering using vectorized operations
+    # Create lookup table for valid actor-time combinations
+    actor_time_lookup <- do.call(rbind, lapply(1:nrow(actor_pds), function(i){
+      data.frame(
+        actor = actor_pds$actor[i],
+        time = actor_pds$min_time[i]:actor_pds$max_time[i],
+        stringsAsFactors = FALSE
+      )
+    }))
+    
+    # Create keys for fast lookup
+    lookup_key <- paste(actor_time_lookup$actor, actor_time_lookup$time, sep="_")
+    data_key1 <- paste(dyad_data[,actor1], dyad_data[,time], sep="_")
+    data_key2 <- paste(dyad_data[,actor2], dyad_data[,time], sep="_")
+    
+    # Filter using vectorized %in% operations
+    valid_pairs <- data_key1 %in% lookup_key & data_key2 %in% lookup_key
+    dyad_data <- dyad_data[valid_pairs, ]
 
-    # define all possible actor1s and actor2s based on user input and data availability
+    # Update actor lists based on filtered data
     a1_all <- unique_vector(dyad_data[,actor1])
     a2_all <- unique_vector(dyad_data[,actor2])
-
-    # cleanup
-    rm(actor1_yr, actor2_yr, actor_yrs)
   }
 
   # check if there are repeating dyads
   num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2, time)
-  if(num_repeat_dyads>0){ edge_value_check(wOrig, sum_dyads, TRUE) }
+  if(num_repeat_dyads > 0){ 
+    edge_value_check(wOrig, sum_dyads, TRUE) 
+  }
 
   # aggregate data if sum dyads selected
   if(sum_dyads){
     dyad_data <- agg_across_units(dyad_data, actor1, actor2, time, weight, symmetric, missing_to_zero)
   }
 
-  # dump zeros in df so we dont have to iterate through
-  # as many rows, but can only do this as long as we can
-  # assume that all dyads are present, so no possible NAs
-  # and then below we can set NAs to 0
+  # remove zeros early if missing_to_zero is TRUE
   if(missing_to_zero){
-    dyad_data <- dyad_data[dyad_data[,weight] != 0, ] }
+    dyad_data <- dyad_data[dyad_data[,weight] != 0, ]
+  }
 
-  # iterate through time periods
-  adj_out <- lapply( time_pds, function(time_pd){
-    
-    # subset to time period
-    slice <- dyad_data[dyad_data[,time] == time_pd,]
-    
-    # determine if actor exists in selected time_pd
-    actor_present <- apply(
-      actor_pds[,2:3], 1, function(x){ time_pd %in% x[1]:x[2] })
-    actors <- actor_pds$actor[actor_present]
-    actors <- actors_rows <- actors_cols <- sort(actors)
-
-    # break up into rows and cols 
-    if(mode=='bipartite'){
-      actors_rows <- sort( actor_pds$actor[actor_present & actor_pds$actor %in% a1_all] )
-      actors_cols <- sort( actor_pds$actor[actor_present & actor_pds$actor %in% a2_all] )
-    }
-
-    # assign cross-section value for adjmat depending on user inputs
-    value <- slice[,weight]
-
-    # create logical value that is TRUE if weight is just 0/1
-    # and false otherwise
-    weight_binary <- TRUE
-    weight_vals <- unique(value)
-    if(any(weight_vals != 0 & weight_vals != 1)){
-      weight_binary <- FALSE }
-    rm(weight_vals)
-
-    # get adj mat filled in
-    adj_mat <- get_matrix(
-      n_rows=length(actors_rows),
-      n_cols=length(actors_cols),
-      actors_rows=actors_rows,
-      actors_cols=actors_cols,
-      matRowIndices=match(slice[,actor1], actors_rows),
-      matColIndices=match(slice[,actor2], actors_cols),
-      value=value,
-      symmetric=symmetric )
-    
-    # add zeros for non-relationships (this should be a logical)
-    if(missing_to_zero){ adj_mat[is.na(adj_mat)] <- 0 }
-
-    # set diagonals to NA
-    if(diag_to_NA & mode=='unipartite' ){ diag(adj_mat) <- NA }
-
-    # if user left weight NULL and set sum_dyads
-    # to FALSE then record weight as NULL for
-    # attribute purposes
-    if(!sum_dyads & is.null(wOrig)){ weight <- NULL }
-
-    # layer label
-    if(is.null(weight)){ layer_label <- 'weight1' } else{ layer_label <- weight }
-
-    # add class info
-    class(adj_mat) <- 'netify'
-    attr(adj_mat, 'netify_type') <- 'cross_sec'
-    attr(adj_mat, 'actor_time_uniform') <- NULL
-    attr(adj_mat, 'actor_pds') <- NULL
-    attr(adj_mat, 'weight') <- weight
-    attr(adj_mat, 'detail_weight') <- weight_label
-    attr(adj_mat, 'weight_binary') <- weight_binary    
-    attr(adj_mat, 'symmetric') <- user_symmetric
-    attr(adj_mat, 'mode') <- mode
-    attr(adj_mat, 'layers') <- layer_label
-    attr(adj_mat, 'diag_to_NA') <- diag_to_NA
-    attr(adj_mat, 'missing_to_zero') <- missing_to_zero
-    attr(adj_mat, 'sum_dyads') <- sum_dyads    
-    attr(adj_mat, 'nodal_data') <- NULL
-    attr(adj_mat, 'dyad_data') <- NULL
-    
-    #
-    return(adj_mat)
-  } ) # close lapply
+  # Pre-compute actor presence matrix for all time periods
+  # This avoids recalculating for each time period
+  actor_presence_matrix <- matrix(FALSE, nrow=nrow(actor_pds), ncol=length(time_pds_num))
+  for(i in 1:nrow(actor_pds)){
+    actor_presence_matrix[i, ] <- (time_pds_num >= actor_pds$min_time[i]) & 
+                                  (time_pds_num <= actor_pds$max_time[i])
+  }
   
-  # label list elements
+  # Pre-split data by time periods for faster subsetting
+  time_indices <- split(seq_len(nrow(dyad_data)), dyad_data[,time])
+  
+  # Cache frequently accessed columns
+  dyad_actor1 <- dyad_data[,actor1]
+  dyad_actor2 <- dyad_data[,actor2]
+  dyad_weight <- dyad_data[,weight]
+
+  # iterate through time periods with optimized operations
+  adj_out <- vector("list", length(time_pds))
   names(adj_out) <- time_pds
   
-  # if user left weight NULL and set sum_dyads
-  # to FALSE then record weight as NULL for
-  # attribute purposes
-  if(!sum_dyads & is.null(wOrig)){ weight <- NULL }
+  for(t_idx in seq_along(time_pds)){
+    time_pd <- time_pds[t_idx]
+    time_pd_num <- time_pds_num[t_idx]
+    
+    # Get indices for this time period
+    slice_indices <- time_indices[[as.character(time_pd_num)]]
+    if(is.null(slice_indices)) slice_indices <- integer(0)
+    
+    # determine actors present in this time period using pre-computed matrix
+    actor_present <- actor_presence_matrix[, t_idx]
+    actors <- sort(actor_pds$actor[actor_present])
+    actors_rows <- actors_cols <- actors
 
-  # if user supplied actor_pds then set 
-  # actor_time_uniform to FALSE
-  if(user_actor_pds){ actor_time_uniform <- FALSE }
+    # break up into rows and cols for bipartite
+    if(mode == 'bipartite'){
+      actors_rows <- sort(actor_pds$actor[actor_present & actor_pds$actor %in% a1_all])
+      actors_cols <- sort(actor_pds$actor[actor_present & actor_pds$actor %in% a2_all])
+    }
 
-  # layer label
-  if(is.null(weight)){ layer_label <- 'weight1' } else{ layer_label <- weight }
+    # get values and indices for this time slice
+    if(length(slice_indices) > 0){
+      slice_actor1 <- dyad_actor1[slice_indices]
+      slice_actor2 <- dyad_actor2[slice_indices]
+      value <- dyad_weight[slice_indices]
+      
+      # Pre-compute matrix indices to avoid repeated match() calls
+      matRowIndices <- match(slice_actor1, actors_rows)
+      matColIndices <- match(slice_actor2, actors_cols)
+    } else {
+      value <- numeric(0)
+      matRowIndices <- integer(0)
+      matColIndices <- integer(0)
+    }
 
-  # get info on binary weights
-  bin_check <- unlist(lapply(adj_out, function(x){ attr(x, 'weight_binary') }))
+    # create logical value that is TRUE if weight is just 0/1
+    weight_binary <- length(value) == 0 || all(value %in% c(0, 1))
 
-  # add attributes to list
-  class(adj_out) <- 'netify'
-  attr(adj_out, 'netify_type') <- 'longit_list'
-  attr(adj_out, 'actor_time_uniform') <- actor_time_uniform
-  attr(adj_out, 'actor_pds') <- actor_pds
-  attr(adj_out, 'weight') <- weight
-  attr(adj_out, 'detail_weight') <- weight_label
-  attr(adj_out, 'weight_binary') <- all(bin_check)
-  attr(adj_out, 'symmetric') <- user_symmetric
-  attr(adj_out, 'mode') <- mode
-  attr(adj_out, 'layers') <- layer_label
-  attr(adj_out, 'diag_to_NA') <- diag_to_NA
-  attr(adj_out, 'missing_to_zero') <- missing_to_zero
-  attr(adj_out, 'sum_dyads') <- sum_dyads  
-  attr(adj_out, 'nodal_data') <- NULL
-  attr(adj_out, 'dyad_data') <- NULL
+    # get adj mat filled in using optimized C++ function
+    adj_mat <- get_matrix(
+      n_rows = length(actors_rows),
+      n_cols = length(actors_cols),
+      actors_rows = actors_rows,
+      actors_cols = actors_cols,
+      matRowIndices = matRowIndices,
+      matColIndices = matColIndices,
+      value = value,
+      symmetric = symmetric,
+      missing_to_zero = missing_to_zero,
+      diag_to_NA = diag_to_NA && mode == 'unipartite'
+    )
+
+    # if user left weight NULL and set sum_dyads to FALSE
+    weight_attr <- if(!sum_dyads && is.null(wOrig)) NULL else weight
+    layer_label <- if(is.null(weight_attr)) 'weight1' else weight_attr
+
+    # add class info and attributes efficiently
+    class(adj_mat) <- 'netify'
+    attributes(adj_mat) <- c(attributes(adj_mat), list(
+      netify_type = 'cross_sec',
+      actor_time_uniform = NULL,
+      actor_pds = NULL,
+      weight = weight_attr,
+      detail_weight = weight_label,
+      weight_binary = weight_binary,
+      symmetric = user_symmetric,
+      mode = mode,
+      layers = layer_label,
+      diag_to_NA = diag_to_NA,
+      missing_to_zero = missing_to_zero,
+      sum_dyads = sum_dyads,
+      nodal_data = NULL,
+      dyad_data = NULL
+    ))
+    
+    adj_out[[t_idx]] <- adj_mat
+  }
   
-  #
+  # Final weight attribute handling
+  weight_final <- if(!sum_dyads && is.null(wOrig)) NULL else weight
+  layer_label_final <- if(is.null(weight_final)) 'weight1' else weight_final
+
+  # if user supplied actor_pds then set actor_time_uniform to FALSE
+  if(user_actor_pds) actor_time_uniform <- FALSE
+
+  # get info on binary weights using vectorized operation
+  bin_check <- vapply(adj_out, function(x) attr(x, 'weight_binary'), logical(1))
+
+  # add attributes to list efficiently
+  class(adj_out) <- 'netify'
+  attributes(adj_out) <- c(attributes(adj_out), list(
+    netify_type = 'longit_list',
+    actor_time_uniform = actor_time_uniform,
+    actor_pds = actor_pds,
+    weight = weight_final,
+    detail_weight = weight_label,
+    weight_binary = all(bin_check),
+    symmetric = user_symmetric,
+    mode = mode,
+    layers = layer_label_final,
+    diag_to_NA = diag_to_NA,
+    missing_to_zero = missing_to_zero,
+    sum_dyads = sum_dyads,
+    nodal_data = NULL,
+    dyad_data = NULL
+  ))
+  
   return(adj_out)
 }
+

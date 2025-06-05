@@ -11,8 +11,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // get_matrix
-NumericMatrix get_matrix(int n_rows, int n_cols, CharacterVector actors_rows, CharacterVector actors_cols, IntegerVector matRowIndices, IntegerVector matColIndices, NumericVector value, bool symmetric);
-RcppExport SEXP _netify_get_matrix(SEXP n_rowsSEXP, SEXP n_colsSEXP, SEXP actors_rowsSEXP, SEXP actors_colsSEXP, SEXP matRowIndicesSEXP, SEXP matColIndicesSEXP, SEXP valueSEXP, SEXP symmetricSEXP) {
+NumericMatrix get_matrix(int n_rows, int n_cols, CharacterVector actors_rows, CharacterVector actors_cols, IntegerVector matRowIndices, IntegerVector matColIndices, NumericVector value, bool symmetric, bool missing_to_zero, bool diag_to_NA);
+RcppExport SEXP _netify_get_matrix(SEXP n_rowsSEXP, SEXP n_colsSEXP, SEXP actors_rowsSEXP, SEXP actors_colsSEXP, SEXP matRowIndicesSEXP, SEXP matColIndicesSEXP, SEXP valueSEXP, SEXP symmetricSEXP, SEXP missing_to_zeroSEXP, SEXP diag_to_NASEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -24,7 +24,47 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type matColIndices(matColIndicesSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type value(valueSEXP);
     Rcpp::traits::input_parameter< bool >::type symmetric(symmetricSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_matrix(n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric));
+    Rcpp::traits::input_parameter< bool >::type missing_to_zero(missing_to_zeroSEXP);
+    Rcpp::traits::input_parameter< bool >::type diag_to_NA(diag_to_NASEXP);
+    rcpp_result_gen = Rcpp::wrap(get_matrix(n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric, missing_to_zero, diag_to_NA));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_matrix_batch
+List get_matrix_batch(IntegerVector n_rows_vec, IntegerVector n_cols_vec, List actors_rows_list, List actors_cols_list, List matRowIndices_list, List matColIndices_list, List value_list, bool symmetric, bool missing_to_zero, bool diag_to_NA);
+RcppExport SEXP _netify_get_matrix_batch(SEXP n_rows_vecSEXP, SEXP n_cols_vecSEXP, SEXP actors_rows_listSEXP, SEXP actors_cols_listSEXP, SEXP matRowIndices_listSEXP, SEXP matColIndices_listSEXP, SEXP value_listSEXP, SEXP symmetricSEXP, SEXP missing_to_zeroSEXP, SEXP diag_to_NASEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type n_rows_vec(n_rows_vecSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type n_cols_vec(n_cols_vecSEXP);
+    Rcpp::traits::input_parameter< List >::type actors_rows_list(actors_rows_listSEXP);
+    Rcpp::traits::input_parameter< List >::type actors_cols_list(actors_cols_listSEXP);
+    Rcpp::traits::input_parameter< List >::type matRowIndices_list(matRowIndices_listSEXP);
+    Rcpp::traits::input_parameter< List >::type matColIndices_list(matColIndices_listSEXP);
+    Rcpp::traits::input_parameter< List >::type value_list(value_listSEXP);
+    Rcpp::traits::input_parameter< bool >::type symmetric(symmetricSEXP);
+    Rcpp::traits::input_parameter< bool >::type missing_to_zero(missing_to_zeroSEXP);
+    Rcpp::traits::input_parameter< bool >::type diag_to_NA(diag_to_NASEXP);
+    rcpp_result_gen = Rcpp::wrap(get_matrix_batch(n_rows_vec, n_cols_vec, actors_rows_list, actors_cols_list, matRowIndices_list, matColIndices_list, value_list, symmetric, missing_to_zero, diag_to_NA));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_matrix_old
+NumericMatrix get_matrix_old(int n_rows, int n_cols, const CharacterVector& actors_rows, const CharacterVector& actors_cols, const IntegerVector& matRowIndices, const IntegerVector& matColIndices, const NumericVector& value, bool symmetric);
+RcppExport SEXP _netify_get_matrix_old(SEXP n_rowsSEXP, SEXP n_colsSEXP, SEXP actors_rowsSEXP, SEXP actors_colsSEXP, SEXP matRowIndicesSEXP, SEXP matColIndicesSEXP, SEXP valueSEXP, SEXP symmetricSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n_rows(n_rowsSEXP);
+    Rcpp::traits::input_parameter< int >::type n_cols(n_colsSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type actors_rows(actors_rowsSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type actors_cols(actors_colsSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type matRowIndices(matRowIndicesSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type matColIndices(matColIndicesSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type value(valueSEXP);
+    Rcpp::traits::input_parameter< bool >::type symmetric(symmetricSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_matrix_old(n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -43,7 +83,9 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_netify_get_matrix", (DL_FUNC) &_netify_get_matrix, 8},
+    {"_netify_get_matrix", (DL_FUNC) &_netify_get_matrix, 10},
+    {"_netify_get_matrix_batch", (DL_FUNC) &_netify_get_matrix_batch, 10},
+    {"_netify_get_matrix_old", (DL_FUNC) &_netify_get_matrix_old, 8},
     {"_netify_repeat_dyads_check_cpp", (DL_FUNC) &_netify_repeat_dyads_check_cpp, 3},
     {NULL, NULL, 0}
 };

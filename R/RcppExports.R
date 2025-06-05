@@ -11,12 +11,52 @@
 #' @param matColIndices numeric vector indicating positions of receivers in data
 #' @param value numeric vector of values to fill in cross-sections of adjacency matrices
 #' @param symmetric logical indicating whether ties are symmetric
+#' @param missing_to_zero logical indicating whether missing values should be set to zero
+#' @param diag_to_NA logical indicating whether diagonal should be set to NA
 #' @return an adjacency matrix
 #' @author Shahryar Minhas, Ha Eun Choi
 #'
 #' @export get_matrix
-get_matrix <- function(n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric) {
-    .Call(`_netify_get_matrix`, n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric)
+get_matrix <- function(n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric, missing_to_zero = TRUE, diag_to_NA = TRUE) {
+    .Call(`_netify_get_matrix`, n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric, missing_to_zero, diag_to_NA)
+}
+
+#' Batch processing version for multiple time periods
+#' 
+#' @param n_rows_vec integer vector of number of rows for each matrix
+#' @param n_cols_vec integer vector of number of columns for each matrix
+#' @param actors_rows_list list of character vectors for row actors
+#' @param actors_cols_list list of character vectors for column actors  
+#' @param matRowIndices_list list of integer vectors for row indices
+#' @param matColIndices_list list of integer vectors for column indices
+#' @param value_list list of numeric vectors for values
+#' @param symmetric logical indicating whether ties are symmetric
+#' @param missing_to_zero logical indicating whether missing values should be set to zero
+#' @param diag_to_NA logical indicating whether diagonal should be set to NA
+#' @return a list of adjacency matrices
+#' @author Shahryar Minhas, Ha Eun Choi
+#'
+#' @export get_matrix_batch
+get_matrix_batch <- function(n_rows_vec, n_cols_vec, actors_rows_list, actors_cols_list, matRowIndices_list, matColIndices_list, value_list, symmetric, missing_to_zero = TRUE, diag_to_NA = TRUE) {
+    .Call(`_netify_get_matrix_batch`, n_rows_vec, n_cols_vec, actors_rows_list, actors_cols_list, matRowIndices_list, matColIndices_list, value_list, symmetric, missing_to_zero, diag_to_NA)
+}
+
+#' This function fills in an adjacency matrix based on actors and data
+#'
+#' @param n_rows integer specifying number of row actors
+#' @param n_cols integer specifying number of column actors
+#' @param actors_rows character vector of row actors
+#' @param actors_cols character vector of column actors
+#' @param matRowIndices numeric vector indicating positions of senders in data
+#' @param matColIndices numeric vector indicating positions of receivers in data
+#' @param value numeric vector of values to fill in cross-sections of adjacency matrices
+#' @param symmetric logical indicating whether ties are symmetric
+#' @return an adjacency matrix
+#' @author Shahryar Minhas, Ha Eun Choi
+#'
+#' @export get_matrix_old
+get_matrix_old <- function(n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric) {
+    .Call(`_netify_get_matrix_old`, n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric)
 }
 
 #' Determine number of repeating dyad-time obs

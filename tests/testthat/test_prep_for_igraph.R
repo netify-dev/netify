@@ -1,4 +1,6 @@
 set.seed(6886)
+# library(netify)
+# library(testthat)
 # library(igraph)
 # library(reshape2)
 
