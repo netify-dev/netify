@@ -129,11 +129,27 @@ prep_for_amen <- function(netlet){
       } else { n_list <- list(NULL,NULL) }
       names(n_list) = c('row', 'col')
 
-      out <- list(
-        Y=get_raw(netlet),
-        Xdyad=attr(netlet, 'dyad_data')[[1]],
-        Xrow=n_list$'row',
-        Xcol=n_list$'col' ) }
+    if( dyad_data_exists ){
+
+      # create dyad array
+      var_matrices <- attr(netlet, 'dyad_data')[[1]]
+      first_matrix <- var_matrices[[1]]
+      dyad_arr <- array(
+        data = unlist(var_matrices, use.names = FALSE),
+        dim = c(
+          nrow(first_matrix), ncol(first_matrix), 
+          length(var_matrices)),
+        dimnames = list(
+          rownames(first_matrix), colnames(first_matrix), 
+          names(var_matrices)) )
+    } else { dyad_arr <- NULL }
+
+    # cross-sec output
+    out <- list(
+      Y=get_raw(netlet),
+      Xdyad=dyad_arr,
+      Xrow=n_list$'row',
+      Xcol=n_list$'col' ) }
 
   # array case
   if(netlet_type == 'longit_array'){

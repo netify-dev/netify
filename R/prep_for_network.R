@@ -212,39 +212,47 @@ add_nodal_to_statnet <- function(
 add_dyad_to_statnet <- function(
   netlet, dyad_data_list, statnet_object, time=NULL){
 
-  # get dyadic array
+  # get dyadic data for specified time period
   if(is.null(time)){
-    dyad_data <- dyad_data_list[[1]]
-  } else { dyad_data <- dyad_data_list[[time]]  }
+    var_matrices <- dyad_data_list[[1]]
+  } else { 
+    var_matrices <- dyad_data_list[[time]]  
+  }
 
-  # get var names
-  vars <- dimnames(dyad_data)[[3]]
+  # get var names from the list of matrices
+  vars <- names(var_matrices)
 
-  # iterate through dyadic vars and 
-  # add into network object
-  for( ii in 1:length(vars) ){
+  # cache netlet attributes for efficiency
+  netlet_mode <- attr(netlet, 'mode')
+  netlet_diag_to_NA <- attr(netlet, 'diag_to_NA')
+  bipartite_logical <- netlet_mode == 'bipartite'
 
-    # generate matrix form of dyad data var
-    dData = dyad_data[,,ii] 
+  # iterate through dyadic vars and add into network object
+  for(ii in seq_along(vars)){
+    var_name <- vars[ii]
+    
+    # get matrix for this variable
+    dData <- var_matrices[[var_name]]
 
     # replace diagonal with 0s except if
     # netlet is bipartite or 
     # diag_to_NA is set to FALSE
-    bipartite_logical <- ifelse(attr(netlet, 'mode') == 'bipartite', TRUE, FALSE)
-    if( !bipartite_logical & attr(netlet, 'diag_to_NA')){
-      diag(dData) = 0 }
+    if(!bipartite_logical && netlet_diag_to_NA){
+      diag(dData) <- 0 
+    }
 
     # set as edge attrib if not bipartite, weird sizing issue
     # when trying to add edge attribute to bipartite network
     # that is not clear to me
     if(!bipartite_logical){
       network::set.edge.value(
-        statnet_object, paste0(vars[ii], '_e'), dData )
+        statnet_object, paste0(var_name, '_e'), dData )
     }
 
     # set as network attrib
     network::set.network.attribute(
-      statnet_object, vars[ii], dData ) }
+      statnet_object, var_name, dData ) 
+  }
 
-  #
-  return(statnet_object) }
+  return(statnet_object) 
+}

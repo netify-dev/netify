@@ -57,14 +57,15 @@ verbCoop_net <- add_dyad(
   dyad_vars=c('matlCoop', 'verbConf', 'matlConf'),
   dyad_vars_symmetric = rep(FALSE, 3) )
 
-# dyadic data is stored in the dyad_data attribute
-# as an array, it can be accessed in the following way:
-dyad_array <- attr(verbCoop_net, 'dyad_data')[[1]]
-dim(dyad_array)
+# dyadic data is now stored as a list of time periods,
+# each containing a list of variable matrices:
+dyad_data_structure <- attr(verbCoop_net, 'dyad_data')
 
-# the dimensions of the array are: nr x nc x pd, where
-# nr is the number of row actors, nc is the number of column actors,
-# and pd is the number of dyadic variables
+# Access specific variable matrix:
+matlCoop_matrix <- dyad_data_structure[["1"]][["matlCoop"]]
+
+# Access all variables for a time period:
+all_vars_t1 <- dyad_data_structure[["1"]]
 
 # longitudinal case
 verbCoop_longit_net <- netify(
@@ -80,15 +81,11 @@ verbCoop_longit_net <- add_dyad(
     dyad_vars = c('matlCoop', 'verbConf', 'matlConf'),
     dyad_vars_symmetric=rep(FALSE, 3) )
 
-# dyadic data in the longit case is still stored in
-# the dyad_data attribute but now as a list of arrays, 
-# it can be accessed in the following way:
-dyad_array_list <- attr(verbCoop_longit_net, 'dyad_data')
-dim(dyad_array_list[['2002']])
+# Access data for specific year and variable:
+matlCoop_2002 <- attr(verbCoop_longit_net, 'dyad_data')[["2002"]][["matlCoop"]]
 
-# the names of the list elements correspond to the time
-# periods and each array within the list is of the same
-# dimensions as the array in the cross-sectional case
+# Access all variables for year 2002:
+all_vars_2002 <- attr(verbCoop_longit_net, 'dyad_data')[["2002"]]
 
 }
 \author{

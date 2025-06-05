@@ -150,8 +150,8 @@ reduce_combine_dyad_attr <- function(
     # extract dyad data from each netlet into list
     dyad_data_list <- lapply(attribs_list, function(x){x$dyad_data})
 
-    # check for and then drop any null elements
-    null_check <- unlist(lapply(dyad_data_list, function(x){is.null(x[[1]])}))
+    # check for and then drop any null elements - optimized check
+    null_check <- vapply(dyad_data_list, function(x){is.null(x) || is.null(x[[1]])}, logical(1))
     dyad_data_list <- dyad_data_list[!null_check]
 
     # if only one element left then just
@@ -167,9 +167,28 @@ reduce_combine_dyad_attr <- function(
 
         # check to make sure that the id row/col and time periods are
         # identical across dyad_data from netlets
+        # For new structure: list(time) -> list(vars) -> matrix
         t_check <- identical_recursive( lapply(dyad_data_list, names))
-        r_check <- identical_recursive( lapply(dyad_data_list, rownames))
-        c_check <- identical_recursive( lapply(dyad_data_list, colnames))
+        
+        # Check row/column names from first time period's first variable matrix
+        r_check <- identical_recursive( lapply(dyad_data_list, function(x) {
+            first_time <- x[[1]]
+            if(length(first_time) > 0) {
+                rownames(first_time[[1]])
+            } else {
+                NULL
+            }
+        }))
+        
+        c_check <- identical_recursive( lapply(dyad_data_list, function(x) {
+            first_time <- x[[1]]
+            if(length(first_time) > 0) {
+                colnames(first_time[[1]])
+            } else {
+                NULL
+            }
+        }))
+        
         if(sum(c(t_check, r_check, c_check)) != 3){
             cli::cli_alert_warning(
                 'Warning: Dyad data id columns are not identical across netlets, 
@@ -178,19 +197,40 @@ reduce_combine_dyad_attr <- function(
             return(NULL) }
 
         # if id columns match then iteratively go through
-        # dyad data and abind together
+        # dyad data and combine matrices
         if(sum(c(t_check, r_check, c_check)) == 3){
 
-            # bind together dyadic arrays
-            t_pds <- names(dyad_data_list[[1]])        
-            abind3 <- function(x, y){ abind::abind(x, y, along=3) }
-            ddata <- lapply(t_pds, function(tt){
-                ddata_tt <- lapply(dyad_data_list, function(dd_ne){
-                    out <- dd_ne[[tt]]
-                    dvars_slice <- intersect(dvars, dimnames(out)[[3]])
-                    return( out[,,dvars_slice,drop=FALSE] ) })
-                return( Reduce('abind3', ddata_tt) ) })
+            # get time periods from first dyad_data element
+            t_pds <- names(dyad_data_list[[1]])
+            
+            # combine dyadic data for new structure
+            ddata <- vector("list", length(t_pds))
             names(ddata) <- t_pds
+            
+            # process each time period
+            for(tt in t_pds) {
+                # collect all variable matrices for this time period across netlets
+                combined_vars <- list()
+                
+                # iterate through each netlet's dyad data for this time period
+                for(netlet_idx in seq_along(dyad_data_list)) {
+                    netlet_dyad_data <- dyad_data_list[[netlet_idx]]
+                    time_period_data <- netlet_dyad_data[[tt]]
+                    
+                    if(!is.null(time_period_data) && length(time_period_data) > 0) {
+                        # get variables that are in our target dvars list
+                        available_vars <- intersect(dvars, names(time_period_data))
+                        
+                        # add each available variable matrix to combined_vars
+                        for(var_name in available_vars) {
+                            combined_vars[[var_name]] <- time_period_data[[var_name]]
+                        }
+                    }
+                }
+                
+                # store combined variables for this time period
+                ddata[[tt]] <- combined_vars
+            }
 
             #
             return( ddata ) }

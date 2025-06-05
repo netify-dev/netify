@@ -246,11 +246,10 @@ add_nodal_to_igraph <- function(
 add_dyad_to_igraph <- function(
   netlet, dyad_data_list, igraph_object, time=NULL){
 
-  # get dyadic array
+  # get dyadic data for specified time period
   if(is.null(time)){
-    dyad_data <- dyad_data_list[[1]]
+    var_matrices <- dyad_data_list[[1]]
   } else {
-
     # # if ego network, then time variable includes ego name
     # # modify to pull out year only since that' the only 
     # # thing that will match with the name of dyad_data_list
@@ -259,24 +258,29 @@ add_dyad_to_igraph <- function(
     #   if(ego_netlet){
     #     time = strsplit(time, '__')[[1]][2] } }
 
-    # subset
-    dyad_data <- dyad_data_list[[time]]
+    # subset to specified time period
+    var_matrices <- dyad_data_list[[time]]
   }
 
-  # get var names
-  vars <- dimnames(dyad_data)[[3]]
+  # get var names from the list of matrices
+  vars <- names(var_matrices)
 
-  # iterate through dyadic vars and 
-  # add into igrpah object
-  for( ii in 1:length(vars) ){
+  # cache netlet attributes for efficiency
+  netlet_mode <- attr(netlet, 'mode')
+  netlet_diag_to_NA <- attr(netlet, 'diag_to_NA')
+  bipartite_logical <- netlet_mode == 'bipartite'
 
-    # generate matrix form of dyad data var
-    dData = dyad_data[,,ii] 
+  # iterate through dyadic vars and add into igraph object
+  for(ii in seq_along(vars)){
+    var_name <- vars[ii]
+    
+    # get matrix for this variable
+    dData <- var_matrices[[var_name]]
 
     # replace diagonal with 0s
-    bipartite_logical <- ifelse(attr(netlet, 'mode') == 'bipartite', TRUE, FALSE)
-    if( !bipartite_logical & attr(netlet, 'diag_to_NA')){
-      diag(dData) = 0 }
+    if(!bipartite_logical && netlet_diag_to_NA){
+      diag(dData) <- 0 
+    }
 
     # generate matrix that tells us where
     # in the rows (and presumably cols) an
@@ -285,11 +289,12 @@ add_dyad_to_igraph <- function(
 
     # subset dyadic data matrix based on ids
     # and add edge attr
-    igraph_object = igraph::set_edge_attr(
-      igraph_object, name=vars[ii], value= dData[ ePosIgraph ] )
+    igraph_object <- igraph::set_edge_attr(
+      igraph_object, name=var_name, value= dData[ePosIgraph] )
   }
-  #
-  return(igraph_object) }
+  
+  return(igraph_object) 
+}
 
 #' adj_igraph_positions
 #' 

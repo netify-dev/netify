@@ -52,8 +52,11 @@ netify_measurements <- function(netlet){
 
     # check dyad data
     if(dyad_data_exist){
-      msrmnts$dvars <- dimnames(attributes(netlet)$dyad_data[[1]])[[3]]
-      msrmnts$n_dvars <- dim(attributes(netlet)$dyad_data[[1]])[3] }
+      # Extract variable names from new structure: list(time) -> list(vars) -> matrix
+      dyad_data_raw <- attributes(netlet)$dyad_data
+      first_time_period <- dyad_data_raw[[1]]
+      msrmnts$dvars <- names(first_time_period)
+      msrmnts$n_dvars <- length(first_time_period) }
   }
 
   # longit array
@@ -87,8 +90,11 @@ netify_measurements <- function(netlet){
 
     # check dyad data
     if(dyad_data_exist){
-      msrmnts$dvars <- dimnames(attributes(netlet)$dyad_data[[1]])[[3]]
-      msrmnts$n_dvars <- dim(attributes(netlet)$dyad_data[[1]])[3] }    
+      # Extract variable names from new structure: list(time) -> list(vars) -> matrix
+      dyad_data_raw <- attributes(netlet)$dyad_data
+      first_time_period <- dyad_data_raw[[1]]
+      msrmnts$dvars <- names(first_time_period)
+      msrmnts$n_dvars <- length(first_time_period) }    
   }
 
   # longit list
@@ -118,8 +124,11 @@ netify_measurements <- function(netlet){
 
     # check dyad data
     if(dyad_data_exist){
-      msrmnts$dvars <- dimnames(attributes(netlet)$dyad_data[[1]])[[3]]
-      msrmnts$n_dvars <- dim(attributes(netlet)$dyad_data[[1]])[3] }
+      # Extract variable names from new structure: list(time) -> list(vars) -> matrix
+      dyad_data_raw <- attributes(netlet)$dyad_data
+      first_time_period <- dyad_data_raw[[1]]
+      msrmnts$dvars <- names(first_time_period)
+      msrmnts$n_dvars <- length(first_time_period) }
   }
 
   # 
