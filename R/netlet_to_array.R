@@ -8,7 +8,10 @@
 #' @return An array object of dimensions nr x nc x t,
 #' where nr is the number of row actors, nc is the number 
 #' of column actors, and t is the number of time periods. 
-#' @export longit_dv_to_arr
+#' #' @author Shahryar Minhas
+#' 
+#' @keywords internal
+#' @noRd
 
 longit_dv_to_arr <- function(netlet){
 
@@ -83,7 +86,10 @@ longit_dv_to_arr <- function(netlet){
 #' where nr is the number of row actors, nc is the number 
 #' of column actors, pn is the number of dyadic variables,
 #' and t is the number of time periods.
-#' @export longit_dyad_to_arr
+#' #' @author Shahryar Minhas
+#' 
+#' @keywords internal
+#' @noRd
 
 longit_dyad_to_arr <- function(netlet){
 
@@ -263,7 +269,10 @@ longit_dyad_to_arr <- function(netlet){
 #' pn is the number of nodal variables, and t is the number of time
 #' periods. The rownames of the array are the actors, and the
 #' colnames are the nodal variables.
-#' @export longit_nodal_to_arr
+#' @author Shahryar Minhas
+#' 
+#' @keywords internal
+#' @noRd
 
 longit_nodal_to_arr <- function(netlet){
 

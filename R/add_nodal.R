@@ -1,9 +1,9 @@
 #' Adds nodal data to a netify object
 #'
-#' `add_nodal` takes in a dataframe and outputs a netify object.
+#' This function takes in a data.frame and outputs a netify object.
 #'
 #' @param netlet a netify object
-#' @param node_data a dataframe object
+#' @param node_data a data.frame object
 #' @param actor a character object indicating which variable in node_data uniquely IDs each node
 #' @param time a character object indicating which variable in node_data tracks time
 #' @param node_vars a vector of which variables from node_data should be merged

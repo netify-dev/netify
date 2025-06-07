@@ -12,6 +12,7 @@
 #'
 #' @importFrom stats median
 #' 
+#' @keywords internal
 #' @noRd
 
 graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
@@ -118,6 +119,7 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
 #'
 #' @details This function is not meant to be called directly by users but is instead used internally by the `summary_actor` function to process each netlet separately. It calculates a wide range of actor-level statistics based on the input matrix and the attributes of the netify object.
 #'
+#' @keywords internal
 #' @noRd
 actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = TRUE, other_stats = NULL) {
   # get igraph version for igraph stats

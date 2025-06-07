@@ -2,9 +2,12 @@
 % Please edit documentation in R/layer_netlet.R
 \name{layer_netlet}
 \alias{layer_netlet}
+\alias{layer_netify}
 \title{Layer netify objects together to create a multilayer network}
 \usage{
 layer_netlet(netlet_list, layer_labels = NULL)
+
+layer_netify(netlet_list, layer_labels = NULL)
 }
 \arguments{
 \item{netlet_list}{a list of netifty objects that you want to layer together}
@@ -15,7 +18,8 @@ layer_netlet(netlet_list, layer_labels = NULL)
 an a multilayer network of class netify
 }
 \description{
-\code{layer_netlet} takes in two netify objects and
+\code{layer_netlet} (also available as \code{layer_netify} and \code{layer}) takes
+in a list of netify objects and
 layers them together to create a multilayer network
 }
 \examples{

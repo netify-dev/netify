@@ -2,9 +2,19 @@
 % Please edit documentation in R/subset_netlet.R
 \name{subset_netlet}
 \alias{subset_netlet}
-\title{subset_netlet method for netify objects}
+\alias{subset_netify}
+\title{subset method for netify objects}
 \usage{
 subset_netlet(
+  netlet,
+  what_to_subset = NULL,
+  what_rows_to_subset = what_to_subset,
+  what_cols_to_subset = what_to_subset,
+  when_to_subset = NULL,
+  what_layers_to_subset = NULL
+)
+
+subset_netify(
   netlet,
   what_to_subset = NULL,
   what_rows_to_subset = what_to_subset,
@@ -33,7 +43,7 @@ If you want to subset at all time points then set this to NULL.}
 a subset of the original network that has relevant netify attributes
 }
 \description{
-subset_netlet takes in a netify object
+This function takes in a netify object
 and allows for the extraction of smaller networks.
 }
 \examples{

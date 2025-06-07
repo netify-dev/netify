@@ -2,9 +2,12 @@
 % Please edit documentation in R/netify_constructors.R
 \name{new_netify}
 \alias{new_netify}
+\alias{new_netlet}
 \title{Constructs a generic netify Object}
 \usage{
 new_netify(data, ...)
+
+new_netlet(data, ...)
 }
 \arguments{
 \item{data}{A data object (matrix, array, or list of matrices).}
@@ -15,7 +18,8 @@ new_netify(data, ...)
 A netify object with the appropriate attributes for the given data structure.
 }
 \description{
-\code{new_netify} is a low-level constructor for creating new netify objects.
+\code{new_netify} (also available as \code{new_netlet}) is a low-level
+constructor for creating new netify objects.
 Mostly for internal use, but can be used to create netify objects from
 matrices, arrays, or lists of matrices.
 }

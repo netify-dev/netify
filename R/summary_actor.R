@@ -60,7 +60,6 @@
 #' @importFrom igraph closeness betweenness eigen_centrality authority_score hub_score
 #' @importFrom cli cli_alert_danger
 #' 
-#' @export
 #' @export summary_actor
 
 summary_actor <- function( netlet, invert_weights_for_igraph=TRUE, other_stats=NULL) {

@@ -1,55 +1,140 @@
-#' Convert netify object to a statnet network object
+#' Convert netify objects to statnet network format
 #'
-#' @param netlet An R object
-#' @param add_nodal_attribs Add any nodal attributes from netlet to igraph object. Default is TRUE.
-#' @param add_dyad_attribs Add any dyad attributes from netlet to igraph object. Default is TRUE.
-#' @return statnet network object
-#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+#' `prep_for_statnet` (also available as `to_statnet`, `to_network`, `netify_to_statnet`, 
+#' `netify_to_network`) transforms netify network objects into statnet's network 
+#' objects, providing access to the extensive statistical modeling capabilities 
+#' of the statnet suite, including ERGMs (Exponential Random Graph Models), 
+#' descriptive statistics, and network visualization tools.
+#'
+#' @param netlet A netify object containing network data. Currently supports 
+#'   single-layer networks only. For multilayer networks, use 
+#'   \code{\link{subset_netlet}} to extract individual layers first.
+#' @param add_nodal_attribs Logical. If TRUE (default), includes nodal attributes 
+#'   from the netify object as vertex attributes in the network object. Set to 
+#'   FALSE to create a network with structure only.
+#' @param add_dyad_attribs Logical. If TRUE (default), includes dyadic attributes 
+#'   from the netify object as edge attributes in the network object. Set to 
+#'   FALSE to exclude edge covariates.
+#'
+#' @return A network object or list of network objects:
+#'   \itemize{
+#'     \item **Cross-sectional networks**: Returns a single network object
+#'     \item **Longitudinal networks**: Returns a named list of network objects, 
+#'       with names corresponding to time periods
+#'   }
+#'   
+#'   The resulting network object(s) will have:
+#'   \itemize{
+#'     \item Vertices named according to actors in the netify object
+#'     \item Edge weights from the netify weight variable stored as "weight" attribute
+#'     \item Vertex attributes for each nodal variable (if add_nodal_attribs = TRUE)
+#'     \item Edge attributes for each dyadic variable (if add_dyad_attribs = TRUE)
+#'     \item Proper directedness based on the symmetric parameter of the netify object
+#'   }
+#'
+#' @details
+#' The conversion process handles different netify structures:
+#' \itemize{
+#'   \item **Cross-sectional**: Direct conversion to a single network object
+#'   \item **Longitudinal arrays**: Internally converted to list format, then 
+#'     each time slice becomes a separate network object
+#'   \item **Longitudinal lists**: Each time period converted to separate network object
+#' }
+#' 
+#' The statnet network format stores networks as an edgelist with attributes, 
+#' making it memory-efficient for sparse networks. All nodal and dyadic attributes 
+#' from the netify object are preserved and can be used in subsequent ERGM 
+#' modeling or network analysis.
+#' 
+#' For longitudinal data, each time period results in an independent network 
+#' object. This format is suitable for discrete-time network analysis or 
+#' pooled ERGM estimation across time periods.
+#'
+#' @note 
+#' This function requires the network package (part of statnet) to be installed. 
+#' 
+#' For ERGM modeling, the ergm package (also part of statnet) should be loaded 
+#' after creating the network objects.
 #'
 #' @examples
-#'
-#' # load data
+#' # Load example data
 #' data(icews)
 #' 
-#' # cross-sectional case
-#' icews_10 <- icews[icews$year==2010,]
+#' # Cross-sectional example
+#' icews_10 <- icews[icews$year == 2010,]
 #'
-#' # create netify object
-#' dvars = c( 'matlCoop', 'verbConf', 'matlConf' )
-#' nvars = c( 'i_polity2','i_log_gdp', 'i_log_pop' )
-#' verbCoop_net = netify( 
+#' # Create netify object with attributes
+#' dvars <- c('matlCoop', 'verbConf', 'matlConf')
+#' nvars <- c('i_polity2', 'i_log_gdp', 'i_log_pop')
+#' 
+#' verbCoop_net <- netify( 
 #'   icews_10,
-#'   actor1='i', actor2='j', 
-#'   symmetric=FALSE, 
-#'   weight='verbCoop',
+#'   actor1 = 'i', actor2 = 'j', 
+#'   symmetric = FALSE, 
+#'   weight = 'verbCoop',
 #'   dyad_vars = dvars,
-#'   dyad_vars_symmetric=rep(FALSE, length(dvars)),
-#'   nodal_vars = nvars )
+#'   dyad_vars_symmetric = rep(FALSE, length(dvars)),
+#'   nodal_vars = nvars
+#' )
 #' 
-#' # convert to a statnet network object
+#' # Convert to statnet network object
 #' ntwk <- prep_for_statnet(verbCoop_net)
+#' 
+#' # Examine the result
 #' ntwk
+#' network::network.size(ntwk)        # number of vertices
+#' network::network.edgecount(ntwk)   # number of edges
+#' network::list.vertex.attributes(ntwk)  # nodal attributes
+#' network::list.edge.attributes(ntwk)    # edge attributes
 #' 
-#' # longitudinal case
-#' verbCoop_longit_net = netify(
+#' # Access specific attributes
+#' network::get.vertex.attribute(ntwk, 'i_polity2')  # polity scores
+#' network::get.edge.attribute(ntwk, 'matlCoop')     # material cooperation
+#' 
+#' # Check network properties
+#' network::is.directed(ntwk)   # TRUE for this example
+#' network::has.loops(ntwk)     # FALSE (no self-ties)
+#' 
+#' # Longitudinal example
+#' verbCoop_longit <- netify(
 #'   icews,
-#'   actor1='i', actor2='j', time='year',
-#'   symmetric=FALSE, 
-#'   weight='verbCoop',
+#'   actor1 = 'i', actor2 = 'j', time = 'year',
+#'   symmetric = FALSE, 
+#'   weight = 'verbCoop',
 #'   dyad_vars = dvars,
-#'   dyad_vars_symmetric=rep(FALSE, length(dvars)),
-#'   nodal_vars = nvars )
+#'   dyad_vars_symmetric = rep(FALSE, length(dvars)),
+#'   nodal_vars = nvars
+#' )
 #'
-#' # convert to a statnet network object
-#' ntwk_longit <- prep_for_statnet(verbCoop_longit_net)
+#' # Convert to list of network objects
+#' ntwk_list <- prep_for_statnet(verbCoop_longit)
 #' 
-#' # output in the longitudinal case is 
-#' # a list of statnet network objects
-#' class(ntwk_longit)
-#' names(ntwk_longit)
-#' ntwk_longit[['2002']]
+#' # Examine structure
+#' class(ntwk_list)        # "list"
+#' length(ntwk_list)       # number of time periods
+#' names(ntwk_list)        # time period labels
+#' 
+#' # Access specific time period
+#' ntwk_2002 <- ntwk_list[['2002']]
+#' ntwk_2002
+#' 
+#' # Convert without attributes for structure only
+#' ntwk_structure <- prep_for_statnet(
+#'   verbCoop_net, 
+#'   add_nodal_attribs = FALSE,
+#'   add_dyad_attribs = FALSE
+#' )
+#' 
+#' \dontrun{
+#' # Use with ergm for modeling (requires ergm package)
+#' library(ergm)
+#' model <- ergm(ntwk ~ edges + mutual + nodematch("i_polity2"))
+#' }
+#'
+#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
 #' @export prep_for_statnet
+#' @aliases netify_to_statnet, prep_for_network, netify_to_network, to_statnet, to_network, network_ify, statnet_ify
 
 prep_for_statnet = function(
   netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE){
@@ -86,7 +171,7 @@ prep_for_statnet = function(
   if(netlet_type == 'cross_sec'){
 
     # convert to a statnet network object
-    ntwk <- netify_to_statnet(netlet)
+    ntwk <- netify_net_to_statnet(netlet)
 
     # process nodal attributes if exist
     if(nodal_data_exist & add_nodal_attribs){
@@ -112,7 +197,7 @@ prep_for_statnet = function(
       time_val = names(netlet)[ii]
 
       # convert to a statnet network object
-      ntwk_slice <- netify_to_statnet(netlet_slice)
+      ntwk_slice <- netify_net_to_statnet(netlet_slice)
 
       # process nodal attributes if exist
       if(nodal_data_exist & add_nodal_attribs){
@@ -134,15 +219,42 @@ prep_for_statnet = function(
   #
   return(ntwk) }
 
-#' netify_to_statnet
+#' @rdname prep_for_statnet
+#' @export
+to_statnet <- prep_for_statnet
+
+#' @rdname prep_for_statnet
+#' @export
+to_network <- prep_for_statnet
+
+#' @rdname prep_for_statnet
+#' @export
+netify_to_statnet <- prep_for_statnet
+
+#' @rdname prep_for_statnet
+#' @export
+netify_to_network <- prep_for_statnet
+
+#' @rdname prep_for_statnet
+#' @export
+network_ify <- prep_for_statnet
+
+#' @rdname prep_for_statnet
+#' @export
+statnet_ify <- prep_for_statnet
+
+#' netify_net_to_statnet
 #' 
 #' Convert netify object to a statnet network object
 #' 
 #' @param netlet netify object
 #' @return statnet network object
 #' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
-netify_to_statnet <- function(netlet){
+netify_net_to_statnet <- function(netlet){
 
   # check if bipartite
   bipartite_logical <- ifelse(attr(netlet, 'mode') == 'bipartite', TRUE, FALSE)  
@@ -181,6 +293,9 @@ netify_to_statnet <- function(netlet){
 #' @param time time indicator for longit case
 #' @return statnet network object with nodal attributes added
 #' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 add_nodal_to_statnet <- function(
   netlet, node_data, statnet_object, time=NULL){
@@ -208,6 +323,9 @@ add_nodal_to_statnet <- function(
 #' @param time time indicator for longit case
 #' @return statnet network object with dyad attributes added
 #' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 add_dyad_to_statnet <- function(
   netlet, dyad_data_list, statnet_object, time=NULL){

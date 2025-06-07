@@ -3,15 +3,23 @@
 \name{is_netify}
 \alias{is_netify}
 \alias{is.netify}
+\alias{is_netlet}
+\alias{is.netlet}
 \title{Is this object a netify object?}
 \usage{
 is_netify(x)
+
+is.netify(x)
+
+is_netlet(x)
+
+is.netlet(x)
 }
 \arguments{
 \item{x}{An R object}
 }
 \value{
-Logical constant, \code{TRUE} if argument \code{object} is a netify
+Logical constant, \code{TRUE} if argument \code{x} is a netify
 object
 }
 \description{

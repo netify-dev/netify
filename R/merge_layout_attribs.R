@@ -16,8 +16,8 @@
 #'         the corresponding node or edge data along with their spatial coordinates (and time indices for
 #'         longitudinal data).
 #'
-#'
-#' @export
+#' @keywords internal
+#' @noRd
 
 merge_layout_attribs <- function(
     netlet, nodes_list, edges_list

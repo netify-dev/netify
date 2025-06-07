@@ -2,9 +2,18 @@
 % Please edit documentation in R/ego_netlet.R
 \name{ego_netlet}
 \alias{ego_netlet}
+\alias{ego_netify}
 \title{Create Ego Networks from a 'netify' Object}
 \usage{
 ego_netlet(
+  netlet,
+  ego,
+  threshold = NULL,
+  ngbd_direction = "any",
+  include_ego = TRUE
+)
+
+ego_netify(
   netlet,
   ego,
   threshold = NULL,
@@ -27,7 +36,7 @@ ego_netlet(
 A list of 'netify' objects, each representing an ego network.
 }
 \description{
-\code{ego_netlet} extracts ego networks from a given 'netify' object. An ego network is the subgraph consisting of a focal node (ego) and its immediate neighbors (alters) in the context of an unweighted network. For weighted networks, users can choose a threshold to define the neighborhood of the ego. The function returns a list of 'netify' objects, each representing an ego network. For oders of the neighborhood greater than 1, we recommend the \code{ego} function from the 'igraph' package.
+\code{ego_netlet} (also available as \code{ego_netify}) extracts ego networks from a given 'netify' object. An ego network is the subgraph consisting of a focal node (ego) and its immediate neighbors (alters) in the context of an unweighted network. For weighted networks, users can choose a threshold to define the neighborhood of the ego. The function returns a list of 'netify' objects, each representing an ego network. For oders of the neighborhood greater than 1, we recommend the \code{ego} function from the 'igraph' package.
 }
 \author{
 Cassy Dorff, Shahryar Minhas

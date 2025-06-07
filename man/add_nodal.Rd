@@ -16,7 +16,7 @@ add_nodal(
 \arguments{
 \item{netlet}{a netify object}
 
-\item{node_data}{a dataframe object}
+\item{node_data}{a data.frame object}
 
 \item{actor}{a character object indicating which variable in node_data uniquely IDs each node}
 
@@ -30,7 +30,7 @@ add_nodal(
 a netify object
 }
 \description{
-\code{add_nodal} takes in a dataframe and outputs a netify object.
+This function takes in a data.frame and outputs a netify object.
 }
 \examples{
 

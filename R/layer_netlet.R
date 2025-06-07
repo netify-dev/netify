@@ -1,8 +1,8 @@
 #' Layer netify objects together to create a multilayer network
 #'
-#' `layer_netlet` takes in two netify objects and 
+#' `layer_netlet` (also available as `layer_netify` and `layer`) takes 
+#' in a list of netify objects and 
 #' layers them together to create a multilayer network
-#' 
 #' 
 #' @param netlet_list a list of netifty objects that you want to layer together
 #' @param layer_labels character: label of the layer for each netify object
@@ -94,7 +94,8 @@
 #' attr(icews_verbCoop_matlCoop, 'layers')
 #' attr(icews_verbCoop_matlCoop_longit_l, 'layers')
 #'
-#' @export
+#' @export layer_netlet
+#' @aliases layer_netify
 
 layer_netlet <- function(netlet_list, layer_labels=NULL){
 
@@ -275,3 +276,7 @@ layer_netlet <- function(netlet_list, layer_labels=NULL){
     # return with relev attributes added
     return(netlet)
 }
+
+#' @rdname layer_netlet
+#' @export
+layer_netify <- layer_netlet

@@ -1,6 +1,6 @@
 #' Create Ego Networks from a 'netify' Object
 #'
-#' `ego_netlet` extracts ego networks from a given 'netify' object. An ego network is the subgraph consisting of a focal node (ego) and its immediate neighbors (alters) in the context of an unweighted network. For weighted networks, users can choose a threshold to define the neighborhood of the ego. The function returns a list of 'netify' objects, each representing an ego network. For oders of the neighborhood greater than 1, we recommend the `ego` function from the 'igraph' package.
+#' `ego_netlet` (also available as `ego_netify`) extracts ego networks from a given 'netify' object. An ego network is the subgraph consisting of a focal node (ego) and its immediate neighbors (alters) in the context of an unweighted network. For weighted networks, users can choose a threshold to define the neighborhood of the ego. The function returns a list of 'netify' objects, each representing an ego network. For oders of the neighborhood greater than 1, we recommend the `ego` function from the 'igraph' package.
 #'
 #' @param netlet A 'netify' object
 #' @param ego A character vector specifying the name(s) of the ego(s) for whom to create the ego networks.
@@ -13,7 +13,7 @@
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
 #' @export ego_netlet
-#' @export
+#' @aliases ego_netify
 #' 
 
 ego_netlet = function(
@@ -235,3 +235,7 @@ ego_netlet = function(
     return(ego_nets)
     ###################### 
 }
+
+#' @rdname ego_netlet
+#' @export
+ego_netify <- ego_netlet

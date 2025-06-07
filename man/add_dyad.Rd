@@ -18,7 +18,7 @@ add_dyad(
 \arguments{
 \item{netlet}{a netify object}
 
-\item{dyad_data}{a dataframe object}
+\item{dyad_data}{a data.frame object}
 
 \item{actor1}{character: actor 1 in the data}
 
@@ -36,7 +36,7 @@ add_dyad(
 a netify object
 }
 \description{
-\code{add_dyad} takes in a dataframe and outputs a netify object.
+This function takes in a data.frame and outputs a netify object.
 }
 \examples{
  

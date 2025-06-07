@@ -1,68 +1,106 @@
-#' peek method for netify objects
+#' Preview subsets of network data from netify objects
 #'
-#' peek takes in a netify object
-#' and displays the some specified rows of information.
+#' `peek` (also available as `preview`, `inspect`, `glimpse_netify`) 
+#' provides a convenient way to inspect portions of network data stored in 
+#' netify objects. Rather than displaying entire networks (which can be overwhelming 
+#' for large datasets), `peek` allows you to examine specific actors, time periods, 
+#' or layers. This is particularly useful for data exploration, verification, and 
+#' debugging network analyses.
 #'
-#' @param netlet object of class netify
-#' @param what_to_peek enter the name of specific nodes to peek in character vector form or provide a numeric range, default is to show the first three rows and columns of interactions
-#' @param what_rows_to_peek similar as what_to_peek but specific to rows, default value is set to what_to_peek. If you want to peek at all rows then set this to NULL. 
-#' @param what_cols_to_peek similar as what_to_peek but specific to columns, default value is set to what_to_peek. If you want to peek at all columns then set this to NULL.
-#' @param when_to_peek choose time points to peek from, default is to show the first time point of data. 
-#' If the entry is a numeric value or vector then it will be used as an index to the time dimension. 
-#' If the entry is a character vector then it will be used to match the time dimension labels.
-#' If you want to peek at all time points then set this to NULL.
-#' @param what_layers_to_peek if the netlet object has multiple layers, then you must choose one layer to peek at.
-#' @return slice of the network
-#' @author Cassy Dorff, Shahryar Minhas
+#' @param netlet A netify object to preview.
+#' @param what_to_peek Specifies which actors/nodes to display. Can be:
+#'   \itemize{
+#'     \item A numeric value (e.g., 3) to show the first n rows and columns
+#'     \item A numeric vector specifying row/column indices (e.g., c(1,3,5))
+#'     \item A character vector of actor names (e.g., c("USA", "China"))
+#'   }
+#'   Default is 3 (first three rows and columns).
+#' @param what_rows_to_peek Specific rows to display. Accepts same input types as 
+#'   `what_to_peek`. Defaults to the value of `what_to_peek`. Set to NULL to 
+#'   display all rows.
+#' @param what_cols_to_peek Specific columns to display. Accepts same input types 
+#'   as `what_to_peek`. Defaults to the value of `what_to_peek`. Set to NULL to 
+#'   display all columns.
+#' @param when_to_peek For longitudinal networks, specifies which time points to 
+#'   display. Can be:
+#'   \itemize{
+#'     \item A numeric value or vector for time indices (e.g., 1 or c(1,5,10))
+#'     \item A character vector matching time labels (e.g., c("2002", "2006"))
+#'     \item NULL to display all time points
+#'   }
+#'   Default is 1 (first time point).
+#' @param what_layers_to_peek For multilayer networks, specifies which layer(s) to 
+#'   display. Must be a character vector matching layer names. Required if the 
+#'   netify object has multiple layers.
+#'
+#' @return Returns a subset of the network data matching the specified criteria:
+#'   \itemize{
+#'     \item For cross-sectional networks: a matrix
+#'     \item For longitudinal arrays: an array (or matrix if one time point)
+#'     \item For longitudinal lists: a list of matrices
+#'   }
+#'   The returned object maintains dimension names for easy interpretation.
+#'
+#' @details
+#' The function handles different netify object types:
+#' \itemize{
+#'   \item **Cross-sectional**: Subsets by rows and columns (and layers if multilayer)
+#'   \item **Longitudinal array**: Subsets by rows, columns, time, and optionally layers
+#'   \item **Longitudinal list**: Subsets each time period's matrix separately, 
+#'     accommodating actor sets that change over time
+#' }
 #' 
-#' @examples
+#' When using character vectors to specify actors, the function automatically matches 
+#' them to the appropriate row/column positions. For longitudinal lists where actors 
+#' may vary across time periods, matching is performed separately for each period.
 #'
-#' # load data
+#' @examples
+#' # Load data
 #' data(icews)
 #' 
-#' # subset to a particular year
+#' # Create cross-sectional network
 #' icews_10 <- icews[icews$year=='2010', ]
-#' 
-#' # gen netify object
 #' icews_verbCoop <- netify(
 #'   dyad_data=icews_10, actor1='i', actor2='j',
-#'   symmetric=FALSE, weight='verbCoop' )
+#'   symmetric=FALSE, weight='verbCoop'
+#' )
 #' 
-#' # peek at relations between a few countries
+#' # Peek at first 3x3 subset (default)
+#' peek(icews_verbCoop)
+#' 
+#' # Peek at specific countries
 #' peek(icews_verbCoop,
-#' 	what_to_peek = c('United Kingdom', 'United States','France') )
+#'   what_to_peek = c('United Kingdom', 'United States', 'France'))
 #' 
-#' # specify rows and cols to peek at
+#' # Different row and column selections
 #' peek(icews_verbCoop,
-#' 	what_rows_to_peek = c('United Kingdom', 'United States','France'),
-#' 	what_cols_to_peek = c('Russian Federation', 'Sri Lanka') )
+#'   what_rows_to_peek = c('United Kingdom', 'United States', 'France'),
+#'   what_cols_to_peek = c('Russian Federation', 'Sri Lanka'))
 #' 
-#' # peek with longit array
+#' # Create longitudinal network
 #' icews_matlConf <- netify(
-#' 	dyad_data=icews, 
-#' 	actor1='i', actor2='j', time='year',
-#' 	symmetric=FALSE, weight='matlConf',
-#' 	output_format = 'longit_array' )
-#' # peek at a few years for the first three rows/cols, 
-#' # specify numeric index or character refs
+#'   dyad_data=icews, 
+#'   actor1='i', actor2='j', time='year',
+#'   symmetric=FALSE, weight='matlConf',
+#'   output_format = 'longit_array'
+#' )
+#' 
+#' # Peek at specific years using indices
 #' peek(icews_matlConf, when_to_peek=c(1, 5, 10))
+#' 
+#' # Or using year labels
 #' peek(icews_matlConf, when_to_peek=c('2002', '2006', '2011'))
 #' 
+#' # View all time periods for specific countries
+#' peek(icews_matlConf, 
+#'   what_to_peek = c('United States', 'China'),
+#'   when_to_peek = NULL)
 #'
-#' @export peek
-
-
-
-#         # create netify object and then subset
-#         netlet = icews_matlConf_l
-
-
-# what_to_peek=actors_to_keep
-# 	what_rows_to_peek=what_to_peek
-# 	what_cols_to_peek=what_to_peek
-# when_to_peek=c('2010', '2011')
-# 	what_layers_to_peek=NULL
-
+#' @author Cassy Dorff, Shahryar Minhas
+#' 
+#'
+#' @export
+#' @aliases preview, inspect, glimpse_netify
 
 peek <- function(
 	netlet, 
@@ -355,3 +393,14 @@ peek <- function(
 		return(relev_netlet) } # close longit list block
 }
 
+#' @rdname peek
+#' @export
+preview <- peek
+
+#' @rdname peek
+#' @export
+inspect <- peek
+
+#' @rdname peek
+#' @export
+glimpse_netify <- peek

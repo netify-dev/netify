@@ -9,6 +9,9 @@
 #' @param msg msg to user if df check fails
 #' @return data.frame object
 #' @author Ha Eun Choi, Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 df_check <- function(
     df,
@@ -46,6 +49,9 @@ df_check <- function(
 #' @return returns a NULL object but stops the process
 #' if there is an error detected
 #' @author Ha Eun Choi, Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 logical_check <- function(
     sum_dyads, symmetric, 
@@ -98,6 +104,9 @@ logical_check <- function(
 #' @return returns a NULL object but stops the process
 #' if there is an error detected
 #' @author Ha Eun Choi, Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 actor_check <- function(actor1, actor2, dyad_data){
 
@@ -133,6 +142,9 @@ actor_check <- function(actor1, actor2, dyad_data){
 #' @return returns a NULL object but stops the process
 #' if there is an error detected
 #' @author Ha Eun Choi, Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 weight_check <- function(weight, dyad_data){
 
@@ -161,6 +173,9 @@ weight_check <- function(weight, dyad_data){
 #' @param sum_dyads logical user input for sum_dyads
 #' @return character string
 #' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 weight_string_label <- function(weight, sum_dyads){
 
@@ -200,6 +215,9 @@ weight_string_label <- function(weight, sum_dyads){
 #' @return returns a NULL object but stops the process
 #' if there is an error detected
 #' @author Ha Eun Choi, Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 time_check <- function(time, dyad_data){
 
@@ -217,38 +235,6 @@ time_check <- function(time, dyad_data){
     return(invisible(NULL))
 }
 
-
-# #' repeat_dyads_check
-# #' 
-# #' Check whether dyadic observations are 
-# #' repeating in the data.frame object
-# #' @param dyad_data user inputted data.frame object
-# #' @param actor1 character value denoting actor1 in the data.frame object
-# #' @param actor2 character value denoting actor2 in the data.frame object
-# #' @param time optoinal character value denoting time in the data.frame object
-# #' @return returns a count of the number of repeating dyads in the
-# #' data.frame object
-# #' @author Ha Eun Choi, Shahryar Minhas
-
-# repeat_dyads_check <- function(dyad_data, actor1, actor2, time=NULL){
-
-#     # use table to get a count of dyadic ids
-#     if(is.null(time)){ 
-#         dyad_data = cbind(dyad_data, time=1)
-#         time = 'time' }
-#     dyad_counts <- table( 
-#         paste( dyad_data[,actor1], dyad_data[,actor2], dyad_data[,time], sep='_'  ) )
-
-#     # subset to those that repeat
-#     repeat_dyads <- dyad_counts[ dyad_counts > 1 ]
-
-#     # get count
-#     num_repeat_dyads <- length(repeat_dyads)    
-
-#     #
-#     return(num_repeat_dyads)
-# }
-
 # repeat_dyads_check
 # 
 #' Check whether dyadic observations are repeating in the data.frame object
@@ -264,6 +250,9 @@ time_check <- function(time, dyad_data){
 #'             If not provided, dyads are considered without regard to time.
 #' @return An integer count of the number of repeating dyads in the data.frame.
 #' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 repeat_dyads_check <- function(dyad_data, actor1, actor2, time = NULL) {
 
@@ -293,6 +282,9 @@ repeat_dyads_check <- function(dyad_data, actor1, actor2, time = NULL) {
 #' @param time logical indicating whether inputted data is longitudinal
 #' @return returns a NULL object but provides warnings to users
 #' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 edge_value_check <- function( weight, sum_dyads, time=FALSE ){
 
@@ -334,6 +326,9 @@ edge_value_check <- function( weight, sum_dyads, time=FALSE ){
 #' if there is an error detected
 #' 
 #' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 add_var_time_check <- function( netlet, time ){
 
@@ -364,6 +359,8 @@ add_var_time_check <- function( netlet, time ){
 #' @author Cassy Dorff, Shahryar Minhas
 #'
 #' @keywords internal
+#' @noRd
+
 actor_mode_check <- function(dyad_data, actor1, actor2, mode) {
     
     # Extract unique actors from each column
@@ -411,6 +408,8 @@ actor_mode_check <- function(dyad_data, actor1, actor2, mode) {
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
 #' @keywords internal
+#' @noRd
+
 bipartite_actor_check <- function(actors_1, actors_2) {
     
     # Check for overlapping actors (warning, not error)
@@ -443,6 +442,8 @@ bipartite_actor_check <- function(actors_1, actors_2) {
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
 #' @keywords internal
+#' @noRd
+
 unipartite_actor_check <- function(actors_1, actors_2) {
     
     # For unipartite networks, we might want to check other things

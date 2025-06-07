@@ -1,6 +1,6 @@
-#' subset_netlet method for netify objects
+#' subset method for netify objects
 #'
-#' subset_netlet takes in a netify object
+#' This function takes in a netify object
 #' and allows for the extraction of smaller networks.
 #'
 #' @param netlet object of class netify
@@ -44,6 +44,7 @@
 #' when_to_subset=c('2010', '2011') )
 #' 
 #' @export subset_netlet
+#' @aliases subset_netify
 #' 
 
 subset_netlet <- function(
@@ -279,3 +280,7 @@ subset_netlet <- function(
     # return object
     return(sub_net)
 }
+
+#' @rdname subset_netlet
+#' @export
+subset_netify <- subset_netlet

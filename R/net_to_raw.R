@@ -7,7 +7,8 @@
 #' @return an object of class matrix, array with netify
 #' attributes stripped
 #' @author Shahryar Minhas
-#' @export
+#' @keywords internal
+#' @noRd
 
 raw_matrix <- function(netlet){
     stopifnot("Not a netify object!" = is_netify(netlet))
@@ -29,7 +30,8 @@ raw_matrix <- function(netlet){
 #' @return an object of class list with netify
 #' attributes stripped
 #' @author Shahryar Minhas
-#' @export
+#' @keywords internal
+#' @noRd
 
 raw_list <- function(netlet){
     stopifnot("Not a netify object!" = is_netify(netlet))
@@ -39,16 +41,23 @@ raw_list <- function(netlet){
     return(netlet)
 }
 
-#' get_raw
+#' Get raw network data without netify attributes
 #'
-#' This function serves as a wrapper for
-#' raw_matrix and raw_list, which serve to
-#' strip netify related attributes from lists
-#' and matrix obejcts
-#' @param netlet a netify object
-#' @return a list or matrix object with netify attributes stripped
+#' `get_raw` extracts the underlying network data structure (matrix or list) 
+#' from a netify object, removing all netify-specific attributes. This is useful
+#' when you need to work with the base R data structures or pass the network
+#' data to functions that don't recognize netify objects.
+#'
+#' @param netlet A netify object
+#' @return A matrix or list object with netify attributes removed. The structure
+#'   returned depends on the type of netify object:
+#'   \itemize{
+#'     \item Cross-sectional networks: returns a matrix
+#'     \item Longitudinal array networks: returns a matrix  
+#'     \item Longitudinal list networks: returns a list
+#'   }
 #' @author Shahryar Minhas
-#' @export
+#' @export get_raw
 
 get_raw <- function(netlet){
 

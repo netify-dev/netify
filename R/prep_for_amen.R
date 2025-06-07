@@ -1,70 +1,98 @@
-#' Convert netify object to amen structured input
+#' Convert netify objects to amen package format
 #'
-#' @aliases prep_for_amen
-#' @param netlet An R object
-#' @return object ready for analysis with amen
-#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+#' `prep_for_amen` (also available as `netify_to_amen`, `to_amen`) 
+#' transforms netify network objects into the specific data 
+#' structure required by the `amen` package for network analysis and modeling. 
+#' The amen package implements various network models including the Social 
+#' Relations Model (SRM) and Additive and Multiplicative Effects (AME) models.
 #'
-#' @keywords netify
+#' @param netlet A netify object containing network data. Currently supports 
+#'   single-layer networks only. For multilayer networks, use 
+#'   \code{\link{subset_netlet}} to extract individual layers first.
+#'
+#' @return A list with components formatted for amen analysis:
+#'   \item{Y}{The network adjacency matrix or array. For cross-sectional data, 
+#'     this is a matrix. For longitudinal data, this is a 3-dimensional array 
+#'     with dimensions: actors by actors by time.}
+#'   \item{Xdyad}{Array of dyadic covariates with dimensions: row by column by covariate 
+#'     for cross-sectional data, or row by column by covariate by time for 
+#'     longitudinal data. NULL if no dyadic variables exist.}
+#'   \item{Xrow}{Matrix or array of row actor (sender) covariates. For cross-sectional 
+#'     data: row actors by covariates. For longitudinal: row actors by covariates by time. 
+#'     NULL if no nodal variables exist.}
+#'   \item{Xcol}{Matrix or array of column actor (receiver) covariates. Same structure 
+#'     as Xrow. For symmetric networks, Xcol will be identical to Xrow.}
+#'
+#' @details
+#' The function handles three types of netify objects:
+#' \itemize{
+#'   \item **Cross-sectional networks**: Produces matrices for Y, Xrow, and Xcol, 
+#'     and a 3D array for Xdyad
+#'   \item **Longitudinal arrays**: Maintains array structure, adding time dimension 
+#'     where needed
+#'   \item **Longitudinal lists**: Converts list format to arrays suitable for amen
+#' }
+#' 
+#' All nodal attributes must be numeric for compatibility with amen models. The 
+#' function will stop with an error if non-numeric nodal variables are detected.
+#' 
+#' Missing values in the network or covariates are preserved as NA, allowing 
+#' amen's modeling functions to handle them appropriately.
+#'
+#'
 #' @examples
-#'
-#' # load icews data
+#' # Load example data
 #' data(icews)
 #' 
-#' # filter to a year for cross-sec example
+#' # Cross-sectional example
 #' icews_10 <- icews[icews$year == 2010,]
 #' 
-#' # netify object
-#' icews_matlConf <- netify(
+#' # Create netify object with nodal and dyadic attributes
+#' icews_net <- netify(
 #'   dyad_data = icews_10, 
 #'   actor1 = 'i', actor2 = 'j', 
 #'   symmetric = FALSE, weight = 'matlConf',
 #'   nodal_vars = c('i_polity2', 'i_log_gdp', 'i_log_pop'),
 #'   dyad_vars = c('matlCoop', 'verbCoop', 'verbConf'),
-#'   dyad_vars_symmetric = c(FALSE, FALSE, FALSE) )
+#'   dyad_vars_symmetric = c(FALSE, FALSE, FALSE)
+#' )
 #' 
-#' # convert to amen input
-#' for_amen <- prep_for_amen(icews_matlConf)
+#' # Convert to amen format
+#' amen_data <- prep_for_amen(icews_net)
 #' 
-#' # for_amen$Y is the matrix of dyadic weights
-#' dim(for_amen$Y)
+#' # Examine structure
+#' str(amen_data)
 #' 
-#' # for_amen$Xdyad is the array of dyadic attributes
-#' dim(for_amen$Xdyad)
+#' # Y contains the network
+#' dim(amen_data$Y)  # actors x actors
 #' 
-#' # for_amen$Xrow is the matrix of nodal attributes for rows
-#' dim(for_amen$Xrow)
+#' # Xdyad contains dyadic covariates
+#' dim(amen_data$Xdyad)  # actors x actors x covariates
 #' 
-#' # for_amen$Xcol is the matrix of nodal attributes for columns
-#' dim(for_amen$Xcol)
+#' # Xrow and Xcol contain actor attributes
+#' dim(amen_data$Xrow)  # actors x attributes
 #' 
-#' # generate a longitudional, directed and weighted network
-#' # where the weights are matlConf and results are organized
-#' # in an array and we have both dyadic and nodal attributes
-#' icews_matlConf_longit <- netify(
-#'   dyad_data=icews,
-#'   actor1='i', actor2='j', time='year',
-#'   symmetric=FALSE, weight='matlConf',
-#'   nodal_vars=c('i_polity2', 'i_log_gdp', 'i_log_pop'),
-#'   dyad_vars=c('matlCoop', 'verbCoop', 'verbConf'),
-#'   dyad_vars_symmetric=c(FALSE, FALSE, FALSE) )
+#' # Longitudinal example
+#' icews_longit <- netify(
+#'   dyad_data = icews,
+#'   actor1 = 'i', actor2 = 'j', time = 'year',
+#'   symmetric = FALSE, weight = 'matlConf',
+#'   nodal_vars = c('i_polity2', 'i_log_gdp', 'i_log_pop'),
+#'   dyad_vars = c('matlCoop', 'verbCoop', 'verbConf'),
+#'   dyad_vars_symmetric = c(FALSE, FALSE, FALSE)
+#' )
 #' 
-#' # convert to amen input
-#' for_amen_longit <- prep_for_amen(icews_matlConf_longit)
+#' # Convert longitudinal data
+#' amen_longit <- prep_for_amen(icews_longit)
 #' 
-#' # for_amen_longit$Y is the array of dyadic weights
-#' dim(for_amen_longit$Y)
-#' 
-#' # for_amen_longit$Xdyad is the array of dyadic attributes
-#' dim(for_amen_longit$Xdyad)
-#' 
-#' # for_amen_longit$Xrow is the array of nodal attributes for rows
-#' dim(for_amen_longit$Xrow)
-#' 
-#' # for_amen_longit$Xcol is the array of nodal attributes for columns
-#' dim(for_amen_longit$Xcol)
-#' 
+#' # Now arrays have time dimension
+#' dim(amen_longit$Y)      # actors x actors x time
+#' dim(amen_longit$Xdyad)  # actors x actors x covariates x time
+#'
+#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+#'
 #' @export prep_for_amen
+#' @aliases netify_to_amen, to_amen, amen_ify
 
 prep_for_amen <- function(netlet){
 
@@ -170,3 +198,15 @@ prep_for_amen <- function(netlet){
   # 
   return(out)
 }
+
+#' @rdname prep_for_amen
+#' @export
+netify_to_amen <- prep_for_amen
+
+#' @rdname prep_for_amen
+#' @export
+to_amen <- prep_for_amen
+
+#' @rdname prep_for_amen
+#' @export
+amen_ify <- prep_for_amen

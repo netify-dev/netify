@@ -2,65 +2,169 @@
 % Please edit documentation in R/prep_for_network.R
 \name{prep_for_statnet}
 \alias{prep_for_statnet}
-\title{Convert netify object to a statnet network object}
+\alias{netify_to_statnet,}
+\alias{prep_for_network,}
+\alias{netify_to_network,}
+\alias{to_statnet,}
+\alias{to_network,}
+\alias{network_ify,}
+\alias{statnet_ify}
+\alias{to_statnet}
+\alias{to_network}
+\alias{netify_to_statnet}
+\alias{netify_to_network}
+\alias{network_ify}
+\title{Convert netify objects to statnet network format}
 \usage{
 prep_for_statnet(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
+
+to_statnet(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
+
+to_network(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
+
+netify_to_statnet(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
+
+netify_to_network(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
+
+network_ify(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
+
+statnet_ify(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
 }
 \arguments{
-\item{netlet}{An R object}
+\item{netlet}{A netify object containing network data. Currently supports
+single-layer networks only. For multilayer networks, use
+\code{\link{subset_netlet}} to extract individual layers first.}
 
-\item{add_nodal_attribs}{Add any nodal attributes from netlet to igraph object. Default is TRUE.}
+\item{add_nodal_attribs}{Logical. If TRUE (default), includes nodal attributes
+from the netify object as vertex attributes in the network object. Set to
+FALSE to create a network with structure only.}
 
-\item{add_dyad_attribs}{Add any dyad attributes from netlet to igraph object. Default is TRUE.}
+\item{add_dyad_attribs}{Logical. If TRUE (default), includes dyadic attributes
+from the netify object as edge attributes in the network object. Set to
+FALSE to exclude edge covariates.}
 }
 \value{
-statnet network object
+A network object or list of network objects:
+\itemize{
+\item \strong{Cross-sectional networks}: Returns a single network object
+\item \strong{Longitudinal networks}: Returns a named list of network objects,
+with names corresponding to time periods
+}
+
+The resulting network object(s) will have:
+\itemize{
+\item Vertices named according to actors in the netify object
+\item Edge weights from the netify weight variable stored as "weight" attribute
+\item Vertex attributes for each nodal variable (if add_nodal_attribs = TRUE)
+\item Edge attributes for each dyadic variable (if add_dyad_attribs = TRUE)
+\item Proper directedness based on the symmetric parameter of the netify object
+}
 }
 \description{
-Convert netify object to a statnet network object
+\code{prep_for_statnet} (also available as \code{to_statnet}, \code{to_network}, \code{netify_to_statnet},
+\code{netify_to_network}) transforms netify network objects into statnet's network
+objects, providing access to the extensive statistical modeling capabilities
+of the statnet suite, including ERGMs (Exponential Random Graph Models),
+descriptive statistics, and network visualization tools.
+}
+\details{
+The conversion process handles different netify structures:
+\itemize{
+\item \strong{Cross-sectional}: Direct conversion to a single network object
+\item \strong{Longitudinal arrays}: Internally converted to list format, then
+each time slice becomes a separate network object
+\item \strong{Longitudinal lists}: Each time period converted to separate network object
+}
+
+The statnet network format stores networks as an edgelist with attributes,
+making it memory-efficient for sparse networks. All nodal and dyadic attributes
+from the netify object are preserved and can be used in subsequent ERGM
+modeling or network analysis.
+
+For longitudinal data, each time period results in an independent network
+object. This format is suitable for discrete-time network analysis or
+pooled ERGM estimation across time periods.
+}
+\note{
+This function requires the network package (part of statnet) to be installed.
+
+For ERGM modeling, the ergm package (also part of statnet) should be loaded
+after creating the network objects.
 }
 \examples{
-
-# load data
+# Load example data
 data(icews)
 
-# cross-sectional case
-icews_10 <- icews[icews$year==2010,]
+# Cross-sectional example
+icews_10 <- icews[icews$year == 2010,]
 
-# create netify object
-dvars = c( 'matlCoop', 'verbConf', 'matlConf' )
-nvars = c( 'i_polity2','i_log_gdp', 'i_log_pop' )
-verbCoop_net = netify( 
+# Create netify object with attributes
+dvars <- c('matlCoop', 'verbConf', 'matlConf')
+nvars <- c('i_polity2', 'i_log_gdp', 'i_log_pop')
+
+verbCoop_net <- netify( 
   icews_10,
-  actor1='i', actor2='j', 
-  symmetric=FALSE, 
-  weight='verbCoop',
+  actor1 = 'i', actor2 = 'j', 
+  symmetric = FALSE, 
+  weight = 'verbCoop',
   dyad_vars = dvars,
-  dyad_vars_symmetric=rep(FALSE, length(dvars)),
-  nodal_vars = nvars )
+  dyad_vars_symmetric = rep(FALSE, length(dvars)),
+  nodal_vars = nvars
+)
 
-# convert to a statnet network object
+# Convert to statnet network object
 ntwk <- prep_for_statnet(verbCoop_net)
+
+# Examine the result
 ntwk
+network::network.size(ntwk)        # number of vertices
+network::network.edgecount(ntwk)   # number of edges
+network::list.vertex.attributes(ntwk)  # nodal attributes
+network::list.edge.attributes(ntwk)    # edge attributes
 
-# longitudinal case
-verbCoop_longit_net = netify(
+# Access specific attributes
+network::get.vertex.attribute(ntwk, 'i_polity2')  # polity scores
+network::get.edge.attribute(ntwk, 'matlCoop')     # material cooperation
+
+# Check network properties
+network::is.directed(ntwk)   # TRUE for this example
+network::has.loops(ntwk)     # FALSE (no self-ties)
+
+# Longitudinal example
+verbCoop_longit <- netify(
   icews,
-  actor1='i', actor2='j', time='year',
-  symmetric=FALSE, 
-  weight='verbCoop',
+  actor1 = 'i', actor2 = 'j', time = 'year',
+  symmetric = FALSE, 
+  weight = 'verbCoop',
   dyad_vars = dvars,
-  dyad_vars_symmetric=rep(FALSE, length(dvars)),
-  nodal_vars = nvars )
+  dyad_vars_symmetric = rep(FALSE, length(dvars)),
+  nodal_vars = nvars
+)
 
-# convert to a statnet network object
-ntwk_longit <- prep_for_statnet(verbCoop_longit_net)
+# Convert to list of network objects
+ntwk_list <- prep_for_statnet(verbCoop_longit)
 
-# output in the longitudinal case is 
-# a list of statnet network objects
-class(ntwk_longit)
-names(ntwk_longit)
-ntwk_longit[['2002']]
+# Examine structure
+class(ntwk_list)        # "list"
+length(ntwk_list)       # number of time periods
+names(ntwk_list)        # time period labels
+
+# Access specific time period
+ntwk_2002 <- ntwk_list[['2002']]
+ntwk_2002
+
+# Convert without attributes for structure only
+ntwk_structure <- prep_for_statnet(
+  verbCoop_net, 
+  add_nodal_attribs = FALSE,
+  add_dyad_attribs = FALSE
+)
+
+\dontrun{
+# Use with ergm for modeling (requires ergm package)
+library(ergm)
+model <- ergm(ntwk ~ edges + mutual + nodematch("i_polity2"))
+}
 
 }
 \author{

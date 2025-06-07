@@ -1,60 +1,128 @@
-#' Convert netify object to igraph object
+#' Convert netify objects to igraph format
 #'
-#' @aliases convert.to.igraph
-#' @param netlet An R object
-#' @param add_nodal_attribs Add any nodal attributes from netlet to igraph object. Default is TRUE.
-#' @param add_dyad_attribs Add any dyad attributes from netlet to igraph object. Default is TRUE.
-#' @return igraph object
-#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+#' `prep_for_igraph` (also available as `netify_to_igraph`, `to_igraph`) transforms 
+#' netify network objects into igraph objects. The conversion preserves network
+#' structure and optionally includes nodal and dyadic attributes as vertex 
+#' and edge attributes in the resulting igraph object.
 #'
-#' @keywords netify
+#' @param netlet A netify object containing network data. Currently supports 
+#'   single-layer networks only. For multilayer networks, use 
+#'   \code{\link{subset_netlet}} to extract individual layers first.
+#' @param add_nodal_attribs Logical. If TRUE (default), includes nodal attributes 
+#'   from the netify object as vertex attributes in the igraph object. Set to 
+#'   FALSE to create a network with structure only.
+#' @param add_dyad_attribs Logical. If TRUE (default), includes dyadic attributes 
+#'   from the netify object as edge attributes in the igraph object. Set to 
+#'   FALSE to exclude edge covariates.
+#'
+#' @return An igraph object or list of igraph objects:
+#'   \itemize{
+#'     \item **Cross-sectional networks**: Returns a single igraph object
+#'     \item **Longitudinal networks**: Returns a named list of igraph objects, 
+#'       with names corresponding to time periods
+#'   }
+#'   
+#'   The resulting igraph object(s) will have:
+#'   \itemize{
+#'     \item Vertices named according to actors in the netify object
+#'     \item Edge weights from the netify weight variable (if present)
+#'     \item Vertex attributes for each nodal variable (if add_nodal_attribs = TRUE)
+#'     \item Edge attributes for each dyadic variable (if add_dyad_attribs = TRUE)
+#'   }
+#'
+#' @details
+#' The conversion process handles different netify structures:
+#' \itemize{
+#'   \item **Cross-sectional**: Direct conversion to a single igraph object
+#'   \item **Longitudinal arrays**: Internally converted to list format, then 
+#'     each time slice becomes a separate igraph object
+#'   \item **Longitudinal lists**: Each time period converted to separate igraph object
+#' }
+#' 
+#' For directed networks, the resulting igraph object will be directed. For 
+#' undirected networks, the igraph object will be undirected. Edge weights in 
+#' the netify object become edge weights in igraph.
+#' 
+#' When longitudinal data includes actors that appear or disappear over time, 
+#' each time period's igraph object will contain only the actors present in 
+#' that period.
+#'
+#' @note 
+#' This function requires the igraph package to be installed. 
+#'
 #' @examples
-#'
-#' # load data
+#' # Load example data
 #' data(icews)
 #' 
-#' # cross-sectional case
-#' icews_10 <- icews[icews$year==2010,]
+#' # Cross-sectional example
+#' icews_10 <- icews[icews$year == 2010,]
 #'
-#' # create netify object
-#' dvars = c( 'matlCoop', 'verbConf', 'matlConf' )
-#' nvars = c( 'i_polity2','i_log_gdp', 'i_log_pop' )
-#' verbCoop_net = netify( 
+#' # Create netify object with attributes
+#' dvars <- c('matlCoop', 'verbConf', 'matlConf')
+#' nvars <- c('i_polity2','i_log_gdp', 'i_log_pop')
+#' 
+#' verbCoop_net <- netify( 
 #'   icews_10,
-#'   actor1='i', actor2='j', 
-#'   symmetric=FALSE, 
-#'   weight='verbCoop',
+#'   actor1 = 'i', actor2 = 'j', 
+#'   symmetric = FALSE, 
+#'   weight = 'verbCoop',
 #'   dyad_vars = dvars,
-#'   dyad_vars_symmetric=rep(FALSE, length(dvars)),
-#'   nodal_vars = nvars )
+#'   dyad_vars_symmetric = rep(FALSE, length(dvars)),
+#'   nodal_vars = nvars
+#' )
 #' 
-#' # convert to igraph object
-#' igrph <- prep_for_igraph(verbCoop_net)
-#' igrph
+#' # Convert to igraph
+#' ig <- prep_for_igraph(verbCoop_net)
 #' 
-#' # longitudinal case
-#' verbCoop_longit_net = netify(
+#' # Examine the result
+#' ig
+#' igraph::vcount(ig)  # number of vertices
+#' igraph::ecount(ig)  # number of edges
+#' igraph::vertex_attr_names(ig)  # nodal attributes
+#' igraph::edge_attr_names(ig)    # edge attributes
+#' 
+#' # Access specific attributes
+#' igraph::V(ig)$i_polity2  # polity scores
+#' igraph::E(ig)$matlCoop   # material cooperation
+#' 
+#' # Longitudinal example
+#' verbCoop_longit <- netify(
 #'   icews,
-#'   actor1='i', actor2='j', time='year',
-#'   symmetric=FALSE, 
-#'   weight='verbCoop',
+#'   actor1 = 'i', actor2 = 'j', time = 'year',
+#'   symmetric = FALSE, 
+#'   weight = 'verbCoop',
 #'   dyad_vars = dvars,
-#'   dyad_vars_symmetric=rep(FALSE, length(dvars)),
-#'   nodal_vars = nvars )
+#'   dyad_vars_symmetric = rep(FALSE, length(dvars)),
+#'   nodal_vars = nvars
+#' )
 #'
-#' # convert to igraph object
-#' igrph_longit <- prep_for_igraph(verbCoop_longit_net)
+#' # Convert to list of igraph objects
+#' ig_list <- prep_for_igraph(verbCoop_longit)
 #' 
-#' # output in the longitudinal case is 
-#' # a list of igraph objects
-#' class(igrph_longit)
-#' names(igrph_longit)
-#' igrph_longit[['2002']]
+#' # Examine structure
+#' class(ig_list)        # "list"
+#' length(ig_list)       # number of time periods
+#' names(ig_list)        # time period labels
+#' 
+#' # Access specific time period
+#' ig_2002 <- ig_list[['2002']]
+#' ig_2002
+#' 
+#' # Convert without attributes
+#' ig_structure_only <- prep_for_igraph(
+#'   verbCoop_net, 
+#'   add_nodal_attribs = FALSE,
+#'   add_dyad_attribs = FALSE
+#' )
+#'
+#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #' 
 #' @export prep_for_igraph
+#' @aliases netify_to_igraph, to_igraph, igraph_ify
  
 prep_for_igraph = function(
-  netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE){
+  netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE
+  ){
 
   # check if netify object
   netify_check(netlet)
@@ -88,7 +156,7 @@ prep_for_igraph = function(
   if(netlet_type == 'cross_sec'){
 
     # convert to igraph object
-    igrph <- netify_to_igraph(netlet)
+    igrph <- netify_net_to_igraph(netlet)
 
     # process nodal attributes if exist
     if(nodal_data_exist){
@@ -114,7 +182,7 @@ prep_for_igraph = function(
       time_val <- names(netlet)[ii]
 
       # convert to network object
-      igrph_slice <- netify_to_igraph(netlet_slice)
+      igrph_slice <- netify_net_to_igraph(netlet_slice)
 
       # process nodal attributes if exist
       if(nodal_data_exist & add_nodal_attribs){
@@ -136,15 +204,30 @@ prep_for_igraph = function(
   #
   return(igrph) }
 
-#' netify_to_igraph
+#' @rdname prep_for_igraph
+#' @export
+netify_to_igraph <- prep_for_igraph
+
+#' @rdname prep_for_igraph
+#' @export
+to_igraph <- prep_for_igraph
+
+#' @rdname prep_for_igraph
+#' @export
+igraph_ify <- prep_for_igraph
+
+#' netify_net_to_igraph
 #' 
 #' Convert netify object to igraph object
 #' 
 #' @param netlet netify object
 #' @return igraph object
 #' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
-netify_to_igraph <- function(netlet){
+netify_net_to_igraph <- function(netlet){
 
   # check if bipartite
   bipartite_logical <- ifelse(attr(netlet, 'mode') == 'bipartite', TRUE, FALSE)
@@ -197,6 +280,9 @@ netify_to_igraph <- function(netlet){
 #' @param time time indicator for longit case
 #' @return igraph object with nodal attributes added
 #' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 add_nodal_to_igraph <- function(
   netlet, node_data, igraph_object, time=NULL){
@@ -242,6 +328,9 @@ add_nodal_to_igraph <- function(
 #' @param time time indicator for longit case
 #' @return igraph object with dyad attributes added
 #' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 add_dyad_to_igraph <- function(
   netlet, dyad_data_list, igraph_object, time=NULL){
@@ -306,6 +395,9 @@ add_dyad_to_igraph <- function(
 #' @return matrix object of how actor positions match
 #' between the adj_mat and igraph_object
 #' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 adj_igraph_positions <- function(adj_mat, igraph_object){
 

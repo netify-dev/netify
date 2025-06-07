@@ -1,9 +1,9 @@
 #' Add dyad data to a netify object
 #'
-#' `add_dyad` takes in a dataframe and outputs a netify object.
+#' This function takes in a data.frame and outputs a netify object.
 #'
 #' @param netlet a netify object
-#' @param dyad_data a dataframe object
+#' @param dyad_data a data.frame object
 #' @param actor1 character: actor 1 in the data
 #' @param actor2 character: actor 2 in the data
 #' @param time a character object indicating which variable in dyad_data tracks time
@@ -285,7 +285,37 @@ add_dyad <- function(
   return(netlet)
 }
 
-# Helper function to determine optimal storage mode
+#' Determine optimal storage mode for matrix values
+#' 
+#' This internal function examines a vector of values and determines the most
+#' efficient storage mode for creating matrices. It helps optimize memory usage
+#' by selecting the appropriate data type-specific matrix creation function.
+#'
+#' @param values A vector of values that will be stored in a matrix. Can be
+#'   logical, character, integer, or numeric.
+#'
+#' @return A character string indicating the optimal storage mode:
+#'   \itemize{
+#'     \item \code{"logical"} for logical vectors
+#'     \item \code{"character"} for character vectors  
+#'     \item \code{"integer"} for integer vectors or numeric vectors containing only integer values
+#'     \item \code{"double"} for numeric vectors with decimal values or as default fallback
+#'   }
+#'
+#' @details
+#' The function performs type checking in a specific order to determine the most
+#' appropriate storage mode. For numeric values, it additionally checks whether
+#' all values are integers (even if stored as doubles) to potentially use more
+#' memory-efficient integer storage. Empty vectors default to "double" storage.
+#' 
+#' This optimization is particularly important for large networks where using
+#' the correct storage type can significantly reduce memory usage.
+#'
+#' @author Shahryar Minhas
+#' 
+#' @keywords internal
+#' @noRd
+
 determine_storage_mode <- function(values) {
   if(length(values) == 0) return("double")
   

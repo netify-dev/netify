@@ -3,9 +3,20 @@
 \name{prep_for_netify}
 \alias{prep_for_netify}
 \alias{convert.to.netify}
+\alias{to_netify,}
+\alias{as_netify,}
+\alias{as.netify}
+\alias{to_netify}
+\alias{as_netify}
 \title{Convert igraph, network, socio-matrices/arrays, and lists of each of those object to a netify object}
 \usage{
 prep_for_netify(net_obj, weight = NULL, ...)
+
+to_netify(net_obj, weight = NULL, ...)
+
+as_netify(net_obj, weight = NULL, ...)
+
+as.netify(net_obj, weight = NULL, ...)
 }
 \arguments{
 \item{net_obj}{An R object (e.g., \code{igraph}, \code{network}, socio-matrix/array, or a list of these objects) that you want to convert to a netify object.}
@@ -22,8 +33,8 @@ a netify object
 \description{
 \code{prep_for_netify} takes in a network object (e.g., an igraph or network object)
 and outputs a netify object. If the input is already a matrix/array/list of matrices,
-then it simply calls \code{new_netify}. Otherwise, it calls the appropriate internal
-helper (\code{decompose_igraph} or \code{decompose_network}) to extract adjacency matrix
+then it simply calls \code{new_netify}. Otherwise, it calls \code{decompose_igraph}
+or \code{decompose_statnet} to extract adjacency matrix
 and any nodal/dyadic attributes, and then calls \code{new_netify}.
 }
 \author{

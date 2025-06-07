@@ -1,17 +1,29 @@
 ########################################
 #' Is this object a netify object?
 #' 
-#' @aliases is.netify
 #' @param x An R object
-#' @return Logical constant, \code{TRUE} if argument \code{object} is a netify
+#' @return Logical constant, \code{TRUE} if argument \code{x} is a netify
 #' object
 #' @author Colin Henry
 #' @keywords netify
 #' @export is_netify
+#' @aliases is.netify is_netlet is.netlet
 
 is_netify <- function(x) {
   "netify" %in% class(x)
 }
+
+#' @rdname is_netify
+#' @export
+is.netify <- is_netify
+
+#' @rdname is_netify
+#' @export
+is_netlet <- is_netify
+
+#' @rdname is_netify
+#' @export
+is.netlet <- is_netify
 ########################################
 
 ########################################
@@ -23,7 +35,8 @@ is_netify <- function(x) {
 #' @return NULL object but stops the process if there 
 #' is an error detected
 #' @author Ha Eun Choi, Colin Henry, Shahryar Minhas
-#' @export netify_check
+#' @keywords internal
+#' @noRd
 
 netify_check <- function(netlet) {
   # check if `dyad_data` is df
@@ -39,7 +52,8 @@ netify_check <- function(netlet) {
 ########################################
 #' Constructs a generic netify Object
 #'
-#' `new_netify` is a low-level constructor for creating new netify objects.
+#' `new_netify` (also available as `new_netlet`) is a low-level 
+#' constructor for creating new netify objects.
 #' Mostly for internal use, but can be used to create netify objects from 
 #' matrices, arrays, or lists of matrices.
 #'
@@ -50,6 +64,7 @@ netify_check <- function(netlet) {
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
 #' @export new_netify
+#' @aliases new_netlet
 
 new_netify <- function(data, ...) {
 
@@ -363,6 +378,10 @@ new_netify <- function(data, ...) {
   #
   return(out)
 }
+
+#' @rdname new_netify
+#' @export
+new_netlet <- new_netify
 ########################################
 
 ########################################

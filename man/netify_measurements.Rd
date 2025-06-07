@@ -2,9 +2,15 @@
 % Please edit documentation in R/netify_measurements.R
 \name{netify_measurements}
 \alias{netify_measurements}
+\alias{netlet_measurements}
+\alias{measurements}
 \title{Get measurements of a netify object}
 \usage{
 netify_measurements(netlet)
+
+netlet_measurements(netlet)
+
+measurements(netlet)
 }
 \arguments{
 \item{netlet}{a netify object}

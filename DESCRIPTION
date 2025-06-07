@@ -12,7 +12,6 @@ Depends:
   R (>= 3.5.0)
 Imports:
     Rcpp,
-    abind,
     reshape2 (>= 1.4.4),
     stats,
     cli,
@@ -27,8 +26,9 @@ Imports:
 LinkingTo:
   Rcpp
 Suggests:
-    knitr,
+    knitr,    
     rmarkdown,
+    abind,    
     tidyr,
     network,
     testthat (>= 3.0.0),

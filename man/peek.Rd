@@ -2,7 +2,12 @@
 % Please edit documentation in R/peek.R
 \name{peek}
 \alias{peek}
-\title{peek method for netify objects}
+\alias{preview,}
+\alias{inspect,}
+\alias{glimpse_netify}
+\alias{preview}
+\alias{inspect}
+\title{Preview subsets of network data from netify objects}
 \usage{
 peek(
   netlet,
@@ -12,63 +17,137 @@ peek(
   when_to_peek = 1,
   what_layers_to_peek = NULL
 )
+
+preview(
+  netlet,
+  what_to_peek = 3,
+  what_rows_to_peek = what_to_peek,
+  what_cols_to_peek = what_to_peek,
+  when_to_peek = 1,
+  what_layers_to_peek = NULL
+)
+
+inspect(
+  netlet,
+  what_to_peek = 3,
+  what_rows_to_peek = what_to_peek,
+  what_cols_to_peek = what_to_peek,
+  when_to_peek = 1,
+  what_layers_to_peek = NULL
+)
+
+glimpse_netify(
+  netlet,
+  what_to_peek = 3,
+  what_rows_to_peek = what_to_peek,
+  what_cols_to_peek = what_to_peek,
+  when_to_peek = 1,
+  what_layers_to_peek = NULL
+)
 }
 \arguments{
-\item{netlet}{object of class netify}
+\item{netlet}{A netify object to preview.}
 
-\item{what_to_peek}{enter the name of specific nodes to peek in character vector form or provide a numeric range, default is to show the first three rows and columns of interactions}
+\item{what_to_peek}{Specifies which actors/nodes to display. Can be:
+\itemize{
+\item A numeric value (e.g., 3) to show the first n rows and columns
+\item A numeric vector specifying row/column indices (e.g., c(1,3,5))
+\item A character vector of actor names (e.g., c("USA", "China"))
+}
+Default is 3 (first three rows and columns).}
 
-\item{what_rows_to_peek}{similar as what_to_peek but specific to rows, default value is set to what_to_peek. If you want to peek at all rows then set this to NULL.}
+\item{what_rows_to_peek}{Specific rows to display. Accepts same input types as
+\code{what_to_peek}. Defaults to the value of \code{what_to_peek}. Set to NULL to
+display all rows.}
 
-\item{what_cols_to_peek}{similar as what_to_peek but specific to columns, default value is set to what_to_peek. If you want to peek at all columns then set this to NULL.}
+\item{what_cols_to_peek}{Specific columns to display. Accepts same input types
+as \code{what_to_peek}. Defaults to the value of \code{what_to_peek}. Set to NULL to
+display all columns.}
 
-\item{when_to_peek}{choose time points to peek from, default is to show the first time point of data.
-If the entry is a numeric value or vector then it will be used as an index to the time dimension.
-If the entry is a character vector then it will be used to match the time dimension labels.
-If you want to peek at all time points then set this to NULL.}
+\item{when_to_peek}{For longitudinal networks, specifies which time points to
+display. Can be:
+\itemize{
+\item A numeric value or vector for time indices (e.g., 1 or c(1,5,10))
+\item A character vector matching time labels (e.g., c("2002", "2006"))
+\item NULL to display all time points
+}
+Default is 1 (first time point).}
 
-\item{what_layers_to_peek}{if the netlet object has multiple layers, then you must choose one layer to peek at.}
+\item{what_layers_to_peek}{For multilayer networks, specifies which layer(s) to
+display. Must be a character vector matching layer names. Required if the
+netify object has multiple layers.}
 }
 \value{
-slice of the network
+Returns a subset of the network data matching the specified criteria:
+\itemize{
+\item For cross-sectional networks: a matrix
+\item For longitudinal arrays: an array (or matrix if one time point)
+\item For longitudinal lists: a list of matrices
+}
+The returned object maintains dimension names for easy interpretation.
 }
 \description{
-peek takes in a netify object
-and displays the some specified rows of information.
+\code{peek} (also available as \code{preview}, \code{inspect}, \code{glimpse_netify})
+provides a convenient way to inspect portions of network data stored in
+netify objects. Rather than displaying entire networks (which can be overwhelming
+for large datasets), \code{peek} allows you to examine specific actors, time periods,
+or layers. This is particularly useful for data exploration, verification, and
+debugging network analyses.
+}
+\details{
+The function handles different netify object types:
+\itemize{
+\item \strong{Cross-sectional}: Subsets by rows and columns (and layers if multilayer)
+\item \strong{Longitudinal array}: Subsets by rows, columns, time, and optionally layers
+\item \strong{Longitudinal list}: Subsets each time period's matrix separately,
+accommodating actor sets that change over time
+}
+
+When using character vectors to specify actors, the function automatically matches
+them to the appropriate row/column positions. For longitudinal lists where actors
+may vary across time periods, matching is performed separately for each period.
 }
 \examples{
-
-# load data
+# Load data
 data(icews)
 
-# subset to a particular year
+# Create cross-sectional network
 icews_10 <- icews[icews$year=='2010', ]
-
-# gen netify object
 icews_verbCoop <- netify(
   dyad_data=icews_10, actor1='i', actor2='j',
-  symmetric=FALSE, weight='verbCoop' )
+  symmetric=FALSE, weight='verbCoop'
+)
 
-# peek at relations between a few countries
+# Peek at first 3x3 subset (default)
+peek(icews_verbCoop)
+
+# Peek at specific countries
 peek(icews_verbCoop,
-	what_to_peek = c('United Kingdom', 'United States','France') )
+  what_to_peek = c('United Kingdom', 'United States', 'France'))
 
-# specify rows and cols to peek at
+# Different row and column selections
 peek(icews_verbCoop,
-	what_rows_to_peek = c('United Kingdom', 'United States','France'),
-	what_cols_to_peek = c('Russian Federation', 'Sri Lanka') )
+  what_rows_to_peek = c('United Kingdom', 'United States', 'France'),
+  what_cols_to_peek = c('Russian Federation', 'Sri Lanka'))
 
-# peek with longit array
+# Create longitudinal network
 icews_matlConf <- netify(
-	dyad_data=icews, 
-	actor1='i', actor2='j', time='year',
-	symmetric=FALSE, weight='matlConf',
-	output_format = 'longit_array' )
-# peek at a few years for the first three rows/cols, 
-# specify numeric index or character refs
+  dyad_data=icews, 
+  actor1='i', actor2='j', time='year',
+  symmetric=FALSE, weight='matlConf',
+  output_format = 'longit_array'
+)
+
+# Peek at specific years using indices
 peek(icews_matlConf, when_to_peek=c(1, 5, 10))
+
+# Or using year labels
 peek(icews_matlConf, when_to_peek=c('2002', '2006', '2011'))
 
+# View all time periods for specific countries
+peek(icews_matlConf, 
+  what_to_peek = c('United States', 'China'),
+  when_to_peek = NULL)
 
 }
 \author{

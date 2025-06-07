@@ -86,7 +86,8 @@ get_actor_time_info <- function(
 #' @param netlet_actor_pds actor pds attributes from netify object
 #' @return a data.frame object with actor pd info in a actor-time format
 #' @author Colin Henry, Shahryar Minhas
-#' @export
+#' @keywords internal
+#' @noRd
 
 actor_pds_to_frame <- function(netlet_actor_pds){
 
@@ -116,7 +117,8 @@ actor_pds_to_frame <- function(netlet_actor_pds){
 #' 
 #' @author Shahryar Minhas
 #' 
-#' @export
+#' @keywords internal
+#' @noRd
 
 actor_pds_from_netlet <- function(netlet){
 

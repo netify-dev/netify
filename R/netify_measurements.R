@@ -4,6 +4,7 @@
 #' @return a list of measurements about the netify object
 #' @author Cassy Dorff, Shahryar Minhas
 #' @export netify_measurements
+#' @aliases netlet_measurements measurements
 
 netify_measurements <- function(netlet){
 
@@ -134,3 +135,11 @@ netify_measurements <- function(netlet){
   # 
   return(msrmnts)
 }
+
+#' @rdname netify_measurements
+#' @export
+netlet_measurements <- netify_measurements
+
+#' @rdname netify_measurements
+#' @export
+measurements <- netify_measurements

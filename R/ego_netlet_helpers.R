@@ -12,7 +12,8 @@
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #'
-#' @export
+#' @keywords internal
+#' @noRd
 
 get_ngbd_net_for_ego <- function(
     raw_net, ego, threshold, 
