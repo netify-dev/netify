@@ -10,6 +10,32 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// count_duplicate_dyads
+int count_duplicate_dyads(CharacterVector actor1, CharacterVector actor2, NumericVector time);
+RcppExport SEXP _netify_count_duplicate_dyads(SEXP actor1SEXP, SEXP actor2SEXP, SEXP timeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type actor1(actor1SEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type actor2(actor2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type time(timeSEXP);
+    rcpp_result_gen = Rcpp::wrap(count_duplicate_dyads(actor1, actor2, time));
+    return rcpp_result_gen;
+END_RCPP
+}
+// count_duplicate_dyads_indexed
+int count_duplicate_dyads_indexed(CharacterVector actor1, CharacterVector actor2, NumericVector time);
+RcppExport SEXP _netify_count_duplicate_dyads_indexed(SEXP actor1SEXP, SEXP actor2SEXP, SEXP timeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type actor1(actor1SEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type actor2(actor2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type time(timeSEXP);
+    rcpp_result_gen = Rcpp::wrap(count_duplicate_dyads_indexed(actor1, actor2, time));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_matrix
 NumericMatrix get_matrix(int n_rows, int n_cols, CharacterVector actors_rows, CharacterVector actors_cols, IntegerVector matRowIndices, IntegerVector matColIndices, NumericVector value, bool symmetric, bool missing_to_zero, bool diag_to_NA);
 RcppExport SEXP _netify_get_matrix(SEXP n_rowsSEXP, SEXP n_colsSEXP, SEXP actors_rowsSEXP, SEXP actors_colsSEXP, SEXP matRowIndicesSEXP, SEXP matColIndicesSEXP, SEXP valueSEXP, SEXP symmetricSEXP, SEXP missing_to_zeroSEXP, SEXP diag_to_NASEXP) {
@@ -110,27 +136,15 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// repeat_dyads_check_cpp
-int repeat_dyads_check_cpp(CharacterVector actor1, CharacterVector actor2, NumericVector time);
-RcppExport SEXP _netify_repeat_dyads_check_cpp(SEXP actor1SEXP, SEXP actor2SEXP, SEXP timeSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< CharacterVector >::type actor1(actor1SEXP);
-    Rcpp::traits::input_parameter< CharacterVector >::type actor2(actor2SEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type time(timeSEXP);
-    rcpp_result_gen = Rcpp::wrap(repeat_dyads_check_cpp(actor1, actor2, time));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_netify_count_duplicate_dyads", (DL_FUNC) &_netify_count_duplicate_dyads, 3},
+    {"_netify_count_duplicate_dyads_indexed", (DL_FUNC) &_netify_count_duplicate_dyads_indexed, 3},
     {"_netify_get_matrix", (DL_FUNC) &_netify_get_matrix, 10},
     {"_netify_get_matrix_integer", (DL_FUNC) &_netify_get_matrix_integer, 10},
     {"_netify_get_matrix_logical", (DL_FUNC) &_netify_get_matrix_logical, 10},
     {"_netify_get_matrix_character", (DL_FUNC) &_netify_get_matrix_character, 10},
     {"_netify_get_matrix_batch", (DL_FUNC) &_netify_get_matrix_batch, 10},
-    {"_netify_repeat_dyads_check_cpp", (DL_FUNC) &_netify_repeat_dyads_check_cpp, 3},
     {NULL, NULL, 0}
 };
 

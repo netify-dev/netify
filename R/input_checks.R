@@ -278,7 +278,7 @@ repeat_dyads_check <- function(dyad_data, actor1, actor2, time = NULL) {
     actor2Vec <- dyad_data[[actor2]]
 
     # call c++ fn
-    out <- repeat_dyads_check_cpp(actor1Vec, actor2Vec, timeVec)
+    out <- count_duplicate_dyads(actor1Vec, actor2Vec, timeVec)
 
     # 
     return(out)

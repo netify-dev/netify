@@ -23,7 +23,7 @@ a netify object
 \code{prep_for_netify} takes in a network object (e.g., an igraph or network object)
 and outputs a netify object. If the input is already a matrix/array/list of matrices,
 then it simply calls \code{new_netify}. Otherwise, it calls the appropriate internal
-helper (\code{process_igraph} or \code{process_network}) to extract adjacency matrix
+helper (\code{decompose_igraph} or \code{decompose_network}) to extract adjacency matrix
 and any nodal/dyadic attributes, and then calls \code{new_netify}.
 }
 \author{
