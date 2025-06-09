@@ -59,7 +59,7 @@
 <span>  actor_pds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  diag_to_NA <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  output_format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span>, <span class="st">"cross_sec"</span>, <span class="st">"longit_list"</span><span class="op">)</span>,</span>
+<span>  output_format <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nodal_vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dyad_vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dyad_vars_symmetric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">symmetric</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">dyad_vars</span><span class="op">)</span><span class="op">)</span></span>
@@ -150,8 +150,7 @@ default is to add all the variables from the extra_dyadic_data data.frame</p></d
 
 
 <dt id="arg-dyad-vars-symmetric">dyad_vars_symmetric<a class="anchor" aria-label="anchor" href="#arg-dyad-vars-symmetric"></a></dt>
-<dd><p>logical vector: whether ties are symmetric, default is to use the same choice as
-the symmetric argument</p></dd>
+<dd><p>logical vector: whether ties are symmetric, default is to use the same choice as the symmetric argument</p></dd>
 
 </dl></div>
     <div class="section level2">

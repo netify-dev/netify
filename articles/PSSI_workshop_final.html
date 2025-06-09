@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Dorff, Keltner,
 Minhas</h4>
             
-            <h4 data-toc-skip class="date">2025-06-02</h4>
+            <h4 data-toc-skip class="date">2025-06-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/PSSI_workshop_final.Rmd" class="external-link"><code>vignettes/PSSI_workshop_final.Rmd</code></a></small>
       <div class="d-none name"><code>PSSI_workshop_final.Rmd</code></div>
@@ -98,7 +98,7 @@ GitHub.</p>
 <pre><code><span><span class="co">## ── <span style="font-weight: bold;">Attaching core tidyverse packages</span> ──────────────────────── tidyverse 2.0.0 ──</span></span>
 <span><span class="co">## <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">dplyr    </span> 1.1.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">readr    </span> 2.1.5</span></span>
 <span><span class="co">## <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">forcats  </span> 1.0.0     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">stringr  </span> 1.5.1</span></span>
-<span><span class="co">## <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2  </span> 3.5.2     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble   </span> 3.2.1</span></span>
+<span><span class="co">## <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">ggplot2  </span> 3.5.2     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tibble   </span> 3.3.0</span></span>
 <span><span class="co">## <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">lubridate</span> 1.9.4     <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">tidyr    </span> 1.3.1</span></span>
 <span><span class="co">## <span style="color: #00BB00;">✔</span> <span style="color: #0000BB;">purrr    </span> 1.0.4     </span></span>
 <span><span class="co">## ── <span style="font-weight: bold;">Conflicts</span> ────────────────────────────────────────── tidyverse_conflicts() ──</span></span>
@@ -124,7 +124,7 @@ between actors.</p>
 <span></span>
 <span><span class="co"># Construct unweighted network (number_of_events by default)</span></span>
 <span><span class="va">mex_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
-<span>  dyad_data <span class="op">=</span> <span class="va">mexico</span>,</span>
+<span>  <span class="va">mexico</span>,</span>
 <span>  actor1 <span class="op">=</span> <span class="st">'side_a'</span>,</span>
 <span>  actor2 <span class="op">=</span> <span class="st">'side_b'</span>,</span>
 <span>  symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -136,8 +136,8 @@ between actors.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Summaries at the graph and actor levels</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   net num_actors    density num_edges prop_edges_missing mean_edge_weight</span></span>
-<span><span class="co">## 1   1         74 0.02554609       138                  0         7.018512</span></span>
+<pre><code><span><span class="co">##   num_actors    density num_edges prop_edges_missing mean_edge_weight</span></span>
+<span><span class="co">## 1         74 0.02520088       138                  0         7.018512</span></span>
 <span><span class="co">##   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition</span></span>
 <span><span class="co">## 1        113.395                  0               0            3757   0.1371326</span></span>
 <span><span class="co">##   sd_of_actor_means transitivity</span></span>
@@ -172,7 +172,7 @@ variable.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Weighted by civilian deaths</span></span>
 <span><span class="va">mex_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
-<span>  dyad_data <span class="op">=</span> <span class="va">mexico</span>,</span>
+<span>  <span class="va">mexico</span>,</span>
 <span>  actor1 <span class="op">=</span> <span class="st">'side_a'</span>,</span>
 <span>  actor2 <span class="op">=</span> <span class="st">'side_b'</span>,</span>
 <span>  weight <span class="op">=</span> <span class="st">'deaths_civilians'</span>,</span>
@@ -184,8 +184,8 @@ variable.</p>
 <span></span>
 <span><span class="co"># Summaries and visualization</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mex_network_civ</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   net num_actors    density num_edges prop_edges_missing mean_edge_weight</span></span>
-<span><span class="co">## 1   1         74 0.01703073        92                  0        0.4813032</span></span>
+<pre><code><span><span class="co">##   num_actors    density num_edges prop_edges_missing mean_edge_weight</span></span>
+<span><span class="co">## 1         74 0.01680058        92                  0        0.4813032</span></span>
 <span><span class="co">##   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition</span></span>
 <span><span class="co">## 1       8.809874                  0               0             380    0.159834</span></span>
 <span><span class="co">##   sd_of_actor_means transitivity</span></span>
@@ -204,7 +204,7 @@ variable.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example: community detection (optimal clustering)</span></span>
 <span><span class="va">i_opt_memb</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="va">ig</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/prep_for_igraph.html">prep_for_igraph</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span>  <span class="va">ig</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_igraph.html">netify_to_igraph</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span>  <span class="va">memb</span> <span class="op">&lt;-</span> <span class="fu">igraph</span><span class="fu">::</span><span class="fu"><a href="https://r.igraph.org/reference/cluster_optimal.html" class="external-link">cluster_optimal</a></span><span class="op">(</span><span class="va">ig</span><span class="op">)</span><span class="op">$</span><span class="va">membership</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">memb</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -222,7 +222,7 @@ variable.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span>size_by_source_count <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">number_of_sources</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">mex_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_nodal.html">add_nodal</a></span><span class="op">(</span></span>
+<span><span class="va">mex_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span>
 <span>  netlet <span class="op">=</span> <span class="va">mex_network_civ</span>,</span>
 <span>  node_data <span class="op">=</span> <span class="va">size_by_source_count</span>,</span>
 <span>  actor <span class="op">=</span> <span class="st">'actor'</span>,</span>
@@ -260,7 +260,7 @@ variable.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a time-varying network</span></span>
 <span><span class="va">mex_network_long</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
-<span>  dyad_data <span class="op">=</span> <span class="va">mexico</span>,</span>
+<span>  <span class="va">mexico</span>,</span>
 <span>  actor1 <span class="op">=</span> <span class="st">'side_a'</span>,</span>
 <span>  actor2 <span class="op">=</span> <span class="st">'side_b'</span>,</span>
 <span>  time <span class="op">=</span> <span class="st">'year'</span>,      </span>
@@ -306,10 +306,23 @@ variable.</p>
 <p><img src="PSSI_workshop_final_files/figure-html/longitudinal_network-3.png" width="1093.75"></p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example: subset for selected years</span></span>
-<span><span class="va">mex_network_short</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subset_netlet.html">subset_netlet</a></span><span class="op">(</span><span class="va">mex_network_long</span>,</span>
-<span>                                   when_to_subset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2006"</span>, <span class="st">"2008"</span>, </span>
-<span>                                                      <span class="st">"2010"</span>, <span class="st">"2012"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network_short</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">mex_network_short</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subset_netify.html">subset_netify</a></span><span class="op">(</span><span class="va">mex_network_long</span>,</span>
+<span>                                   time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2006"</span>, <span class="st">"2008"</span>, </span>
+<span>                                           <span class="st">"2010"</span>, <span class="st">"2012"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">mex_network_short</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span></span>
+<span><span class="co">## • Unipartite</span></span>
+<span><span class="co">## • Symmetric</span></span>
+<span><span class="co">## • Sum of Weights from `deaths_civilians`</span></span>
+<span><span class="co">## • Longitudinal: 4 Periods</span></span>
+<span><span class="co">## • # Unique Actors: 74</span></span>
+<span><span class="co">## Network Summary Statistics (averaged across time):</span></span>
+<span><span class="co">##                   dens miss  mean trans</span></span>
+<span><span class="co">## deaths_civilians 0.002    0 0.016  0.05</span></span>
+<span><span class="co">## • Nodal Features: None</span></span>
+<span><span class="co">## • Dyad Features: None</span></span></code></pre>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network_short</span><span class="op">)</span></span></code></pre></div>
 <p><img src="PSSI_workshop_final_files/figure-html/longitudinal_network-4.png" width="1093.75"></p>
 </div>
 </div>
@@ -318,13 +331,13 @@ variable.</p>
 </h3>
 <p>Let’s now repeat similar steps for conflict data in Myanmar
 (Burma).</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># UCDP data for Myanmar</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">myanmar</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create basic network</span></span>
 <span><span class="va">my_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
-<span>  dyad_data <span class="op">=</span> <span class="va">myanmar</span>,</span>
+<span>  <span class="va">myanmar</span>,</span>
 <span>  actor1 <span class="op">=</span> <span class="st">'side_a'</span>,</span>
 <span>  actor2 <span class="op">=</span> <span class="st">'side_b'</span>,</span>
 <span>  symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -333,18 +346,18 @@ variable.</p>
 <span>  missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> Warning: there are repeating dyads within time periods in the dataset. When `sum_dyads = TRUE` and `weight` is not supplied, edges in the outputted adjacency matrix represent a count of interactions between actors.</span></span></code></pre>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">my_network</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   net num_actors    density num_edges prop_edges_missing mean_edge_weight</span></span>
-<span><span class="co">## 1   1         27 0.08262108        58                  0         21.00855</span></span>
+<pre><code><span><span class="co">##   num_actors    density num_edges prop_edges_missing mean_edge_weight</span></span>
+<span><span class="co">## 1         27 0.07956104        58                  0         21.00855</span></span>
 <span><span class="co">##   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition</span></span>
 <span><span class="co">## 1       183.2769                  0               0            2535   0.2944592</span></span>
 <span><span class="co">##   sd_of_actor_means transitivity</span></span>
 <span><span class="co">## 1          56.44117   0.06637168</span></span></code></pre>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Weighted by civilian deaths</span></span>
 <span><span class="va">my_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
-<span>  dyad_data <span class="op">=</span> <span class="va">myanmar</span>,</span>
+<span>  <span class="va">myanmar</span>,</span>
 <span>  actor1 <span class="op">=</span> <span class="st">'side_a'</span>,</span>
 <span>  actor2 <span class="op">=</span> <span class="st">'side_b'</span>,</span>
 <span>  weight <span class="op">=</span> <span class="st">'deaths_civilians'</span>,</span>
@@ -362,7 +375,7 @@ variable.</p>
 </h4>
 <p>We define various attribute categories (government, non-government,
 ethnic/ideological, armed, etc.) and add those as node-level data.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define actor categories</span></span>
 <span><span class="va">gov_actors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Government of Myanmar (Burma)"</span>, <span class="st">"BMA"</span>, <span class="st">"NUG"</span><span class="op">)</span></span>
 <span><span class="va">nongov_actors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -404,15 +417,15 @@ ethnic/ideological, armed, etc.) and add those as node-level data.</p>
 <span><span class="va">node_data</span> <span class="op">&lt;-</span> <span class="va">node_data</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate_all.html" class="external-link">mutate_all</a></span><span class="op">(</span><span class="va">as.factor</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Add these attributes to the network</span></span>
-<span><span class="va">my_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_nodal.html">add_nodal</a></span><span class="op">(</span><span class="va">my_network_civ</span>, </span>
+<span><span class="va">my_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span><span class="va">my_network_civ</span>, </span>
 <span>                            node_data <span class="op">=</span> <span class="va">node_data</span>, </span>
 <span>                            actor <span class="op">=</span> <span class="st">'actor'</span>, </span>
 <span>                            node_vars <span class="op">=</span> <span class="st">'gov_or_nongov'</span><span class="op">)</span></span>
-<span><span class="va">my_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_nodal.html">add_nodal</a></span><span class="op">(</span><span class="va">my_network_civ</span>, </span>
+<span><span class="va">my_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span><span class="va">my_network_civ</span>, </span>
 <span>                            node_data <span class="op">=</span> <span class="va">node_data</span>, </span>
 <span>                            actor <span class="op">=</span> <span class="st">'actor'</span>, </span>
 <span>                            node_vars <span class="op">=</span> <span class="st">'ethnic_or_ideological'</span><span class="op">)</span></span>
-<span><span class="va">my_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_nodal.html">add_nodal</a></span><span class="op">(</span><span class="va">my_network_civ</span>, </span>
+<span><span class="va">my_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span><span class="va">my_network_civ</span>, </span>
 <span>                            node_data <span class="op">=</span> <span class="va">node_data</span>, </span>
 <span>                            actor <span class="op">=</span> <span class="st">'actor'</span>, </span>
 <span>                            node_vars <span class="op">=</span> <span class="st">'armed_or_not'</span><span class="op">)</span></span>
@@ -426,7 +439,7 @@ ethnic/ideological, armed, etc.) and add those as node-level data.</p>
 <span>  add_text <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="PSSI_workshop_final_files/figure-html/nodal_attributes-1.png" width="1093.75"></p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">my_network_civ</span>,</span>
 <span>  title <span class="op">=</span> <span class="st">"Myanmar Network"</span>,</span>
@@ -441,7 +454,7 @@ ethnic/ideological, armed, etc.) and add those as node-level data.</p>
 </h4>
 <p>Finally, we illustrate a bipartite network example, focusing on
 interactions between Buddhist and Christian actors in Myanmar.</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define actors by religion</span></span>
 <span><span class="va">buddhist_actors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PSLF"</span>, <span class="st">"DKBA"</span>, <span class="st">"God's Army"</span>, <span class="st">"Government of Myanmar (Burma)"</span><span class="op">)</span></span>
 <span><span class="va">christian_actors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"KNU"</span>, <span class="st">"KNPP"</span>, <span class="st">"KIO"</span>, <span class="st">"MDA"</span>, <span class="st">"NSCN-K"</span>, <span class="st">"CNF"</span><span class="op">)</span></span>
@@ -463,7 +476,7 @@ interactions between Buddhist and Christian actors in Myanmar.</p>
 <span></span>
 <span><span class="co"># Construct bipartite network</span></span>
 <span><span class="va">bipartite_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
-<span>  dyad_data <span class="op">=</span> <span class="va">myanmar_bipartite</span>,</span>
+<span>  <span class="va">myanmar_bipartite</span>,</span>
 <span>  actor1 <span class="op">=</span> <span class="st">'side_a'</span>,</span>
 <span>  actor2 <span class="op">=</span> <span class="st">'side_b'</span>,</span>
 <span>  mode <span class="op">=</span> <span class="st">'bipartite'</span>,</span>

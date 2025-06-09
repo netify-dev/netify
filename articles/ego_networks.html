@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2025-06-02</h4>
+            <h4 data-toc-skip class="date">2025-06-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/ego_networks.Rmd" class="external-link"><code>vignettes/ego_networks.Rmd</code></a></small>
       <div class="d-none name"><code>ego_networks.Rmd</code></div>
@@ -93,7 +93,8 @@ data (ICEWS data) using the <code>netify</code> package.</p>
 <span></span>
 <span><span class="co"># create a netify object</span></span>
 <span><span class="va">netlet</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
-<span>    dyad_data<span class="op">=</span><span class="va">icews</span>, actor1<span class="op">=</span><span class="st">'i'</span>, actor2<span class="op">=</span><span class="st">'j'</span>,</span>
+<span>    <span class="va">icews</span>, </span>
+<span>    actor1<span class="op">=</span><span class="st">'i'</span>, actor2<span class="op">=</span><span class="st">'j'</span>,</span>
 <span>    time <span class="op">=</span> <span class="st">'year'</span>,</span>
 <span>    symmetric<span class="op">=</span><span class="cn">FALSE</span>, weight<span class="op">=</span><span class="st">'verbCoop'</span>,</span>
 <span>    mode<span class="op">=</span><span class="st">'unipartite'</span>, sum_dyads<span class="op">=</span><span class="cn">FALSE</span>,</span>
@@ -113,14 +114,14 @@ data (ICEWS data) using the <code>netify</code> package.</p>
 <span><span class="co">#&gt; • # Unique Actors: 152</span></span>
 <span><span class="co">#&gt; Network Summary Statistics (averaged across time):</span></span>
 <span><span class="co">#&gt;           dens miss   mean recip trans</span></span>
-<span><span class="co">#&gt; verbCoop 0.418    0 19.114 0.976 0.627</span></span>
+<span><span class="co">#&gt; verbCoop 0.415    0 19.114 0.976 0.627</span></span>
 <span><span class="co">#&gt; • Nodal Features: i_polity2, i_log_gdp, i_log_pop</span></span>
 <span><span class="co">#&gt; • Dyad Features: matlCoop, verbConf, matlConf</span></span></code></pre></div>
 <p>This is a longitudinal, weighted network with nodal and dyadic
 attributes. In a few more steps we will show how to highlight these
 attributes in a plot.</p>
 <p>Let’s say we want to extract the ego network specifically for
-Pakistan. We can do this using the <code>ego_netlet</code> function.
+Pakistan. We can do this using the <code>ego_netify</code> function.
 This function has the following arguments:</p>
 <ul>
 <li>
@@ -152,38 +153,38 @@ included in the ego network. Default is TRUE.</li>
 keeping the default threshold.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># extract ego network for Pakistan</span></span>
-<span><span class="va">pakistan_ego_net</span> <span class="op">=</span> <span class="fu"><a href="../reference/ego_netlet.html">ego_netlet</a></span><span class="op">(</span><span class="va">netlet</span>, ego <span class="op">=</span> <span class="st">'Pakistan'</span><span class="op">)</span></span>
+<span><span class="va">pakistan_ego_net</span> <span class="op">=</span> <span class="fu"><a href="../reference/ego_netify.html">ego_netify</a></span><span class="op">(</span><span class="va">netlet</span>, ego <span class="op">=</span> <span class="st">'Pakistan'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># print</span></span>
 <span><span class="va">pakistan_ego_net</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Hello, you have created a neighborhood network for ego(s) (Pakistan), yay!</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span></span>
 <span><span class="co">#&gt; • Unipartite</span></span>
 <span><span class="co">#&gt; • Asymmetric</span></span>
 <span><span class="co">#&gt; • Weights from `verbCoop`</span></span>
 <span><span class="co">#&gt; • Longitudinal: 13 Periods</span></span>
-<span><span class="co">#&gt; • # Unique Egos: 1 | # Unique Alters: 81</span></span>
-<span><span class="co">#&gt; Neighborhood Network Summary Statistics (averaged across time):</span></span>
+<span><span class="co">#&gt; • # Unique Actors: 82</span></span>
+<span><span class="co">#&gt; Network Summary Statistics (averaged across time):</span></span>
 <span><span class="co">#&gt;           dens miss    mean recip trans</span></span>
-<span><span class="co">#&gt; Pakistan 0.865    0 165.009 0.978 0.912</span></span>
+<span><span class="co">#&gt; verbCoop 0.842    0 165.009 0.978 0.912</span></span>
 <span><span class="co">#&gt; • Nodal Features: i_polity2, i_log_gdp, i_log_pop</span></span>
 <span><span class="co">#&gt; • Dyad Features: matlCoop, verbConf, matlConf</span></span></code></pre></div>
 <p>The print output tells us that across the entire time series, we can
 see that Pakistan has 81 unique alters. If we wanted to look at a
 specific year we can just subset the object by that year (note that
-<code>subset_netlet</code> does not work with ego networks at this
+<code>subset_netify</code> does not work with ego networks at this
 time):</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># subset to a specific year</span></span>
 <span><span class="va">pakistan_ego_net</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Hello, you have created a neighborhood network for ego(s) (Pakistan: 2002), yay!</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span></span>
 <span><span class="co">#&gt; • Unipartite</span></span>
 <span><span class="co">#&gt; • Asymmetric</span></span>
 <span><span class="co">#&gt; • Weights from `verbCoop`</span></span>
 <span><span class="co">#&gt; • Cross-Sectional</span></span>
-<span><span class="co">#&gt; • # Unique Egos: 1 | # Unique Alters: 34</span></span>
-<span><span class="co">#&gt; Neighborhood Network Summary Statistics:</span></span>
-<span><span class="co">#&gt;                 dens miss    mean recip trans</span></span>
-<span><span class="co">#&gt; Pakistan: 2002 0.777    0 166.934 0.979 0.849</span></span>
+<span><span class="co">#&gt; • # Unique Actors: 35</span></span>
+<span><span class="co">#&gt; Network Summary Statistics:</span></span>
+<span><span class="co">#&gt;           dens miss    mean recip trans</span></span>
+<span><span class="co">#&gt; verbCoop 0.755    0 166.934 0.979 0.849</span></span>
 <span><span class="co">#&gt; • Nodal Features: None</span></span>
 <span><span class="co">#&gt; • Dyad Features: None</span></span></code></pre></div>
 <p>We can also obtain summary statistics for all of Pakistan’s ego
@@ -191,13 +192,13 @@ networks across the time series using the netify <code>summary</code>
 function:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    net    layer num_actors   density num_edges prop_edges_missing</span></span>
-<span><span class="co">#&gt; 1 2002 Pakistan         35 0.7773109       925                  0</span></span>
-<span><span class="co">#&gt; 2 2003 Pakistan         30 0.9091954       791                  0</span></span>
-<span><span class="co">#&gt; 3 2004 Pakistan         51 0.7419608      1892                  0</span></span>
-<span><span class="co">#&gt; 4 2005 Pakistan         49 0.8337585      1961                  0</span></span>
-<span><span class="co">#&gt; 5 2006 Pakistan         41 0.8426829      1382                  0</span></span>
-<span><span class="co">#&gt; 6 2007 Pakistan         42 0.8919861      1536                  0</span></span>
+<span><span class="co">#&gt;              net num_actors   density num_edges prop_edges_missing</span></span>
+<span><span class="co">#&gt; 1 Pakistan__2002         35 0.7551020       925                  0</span></span>
+<span><span class="co">#&gt; 2 Pakistan__2003         30 0.8788889       791                  0</span></span>
+<span><span class="co">#&gt; 3 Pakistan__2004         51 0.7274125      1892                  0</span></span>
+<span><span class="co">#&gt; 4 Pakistan__2005         49 0.8167430      1961                  0</span></span>
+<span><span class="co">#&gt; 5 Pakistan__2006         41 0.8221297      1382                  0</span></span>
+<span><span class="co">#&gt; 6 Pakistan__2007         42 0.8707483      1536                  0</span></span>
 <span><span class="co">#&gt;   mean_edge_weight sd_edge_weight median_edge_weight min_edge_weight</span></span>
 <span><span class="co">#&gt; 1        166.93445       514.1573                 14               0</span></span>
 <span><span class="co">#&gt; 2        258.17356       660.1221                 39               0</span></span>
@@ -223,7 +224,7 @@ function:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#plot(pakistan_ego_net)</span></span>
 <span></span>
-<span><span class="co">#test&lt;-subset_netlet(pakistan_ego_net,</span></span>
+<span><span class="co">#test&lt;-subset_netify(pakistan_ego_net,</span></span>
 <span>    <span class="co"># when_to_subset='2013')</span></span>
 <span></span>
 <span><span class="co">#test2&lt;-pakistan_ego_net[[1]]</span></span>

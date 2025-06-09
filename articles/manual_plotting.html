@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2025-06-02</h4>
+            <h4 data-toc-skip class="date">2025-06-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/manual_plotting.Rmd" class="external-link"><code>vignettes/manual_plotting.Rmd</code></a></small>
       <div class="d-none name"><code>manual_plotting.Rmd</code></div>
@@ -100,7 +100,8 @@ legends for a color aesthetic for both nodes and edges).</p>
 <span></span>
 <span><span class="co"># create a netify object</span></span>
 <span><span class="va">netlet</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
-<span>    dyad_data<span class="op">=</span><span class="va">icews</span>, actor1<span class="op">=</span><span class="st">'i'</span>, actor2<span class="op">=</span><span class="st">'j'</span>,</span>
+<span>    <span class="va">icews</span>, </span>
+<span>    actor1<span class="op">=</span><span class="st">'i'</span>, actor2<span class="op">=</span><span class="st">'j'</span>,</span>
 <span>    time <span class="op">=</span> <span class="st">'year'</span>,</span>
 <span>    symmetric<span class="op">=</span><span class="cn">FALSE</span>, weight<span class="op">=</span><span class="st">'verbCoop'</span>,</span>
 <span>    mode<span class="op">=</span><span class="st">'unipartite'</span>, sum_dyads<span class="op">=</span><span class="cn">FALSE</span>,</span>
@@ -126,9 +127,9 @@ legends for a color aesthetic for both nodes and edges).</p>
 <span>  <span class="st">'Syrian Arab Republic'</span>, <span class="st">'Thailand'</span>, </span>
 <span>  <span class="st">'United Kingdom'</span>, <span class="st">'United States'</span>, </span>
 <span>  <span class="st">'Zimbabwe'</span> <span class="op">)</span></span>
-<span><span class="va">netlet</span> <span class="op">=</span> <span class="fu"><a href="../reference/subset_netlet.html">subset_netlet</a></span><span class="op">(</span></span>
+<span><span class="va">netlet</span> <span class="op">=</span> <span class="fu"><a href="../reference/subset_netify.html">subset_netify</a></span><span class="op">(</span></span>
 <span>  <span class="va">netlet</span>, </span>
-<span>  what_to_subset <span class="op">=</span> <span class="va">actors_to_keep</span></span>
+<span>  actors <span class="op">=</span> <span class="va">actors_to_keep</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># print</span></span>
@@ -141,7 +142,7 @@ legends for a color aesthetic for both nodes and edges).</p>
 <span><span class="co">## • # Unique Actors: 34</span></span>
 <span><span class="co">## Network Summary Statistics (averaged across time):</span></span>
 <span><span class="co">##           dens miss    mean recip trans</span></span>
-<span><span class="co">## verbCoop 0.887    0 179.484 0.978 0.928</span></span>
+<span><span class="co">## verbCoop 0.861    0 179.484 0.978 0.928</span></span>
 <span><span class="co">## • Nodal Features: i_polity2, i_log_gdp, i_log_pop</span></span>
 <span><span class="co">## • Dyad Features: matlCoop, verbConf, matlConf</span></span></code></pre>
 <p>This is a longitudinal, weighted network with nodal and dyadic
@@ -170,9 +171,9 @@ frames that can be passed to <code>ggplot2</code>.</p>
 <span><span class="co">##   ..$ to      : chr [1:12937] "Brazil" "Brazil" "Brazil" "Brazil" ...</span></span>
 <span><span class="co">##   ..$ time    : chr [1:12937] "2002" "2003" "2004" "2005" ...</span></span>
 <span><span class="co">##   ..$ verbCoop: num [1:12937] 3 3 24 27 54 4 26 7 12 5 ...</span></span>
-<span><span class="co">##   ..$ matlCoop: num [1:12937] 0 1 0 0 0 0 0 0 1 0 ...</span></span>
-<span><span class="co">##   ..$ verbConf: num [1:12937] 0 2 0 2 3 0 2 1 0 0 ...</span></span>
-<span><span class="co">##   ..$ matlConf: num [1:12937] 0 0 2 0 1 0 0 0 0 0 ...</span></span>
+<span><span class="co">##   ..$ matlCoop: int [1:12937] 0 1 0 0 0 0 0 0 1 0 ...</span></span>
+<span><span class="co">##   ..$ verbConf: int [1:12937] 0 2 0 2 3 0 2 1 0 0 ...</span></span>
+<span><span class="co">##   ..$ matlConf: int [1:12937] 0 0 2 0 1 0 0 0 0 0 ...</span></span>
 <span><span class="co">##   ..$ x1      : num [1:12937] -3.187 -0.3978 -0.0496 -0.3853 -0.5135 ...</span></span>
 <span><span class="co">##   ..$ y1      : num [1:12937] 2.535 -1.3386 0.0651 0.9399 1.4266 ...</span></span>
 <span><span class="co">##   ..$ x2      : num [1:12937] -2.9515 -0.0649 -0.0429 -0.2949 -0.3298 ...</span></span>
