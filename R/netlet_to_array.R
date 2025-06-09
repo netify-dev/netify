@@ -21,58 +21,64 @@ longit_dv_to_arr <- function(netlet){
     # pull out object to collapse into an array
     array_list <- get_raw(netlet)
 
-    # get dimensions and type
+    # get dimensions and type - cache attributes
+    netlet_attrs <- attributes(netlet)
     msrmnts <- netify_measurements(netlet)
-    netlet_type <- attr(netlet, 'netify_type')
-
-    # check if actor time is uniform
-    actor_unif <- attr(netlet, 'actor_time_uniform')
+    netlet_type <- netlet_attrs$netify_type
+    actor_unif <- netlet_attrs$actor_time_uniform
 
     # longit_list + actor_unif case
-    if(netlet_type == 'longit_list' & actor_unif){
+    if(netlet_type == 'longit_list' && actor_unif){
 
+        # Cache dimensions
+        n_row <- msrmnts$n_row_actors[[1]]
+        n_col <- msrmnts$n_col_actors[[1]]
+        n_time <- msrmnts$n_time
+        time_periods <- msrmnts$time
+        
         # set up array to fill in
-        arr_dim <- c(
-            msrmnts$n_row_actors[[1]],
-            msrmnts$n_col_actors[[1]],
-            msrmnts$n_time )
-        arr_labs <- list(
-            msrmnts$row_actors[[1]],
-            msrmnts$col_actors[[1]],
-            msrmnts$time )
-        arr <- array(NA, arr_dim, dimnames=arr_labs)
+        arr <- array(NA, 
+            dim = c(n_row, n_col, n_time),
+            dimnames = list(
+                msrmnts$row_actors[[1]],
+                msrmnts$col_actors[[1]],
+                time_periods))
 
-        # fill in array
-        for(tt in msrmnts$time){
-            arr[,,tt] = array_list[[tt]] }
-        return(arr) }
+        # fill in array - use seq_along for efficiency
+        for(i in seq_along(time_periods)){
+            arr[,,i] <- array_list[[time_periods[i]]]
+        }
+        return(arr)
+    }
 
     # longit_list + !actor_unif case
-    if(netlet_type == 'longit_list' & !actor_unif){
+    if(netlet_type == 'longit_list' && !actor_unif){
 
-        # set up array to fill in            
-        row_actors <- sort(unique(unlist(msrmnts$row_actors)))
-        n_row_actors <- length(row_actors)
-        col_actors <- sort(unique(unlist(msrmnts$col_actors)))
-        n_col_actors <- length(col_actors)
-        arr_dim <- c(
-            n_row_actors,
-            n_col_actors,
-            msrmnts$n_time )
-        arr_labs <- list(
-            row_actors,
-            col_actors,
-            msrmnts$time )
-        arr <- array(NA, arr_dim, dimnames=arr_labs)
+        # Optimize unique operations
+        all_row_actors <- unlist(msrmnts$row_actors, use.names = FALSE)
+        all_col_actors <- unlist(msrmnts$col_actors, use.names = FALSE)
+        row_actors <- sort(unique(all_row_actors))
+        col_actors <- sort(unique(all_col_actors))
         
-        # fill in array
-        for(tt in msrmnts$time){
-            # pull out arr from list
+        # Cache dimensions
+        n_row_actors <- length(row_actors)
+        n_col_actors <- length(col_actors)
+        n_time <- msrmnts$n_time
+        time_periods <- msrmnts$time
+        
+        # set up array to fill in            
+        arr <- array(NA,
+            dim = c(n_row_actors, n_col_actors, n_time),
+            dimnames = list(row_actors, col_actors, time_periods))
+        
+        # fill in array - optimized with direct indexing
+        for(i in seq_along(time_periods)){
+            tt <- time_periods[i]
             to_add <- array_list[[tt]]
-            to_add_rows <- rownames(to_add)
-            to_add_cols <- colnames(to_add)
-            arr[to_add_rows, to_add_cols, tt] = to_add }
-        return(arr) }
+            arr[rownames(to_add), colnames(to_add), i] <- to_add
+        }
+        return(arr)
+    }
 }
 
 #' Convert list of dyadic arrays into an array
@@ -88,6 +94,8 @@ longit_dv_to_arr <- function(netlet){
 #' and t is the number of time periods.
 #' #' @author Shahryar Minhas
 #' 
+#' @importFrom stats setNames
+#' 
 #' @keywords internal
 #' @noRd
 
@@ -100,12 +108,12 @@ longit_dyad_to_arr <- function(netlet){
     array_list <- attr(netlet, 'dyad_data')
 
     # get dimensions and type - cache attributes
-    msrmnts <- netify_measurements(netlet)
     netlet_attrs <- attributes(netlet)
+    msrmnts <- netify_measurements(netlet)
     netlet_type <- netlet_attrs$netify_type
     actor_unif <- netlet_attrs$actor_time_uniform
 
-    # Helper function to convert new structure to old array format
+    # Helper function to convert new structure to old array format - optimized
     convert_to_array <- function(time_period_data, target_rows, target_cols, dvars) {
         n_rows <- length(target_rows)
         n_cols <- length(target_cols)
@@ -118,23 +126,19 @@ longit_dyad_to_arr <- function(netlet){
             dimnames = list(target_rows, target_cols, dvars)
         )
         
-        # Fill array with data from individual matrices
+        # Fill array with data from individual matrices - vectorized where possible
         for(i in seq_along(dvars)) {
-            var_name <- dvars[i]
-            if(!is.null(time_period_data[[var_name]])) {
-                # Get the matrix for this variable
-                var_matrix <- time_period_data[[var_name]]
-                
-                # Extract row/col names from matrix
-                matrix_rows <- rownames(var_matrix)
-                matrix_cols <- colnames(var_matrix)
-                
-                # Map matrix indices to target array indices
-                row_indices <- match(matrix_rows, target_rows)
-                col_indices <- match(matrix_cols, target_cols)
-                
-                # Fill in the array
-                time_array[row_indices, col_indices, i] <- var_matrix
+            var_matrix <- time_period_data[[dvars[i]]]
+            if(!is.null(var_matrix)) {
+                # Direct assignment when dimensions match
+                if(identical(dim(var_matrix), c(n_rows, n_cols)) && 
+                   identical(rownames(var_matrix), target_rows) && 
+                   identical(colnames(var_matrix), target_cols)) {
+                    time_array[,,i] <- var_matrix
+                } else {
+                    # Use direct indexing instead of match when possible
+                    time_array[rownames(var_matrix), colnames(var_matrix), i] <- var_matrix
+                }
             }
         }
         
@@ -144,32 +148,22 @@ longit_dyad_to_arr <- function(netlet){
     # longit_array + actor_unif case
     if(netlet_type == 'longit_array' && actor_unif){
         
-        # set up array to fill in - cache dimensions
-        n_row_actors <- msrmnts$n_row_actors
-        n_col_actors <- msrmnts$n_col_actors
-        n_dvars <- msrmnts$n_dvars
-        n_time <- msrmnts$n_time
-        time_periods <- msrmnts$time
+        # Cache all dimensions at once
+        dims <- c(msrmnts$n_row_actors, msrmnts$n_col_actors, msrmnts$n_dvars, msrmnts$n_time)
+        labs <- list(msrmnts$row_actors, msrmnts$col_actors, msrmnts$dvars, msrmnts$time)
+        
+        arr <- array(NA, dim = dims, dimnames = labs)
+        
+        # fill in array - cache common values
+        row_actors <- msrmnts$row_actors
+        col_actors <- msrmnts$col_actors
         dvars <- msrmnts$dvars
         
-        arr_dim <- c(n_row_actors, n_col_actors, n_dvars, n_time)
-        arr_labs <- list(
-            msrmnts$row_actors,
-            msrmnts$col_actors,
-            dvars,
-            time_periods )
-        arr <- array(NA, arr_dim, dimnames=arr_labs)
-        
-        # fill in array - optimized loop
-        for(i in seq_along(time_periods)){
-            tt <- time_periods[i]
-            time_period_data <- array_list[[tt]]
-            
-            # Convert new structure to array format
+        for(i in seq_along(msrmnts$time)){
             arr[,,,i] <- convert_to_array(
-                time_period_data, 
-                msrmnts$row_actors, 
-                msrmnts$col_actors, 
+                array_list[[msrmnts$time[i]]], 
+                row_actors, 
+                col_actors, 
                 dvars
             )
         }
@@ -179,28 +173,21 @@ longit_dyad_to_arr <- function(netlet){
     # longit_list + actor_unif case
     if(netlet_type == 'longit_list' && actor_unif){
 
-        # set up array to fill in - cache dimensions
-        n_row_actors <- msrmnts$n_row_actors[[1]]
-        n_col_actors <- msrmnts$n_col_actors[[1]]
-        n_dvars <- msrmnts$n_dvars
-        n_time <- msrmnts$n_time
-        time_periods <- msrmnts$time
-        dvars <- msrmnts$dvars
+        # Cache dimensions and common values
         row_actors <- msrmnts$row_actors[[1]]
         col_actors <- msrmnts$col_actors[[1]]
+        dvars <- msrmnts$dvars
+        time_periods <- msrmnts$time
         
-        arr_dim <- c(n_row_actors, n_col_actors, n_dvars, n_time)
-        arr_labs <- list(row_actors, col_actors, dvars, time_periods)
-        arr <- array(NA, arr_dim, dimnames=arr_labs)
+        dims <- c(length(row_actors), length(col_actors), length(dvars), length(time_periods))
+        labs <- list(row_actors, col_actors, dvars, time_periods)
+        
+        arr <- array(NA, dim = dims, dimnames = labs)
 
-        # fill in array - optimized loop
+        # fill in array
         for(i in seq_along(time_periods)){
-            tt <- time_periods[i]
-            time_period_data <- array_list[[tt]]
-            
-            # Convert new structure to array format
             arr[,,,i] <- convert_to_array(
-                time_period_data, 
+                array_list[[time_periods[i]]], 
                 row_actors, 
                 col_actors, 
                 dvars
@@ -212,26 +199,27 @@ longit_dyad_to_arr <- function(netlet){
     # longit_list + !actor_unif case
     if(netlet_type == 'longit_list' && !actor_unif){
 
-        # set up array to fill in - optimized unique operations
+        # Optimize unique operations - do once
         all_row_actors <- unlist(msrmnts$row_actors, use.names = FALSE)
         all_col_actors <- unlist(msrmnts$col_actors, use.names = FALSE)
         row_actors <- sort(unique(all_row_actors))
         col_actors <- sort(unique(all_col_actors))
-        n_row_actors <- length(row_actors)
-        n_col_actors <- length(col_actors)
-        n_dvars <- msrmnts$n_dvars
-        n_time <- msrmnts$n_time
-        time_periods <- msrmnts$time
-        dvars <- msrmnts$dvars
         
-        arr_dim <- c(n_row_actors, n_col_actors, n_dvars, n_time)
-        arr_labs <- list(row_actors, col_actors, dvars, time_periods)
-        arr <- array(NA, arr_dim, dimnames=arr_labs)
+        # Cache dimensions
+        dvars <- msrmnts$dvars
+        time_periods <- msrmnts$time
+        dims <- c(length(row_actors), length(col_actors), length(dvars), length(time_periods))
+        labs <- list(row_actors, col_actors, dvars, time_periods)
+        
+        arr <- array(NA, dim = dims, dimnames = labs)
 
-        # fill in array - optimized with pre-computed matches
+        # Pre-compute actor mappings for efficiency
+        row_actor_indices <- setNames(seq_along(row_actors), row_actors)
+        col_actor_indices <- setNames(seq_along(col_actors), col_actors)
+
+        # fill in array
         for(i in seq_along(time_periods)){
             tt <- time_periods[i]
-            time_period_data <- array_list[[tt]]
             
             # Get actors for this time period
             period_row_actors <- msrmnts$row_actors[[tt]]
@@ -239,18 +227,18 @@ longit_dyad_to_arr <- function(netlet){
             
             # Convert new structure to array format for this time period
             period_array <- convert_to_array(
-                time_period_data, 
+                array_list[[tt]], 
                 period_row_actors, 
                 period_col_actors, 
                 dvars
             )
             
-            # Map to full actor space
-            row_indices <- match(period_row_actors, row_actors)
-            col_indices <- match(period_col_actors, col_actors)
+            # Use pre-computed indices for faster lookup
+            row_idx <- row_actor_indices[period_row_actors]
+            col_idx <- col_actor_indices[period_col_actors]
             
             # Fill in the main array
-            arr[row_indices, col_indices, , i] <- period_array
+            arr[row_idx, col_idx, , i] <- period_array
         }
         return(arr) 
     } 
@@ -280,107 +268,80 @@ longit_nodal_to_arr <- function(netlet){
     netify_check(netlet)
 
     # if nodal data not present return NULL
-    if(is.null(attr(netlet, 'nodal_data'))){
-        return(NULL) }
-
-    # pull out object to collapse into an array
     nodal_df <- attr(netlet, 'nodal_data')
+    if(is.null(nodal_df)){
+        return(NULL)
+    }
 
-    # get dimensions and type
+    # get dimensions and type - cache attributes
+    netlet_attrs <- attributes(netlet)
     msrmnts <- netify_measurements(netlet)
-    netlet_type <- attr(netlet, 'netify_type')
+    netlet_type <- netlet_attrs$netify_type
+    actor_unif <- netlet_attrs$actor_time_uniform
 
-    # check if actor time is uniform
-    actor_unif <- attr(netlet, 'actor_time_uniform')
+    # Pre-compute common values
+    nvars <- msrmnts$nvars
+    n_nvars <- msrmnts$n_nvars
+    time_periods <- msrmnts$time
+    n_time <- msrmnts$n_time
+
+    # Helper function to fill array - optimized
+    fill_nodal_array <- function(actors, n_actors) {
+        # Initialize array
+        arr <- array(NA, 
+            dim = c(n_actors, n_nvars, n_time),
+            dimnames = list(actors, nvars, time_periods))
+        
+        # Convert to matrix once for efficiency
+        nodal_matrix <- as.matrix(nodal_df[, nvars, drop = FALSE])
+        
+        # Group by time for efficiency
+        time_indices <- split(seq_len(nrow(nodal_df)), nodal_df$time)
+        
+        # Fill array by time period
+        for(i in seq_along(time_periods)) {
+            tt <- time_periods[i]
+            idx <- time_indices[[tt]]
+            if(length(idx) > 0) {
+                actors_tt <- nodal_df$actor[idx]
+                arr[actors_tt, , i] <- nodal_matrix[idx, , drop = FALSE]
+            }
+        }
+        return(arr)
+    }
 
     # longit_array + actor_unif case
-    if(netlet_type == 'longit_array' & actor_unif){
+    if(netlet_type == 'longit_array' && actor_unif){
+        # Create arrays for both row and col actors
+        out <- list(
+            row = fill_nodal_array(msrmnts$row_actors, msrmnts$n_row_actors),
+            col = fill_nodal_array(msrmnts$col_actors, msrmnts$n_col_actors)
+        )
+        return(out)
+    }
 
-        # set up array to fill in for both rows and cols
-        out <- lapply(c('row', 'col'), function(dlab){
-            
-            # set up array to fill in for particular dim
-            arr_dim <- c(
-                msrmnts[[paste0('n_',dlab,'_actors')]],
-                msrmnts$n_nvars, msrmnts$n_time )
-            arr_labs <- list(
-                msrmnts[[paste0(dlab, '_actors')]],
-                msrmnts$nvars, msrmnts$time )
-            arr <- array(NA, arr_dim, dimnames=arr_labs)
-
-            # fill in array
-            for(tt in msrmnts$time){
-                to_add <- nodal_df[nodal_df$time==tt,]
-                to_add_rows <- to_add$actor
-                to_add <- to_add[,msrmnts$nvars,drop=FALSE]
-                to_add <- data.matrix(to_add)
-                rownames(to_add) <- to_add_rows
-                arr[to_add_rows,,tt] = to_add }
-            return(arr) })
-        #
-        names(out) = c('row', 'col')
-        return(out) }
-
-    # longit_array + actor_unif case
-    if(netlet_type == 'longit_list' & actor_unif){
-
-        # set up array to fill in for both rows and cols
-        out <- lapply(c('row', 'col'), function(dlab){
-
-            # set up array to fill in for particular dim
-            arr_dim <- c(
-                msrmnts[[paste0('n_', dlab, '_actors')]][[1]],
-                msrmnts$n_nvars,
-                msrmnts$n_time )
-            arr_labs <- list(
-                msrmnts[[paste0(dlab, '_actors')]][[1]],
-                msrmnts$nvars,
-                msrmnts$time )
-            arr <- array(NA, arr_dim, dimnames=arr_labs)
-
-            # fill in array
-            for(tt in msrmnts$time){
-                to_add <- nodal_df[nodal_df$time==tt,]
-                to_add_rows <- to_add$actor
-                to_add <- to_add[,msrmnts$nvars,drop=FALSE]
-                to_add <- data.matrix(to_add)                
-                rownames(to_add) <- to_add_rows
-                arr[to_add_rows,,tt] = to_add }            
-            return(arr) })
-
-        #
-        names(out) = c('row', 'col')
-        return(out) }
+    # longit_list + actor_unif case
+    if(netlet_type == 'longit_list' && actor_unif){
+        # Use first time period's actors
+        out <- list(
+            row = fill_nodal_array(msrmnts$row_actors[[1]], msrmnts$n_row_actors[[1]]),
+            col = fill_nodal_array(msrmnts$col_actors[[1]], msrmnts$n_col_actors[[1]])
+        )
+        return(out)
+    }
 
     # longit_list + !actor_unif case
-    if(netlet_type == 'longit_list' & !actor_unif){
-
-        # set up array to fill in for both rows and cols
-        out <- lapply(c('row', 'col'), function(dlab){
-
-            # set up array to fill in for particular dim
-            actors <- sort(unique(unlist(msrmnts[[paste0(dlab,'_actors')]])))
-            n_actors <- length(actors)
-            arr_dim <- c(
-                n_actors,
-                msrmnts$n_nvars,
-                msrmnts$n_time )
-            arr_labs <- list(
-                actors,
-                msrmnts$nvars,
-                msrmnts$time )
-            arr <- array(NA, arr_dim, dimnames=arr_labs)
-
-            # fill in array
-            for(tt in msrmnts$time){
-                to_add <- nodal_df[nodal_df$time==tt,]
-                to_add_rows <- to_add$actor
-                to_add <- to_add[,msrmnts$nvars,drop=FALSE]
-                to_add <- data.matrix(to_add)                
-                rownames(to_add) <- to_add_rows
-                arr[to_add_rows,,tt] = to_add }
-            return(arr) })    
-            #
-            names(out) = c('row', 'col')
-            return(out) }
+    if(netlet_type == 'longit_list' && !actor_unif){
+        # Get unique actors efficiently
+        all_row_actors <- unlist(msrmnts$row_actors, use.names = FALSE)
+        all_col_actors <- unlist(msrmnts$col_actors, use.names = FALSE)
+        row_actors <- sort(unique(all_row_actors))
+        col_actors <- sort(unique(all_col_actors))
+        
+        out <- list(
+            row = fill_nodal_array(row_actors, length(row_actors)),
+            col = fill_nodal_array(col_actors, length(col_actors))
+        )
+        return(out)
+    }
 }

@@ -266,8 +266,8 @@ test_that('add_nodal, bipartite: cross_sec', {
     net_adj <- netify(
         dd, actor1='actor1', actor2='actor2', weight='value', mode='bipartite')
 
-    # add_nodal()
-    net_adj = add_nodal(
+    # add_node_vars()
+    net_adj = add_node_vars(
         net_adj,
         node_data,
         actor = 'actor'
@@ -310,11 +310,11 @@ test_that('add_nodal in stages, bipartite: cross_sec', {
         dd, actor1='actor1', actor2='actor2', weight='value', mode='bipartite')
 
     # add row and then col
-    net_adj = add_nodal( net_adj, row_col_data, actor = 'actor' )
-    net_adj = add_nodal( 
+    net_adj = add_node_vars( net_adj, row_col_data, actor = 'actor' )
+    net_adj = add_node_vars( 
         net_adj, row_data, actor = 'actor',
         replace_existing = TRUE )
-    net_adj = add_nodal( 
+    net_adj = add_node_vars( 
         net_adj, col_data, actor = 'actor', 
         replace_existing = TRUE ) 
 
@@ -368,8 +368,8 @@ test_that('add_nodal, bipartite: longit_list, actor uniform FALSE', {
         mode='bipartite'
         )
 
-    # add_nodal()
-    net_adj = add_nodal(
+    # add_node_vars()
+    net_adj = add_node_vars(
         net_adj,
         node_data,
         actor = 'actor',
@@ -421,8 +421,8 @@ test_that('add_nodal, bipartite: longit_list, actor uniform TRUE', {
         mode='bipartite'
         )
 
-    # add_nodal()
-    net_adj = add_nodal(
+    # add_node_vars()
+    net_adj = add_node_vars(
         net_adj,
         node_data,
         actor = 'actor',
@@ -460,7 +460,7 @@ test_that(
 	  mode='bipartite' )
 
 	# add dyad variables in fake data as a dyadic attribute
-	a_matrix = add_dyad(
+	a_matrix = add_dyad_vars(
 	  a_matrix, fake_dyads,
 	  'actor1', 'actor2', NULL,
 	  c('var1', 'var2', 'var3', 'var4'),
@@ -518,7 +518,7 @@ test_that(
 	  mode='bipartite' )
 
 	# add dyad variables in fake data as a dyadic attribute
-	a_matrix = add_dyad(
+	a_matrix = add_dyad_vars(
 	  a_matrix, fake_dyads,
 	  'actor1', 'actor2', NULL,
 	  c('var1', 'var2', 'var3', 'var4'),
@@ -575,7 +575,7 @@ test_that(
 	  mode='bipartite' )
 
 	# add dyad variables in fake data as a dyadic attribute
-	a_matrix = add_dyad(
+	a_matrix = add_dyad_vars(
 	  a_matrix, fake_dyads,
 	  'actor1', 'actor2', 'time',
 		c('var1', 'var2', 'var3', 'var4'),
@@ -633,7 +633,7 @@ test_that('add_dyad, bipartite: mixed variable types', {
     symmetric = FALSE, weight = NULL, mode = 'bipartite', diag_to_NA = FALSE
   )
   
-  a_matrix <- add_dyad(
+  a_matrix <- add_dyad_vars(
     a_matrix, fake_dyads, 'actor1', 'actor2', NULL,
     c('numeric_var', 'integer_var', 'logical_var', 'character_var'),
     c(FALSE, FALSE, FALSE, FALSE)
@@ -717,7 +717,7 @@ test_that('add_dyad, bipartite: longitudinal with varying actors', {
     symmetric = FALSE, weight = 'dv', mode = 'bipartite', actor_time_uniform = FALSE
   )
   
-  a_matrix <- add_dyad(
+  a_matrix <- add_dyad_vars(
     a_matrix, fake_dyads, 'actor1', 'actor2', 'time', 'var1', FALSE
   )
   
@@ -777,7 +777,7 @@ test_that('add_dyad, bipartite: missing values in variables', {
     symmetric = FALSE, weight = NULL, mode = 'bipartite', diag_to_NA = FALSE
   )
   
-  a_matrix <- add_dyad(
+  a_matrix <- add_dyad_vars(
     a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE
   )
   
@@ -804,11 +804,11 @@ test_that('add_dyad, bipartite: replace existing variables', {
   )
   
   # Add variable first time
-  a_matrix <- add_dyad(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE)
+  a_matrix <- add_dyad_vars(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE)
   
   # Change values and replace
   fake_dyads$var1 <- (1:nrow(fake_dyads)) * 100
-  a_matrix <- add_dyad(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE, 
+  a_matrix <- add_dyad_vars(a_matrix, fake_dyads, 'actor1', 'actor2', NULL, 'var1', FALSE, 
                       replace_existing = TRUE)
   
   dyad_data <- attr(a_matrix, 'dyad_data')

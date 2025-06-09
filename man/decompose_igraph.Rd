@@ -2,40 +2,85 @@
 % Please edit documentation in R/decompose_rs.R
 \name{decompose_igraph}
 \alias{decompose_igraph}
-\alias{igraph_to_base}
-\title{Break down an \code{igraph} object into base R components}
+\title{Decompose an igraph object into base R components}
 \usage{
 decompose_igraph(grph, weight = NULL)
-
-igraph_to_base(grph, weight = NULL)
 }
 \arguments{
-\item{grph}{An igraph object.}
+\item{grph}{An igraph object to be decomposed.}
 
-\item{weight}{An optional character string specifying the edge attribute to use as weights. Defaults to NULL.}
+\item{weight}{Character string specifying the edge attribute to use as weights
+in the adjacency matrix. If NULL (default), the unweighted adjacency matrix
+is returned with 1s for edges and 0s for non-edges.}
 }
 \value{
-A list containing:
-\describe{
-\item{adj_mat}{The adjacency matrix extracted from the igraph object.}
-\item{ndata}{A data frame of vertex attributes, or NULL if not available.}
-\item{ddata}{A data frame of edge attributes, or NULL if not available.}
-\item{weight}{The edge attribute name used, if provided.}
+A list containing four elements:
+\itemize{
+\item \strong{adj_mat}: The adjacency matrix extracted from the igraph object
+\itemize{
+\item For unipartite graphs: Square matrix of dimension n×n
+\item For bipartite graphs: Rectangular matrix of dimension n₁×n₂
+\item Values are edge weights if specified, otherwise 0/1
+}
+\item \strong{ndata}: A data frame of vertex attributes, or NULL if none exist
+\itemize{
+\item Always includes an 'actor' column with vertex names
+\item Additional columns for each vertex attribute
+}
+\item \strong{ddata}: A data frame of edge attributes, or NULL if none exist
+\itemize{
+\item Columns 'from' and 'to' specify edge endpoints
+\item Additional columns for each edge attribute
+}
+\item \strong{weight}: The edge attribute name used for weights, if provided
 }
 }
 \description{
-\code{decompose_igraph} (also available as \code{igraph_to_base}) processes an
-igraph object to extract its adjacency matrix along with any
-available vertex and edge attributes, returning them in a standardized list format.
+\code{decompose_igraph} extracts the adjacency matrix and any vertex/edge attributes
+from an igraph object, returning them in a standardized list format.
 }
 \details{
-If the graph does not have vertex names, default names are assigned:
+The function handles both unipartite and bipartite graphs appropriately:
+
+\strong{Graph type detection:}
 \itemize{
-\item For bipartite graphs: rows are labeled as "r1", "r2", etc., and columns as "c1", "c2", etc.
-\item For unipartite graphs: all vertices are labeled as "a1", "a2", etc.
+\item Bipartite graphs must have a logical 'type' vertex attribute
+\item If the 'type' attribute exists but is not logical, the graph is treated
+as unipartite with a warning
 }
-Note: For longitudinal networks with changing actor composition, it is recommended
-to explicitly name vertices before conversion to ensure consistent actor identification across time periods.
+
+\strong{Vertex naming:}
+
+If the graph lacks vertex names, default names are assigned:
+\itemize{
+\item Unipartite graphs: "a1", "a2", ..., "an"
+\item Bipartite graphs: "r1", "r2", ... for type 1; "c1", "c2", ... for type 2
+}
+
+Existing vertex names are always preserved and used in the output.
+
+\strong{Matrix extraction:}
+\itemize{
+\item Unipartite: Uses \code{as_adjacency_matrix()} to get n×n matrix
+\item Bipartite: Uses \code{as_biadjacency_matrix()} to get n₁×n₂ matrix where
+rows correspond to type=FALSE vertices and columns to type=TRUE vertices
+}
+
+\strong{Attribute handling:}
+
+All vertex and edge attributes are preserved in the output data frames. System
+attributes (like 'name' and 'type') are included alongside user-defined attributes.
+}
+\note{
+For longitudinal networks with changing actor composition, explicitly set vertex
+names before decomposition to ensure consistent actor identification across time
+periods.
+
+The adjacency matrix is always returned as a standard R matrix (not sparse),
+which may have memory implications for very large graphs.
+
+When edge attributes are used as weights, ensure they contain numeric values.
+Non-numeric edge attributes will cause an error.
 }
 \author{
 Cassy Dorff, Shahryar Minhas

@@ -1,319 +1,398 @@
-# # tests for summary_actor
-# ### all weighted version
-# # 1-a) cross_sec & symmetric
-# # 1-b) cross_sec $ asymmetric
-# # 2-a) longit_list $ symmetric
-# # 2-b) longit_list & asymmetric
-#
-# ############################################
-# test_that('summary_actor: cross-sec & symmetric', {
-#
-#   # create symmetric dat
-#   actor1 <- c('a','a','b', 'b', 'c','c')
-#   actor2 <- c('b', 'c','a','c','b','a')
-#   value <- c(2,4,2,7,7,4)
-#   sym_weight_df <- data.frame(actor1=actor1,actor2=actor2, value = value)
-#   sym_weight_df <- sym_weight_df[sym_weight_df$actor1!=sym_weight_df$actor2,]
-#
-#   # create matrix
-#   sym_weight_matrix <- matrix(0, nrow=3, ncol=3, dimnames=list(letters[1:3],letters[1:3]))
-#   for(ii in 1:nrow(sym_weight_df)){
-#     sym_weight_matrix[sym_weight_df$actor1[ii],sym_weight_df$actor2[ii]] = sym_weight_df$value[ii] }
-#
-#   # calculate centrality scores
-#
-#   # degree centrality
-#   average_degree_in <- rowMeans(sym_weight_matrix, na.rm=TRUE)
-#   average_degree_out <- colMeans(sym_weight_matrix, na.rm=TRUE)
-#   average_degree_total <- rowMeans(sym_weight_matrix, na.rm=TRUE) + colMeans(sym_weight_matrix, na.rm=TRUE)
-#
-#   # eigenvector centrality
-#   decomp = eigen(sym_weight_matrix)
-#   decompVectors = decomp$vectors[,1]
-#
-#   if(any(is.complex(decompVectors))){eigenvec <- NA}
-#   else{eigenvec <- decompVectors/max(decompVectors)}
-#
-#   # authority score
-#   decomp <- svd(sym_weight_matrix)
-#   decompV <- decomp$v[,1]
-#   authority <- scale(decompV)
-#
-#   # hub score
-#   decompU <- decomp$u[,1]
-#   hub <- scale(decompU)
-#
-#   # actor
-#   actor = rownames(sym_weight_matrix)
-#
-#   summary_result = data.frame(average_degree_in = average_degree_in,
-#                               average_degree_out = average_degree_out,
-#                               average_degree_total = average_degree_total,
-#                               eigenvec = eigenvec,
-#                               authority=authority,
-#                               hub=hub,
-#                               actor = actor)
-#
-#   rownames(summary_result) <- NULL
-#   summary_result <- summary_result[,c('actor', setdiff(names(summary_result), 'actor'))]
-#
-#   # convert the output into conflictNet object
-#   class(summary_result) <- 'conflictNet'
-#
-#   # convert into conflictNet object
-#   class(sym_weight_matrix) <- 'conflictNet'
-#   attr(sym_weight_matrix, 'conflictNetType') <- 'cross_sec'
-#   attr(sym_weight_matrix, 'symmetric') <- TRUE
-#
-#   summary_actor_result <- summary_actor(sym_weight_matrix)
-#
-#   # convert the output into conflictNet object
-#   class(summary_result) <- 'conflictNet'
-#   # the test
-#   expect_identical(summary_actor_result, summary_result)
-#
-# })
-#
-# ############################################
-# test_that('summary_actor: cross-sec & asymmetric', {
-#
-#   # create data that is cross-sectional, asymmetric, and non-weighted
-#   asym_non_weight_df <- expand.grid(actor1=letters[1:3],actor2=letters[1:3],stringsAsFactors=FALSE)
-#   asym_non_weight_df$value <- rbinom(nrow(asym_non_weight_df), 1, .5)
-#   asym_non_weight_df <- asym_non_weight_df[asym_non_weight_df$actor1!=asym_non_weight_df$actor2,]
-#
-#   # filter out zero responses, equivalent to an event dataset
-#   asym_non_weight_df <- asym_non_weight_df[asym_non_weight_df$value>0,]
-#
-#   # create matrix
-#   asym_non_weight_matrix <- matrix(0, nrow=3, ncol=3, dimnames=list(letters[1:3],letters[1:3]))
-#   for(ii in 1:nrow(asym_non_weight_df)){
-#     asym_non_weight_matrix[asym_non_weight_df$actor1[ii],asym_non_weight_df$actor2[ii]] = asym_non_weight_df$value[ii] }
-#   # calculate centrality scores
-#
-#   # degree centrality
-#   average_degree_in <- rowMeans(asym_non_weight_matrix, na.rm=TRUE)
-#   average_degree_out <- colMeans(asym_non_weight_matrix, na.rm=TRUE)
-#   average_degree_total <- rowMeans(asym_non_weight_matrix, na.rm=TRUE) + colMeans(asym_non_weight_matrix, na.rm=TRUE)
-#
-#   # eigenvector centrality
-#   decomp = eigen(asym_non_weight_matrix)
-#   decompVectors = decomp$vectors[,1]
-#
-#   if(any(is.complex(decompVectors))){eigenvec <- NA}
-#   else{eigenvec <- decompVectors/max(decompVectors)}
-#
-#   # authority score
-#   decomp <- svd(asym_non_weight_matrix)
-#   decompV <- decomp$v[,1]
-#   authority <- scale(decompV)
-#
-#   # hub score
-#   decompU <- decomp$u[,1]
-#   hub <- scale(decompU)
-#
-#
-#   # actor
-#   actor = rownames(asym_non_weight_matrix)
-#
-#   summary_result = data.frame(average_degree_in = average_degree_in,
-#                               average_degree_out = average_degree_out,
-#                               average_degree_total = average_degree_total,
-#                               eigenvec = eigenvec,
-#                               authority = authority,
-#                               hub = hub,
-#                               actor = actor)
-#
-#   rownames(summary_result) <- NULL
-#   summary_result <- summary_result[,c('actor', setdiff(names(summary_result), 'actor'))]
-#
-#
-#   # convert into conflictNet object
-#   class(asym_non_weight_matrix) <- 'conflictNet'
-#   attr(asym_non_weight_matrix, 'conflictNetType') <- 'cross_sec'
-#   attr(asym_non_weight_matrix, 'symmetric') <- FALSE
-#
-#   summary_actor_result <- summary_actor(asym_non_weight_matrix)
-#
-#   # convert the output into conflictNet object
-#   class(summary_result) <- 'conflictNet'
-#
-#   # the test
-#   expect_identical(summary_actor_result, summary_result)
-#
-# })
-#
-# ############################################
-# test_that('summary_actor: longitudinal list & symmetric', {
-#
-#   # create data
-#   actor1 <- rep(c('a','a','b', 'b', 'c','c'), 3)
-#   actor2 <- rep(c('b', 'c','a','c','b','a'),3)
-#   value <- c(c(2,4,2,7,7,4), c(4,5,4,6,6,5), c(11,2,11,3,3,2))
-#   time <- rep(1:3, each = 6)
-#   long_sym_weight_df <- data.frame(actor1=actor1,actor2=actor2, value = value, time = time)
-#
-#   # create matrix
-#   long_sym_weight_matrix <- matrix(0, nrow=3, ncol=3, dimnames=list(letters[1:3],letters[1:3]))
-#
-#   # create an empty list object to store matrices
-#   result <- list()
-#   times = sort(unique(long_sym_weight_df[,"time"]))
-#   for(i in times) {
-#     slice <- long_sym_weight_df[long_sym_weight_df[,"time"] == i,]
-#
-#     for(ii in 1:nrow(slice)){
-#       long_sym_weight_matrix[slice$actor1[ii],slice$actor2[ii]] = slice$value[ii]
-#
-#       result[[i]] <- long_sym_weight_matrix} }
-#
-#   names(result) <- times
-#
-#   # calculate centrality scores
-#
-#   # degree centrality
-#
-#   out <- list()
-#   for(i in 1:length(result)){
-#     average_degree_in <- rowMeans(result[[i]], na.rm=TRUE)
-#     average_degree_out <- colMeans(result[[i]], na.rm=TRUE)
-#     average_degree_total <- rowMeans(result[[i]], na.rm=TRUE) + colMeans(result[[i]], na.rm=TRUE)
-#
-#
-#     # eigenvector centrality
-#     decomp = eigen(result[[i]])
-#     decompVectors = decomp$vectors[,1]
-#
-#     if(any(is.complex(decompVectors))){eigenvec <- NA}
-#     else{eigenvec <- decompVectors/max(decompVectors)}
-#     print("eigenvec is not well-defined for directed network")
-#
-#     # authority score
-#     decomp <- svd(result[[i]])
-#     decompV <- decomp$v[,1]
-#     authority <- scale(decompV)
-#
-#     # hub score
-#     decompU <- decomp$u[,1]
-#     hub <- scale(decompU)
-#
-#
-#     out[[i]] <- data.frame(
-#       average_degree_in=average_degree_in, average_degree_out=average_degree_out, average_degree_total=average_degree_total,
-#       eigenvec = eigenvec, authority = authority, hub = hub
-#     )
-#   }
-#
-#   out <- do.call('rbind', out)
-#   out <- data.frame(out, stringsAsFactors=FALSE)
-#
-#   out$actor <- rep(c('a', 'b', 'c'), 3)
-#   out$time <- as.double(rep(1:3, each=3))
-#   rownames(out) <- NULL
-#
-#   vars <- c('actor', "time")
-#   out <- out[,c(vars, setdiff(names(out), vars))]
-#
-#   summary_result <- out
-#
-#   # convert into conflictNet object
-#   class(result) <- 'conflictNet'
-#   attr(result, 'conflictNetType') <- 'longit_list'
-#   attr(result, 'symmetric') <- TRUE
-#   summary_actor_result <- summary_actor(result)
-#
-#   # convert the output into conflictNet object
-#   class(summary_result) <- 'conflictNet'
-#   # the test
-#   expect_identical(summary_actor_result, summary_result)
-#
-# })
-#
-# ############################################
-# test_that('summary_actor: longitudinal list & asymmetric', {
-#
-#   long_asym_weight_df <- expand.grid(actor1=letters[1:3],actor2=letters[1:3], time = 1:10, stringsAsFactors=FALSE)
-#   long_asym_weight_df$value <- rnorm(nrow(long_asym_weight_df))
-#   long_asym_weight_df <- long_asym_weight_df[long_asym_weight_df$actor1!=long_asym_weight_df$actor2,]
-#
-#   # create matrix
-#   long_asym_weight_matrix <- matrix(0, nrow=3, ncol=3, dimnames=list(letters[1:3],letters[1:3]))
-#
-#   # create an empty list object to store matrices
-#   times <- sort(unique(long_asym_weight_df[,"time"]))
-#   result <- lapply(times, function(t){
-#
-#     # slice to relevant time period
-#     slice <- long_asym_weight_df[long_asym_weight_df[,"time"] == t,]
-#
-#     # fill in
-#     for(ii in 1:nrow(slice)){
-#       long_asym_weight_matrix[slice$actor1[ii],slice$actor2[ii]] = slice$value[ii] }
-#
-#     #
-#     return(long_asym_weight_matrix) })
-#   names(result) <- times
-#   # calculate centrality scores
-#
-#   # degree centrality
-#
-#   out <- list()
-#   for(i in 1:length(result)){
-#     average_degree_in <- rowMeans(result[[i]], na.rm=TRUE)
-#     average_degree_out <- colMeans(result[[i]], na.rm=TRUE)
-#     average_degree_total <- rowMeans(result[[i]], na.rm=TRUE) + colMeans(result[[i]], na.rm=TRUE)
-#
-#
-#
-#     # eigenvector centrality
-#     decomp = eigen(result[[i]])
-#     decompVectors = decomp$vectors[,1]
-#
-#     if(any(is.complex(decompVectors))){eigenvec <- NA}
-#     else{eigenvec <- decompVectors/max(decompVectors)}
-#
-#     # authority score
-#     decomp <- svd(result[[i]])
-#     decompV <- decomp$v[,1]
-#     authority <- scale(decompV)
-#
-#     # hub score
-#     decompU <- decomp$u[,1]
-#     hub <- scale(decompU)
-#
-#
-#     out[[i]] <- data.frame(
-#       average_degree_in=average_degree_in, average_degree_out=average_degree_out, average_degree_total=average_degree_total,
-#       eigenvec = eigenvec, authority = authority, hub = hub
-#     )
-#   }
-#
-#   out <- do.call('rbind', out)
-#   out <- data.frame(out, stringsAsFactors=FALSE)
-#
-#   out$actor <- rep(c('a', 'b', 'c'), 10)
-#   out$time <- as.double(rep(1:10, each=3))
-#   rownames(out) <- NULL
-#
-#   vars <- c('actor', "time")
-#   out <- out[,c(vars, setdiff(names(out), vars))]
-#
-#   summary_result <- out
-#
-#   # convert into conflictNet object
-#   class(result) <- 'conflictNet'
-#   attr(result, 'conflictNetType') <- 'longit_list'
-#   attr(result, 'symmetric') <- FALSE
-#
-#   summary_actor_result <- summary_actor(result)
-#
-#   # convert the output into conflictNet object
-#   class(summary_result) <- 'conflictNet'
-#
-#   # the test
-#   expect_identical(summary_actor_result, summary_result)
-#
-# })
-#
-#
-#
+set.seed(6886)
+
+# library(testthat)
+# library(netify)
+# devtools::load_all("~/Research/netify_dev/netify")
+
+test_that("summary_actor works for cross-sectional networks", {
+  # Create a simple cross-sectional network
+  data(icews)
+  icews_10 <- icews[icews$year == 2010,]
+  net <- netify(
+    icews_10,
+    actor1 = 'i', actor2 = 'j',
+    symmetric = FALSE,
+    weight = 'verbCoop'
+  )
+  
+  # Test basic summary
+  actor_stats <- summary_actor(net)
+  
+  expect_s3_class(actor_stats, "data.frame")
+  expect_true("actor" %in% names(actor_stats))
+  expect_false("time" %in% names(actor_stats))  # No time for cross-sectional
+  expect_false("layer" %in% names(actor_stats))  # No layer column for single layer
+  
+  # Check for directed network columns
+  expect_true(all(c("degree_in", "degree_out", "degree_total") %in% names(actor_stats)))
+  expect_true(all(c("closeness_in", "closeness_out", "closeness_all") %in% names(actor_stats)))
+  expect_true("betweenness" %in% names(actor_stats))
+  expect_true("authority_score" %in% names(actor_stats))
+  expect_true("hub_score" %in% names(actor_stats))
+  
+  # Check that each actor appears once
+  expect_equal(nrow(actor_stats), length(unique(actor_stats$actor)))
+})
+
+test_that("summary_actor works for longitudinal networks", {
+  # Create longitudinal network
+  data(icews)
+  net_longit <- netify(
+    icews,
+    actor1 = 'i', actor2 = 'j', time = 'year',
+    symmetric = FALSE,
+    weight = 'matlConf'
+  )
+  
+  # Test summary
+  actor_stats <- summary_actor(net_longit)
+  
+  expect_s3_class(actor_stats, "data.frame")
+  expect_true("actor" %in% names(actor_stats))
+  expect_true("time" %in% names(actor_stats))
+  
+  # Check that we have entries for each actor-time combination
+  n_times <- length(unique(icews$year))
+  expect_true(nrow(actor_stats) > n_times)  # Multiple actors per time
+  
+  # Verify time periods are correctly extracted
+  expect_true(all(unique(actor_stats$time) %in% as.character(unique(icews$year))))
+})
+
+test_that("summary_actor works for symmetric networks", {
+  # Create symmetric network
+  data(icews)
+  icews_10 <- icews[icews$year == 2010,]
+  net_sym <- netify(
+    icews_10,
+    actor1 = 'i', actor2 = 'j',
+    symmetric = TRUE,
+    weight = 'verbCoop'
+  )
+  
+  actor_stats <- summary_actor(net_sym)
+  
+  # Check that undirected-only columns are present
+  expect_true("degree" %in% names(actor_stats))
+  expect_true("prop_ties" %in% names(actor_stats))
+  expect_true("network_share" %in% names(actor_stats))
+  expect_true("closeness" %in% names(actor_stats))
+  expect_true("betweenness" %in% names(actor_stats))
+  expect_true("eigen_vector" %in% names(actor_stats))
+  
+  # Check that directed-only columns are absent
+  expect_false("degree_in" %in% names(actor_stats))
+  expect_false("degree_out" %in% names(actor_stats))
+  expect_false("authority_score" %in% names(actor_stats))
+  expect_false("hub_score" %in% names(actor_stats))
+})
+
+test_that("summary_actor works for binary networks", {
+  # Create binary network
+  data(icews)
+  icews_10 <- icews[icews$year == 2010,]
+  net_bin <- netify(
+    icews_10,
+    actor1 = 'i', actor2 = 'j',
+    symmetric = FALSE
+  )
+  
+  actor_stats <- summary_actor(net_bin)
+  
+  # Check that binary network has degree columns
+  expect_true(all(c("degree_in", "degree_out", "degree_total") %in% names(actor_stats)))
+  
+  # Check that weighted statistics are absent
+  expect_false("strength_sum_in" %in% names(actor_stats))
+  expect_false("strength_sum_out" %in% names(actor_stats))
+  expect_false("strength_avg_in" %in% names(actor_stats))
+  expect_false("strength_std_in" %in% names(actor_stats))
+})
+
+test_that("summary_actor works for weighted networks", {
+  # Create weighted network
+  data(icews)
+  icews_10 <- icews[icews$year == 2010,]
+  net_weighted <- netify(
+    icews_10,
+    actor1 = 'i', actor2 = 'j',
+    symmetric = FALSE,
+    weight = 'verbCoop'
+  )
+  
+  actor_stats <- summary_actor(net_weighted)
+  
+  # Check that weighted statistics are present
+  expect_true(all(c("strength_sum_in", "strength_sum_out", "strength_sum_total") %in% names(actor_stats)))
+  expect_true(all(c("strength_avg_in", "strength_avg_out", "strength_avg_total") %in% names(actor_stats)))
+  expect_true(all(c("strength_std_in", "strength_std_out", "strength_std_total") %in% names(actor_stats)))
+  expect_true(all(c("strength_median_in", "strength_median_out", "strength_median_total") %in% names(actor_stats)))
+})
+
+test_that("summary_actor works for multilayer networks", {
+  # Create multilayer network
+  data(icews)
+  icews_10 <- icews[icews$year == 2010,]
+  
+  net1 <- netify(icews_10, actor1='i', actor2='j', weight='verbCoop')
+  net2 <- netify(icews_10, actor1='i', actor2='j', weight='matlCoop')
+  
+  multi_net <- layer_netify(
+    list(net1, net2),
+    layer_labels = c("verbal", "material")
+  )
+  
+  actor_stats <- summary_actor(multi_net)
+  
+  expect_true("layer" %in% names(actor_stats))
+  expect_equal(sort(unique(actor_stats$layer)), c("material", "verbal"))
+  
+  # Each actor should appear in each layer
+  n_actors <- length(unique(actor_stats$actor))
+  expect_equal(nrow(actor_stats), n_actors * 2)  # 2 layers
+})
+
+test_that("summary_actor handles custom statistics correctly", {
+  # Create test network
+  data(icews)
+  icews_10 <- icews[icews$year == 2010,]
+  net <- netify(
+    icews_10,
+    actor1 = 'i', actor2 = 'j',
+    weight = 'verbCoop'
+  )
+  
+  # Test single custom function
+  max_out <- function(mat) {
+    apply(mat, 1, max, na.rm = TRUE)
+  }
+  
+  actor_stats1 <- summary_actor(net, other_stats = list(max_out = max_out))
+  expect_true("max_out" %in% names(actor_stats1))
+  expect_equal(length(actor_stats1$max_out), nrow(actor_stats1))
+  
+  # Test multiple custom functions
+  max_in <- function(mat) {
+    apply(mat, 2, max, na.rm = TRUE)
+  }
+  
+  actor_stats2 <- summary_actor(net, other_stats = list(
+    max_out = max_out,
+    max_in = max_in
+  ))
+  expect_true(all(c("max_out", "max_in") %in% names(actor_stats2)))
+})
+
+test_that("summary_actor handles bipartite networks", {
+  # Create bipartite network data
+  bip_data <- data.frame(
+    actor1 = rep(letters[1:5], each = 3),
+    actor2 = rep(LETTERS[1:3], 5),
+    weight = runif(15, 0, 10)
+  )
+  
+  net_bip <- netify(
+    bip_data,
+    actor1 = 'actor1', actor2 = 'actor2',
+    mode = 'bipartite',
+    weight = 'weight'
+  )
+  
+  actor_stats <- summary_actor(net_bip)
+  
+  # Check that all actors from both modes are included
+  all_actors <- c(letters[1:5], LETTERS[1:3])
+  expect_true(all(all_actors %in% actor_stats$actor))
+  expect_equal(nrow(actor_stats), 8)  # 5 + 3 actors
+  
+  # Bipartite networks should be treated as directed
+  expect_true("degree_total" %in% names(actor_stats))
+})
+
+test_that("summary_actor handles ego networks", {
+  # First create a netify object
+  data(icews)
+  net <- netify(
+    icews,
+    actor1 = 'i', actor2 = 'j', time = 'year',
+    weight = 'verbCoop'
+  )
+  
+  # Then create ego network
+  ego_net <- ego_netify(
+    net,
+    ego = "United States"
+  )
+  
+  actor_stats <- summary_actor(ego_net)
+    
+  # Check that it returns something :)
+  expect_true(nrow(actor_stats) > 0)
+})
+
+test_that("summary_actor produces consistent output structure", {
+  # Create different types of networks
+  data(icews)
+  icews_10 <- icews[icews$year == 2010,]
+  
+  # Test directed network
+  net_directed <- netify(icews_10, 'i', 'j', symmetric = FALSE, weight = 'verbCoop')
+  stats_directed <- summary_actor(net_directed)
+  
+  expect_s3_class(stats_directed, "data.frame")
+  expect_true("actor" %in% names(stats_directed))
+  expect_true(nrow(stats_directed) > 0)
+  
+  # Test undirected network
+  net_undirected <- netify(icews_10, 'i', 'j', symmetric = TRUE, weight = 'verbCoop')
+  stats_undirected <- summary_actor(net_undirected)
+  
+  expect_s3_class(stats_undirected, "data.frame")
+  expect_true("actor" %in% names(stats_undirected))
+  expect_equal(nrow(stats_undirected), nrow(stats_directed))  # Same actors
+  
+  # Test binary network
+  net_binary <- netify(icews_10, 'i', 'j', symmetric = FALSE)
+  stats_binary <- summary_actor(net_binary)
+  
+  expect_s3_class(stats_binary, "data.frame")
+  expect_true("actor" %in% names(stats_binary))
+  expect_equal(nrow(stats_binary), nrow(stats_directed))  # Same actors
+})
+
+test_that("summary_actor weight inversion parameter works", {
+  # Create a network with multiple paths where weights matter
+  # Diamond-shaped network: A -> B -> D and A -> C -> D
+  # Different weights on each path will affect shortest paths
+  test_data <- data.frame(
+    actor1 = c("A", "A", "B", "C", "B", "C"),
+    actor2 = c("B", "C", "D", "D", "C", "B"),
+    weight = c(1,   10,  1,   1,   5,   5)  # Path through B is shorter by weight
+  )
+  
+  net <- netify(
+    test_data,
+    actor1 = 'actor1', 
+    actor2 = 'actor2',
+    weight = 'weight',
+    symmetric = FALSE
+  )
+  
+  # Get stats with default inversion (TRUE)
+  stats_inverted <- summary_actor(net, invert_weights_for_igraph = TRUE)
+  
+  # Get stats without inversion  
+  stats_not_inverted <- summary_actor(net, invert_weights_for_igraph = FALSE)
+  
+  # Both should return data frames with same structure
+  expect_identical(names(stats_inverted), names(stats_not_inverted))
+  expect_equal(nrow(stats_inverted), nrow(stats_not_inverted))
+  
+  # verify the parameter works without error
+  expect_s3_class(stats_inverted, "data.frame")
+  expect_s3_class(stats_not_inverted, "data.frame")
+  
+  expect_equal(stats_inverted$strength_sum_out, stats_not_inverted$strength_sum_out)
+})
+
+test_that("summary_actor weight inversion produces different centrality values", {
+  # Create a network where shortest paths differ based on weight interpretation
+  # Path 1: A -> B -> E (weights: 1 + 1 = 2)
+  # Path 2: A -> C -> D -> E (weights: 10 + 10 + 10 = 30)
+  # When weights are distances: Path 1 is shorter (2 < 30)
+  # When weights are inverted (strengths): Path 2 is "shorter" (1/10 + 1/10 + 1/10 = 0.3 < 1/1 + 1/1 = 2)
+  
+  test_data <- data.frame(
+    actor1 = c("A", "A", "B", "C", "D"),
+    actor2 = c("B", "C", "E", "D", "E"),
+    weight = c(1,  10,  1,  10,  10)
+  )
+  
+  net <- netify(
+    test_data,
+    actor1 = 'actor1', 
+    actor2 = 'actor2',
+    weight = 'weight',
+    symmetric = FALSE
+  )
+  
+  # Get stats with inversion (weights as strengths)
+  stats_inverted <- summary_actor(net, invert_weights_for_igraph = TRUE)
+  
+  # Get stats without inversion (weights as distances) 
+  stats_not_inverted <- summary_actor(net, invert_weights_for_igraph = FALSE)
+  
+  # Extract values for node B (which is on the short direct path)
+  b_inverted <- stats_inverted[stats_inverted$actor == "B",]
+  b_not_inverted <- stats_not_inverted[stats_not_inverted$actor == "B",]
+  
+  # Extract values for node C (which is on the long indirect path)
+  c_inverted <- stats_inverted[stats_inverted$actor == "C",]
+  c_not_inverted <- stats_not_inverted[stats_not_inverted$actor == "C",]
+  
+  # Betweenness centrality should differ
+  # When weights are distances (not inverted): B should have higher betweenness (on shortest path)
+  # When weights are strengths (inverted): C should have higher betweenness
+  expect_true(
+    b_not_inverted$betweenness != b_inverted$betweenness ||
+    c_not_inverted$betweenness != c_inverted$betweenness,
+    info = "Betweenness centrality should differ with weight inversion"
+  )
+  
+  # #
+  # cat("\nBetweenness without inversion (weights as distances):\n")
+  # cat("Node B:", b_not_inverted$betweenness, "\n")
+  # cat("Node C:", c_not_inverted$betweenness, "\n")
+  
+  # cat("\nBetweenness with inversion (weights as strengths):\n")
+  # cat("Node B:", b_inverted$betweenness, "\n")
+  # cat("Node C:", c_inverted$betweenness, "\n")
+})
+
+# Alternative test with a guaranteed difference
+test_that("summary_actor weight inversion affects closeness centrality", {
+  # Create a star network with different weight patterns
+  # Center node A connects to all others
+  # Weights vary significantly
+  test_data <- data.frame(
+    actor1 = c("A", "A", "A", "A"),
+    actor2 = c("B", "C", "D", "E"),
+    weight = c(1, 2, 10, 20)  # Very different weights
+  )
+  
+  net <- netify(
+    test_data,
+    actor1 = 'actor1', 
+    actor2 = 'actor2',
+    weight = 'weight',
+    symmetric = TRUE  # Use symmetric to simplify
+  )
+  
+  # Get stats with and without inversion
+  stats_inv <- summary_actor(net, invert_weights_for_igraph = TRUE)
+  stats_no_inv <- summary_actor(net, invert_weights_for_igraph = FALSE)
+  
+  # Look at closeness for the center node A
+  a_inv <- stats_inv[stats_inv$actor == "A",]
+  a_no_inv <- stats_no_inv[stats_no_inv$actor == "A",]
+  
+  # Closeness should definitely differ for node A
+  expect_false(
+    isTRUE(all.equal(a_inv$closeness, a_no_inv$closeness)),
+    info = "Closeness centrality should differ for central node with weight inversion"
+  )
+  
+  # Also check peripheral nodes
+  b_inv <- stats_inv[stats_inv$actor == "B",]
+  b_no_inv <- stats_no_inv[stats_no_inv$actor == "B",]
+  
+  expect_false(
+    isTRUE(all.equal(b_inv$closeness, b_no_inv$closeness)),
+    info = "Closeness centrality should differ for peripheral nodes with weight inversion"
+  )
+  
+  # #
+  # cat("\nCloseness centrality differences:\n")
+  # cat("Node A - No inversion:", a_no_inv$closeness, "With inversion:", a_inv$closeness, "\n")
+  # cat("Node B - No inversion:", b_no_inv$closeness, "With inversion:", b_inv$closeness, "\n")
+})

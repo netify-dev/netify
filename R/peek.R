@@ -1,406 +1,404 @@
 #' Preview subsets of network data from netify objects
 #'
-#' `peek` (also available as `preview`, `inspect`, `glimpse_netify`) 
-#' provides a convenient way to inspect portions of network data stored in 
-#' netify objects. Rather than displaying entire networks (which can be overwhelming 
-#' for large datasets), `peek` allows you to examine specific actors, time periods, 
-#' or layers. This is particularly useful for data exploration, verification, and 
-#' debugging network analyses.
+#' `peek` provides a 
+#' convenient way to inspect portions of network data stored in netify objects. 
+#' Rather than displaying entire networks (which can be overwhelming for large 
+#' datasets), this function allows you to examine specific actors, time periods, 
+#' or layers for data exploration, verification, and debugging.
 #'
-#' @param netlet A netify object to preview.
-#' @param what_to_peek Specifies which actors/nodes to display. Can be:
+#' @param netlet A netify object to preview. Can be cross-sectional, longitudinal 
+#'   (array or list format), and/or multilayer.
+#'   
+#' @param rows Specifies which actors to display as senders of ties (row actors 
+#'   in the adjacency matrix). Can be:
 #'   \itemize{
-#'     \item A numeric value (e.g., 3) to show the first n rows and columns
-#'     \item A numeric vector specifying row/column indices (e.g., c(1,3,5))
-#'     \item A character vector of actor names (e.g., c("USA", "China"))
+#'     \item \strong{Single number}: Shows the first n actors (e.g., \code{rows = 5} 
+#'       displays actors 1-5)
+#'     \item \strong{Numeric vector}: Shows specific positions (e.g., \code{rows = c(1,3,5)} 
+#'       displays the 1st, 3rd, and 5th actors)
+#'     \item \strong{Character vector}: Shows named actors (e.g., \code{rows = c("USA", "China")} 
+#'       displays these specific countries)
+#'     \item \strong{NULL}: Shows all row actors (default is 3)
 #'   }
-#'   Default is 3 (first three rows and columns).
-#' @param what_rows_to_peek Specific rows to display. Accepts same input types as 
-#'   `what_to_peek`. Defaults to the value of `what_to_peek`. Set to NULL to 
-#'   display all rows.
-#' @param what_cols_to_peek Specific columns to display. Accepts same input types 
-#'   as `what_to_peek`. Defaults to the value of `what_to_peek`. Set to NULL to 
-#'   display all columns.
-#' @param when_to_peek For longitudinal networks, specifies which time points to 
-#'   display. Can be:
+#'   In bipartite networks, rows represent actors in the first mode.
+#'   
+#' @param cols Specifies which actors to display as receivers of ties (column actors 
+#'   in the adjacency matrix). Accepts the same input types as \code{rows}. In 
+#'   bipartite networks, columns represent actors in the second mode. Default is 3.
+#'   
+#' @param time For longitudinal networks, specifies which time periods to display. Can be:
 #'   \itemize{
-#'     \item A numeric value or vector for time indices (e.g., 1 or c(1,5,10))
-#'     \item A character vector matching time labels (e.g., c("2002", "2006"))
-#'     \item NULL to display all time points
+#'     \item \strong{Single number}: Shows the nth time period (e.g., \code{time = 1} 
+#'       shows the first time period)
+#'     \item \strong{Numeric vector}: Shows specific time indices (e.g., \code{time = c(1,5,10)})
+#'     \item \strong{Character vector}: Shows named time periods (e.g., \code{time = c("2002", "2006")} 
+#'       displays these specific years)
+#'     \item \strong{NULL}: Shows all time periods
 #'   }
-#'   Default is 1 (first time point).
-#' @param what_layers_to_peek For multilayer networks, specifies which layer(s) to 
-#'   display. Must be a character vector matching layer names. Required if the 
-#'   netify object has multiple layers.
+#'   Default is 1 (first time period only). Ignored for cross-sectional networks.
+#'   
+#' @param layers For multilayer networks, specifies which layer(s) to display. Must be 
+#'   a character vector matching layer names in the netify object (e.g., 
+#'   \code{layers = c("trade", "alliance")}). For single-layer networks, this 
+#'   parameter is ignored. Default is NULL (shows all layers).
 #'
-#' @return Returns a subset of the network data matching the specified criteria:
-#'   \itemize{
-#'     \item For cross-sectional networks: a matrix
-#'     \item For longitudinal arrays: an array (or matrix if one time point)
-#'     \item For longitudinal lists: a list of matrices
+#' @return Returns a subset of the raw network data (without netify attributes):
+#'   
+#'   \describe{
+#'     \item{\strong{Cross-sectional networks}}{
+#'       \itemize{
+#'         \item Single layer: Returns a matrix with selected rows and columns
+#'         \item Multilayer: Returns a 3D array (rows × columns × layers)
+#'       }
+#'     }
+#'     \item{\strong{Longitudinal networks}}{
+#'       \itemize{
+#'         \item Array format: Returns an array with dimensions depending on selection
+#'         \item List format: Returns a list of matrices, one per selected time period
+#'       }
+#'     }
 #'   }
-#'   The returned object maintains dimension names for easy interpretation.
+#'   
+#'   All returned objects preserve dimension names (actor names, time labels, layer 
+#'   names) for easy interpretation. Single dimensions are automatically dropped.
 #'
 #' @details
-#' The function handles different netify object types:
+#' \strong{Purpose and Design}
+#' 
+#' \code{peek} is designed as a lightweight data exploration tool. Unlike 
+#' \code{\link{subset_netify}}, which creates new netify objects with all attributes 
+#' preserved, \code{peek} returns only the raw network data for quick inspection. 
+#' This makes it ideal for:
 #' \itemize{
-#'   \item **Cross-sectional**: Subsets by rows and columns (and layers if multilayer)
-#'   \item **Longitudinal array**: Subsets by rows, columns, time, and optionally layers
-#'   \item **Longitudinal list**: Subsets each time period's matrix separately, 
-#'     accommodating actor sets that change over time
+#'   \item Verifying data structure and content
+#'   \item Checking specific relationships
+#'   \item Debugging data issues
+#'   \item Quick visual inspection of network patterns
 #' }
 #' 
-#' When using character vectors to specify actors, the function automatically matches 
-#' them to the appropriate row/column positions. For longitudinal lists where actors 
-#' may vary across time periods, matching is performed separately for each period.
+#' \strong{Understanding Network Directions}
+#' 
+#' In directed networks:
+#' \itemize{
+#'   \item \strong{Rows} represent actors sending ties (out-ties)
+#'   \item \strong{Columns} represent actors receiving ties (in-ties)
+#'   \item Cell \code{[i,j]} contains the tie from actor i to actor j
+#' }
+#' 
+#' For example, if cell \code{["USA", "China"]} = 5, this means USA sends a tie of 
+#' strength 5 to China.
+#' 
+#' \strong{Smart Selection Behavior}
+#' 
+#' The function includes several convenience features:
+#' \itemize{
+#'   \item Single numbers are expanded to ranges (e.g., \code{rows = 5} becomes rows 1-5)
+#'   \item Out-of-bounds indices are silently ignored (no errors during exploration)
+#'   \item Character names are matched to actor labels
+#'   \item Dimension reduction: if only one time period or layer is selected, that 
+#'     dimension is dropped from the output
+#' }
+#' 
+#'
+#' @note 
+#' \strong{Important distinctions:}
+#' \itemize{
+#'   \item Use \code{peek} for quick data inspection (returns raw matrices)
+#'   \item Use \code{\link{subset_netify}} to create new netify objects with attributes
+#'   \item Use \code{\link{get_raw}} to extract all raw data from a netify object
+#' }
+#' 
+#' When multiple layers are present and no layer selection is specified, all layers 
+#' are returned with a warning message to remind you about the multilayer structure.
 #'
 #' @examples
-#' # Load data
+#' # Load example data
 #' data(icews)
 #' 
-#' # Create cross-sectional network
-#' icews_10 <- icews[icews$year=='2010', ]
-#' icews_verbCoop <- netify(
-#'   dyad_data=icews_10, actor1='i', actor2='j',
-#'   symmetric=FALSE, weight='verbCoop'
+#' # Example 1: Basic usage with cross-sectional network
+#' icews_10 <- icews[icews$year == 2010, ]
+#' net <- netify(
+#'   icews_10, 
+#'   actor1 = 'i', actor2 = 'j',
+#'   weight = 'verbCoop'
 #' )
 #' 
-#' # Peek at first 3x3 subset (default)
-#' peek(icews_verbCoop)
+#' # Default: see first 3 actors (both sending and receiving)
+#' peek(net)
 #' 
-#' # Peek at specific countries
-#' peek(icews_verbCoop,
-#'   what_to_peek = c('United Kingdom', 'United States', 'France'))
+#' # See first 5 senders and first 5 receivers
+#' peek(net, rows = 5, cols = 5)
 #' 
-#' # Different row and column selections
-#' peek(icews_verbCoop,
-#'   what_rows_to_peek = c('United Kingdom', 'United States', 'France'),
-#'   what_cols_to_peek = c('Russian Federation', 'Sri Lanka'))
+#' # Example 2: Specific actors by name
+#' # See ties from US and China to Russia, India, and Brazil
+#' peek(net,
+#'   rows = c('United States', 'China'),
+#'   cols = c('Russia', 'India', 'Brazil'))
 #' 
-#' # Create longitudinal network
-#' icews_matlConf <- netify(
-#'   dyad_data=icews, 
-#'   actor1='i', actor2='j', time='year',
-#'   symmetric=FALSE, weight='matlConf',
-#'   output_format = 'longit_array'
+#' # Example 3: Longitudinal network
+#' net_longit <- netify(
+#'   icews, 
+#'   actor1 = 'i', actor2 = 'j', time = 'year',
+#'   weight = 'matlConf'
 #' )
 #' 
-#' # Peek at specific years using indices
-#' peek(icews_matlConf, when_to_peek=c(1, 5, 10))
+#' # See first 5 actors in specific years
+#' peek(net_longit, 
+#'   rows = 5, cols = 5,
+#'   time = c('2002', '2006', '2010'))
 #' 
-#' # Or using year labels
-#' peek(icews_matlConf, when_to_peek=c('2002', '2006', '2011'))
+#' # See all actors in year 2010
+#' peek(net_longit, 
+#'   rows = NULL, cols = NULL,
+#'   time = '2010')
+#'   
+#' # Example 4: Using numeric indices
+#' # See specific positions in the network
+#' peek(net, 
+#'   rows = c(1, 3, 5, 7),  # 1st, 3rd, 5th, 7th senders
+#'   cols = 1:10)           # first 10 receivers
 #' 
-#' # View all time periods for specific countries
-#' peek(icews_matlConf, 
-#'   what_to_peek = c('United States', 'China'),
-#'   when_to_peek = NULL)
-#'
+#' # Example 5: Quick inspection patterns
+#' # See who USA interacts with
+#' peek(net, rows = "United States", cols = 10)  # USA's ties to first 10 countries
+#' peek(net, rows = 10, cols = "United States")  # First 10 countries' ties to USA
+#' 
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
-#'
-#' @export
-#' @aliases preview, inspect, glimpse_netify
+#' @export peek
 
 peek <- function(
 	netlet, 
-	what_to_peek=3,
-	what_rows_to_peek=what_to_peek,
-	what_cols_to_peek=what_to_peek,
-	when_to_peek=1,
-	what_layers_to_peek=NULL
+	rows = 3,
+	cols = 3,
+	time = 1,
+	layers = NULL
 	){
 
     # user input checks
     netify_check(netlet)
 
-	# pull out attrs
-	objAttrs <- attributes(netlet)
+	# Cache attributes for efficiency
+	netify_type <- attr(netlet, 'netify_type')
+	n_layers <- length(attr(netlet, 'layers'))
+	is_multilayer <- n_layers > 1
+	is_longit <- netify_type != 'cross_sec'
 
-	# get measurements
-	msrmnts <- netify_measurements(netlet)
-
-	# set n_layers in msrmnts to 1 if set to NULL
-	if(is.null(msrmnts$n_layers)){ msrmnts$n_layers <- 1 }
-
-	# get character vector of layers to keep or subset
-	multilayer_logic_input <- msrmnts$n_layers > 1
-	if(is.null(what_layers_to_peek)){
-
-		# if no subsetting then type in terms of multilayer or not
-		# is same in input and output
-		multilayer_logic_out <- multilayer_logic_input
-
-	} else {
-
-		# if user specifies layers then check if resulting number of 
-		# layers will constitute a multilayer object
-		multilayer_logic_out <- length(what_layers_to_peek) > 1
-		layer_labels <- what_layers_to_peek
-
-		# stop if they supply an argument to what_layers_to_peek but netlet is not multilayer
-		if(!multilayer_logic_input){
-			cli::cli_alert_danger("You have supplied an argument to what_layers_to_peek but the netlet object is not multilayer. Please remove the argument to what_layers_to_peek or provide a multilayer netlet object." )
-			stop() }
-
-		# make sure that user specified layers exist
-		layer_diffs = setdiff(layer_labels, msrmnts$layers)
-		if(length(layer_diffs) > 0){
+	# Handle layer selection
+	if(is_multilayer && is.null(layers)){
+		cli::cli_alert_warning("Multiple layers detected. Showing all layers. Specify 'layers' parameter to select specific layers.")
+	} else if(!is_multilayer && !is.null(layers)){
+		cli::cli_alert_warning("Single layer network - ignoring 'layers' parameter.")
+		layers <- NULL
+	}
+	
+	# Validate layer selection if provided
+	if(!is.null(layers)){
+		available_layers <- attr(netlet, 'layers')
+		invalid_layers <- setdiff(layers, available_layers)
+		if(length(invalid_layers) > 0){
 			cli::cli_alert_danger(
-				paste0("The following specified layers do not exist in the object: ", paste(layer_diffs, collapse=", "), ". You can check what layers exist in your object using the following code: attr(netlet, 'layers'), where netlet should be substituted with the name of your netify object." ) )
-			stop() }
-	}
-
-	# org when_to_peek info if longit data supplied
-	if(objAttrs$netify_type %in% c('longit_list', 'longit_array')){
-
-		# get time label
-		if(objAttrs$netify_type == 'longit_list'){ time_labels <- msrmnts$time }
-		if(objAttrs$netify_type == 'longit_array'){ time_labels <- msrmnts$time }
-
-		# if null supplied to when_to_peek create 
-		# numeric range corresponding to length of data
-		if(is.null(when_to_peek) & objAttrs$netify_type == 'longit_list'){ 
-			when_to_peek <- 1:length(netlet) }
-		if(is.null(when_to_peek) & objAttrs$netify_type == 'longit_array' & !multilayer_logic_input){ 
-			when_to_peek <- 1:(dim(netlet)[3]) }
-		if(is.null(when_to_peek) & objAttrs$netify_type == 'longit_array' & multilayer_logic_input){ 
-			when_to_peek <- 1:(dim(netlet)[4]) }
-
-		# org info about when_to_peek
-		# if character entry then match to numeric index of time dim
-		if(is.character(when_to_peek)){
-			when_to_peek <- match(when_to_peek, time_labels) }
-	}
-
-	# if null supplied to any of the what_ arguments then 
-	# create numeric vectors corresponding to the size of the data
-	if(is.null(what_rows_to_peek)){
-		if(objAttrs$netify_type %in% c('cross_sec', 'longit_array')){
-			what_rows_to_peek <- 1:nrow(netlet) }
-		if(objAttrs$netify_type == 'longit_list'){
-			what_rows_to_peek <- lapply(netlet, function(x){ 1:nrow(x) }) } }
-
-	# similarly for cols
-	if(is.null(what_cols_to_peek)){
-		if(objAttrs$netify_type %in% c('cross_sec', 'longit_array')){
-			what_cols_to_peek <- 1:ncol(netlet) }
-		if(objAttrs$netify_type == 'longit_list'){
-			what_cols_to_peek <- lapply(netlet, function(x){ 1:ncol(x) }) } }
-
-	# org row and col specs into a list
-	row_col <- list(
-		rows=what_rows_to_peek, 
-		cols=what_cols_to_peek)
-
-	# more cleanup on user inputs to what_ arguments
-	# if numeric entry and it's a single entry then 
-	# adjust to provide a range
-	row_col <- lapply(row_col, function(x){
-		if(is.numeric(x) & length(x)==1){ x <- 1:x} else{ x } })
-
-	# if character entry then we need to determine the row/col 
-	# indices of where actors fall
-	row_col <- lapply(1:2, function(ii){
-		
-		# index a row_col element
-		x <- row_col[[ii]]
-
-		# if user supplied a factor convert to character
-		if(is.factor(x)){ x <- as.character(x) }
-
-		# if character entry
-		if(is.character(x)){
-
-			# case of cross_sec and longit_array are straightforward
-			# because we can just match the labels from the dimlabels
-			if(objAttrs$netify_type %in% c('cross_sec', 'longit_array')){
-				x <- match(x, dimnames(netlet)[[ii]]) }
-
-			# case of longit_list requires us to iterate through
-			# the list of mats and match by time period given actors 
-			# can change
-			if(objAttrs$netify_type == 'longit_list'){
-				x <- lapply(when_to_peek, function(tt){
-					match( x, dimnames(netlet[[tt]])[[ii]] ) } ) }
-		} # end if character
-
-		#
-		return(x) } )
-
-	# add char names to elems of row/col if missing
-	if(objAttrs$netify_type == 'longit_list'){
-	if( is.null(names(row_col[[1]])) | is.null(names(row_col[[2]])) ) {
-
-		# if when_to_peek is same length as netlet then 
-		# just add names from netlet
-		if(length(when_to_peek)==msrmnts$n_time){
-			names(row_col[[1]]) <- time_labels
-			names(row_col[[2]]) <- time_labels }
-		
-		# if when to peek is smaller then pull out
-		# corresponding names from netlet and add to row/col 
-		if(length(when_to_peek)<msrmnts$n_time){
-			names(row_col[[1]]) <- time_labels[when_to_peek]
-			names(row_col[[2]]) <- time_labels[when_to_peek] }
-	}
-	}
-
-	# get raw version of netlet to help with subsetting
-	netlet <- get_raw(netlet)
-
-	# if cross sec print specified rows and cols
-	if(objAttrs$netify_type == 'cross_sec'){
-
-		# make sure rows and cols selected dont exceed dims of data
-		row_col <- lapply(1:2, function(ii){
-			return( intersect(row_col[[ii]], 1:dim(netlet)[ii]) ) })
-
-		# so first check if the input is multilayer if not then just subset rows and cols
-		if(!multilayer_logic_input){
-			out = netlet[ row_col[[1]], row_col[[2]] , drop=FALSE ] }
-
-		# if it is multilayer then we need to check
-		# if user has supplied layers to subset to or not
-		if(multilayer_logic_input) {
-
-			# if what_layers_to_peek is NULL then just return with 
-			# third mode accounted for
-			if(is.null(what_layers_to_peek)){
-				out = netlet[ row_col[[1]], row_col[[2]] , , drop=FALSE ] }
-
-			# if what_layers_to_peek is supplied then subset by it
-			if(!is.null(what_layers_to_peek)){
-				out = netlet[ row_col[[1]], row_col[[2]] , layer_labels, drop=FALSE ] }
+				"Invalid layer(s): {paste(invalid_layers, collapse=', ')}. Available layers: {paste(available_layers, collapse=', ')}")
+			stop()
 		}
+	}
 
-		# if the input was multilayer but the output is not then drop the third mode
-		if(multilayer_logic_input & !multilayer_logic_out){ out <- out[,,,drop=TRUE] }
+	# Get raw data for processing
+	raw_data <- get_raw(netlet)
 
-		# 
-		return( out )
-	} # close the cross-sectional block
-		
-	# if array print specified rows, cols and time
-	if(objAttrs$netify_type == 'longit_array'){
-
-		# make sure time range specified doesnt exceed dims of data
-		# remember that position of time depends on if the input is 
-		# multilayer or not
-		if(!multilayer_logic_input){
-			when_to_peek <- intersect(when_to_peek, 1:dim(netlet)[3]) }
-		if(multilayer_logic_input){
-			when_to_peek <- intersect(when_to_peek, 1:dim(netlet)[4]) }
-
-		# make sure rows and cols selected dont exceed dims of data
-		row_col <- lapply(1:2, function(ii){
-			return( intersect(row_col[[ii]], 1:dim(netlet)[ii]) ) })
-
-		# so first check if the input is multilayer if not then just subset rows and cols
-		if(!multilayer_logic_input){
-			out = netlet[ row_col[[1]], row_col[[2]], when_to_peek , drop=FALSE ] }
-
-		# if it is multilayer then we need to check
-		# if user has supplied layers to subset to or not
-		if(multilayer_logic_input) {
-
-			# if what_layers_to_peek is NULL then just return with 
-			# third mode accounted for
-			if(is.null(what_layers_to_peek)){
-				out = netlet[ row_col[[1]], row_col[[2]] , , when_to_peek, drop=FALSE ] }
-
-			# if what_layers_to_peek is supplied then subset by it
-			if(!is.null(what_layers_to_peek)){
-				out = netlet[ row_col[[1]], row_col[[2]] , layer_labels, when_to_peek, drop=FALSE ] }
+	# Process time selection for longitudinal data
+	if(is_longit){
+		time_labels <- if(netify_type == 'longit_list') {
+			names(raw_data)
+		} else {
+			dimnames(raw_data)[[if(is_multilayer) 4 else 3]]
 		}
-
-
-		# drop unnecessary dimensions: 
-		# time periods if user subsetted down to one period
-		# layers if user subsetted down to one layer
-		out = drop(out)
-
-		# 
-		return( out )
-	} # close the longit array block
-
-	# if list print specified rows, cols and time
-	if(objAttrs$netify_type == 'longit_list'){
-
-		# make sure time range specified doesnt exceed dims of data
-		when_to_peek <- intersect(when_to_peek, 1:length(netlet))
-		netlet <- netlet[when_to_peek]
-		row_col <- lapply(row_col, function(x){
-			if(is.list(x)){ x <- x[time_labels[when_to_peek]] }
-			return(x) })
-
-		# iterate through time periods
-		relev_netlet <- lapply(1:length(netlet), function(tt){
-			
-			# get slice of raw netlet
-			slice <- netlet[[tt]]
-
-			# pick relev actors but also make sure that 
-			# range specified doesnt exceed dims in network
-			row_col <- lapply(1:2, function(ii){
-
-				# choose element from row_col
-				ids <- row_col[[ii]]
-
-				# list object if we have time varying ids
-				# pull out relevant ids for time slice				
-				if(is.list(ids)){ ids_slice <- ids[[tt]] }
-				
-				# not list, if just a general range specified
-				# pull out relevant ids for time slice				
-				if(!is.list(ids)){ ids_slice <- ids }
-
-				# only keep if within range of data
-				ids_slice <- intersect(ids_slice, 1:dim(slice)[ii])				
-
-				#
-				return(ids_slice) })
-
-			# so first check if the input is multilayer if not then just subset rows and cols
-			if(!multilayer_logic_input){
-				relev_slice = slice[ row_col[[1]], row_col[[2]] , drop=FALSE ] }
-
-			# if it is multilayer then we need to check
-			# if user has supplied layers to subset to or not
-			if(multilayer_logic_input) {
-
-				# if what_layers_to_peek is NULL then just return with 
-				# third mode accounted for
-				if(is.null(what_layers_to_peek)){
-					relev_slice = slice[ row_col[[1]], row_col[[2]] , , drop=FALSE ] }
-
-				# if what_layers_to_peek is supplied then subset by it
-				if(!is.null(what_layers_to_peek)){
-					relev_slice = slice[ row_col[[1]], row_col[[2]] , layer_labels, drop=FALSE ] }
-			}
-
-			# if the input was multilayer but the output is not then drop the third mode
-			if(multilayer_logic_input & !multilayer_logic_out){ relev_slice <- relev_slice[,,,drop=TRUE] }
-
-			#
-			return(relev_slice)
-			})
 		
-		# add names back
-		names(relev_netlet) <- names(netlet)
+		# Convert time parameter to indices
+		if(is.null(time)){
+			time_idx <- seq_along(time_labels)
+		} else if(is.character(time)){
+			time_idx <- match(time, time_labels)
+			time_idx <- time_idx[!is.na(time_idx)]
+		} else {
+			time_idx <- time
+		}
+		
+		# Validate time indices
+		max_time <- length(time_labels)
+		time_idx <- time_idx[time_idx >= 1 & time_idx <= max_time]
+		
+		if(length(time_idx) == 0){
+			cli::cli_alert_danger("No valid time periods selected")
+			stop()
+		}
+	}
 
-		#
-		return(relev_netlet) } # close longit list block
+	# Process row/column selection based on netify type
+	if(netify_type == 'cross_sec'){
+		return(peek_cross_sectional(raw_data, rows, cols, layers, is_multilayer))
+	} else if(netify_type == 'longit_array'){
+		return(peek_longit_array(raw_data, rows, cols, time_idx, layers, is_multilayer))
+	} else if(netify_type == 'longit_list'){
+		return(peek_longit_list(raw_data, rows, cols, time_idx, layers, is_multilayer))
+	}
 }
 
-#' @rdname peek
-#' @export
-preview <- peek
+#' Extract subset from cross-sectional network data
+#' 
+#' Internal helper function that processes cross-sectional network data
+#' for the peek function. Handles both single-layer and multilayer networks.
+#'
+#' @param data Raw network data (matrix or 3D array)
+#' @param rows Row selection (actors sending ties)
+#' @param cols Column selection (actors receiving ties)  
+#' @param layers Layer names to select (NULL for all layers)
+#' @param is_multilayer Logical indicating if network has multiple layers
+#'
+#' @return Subsetted matrix or array based on selection criteria
+#'
+#' @keywords internal
+#' @noRd
+peek_cross_sectional <- function(data, rows, cols, layers, is_multilayer){
+	# Get dimensions
+	dims <- dim(data)
+	actor_rows <- dimnames(data)[[1]]
+	actor_cols <- dimnames(data)[[2]]
+	
+	# Process row selection
+	row_idx <- process_actor_selection(rows, actor_rows, dims[1])
+	col_idx <- process_actor_selection(cols, actor_cols, dims[2])
+	
+	# Subset data
+	if(!is_multilayer){
+		return(data[row_idx, col_idx, drop = FALSE])
+	} else {
+		if(is.null(layers)){
+			out <- data[row_idx, col_idx, , drop = FALSE]
+		} else {
+			out <- data[row_idx, col_idx, layers, drop = FALSE]
+		}
+		return(drop(out))
+	}
+}
 
-#' @rdname peek
-#' @export
-inspect <- peek
+#' Extract subset from longitudinal array network data
+#' 
+#' Internal helper function that processes longitudinal array-format network data
+#' for the peek function. Handles time dimension along with actor and layer selection.
+#'
+#' @param data Raw network data in array format (3D or 4D array)
+#' @param rows Row selection (actors sending ties)
+#' @param cols Column selection (actors receiving ties)
+#' @param time_idx Numeric indices of time periods to extract
+#' @param layers Layer names to select (NULL for all layers)
+#' @param is_multilayer Logical indicating if network has multiple layers
+#'
+#' @return Subsetted array with selected dimensions
+#'
+#' @keywords internal
+#' @noRd
+peek_longit_array <- function(data, rows, cols, time_idx, layers, is_multilayer){
+	# Get dimensions
+	dims <- dim(data)
+	actor_rows <- dimnames(data)[[1]]
+	actor_cols <- dimnames(data)[[2]]
+	
+	# Process actor selection
+	row_idx <- process_actor_selection(rows, actor_rows, dims[1])
+	col_idx <- process_actor_selection(cols, actor_cols, dims[2])
+	
+	# Subset data
+	if(!is_multilayer){
+		out <- data[row_idx, col_idx, time_idx, drop = FALSE]
+	} else {
+		if(is.null(layers)){
+			out <- data[row_idx, col_idx, , time_idx, drop = FALSE]
+		} else {
+			out <- data[row_idx, col_idx, layers, time_idx, drop = FALSE]
+		}
+	}
+	return(drop(out))
+}
 
-#' @rdname peek
-#' @export
-glimpse_netify <- peek
+#' Extract subset from longitudinal list network data
+#' 
+#' Internal helper function that processes longitudinal list-format network data
+#' for the peek function. Handles networks where actor composition may vary across
+#' time periods.
+#'
+#' @param data List of network matrices, one per time period
+#' @param rows Row selection (actors sending ties)
+#' @param cols Column selection (actors receiving ties)
+#' @param time_idx Numeric indices of time periods to extract
+#' @param layers Layer names to select (NULL for all layers)
+#' @param is_multilayer Logical indicating if network has multiple layers
+#'
+#' @return List of subsetted matrices for selected time periods
+#'
+#' @keywords internal
+#' @noRd
+peek_longit_list <- function(data, rows, cols, time_idx, layers, is_multilayer){
+	# Subset to requested time periods
+	data_subset <- data[time_idx]
+	
+	# Process each time period
+	result <- lapply(data_subset, function(slice){
+		dims <- dim(slice)
+		actor_rows <- dimnames(slice)[[1]]
+		actor_cols <- dimnames(slice)[[2]]
+		
+		# Process actor selection for this time period
+		row_idx <- process_actor_selection(rows, actor_rows, dims[1])
+		col_idx <- process_actor_selection(cols, actor_cols, dims[2])
+		
+		# Subset
+		if(!is_multilayer){
+			return(slice[row_idx, col_idx, drop = FALSE])
+		} else {
+			if(is.null(layers)){
+				out <- slice[row_idx, col_idx, , drop = FALSE]
+			} else {
+				out <- slice[row_idx, col_idx, layers, drop = FALSE]
+			}
+			return(drop(out))
+		}
+	})
+	
+	return(result)
+}
+
+#' Process actor selection for peek operations
+#' 
+#' Internal helper function that converts various actor selection formats into
+#' numeric indices. Handles single numbers (first n), numeric vectors (specific
+#' positions), character vectors (actor names), and NULL (all actors).
+#'
+#' @param selection User input for actor selection (numeric, character, or NULL)
+#' @param actor_names Character vector of available actor names
+#' @param max_dim Maximum dimension size (total number of actors)
+#'
+#' @return Numeric vector of valid actor indices
+#'
+#' @keywords internal
+#' @noRd
+process_actor_selection <- function(selection, actor_names, max_dim){
+	if(is.null(selection)){
+		# NULL means all actors
+		return(seq_len(max_dim))
+	} else if(is.numeric(selection) && length(selection) == 1){
+		# Single number means first n actors
+		return(seq_len(min(selection, max_dim)))
+	} else if(is.numeric(selection)){
+		# Numeric vector of indices
+		return(selection[selection >= 1 & selection <= max_dim])
+	} else if(is.character(selection) || is.factor(selection)){
+		# Character vector of actor names
+		if(is.factor(selection)) selection <- as.character(selection)
+		idx <- match(selection, actor_names)
+		return(idx[!is.na(idx)])
+	} else {
+		cli::cli_alert_danger("Invalid selection type. Use numeric indices or character names.")
+		stop()
+	}
+}

@@ -1,281 +1,493 @@
-#' Decompose a netify object into edges and nodal data frames
+#' Decompose a netify object into edge and node data frames
 #'
-#' `decompose_netlet` (also available as `decompose_netify` and 
-#' `netify_to_base`, `netlet_to_base`) separates a 
-#' netify object into its constituent parts:
-#' a data frame of edges and a data frame of nodal attributes. This function
-#' is particularly useful for preparing network data for analyses that
-#' require separate edge and node data sets.
+#' `decompose_netify` (also available as `decompose`) separates a netify 
+#' object into its constituent parts: a data frame of edges with attributes and 
+#' a data frame of nodal attributes. 
 #'
-#' @param netlet A netify object to be decomposed.
-#' @param remove_zeros Logical. If TRUE, remove edges with zero values.
+#' @param netlet A netify object (class "netify") to be decomposed.
+#' @param remove_zeros Logical. If TRUE (default), edges with zero weight values 
+#'   are removed from the edge data frame. If FALSE, zero-weight edges are retained.
 #'
-#' @return A list containing two elements: `edge_data` and `nodal_data`.
-#'         `edge_data` is a data frame of edges with attributes, and
-#'         `nodal_data` is a data frame containing node attributes.
-#'
-#' @examples
-#' # load icews data
-#' data(icews)
-#' 
-#' # choose attributes
-#' nvars = c( 'i_polity2', 'i_log_gdp', 'i_log_pop' )
-#' dvars = c( 'matlCoop', 'verbConf', 'matlConf' )
-#'
-#' # create a netify object
-#' netlet = netify(
-#'     dyad_data=icews, actor1='i', actor2='j',
-#'     time = 'year',
-#'     symmetric=FALSE, weight='verbCoop',
-#'     mode='unipartite', sum_dyads=FALSE,
-#'     actor_time_uniform=TRUE, actor_pds=NULL,
-#'     diag_to_NA=TRUE, missing_to_zero=TRUE,
-#'     nodal_vars = nvars, 
-#'     dyad_vars = dvars
-#' )
-#' 
-#' # decompose the netify object
-#' decomposed = decompose_netlet( netlet )
-#' 
-#' lapply(decomposed, head)
-#' 
-#' @author Cassy Dorff, Shahryar Minhas
-#' 
-#' @export decompose_netlet
-#' @aliases decompose_netify netify_to_base netlet_to_base
-#' 
-
-decompose_netlet <- function(
-    netlet, remove_zeros=TRUE
-){
-
-	# check if netify object
-	netify_check(netlet)	
-
-	# pull out attrs - cache for reuse
-	obj_attrs <- attributes(netlet)
-	netify_type <- obj_attrs$netify_type
-
-	# pull out msrmnts
-	msrmnts <- netify_measurements(netlet)
-
-    # build edge data from dv #####################
-    # edge data
-    edge_data = reshape2::melt( get_raw( netlet ) )
-    edge_data$Var1 = char(edge_data$Var1)
-    edge_data$Var2 = char(edge_data$Var2)
-    edge_data = edge_data[
-        edge_data$Var1 != edge_data$Var2, ]
-
-    # remove zeros
-    if(remove_zeros){
-        edge_data = edge_data[edge_data$value != 0, ]
-    }
-
-    # if starting with array change Var3 (time) to L1
-    if(netify_type == 'longit_array'){
-        names(edge_data)[names(edge_data) == 'Var3'] <- 'L1'
-    }
-
-    # add weight label
-    weight_attr <- obj_attrs$weight
-    if(!is.null(weight_attr)){
-        names(edge_data)[names(edge_data) == 'value'] <- weight_attr
-    } else { 
-        names(edge_data)[names(edge_data) == 'value'] <- 'net_value'
-    }
-
-    # if ego netlet then we need to rename time column
-    # since right now it is a concatenation of the ego
-    # and the time point
-    if(netify_type != 'cross_sec'){
-        ego_netlet = obj_attrs$ego_netlet
-        if(!is.null(ego_netlet) && ego_netlet){
-            edge_data$L1 = vapply(strsplit(edge_data$L1, '__'), 
-                                  function(x) x[2], character(1))
-        }
-    }
-    ######################
-
-    # add other dyad attribs #####################
-    # merge dyad attribs with dv edge data
-    dyad_data_attr <- obj_attrs$dyad_data
-    if( !is.null(dyad_data_attr) ){
-
-        # Convert new dyad_data structure to old format for melting
-        # New structure: list(time_periods) -> list(variables) -> matrix
-        # Convert to: list(time_periods) -> array(n_rows, n_cols, n_vars)
-        time_periods <- names(dyad_data_attr)
-        dyad_data_old_format <- vector("list", length(time_periods))
-        names(dyad_data_old_format) <- time_periods
-        
-        for(time_period in time_periods) {
-            var_matrices <- dyad_data_attr[[time_period]]
-            
-            if(length(var_matrices) > 0) {
-                # Get dimensions from first matrix
-                first_matrix <- var_matrices[[1]]
-                n_rows <- nrow(first_matrix)
-                n_cols <- ncol(first_matrix)
-                n_vars <- length(var_matrices)
-                var_names <- names(var_matrices)
-                
-                # Create array for this time period
-                time_array <- array(
-                    dim = c(n_rows, n_cols, n_vars),
-                    dimnames = list(
-                        rownames(first_matrix),
-                        colnames(first_matrix),
-                        var_names
-                    )
-                )
-                
-                # Fill array with data from individual matrices - optimized
-                for(i in seq_along(var_names)) {
-                    time_array[, , i] <- var_matrices[[i]]
-                }
-                
-                dyad_data_old_format[[time_period]] <- time_array
-            }
-        }
-
-        # melt dyad data
-        dyad_data = reshape2::melt( dyad_data_old_format )
-        dyad_data = dyad_data[dyad_data$Var1 != dyad_data$Var2, ]
-
-        # spread vars
-        dyad_data = reshape2::dcast( 
-            dyad_data, Var1 + Var2 + L1 ~ Var3, value.var='value' )
-
-        # set ids based on netify_type
-        if (netify_type == 'cross_sec') {
-            merge_by_vars <- c('Var1', 'Var2')
-        } else {
-            merge_by_vars <- c('Var1', 'Var2', 'L1') }	
-
-        # remove vars in dyad_data that are already in 
-        # edge_data except id vars if necessary - optimized
-        dyad_names <- names(dyad_data)
-        edge_names <- names(edge_data)
-        to_drop = setdiff(intersect(dyad_names, edge_names), merge_by_vars)
-        if(length(to_drop) > 0){
-            drop_indices <- match(to_drop, dyad_names)
-            dyad_data = dyad_data[, -drop_indices, drop=FALSE]
-        }
-
-        # merge to edge_data
-        edge_data = merge(edge_data, dyad_data, by=merge_by_vars )
-
-        # cleanup
-        rm(dyad_data, dyad_data_old_format, time_periods, var_matrices, 
-           first_matrix, time_array, dyad_names, edge_names)
-    }
-
-    # id vars for cross-sec and longit case
-    if(netify_type == 'cross_sec'){ edge_data$L1 = 1 }
-    edge_id_vars = c('Var1', 'Var2', 'L1')
-    
-    # reorder vars
-    edge_vars = c(
-        edge_id_vars, 
-        setdiff(names(edge_data), edge_id_vars))
-    edge_data = edge_data[,edge_vars]
-
-    # relabel id cols
-    names(edge_data)[1:3] = c('from', 'to', 'time')
-    ######################
-
-    # org nodal attrib data #####################
-    # other nodal data
-    nodal_data_attr <- obj_attrs$nodal_data
-    if( !is.null(nodal_data_attr)){
-        nodal_data = nodal_data_attr
-    } else {
-        nodal_data = actor_pds_to_frame(obj_attrs$actor_pds)
-    }
-
-    # if time variable not present in nodal data add
-    nodal_names <- names(nodal_data)
-    if(!'time' %in% nodal_names){ nodal_data$time = 1 }
-
-    # reorder vars
-    node_id_vars = c('actor', 'time')
-    node_vars = c(
-        node_id_vars, 
-        setdiff(nodal_names, node_id_vars))
-    nodal_data = nodal_data[,node_vars]
-
-    # relabel id cols
-    names(nodal_data)[1:2] = c('name', 'time')
-    
-    # convert node time to char if not already
-    nodal_data$time = char(nodal_data$time)
-    ######################
-
-    ######################
-    # if cross-sectional make sure that time value
-    # in edge_data is the same as time value
-    # in nodal_data
-    if(netify_type == 'cross_sec'){
-        edge_data$time = nodal_data$time[1]
-    }
-    ######################
-
-    ######################
-    # 
-    out = list(
-        edge_data = edge_data,
-        nodal_data = nodal_data)
-    ######################    
-
-    ######################
-    #
-    return(out)
-    ######################
-}
-
-#' @rdname decompose_netlet
-#' @export
-decompose_netify <- decompose_netlet
-
-#' @rdname decompose_netlet
-#' @export
-netify_to_base <- decompose_netlet
-
-#' @rdname decompose_netlet
-#' @export
-netlet_to_base <- decompose_netlet
-
-#' Break down an `igraph` object into base R components
-#'
-#' `decompose_igraph` (also available as `igraph_to_base`) processes an 
-#' igraph object to extract its adjacency matrix along with any 
-#' available vertex and edge attributes, returning them in a standardized list format.
-#'
-#' @param grph An igraph object.
-#' @param weight An optional character string specifying the edge attribute to use as weights. Defaults to NULL.
-#'
-#' @return A list containing:
-#' \describe{
-#'   \item{adj_mat}{The adjacency matrix extracted from the igraph object.}
-#'   \item{ndata}{A data frame of vertex attributes, or NULL if not available.}
-#'   \item{ddata}{A data frame of edge attributes, or NULL if not available.}
-#'   \item{weight}{The edge attribute name used, if provided.}
-#' }
+#' @return A list containing two data frames:
+#'   \itemize{
+#'     \item \strong{edge_data}: A data frame where each row represents an edge with columns:
+#'       \itemize{
+#'         \item \code{from}: Source node identifier
+#'         \item \code{to}: Target node identifier  
+#'         \item \code{time}: Time period (character; "1" for cross-sectional networks)
+#'         \item \code{weight}: Edge weight values (using original weight variable name if specified)
+#'         \item Additional columns for any dyadic variables stored in the netify object
+#'       }
+#'     \item \strong{nodal_data}: A data frame where each row represents a node-time combination with columns:
+#'       \itemize{
+#'         \item \code{name}: Node identifier
+#'         \item \code{time}: Time period (character; "1" for cross-sectional networks)
+#'         \item Additional columns for any nodal variables stored in the netify object
+#'       }
+#'   }
 #'
 #' @details
-#' If the graph does not have vertex names, default names are assigned:
+#' The function helpful for:
+#' 
+#' \strong{Edge data processing:}
 #' \itemize{
-#'   \item For bipartite graphs: rows are labeled as "r1", "r2", etc., and columns as "c1", "c2", etc.
-#'   \item For unipartite graphs: all vertices are labeled as "a1", "a2", etc.
+#'   \item Extracts the adjacency matrix (or array for longitudinal networks) from the netify object
+#'   \item Converts it to long format using reshape2::melt
+#'   \item Removes self-loops (edges where source equals target)
+#'   \item Optionally removes zero-weight edges based on the remove_zeros parameter
+#'   \item Merges any dyadic variables stored in the netify object
+#'   \item Renames columns to standardized names (from, to, time)
 #' }
-#' Note: For longitudinal networks with changing actor composition, it is recommended 
-#' to explicitly name vertices before conversion to ensure consistent actor identification across time periods.
+#' 
+#' \strong{Node data processing:}
+#' \itemize{
+#'   \item Extracts nodal attributes if present, or constructs from actor_pds information
+#'   \item Ensures consistent time variable across node and edge data
+#'   \item Renames columns to standardized names (name, time)
+#' }
+#' 
+#' \strong{Time handling:}
+#' \itemize{
+#'   \item For cross-sectional networks: Sets time to "1" in both data frames
+#'   \item For longitudinal networks: Preserves original time periods as character values
+#'   \item For ego networks: Extracts time from ego-time concatenated identifiers
+#' }
+#' 
+#' \strong{Variable preservation:}
+#' 
+#' All dyadic and nodal variables stored in the netify object are preserved in the 
+#' output data frames. Dyadic variables are merged with the edge data, while nodal 
+#' variables remain in the nodal data frame.
+#'
+#'
+#' @examples
+#' # Load example data
+#' data(icews)
+#' 
+#' # Example 1: Cross-sectional network
+#' icews_10 <- icews[icews$year == 2010,]
+#' 
+#' # Create netify object
+#' net_cs <- netify(
+#'   icews_10,
+#'   actor1 = 'i', actor2 = 'j',
+#'   symmetric = FALSE,
+#'   weight = 'verbCoop'
+#' )
+#' 
+#' # Decompose to data frames
+#' decomposed_cs <- decompose_netify(net_cs)
+#' 
+#' # Examine structure
+#' str(decomposed_cs)
+#' head(decomposed_cs$edge_data)
+#' head(decomposed_cs$nodal_data)
+#' 
+#' # Example 2: Longitudinal network with attributes
+#' nvars <- c('i_polity2', 'i_log_gdp', 'i_log_pop')
+#' dvars <- c('matlCoop', 'verbConf', 'matlConf')
+#' 
+#' net_longit <- netify(
+#'   dyad_data = icews,
+#'   actor1 = 'i', actor2 = 'j',
+#'   time = 'year',
+#'   symmetric = FALSE,
+#'   weight = 'verbCoop',
+#'   nodal_vars = nvars,
+#'   dyad_vars = dvars
+#' )
+#' 
+#' # Decompose with all attributes
+#' decomposed_longit <- decompose_netify(net_longit)
+#' 
+#' # Check that variables are preserved
+#' names(decomposed_longit$edge_data)  # Includes dyadic variables
+#' names(decomposed_longit$nodal_data)  # Includes nodal variables
+#' 
+#' # Example 3: Keep zero-weight edges
+#' decomposed_with_zeros <- decompose_netify(net_cs, remove_zeros = FALSE)
+#' 
+#' # Compare edge counts
+#' nrow(decomposed_cs$edge_data)         # Without zeros
+#' nrow(decomposed_with_zeros$edge_data)  # With zeros
+#' 
+#' # Example 4: Use for visualization prep
+#' \dontrun{
+#' # Decompose for use with ggplot2
+#' plot_data <- decompose_netify(net_cs)
+#' 
+#' # Can now use edge_data and nodal_data separately
+#' # for network visualization
+#' }
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#' 
+#' @export decompose_netify
+
+decompose_netify <- function(netlet, remove_zeros = TRUE) {
+    
+    # Input validation
+    netify_check(netlet)
+    if (!is.logical(remove_zeros) || length(remove_zeros) != 1) {
+        stop("remove_zeros must be a single logical value")
+    }
+    
+    # Cache attributes for efficiency
+    obj_attrs <- attributes(netlet)
+    netify_type <- obj_attrs$netify_type
+    weight_attr <- obj_attrs$weight
+    ego_netlet <- obj_attrs$ego_netlet
+    
+    # Get measurements
+    msrmnts <- netify_measurements(netlet)
+    
+    # Process edge data
+    edge_data <- process_edge_data(
+        netlet = netlet,
+        netify_type = netify_type,
+        weight_attr = weight_attr,
+        remove_zeros = remove_zeros,
+        ego_netlet = ego_netlet
+    )
+    
+    # Process dyadic attributes
+    if (!is.null(obj_attrs$dyad_data)) {
+        edge_data <- merge_dyadic_attributes(
+            edge_data = edge_data,
+            dyad_data_attr = obj_attrs$dyad_data,
+            netify_type = netify_type
+        )
+    }
+    
+    # Finalize edge data structure
+    edge_data <- finalize_edge_data(edge_data, netify_type)
+    
+    # Process nodal data 
+    nodal_data <- process_nodal_data(
+        obj_attrs = obj_attrs,
+        netify_type = netify_type
+    )
+    
+    # Synchronize time variables
+    if (netify_type == 'cross_sec' && nrow(nodal_data) > 0) {
+        edge_data$time <- as.character(nodal_data$time[1])
+    }
+    
+    # Return results
+    list(
+        edge_data = edge_data,
+        nodal_data = nodal_data
+    )
+}
+
+#' Process edge data from netify object
+#' @keywords internal
+#' @noRd
+process_edge_data <- function(netlet, netify_type, weight_attr, remove_zeros, ego_netlet) {
+    
+    # Extract raw adjacency data
+    raw_data <- get_raw(netlet)
+    
+    # Melt to long format
+    edge_data <- reshape2::melt(raw_data)
+    
+    # Ensure character actor names
+    edge_data$Var1 <- as.character(edge_data$Var1)
+    edge_data$Var2 <- as.character(edge_data$Var2)
+    
+    # Remove self-loops
+    edge_data <- edge_data[edge_data$Var1 != edge_data$Var2, ]
+    
+    # Remove zeros if requested (BEFORE renaming columns)
+    if (remove_zeros && nrow(edge_data) > 0) {
+        edge_data <- edge_data[edge_data$value != 0, ]
+    }
+    
+    # Handle longitudinal array format
+    if (netify_type == 'longit_array') {
+        names(edge_data)[names(edge_data) == 'Var3'] <- 'L1'
+    }
+    
+    # Rename weight column
+    if (!is.null(weight_attr)) {
+        names(edge_data)[names(edge_data) == 'value'] <- weight_attr
+    } else {
+        names(edge_data)[names(edge_data) == 'value'] <- 'net_value'
+    }
+    
+    # Handle ego networks
+    if (netify_type != 'cross_sec' && !is.null(ego_netlet) && ego_netlet) {
+        if ('L1' %in% names(edge_data)) {
+            edge_data$L1 <- vapply(
+                strsplit(edge_data$L1, '__', fixed = TRUE),
+                function(x) if(length(x) >= 2) x[2] else x[1],
+                character(1)
+            )
+        }
+    }
+    
+    edge_data
+}
+
+#' Merge dyadic attributes into edge data
+#' @keywords internal
+#' @noRd
+merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type) {
+    
+    # Convert new structure to meltable format
+    dyad_data_melted <- melt_dyad_data(dyad_data_attr)
+    
+    if (nrow(dyad_data_melted) == 0) {
+        return(edge_data)
+    }
+    
+    # Remove self-loops from dyad data
+    dyad_data_melted <- dyad_data_melted[
+        dyad_data_melted$Var1 != dyad_data_melted$Var2, 
+    ]
+    
+    # Reshape to wide format
+    dyad_data_wide <- reshape2::dcast(
+        dyad_data_melted, 
+        Var1 + Var2 + L1 ~ Var3, 
+        value.var = 'value'
+    )
+    
+    # Determine merge columns
+    merge_by <- if (netify_type == 'cross_sec') {
+        c('Var1', 'Var2')
+    } else {
+        c('Var1', 'Var2', 'L1')
+    }
+    
+    # Remove duplicate columns except merge keys
+    cols_to_keep <- c(merge_by, setdiff(names(dyad_data_wide), names(edge_data)))
+    dyad_data_wide <- dyad_data_wide[, cols_to_keep, drop = FALSE]
+    
+    # Merge
+    merge(edge_data, dyad_data_wide, by = merge_by, all.x = TRUE)
+}
+
+#' Convert dyad_data attribute to meltable format
+#' @keywords internal
+#' @noRd
+melt_dyad_data <- function(dyad_data_attr) {
+    
+    melted_list <- list()
+    
+    for (time_period in names(dyad_data_attr)) {
+        var_matrices <- dyad_data_attr[[time_period]]
+        
+        if (length(var_matrices) == 0) next
+        
+        # Get dimensions from first matrix
+        first_matrix <- var_matrices[[1]]
+        n_rows <- nrow(first_matrix)
+        n_cols <- ncol(first_matrix)
+        n_vars <- length(var_matrices)
+        var_names <- names(var_matrices)
+        
+        # Create array for melting
+        time_array <- array(
+            dim = c(n_rows, n_cols, n_vars),
+            dimnames = list(
+                rownames(first_matrix),
+                colnames(first_matrix),
+                var_names
+            )
+        )
+        
+        # Fill array
+        for (i in seq_along(var_names)) {
+            time_array[, , i] <- var_matrices[[i]]
+        }
+        
+        melted_list[[time_period]] <- time_array
+    }
+    
+    if (length(melted_list) == 0) {
+        return(data.frame(
+            Var1 = character(0),
+            Var2 = character(0),
+            Var3 = character(0),
+            L1 = character(0),
+            value = numeric(0)
+        ))
+    }
+    
+    reshape2::melt(melted_list)
+}
+
+#' Finalize edge data structure
+#' @keywords internal
+#' @noRd
+finalize_edge_data <- function(edge_data, netify_type) {
+    
+    # Add time column for cross-sectional
+    if (netify_type == 'cross_sec' && !'L1' %in% names(edge_data)) {
+        edge_data$L1 <- "1"
+    }
+    
+    # Ensure L1 exists
+    if (!'L1' %in% names(edge_data)) {
+        edge_data$L1 <- "1"
+    }
+    
+    # Reorder columns
+    id_vars <- c('Var1', 'Var2', 'L1')
+    other_vars <- setdiff(names(edge_data), id_vars)
+    edge_data <- edge_data[, c(id_vars, other_vars), drop = FALSE]
+    
+    # Rename ID columns
+    names(edge_data)[1:3] <- c('from', 'to', 'time')
+    
+    # Ensure time is character
+    edge_data$time <- as.character(edge_data$time)
+    
+    edge_data
+}
+
+#' Process nodal data from netify object
+#' @keywords internal
+#' @noRd
+process_nodal_data <- function(obj_attrs, netify_type) {
+    
+    # Get nodal data from attributes or construct from actor_pds
+    if (!is.null(obj_attrs$nodal_data)) {
+        nodal_data <- obj_attrs$nodal_data
+    } else if (!is.null(obj_attrs$actor_pds)) {
+        nodal_data <- actor_pds_to_frame(obj_attrs$actor_pds)
+    } else {
+        # Fallback: empty data frame
+        nodal_data <- data.frame(
+            actor = character(0),
+            time = character(0),
+            stringsAsFactors = FALSE
+        )
+    }
+    
+    # Ensure data frame
+    if (!is.data.frame(nodal_data)) {
+        nodal_data <- as.data.frame(nodal_data, stringsAsFactors = FALSE)
+    }
+    
+    # Add time column if missing
+    if (nrow(nodal_data) > 0 && !'time' %in% names(nodal_data)) {
+        nodal_data$time <- "1"
+    }
+    
+    # Standardize column order
+    if (nrow(nodal_data) > 0) {
+        id_vars <- c('actor', 'time')
+        # Ensure actor column exists
+        if (!'actor' %in% names(nodal_data)) {
+            # Try to find actor column by position or name pattern
+            possible_actor_cols <- c('name', 'node', 'vertex')
+            actor_col <- intersect(possible_actor_cols, names(nodal_data))
+            if (length(actor_col) > 0) {
+                names(nodal_data)[names(nodal_data) == actor_col[1]] <- 'actor'
+            } else if (ncol(nodal_data) > 0) {
+                # Assume first column is actor
+                names(nodal_data)[1] <- 'actor'
+            }
+        }
+        
+        existing_id_vars <- intersect(id_vars, names(nodal_data))
+        other_vars <- setdiff(names(nodal_data), id_vars)
+        nodal_data <- nodal_data[, c(existing_id_vars, other_vars), drop = FALSE]
+        
+        # Rename actor column to name
+        if ('actor' %in% names(nodal_data)) {
+            names(nodal_data)[names(nodal_data) == 'actor'] <- 'name'
+        }
+    }
+    
+    # Ensure time is character
+    if ('time' %in% names(nodal_data)) {
+        nodal_data$time <- as.character(nodal_data$time)
+    }
+    
+    nodal_data
+}
+
+#' Decompose an igraph object into base R components
+#'
+#' `decompose_igraph` extracts the adjacency matrix and any vertex/edge attributes 
+#' from an igraph object, returning them in a standardized list format. 
+#'
+#' @param grph An igraph object to be decomposed.
+#' @param weight Character string specifying the edge attribute to use as weights 
+#'   in the adjacency matrix. If NULL (default), the unweighted adjacency matrix 
+#'   is returned with 1s for edges and 0s for non-edges.
+#'
+#' @return A list containing four elements:
+#'   \itemize{
+#'     \item \strong{adj_mat}: The adjacency matrix extracted from the igraph object
+#'       \itemize{
+#'         \item For unipartite graphs: Square matrix of dimension n×n
+#'         \item For bipartite graphs: Rectangular matrix of dimension n₁×n₂
+#'         \item Values are edge weights if specified, otherwise 0/1
+#'       }
+#'     \item \strong{ndata}: A data frame of vertex attributes, or NULL if none exist
+#'       \itemize{
+#'         \item Always includes an 'actor' column with vertex names
+#'         \item Additional columns for each vertex attribute
+#'       }
+#'     \item \strong{ddata}: A data frame of edge attributes, or NULL if none exist
+#'       \itemize{
+#'         \item Columns 'from' and 'to' specify edge endpoints
+#'         \item Additional columns for each edge attribute
+#'       }
+#'     \item \strong{weight}: The edge attribute name used for weights, if provided
+#'   }
+#'
+#' @details
+#' The function handles both unipartite and bipartite graphs appropriately:
+#' 
+#' \strong{Graph type detection:}
+#' \itemize{
+#'   \item Bipartite graphs must have a logical 'type' vertex attribute
+#'   \item If the 'type' attribute exists but is not logical, the graph is treated 
+#'     as unipartite with a warning
+#' }
+#' 
+#' \strong{Vertex naming:}
+#' 
+#' If the graph lacks vertex names, default names are assigned:
+#' \itemize{
+#'   \item Unipartite graphs: "a1", "a2", ..., "an"
+#'   \item Bipartite graphs: "r1", "r2", ... for type 1; "c1", "c2", ... for type 2
+#' }
+#' 
+#' Existing vertex names are always preserved and used in the output.
+#' 
+#' \strong{Matrix extraction:}
+#' \itemize{
+#'   \item Unipartite: Uses `as_adjacency_matrix()` to get n×n matrix
+#'   \item Bipartite: Uses `as_biadjacency_matrix()` to get n₁×n₂ matrix where 
+#'     rows correspond to type=FALSE vertices and columns to type=TRUE vertices
+#' }
+#' 
+#' \strong{Attribute handling:}
+#' 
+#' All vertex and edge attributes are preserved in the output data frames. System 
+#' attributes (like 'name' and 'type') are included alongside user-defined attributes.
+#'
+#' @note 
+#' For longitudinal networks with changing actor composition, explicitly set vertex 
+#' names before decomposition to ensure consistent actor identification across time 
+#' periods.
+#' 
+#' The adjacency matrix is always returned as a standard R matrix (not sparse), 
+#' which may have memory implications for very large graphs.
+#' 
+#' When edge attributes are used as weights, ensure they contain numeric values. 
+#' Non-numeric edge attributes will cause an error.
+#'
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #'
 #' @export decompose_igraph
-#' @aliases igraph_to_base
 
 decompose_igraph <- function(grph, weight = NULL) {
     stopifnot(inherits(grph, "igraph"))
@@ -382,40 +594,90 @@ decompose_igraph <- function(grph, weight = NULL) {
     )
 }
 
-#' @rdname decompose_igraph
-#' @export
-igraph_to_base <- decompose_igraph
-
-#' Break down a `network` object into base R components
+#' Decompose a network object into base R components
 #'
-#' `decompose_statnet` (also available as `decompose_network`, 
-#' `network_to_base`, and `statnet_to_base`) processes an object 
-#' from the `network` package to extract its adjacency matrix along with any available vertex and edge attributes, and returns them in a standardized list format.
+#' `decompose_statnet` (also available as `decompose_network`) extracts the 
+#' adjacency matrix and any vertex/edge attributes 
+#' from a network object (from the statnet suite), returning them in a standardized 
+#' list format. 
 #'
-#' @param ntwk A `network` object.
-#' @param weight An optional character string specifying the edge attribute to use as weights. Defaults to NULL.
+#' @param ntwk A network object (class "network") to be decomposed.
+#' @param weight Character string specifying the edge attribute to use as weights 
+#'   in the adjacency matrix. If NULL (default), the unweighted adjacency matrix 
+#'   is returned with 1s for edges and 0s for non-edges.
 #'
-#' @return A list containing:
-#' \describe{
-#'   \item{adj_mat}{The adjacency matrix extracted from the network object.}
-#'   \item{ndata}{A data frame of vertex attributes, or NULL if not available.}
-#'   \item{ddata}{A data frame of edge attributes combined with vertex names, or NULL if not available.}
-#'   \item{weight}{The edge attribute name used, if provided.}
-#' }
+#' @return A list containing four elements:
+#'   \itemize{
+#'     \item \strong{adj_mat}: The adjacency matrix extracted from the network object
+#'       \itemize{
+#'         \item For unipartite networks: Square matrix of dimension n×n
+#'         \item For bipartite networks: Full square matrix of dimension (n₁+n₂)×(n₁+n₂)
+#'         \item Values are edge weights if specified, otherwise 0/1
+#'       }
+#'     \item \strong{ndata}: A data frame of vertex attributes, or NULL if none exist
+#'       \itemize{
+#'         \item Always includes an 'actor' column with vertex names
+#'         \item Additional columns for each vertex attribute (excluding system attributes)
+#'       }
+#'     \item \strong{ddata}: A data frame of edge attributes, or NULL if none exist
+#'       \itemize{
+#'         \item Columns 'from' and 'to' specify edge endpoints using vertex names
+#'         \item Additional columns for each edge attribute
+#'       }
+#'     \item \strong{weight}: The edge attribute name used for weights, if provided
+#'   }
 #'
 #' @details
-#' If the network does not have vertex names, default names are assigned:
-#' \itemize{
-#'   \item For bipartite networks: rows are labeled as "r1", "r2", etc., and columns as "c1", "c2", etc.
-#'   \item For unipartite networks: all vertices are labeled as "a1", "a2", etc.
-#' }
-#' Note: For longitudinal networks with changing actor composition, it is recommended 
-#' to explicitly name vertices before conversion to ensure consistent actor identification across time periods.
+#' The function handles both unipartite and bipartite networks appropriately:
 #' 
+#' \strong{Network type detection:}
+#' \itemize{
+#'   \item Bipartite networks are identified using `is.bipartite()`
+#'   \item The bipartite partition size is retrieved from the 'bipartite' network attribute
+#' }
+#' 
+#' \strong{Vertex naming:}
+#' 
+#' The function checks for existing vertex names in the 'vertex.names' attribute. 
+#' If names are just the default numeric sequence (1, 2, 3, ...), they are treated 
+#' as missing. Default names are assigned when needed:
+#' \itemize{
+#'   \item Unipartite networks: "a1", "a2", ..., "an"
+#'   \item Bipartite networks: "r1", "r2", ... for first partition; "c1", "c2", ... for second partition
+#' }
+#' 
+#' \strong{Matrix extraction:}
+#' 
+#' Unlike igraph's bipartite handling, the network package returns the full 
+#' adjacency matrix even for bipartite networks. The function:
+#' \itemize{
+#'   \item Extracts the full matrix using `as.matrix.network.adjacency()`
+#'   \item For bipartite networks, the matrix has dimension (n₁+n₂)×(n₁+n₂) with 
+#'     the first n₁ rows/columns for the first partition
+#' }
+#' 
+#' \strong{Attribute handling:}
+#' 
+#' System attributes ('vertex.names' and 'na') are excluded from the vertex 
+#' attribute data frame. All user-defined vertex and edge attributes are preserved.
+#'
+#' @note 
+#' For longitudinal networks with changing actor composition, explicitly set vertex 
+#' names before decomposition to ensure consistent actor identification across time 
+#' periods.
+#' 
+#' The adjacency matrix format differs between this function and `decompose_igraph` 
+#' for bipartite networks: this function returns the full square matrix while 
+#' `decompose_igraph` returns only the rectangular bipartite portion.
+#' 
+#' Edge directions are preserved in the adjacency matrix according to the network's 
+#' directed/undirected property.
+#'
+#'
 #' @author Cassy Dorff, Shahryar Minhas
 #'
 #' @export decompose_statnet
-#' @aliases decompose_network network_to_base statnet_to_base
+#' @aliases decompose_network
 
 decompose_statnet <- function(ntwk, weight = NULL) {
     stopifnot(inherits(ntwk, "network"))
@@ -531,10 +793,3 @@ decompose_statnet <- function(ntwk, weight = NULL) {
 #' @export
 decompose_network <- decompose_statnet
 
-#' @rdname decompose_statnet
-#' @export
-network_to_base <- decompose_statnet
-
-#' @rdname decompose_statnet
-#' @export
-statnet_to_base <- decompose_statnet

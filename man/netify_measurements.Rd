@@ -2,24 +2,57 @@
 % Please edit documentation in R/netify_measurements.R
 \name{netify_measurements}
 \alias{netify_measurements}
-\alias{netlet_measurements}
 \alias{measurements}
-\title{Get measurements of a netify object}
+\title{Extract measurements and dimensions from a netify object}
 \usage{
 netify_measurements(netlet)
-
-netlet_measurements(netlet)
 
 measurements(netlet)
 }
 \arguments{
-\item{netlet}{a netify object}
+\item{netlet}{A netify object (class "netify") to analyze. Can be cross-sectional,
+longitudinal array, or longitudinal list format.}
 }
 \value{
-a list of measurements about the netify object
+A list containing measurements of the netify object with the following
+components (availability depends on netify type):
+
+\strong{Actor information:}
+\itemize{
+\item \code{row_actors}: Character vector (or list) of row actor names
+\item \code{col_actors}: Character vector (or list) of column actor names
+\item \code{n_row_actors}: Integer (or list) count of row actors
+\item \code{n_col_actors}: Integer (or list) count of column actors
+}
+
+\strong{Temporal information:}
+\itemize{
+\item \code{time}: Character vector of time period labels (NULL for cross-sectional)
+\item \code{n_time}: Integer count of time periods (NULL for cross-sectional)
+}
+
+\strong{Layer information:}
+\itemize{
+\item \code{layers}: Character vector of layer names (NULL if single layer)
+\item \code{n_layers}: Integer count of layers (NULL if single layer)
+}
+
+\strong{Attribute information:}
+\itemize{
+\item \code{nvars}: Character vector of nodal variable names
+\item \code{n_nvars}: Integer count of nodal variables
+\item \code{dvars}: Character vector of dyadic variable names
+\item \code{n_dvars}: Integer count of dyadic variables
+}
 }
 \description{
-Get measurements of a netify object
+\code{netify_measurements} (also available as \code{measurements})
+extracts comprehensive information about the structure, dimensions, and attributes
+of a netify object. This function provides a standardized way to inspect network
+properties across different netify types.
+}
+\details{
+The function will adapt its output based on the netify object type.
 }
 \author{
 Cassy Dorff, Shahryar Minhas

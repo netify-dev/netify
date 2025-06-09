@@ -1,6 +1,6 @@
 #' Convert netify objects back to dyadic data frames
 #'
-#' `unnetify` (also available as `to_df`, `netify_to_df`, `dyadify`) reverses 
+#' `unnetify` (also available as `netify_to_df`) reverses 
 #' the netify transformation by converting network objects back into dyadic 
 #' (edge-level) data frames. This function combines network structure with any 
 #' associated nodal and dyadic attributes, creating a data frame where each row 
@@ -113,7 +113,7 @@
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
 #' @export unnetify
-#' @aliases netify_to_df, to_df, dyadify
+#' @aliases netify_to_df
 #' 
 
 unnetify <- function(netlet, remove_zeros=FALSE){
@@ -128,7 +128,7 @@ unnetify <- function(netlet, remove_zeros=FALSE){
 
 	######################
     # get to df format
-    net_dfs = decompose_netlet( netlet, remove_zeros=remove_zeros )
+    net_dfs = decompose_netify( netlet, remove_zeros=remove_zeros )
     edge_data = net_dfs$edge_data
     nodal_data = net_dfs$nodal_data
     rm(net_dfs)
@@ -182,12 +182,4 @@ unnetify <- function(netlet, remove_zeros=FALSE){
 
 #' @rdname unnetify
 #' @export
-to_df <- unnetify
-
-#' @rdname unnetify
-#' @export
 netify_to_df <- unnetify
-
-#' @rdname unnetify
-#' @export
-dyadify <- unnetify

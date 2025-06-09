@@ -1,27 +1,115 @@
-#' Prepare graphical parameters for ggplot2 based on specified plot arguments.
+#' Prepare graphical parameters for plot.netify
 #'
-#' This function organizes and formats static and variable-dependent aesthetic parameters 
-#' for nodes, text labels, and edges to be used in ggplot2 visualizations. It adjusts parameters
-#' based on the existence and non-null status of the corresponding entries in `plot_args`.
+#' `gg_params` organizes and formats aesthetic parameters for network visualization 
+#' components (nodes, text labels, and edges) into a structure suitable for ggplot2. 
+#' The function separates static (fixed) parameters from dynamic (data-mapped) 
+#' parameters, enabling flexible network visualization.
 #'
-#' @param plot_args A list containing user-defined specifications for various graphical parameters
-#'                  such as color, size, alpha, and others for different components of the plot.
+#' @param plot_args A list containing visualization specifications. Can include both 
+#'   static parameters (fixed values) and variable parameters (mapped to data columns) 
+#'   for different network components. See Details for the full list of supported 
+#'   parameters.
 #'
-#' @return A list containing organized graphical parameters for nodes, text, labels, and edges.
-#'         Each component has sub-lists for static parameters and variable parameters.
-#' 
-#' @author Cassy Dorff, Shahryar Minhas 
+#' @return A list with five components, each containing static and variable aesthetic mappings:
+#'   \itemize{
+#'     \item \strong{point}: Node visualization parameters
+#'       \itemize{
+#'         \item \code{static}: Named list of fixed aesthetic values
+#'         \item \code{var}: Named list of aesthetic mappings (as formulas)
+#'       }
+#'     \item \strong{text}: Text label parameters
+#'       \itemize{
+#'         \item \code{static}: Named list of fixed aesthetic values
+#'         \item \code{var}: Named list of aesthetic mappings (as formulas)
+#'       }
+#'     \item \strong{label}: Box label parameters
+#'       \itemize{
+#'         \item \code{static}: Named list of fixed aesthetic values
+#'         \item \code{var}: Named list of aesthetic mappings (as formulas)
+#'       }
+#'     \item \strong{edge}: Straight edge parameters
+#'       \itemize{
+#'         \item \code{static}: Named list of fixed aesthetic values
+#'         \item \code{var}: Named list of aesthetic mappings (as formulas)
+#'       }
+#'     \item \strong{curve}: Curved edge parameters
+#'       \itemize{
+#'         \item \code{static}: Named list of fixed aesthetic values including curvature
+#'         \item \code{var}: Named list of aesthetic mappings (as formulas)
+#'       }
+#'   }
 #'
 #' @details
-#' The function splits the graphical parameters into static and dynamic (variable-dependent) categories.
-#' Static parameters are directly applied when the corresponding variable-dependent parameter is not set.
-#' If a variable-dependent parameter is set, the static parameter is excluded to allow dynamic mapping in ggplot.
+#' The function processes aesthetic parameters for network visualization by:
+#' 
+#' \strong{Parameter organization:}
+#' 
+#' For each visual component (nodes, text, labels, edges), the function:
+#' \enumerate{
+#'   \item Collects all relevant static parameters from plot_args
+#'   \item Checks for corresponding variable parameters (ending in "_var")
+#'   \item When a variable parameter exists, removes the static parameter to allow 
+#'     dynamic mapping
+#'   \item Creates formula objects for variable mappings compatible with ggplot2's aes()
+#' }
+#' 
+#' \strong{Supported parameters:}
+#' 
+#' \emph{Node (point) parameters:}
+#' \itemize{
+#'   \item Static: \code{point_alpha}, \code{point_color}, \code{point_fill}, 
+#'     \code{point_shape}, \code{point_size}, \code{point_stroke}
+#'   \item Variable: \code{point_alpha_var}, \code{point_color_var}, \code{point_fill_var}, 
+#'     \code{point_shape_var}, \code{point_size_var}, \code{point_stroke_var}
+#' }
+#' 
+#' \emph{Text parameters:}
+#' \itemize{
+#'   \item Static: \code{text_alpha}, \code{text_color}, \code{text_size}, 
+#'     \code{text_family}, \code{text_fontface}, \code{text_angle}, \code{check_overlap}
+#'   \item Variable: \code{text_alpha_var}, \code{text_color_var}, \code{text_size_var}
+#' }
+#' 
+#' \emph{Label parameters:}
+#' \itemize{
+#'   \item Static: \code{label_alpha}, \code{label_color}, \code{label_fill}, 
+#'     \code{label_size}, \code{label_family}, \code{label_fontface}, \code{label_angle}, 
+#'     \code{label_hjust}, \code{label_vjust}, \code{label_lineheight}, \code{check_overlap}
+#'   \item Variable: \code{label_alpha_var}, \code{label_color_var}, \code{label_fill_var}, 
+#'     \code{label_size_var}
+#' }
+#' 
+#' \emph{Edge parameters:}
+#' \itemize{
+#'   \item Static: \code{edge_color}, \code{edge_linewidth}, \code{edge_linetype}, 
+#'     \code{edge_alpha}, \code{edge_arrow}, \code{edge_arrow_fill}, \code{edge_lineend}, 
+#'     \code{edge_linejoin}
+#'   \item Variable: \code{edge_alpha_var}, \code{edge_color_var}, \code{edge_linetype_var}, 
+#'     \code{edge_linewidth_var}
+#'   \item Curve-specific: \code{edge_curvature}, \code{edge_angle}, \code{edge_ncp}
+#' }
+#' 
+#' \strong{Static vs. variable parameters:}
+#' 
+#' Static parameters apply a fixed aesthetic value to all elements. Variable parameters 
+#' map aesthetics to data columns, allowing visual properties to vary based on data 
+#' values. When both are specified for the same aesthetic, the variable parameter 
+#' takes precedence.
 #'
-#' Dynamic or variable-dependent parameters are set based on a mapping from data columns specified in `plot_args`.
-#' The function checks for non-null entries in `plot_args` and assigns these to the appropriate aesthetic
-#' if the entry exists. For example, if `plot_args$point_color_var` is not null, it will create a dynamic color 
-#' mapping for nodes and remove any static color setting.
-#'@export 
+#' @note 
+#' This function is primarily intended for internal use by netify plotting functions.
+#' 
+#' Variable parameters must reference column names that exist in the data frames 
+#' used for plotting (typically the output from `decompose_netify()`).
+#' 
+#' The returned formula objects use the tilde notation (e.g., \code{~column_name}) 
+#' required by ggplot2's aes() function.
+#'
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#' 
+#' @keywords internal
+#' @noRd
 
 gg_params <- function(
     plot_args    

@@ -1,34 +1,80 @@
-#' Calculate node layout positions for a netify object
+#' Calculate node layout positions for netify visualization
 #'
-#' This function converts a netify object into an igraph object to compute layout positions 
-#' using various igraph layout algorithms. It supports both cross-sectional and longitudinal 
-#' data, with an option for static positioning of actors.
+#' `get_node_layout` computes node positions for network visualization using various 
+#' layout algorithms from igraph. This function converts a netify object to igraph 
+#' format, applies the specified layout algorithm, and returns node coordinates 
+#' suitable for plotting.
 #'
-#' @param netlet A netify object to be used for layout computation.
-#' @param layout A character string specifying the layout algorithm from igraph 
-#'        to be used. If NULL and the object mode is 'bipartite', 'bipartite' layout is used;
-#'        otherwise, 'nicely' is used as default.
-#' @param static_actor_positions Logical indicating whether to use static positions for actors.
-#'        Useful in longitudinal studies where node positions should remain consistent over time.
-#'        If TRUE, the layout by default is calculated based on a collapsed adjacency matrix across 
-#'        all time points. Users can also specify a specific time point to use as the static layout by 
-#'        setting `which_static` to the desired time point.
-#' @param which_static Integer indicating which time point's layout should be used as the static layout.
-#' @param seed Integer specifying the seed for random number generation.
+#' @param netlet A netify object (class "netify") for which to compute layout positions.
+#' @param layout Character string specifying the layout algorithm to use. Options include:
+#'   \itemize{
+#'     \item \code{"nicely"}: Automatic selection of appropriate layout (default for unipartite)
+#'     \item \code{"bipartite"}: Two-column layout for bipartite networks (default for bipartite)
+#'     \item \code{"fruchtermanreingold"} or \code{"fr"}: Force-directed layout
+#'     \item \code{"kamadakawai"} or \code{"kk"}: Another force-directed layout
+#'     \item \code{"circle"}: Nodes arranged in a circle
+#'     \item \code{"star"}: Star-shaped layout
+#'     \item \code{"grid"}: Nodes on a grid
+#'     \item \code{"tree"}: Hierarchical tree layout
+#'     \item \code{"random"} or \code{"randomly"}: Random positions
+#'     \item Additional options: \code{"graphopt"}, \code{"sugiyama"}, \code{"drl"}, 
+#'       \code{"lgl"}, \code{"dh"}, \code{"gem"}, \code{"mds"}
+#'   }
+#'   If NULL, defaults to "nicely" for unipartite or "bipartite" for bipartite networks.
+#' @param static_actor_positions Logical. If TRUE, maintains consistent node positions 
+#'   across all time periods in longitudinal networks. If FALSE (default), each time 
+#'   period gets its own optimized layout.
+#' @param which_static Integer specifying which time period's layout to use as the 
+#'   static template when static_actor_positions is TRUE. If NULL (default), creates 
+#'   a static layout based on the aggregated network across all time periods.
+#' @param seed Integer for random number generation to ensure reproducible layouts. 
+#'   Default is 6886.
 #'
-#' @return A list containing two elements: `nodes` and `edges`. Each of these is a list of data frames
-#'         representing the nodes and edges for each time point in the netify object.
-#'         Each node data frame contains columns for node indices, actor names, and their x, y coordinates.
-#'         Each edge data frame includes from and to node names, along with start and end coordinates for drawing edges.
+#' @return A list of data frames (one per time period) where each data frame contains:
+#'   \itemize{
+#'     \item \strong{index}: Integer node index
+#'     \item \strong{actor}: Character string with actor name
+#'     \item \strong{x}: Numeric x-coordinate for node position
+#'     \item \strong{y}: Numeric y-coordinate for node position
+#'   }
+#'   
+#'   For cross-sectional networks, returns a list with one element. For longitudinal 
+#'   networks, returns a named list with time periods as names.
+#'
+#' @details
+#' This function handles layout generation for both cross-sectional and longitudinal 
+#' networks with several key features:
+#' 
+#' \strong{Layout algorithms:}
+#' 
+#' The function provides access to all major igraph layout algorithms. The default 
+#' "nicely" option automatically selects an appropriate algorithm based on the 
+#' network structure. 
+#' 
+#' \strong{Longitudinal layouts:}
+#' 
+#' For longitudinal networks, two approaches are available:
+#' \itemize{
+#'   \item \strong{Dynamic layouts}: Each time period gets its own optimized layout, 
+#'     which may better reveal structural changes but makes visual comparison harder
+#'   \item \strong{Static layouts}: All time periods use the same node positions, 
+#'     facilitating visual comparison of network evolution
+#' }
+#' 
+#' When using static layouts with which_static = NULL, the function creates a 
+#' composite layout based on the aggregated network structure across all time periods 
+#' (summed for binary networks, averaged for weighted networks).
+#' 
+#' \strong{Bipartite networks:}
+#' 
+#' For bipartite networks, the default layout arranges the two node sets in separate 
+#' columns.
+#'
+#'
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
-#'
-#' @importFrom igraph layout_nicely layout_with_fr layout_with_kk layout_randomly
-#'             layout_in_circle layout_as_star layout_on_grid layout_with_graphopt
-#'             layout_with_sugiyama layout_with_drl layout_with_lgl layout_as_bipartite
-#'             V
 #' @export get_node_layout
-#'
+#' 
 
 get_node_layout <- function(
 	netlet,
@@ -54,7 +100,7 @@ get_node_layout <- function(
 
 	# convert to igraph to get
 	# layout positions
-	g = prep_for_igraph(netlet, 
+	g = netify_to_igraph(netlet, 
 		add_nodal_attribs = FALSE, 
 		add_dyad_attribs = FALSE )
 
@@ -146,7 +192,7 @@ get_node_layout <- function(
 					actor1 = 'Var1', actor2 = 'Var2', 
 					symmetric = obj_attrs$symmetric, mode = obj_attrs$mode,
 					diag_to_NA = obj_attrs$diag_to_NA, missing_to_zero = TRUE )))
-				g_static = prep_for_igraph(netlet_static) }
+				g_static = netify_to_igraph(netlet_static) }
 
 			# if specific time point chosen to base layout off of then
 			# set g_static based on what was chosen

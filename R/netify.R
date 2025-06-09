@@ -36,8 +36,7 @@
 #' @param dyad_vars character vector: names of the dyadic variables in the dyad_data
 #' object that should be added as attributes to the netify object, 
 #' default is to add all the variables from the extra_dyadic_data data.frame
-#' @param dyad_vars_symmetric logical vector: whether ties are symmetric, default is to use the same choice as
-#' the symmetric argument
+#' @param dyad_vars_symmetric logical vector: whether ties are symmetric, default is to use the same choice as the symmetric argument
 #'
 #' @return a netify object
 #'
@@ -82,10 +81,7 @@ netify <- function(
     actor_pds=NULL,
     diag_to_NA=TRUE,
     missing_to_zero=TRUE,    
-    output_format=ifelse(
-        is.null(time), 
-        'cross_sec', 
-        'longit_list'),
+    output_format=NULL,  # Changed default to NULL
     nodal_vars=NULL,
     dyad_vars=NULL, 
     dyad_vars_symmetric=rep(
@@ -112,14 +108,35 @@ netify <- function(
     actor_mode_check(dyad_data, actor1, actor2, mode)
 
     # if sum_dyads is set to TRUE then users need to input nodal_vars and dyad_vars
-    # themselves after the network is generated using add_nodal and add_dyad
+    # themselves after the network is generated using add_node_vars and add_dyad_vars
     if( sum_dyads==TRUE ){
         if( !is.null(nodal_vars) | !is.null(dyad_vars) ){
             cli::cli_alert_warning(
                 "Warning: When sum_dyads is set to TRUE nodal and dyadic attributes cannot automatically be created
-                using `netify`. Instead users need to add them afterwards using the `add_dyad` and `add_nodal`
+                using `netify`. Instead users need to add them afterwards using the `add_dyad_vars` and `add_node_vars`
                 functions.")
             nodal_vars <- dyad_vars <- NULL } }
+
+    # FIX: Determine output_format based on actual data if not specified
+    if(is.null(output_format)){
+        if(is.null(time)){
+            output_format <- 'cross_sec'
+        } else {
+            # Check how many unique time periods exist
+            n_time_periods <- length(unique(dyad_data[[time]]))
+            
+            if(n_time_periods == 1){
+                output_format <- 'cross_sec'
+                # Inform user
+                cli::cli_alert_info(
+                    "Time variable specified but only one time period found. Creating cross-sectional network."
+                )
+            } else {
+                # Default to list format for multiple time periods
+                output_format <- 'longit_list'
+            }
+        }
+    }
 
     # choose relevant get_adjacency_* function
     # based on output_format
@@ -160,8 +177,8 @@ netify <- function(
         # pull out nodal data
         nodeData <- unique(dyad_data[,c(actor1, time, nodal_vars)])
 
-        # add it in using add_nodal function
-        netlet <- add_nodal( 
+        # add it in using add_node_vars function
+        netlet <- add_node_vars( 
             netlet=netlet, node_data=nodeData, 
             actor=actor1, time=time, 
             node_vars=nodal_vars ) }
@@ -173,8 +190,8 @@ netify <- function(
         if( is.null( dyad_vars_symmetric ) ){ 
             dyad_vars_symmetric = rep(symmetric, length(dyad_vars)) }
 
-        # add dyad vars using add_dyad
-        netlet <- add_dyad(
+        # add dyad vars using add_dyad_vars
+        netlet <- add_dyad_vars(
             netlet=netlet, dyad_data=dyad_data, 
             actor1=actor1, actor2=actor2, time=time, 
             dyad_vars=dyad_vars, 
@@ -183,4 +200,3 @@ netify <- function(
     # return netlet object
     return(netlet)
 }
-

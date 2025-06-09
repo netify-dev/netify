@@ -1,46 +1,67 @@
-#' Creates a dataframe indicating start and end time point
+#' Extract actor time range information from dyadic data
 #'
-#' `get_actor_time_info` takes in a longitudinal dyadic dataset and computes when
-#' actors entered and exited the network. Entering will be determined by the
-#' first period the actor had an interaction and exiting by the last period.
+#' `get_actor_time_info` analyzes a longitudinal dyadic dataset to determine when 
+#' each actor enters and exits the network. Entry is defined as the first time 
+#' period in which an actor appears in any interaction (as either sender or 
+#' receiver), and exit as the last time period.
 #' 
-#' @param dyad_data a dyadic dataframe
-#' @param actor1 character: actor 1 in the data
-#' @param actor2 character: actor 2 in the data
-#' @param time character: time in the data
+#' @param dyad_data A data.frame containing longitudinal dyadic observations. Must 
+#'   include columns for two actors and time periods. Will be coerced to data.frame 
+#'   if a tibble or data.table is provided.
+#' @param actor1 Character string specifying the column name for the first actor 
+#'   in each dyad.
+#' @param actor2 Character string specifying the column name for the second actor 
+#'   in each dyad.
+#' @param time Character string specifying the column name for time periods.
 #' 
-#' @return a dataframe with three columns:
-#' \describe{
-#'   \item{actor}{a column indicating actors in the data}
-#'   \item{min_time}{a column indicating the first time
-#'     point in which the actor should be considered a part of the network}
-#'   \item{max_time}{a column indicating the last time point in
-#'     which the actor should be considered a part of the network}
+#' @return A data.frame with three columns containing actor-level time information:
+#'   \itemize{
+#'     \item \strong{actor}: Character vector of unique actor identifiers found 
+#'       in either actor1 or actor2 columns
+#'     \item \strong{min_time}: The earliest time period in which each actor 
+#'       appears in the data (entry point)
+#'     \item \strong{max_time}: The latest time period in which each actor 
+#'       appears in the data (exit point)
+#'   }
+#'   
+#'   Actors are ordered as they appear in the aggregation, not alphabetically or 
+#'   by time.
+#'
+#' @details
+#' The function performs the following operations:
+#' 
+#' \strong{Data processing:}
+#' \enumerate{
+#'   \item Combines actor1 and actor2 columns into a single nodal format
+#'   \item Aggregates by actor to find minimum and maximum time periods
+#'   \item Returns a clean data.frame with one row per unique actor
 #' }
+#' 
+#' \strong{Use cases:}
+#' 
+#' Main usage in this package is to:
+#' \itemize{
+#'   \item Preparing actor existence information for the `actor_pds` parameter in 
+#'     `netify()`
+#' }
+#' 
+#' \strong{Assumptions:}
+#' \itemize{
+#'   \item An actor is considered "present" in any time period where they appear 
+#'     in the data, regardless of their role (sender/receiver)
+#'   \item Missing values in time periods are ignored when calculating min/max
+#'   \item Actors must appear in at least one non-missing time period
+#' }
+#'
+#' @note 
+#' The function assumes that presence in the data indicates network participation. 
+#' If actors can be temporarily absent from the network while still being considered 
+#' members, this function will not capture such gaps.
+#' 
 #'
 #' @author Shahryar Minhas, Ha Eun Choi
 #' 
-#' @examples
-#' \dontrun{
-#' library(peacesciencer)
-#' library(dplyr)
-#'
-#' cow_dyads <- create_dyadyears(
-#'   subset_years = c(1980:2001)
-#'   ) %>%
-#'   # add mids
-#'   add_cow_mids()
-#'
-#' actor_time <- get_actor_time_info(
-#'   dyad_data = cow_dyads, 
-#'   actor1 = 'ccode1', 
-#'   actor2 = 'ccode2', 
-#'   time = 'year'
-#' )
-#' }
-#'
 #' @export get_actor_time_info
-#' 
 
 get_actor_time_info <- function(
   dyad_data,

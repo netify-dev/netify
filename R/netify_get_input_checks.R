@@ -3,7 +3,7 @@
 #' df_check
 #'
 #' Checks to make sure a data.frame is inputted and
-#' if a tibble data.frame is inputted then it is
+#' if a `tibble` or `data.table` data.frame is inputted then it is
 #' converted to a base R data.frame object
 #' @param df user inputted object to check
 #' @param msg msg to user if df check fails
@@ -37,6 +37,7 @@ df_check <- function(
     
     # return
     return(df) }
+
 #' logical_check
 #'
 #' Checks to make sure user has correctly inputted logicals
@@ -453,7 +454,7 @@ unipartite_actor_check <- function(actors_1, actors_2) {
     if(length(all_actors) < 4) {
         cli::cli_alert_warning(
             c("!" = "Unipartite network has only {length(all_actors)} unique actor{?s}.",
-              "i" = "Networks with fewer than 4 actors may not be meaningful.")
+              "i" = " Networks with fewer than 4 actors may not be meaningful.")
         )
     }
     

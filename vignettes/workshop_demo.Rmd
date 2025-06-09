@@ -31,10 +31,10 @@ This vignette provides a high level overview of our package from start to finish
 
 | Create💡  | Explore 🔎 | Advance ️🚀|
 |---------|---------|---------|
-| `netify()`  | `peek()`  | `prep_for_amen()`  |
-| `add_nodal()` | `summary_actor()`   | `prep_for_igraph()`  |
-| `add_dyad()`  | `summary()`  | `prep_for_statnet()`  |
-| `subset_netlet()`  | `plot_actor_stats()`  |   | 
+| `netify()`  | `peek()`  | `netify_to_amen()`  |
+| `add_node_vars()` | `summary_actor()`   | `netify_to_igraph()`  |
+| `add_dyad_vars()`  | `summary()`  | `netify_to_statnet()`  |
+| `subset_netify()`  | `plot_actor_stats()`  |   | 
 |              |   `plot_graph_stats()`|        |
 |              |   `plot()`|        |
 
@@ -112,7 +112,7 @@ mid_long_network <- netify(
 
 **Congratulations** you have created a network object! 🎉
 
-We can also add nodal and dyadic data after we've created the network via the `add_nodal()` and `add_dyad()` functions. 
+We can also add nodal and dyadic data after we've created the network via the `add_node_vars()` and `add_dyad_vars()` functions. 
 
 Let's assume that we had information about each actor in the network that we'd like to add as a nodal variable after we already made the network object. This could be from our original data set or elsewhere. For example, lets add a logged variable measuring gdp for each node in the network over time:
 
@@ -122,7 +122,7 @@ node_data <- unique(cow_dyads[,c("ccode1", "year", "wbgdppc2011est2")])
 node_data$wbgdppc2011est2_log <- log(node_data$wbgdppc2011est2)
 
 # add nodal variable to netlet object
-mid_long_network <- add_nodal(
+mid_long_network <- add_node_vars(
     netlet = mid_long_network,
     node_data = node_data,
     actor = "ccode1",
@@ -133,7 +133,7 @@ mid_long_network <- add_nodal(
 cow_dyads$log_capdist = log(cow_dyads$capdist + 1)
 
 # now lets add this to the netlet
-mid_long_network <- add_dyad(
+mid_long_network <- add_dyad_vars(
   netlet = mid_long_network, 
   dyad_data= cow_dyads,
   actor1= 'ccode1',
@@ -151,8 +151,9 @@ We made a network, so let's look at it. First, we might want to take a `peek` at
 ```{r}
 peek(
   mid_long_network, 
-  when_to_peek = c('2012'), 
-  what_to_peek = c(13, 15:24)
+  time = c('2012'), 
+  rows = c(13, 15:24),
+  cols = c(13, 15:24)
   )
 ```
 
@@ -248,7 +249,7 @@ We can also use `netify` functions to explore actor level summary statistics in 
 
 ```{r}
 # add actor variables from summary_actor_mids
-mid_long_network = add_nodal(
+mid_long_network = add_node_vars(
     mid_long_network, 
     summary_actor_mids,
     actor='actor', time='time',
@@ -408,7 +409,7 @@ if(!'amen' %in% rownames(installed.packages())){
 library(amen)
 
 # prep for amen
-mid_cross_amen <- prep_for_amen(mid_cross_network)
+mid_cross_amen <- netify_to_amen(mid_cross_network)
 
 # we got all the elements we need for amen! woohoO!
 str(mid_cross_amen)
@@ -438,9 +439,9 @@ if(!'ergm' %in% rownames(installed.packages())){
   install.packages('ergm', repos='https://cloud.r-project.org') }
 library(ergm)
 
-# called prep_for_statnet because it's a reference
+# called netify_to_statnet because it's a reference
 # to the network library, which is what ergm uses
-mid_cross_ergm = prep_for_statnet(mid_cross_network)
+mid_cross_ergm = netify_to_statnet(mid_cross_network)
 
 # attributes should all be loaded into the 
 # appropriate slot
@@ -474,7 +475,7 @@ data(mexico)
 ```{r}
 # default to number of events
 mex_network <- netify(
-  dyad_data = mexico,
+  mexico,
   actor1 = 'side_a',
   actor2 = 'side_b',
   symmetric = TRUE,
@@ -488,7 +489,7 @@ summary(mex_network)
 
 # weight using a variable
 mex_network_civ <- netify(
-  dyad_data = mexico,
+  mexico,
   actor1 = 'side_a',
   actor2 = 'side_b',
   weight = 'deaths_civilians',
@@ -530,7 +531,7 @@ We can also apply functions from `igraph`:
 
 ```{r, warning=FALSE, message = FALSE}
 i_opt_memb = function(x){
-  ig = prep_for_igraph(x)
+  ig = netify_to_igraph(x)
   memb = igraph::cluster_optimal(ig)$membership
   return(memb)
   }

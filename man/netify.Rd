@@ -17,7 +17,7 @@ netify(
   actor_pds = NULL,
   diag_to_NA = TRUE,
   missing_to_zero = TRUE,
-  output_format = ifelse(is.null(time), "cross_sec", "longit_list"),
+  output_format = NULL,
   nodal_vars = NULL,
   dyad_vars = NULL,
   dyad_vars_symmetric = rep(symmetric, length(dyad_vars))
@@ -73,8 +73,7 @@ will default to "longit_list".}
 object that should be added as attributes to the netify object,
 default is to add all the variables from the extra_dyadic_data data.frame}
 
-\item{dyad_vars_symmetric}{logical vector: whether ties are symmetric, default is to use the same choice as
-the symmetric argument}
+\item{dyad_vars_symmetric}{logical vector: whether ties are symmetric, default is to use the same choice as the symmetric argument}
 }
 \value{
 a netify object

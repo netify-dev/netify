@@ -2,20 +2,12 @@
 % Please edit documentation in R/unnetify.R
 \name{unnetify}
 \alias{unnetify}
-\alias{netify_to_df,}
-\alias{to_df,}
-\alias{dyadify}
-\alias{to_df}
 \alias{netify_to_df}
 \title{Convert netify objects back to dyadic data frames}
 \usage{
 unnetify(netlet, remove_zeros = FALSE)
 
-to_df(netlet, remove_zeros = FALSE)
-
 netify_to_df(netlet, remove_zeros = FALSE)
-
-dyadify(netlet, remove_zeros = FALSE)
 }
 \arguments{
 \item{netlet}{A netify object to be converted to dyadic format.}
@@ -43,7 +35,7 @@ the weight parameter used in netify)
 }
 }
 \description{
-\code{unnetify} (also available as \code{to_df}, \code{netify_to_df}, \code{dyadify}) reverses
+\code{unnetify} (also available as \code{netify_to_df}) reverses
 the netify transformation by converting network objects back into dyadic
 (edge-level) data frames. This function combines network structure with any
 associated nodal and dyadic attributes, creating a data frame where each row

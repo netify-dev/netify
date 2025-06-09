@@ -37,7 +37,8 @@ dvars = c( 'matlCoop', 'verbConf', 'matlConf' )
 
 # create a netify object
 netlet = netify(
-    dyad_data=icews, actor1='i', actor2='j',
+    icews, 
+    actor1='i', actor2='j',
     time = 'year',
     symmetric=FALSE, weight='verbCoop',
     mode='unipartite', sum_dyads=FALSE,
@@ -53,7 +54,7 @@ netlet
 
 This is a longitudinal, weighted network with nodal and dyadic attributes. In a few more steps we will show how to highlight these attributes in a plot.
 
-Let's say we want to extract the ego network specifically for Pakistan. We can do this using the `ego_netlet` function. This function has the following arguments: 
+Let's say we want to extract the ego network specifically for Pakistan. We can do this using the `ego_netify` function. This function has the following arguments: 
 
 - `netlet`: A 'netify' object, which contains the network data structured for analysis and visualization.
 - `ego`: A character vector specifying the name(s) of the ego(s) for whom to create the ego networks.
@@ -65,13 +66,13 @@ Using these arguments, let's extract the ego network for Pakistan, keeping the d
 
 ```{r}
 # extract ego network for Pakistan
-pakistan_ego_net = ego_netlet(netlet, ego = 'Pakistan')
+pakistan_ego_net = ego_netify(netlet, ego = 'Pakistan')
 
 # print
 pakistan_ego_net
 ```
 
-The print output tells us that across the entire time series, we can see that Pakistan has 81 unique alters. If we wanted to look at a specific year we can just subset the object by that year (note that `subset_netlet` does not work with ego networks at this time): 
+The print output tells us that across the entire time series, we can see that Pakistan has 81 unique alters. If we wanted to look at a specific year we can just subset the object by that year (note that `subset_netify` does not work with ego networks at this time): 
 
 ```{r}
 # subset to a specific year
@@ -89,7 +90,7 @@ We can also inspect the ego network via plot.
 ```{r}
 #plot(pakistan_ego_net)
 
-#test<-subset_netlet(pakistan_ego_net,
+#test<-subset_netify(pakistan_ego_net,
     # when_to_subset='2013')
 
 #test2<-pakistan_ego_net[[1]]

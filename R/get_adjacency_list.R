@@ -1,57 +1,114 @@
-#' Longitudinal variants of `get_adjacency()` which returns a list of adjacency matrices
+#' Create a netify list from longitudinal dyadic data
 #'
-#' This function takes in a dyadic dataset
-#' and outputs a list of adjacency matrices in which the actor composition in the network can vary over time.
+#' `get_adjacency_list` converts longitudinal dyadic data into a list of adjacency 
+#' matrices of class "netify". This function creates a list structure where each 
+#' element is a network matrix for a specific time period, allowing for 
+#' time-varying actor composition.
 #'
-#' @param dyad_data a dyadic dataframe (or a tibble)
-#' @param actor1 character: name of the actor 1 variable in dyad_data
-#' @param actor2 character: name of the actor 2 variable in dyad_data
-#' @param time character: name of the time variable in dyad_data, the values of the time variable itself should be numeric
-#' @param symmetric logical: whether ties are symmetric, default is TRUE
-#' @param mode character: whether the network is unipartite or bipartite, default is unipartite
-#' @param weight character: name of the weighted edges variable, default is NULL
-#' @param sum_dyads logical: whether to sum up the `weight` value when there exists repeating dyads within time periods
-#' @param actor_time_uniform logical: whether to assume
-#' actors are the same across the full time series observed in the data
-#' TRUE means that actors are the same across the full time
-#' series observed in the data
-#' FALSE means that actors come in and out of the observed data and
-#' their "existence" should be determined by the data, meaning that
-#' their first year of existence will be determined by the time point
-#' of their first event and their last year of existence by the
-#' time point of their last event
-#' @param actor_pds a data.frame indicating start and end time point for every
-#' actor, this can be created manually (see example) or using `get_actor_time_info.R`, 
-#' if provided then choice of `actor_time_uniform` is irrelevant.
-#' @param diag_to_NA logical: whether diagonals should be set to NA, default is TRUE
-#' @param missing_to_zero logical: whether missing values should be set to zero, default is TRUE
+#' @param dyad_data A data.frame containing longitudinal dyadic observations. Will 
+#'   be coerced to data.frame if a tibble or data.table is provided.
+#' @param actor1 Character string specifying the column name for the first actor 
+#'   in each dyad.
+#' @param actor2 Character string specifying the column name for the second actor 
+#'   in each dyad.
+#' @param time Character string specifying the column name for time periods. Values 
+#'   in this column must be numeric.
+#' @param symmetric Logical. If TRUE (default), treats the network as undirected 
+#'   (i.e., edges have no direction). If FALSE, treats the network as directed.
+#' @param mode Character string specifying network structure. Options are:
+#'   \itemize{
+#'     \item \code{"unipartite"}: One set of actors (default)
+#'     \item \code{"bipartite"}: Two distinct sets of actors
+#'   }
+#' @param weight Character string specifying the column name containing edge weights. 
+#'   If NULL (default), edges are treated as unweighted (binary).
+#' @param sum_dyads Logical. If TRUE, sums weight values when multiple edges exist 
+#'   between the same actor pair in the same time period. If FALSE (default), uses 
+#'   the last observed value.
+#' @param actor_time_uniform Logical indicating how to handle actor composition:
+#'   \itemize{
+#'     \item \code{TRUE}: Assumes all actors exist across the entire time range
+#'     \item \code{FALSE}: Determines actor existence from the data - actors exist 
+#'       from their first observed interaction to their last
+#'   }
+#' @param actor_pds Optional data.frame specifying when actors enter and exit the 
+#'   network. Must contain columns 'actor', 'min_time', and 'max_time'. Can be 
+#'   created using `get_actor_time_info()`. If provided, overrides actor_time_uniform.
+#' @param diag_to_NA Logical. If TRUE (default), sets diagonal values (self-loops) 
+#'   to NA. Automatically set to FALSE for bipartite networks.
+#' @param missing_to_zero Logical. If TRUE (default), treats missing edges as zeros. 
+#'   If FALSE, missing edges remain as NA.
 #'
-#' @return a list of adjacency matrices of class netify
+#' @return A list of class "netify" (a netify list) with:
+#'   \itemize{
+#'     \item \strong{Elements}: Named list where each element is a netify matrix 
+#'       for one time period
+#'     \item \strong{Names}: Character representation of time periods
+#'     \item \strong{Class}: "netify" - this is a full netify object compatible 
+#'       with all netify functions
+#'     \item \strong{Attributes}: Extensive metadata including network properties, 
+#'       actor composition information, and processing parameters
+#'   }
+#'   
+#'   Each matrix in the list may have different dimensions if actor composition 
+#'   varies over time. The returned object can be used with all netify functions 
+#'   such as `summary()`, `plot()`, `to_igraph()`, etc.
 #'
-#' @author Cassy Dorff, Ha Eun Choi, Shahryar Minhas
+#' @details
+#' \strong{Note on usage:}
+#' 
+#' While this function is exported and available for direct use, the primary and 
+#' recommended way to create netify objects from longitudinal dyadic data is through 
+#' the `netify()` function. The `netify()` function:
+#' \itemize{
+#'   \item Automatically chooses between array and list representations based on 
+#'     your data
+#'   \item Provides more comprehensive data validation
+#'   \item Can incorporate nodal and dyadic attributes during creation
+#'   \item Offers a unified interface for all types of network data
+#' }
+#' 
+#' Use `get_adjacency_list()` directly only when you specifically need a list 
+#' structure or require low-level control over the creation process.
+#' 
+#' \strong{Actor composition handling:}
+#' 
+#' This function is particularly useful when actors enter and exit the network 
+#' over time. Unlike `get_adjacency_array()`, which requires constant actor 
+#' composition, this function can handle:
+#' \itemize{
+#'   \item New actors appearing in later time periods
+#'   \item Actors exiting and no longer appearing in the data
+#'   \item Different sets of actors active in each time period
+#' }
 #'
 #' @examples
-#' 
-#' 
-#' # load example directed event data from ICEWS
-#' # this data comes in the form of a dyadic
-#' # dataframe where all dyad pairs are listed
+#' # Load example data
 #' data(icews)
 #' 
-#' # generate a longitudinal, directed, and weighted network
-#' # where the weights are verbConf
-#' # note that in longitudinal networks we can have all the 
-#' # same actors in every year and if that's the case
-#' # we set actor_time_uniform to TRUE, in the next
-#' # example we'll show how to adjust when actors
-#' # change over time
-#' icews_verbConf <- get_adjacency_list(
-#'   dyad_data=icews, 
-#'   actor1='i', actor2='j', time='year',
-#'   actor_time_uniform=TRUE,
-#'   symmetric=FALSE, weight='verbConf' )
-#' icews_verbConf
+#' # Create a netify list with constant actor composition
+#' icews_list <- get_adjacency_list(
+#'   dyad_data = icews, 
+#'   actor1 = 'i', 
+#'   actor2 = 'j', 
+#'   time = 'year',
+#'   actor_time_uniform = TRUE,
+#'   symmetric = FALSE, 
+#'   weight = 'verbConf'
+#' )
 #' 
+#' # Verify it's a netify object
+#' class(icews_list)  # "netify"
+#' 
+#' # Check structure
+#' length(icews_list)  # Number of time periods
+#' names(icews_list)   # Time period labels
+#' 
+#' # Access specific time period
+#' icews_2010 <- icews_list[["2010"]]
+#' dim(icews_2010)
+#'
+#' @author Cassy Dorff, Ha Eun Choi, Shahryar Minhas
 #' 
 #' @export get_adjacency_list
 #' 
@@ -206,7 +263,7 @@ get_adjacency_list <- function(
 
   # aggregate data if sum dyads selected
   if(sum_dyads){
-    dyad_data <- agg_across_units(dyad_data, actor1, actor2, time, weight, symmetric, missing_to_zero)
+    dyad_data <- aggregate_dyad(dyad_data, actor1, actor2, time, weight, symmetric, missing_to_zero)
   }
 
   # remove zeros early if missing_to_zero is TRUE

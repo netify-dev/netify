@@ -50,17 +50,91 @@ netify_check <- function(netlet) {
 ########################################
 
 ########################################
-#' Constructs a generic netify Object
+#' Low-level constructor for netify objects
 #'
-#' `new_netify` (also available as `new_netlet`) is a low-level 
-#' constructor for creating new netify objects.
-#' Mostly for internal use, but can be used to create netify objects from 
-#' matrices, arrays, or lists of matrices.
+#' `new_netify` (also available as `new_netlet`) is a low-level constructor that 
+#' creates netify objects from raw matrix, array, or list data structures. This 
+#' function automatically detects network properties and sets appropriate attributes, 
+#' making it useful for converting existing network data into the netify format.
 #'
-#' @param data A data object (matrix, array, or list of matrices).
-#' @param ... Additional parameters to be stored as attributes on the netify object.
+#' @param data A network data structure to convert:
+#'   \itemize{
+#'     \item \strong{Matrix}: Creates a cross-sectional netify object
+#'     \item \strong{3D array}: Creates a longitudinal array netify object 
+#'       (dimensions: actors × actors × time)
+#'     \item \strong{List of matrices}: Creates a longitudinal list netify object 
+#'       (useful for time-varying actor composition)
+#'   }
+#' @param ... Additional parameters to set as attributes on the netify object. 
+#'   Common parameters include:
+#'   \itemize{
+#'     \item \code{symmetric}: Logical indicating if network is undirected
+#'     \item \code{mode}: "unipartite" or "bipartite"
+#'     \item \code{weight}: Name of the edge weight variable
+#'     \item \code{diag_to_NA}: Whether to set diagonal to NA
+#'     \item \code{missing_to_zero}: Whether to treat missing edges as zeros
+#'     \item \code{nodal_data}: Data frame of node attributes
+#'     \item \code{dyad_data}: Dyadic attributes (see netify documentation)
+#'   }
+#'   
+#'   If not provided, these properties are automatically detected from the data.
 #'
-#' @return A netify object with the appropriate attributes for the given data structure.
+#' @return A netify object with class "netify" and appropriate structure:
+#'   \itemize{
+#'     \item For matrices: A single netify matrix with netify_type = "cross_sec"
+#'     \item For arrays: A netify array with netify_type = "longit_array"
+#'     \item For lists: A netify list with netify_type = "longit_list", where 
+#'       each element is itself a netify object
+#'   }
+#'   
+#'   All netify objects include automatically detected or user-specified attributes 
+#'   for network properties, making them ready for use with netify functions.
+#'
+#' @details
+#' \strong{Automatic property detection:}
+#' 
+#' When properties are not explicitly provided, `new_netify` intelligently detects:
+#' \itemize{
+#'   \item \strong{Symmetry}: Checks if matrix equals its transpose
+#'   \item \strong{Mode}: Infers unipartite/bipartite from dimensions and actor names
+#'   \item \strong{Edge weights}: Detects binary (0/1) vs. weighted networks
+#'   \item \strong{Diagonal treatment}: Checks if diagonal contains all NAs
+#'   \item \strong{Missing values}: Determines if NAs exist off-diagonal
+#'   \item \strong{Actor composition}: For longitudinal data, detects if actors 
+#'     remain constant or vary over time
+#' }
+#' 
+#' \strong{Naming conventions:}
+#' 
+#' If row/column names are not provided:
+#' \itemize{
+#'   \item Unipartite networks: Actors named "a1", "a2", ...
+#'   \item Bipartite networks: Row actors "r1", "r2", ...; column actors "c1", "c2", ...
+#'   \item Time periods: Named as "1", "2", ... if not specified
+#' }
+#' 
+#' \strong{Longitudinal data handling:}
+#' 
+#' For longitudinal networks:
+#' \itemize{
+#'   \item Arrays assume constant actor composition across time
+#'   \item Lists allow for time-varying actor composition
+#'   \item Each time slice in a list becomes a separate cross-sectional netify object
+#'   \item Properties are detected across all time periods (e.g., symmetric if ALL 
+#'     time slices are symmetric)
+#' }
+#'
+#' @note 
+#' This is a low-level constructor primarily intended for package developers or 
+#' advanced users. Most users should use the higher-level `netify()` function, 
+#' which provides more comprehensive data validation and preprocessing.
+#' 
+#' The function does not support multilayer networks directly. To create multilayer 
+#' networks, create separate netify objects and combine them with `layer_netify()`.
+#' 
+#' While the function attempts to detect network properties automatically, explicitly 
+#' providing these parameters is recommended for clarity.
+#'
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
 #' @export new_netify
@@ -101,7 +175,7 @@ new_netify <- function(data, ...) {
     (data_class == "list" && any(
       sapply(data, function(x) !is.matrix(x) || length(dim(x)) > 2)))) {
     cli::cli_alert_danger(
-       "Error: `new_netify` doesn't support multilayer networks currently. Please create separate netlets with `new_netify` and then use the `layer_netlet` function to combine into a multilayer netify object.")
+       "Error: `new_netify` doesn't support multilayer networks currently. Please create separate netlets with `new_netify` and then use the `layer_netify` function to combine into a multilayer netify object.")
     stop() }
 
   # determine netify_type based on data class
