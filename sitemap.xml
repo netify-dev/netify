@@ -12,8 +12,6 @@
 <url><loc>https://netify-dev.github.io/netify/reference/add_dyad_vars.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/add_node_vars.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/aggregate_dyad.html</loc></url>
-<url><loc>https://netify-dev.github.io/netify/reference/count_duplicate_dyads.html</loc></url>
-<url><loc>https://netify-dev.github.io/netify/reference/count_duplicate_dyads_indexed.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/decompose_igraph.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/decompose_netify.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/decompose_statnet.html</loc></url>
@@ -24,11 +22,6 @@
 <url><loc>https://netify-dev.github.io/netify/reference/get_adjacency_array.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/get_adjacency_list.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/get_edge_layout.html</loc></url>
-<url><loc>https://netify-dev.github.io/netify/reference/get_matrix.html</loc></url>
-<url><loc>https://netify-dev.github.io/netify/reference/get_matrix_batch.html</loc></url>
-<url><loc>https://netify-dev.github.io/netify/reference/get_matrix_character.html</loc></url>
-<url><loc>https://netify-dev.github.io/netify/reference/get_matrix_integer.html</loc></url>
-<url><loc>https://netify-dev.github.io/netify/reference/get_matrix_logical.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/get_node_layout.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/get_raw.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/icews.html</loc></url>
