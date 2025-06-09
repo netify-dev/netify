@@ -3,7 +3,7 @@
 #' This function takes in various types of network data (dyadic datasets, matrices, 
 #' arrays, lists, igraph objects, or network objects) and outputs a netify object.
 #'
-#' @param data_obj data object to netify. Can be:
+#' @param input data object to netify. Can be:
 #'   \itemize{
 #'     \item A data.frame (or tibble/data.table) with dyadic data
 #'     \item A matrix representing an adjacency matrix
@@ -44,9 +44,9 @@
 #'   "longit_list". If not specified and time is NULL then output_format 
 #'   will be "cross_sec" and if time is specified then output_format 
 #'   will default to "longit_list". Only applies to data.frame inputs.
-#' @param nodal_vars character vector: names of the nodal variables in the data_obj 
+#' @param nodal_vars character vector: names of the nodal variables in the input 
 #'   that should be added as attributes to the netify object (for data.frame inputs)
-#' @param dyad_vars character vector: names of the dyadic variables in the data_obj
+#' @param dyad_vars character vector: names of the dyadic variables in the input
 #'   that should be added as attributes to the netify object (for data.frame inputs)
 #' @param dyad_vars_symmetric logical vector: whether ties are symmetric, default is 
 #'   to use the same choice as the symmetric argument
@@ -70,7 +70,7 @@
 #' # From a data.frame: generate a longitudional, directed and weighted network
 #' # where the weights are matlConf
 #' icews_matlConf <- netify(
-#'     data_obj=icews,
+#'     input=icews,
 #'     actor1='i', actor2='j', time='year',
 #'     symmetric=FALSE, weight='matlConf')
 #'
@@ -89,7 +89,7 @@
 #' 
 
 netify <- function(
-    data_obj,
+    input,
     actor1=NULL, actor2=NULL, time=NULL, 
     symmetric=TRUE, mode='unipartite',
     weight=NULL, sum_dyads=FALSE,
@@ -113,11 +113,11 @@ netify <- function(
     
     if (input_type == "auto") {
         # Auto-detect based on object type
-        if (inherits(data_obj, c("matrix", "array", "igraph", "network"))) {
+        if (inherits(input, c("matrix", "array", "igraph", "network"))) {
             use_network_path <- TRUE
-        } else if (is.list(data_obj) && length(data_obj) > 0) {
+        } else if (is.list(input) && length(input) > 0) {
             # Check if it's a list of network objects
-            first_elem <- data_obj[[1]]
+            first_elem <- input[[1]]
             if (inherits(first_elem, c("matrix", "igraph", "network"))) {
                 use_network_path <- TRUE
             }
@@ -131,7 +131,7 @@ netify <- function(
     if (use_network_path) {
         # Use to_netify for network objects
         return(to_netify(
-            net_obj = data_obj,
+            net_obj = input,
             weight = weight,
             symmetric = symmetric,
             mode = mode,
@@ -148,7 +148,7 @@ netify <- function(
     # Continue with the existing netify logic...
     
     # checks on user inputs
-    dyad_data <- df_check(data_obj)
+    dyad_data <- df_check(input)
     logical_check(sum_dyads, symmetric, diag_to_NA, missing_to_zero)
     actor_check(actor1, actor2, dyad_data)
     weight_check(weight, dyad_data)

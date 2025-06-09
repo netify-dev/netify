@@ -61,7 +61,7 @@
 #' icews_10 <- icews[icews$year == 2010,]
 #' 
 #' verbCoop_net <- netify(
-#'   dyad_data = icews_10,
+#'   icews_10,
 #'   actor1 = 'i', actor2 = 'j',
 #'   symmetric = FALSE,
 #'   weight = 'verbCoop',
@@ -86,7 +86,7 @@
 #' 
 #' # Longitudinal example
 #' verbCoop_longit <- netify(
-#'   dyad_data = icews,
+#'   icews,
 #'   actor1 = 'i', actor2 = 'j', 
 #'   time = 'year',
 #'   symmetric = FALSE,

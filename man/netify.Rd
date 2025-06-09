@@ -5,7 +5,7 @@
 \title{Create network object from various data types}
 \usage{
 netify(
-  data_obj,
+  input,
   actor1 = NULL,
   actor2 = NULL,
   time = NULL,
@@ -26,7 +26,7 @@ netify(
 )
 }
 \arguments{
-\item{data_obj}{data object to netify. Can be:
+\item{input}{data object to netify. Can be:
 \itemize{
 \item A data.frame (or tibble/data.table) with dyadic data
 \item A matrix representing an adjacency matrix
@@ -80,10 +80,10 @@ estimated for the user based on their choice of \code{actor_time_uniform}}
 will be "cross_sec" and if time is specified then output_format
 will default to "longit_list". Only applies to data.frame inputs.}
 
-\item{nodal_vars}{character vector: names of the nodal variables in the data_obj
+\item{nodal_vars}{character vector: names of the nodal variables in the input
 that should be added as attributes to the netify object (for data.frame inputs)}
 
-\item{dyad_vars}{character vector: names of the dyadic variables in the data_obj
+\item{dyad_vars}{character vector: names of the dyadic variables in the input
 that should be added as attributes to the netify object (for data.frame inputs)}
 
 \item{dyad_vars_symmetric}{logical vector: whether ties are symmetric, default is
@@ -113,7 +113,7 @@ data(icews)
 # From a data.frame: generate a longitudional, directed and weighted network
 # where the weights are matlConf
 icews_matlConf <- netify(
-    data_obj=icews,
+    input=icews,
     actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='matlConf')
 

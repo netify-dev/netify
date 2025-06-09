@@ -29,7 +29,7 @@ test_that(
 
   # get adjacency
   a_matrix <- get_adjacency_list(
-    dyad_data=long_asym_weight_df,
+    long_asym_weight_df,
     actor1='actor1', actor2='actor2', time='time',
 		actor_time_uniform=TRUE, actor_pds=NULL,
     weight='value', symmetric=FALSE,
@@ -82,7 +82,7 @@ test_that(
 
   # get adjacency
   a_matrix <- get_adjacency_list(
-		dyad_data=long_sym_weight_df,
+		long_sym_weight_df,
     actor1='actor1', actor2='actor2', time='time',
 		actor_time_uniform=TRUE, actor_pds=NULL,
     weight='value', symmetric=TRUE, sum_dyads=TRUE,
@@ -122,7 +122,7 @@ test_that(
 
   # get adjacency
   a_matrix <- get_adjacency_list(
-    dyad_data=long_asym_non_weight_df,
+    long_asym_non_weight_df,
     actor1='actor1', actor2='actor2', time='time',
 		actor_time_uniform=TRUE, actor_pds=NULL,
     weight=NULL, symmetric=FALSE,
@@ -161,7 +161,7 @@ test_that(
 
   # get adjacency
   a_matrix <- get_adjacency_list(
-    dyad_data=long_sym_non_weight_df,
+    long_sym_non_weight_df,
     actor1='actor1', actor2='actor2', time='time',
 		actor_time_uniform=TRUE, actor_pds=NULL,
     weight=NULL, symmetric=TRUE,

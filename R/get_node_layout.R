@@ -188,7 +188,7 @@ get_node_layout <- function(
 				raw_netlet_df = reshape2::melt(raw_netlet_static)
 				raw_netlet_df = raw_netlet_df[raw_netlet_df$Var1 != raw_netlet_df$Var2, ]
 				netlet_static = suppressMessages(suppressWarnings(netify(
-					dyad_data = raw_netlet_df,
+					raw_netlet_df,
 					actor1 = 'Var1', actor2 = 'Var2', 
 					symmetric = obj_attrs$symmetric, mode = obj_attrs$mode,
 					diag_to_NA = obj_attrs$diag_to_NA, missing_to_zero = TRUE )))

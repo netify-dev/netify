@@ -25,7 +25,7 @@ See our `workshop_demo` vignette for more information. To get started, supply a 
       data(icews)
 
       icews_conflict <- netify(
-        dyad_data=icews,
+        icews,
         actor1='i', actor2='j',
         time='year',
         symmetric=FALSE, weight='matlConf')
