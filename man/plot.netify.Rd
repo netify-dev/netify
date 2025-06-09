@@ -56,7 +56,7 @@ dvars = c( 'matlCoop', 'verbConf', 'matlConf' )
 
 # create a netify object
 netlet = netify(
-    dyad_data=icews, actor1='i', actor2='j',
+    icews, actor1='i', actor2='j',
     time = 'year',
     symmetric=FALSE, weight='verbCoop',
     mode='unipartite', sum_dyads=FALSE,

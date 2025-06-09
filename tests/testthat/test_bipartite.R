@@ -568,7 +568,7 @@ test_that(
 
 	# convert to conflictNet object
 	a_matrix <- netify(
-	  dyad_data=fake_dyads,
+	  fake_dyads,
 	  actor1='actor1', actor2='actor2', time='time',
 	  symmetric=TRUE,
 	  weight='dv',
@@ -629,7 +629,7 @@ test_that('add_dyad, bipartite: mixed variable types', {
   fake_dyads$character_var <- sample(c("high", "low"), nrow(fake_dyads), replace = TRUE)
   
   a_matrix <- get_adjacency(
-    dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2', 
+    fake_dyads, actor1 = 'actor1', actor2 = 'actor2', 
     symmetric = FALSE, weight = NULL, mode = 'bipartite', diag_to_NA = FALSE
   )
   
@@ -666,7 +666,7 @@ test_that('get_adjacency, bipartite: empty actor2 set', {
     # Should handle empty data gracefully
     expect_error({
       a_matrix <- netify(
-        dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
+        fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
         symmetric = FALSE, weight = 'value', mode = 'bipartite'
       )
     }, 0) # 0 means error expected
@@ -685,7 +685,7 @@ test_that('get_adjacency, bipartite: very unbalanced dimensions', {
   fake_dyads$value <- rnorm(nrow(fake_dyads))
   
   a_matrix <- get_adjacency(
-    dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
+    fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
     symmetric = FALSE, weight = 'value', mode = 'bipartite'
   )
   
@@ -713,7 +713,7 @@ test_that('add_dyad, bipartite: longitudinal with varying actors', {
   fake_dyads$dv <- rnorm(nrow(fake_dyads))
   
   a_matrix <- netify(
-    dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2', time = 'time',
+    fake_dyads, actor1 = 'actor1', actor2 = 'actor2', time = 'time',
     symmetric = FALSE, weight = 'dv', mode = 'bipartite', actor_time_uniform = FALSE
   )
   
@@ -747,7 +747,7 @@ test_that('get_adjacency, bipartite: large sparse network', {
   start_time <- Sys.time()
   
   a_matrix <- get_adjacency(
-    dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
+    fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
     symmetric = FALSE, weight = 'value', mode = 'bipartite'
   )
   
@@ -773,7 +773,7 @@ test_that('add_dyad, bipartite: missing values in variables', {
   fake_dyads$var1[c(1,3)] <- NA  # introduce some NAs
   
   a_matrix <- get_adjacency(
-    dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
+    fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
     symmetric = FALSE, weight = NULL, mode = 'bipartite', diag_to_NA = FALSE
   )
   
@@ -799,7 +799,7 @@ test_that('add_dyad, bipartite: replace existing variables', {
   fake_dyads$var1 <- 1:nrow(fake_dyads)
   
   a_matrix <- get_adjacency(
-    dyad_data = fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
+    fake_dyads, actor1 = 'actor1', actor2 = 'actor2',
     symmetric = FALSE, weight = NULL, mode = 'bipartite', diag_to_NA = FALSE
   )
   

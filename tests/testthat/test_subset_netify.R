@@ -58,16 +58,16 @@ icews_bipartite_10 = icews_bipartite[icews_bipartite$year=='2010', ]
 
 # create cross-sectional multilayer netlet
 icews_verbCoop_l <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='verbCoop', output_format='longit_list')
 icews_matlCoop_l <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='matlCoop', output_format='longit_list')
 icews_verbConf_l <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='verbConf', output_format='longit_list')
 icews_matlConf_l <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='matlConf', output_format='longit_list')
 
 # layer together cross-sec netify objects together
@@ -77,16 +77,16 @@ icews_all_l <- layer_netify(
 
 # create cross-sectional multilayer netlet
 icews_verbCoop_a <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='verbCoop', output_format='longit_array')
 icews_matlCoop_a <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='matlCoop', output_format='longit_array')
 icews_verbConf_a <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='verbConf', output_format='longit_array')
 icews_matlConf_a <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='matlConf', output_format='longit_array')
 
 # layer together cross-sec netify objects together
@@ -96,16 +96,16 @@ icews_all_a <- layer_netify(
 
 # do the same for the cross sectional version
 icews_verbCoop_10 <- netify(
-    dyad_data=icews_10, actor1='i', actor2='j', 
+    icews_10, actor1='i', actor2='j', 
     symmetric=FALSE, weight='verbCoop' )
 icews_matlCoop_10 <- netify(
-    dyad_data=icews_10, actor1='i', actor2='j', 
+    icews_10, actor1='i', actor2='j', 
     symmetric=FALSE, weight='matlCoop' )
 icews_verbConf_10 <- netify(
-    dyad_data=icews_10, actor1='i', actor2='j', 
+    icews_10, actor1='i', actor2='j', 
     symmetric=FALSE, weight='verbConf' )
 icews_matlConf_10 <- netify(
-    dyad_data=icews_10, actor1='i', actor2='j', 
+    icews_10, actor1='i', actor2='j', 
     symmetric=FALSE, weight='matlConf' )
 
 # layer together
@@ -205,7 +205,7 @@ test_that(
 
         # create netify object and then subset
         netlet = netify(
-            dyad_data = icews_bipartite, 
+            icews_bipartite, 
             actor1 = 'i', actor2 = 'j', time='year',
             symmetric=FALSE, weight='matlConf',
             mode='bipartite',
@@ -238,7 +238,7 @@ test_that(
 
         # create netify object and then subset
         netlet = netify(
-            dyad_data = icews_bipartite, 
+            icews_bipartite, 
             actor1 = 'i', actor2 = 'j', time='year',
             symmetric=FALSE, weight='matlConf',
             mode='bipartite',
@@ -271,7 +271,7 @@ test_that(
 
         # create netify object and then subset
         netlet = netify(
-            dyad_data = icews_bipartite, 
+            icews_bipartite, 
             actor1 = 'i', actor2 = 'j', time='year',
             symmetric=FALSE, weight='matlConf',
             mode='bipartite',
@@ -309,7 +309,7 @@ test_that(
 
         # create netify object and then subset
         netlet = netify(
-            dyad_data = icews_bipartite, 
+            icews_bipartite, 
             actor1 = 'i', actor2 = 'j', time='year',
             symmetric=FALSE, weight='matlConf',
             mode='bipartite',
@@ -342,7 +342,7 @@ test_that(
 
         # create netify object and then subset
         netlet = netify(
-            dyad_data = icews_bipartite, 
+            icews_bipartite, 
             actor1 = 'i', actor2 = 'j', time='year',
             symmetric=FALSE, weight='matlConf',
             mode='bipartite',
@@ -375,7 +375,7 @@ test_that(
 
         # create netify object and then subset
         netlet = netify(
-            dyad_data = icews_bipartite, 
+            icews_bipartite, 
             actor1 = 'i', actor2 = 'j', time='year',
             symmetric=FALSE, weight='matlConf',
             mode='bipartite',
@@ -413,7 +413,7 @@ test_that(
 
         # create netify object and then subset
         netlet = netify(
-            dyad_data = icews_bipartite_10, 
+            icews_bipartite_10, 
             actor1 = 'i', actor2 = 'j', 
             symmetric=FALSE, weight='matlConf',
             mode='bipartite'
@@ -445,7 +445,7 @@ test_that(
 
         # create netify object and then subset
         netlet = netify(
-            dyad_data = icews_bipartite_10, 
+            icews_bipartite_10, 
             actor1 = 'i', actor2 = 'j', time='year',
             symmetric=FALSE, weight='matlConf',
             mode='bipartite'
@@ -477,7 +477,7 @@ test_that(
 
         # create netify object and then subset
         netlet = netify(
-            dyad_data = icews_bipartite_10, 
+            icews_bipartite_10, 
             actor1 = 'i', actor2 = 'j', time='year',
             symmetric=FALSE, weight='matlConf',
             mode='bipartite'
@@ -1157,7 +1157,7 @@ test_that(
         
         # create netify object with attributes
         netlet <- netify(
-            dyad_data=icews,
+            icews,
             actor1='i', actor2='j', time='year',
             symmetric=FALSE, weight='matlConf',
             nodal_vars=c('i_polity2', 'i_log_gdp', 'i_log_pop'),

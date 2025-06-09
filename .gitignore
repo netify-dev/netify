@@ -1,4 +1,5 @@
 docs
 /doc/
 /Meta/
-.DS_Store
+*.DS_Store
+*.DS_store

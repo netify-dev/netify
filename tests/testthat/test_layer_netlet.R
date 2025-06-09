@@ -13,55 +13,55 @@ icews_10 <- icews[icews$year=='2010', ]
 # create individual layer networks for testing
 # Cross-sectional networks
 icews_verbCoop_10 <- netify(
-    dyad_data=icews_10, actor1='i', actor2='j', 
+    icews_10, actor1='i', actor2='j', 
     symmetric=FALSE, weight='verbCoop' )
 icews_matlCoop_10 <- netify(
-    dyad_data=icews_10, actor1='i', actor2='j', 
+    icews_10, actor1='i', actor2='j', 
     symmetric=FALSE, weight='matlCoop' )
 icews_verbConf_10 <- netify(
-    dyad_data=icews_10, actor1='i', actor2='j', 
+    icews_10, actor1='i', actor2='j', 
     symmetric=FALSE, weight='verbConf' )
 icews_matlConf_10 <- netify(
-    dyad_data=icews_10, actor1='i', actor2='j', 
+    icews_10, actor1='i', actor2='j', 
     symmetric=FALSE, weight='matlConf' )
 
 # Longitudinal list format networks
 icews_verbCoop_l <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='verbCoop', output_format='longit_list')
 icews_matlCoop_l <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='matlCoop', output_format='longit_list')
 icews_verbConf_l <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='verbConf', output_format='longit_list')
 icews_matlConf_l <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='matlConf', output_format='longit_list')
 
 # Longitudinal array format networks
 icews_verbCoop_a <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='verbCoop', output_format='longit_array')
 icews_matlCoop_a <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='matlCoop', output_format='longit_array')
 icews_verbConf_a <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='verbConf', output_format='longit_array')
 icews_matlConf_a <- netify(
-    dyad_data=icews, actor1='i', actor2='j', time='year',
+    icews, actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='matlConf', output_format='longit_array')
 
 # Networks with attributes for testing attribute handling
 icews_verbCoop_attrs <- netify(
-    dyad_data=icews_10, actor1='i', actor2='j', 
+    icews_10, actor1='i', actor2='j', 
     symmetric=FALSE, weight='verbCoop',
     nodal_vars = c('i_polity2', 'i_log_gdp'),
     dyad_vars = c('matlCoop', 'verbConf'))
 
 icews_matlCoop_attrs <- netify(
-    dyad_data=icews_10, actor1='i', actor2='j', 
+    icews_10, actor1='i', actor2='j', 
     symmetric=FALSE, weight='matlCoop',
     nodal_vars = c('i_polity2', 'i_log_gdp'),
     dyad_vars = c('verbCoop', 'matlConf'))

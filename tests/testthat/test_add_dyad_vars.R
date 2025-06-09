@@ -21,7 +21,7 @@ test_that(
 
 	# convert to conflictNet object
 	a_matrix <- get_adjacency(
-	  dyad_data=fake_dyads,
+	  fake_dyads,
 	  actor1='actor1', actor2='actor2', symmetric=TRUE,
 	  weight=NULL,
 	  diag_to_NA=FALSE )
@@ -86,7 +86,7 @@ test_that(
 
 	# convert to conflictNet object
 	a_matrix <- get_adjacency(
-	  dyad_data=fake_dyads,
+	  fake_dyads,
 	  actor1='actor1', actor2='actor2', symmetric=TRUE,
 	  weight=NULL,
 	  diag_to_NA=FALSE )
@@ -147,7 +147,7 @@ test_that(
 
 	# convert to conflictNet object
 	a_matrix <- get_adjacency_list(
-	  dyad_data=fake_dyads,
+	  fake_dyads,
 	  actor1='actor1', actor2='actor2', time='time',
 	  symmetric=TRUE,
 	  weight=NULL,
@@ -227,7 +227,7 @@ test_that(
 
 	# convert to conflictNet object
 	a_matrix <- get_adjacency_list(
-	  dyad_data=fake_dyads,
+	  fake_dyads,
 	  actor1='actor1', actor2='actor2', time='time',
 	  symmetric=TRUE,
 	  weight=NULL,

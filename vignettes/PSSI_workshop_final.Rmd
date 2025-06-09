@@ -184,7 +184,7 @@ plot_actor_stats(summary_actor_mex,
 
 # Visualize
 plot.netify(mex_network_long,
-            static_actor_positions = TRUE,
+            static_actor_positions = FALSE,
             remove_isolates = TRUE)
 
 # Example: subset for selected years

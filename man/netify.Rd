@@ -2,10 +2,10 @@
 % Please edit documentation in R/netify.R
 \name{netify}
 \alias{netify}
-\title{Create network object from data.frame}
+\title{Create network object from various data types}
 \usage{
 netify(
-  dyad_data,
+  input,
   actor1 = NULL,
   actor2 = NULL,
   time = NULL,
@@ -20,18 +20,31 @@ netify(
   output_format = NULL,
   nodal_vars = NULL,
   dyad_vars = NULL,
-  dyad_vars_symmetric = rep(symmetric, length(dyad_vars))
+  dyad_vars_symmetric = rep(symmetric, length(dyad_vars)),
+  input_type = c("auto", "dyad_df", "netify_obj"),
+  ...
 )
 }
 \arguments{
-\item{dyad_data}{data object to netify}
+\item{input}{data object to netify. Can be:
+\itemize{
+\item A data.frame (or tibble/data.table) with dyadic data
+\item A matrix representing an adjacency matrix
+\item A 3D array representing longitudinal networks
+\item A list of matrices representing longitudinal networks
+\item An igraph object
+\item A network object (from the network package)
+\item A list of igraph or network objects
+}}
 
-\item{actor1}{character: name of the actor 1 variable in the data}
+\item{actor1}{character: name of the actor 1 variable in the data (required
+for data.frame inputs)}
 
-\item{actor2}{character: name of the actor 2 variable in the data}
+\item{actor2}{character: name of the actor 2 variable in the data (required
+for data.frame inputs)}
 
 \item{time}{character: name of the time variable in the data, if
-no time is provided then it will be assumed}
+no time is provided then cross-sectional network will be created}
 
 \item{symmetric}{logical: whether ties are symmetric, default is TRUE}
 
@@ -55,7 +68,7 @@ time point of their last event. Outputted netify object will be
 in a list format.}
 
 \item{actor_pds}{a data.frame indicating start and end time point for every
-actor, this can be created using \code{get_actor_time_info.R}, unless provided this will
+actor, this can be created using \code{get_actor_time_info}, unless provided this will
 estimated for the user based on their choice of \code{actor_time_uniform}}
 
 \item{diag_to_NA}{logical: whether diagonals should be set to NA, default is TRUE}
@@ -63,23 +76,32 @@ estimated for the user based on their choice of \code{actor_time_uniform}}
 \item{missing_to_zero}{logical: whether missing values should be set to zero, default is TRUE}
 
 \item{output_format}{character: "cross_sec", "longit_array", or
-"longit_list. If not specified and time is NULL then output_format
+"longit_list". If not specified and time is NULL then output_format
 will be "cross_sec" and if time is specified then output_format
-will default to "longit_list".}
+will default to "longit_list". Only applies to data.frame inputs.}
 
-\item{nodal_vars}{character vector: names of the nodal variables in the dyad_data object that should be added as attributes to the netify object}
+\item{nodal_vars}{character vector: names of the nodal variables in the input
+that should be added as attributes to the netify object (for data.frame inputs)}
 
-\item{dyad_vars}{character vector: names of the dyadic variables in the dyad_data
-object that should be added as attributes to the netify object,
-default is to add all the variables from the extra_dyadic_data data.frame}
+\item{dyad_vars}{character vector: names of the dyadic variables in the input
+that should be added as attributes to the netify object (for data.frame inputs)}
 
-\item{dyad_vars_symmetric}{logical vector: whether ties are symmetric, default is to use the same choice as the symmetric argument}
+\item{dyad_vars_symmetric}{logical vector: whether ties are symmetric, default is
+to use the same choice as the symmetric argument}
+
+\item{input_type}{character: force specific input type interpretation.
+Options are "auto" (default), "dyad_df", or "netify_obj". Use "dyad_df"
+to force data.frame interpretation or "netify_obj" to force matrix/array/
+igraph/network interpretation.}
+
+\item{...}{additional arguments passed to \code{to_netify} when processing network objects}
 }
 \value{
 a netify object
 }
 \description{
-This function takes in a dyadic dataset and outputs a netlet object.
+This function takes in various types of network data (dyadic datasets, matrices,
+arrays, lists, igraph objects, or network objects) and outputs a netify object.
 }
 \examples{
 
@@ -88,25 +110,23 @@ This function takes in a dyadic dataset and outputs a netlet object.
 # dataframe where all dyad pairs are listed
 data(icews)
 
-# generate a longitudional, directed and weighted network
-# where the weights are matlConf and results are organized
-# in an array
+# From a data.frame: generate a longitudional, directed and weighted network
+# where the weights are matlConf
 icews_matlConf <- netify(
-    dyad_data=icews,
+    input=icews,
     actor1='i', actor2='j', time='year',
     symmetric=FALSE, weight='matlConf')
 
-# generate a longitudional, directed and weighted network
-# where the weights are matlConf and results are organized
-# in an array and we have both dyadic and nodal attributes
-icews_matlConf <- netify(
-    dyad_data=icews,
-    actor1='i', actor2='j', time='year',
-    symmetric=FALSE, weight='matlConf',
-    nodal_vars=c('i_polity2', 'i_log_gdp', 'i_log_pop'),
-    dyad_vars=c('matlCoop', 'verbCoop', 'verbConf'),
-    dyad_vars_symmetric=c(FALSE, FALSE, FALSE) )  
+# From a matrix
+adj_matrix <- matrix(rbinom(100, 1, 0.3), 10, 10)
+net_from_matrix <- netify(adj_matrix)
 
+# From an igraph object
+\dontrun{
+library(igraph)
+g <- sample_gnp(10, 0.3)
+net_from_igraph <- netify(g)
+}
 
 }
 \author{

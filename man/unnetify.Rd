@@ -74,7 +74,7 @@ data(icews)
 icews_10 <- icews[icews$year == 2010,]
 
 verbCoop_net <- netify(
-  dyad_data = icews_10,
+  icews_10,
   actor1 = 'i', actor2 = 'j',
   symmetric = FALSE,
   weight = 'verbCoop',
@@ -99,7 +99,7 @@ head(dyad_df[, c("from", "to", "i_polity2_from", "i_polity2_to")])
 
 # Longitudinal example
 verbCoop_longit <- netify(
-  dyad_data = icews,
+  icews,
   actor1 = 'i', actor2 = 'j', 
   time = 'year',
   symmetric = FALSE,

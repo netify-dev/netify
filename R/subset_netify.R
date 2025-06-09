@@ -75,7 +75,7 @@
 #' # generate a longitudional netify object 
 #' # with both dyadic and nodal attributes
 #' icews_matlConf <- netify(
-#'     dyad_data=icews,
+#'     icews,
 #'     actor1='i', actor2='j', time='year',
 #'     symmetric=FALSE, weight='matlConf',
 #'     nodal_vars=c('i_polity2', 'i_log_gdp', 'i_log_pop'),

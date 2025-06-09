@@ -88,7 +88,7 @@
 #' dvars <- c('matlCoop', 'verbConf', 'matlConf')
 #' 
 #' net_longit <- netify(
-#'   dyad_data = icews,
+#'   icews,
 #'   actor1 = 'i', actor2 = 'j',
 #'   time = 'year',
 #'   symmetric = FALSE,
