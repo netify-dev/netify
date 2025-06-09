@@ -21,7 +21,7 @@ test_that('netify_to_igraph: unweighted cross-sec, asymmetric', {
 
     # convert to netify object
     a_matrix <- netify(
-      dyad_data=df,
+      df,
       actor1='Var1', actor2='Var2', symmetric=FALSE,
       weight=NULL,
       diag_to_NA=FALSE )
@@ -47,7 +47,7 @@ test_that('netify_to_igraph: weighted cross-sec, asymmetric', {
 
     # convert to netify object
     a_matrix <- netify(
-      dyad_data=df,
+      df,
       actor1='Var1', actor2='Var2', symmetric=FALSE,
       weight='value',
       diag_to_NA=FALSE )
@@ -79,7 +79,7 @@ test_that('netify_to_igraph: unweighted cross-sec, symmetric', {
 
     # convert to netify object
     a_matrix <- netify(
-      dyad_data=df,
+      df,
       actor1='Var1', actor2='Var2', symmetric=TRUE,
       weight=NULL,
       diag_to_NA=TRUE )
@@ -108,7 +108,7 @@ test_that('netify_to_igraph: weighted cross-sec, symmetric', {
 
     # convert to netify object
     a_matrix <- netify(
-      dyad_data=df,
+      df,
       actor1='Var1', actor2='Var2', symmetric=TRUE,
       weight='value',
       diag_to_NA=TRUE )
@@ -143,7 +143,7 @@ test_that('netify_to_igraph, bipartite: unweighted cross-sec, asymmetric', {
 
     # convert to netify object
     a_matrix <- netify(
-      dyad_data=df,
+      df,
       actor1='Var1', actor2='Var2', symmetric=FALSE,
       weight=NULL,
       mode='bipartite' )
@@ -179,7 +179,7 @@ test_that('netify_to_igraph, bipartite: weighted cross-sec, asymmetric', {
 
     # convert to netify object
     a_matrix <- netify(
-      dyad_data=df,
+      df,
       actor1='Var1', actor2='Var2', symmetric=FALSE,
       weight='value',
       mode='bipartite' )
@@ -214,7 +214,7 @@ test_that(
 
 		# convert to netify object
 		a_matrix <- netify(
-		  dyad_data=fakeDyads,
+		  fakeDyads,
 		  actor1='actor1', actor2='actor2', symmetric=FALSE,
 		  weight='weight',
 		  diag_to_NA=FALSE )
@@ -289,7 +289,7 @@ test_that(
 
 		# convert to netify object
 		a_matrix <- netify(
-		  dyad_data=fakeDyads,
+		  fakeDyads,
 		  actor1='actor1', actor2='actor2', symmetric=FALSE,
 		  weight=NULL,
 		  diag_to_NA=FALSE )
@@ -370,7 +370,7 @@ test_that(
 
 		# convert to netify object
 		a_matrix <- netify(
-		  dyad_data=fakeDyads,
+		  fakeDyads,
 		  actor1='actor1', actor2='actor2', 
 		  weight='weight',
 		  mode='bipartite' )

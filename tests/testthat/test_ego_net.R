@@ -14,7 +14,7 @@ test_that("ego_netify works for single ego in cross-sectional network", {
     
     # create netify object
     net <- netify(
-        dyad_data = test_data,
+        test_data,
         actor1 = "from",
         actor2 = "to",
         weight = "weight",
@@ -50,7 +50,7 @@ test_that("ego_netify works with multiple egos and direction options", {
     
     # create netify object
     net <- netify(
-        dyad_data = test_data,
+        test_data,
         actor1 = "from",
         actor2 = "to",
         symmetric = FALSE
@@ -93,7 +93,7 @@ test_that("ego_netify works for longitudinal networks with thresholds", {
     
     # create longitudinal netify object
     net_longit <- netify(
-        dyad_data = test_data,
+        test_data,
         actor1 = "from",
         actor2 = "to",
         time = "time",

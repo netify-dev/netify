@@ -16,13 +16,13 @@ test_that(
 
         # get_adj call
         nigeria_unweighted <- get_adjacency(
-            dyad_data=nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2',
             symmetric = TRUE)
 
         # netify call
-        nigeria_unweighted2  <- get_adjacency(
-            dyad_data=nigeria, 
+        nigeria_unweighted2  <- netify(
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2',
             symmetric = TRUE)
 
@@ -35,13 +35,13 @@ test_that(
 
         # get_adj call
         nigeria_weighted <- get_adjacency(
-            dyad_data = nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2',
             symmetric = TRUE, sum_dyads = TRUE)
 
         # netify call
         nigeria_weighted2  <- netify(
-            dyad_data=nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2',
             symmetric = TRUE, sum_dyads=TRUE)
 
@@ -54,12 +54,12 @@ test_that(
 
         # get_adj call
         icews_verbCoop <- get_adjacency(
-            dyad_data=icews_10, actor1='i', actor2='j',
+            icews_10, actor1='i', actor2='j',
             symmetric=FALSE, weight='verbCoop' )
 
         # netify call
         icews_verbCoop2 <- netify(
-            dyad_data=icews_10, actor1='i', actor2='j',
+            icews_10, actor1='i', actor2='j',
             symmetric=FALSE, weight='verbCoop' )
 
         #
@@ -71,12 +71,12 @@ test_that(
 
         # get_adj call
         icews_matlConf <- get_adjacency(
-            dyad_data=icews_10, actor1='i', actor2='j',
+            icews_10, actor1='i', actor2='j',
             symmetric=FALSE, weight='matlConf' )
 
         # netify call
         icews_matlConf2 <- netify(
-            dyad_data=icews_10, actor1='i', actor2='j',
+            icews_10, actor1='i', actor2='j',
             symmetric=FALSE, weight='matlConf' )
 
         #
@@ -89,13 +89,13 @@ test_that(
 
         # get_adj call
         icews_matlConf <- get_adjacency_array(
-            dyad_data=icews, 
+            icews, 
             actor1='i', actor2='j', time='year',
             symmetric=FALSE, weight='matlConf' )
         
         # netify call
         icews_matlConf2 <- netify(
-            dyad_data=icews, 
+            icews, 
             actor1='i', actor2='j', time='year',
             symmetric=FALSE, weight='matlConf',
             output_format='longit_array' )
@@ -110,13 +110,13 @@ test_that(
 
         # get_adj call
         nigeria_unweighted <- get_adjacency_list(
-            dyad_data=nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2', time='year',
             symmetric = TRUE, actor_time_uniform = TRUE)
 
         # netify call
         nigeria_unweighted2 <- netify(
-            dyad_data=nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2', time='year',
             symmetric = TRUE, actor_time_uniform = TRUE)
 
@@ -129,13 +129,13 @@ test_that(
 
         # get_adj call
         nigeria_weighted <- get_adjacency_list(
-            dyad_data = nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2', time='year',
             symmetric = TRUE, actor_time_uniform = TRUE, sum_dyads = TRUE)
 
         # netify call
         nigeria_weighted2 <- netify(
-            dyad_data = nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2', time='year',
             symmetric = TRUE, actor_time_uniform = TRUE, sum_dyads = TRUE)
 
@@ -148,13 +148,13 @@ test_that(
 
         # get_adj call
         nigeria_unweighted <- get_adjacency_list(
-            dyad_data=nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2', time='year',
             symmetric = TRUE, actor_time_uniform = FALSE)
 
         # netify call
         nigeria_unweighted2 <- netify(
-            dyad_data=nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2', time='year',
             symmetric = TRUE, actor_time_uniform = FALSE)
 
@@ -167,13 +167,13 @@ test_that(
 
         # get_adj call
         nigeria_weighted <- get_adjacency_list(
-            dyad_data = nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2', time='year',
             symmetric = TRUE, actor_time_uniform = FALSE, sum_dyads = TRUE)
 
         # netify call
         nigeria_weighted2 <- netify(
-            dyad_data = nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2', time='year',
             symmetric = TRUE, actor_time_uniform = FALSE, sum_dyads = TRUE)
 
@@ -199,13 +199,13 @@ test_that(
 
         # get_adj call
         nigeria_weighted_specific_actors <- get_adjacency_list(
-            dyad_data = nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2', time='year',
             symmetric = TRUE, actor_pds = actor_comp, sum_dyads = TRUE )
 
         # netify call
         nigeria_weighted_specific_actors2 <- netify(
-            dyad_data = nigeria, 
+            nigeria, 
             actor1= 'actor1', actor2= 'actor2', time='year',
             symmetric = TRUE, actor_pds = actor_comp, sum_dyads = TRUE )
 

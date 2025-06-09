@@ -69,7 +69,7 @@ test_that("decompose_netify works for cross-sectional networks", {
   
   # create netify object with dyad_vars (from the dyad_data columns)
   net_cs <- netify(
-    dyad_data = test_data$cs_data,
+    test_data$cs_data,
     actor1 = "from",
     actor2 = "to",
     weight = "weight",
