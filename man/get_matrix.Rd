@@ -12,7 +12,9 @@ get_matrix(
   matRowIndices,
   matColIndices,
   value,
-  symmetric
+  symmetric,
+  missing_to_zero = TRUE,
+  diag_to_NA = TRUE
 )
 }
 \arguments{
@@ -31,6 +33,10 @@ get_matrix(
 \item{value}{numeric vector of values to fill in cross-sections of adjacency matrices}
 
 \item{symmetric}{logical indicating whether ties are symmetric}
+
+\item{missing_to_zero}{logical indicating whether missing values should be set to zero}
+
+\item{diag_to_NA}{logical indicating whether diagonal should be set to NA}
 }
 \value{
 an adjacency matrix

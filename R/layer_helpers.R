@@ -1,11 +1,15 @@
-#' Helper function for layer_netlet to set layer labels
+#' Helper function for layer_netify to set layer labels
 #' 
 #' @param netlet_list list of netlet objects
 #' @param layer_labels character vector of layer labels
 #' @return character vector of layer labels
+#' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 set_layer_labels <- function(netlet_list, layer_labels){
-    # if provided maker sure the number of labels
+    # if provided make sure the number of labels
     # are the same as the length of the netlet list obj
     if(!is.null(layer_labels)){
         if(length(layer_labels) != length(netlet_list)){
@@ -17,10 +21,8 @@ set_layer_labels <- function(netlet_list, layer_labels){
     # if layer labels not present see if we can pull them from
     # the list object
     if(is.null(layer_labels)){
-        if(!is.null(names(netlet_list))){
-            layer_labels <- names(netlet_list) 
-        } else {
-            layer_labels <- paste0("layer", 1:length(netlet_list)) } }
+        layer_labels <- names(netlet_list) %||% paste0("layer", seq_along(netlet_list))
+    }
 
     #
     return(layer_labels) }
@@ -36,6 +38,10 @@ set_layer_labels <- function(netlet_list, layer_labels){
 #' vector is the preamble before the element name and
 #' second part is what should come after the element name.
 #' @return NULL
+#' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 check_layer_compatible <- function(a_list, elems, msg){
 
@@ -45,7 +51,7 @@ check_layer_compatible <- function(a_list, elems, msg){
 
         # check if that attribute is identical across layers
         elem_check <- identical_recursive(
-            lapply(a_list, function(x){x[[elem]]}) )
+            lapply(a_list, `[[`, elem) )
 
         # if not identical then throw error and stop
         if(!elem_check){
@@ -53,7 +59,7 @@ check_layer_compatible <- function(a_list, elems, msg){
                 paste0( msg[1], elem, msg[2] ) )
             stop() } } }
 
-#' Helper function for layer_netlet to extract attributes
+#' Helper function for layer_netify to extract attributes
 #' from listed netlet objects 
 #' 
 #' @param a_list named list object
@@ -61,38 +67,43 @@ check_layer_compatible <- function(a_list, elems, msg){
 #' @param list_format logical, if TRUE return list of attributes
 #' @param get_unique logical, if TRUE return unique values of attribute
 #' @return attribute values
+#' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 get_attribs <- function(
     a_list, attrib, 
     list_format=FALSE, get_unique=FALSE
     ){
-    out <- lapply(a_list, function(x){x[[attrib]]})
+    out <- lapply(a_list, `[[`, attrib)
     if(list_format){ return(out) }
     if(!list_format){
-        out <- unlist(out)
+        out <- unlist(out, use.names = FALSE)
         if(get_unique){ return(unique(out)) 
         } else { return(out) } } }
 
 #' Reduce and combine multiple nodal attributes of netify objects
 #' into a single nodal attribute. Mainly for use within the
-#' layer_netlet function
+#' layer_netify function
 #' 
 #' @param attribs_list list of attributes from each netlet
 #' @param msrmnts_list list of msrmnts from each netlet
 #' @param netlet_type character string of netlet type
 #' @return nodal attribute data.frame
+#' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 reduce_combine_nodal_attr <- function(
     attribs_list, msrmnts_list, netlet_type ){
     
     # extract nodal data from each netlet into list
-    nodal_data_list <- lapply(
-        attribs_list, function(x){x$nodal_data})
+    nodal_data_list <- lapply(attribs_list, `[[`, "nodal_data")
 
-    # check for and then drop any null elements
-    null_check <- unlist(
-        lapply(nodal_data_list, function(x){is.null(x)}))
-    nodal_data_list <- nodal_data_list[!null_check]
+    # check for and then drop any null elements - vectorized
+    nodal_data_list <- nodal_data_list[!vapply(nodal_data_list, is.null, logical(1))]
 
     # if only one element left then just
     # return that one nodal data element
@@ -108,12 +119,12 @@ reduce_combine_nodal_attr <- function(
         # check to make sure that the id column(s) are identical
         # if columns are not identical then return NULL with
         # warning that user needs to readd themselves
-        if(netlet_type == 'cross_sec'){
-            n_id_check <- identical_recursive(
-                lapply(nodal_data_list, function(x){x[,1]})) }
-        if(netlet_type %in% c('longit_array', 'longit_list')){
-            n_id_check <- identical_recursive(
-                lapply(nodal_data_list, function(x){x[,1:2]})) }
+        n_id_check <- if(netlet_type == 'cross_sec') {
+            identical_recursive(lapply(nodal_data_list, function(x) x[, 1]))
+        } else {
+            identical_recursive(lapply(nodal_data_list, function(x) x[, 1:2]))
+        }
+        
         if(!n_id_check){
             cli::cli_alert_warning(
                 'Warning: Nodal data id columns are not identical across netlets, 
@@ -122,36 +133,45 @@ reduce_combine_nodal_attr <- function(
             return( NULL ) }
 
         # if id columns match then iteratively go through 
-        # nodal data and cbind together, procedure is different
-        # depending on type
+        # nodal data and cbind together
         if(n_id_check){
-            ndata <- do.call('cbind', lapply(nodal_data_list, function(slice){
-                nvars_slice <- intersect(names(slice), nvars)
-                return(slice[,nvars_slice,drop=FALSE]) }))
+            # Pre-filter nvars for each slice to avoid repeated intersections
+            ndata_list <- lapply(nodal_data_list, function(slice){
+                nvars_slice <- names(slice)[names(slice) %in% nvars]
+                slice[, nvars_slice, drop=FALSE]
+            })
+            
+            ndata <- do.call('cbind', ndata_list)
+            
             if(netlet_type == 'cross_sec'){
-                ndata <- cbind(actor=nodal_data_list[[1]][,1], ndata[,nvars]) }
-            if(netlet_type %in% c('longit_array', 'longit_list')){
-                ndata <- cbind(nodal_data_list[[1]][,1:2], ndata[,nvars]) }
+                ndata <- cbind(actor = nodal_data_list[[1]][, 1], ndata)
+            } else {
+                ndata <- cbind(nodal_data_list[[1]][, 1:2], ndata)
+            }
             return( ndata ) }
     } }
 
 #' Reduce and combine multiple dyadic attributes of netify objects
 #' into a single dyadic attribute. Mainly for use within the
-#' layer_netlet function
+#' layer_netify function
 #' 
 #' @param attribs_list list of attributes from each netlet
 #' @param msrmnts_list list of msrmnts from each netlet
 #' @param netlet_type character string of netlet type
 #' @return dyad attribute data.frame
+#' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 
 reduce_combine_dyad_attr <- function(
     attribs_list, msrmnts_list, netlet_type ){
 
     # extract dyad data from each netlet into list
-    dyad_data_list <- lapply(attribs_list, function(x){x$dyad_data})
+    dyad_data_list <- lapply(attribs_list, `[[`, "dyad_data")
 
-    # check for and then drop any null elements
-    null_check <- unlist(lapply(dyad_data_list, function(x){is.null(x[[1]])}))
+    # check for and then drop any null elements - already optimized
+    null_check <- vapply(dyad_data_list, function(x){is.null(x) || is.null(x[[1]])}, logical(1))
     dyad_data_list <- dyad_data_list[!null_check]
 
     # if only one element left then just
@@ -167,10 +187,24 @@ reduce_combine_dyad_attr <- function(
 
         # check to make sure that the id row/col and time periods are
         # identical across dyad_data from netlets
+        # For new structure: list(time) -> list(vars) -> matrix
         t_check <- identical_recursive( lapply(dyad_data_list, names))
-        r_check <- identical_recursive( lapply(dyad_data_list, rownames))
-        c_check <- identical_recursive( lapply(dyad_data_list, colnames))
-        if(sum(c(t_check, r_check, c_check)) != 3){
+        
+        # Extract first time period's first variable matrix once
+        first_elements <- lapply(dyad_data_list, function(x) {
+            first_time <- x[[1]]
+            if(length(first_time) > 0) {
+                list(rows = rownames(first_time[[1]]), 
+                     cols = colnames(first_time[[1]]))
+            } else {
+                list(rows = NULL, cols = NULL)
+            }
+        })
+        
+        r_check <- identical_recursive(lapply(first_elements, `[[`, "rows"))
+        c_check <- identical_recursive(lapply(first_elements, `[[`, "cols"))
+        
+        if(!all(c(t_check, r_check, c_check))){
             cli::cli_alert_warning(
                 'Warning: Dyad data id columns are not identical across netlets, 
                 dyad data will not be merged from netlets, you can readd dyad 
@@ -178,19 +212,40 @@ reduce_combine_dyad_attr <- function(
             return(NULL) }
 
         # if id columns match then iteratively go through
-        # dyad data and abind together
-        if(sum(c(t_check, r_check, c_check)) == 3){
+        # dyad data and combine matrices
+        if(all(c(t_check, r_check, c_check))){
 
-            # bind together dyadic arrays
-            t_pds <- names(dyad_data_list[[1]])        
-            abind3 <- function(x, y){ abind::abind(x, y, along=3) }
-            ddata <- lapply(t_pds, function(tt){
-                ddata_tt <- lapply(dyad_data_list, function(dd_ne){
-                    out <- dd_ne[[tt]]
-                    dvars_slice <- intersect(dvars, dimnames(out)[[3]])
-                    return( out[,,dvars_slice,drop=FALSE] ) })
-                return( Reduce('abind3', ddata_tt) ) })
+            # get time periods from first dyad_data element
+            t_pds <- names(dyad_data_list[[1]])
+            
+            # Pre-allocate list
+            ddata <- vector("list", length(t_pds))
             names(ddata) <- t_pds
+            
+            # process each time period more efficiently
+            for(tt_idx in seq_along(t_pds)) {
+                tt <- t_pds[tt_idx]
+                
+                # Pre-allocate combined_vars with known size
+                combined_vars <- list()
+                
+                # iterate through each netlet's dyad data for this time period
+                for(netlet_dyad_data in dyad_data_list) {
+                    time_period_data <- netlet_dyad_data[[tt]]
+                    
+                    if(!is.null(time_period_data) && length(time_period_data) > 0) {
+                        # Direct assignment is faster than repeated list operations
+                        for(var_name in names(time_period_data)) {
+                            if(var_name %in% dvars) {
+                                combined_vars[[var_name]] <- time_period_data[[var_name]]
+                            }
+                        }
+                    }
+                }
+                
+                # store combined variables for this time period
+                ddata[[tt_idx]] <- combined_vars
+            }
 
             #
             return( ddata ) }

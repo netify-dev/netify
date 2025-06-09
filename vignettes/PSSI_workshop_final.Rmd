@@ -51,7 +51,7 @@ data(mexico)
 
 # Construct unweighted network (number_of_events by default)
 mex_network <- netify(
-  dyad_data = mexico,
+  mexico,
   actor1 = 'side_a',
   actor2 = 'side_b',
   symmetric = TRUE,
@@ -87,7 +87,7 @@ Next, we create a weighted network using the civilian deaths variable.
 ```{r weighted_network}
 # Weighted by civilian deaths
 mex_network_civ <- netify(
-  dyad_data = mexico,
+  mexico,
   actor1 = 'side_a',
   actor2 = 'side_b',
   weight = 'deaths_civilians',
@@ -108,7 +108,7 @@ plot(mex_network_civ,
 
 # Example: community detection (optimal clustering)
 i_opt_memb <- function(x){
-  ig <- prep_for_igraph(x)
+  ig <- netify_to_igraph(x)
   memb <- igraph::cluster_optimal(ig)$membership
   return(memb)
 }
@@ -126,7 +126,7 @@ size_by_source_count <- mexico |>
   summarize(size_by_source_count = sum(number_of_sources, na.rm = TRUE)) |>
   ungroup()
 
-mex_network_civ <- add_nodal(
+mex_network_civ <- add_node_vars(
   netlet = mex_network_civ,
   node_data = size_by_source_count,
   actor = 'actor',
@@ -160,7 +160,7 @@ We can also create time-varying networks. Here, we use the **year** field to con
 ```{r longitudinal_network}
 # Create a time-varying network
 mex_network_long <- netify(
-  dyad_data = mexico,
+  mexico,
   actor1 = 'side_a',
   actor2 = 'side_b',
   time = 'year',      
@@ -188,9 +188,10 @@ plot.netify(mex_network_long,
             remove_isolates = TRUE)
 
 # Example: subset for selected years
-mex_network_short <- subset_netlet(mex_network_long,
-                                   when_to_subset = c("2006", "2008", 
-                                                      "2010", "2012"))
+mex_network_short <- subset_netify(mex_network_long,
+                                   time = c("2006", "2008", 
+                                           "2010", "2012"))
+mex_network_short
 plot(mex_network_short)
 ```
 
@@ -204,7 +205,7 @@ data(myanmar)
 
 # Create basic network
 my_network <- netify(
-  dyad_data = myanmar,
+  myanmar,
   actor1 = 'side_a',
   actor2 = 'side_b',
   symmetric = TRUE,
@@ -217,7 +218,7 @@ summary(my_network)
 
 # Weighted by civilian deaths
 my_network_civ <- netify(
-  dyad_data = myanmar,
+  myanmar,
   actor1 = 'side_a',
   actor2 = 'side_b',
   weight = 'deaths_civilians',
@@ -277,15 +278,15 @@ node_data <- data.frame(
 node_data <- node_data |> mutate_all(as.factor)
 
 # Add these attributes to the network
-my_network_civ <- add_nodal(my_network_civ, 
+my_network_civ <- add_node_vars(my_network_civ, 
                             node_data = node_data, 
                             actor = 'actor', 
                             node_vars = 'gov_or_nongov')
-my_network_civ <- add_nodal(my_network_civ, 
+my_network_civ <- add_node_vars(my_network_civ, 
                             node_data = node_data, 
                             actor = 'actor', 
                             node_vars = 'ethnic_or_ideological')
-my_network_civ <- add_nodal(my_network_civ, 
+my_network_civ <- add_node_vars(my_network_civ, 
                             node_data = node_data, 
                             actor = 'actor', 
                             node_vars = 'armed_or_not')
@@ -334,7 +335,7 @@ myanmar_bipartite$actor_type_b <- ifelse(
 
 # Construct bipartite network
 bipartite_network <- netify(
-  dyad_data = myanmar_bipartite,
+  myanmar_bipartite,
   actor1 = 'side_a',
   actor2 = 'side_b',
   mode = 'bipartite',

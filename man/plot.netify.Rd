@@ -67,7 +67,7 @@ netlet = netify(
 )
 
 # add basic summary network stats
-netlet = add_nodal(
+netlet = add_node_vars(
     netlet, 
     summary_actor(netlet),
     actor='actor', time='time')

@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_node_layout.R
 \name{get_node_layout}
 \alias{get_node_layout}
-\title{Calculate node layout positions for a netify object}
+\title{Calculate node layout positions for netify visualization}
 \usage{
 get_node_layout(
   netlet,
@@ -13,32 +13,81 @@ get_node_layout(
 )
 }
 \arguments{
-\item{netlet}{A netify object to be used for layout computation.}
+\item{netlet}{A netify object (class "netify") for which to compute layout positions.}
 
-\item{layout}{A character string specifying the layout algorithm from igraph
-to be used. If NULL and the object mode is 'bipartite', 'bipartite' layout is used;
-otherwise, 'nicely' is used as default.}
+\item{layout}{Character string specifying the layout algorithm to use. Options include:
+\itemize{
+\item \code{"nicely"}: Automatic selection of appropriate layout (default for unipartite)
+\item \code{"bipartite"}: Two-column layout for bipartite networks (default for bipartite)
+\item \code{"fruchtermanreingold"} or \code{"fr"}: Force-directed layout
+\item \code{"kamadakawai"} or \code{"kk"}: Another force-directed layout
+\item \code{"circle"}: Nodes arranged in a circle
+\item \code{"star"}: Star-shaped layout
+\item \code{"grid"}: Nodes on a grid
+\item \code{"tree"}: Hierarchical tree layout
+\item \code{"random"} or \code{"randomly"}: Random positions
+\item Additional options: \code{"graphopt"}, \code{"sugiyama"}, \code{"drl"},
+\code{"lgl"}, \code{"dh"}, \code{"gem"}, \code{"mds"}
+}
+If NULL, defaults to "nicely" for unipartite or "bipartite" for bipartite networks.}
 
-\item{static_actor_positions}{Logical indicating whether to use static positions for actors.
-Useful in longitudinal studies where node positions should remain consistent over time.
-If TRUE, the layout by default is calculated based on a collapsed adjacency matrix across
-all time points. Users can also specify a specific time point to use as the static layout by
-setting \code{which_static} to the desired time point.}
+\item{static_actor_positions}{Logical. If TRUE, maintains consistent node positions
+across all time periods in longitudinal networks. If FALSE (default), each time
+period gets its own optimized layout.}
 
-\item{which_static}{Integer indicating which time point's layout should be used as the static layout.}
+\item{which_static}{Integer specifying which time period's layout to use as the
+static template when static_actor_positions is TRUE. If NULL (default), creates
+a static layout based on the aggregated network across all time periods.}
 
-\item{seed}{Integer specifying the seed for random number generation.}
+\item{seed}{Integer for random number generation to ensure reproducible layouts.
+Default is 6886.}
 }
 \value{
-A list containing two elements: \code{nodes} and \code{edges}. Each of these is a list of data frames
-representing the nodes and edges for each time point in the netify object.
-Each node data frame contains columns for node indices, actor names, and their x, y coordinates.
-Each edge data frame includes from and to node names, along with start and end coordinates for drawing edges.
+A list of data frames (one per time period) where each data frame contains:
+\itemize{
+\item \strong{index}: Integer node index
+\item \strong{actor}: Character string with actor name
+\item \strong{x}: Numeric x-coordinate for node position
+\item \strong{y}: Numeric y-coordinate for node position
+}
+
+For cross-sectional networks, returns a list with one element. For longitudinal
+networks, returns a named list with time periods as names.
 }
 \description{
-This function converts a netify object into an igraph object to compute layout positions
-using various igraph layout algorithms. It supports both cross-sectional and longitudinal
-data, with an option for static positioning of actors.
+\code{get_node_layout} computes node positions for network visualization using various
+layout algorithms from igraph. This function converts a netify object to igraph
+format, applies the specified layout algorithm, and returns node coordinates
+suitable for plotting.
+}
+\details{
+This function handles layout generation for both cross-sectional and longitudinal
+networks with several key features:
+
+\strong{Layout algorithms:}
+
+The function provides access to all major igraph layout algorithms. The default
+"nicely" option automatically selects an appropriate algorithm based on the
+network structure.
+
+\strong{Longitudinal layouts:}
+
+For longitudinal networks, two approaches are available:
+\itemize{
+\item \strong{Dynamic layouts}: Each time period gets its own optimized layout,
+which may better reveal structural changes but makes visual comparison harder
+\item \strong{Static layouts}: All time periods use the same node positions,
+facilitating visual comparison of network evolution
+}
+
+When using static layouts with which_static = NULL, the function creates a
+composite layout based on the aggregated network structure across all time periods
+(summed for binary networks, averaged for weighted networks).
+
+\strong{Bipartite networks:}
+
+For bipartite networks, the default layout arranges the two node sets in separate
+columns.
 }
 \author{
 Cassy Dorff, Shahryar Minhas

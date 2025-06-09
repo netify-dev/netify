@@ -1,33 +1,70 @@
-#' Plotting function for graph level statistics for netify objects
+#' Visualize network-level statistics
 #'
-#' `plot_graph_stats` takes a data frame containing graph level statistics and 
-#' generates a visual representation using either line or bar plots. This function
-#' is designed to work with data frames that represent network statistics over 
-#' multiple networks or time points.
+#' `plot_graph_stats` creates line or bar plots to visualize network-level 
+#' statistics across multiple networks, time points, or layers. This function 
+#' is designed to work with output from `summary_net()` or similar functions 
+#' that produce network-level summary statistics.
 #'
-#' @param summary_df A data frame produced by the `summary.netify` function 
-#'   or any other function that outputs network statistics in a similar format. 
-#'   The data frame should have a column "net" which identifies the network 
-#'   or time point for each row.
-#' @param type A character string specifying the type of plot to generate: 
-#'   either 'line' for line plots or 'bar' for bar plots. The default is 'line'.
-#' @param specific_stats Optional vector of column names from `summary_df` 
-#'   specifying which statistics to plot. If NULL (the default), all statistics 
-#'   in `summary_df` will be plotted.
+#' @param summary_df A data frame containing network-level statistics, typically 
+#'   from `summary_net()`. Must include a "net" column identifying each network 
+#'   or time point. May include a "layer" column for multilayer networks. All 
+#'   other columns should contain numeric statistics to plot.
+#' @param type Character string specifying the plot type. Options are:
+#'   \itemize{
+#'     \item \code{"line"}: Line plot with points (default). Best for temporal data
+#'     \item \code{"bar"}: Bar plot with grouped bars. Required for multilayer 
+#'       non-temporal data
+#'   }
+#' @param specific_stats Character vector of statistic names to plot. If NULL 
+#'   (default), plots all numeric columns in summary_df. Must match column names 
+#'   exactly.
 #'
-#' @return A `ggplot` object displaying the specified statistics for each network.
-#'   The plots are faceted by statistic type across the networks or time points.
+#' @return A ggplot object displaying the specified statistics. The plot structure 
+#'   depends on the data:
+#'   \itemize{
+#'     \item \strong{Single time/network}: Returns error (single row not plottable)
+#'     \item \strong{Multiple times/networks}: Line or bar plot faceted by statistic
+#'     \item \strong{Multilayer temporal}: Line plots colored by layer
+#'     \item \strong{Multilayer non-temporal}: Grouped bar plots by layer
+#'   }
+#'   
+#'   All plots are faceted by statistic with free y-axis scales for better 
+#'   comparison across different value ranges.
 #'
+#' @details
+#' \strong{Data structure detection:}
+#' 
+#' The function automatically detects the structure of your data:
+#' \itemize{
+#'   \item \strong{Longitudinal}: Multiple unique values in "net" column
+#'   \item \strong{Multilayer}: Multiple unique values in "layer" column
+#'   \item \strong{Single network}: Only one row (returns error with suggestion)
+#' }
+#' 
+#' \strong{Plot type selection:}
+#' \itemize{
+#'   \item Line plots are preferred for temporal data to show trends
+#'   \item Bar plots are automatically selected for multilayer non-temporal data
+#'   \item Bar plots can be useful for comparing discrete time points
+#' }
+#' 
+#' \strong{Faceting behavior:}
+#' 
+#' Each statistic gets its own facet panel with:
+#' \itemize{
+#'   \item Independent y-axis scales (scales = "free_y")
+#'   \item Shared x-axis across all panels
+#'   \item Automatic layout based on number of statistics
+#' }
+#'
+#' @note 
+#' The function requires at least two networks/time points to create a meaningful 
+#' plot. For single network summaries, consider using a table format instead.
+#' 
 #'
 #' @author Ha Eun Choi, Cassy Dorff, Shahryar Minhas
 #'
-#' @import ggplot2
-#' @importFrom cli cli_alert_danger
-#' @importFrom reshape2 melt
-#' @import rlang
-#'
 #' @export plot_graph_stats
-#' @export
 
 plot_graph_stats <- function(
   summary_df, 
@@ -160,30 +197,3 @@ plot_graph_stats <- function(
   return(viz)
   ######################
 }
-
-# library(netify)
-# example(layer_netlet)
-
-# # icews_matlCoop # cross-sec single layer
-# # icews_verbCoop_matlCoop # cross-sec multi layer
-# # icews_matlCoop_longit_l # longit single layer
-# # icews_verbCoop_matlCoop_longit_l # longit multi layer
-
-# c_sing = summary(icews_matlCoop)
-# c_mult = summary(icews_verbCoop_matlCoop)
-# l_sing = summary(icews_matlCoop_longit_l)
-# l_mult = summary(icews_verbCoop_matlCoop_longit_l)
-
-
-# # cross-sec single layer variations
-# plot_graph_stats(c_sing)
-
-# # cross-sec multi layer variations
-# plot_graph_stats(c_mult)
-
-# # longit single layer variations
-# plot_graph_stats(l_sing)
-
-# # longit multi layer variations
-# plot_graph_stats(l_mult)
-

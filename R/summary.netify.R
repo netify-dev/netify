@@ -1,62 +1,135 @@
-#' Summary method to get graph level statistics for netify objects
+#' Calculate graph-level statistics for netify objects
 #'
-#' `summary.netify` processes a netify object to calculate and return a data frame of graph-level statistics. This function is designed to work with both cross-sectional and longitudinal netify data structures, providing a comprehensive overview of network characteristics such as density, reciprocity, and standard deviations of sending and receiving effects.
+#' Computes comprehensive graph-level statistics for netify objects, including 
+#' density, reciprocity, centralization measures, and custom metrics. Handles 
+#' cross-sectional and longitudinal networks, as well as multilayer structures.
 #'
-#' @param object An object of class netify, which should have been created using the function `netify`. This object contains the network data structured for analysis.
-#' @param ... Additional parameters which can include user-defined statistical functions. These functions should take a matrix as input and return a scalar value. They will be applied to each network slice individually if the netify object represents longitudinal data.
-#'   - `other_stats`: A named list of functions that take a matrix and return additional actor-level statistics to be included in the output. Each function should accept a matrix as input and return a vector or single value per actor. This allows for the inclusion of custom metrics in the summary output.
+#' @param object A netify object containing network data
+#' @param ... Additional arguments, including:
+#'   \describe{
+#'     \item{\code{other_stats}}{Named list of custom functions to calculate 
+#'       additional graph-level statistics. Each function should accept a matrix 
+#'       and return a named vector of scalar values.}
+#'   }
 #'
-#' @return A data frame where each row represents the network-level statistics for a single network or a single time point in a longitudinal study. Depending on the network type and data attributes, the columns can include:
-#' - `num_actors`: Number of actors in the network - for bipartite networks number of row and column actors are reported separately.
-#' - `density`: The proportion of possible connections that are actual connections within the network.
-#' - `num_edges`: The total number of edges in the network (does not take edge weight into account).
-#' - `mean_edge_weight`: The average weight of edges in the network, provided only for weighted networks.
-#' - `sd_edge_weight`: The standard deviation of edge weights in the network, provided only for weighted networks.
-#' - `median_edge_weight`: The median edge weight in the network, provided only for weighted networks.
-#' - `prop_edges_missing`: The proportion of potential edges that are missing.
-#' - `min_edge_weight` and `max_edge_weight`: The minimum and maximum edge weights observed in the network, provided only for weighted networks.
-#' - `competition_row` and `competition_col` (defaults to `competition` for undirected networks): Measures network competitiveness using the Herfindahl-Hirschman Index (HHI), defined as \eqn{\sum_{i=1}^{n} (s_i)^2}, where \eqn{s_i} is the proportion of interactions by actor \eqn{i} and \eqn{n} is the total number of actors. The index ranges from 1/n (indicating high diversity and competitive interaction across actors) to 1 (one actor dominates all interactions). Refer to Dorff, Gallop, & Minhas (2023) for an application of this measure in conflict networks.
-#' - `sd_of_row_means` and `sd_of_col_means`: Standard deviations of the sending and receiving effects (row and column means). These statistics are meant to describe the variability in actor behavior across the network.
-#' - `covar_of_row_col_means`: The covariance between sending and receiving effects, always takes weights into account and is only calculated for unipartite networks.
-#' - `reciprocity`: The reciprocity of the network, defined as the correlation between the adjacency matrix and its transpose, always takes weights into account and is only calculated for unipartite networks.
-#' - `transitivity`: The overall transitivity or clustering coefficient of the network, reflecting the likelihood that two neighbors of a node are connected (calculated using `transitivity` function from `igraph`).
+#' @return A data frame with one row per network/time period containing:
+#'   
+#'   \strong{Basic network properties:}
+#'   \describe{
+#'     \item{\code{net}}{Network/time identifier}
+#'     \item{\code{layer}}{Layer name (for multilayer networks)}
+#'     \item{\code{num_actors}}{Number of actors (or \code{num_row_actors} and 
+#'       \code{num_col_actors} for bipartite networks)}
+#'     \item{\code{density}}{Proportion of possible ties that exist}
+#'     \item{\code{num_edges}}{Total number of edges (unweighted count)}
+#'     \item{\code{prop_edges_missing}}{Proportion of potential edges that are NA}
+#'   }
+#'   
+#'   \strong{For weighted networks only:}
+#'   \describe{
+#'     \item{\code{mean_edge_weight}}{Average weight of existing edges}
+#'     \item{\code{sd_edge_weight}}{Standard deviation of edge weights}
+#'     \item{\code{median_edge_weight}}{Median edge weight}
+#'     \item{\code{min_edge_weight}, \code{max_edge_weight}}{Range of edge weights}
+#'   }
+#'   
+#'   \strong{Structural measures:}
+#'   \describe{
+#'     \item{\code{competition} (or \code{competition_row}/\code{competition_col})}{
+#'       Herfindahl-Hirschman Index measuring concentration of ties. Calculated as 
+#'       \eqn{\sum_{i=1}^{n} (s_i)^2} where \eqn{s_i} is actor i's share of total 
+#'       ties. Ranges from 1/n (equal distribution) to 1 (one actor has all ties).}
+#'     \item{\code{sd_of_actor_means} (or \code{sd_of_row_means}/\code{sd_of_col_means})}{
+#'       Standard deviation of actors' average tie strengths, measuring heterogeneity 
+#'       in actor activity levels}
+#'     \item{\code{transitivity}}{Global clustering coefficient (probability that 
+#'       two neighbors of a node are connected)}
+#'   }
+#'   
+#'   \strong{For directed networks only:}
+#'   \describe{
+#'     \item{\code{covar_of_row_col_means}}{Covariance between actors' sending and 
+#'       receiving patterns}
+#'     \item{\code{reciprocity}}{Correlation between adjacency matrix and its 
+#'       transpose, measuring tendency for mutual ties}
+#'   }
 #'
-#' @details This function is especially useful to simplify the process of extracting key network statistics across multiple networks in a netify object. It is capable of handling both weighted and unweighted networks and adjusts its calculations based on the nature of the network data (cross-sectional vs. longitudinal).
-#' 
-#' @author Cassy Dorff, Shahryar Minhas
-#'
-#' @examples
-#' 
-#' # load icews data
-#' data(icews)
-#'
-#' # create netlet
-#' netlet = netify(
-#'     dyad_data=icews, actor1='i', actor2='j',
-#'     time = 'year', symmetric=FALSE, weight='verbCoop' )
-#'
-#' # calculate default summary stats
-#' summ_graph = summary(netlet)
-#' head(summ_graph)
-#'
-#' # add custom summary stat
-#' spinglass_ig = function(mat){
-#'     g = prep_for_igraph(mat)
-#'     comm = igraph::cluster_spinglass(g)
-#'     num_comm = length(comm$csize)
-#'     return( c(
-#'         num_comm=num_comm,
-#'         comm_modul = comm$modularity
-#'     ) )
+#' @details
+#' The function automatically adapts calculations based on network properties:
+#' \itemize{
+#'   \item \strong{Bipartite networks}: Reports row and column actors separately
+#'   \item \strong{Directed networks}: Calculates separate statistics for in/out ties
+#'   \item \strong{Weighted networks}: Includes weight-based statistics
+#'   \item \strong{Multilayer networks}: Processes each layer independently
+#'   \item \strong{Longitudinal networks}: Calculates statistics for each time period
 #' }
 #' 
-#' # since calculating communities can be intensive
-#' # lets take subset of time periods
-#' sub_net = subset_netlet(netlet, when_to_subset = as.character(2013:2014))
+#' \strong{Competition Index Interpretation:}
+#' 
+#' The competition measure (HHI) captures how concentrated network ties are among 
+#' actors. Low values indicate distributed activity across many actors (competitive), 
+#' while high values indicate concentration among few actors (monopolistic). This 
+#' is particularly useful for analyzing power dynamics or resource distribution in 
+#' networks.
+#' 
+#' \strong{Custom Statistics:}
+#' 
+#' Add custom graph-level metrics using the \code{other_stats} parameter:
+#' 
+#' \preformatted{
+#' # Example: Community detection
+#' modularity_stat <- function(mat) {
+#'   g <- netify_to_igraph(mat)
+#'   comm <- igraph::cluster_walktrap(g)
+#'   c(modularity = igraph::modularity(comm),
+#'     n_communities = length(unique(comm$membership)))
+#' }
+#' 
+#' summary(net, other_stats = list(community = modularity_stat))
+#' }
 #'
-#' # feed custom summary stat into summary
-#' summary(sub_net, 
-#'     other_stats=list(spinglass_ig=spinglass_ig)) 
+#' @note 
+#' For large longitudinal or multilayer networks, computation can be intensive. 
+#' Consider using \code{\link{subset_netify}} to analyze specific time periods 
+#' or layers.
+#' 
+#' Missing edges (NA values) are excluded from density calculations but tracked 
+#' in the \code{prop_edges_missing} statistic.
+#'
+#' @references
+#' Dorff, C., Gallop, M., & Minhas, S. (2023). "Networks of violence: Predicting 
+#' conflict in Nigeria." \emph{Journal of Politics}, 85(1).
+#'
+#' @examples
+#' # Load example data
+#' data(icews)
+#'
+#' # Basic usage
+#' net <- netify(
+#'   icews, 
+#'   actor1 = 'i', actor2 = 'j', time = 'year',
+#'   symmetric = FALSE, 
+#'   weight = 'verbCoop'
+#' )
+#' 
+#' # get summary
+#' summary(net)
+#'
+#' \dontrun{
+#' # Add custom statistics - community detection
+#' comm_stats <- function(mat) {
+#'   g <- netify_to_igraph(mat)
+#'   comm <- igraph::cluster_spinglass(g)
+#'   c(n_communities = length(comm$csize),
+#'     modularity = comm$modularity)
+#' }
+#' 
+#' # Apply to subset for efficiency
+#' sub_net <- subset_netify(net, time = as.character(2013:2014))
+#' summary(sub_net, other_stats = list(community = comm_stats))
+#' }
+#' 
+#' @author Cassy Dorff, Shahryar Minhas
 #' 
 #' @importFrom igraph transitivity
 #' 
@@ -66,176 +139,154 @@ summary.netify <- function(object, ...){
 
 	######################
 	# prelim checks
-
 	# check if netify object
 	netify_check(object)
 
 	# get summary args
 	summary_args <- list(...)
 
-	# placeholder
-	netlet_base <- object ; rm(object)
-
-	# pull out attrs
-	obj_attrs <- attributes(netlet_base)
-
-	# pull out number of layers
-	layers = obj_attrs$layers
-
-	# get type
+	# cache attributes
+	obj_attrs <- attributes(object)
+	layers <- obj_attrs$layers
+	n_layers <- length(layers)
 	netlet_type <- obj_attrs$netify_type
+	is_cross_sec <- netlet_type == 'cross_sec'
+	is_symmetric <- obj_attrs$symmetric
+	is_unipartite <- obj_attrs$mode == 'unipartite'
+	is_all_binary <- all(obj_attrs$weight_binary)
+	
+	# Check for ego network
+	ego_netlet <- !is.null(obj_attrs$ego_netlet) && obj_attrs$ego_netlet
+	if(ego_netlet) {
+		ego_vec <- obj_attrs$ego_vec
+		ego_longit <- obj_attrs$ego_longit
+	}
 	######################
 
 	######################
-	# iterate through each layer and recombine
-	net_stats_l_mutli = lapply(layers, function(layer){
-
-		######################
-		# if just one layer then just set netlet to user input,
-		# if more than one then subset
-		if(length(layers)==1){ netlet = netlet_base }
-		if(length(layers)>1){
-			netlet = subset_netlet(
-				netlet_base, what_layers_to_subset = layer)
-			obj_attrs <- attributes(netlet) }
+	# Pre-allocate results list
+	net_stats_l_multi <- vector("list", n_layers)
+	
+	# iterate through each layer
+	for(i in seq_along(layers)){
+		layer <- layers[i]
 		
-		# if cross sec convert to a list object so that
-		# we can use lapply
-		if(netlet_type == 'cross_sec'){ netlet <- list(netlet) }
-		if(netlet_type == 'longit_array'){ netlet <- array_to_list(netlet) }
+		######################
+		# Extract layer efficiently
+		if(n_layers == 1){ 
+			netlet <- object 
+		} else {
+			netlet <- subset_netify(object, layers = layer)
+			obj_attrs <- attributes(netlet)
+		}
+		
+		# Convert to list format for processing
+		netlet_list <- switch(netlet_type,
+			'cross_sec' = list(netlet),
+			'longit_array' = array_to_list(netlet),
+			'longit_list' = netlet
+		)
 		######################		
 
 		######################
-		# calc stats across netlet(s)
-		net_stats_l <- lapply(netlet, function(mat){
-			return( graph_stats_for_netlet(mat, obj_attrs, summary_args) ) })
+		# calc stats across netlet(s) - vectorized where possible
+		net_stats_list <- lapply(netlet_list, function(mat){
+			graph_stats_for_netlet(mat, obj_attrs, summary_args)
+		})
 		######################
 
 		######################
-		# bind into one matrix
-		net_stats <- do.call('rbind', net_stats_l)
-		net_stats <- data.frame(net_stats, stringsAsFactors=FALSE)
-
-		# move variable label to be a column
-		net_stats$net <- rownames(net_stats)
-		rownames(net_stats) <- NULL
-
-		# add layer info
-		net_stats$layer = layer
-
-		#
-		return(net_stats) })
-	######################
-
-	######################
-	# bind into one matrix and start cleaning
-	net_stats = do.call('rbind', net_stats_l_mutli)
-
-	# reorder cols
-	net_stats <- net_stats[,
-		c( 'net', 'layer', 
-			setdiff(names(net_stats), c('net', 'layer'))) ]
-
-	# drop layer column if only one layer
-	if(length(layers)==1){
-		net_stats = net_stats[,setdiff(names(net_stats), 'layer')] }
-
-	# if unipartite then collapse num_row_actors and num_col_actors
-	# into one column: num_actors
-	if(obj_attrs$mode=='unipartite'){
-
-		# find num_row_actors
-		n_r_i = which(names(net_stats) == 'num_row_actors')
-		names(net_stats)[n_r_i] = 'num_actors'
-
-		# drop num_col_actors
-		net_stats <- net_stats[,setdiff(names(net_stats), 'num_col_actors')]
-	}
-
-	# if undirected then collapse row and col stats into one
-	if(obj_attrs$symmetric){
-
-		# find competition_row
-		c_r_i = which(names(net_stats) == 'competition_row')
-		names(net_stats)[c_r_i] = 'competition'
-
-		# find sd_of_row_means
-		sd_r_i = which(names(net_stats) == 'sd_of_row_means')
-		names(net_stats)[sd_r_i] = 'sd_of_actor_means'
-
-		# drop covar_of_row_col_means and reciprocity
-		to_drop = c(
-			'competition_col', 'sd_of_col_means',
-			'covar_of_row_col_means', 'reciprocity'
-		)
-		net_stats <- net_stats[,setdiff(names(net_stats), to_drop)]
-	}
-
-	# if not weighted then drop redundant stats
-	if(all(obj_attrs$weight_binary)){
-		# drop mean_edge_weight, sd_edge_weight,
-		# min_edge_weight, max_edge_weight
-		to_drop = c(
-			'mean_edge_weight', 'sd_edge_weight', 
-			'min_edge_weight', 'max_edge_weight', 
-			'median_edge_weight')
-		net_stats <- net_stats[,setdiff(names(net_stats), to_drop)]
+		# Efficient data frame creation
+		net_stats <- do.call('rbind', net_stats_list)
+		net_names <- names(netlet_list) %||% rownames(net_stats)
+		
+		net_stats <- as.data.frame(net_stats, stringsAsFactors = FALSE)
+		net_stats$net <- net_names
+		net_stats$layer <- layer
+		
+		# Store in pre-allocated list
+		net_stats_l_multi[[i]] <- net_stats
 	}
 	######################
 
 	######################
-	# pull out some ego info if it's there,
-	# assume FALSE
-	ego_netlet = FALSE ; ego_longit = FALSE
-	include_ego = FALSE
-	if(!is.null(obj_attrs$ego_netlet)){
-		if(obj_attrs$ego_netlet){
-			ego_netlet = TRUE
-			ego_vec = obj_attrs$ego_vec			
-			ego_longit = obj_attrs$ego_longit } }
+	# Combine all results efficiently
+	net_stats <- do.call('rbind', net_stats_l_multi)
+	rownames(net_stats) <- NULL
+	
+	# Reorder columns - check if columns exist first
+	id_cols <- c('net', 'layer')
+	# Only include id_cols that actually exist in net_stats
+	existing_id_cols <- id_cols[id_cols %in% names(net_stats)]
+	stat_cols <- setdiff(names(net_stats), id_cols)
 
-	# if ego netlet then make some changes
-	# layer will be added and used for ego
-	# net will stand in for time if ego data is longit
+	# Only reorder if we have the expected columns
+	if(length(existing_id_cols) > 0) {
+		net_stats <- net_stats[, c(existing_id_cols, stat_cols)]
+	}
+	
+	# Drop layer column if only one layer
+	if(n_layers == 1){
+		net_stats$layer <- NULL
+	}
+
+	# Simplify column names based on network type
+	if(is_unipartite){
+		# Rename num_row_actors to num_actors
+		names(net_stats)[names(net_stats) == 'num_row_actors'] <- 'num_actors'
+		# Remove num_col_actors
+		net_stats$num_col_actors <- NULL
+	}
+
+	# Simplify for undirected networks
+	if(is_symmetric){
+		# Rename competition and sd measures
+		names(net_stats)[names(net_stats) == 'competition_row'] <- 'competition'
+		names(net_stats)[names(net_stats) == 'sd_of_row_means'] <- 'sd_of_actor_means'
+		
+		# Remove directed-only statistics
+		cols_to_remove <- c('competition_col', 'sd_of_col_means', 
+		                   'covar_of_row_col_means', 'reciprocity')
+		net_stats[cols_to_remove] <- NULL
+	}
+
+	# Remove weight statistics for binary networks
+	if(is_all_binary){
+		weight_cols <- c('mean_edge_weight', 'sd_edge_weight', 
+		                'min_edge_weight', 'max_edge_weight', 
+		                'median_edge_weight')
+		net_stats[weight_cols] <- NULL
+	}
+	######################
+
+	######################
+	# Handle ego networks efficiently
 	if(ego_netlet){
-
-		# if no longit info for ego then need to modify id vars
 		if(!ego_longit){
-
-			# if just one time point and one ego then layer is just ego_vec
-			# otherwise the net column will have multiple egos
-			if(!ego_longit & obj_attrs$netify_type=='cross_sec'){
-				layer = ego_vec
+			# Non-longitudinal ego network
+			if(is_cross_sec){
+				net_stats$layer <- ego_vec
 			} else {
-				layer = net_stats$net }
+				net_stats$layer <- net_stats$net
+			}
+			net_stats$net <- 1
+		} else {
+			# Longitudinal ego network
+			net_split <- strsplit(net_stats$net, '__', fixed = TRUE)
+			ego_units <- vapply(net_split, `[`, character(1), 1)
+			ego_pds <- vapply(net_split, `[`, character(1), 2)
 			
-			# since this is nonlongit case set net to 1
-			net_stats$net = 1 }
-
-		# if longit info for ego
-		if(ego_longit){
-
-			# extract units and pds from net column
-			ego_units = unique(
-				unlist( lapply( strsplit(
-					net_stats$net, '__'), function(x){ x[1] })))
-			ego_pds = unique(
-				unlist( lapply( strsplit(
-					net_stats$net, '__'), function(x){ x[2] })))
-
-			# add relev vars
-			net_stats$net = ego_pds
-			layer = ego_units
+			net_stats$net <- ego_pds
+			net_stats$layer <- ego_units
 		}
-
-		# organize
-		net_stats = cbind(
-			net=net_stats[,'net'], layer=layer, net_stats[,-1])
+		
+		# Ensure correct column order
+		net_stats <- net_stats[, c('net', 'layer', 
+		                           setdiff(names(net_stats), c('net', 'layer')))]
 	}
 	######################	
 
 	######################	
-	#
 	return(net_stats)
 	######################		
 }

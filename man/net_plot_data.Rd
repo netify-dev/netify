@@ -2,35 +2,117 @@
 % Please edit documentation in R/net_plot_data.R
 \name{net_plot_data}
 \alias{net_plot_data}
-\title{Data preparation for plotting 'netify' objects}
+\title{Prepare netify data for network visualization}
 \usage{
 net_plot_data(netlet, plot_args = list())
 }
 \arguments{
-\item{netlet}{A 'netify' object, which contains the network data structured for analysis and visualization.}
+\item{netlet}{A netify object (class "netify") containing the network to be
+visualized. Must be a single-layer network (multilayer networks not currently
+supported).}
 
-\item{plot_args}{A list of arguments that influence the layout and presentation of the network visualization, including:
-- \code{point_layout}: Optional, user-provided node layout; if not provided, layout will be generated based on \code{layout} parameter.
-- \code{layout}: Specifies the layout algorithm from 'igraph' to position the nodes if \code{point_layout} is not provided. Available options include "nicely", "fruchterman.reingold", "kamada.kawai", "random", "circle", "star", "grid", "graphopt", "sugiyama", "drl", "lgl", "bipartite", "tree", "randomly", "dh", "fr", "kk", "gem", and "mds".
-- \code{remove_isolates}: Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
-- \code{static_actor_positions}: Logical indicating whether to use static positions for actors.
-- \code{add_edges}: Logical; if TRUE, edges will be added to the plot. Default is TRUE.
-- \code{curve_edges}: Logical; if TRUE, edges will be curved. Default is FALSE.
-- \code{add_points}: Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.
-- \code{add_text}: Logical; if TRUE, text annotations will be added. Default is FALSE.
-- \code{add_label}: Logical; if TRUE, labels will be added. Default is FALSE.
-- \code{select_text}: A vector of node names to specifically add text to; others will not have text.
-- \code{select_label}: A vector of node names to specifically add labels to; others will not have labels.}
+\item{plot_args}{A list of plotting arguments controlling visualization appearance
+and behavior. Can include:
+
+\strong{Layout parameters:}
+\itemize{
+\item \code{point_layout}: Pre-computed node positions as a data.frame or list
+of data.frames (for longitudinal networks). If provided, overrides layout
+algorithm selection
+\item \code{layout}: Character string specifying the igraph layout algorithm.
+Options: "nicely" (default), "fr" (Fruchterman-Reingold), "kk" (Kamada-Kawai),
+"circle", "star", "grid", "tree", "bipartite", and others. See
+\code{\link{get_node_layout}} for full list
+\item \code{static_actor_positions}: Logical. If TRUE, maintains consistent
+node positions across time periods in longitudinal networks
+\item \code{which_static}: Integer specifying which time period to use as
+the template for static positions
+\item \code{seed}: Integer for reproducible random layouts
+}
+
+\strong{Display options:}
+\itemize{
+\item \code{remove_isolates}: Logical. Remove unconnected nodes (default: TRUE)
+\item \code{add_edges}: Logical. Include edges in visualization (default: TRUE)
+\item \code{curve_edges}: Logical. Use curved edges instead of straight (default: FALSE)
+\item \code{add_points}: Logical. Display nodes as points (default: TRUE)
+\item \code{add_text}: Logical. Add text labels to nodes (default: FALSE)
+\item \code{add_label}: Logical. Add boxed labels to nodes (default: FALSE)
+}
+
+\strong{Selective labeling:}
+\itemize{
+\item \code{select_text}: Character vector of node names to label with text
+\item \code{select_label}: Character vector of node names to label with boxes
+}
+
+Additional aesthetic parameters are processed by \code{adjust_plot_args}
+and \code{gg_params}.}
 }
 \value{
-A list containing \code{plot_args}, \code{ggnet_params}, and \code{net_dfs} which are used for setting up the plot:
-- \code{plot_args}: Adjusted plotting arguments including layout and graphical settings.
-- \code{ggnet_params}: Graphical parameters organized for nodes, edges, and labels.
-- \code{net_dfs}: Data frames for nodes and edges prepared for plotting.
+A list with three components for creating network visualizations:
+\itemize{
+\item \strong{plot_args}: Processed plotting arguments with defaults applied
+and parameters validated. Includes all layout and display settings
+\item \strong{ggnet_params}: Organized aesthetic parameters for ggplot2 mapping.
+Contains separate specifications for nodes, edges, text, and labels with both
+static and dynamic (data-mapped) aesthetics
+\item \strong{net_dfs}: Data frames ready for plotting:
+\itemize{
+\item \code{nodal_data}: Node information including positions (x, y),
+attributes, and any additional variables
+\item \code{edge_data}: Edge information including endpoint coordinates
+(x1, y1, x2, y2) and edge attributes
+}
+}
 }
 \description{
-This function prepares the necessary data components for visualizing 'netify' objects.
-It processes network attributes and setups up layout and aesthetic parameters for subsequent plotting.
+\code{net_plot_data} processes a netify object and generates all necessary components
+for network visualization. This function handles layout computation, aesthetic
+parameter organization, and data structuring for subsequent plotting with ggplot2
+or other visualization tools.
+}
+\details{
+This function serves as the data preparation layer for netify visualization,
+performing several operations:
+
+\strong{Data validation:}
+\itemize{
+\item Ensures the input is a valid netify object
+\item Checks for single-layer networks (multilayer not supported)
+\item Validates ego networks contain only one ego
+}
+
+\strong{Layout computation:}
+\itemize{
+\item Generates node positions using specified algorithm if not provided
+\item Calculates edge endpoint coordinates based on node positions
+\item Handles both cross-sectional and longitudinal layouts
+}
+
+\strong{Data organization:}
+\itemize{
+\item Merges layout information with network attributes
+\item Processes plotting arguments and applies defaults
+\item Organizes aesthetic parameters for ggplot2 compatibility
+\item Removes isolates if requested
+}
+
+\strong{Output structure:}
+
+The returned data is structured for direct use with ggplot2 or can be further
+customized. The separation of layout, aesthetics, and data allows for flexible
+visualization workflows.
+}
+\note{
+This function is primarily designed for use with netify's plot method but can
+be called directly for custom visualization workflows.
+
+For multilayer networks, use \code{\link{subset_netify}} to extract individual
+layers before visualization.
+
+For ego networks with multiple egos, create separate visualizations and combine
+them using packages like patchwork.
 }
 \author{
 Cassy Dorff, Shahryar Minhas

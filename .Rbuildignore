@@ -1,6 +1,11 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.vscode$
+^README\.Rmd$
+^README-.*\.png$
+^\.github$
 ^_pkgdown\.yml$
 ^docs$
-^pkgdown$
-^\.github$
 ^doc$
+^pkgdown$
 ^Meta$

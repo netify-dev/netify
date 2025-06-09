@@ -2,73 +2,174 @@
 % Please edit documentation in R/peek.R
 \name{peek}
 \alias{peek}
-\title{peek method for netify objects}
+\title{Preview subsets of network data from netify objects}
 \usage{
-peek(
-  netlet,
-  what_to_peek = 3,
-  what_rows_to_peek = what_to_peek,
-  what_cols_to_peek = what_to_peek,
-  when_to_peek = 1,
-  what_layers_to_peek = NULL
-)
+peek(netlet, rows = 3, cols = 3, time = 1, layers = NULL)
 }
 \arguments{
-\item{netlet}{object of class netify}
+\item{netlet}{A netify object to preview. Can be cross-sectional, longitudinal
+(array or list format), and/or multilayer.}
 
-\item{what_to_peek}{enter the name of specific nodes to peek in character vector form or provide a numeric range, default is to show the first three rows and columns of interactions}
+\item{rows}{Specifies which actors to display as senders of ties (row actors
+in the adjacency matrix). Can be:
+\itemize{
+\item \strong{Single number}: Shows the first n actors (e.g., \code{rows = 5}
+displays actors 1-5)
+\item \strong{Numeric vector}: Shows specific positions (e.g., \code{rows = c(1,3,5)}
+displays the 1st, 3rd, and 5th actors)
+\item \strong{Character vector}: Shows named actors (e.g., \code{rows = c("USA", "China")}
+displays these specific countries)
+\item \strong{NULL}: Shows all row actors (default is 3)
+}
+In bipartite networks, rows represent actors in the first mode.}
 
-\item{what_rows_to_peek}{similar as what_to_peek but specific to rows, default value is set to what_to_peek. If you want to peek at all rows then set this to NULL.}
+\item{cols}{Specifies which actors to display as receivers of ties (column actors
+in the adjacency matrix). Accepts the same input types as \code{rows}. In
+bipartite networks, columns represent actors in the second mode. Default is 3.}
 
-\item{what_cols_to_peek}{similar as what_to_peek but specific to columns, default value is set to what_to_peek. If you want to peek at all columns then set this to NULL.}
+\item{time}{For longitudinal networks, specifies which time periods to display. Can be:
+\itemize{
+\item \strong{Single number}: Shows the nth time period (e.g., \code{time = 1}
+shows the first time period)
+\item \strong{Numeric vector}: Shows specific time indices (e.g., \code{time = c(1,5,10)})
+\item \strong{Character vector}: Shows named time periods (e.g., \code{time = c("2002", "2006")}
+displays these specific years)
+\item \strong{NULL}: Shows all time periods
+}
+Default is 1 (first time period only). Ignored for cross-sectional networks.}
 
-\item{when_to_peek}{choose time points to peek from, default is to show the first time point of data.
-If the entry is a numeric value or vector then it will be used as an index to the time dimension.
-If the entry is a character vector then it will be used to match the time dimension labels.
-If you want to peek at all time points then set this to NULL.}
-
-\item{what_layers_to_peek}{if the netlet object has multiple layers, then you must choose one layer to peek at.}
+\item{layers}{For multilayer networks, specifies which layer(s) to display. Must be
+a character vector matching layer names in the netify object (e.g.,
+\code{layers = c("trade", "alliance")}). For single-layer networks, this
+parameter is ignored. Default is NULL (shows all layers).}
 }
 \value{
-slice of the network
+Returns a subset of the raw network data (without netify attributes):
+
+\describe{
+\item{\strong{Cross-sectional networks}}{
+\itemize{
+\item Single layer: Returns a matrix with selected rows and columns
+\item Multilayer: Returns a 3D array (rows × columns × layers)
+}
+}
+\item{\strong{Longitudinal networks}}{
+\itemize{
+\item Array format: Returns an array with dimensions depending on selection
+\item List format: Returns a list of matrices, one per selected time period
+}
+}
+}
+
+All returned objects preserve dimension names (actor names, time labels, layer
+names) for easy interpretation. Single dimensions are automatically dropped.
 }
 \description{
-peek takes in a netify object
-and displays the some specified rows of information.
+\code{peek} provides a
+convenient way to inspect portions of network data stored in netify objects.
+Rather than displaying entire networks (which can be overwhelming for large
+datasets), this function allows you to examine specific actors, time periods,
+or layers for data exploration, verification, and debugging.
+}
+\details{
+\strong{Purpose and Design}
+
+\code{peek} is designed as a lightweight data exploration tool. Unlike
+\code{\link{subset_netify}}, which creates new netify objects with all attributes
+preserved, \code{peek} returns only the raw network data for quick inspection.
+This makes it ideal for:
+\itemize{
+\item Verifying data structure and content
+\item Checking specific relationships
+\item Debugging data issues
+\item Quick visual inspection of network patterns
+}
+
+\strong{Understanding Network Directions}
+
+In directed networks:
+\itemize{
+\item \strong{Rows} represent actors sending ties (out-ties)
+\item \strong{Columns} represent actors receiving ties (in-ties)
+\item Cell \code{[i,j]} contains the tie from actor i to actor j
+}
+
+For example, if cell \code{["USA", "China"]} = 5, this means USA sends a tie of
+strength 5 to China.
+
+\strong{Smart Selection Behavior}
+
+The function includes several convenience features:
+\itemize{
+\item Single numbers are expanded to ranges (e.g., \code{rows = 5} becomes rows 1-5)
+\item Out-of-bounds indices are silently ignored (no errors during exploration)
+\item Character names are matched to actor labels
+\item Dimension reduction: if only one time period or layer is selected, that
+dimension is dropped from the output
+}
+}
+\note{
+\strong{Important distinctions:}
+\itemize{
+\item Use \code{peek} for quick data inspection (returns raw matrices)
+\item Use \code{\link{subset_netify}} to create new netify objects with attributes
+\item Use \code{\link{get_raw}} to extract all raw data from a netify object
+}
+
+When multiple layers are present and no layer selection is specified, all layers
+are returned with a warning message to remind you about the multilayer structure.
 }
 \examples{
-
-# load data
+# Load example data
 data(icews)
 
-# subset to a particular year
-icews_10 <- icews[icews$year=='2010', ]
+# Example 1: Basic usage with cross-sectional network
+icews_10 <- icews[icews$year == 2010, ]
+net <- netify(
+  icews_10, 
+  actor1 = 'i', actor2 = 'j',
+  weight = 'verbCoop'
+)
 
-# gen netify object
-icews_verbCoop <- netify(
-  dyad_data=icews_10, actor1='i', actor2='j',
-  symmetric=FALSE, weight='verbCoop' )
+# Default: see first 3 actors (both sending and receiving)
+peek(net)
 
-# peek at relations between a few countries
-peek(icews_verbCoop,
-	what_to_peek = c('United Kingdom', 'United States','France') )
+# See first 5 senders and first 5 receivers
+peek(net, rows = 5, cols = 5)
 
-# specify rows and cols to peek at
-peek(icews_verbCoop,
-	what_rows_to_peek = c('United Kingdom', 'United States','France'),
-	what_cols_to_peek = c('Russian Federation', 'Sri Lanka') )
+# Example 2: Specific actors by name
+# See ties from US and China to Russia, India, and Brazil
+peek(net,
+  rows = c('United States', 'China'),
+  cols = c('Russia', 'India', 'Brazil'))
 
-# peek with longit array
-icews_matlConf <- netify(
-	dyad_data=icews, 
-	actor1='i', actor2='j', time='year',
-	symmetric=FALSE, weight='matlConf',
-	output_format = 'longit_array' )
-# peek at a few years for the first three rows/cols, 
-# specify numeric index or character refs
-peek(icews_matlConf, when_to_peek=c(1, 5, 10))
-peek(icews_matlConf, when_to_peek=c('2002', '2006', '2011'))
+# Example 3: Longitudinal network
+net_longit <- netify(
+  icews, 
+  actor1 = 'i', actor2 = 'j', time = 'year',
+  weight = 'matlConf'
+)
 
+# See first 5 actors in specific years
+peek(net_longit, 
+  rows = 5, cols = 5,
+  time = c('2002', '2006', '2010'))
+
+# See all actors in year 2010
+peek(net_longit, 
+  rows = NULL, cols = NULL,
+  time = '2010')
+  
+# Example 4: Using numeric indices
+# See specific positions in the network
+peek(net, 
+  rows = c(1, 3, 5, 7),  # 1st, 3rd, 5th, 7th senders
+  cols = 1:10)           # first 10 receivers
+
+# Example 5: Quick inspection patterns
+# See who USA interacts with
+peek(net, rows = "United States", cols = 10)  # USA's ties to first 10 countries
+peek(net, rows = 10, cols = "United States")  # First 10 countries' ties to USA
 
 }
 \author{

@@ -49,7 +49,8 @@ dvars = c( 'matlCoop', 'verbConf', 'matlConf' )
 
 # create a netify object
 netlet = netify(
-    dyad_data=icews, actor1='i', actor2='j',
+    icews, 
+    actor1='i', actor2='j',
     time = 'year',
     symmetric=FALSE, weight='verbCoop',
     mode='unipartite', sum_dyads=FALSE,
@@ -75,9 +76,9 @@ actors_to_keep = c(
   'Syrian Arab Republic', 'Thailand', 
   'United Kingdom', 'United States', 
   'Zimbabwe' )
-netlet = subset_netlet(
+netlet = subset_netify(
   netlet, 
-  what_to_subset = actors_to_keep
+  actors = actors_to_keep
 )
 
 # print

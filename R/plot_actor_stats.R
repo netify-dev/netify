@@ -1,33 +1,64 @@
-#' Plot Actor-Level Statistics for Netify Objects
+#' Visualize actor-level network statistics
 #'
-#' `plot_actor_stats` generates visualizations for actor-level statistics using the output from the `summary_actor` function. The function supports both cross-sectional and longitudinal data, offering insights into the distribution of statistics across actors or focusing on specific actors over time.
+#' `plot_actor_stats` creates visualizations of actor-level statistics from 
+#' `summary_actor()` output. The function automatically adapts to the data 
+#' structure (cross-sectional/longitudinal, single/multilayer) and offers two 
+#' main visualization approaches: distribution across actors or tracking specific 
+#' actors.
 #'
-#' @param summary_df A dataframe from the `summary_actor` function containing actor-level or actor-time level statistics. The dataframe should have columns labeled "actor" and "time" for longitudinal data.
-#' @param longitudinal Logical; if TRUE, the data is considered longitudinal. Default is set to TRUE if there is a "time" column in the dataframe passed to summary_df. 
-#' @param multilayer Logical; if TRUE, the data is considered to be multilayered. Default is set to TRUE if there is a "layer" column in the dataframe passed to summary_df.
-#' @param across_actor Logical; if TRUE, visualizations will focus on the distribution of statistics across actors. If FALSE, visualizations will focus on specific actors. Default is TRUE. If setting across_actor to TRUE and specific actors are provided, the data will be subsetted to include only the specified actors.
-#' @param specific_stats Optional; a vector of specific statistics to plot. If NULL, all available statistics in the dataframe are used. If specified, the function will check if these statistics are present in the dataframe and will subset the data accordingly.
-#' @param specific_actors Optional; a vector of specific actor names for which statistics will be plotted. When NULL, statistics for all actors are considered. If specified, the function will check if these actors are present in the dataframe and will subset the data accordingly. This parameter is relevant only if `across_actor` is set to FALSE.
+#' @param summary_df A data frame from `summary_actor()` containing actor-level 
+#'   statistics. Must include an "actor" column. May include "time" column for 
+#'   longitudinal data and "layer" column for multilayer networks.
+#' @param longitudinal Logical indicating whether to treat data as longitudinal. 
+#'   If NULL (default), automatically detected based on presence of "time" column. 
+#'   Set to FALSE if only one unique time point exists.
+#' @param multilayer Logical indicating whether to treat data as multilayer. 
+#'   If NULL (default), automatically detected based on presence of "layer" column. 
+#'   Set to FALSE if only one unique layer exists.
+#' @param across_actor Logical. If TRUE (default), visualizes distribution of 
+#'   statistics across all actors. If FALSE, focuses on tracking specific actors. 
+#'   When TRUE with `specific_actors` provided, shows distribution for only those 
+#'   actors.
+#' @param specific_stats Character vector of statistic names to plot. If NULL 
+#'   (default), plots all available statistics. Must match column names in 
+#'   `summary_df`.
+#' @param specific_actors Character vector of actor names to highlight or focus on. 
+#'   If NULL (default) with `across_actor = FALSE`, includes all actors (with 
+#'   warning if > 25 actors). Must match values in the "actor" column.
 #'
-#' @return A `ggplot` object representing the requested visualization, which can be further customized or printed.
+#' @return A ggplot object that can be further customized or saved. The plot type 
+#'   depends on the data structure and parameters:
+#'   \itemize{
+#'     \item \strong{Cross-sectional, across actors}: Density plots with rug plots
+#'     \item \strong{Cross-sectional, specific actors}: Beeswarm plots
+#'     \item \strong{Longitudinal, across actors}: Ridge density plots over time
+#'     \item \strong{Longitudinal, specific actors}: Line plots over time
+#'   }
+#'   
+#'   All plots are faceted by statistic and, when applicable, by layer.
 #'
-#' @details This function can generate different types of plots based on the structure of the input data:
-#' - For cross-sectional data, it will show the distribution of statistics across actors using density plots or compare specific actors using various plot types.
-#' - For longitudinal data, it will show how the distribution of statistics changes over time using ridge density plots or track changes in statistics for specific actors over time using line plots.
+#' @details
+#' \strong{Visualization logic:}
+#' 
+#' The function chooses appropriate visualizations based on data structure:
+#' \itemize{
+#'   \item \strong{Distribution plots} (`across_actor = TRUE`): Show how statistics 
+#'     are distributed across the actor population
+#'   \item \strong{Actor-specific plots} (`across_actor = FALSE`): Track individual 
+#'     actors, with specified actors highlighted in color while others appear in gray
+#' }
+#'
+#' 
+#' All plots use `theme_stat_netify()` for consistent styling across netify 
+#' visualizations.
+#' 
+#' For multilayer longitudinal data with `across_actor = FALSE`, consider using 
+#' `specific_stats` to avoid overcrowded facets.
+#'
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
-#' @import ggplot2
-#' @importFrom RColorBrewer brewer.pal
-#' @importFrom ggridges geom_density_ridges position_points_jitter
-#' @importFrom ggbeeswarm geom_quasirandom
-#' @importFrom reshape2 melt
-#' @importFrom cli cli_alert_danger cli_alert_warning
-#' @importFrom grDevices colors
-#' @import rlang
-#' 
 #' @export plot_actor_stats
-#' 
 
 plot_actor_stats <- function(
   summary_df,
@@ -339,52 +370,4 @@ plot_actor_stats <- function(
   #
   return(viz)
 }
-
-# library(netify)
-# example(layer_netlet)
-# ls()
-
-# # icews_matlCoop # cross-sec single layer
-# # icews_verbCoop_matlCoop # cross-sec multi layer
-# # icews_matlCoop_longit_l # longit single layer
-# # icews_verbCoop_matlCoop_longit_l # longit multi layer
-
-# c_sing = summary_actor(icews_matlCoop)
-# c_mult = summary_actor(icews_verbCoop_matlCoop)
-# l_sing = summary_actor(icews_matlCoop_longit_l)
-# l_mult = summary_actor(icews_verbCoop_matlCoop_longit_l)
-
-
-# stats = c(
-#   'degree_total', 'strength_avg_total', 'network_share_total'
-# )
-
-# actors = c(
-#   'United States', 'United Kingdom',
-#   'China', 'Russian Federation'
-# )
-
-# # cross-sec single layer variations
-# plot_actor_stats(c_sing)
-# plot_actor_stats(c_sing, across_actor=FALSE)
-# plot_actor_stats(c_sing, specific_stats=stats)
-# plot_actor_stats(c_sing, across_actor=FALSE, specific_actors=actors)
-
-# # cross-sec multi layer variations
-# plot_actor_stats(c_mult)
-# plot_actor_stats(c_mult, across_actor=FALSE)
-# plot_actor_stats(c_mult, specific_stats=stats)
-# plot_actor_stats(c_mult, across_actor=FALSE, specific_actors=actors)
-
-# # longit single layer variations
-# plot_actor_stats(l_sing)
-# plot_actor_stats(l_sing, across_actor=FALSE)
-# plot_actor_stats(l_sing, specific_stats=stats)
-# plot_actor_stats(l_sing, across_actor=FALSE, specific_actors=actors)
-
-# # longit multi layer variations
-# plot_actor_stats(l_mult)
-# plot_actor_stats(l_mult, across_actor=FALSE, specific_stats=stats)
-# plot_actor_stats(l_mult, specific_stats=stats)
-# plot_actor_stats(l_mult, across_actor=FALSE, specific_actors=actors, specific_stats=stats)
 

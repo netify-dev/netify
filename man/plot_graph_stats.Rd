@@ -2,32 +2,75 @@
 % Please edit documentation in R/plot_graph_stats.R
 \name{plot_graph_stats}
 \alias{plot_graph_stats}
-\title{Plotting function for graph level statistics for netify objects}
+\title{Visualize network-level statistics}
 \usage{
 plot_graph_stats(summary_df, type = "line", specific_stats = NULL)
 }
 \arguments{
-\item{summary_df}{A data frame produced by the \code{summary.netify} function
-or any other function that outputs network statistics in a similar format.
-The data frame should have a column "net" which identifies the network
-or time point for each row.}
+\item{summary_df}{A data frame containing network-level statistics, typically
+from \code{summary_net()}. Must include a "net" column identifying each network
+or time point. May include a "layer" column for multilayer networks. All
+other columns should contain numeric statistics to plot.}
 
-\item{type}{A character string specifying the type of plot to generate:
-either 'line' for line plots or 'bar' for bar plots. The default is 'line'.}
+\item{type}{Character string specifying the plot type. Options are:
+\itemize{
+\item \code{"line"}: Line plot with points (default). Best for temporal data
+\item \code{"bar"}: Bar plot with grouped bars. Required for multilayer
+non-temporal data
+}}
 
-\item{specific_stats}{Optional vector of column names from \code{summary_df}
-specifying which statistics to plot. If NULL (the default), all statistics
-in \code{summary_df} will be plotted.}
+\item{specific_stats}{Character vector of statistic names to plot. If NULL
+(default), plots all numeric columns in summary_df. Must match column names
+exactly.}
 }
 \value{
-A \code{ggplot} object displaying the specified statistics for each network.
-The plots are faceted by statistic type across the networks or time points.
+A ggplot object displaying the specified statistics. The plot structure
+depends on the data:
+\itemize{
+\item \strong{Single time/network}: Returns error (single row not plottable)
+\item \strong{Multiple times/networks}: Line or bar plot faceted by statistic
+\item \strong{Multilayer temporal}: Line plots colored by layer
+\item \strong{Multilayer non-temporal}: Grouped bar plots by layer
+}
+
+All plots are faceted by statistic with free y-axis scales for better
+comparison across different value ranges.
 }
 \description{
-\code{plot_graph_stats} takes a data frame containing graph level statistics and
-generates a visual representation using either line or bar plots. This function
-is designed to work with data frames that represent network statistics over
-multiple networks or time points.
+\code{plot_graph_stats} creates line or bar plots to visualize network-level
+statistics across multiple networks, time points, or layers. This function
+is designed to work with output from \code{summary_net()} or similar functions
+that produce network-level summary statistics.
+}
+\details{
+\strong{Data structure detection:}
+
+The function automatically detects the structure of your data:
+\itemize{
+\item \strong{Longitudinal}: Multiple unique values in "net" column
+\item \strong{Multilayer}: Multiple unique values in "layer" column
+\item \strong{Single network}: Only one row (returns error with suggestion)
+}
+
+\strong{Plot type selection:}
+\itemize{
+\item Line plots are preferred for temporal data to show trends
+\item Bar plots are automatically selected for multilayer non-temporal data
+\item Bar plots can be useful for comparing discrete time points
+}
+
+\strong{Faceting behavior:}
+
+Each statistic gets its own facet panel with:
+\itemize{
+\item Independent y-axis scales (scales = "free_y")
+\item Shared x-axis across all panels
+\item Automatic layout based on number of statistics
+}
+}
+\note{
+The function requires at least two networks/time points to create a meaningful
+plot. For single network summaries, consider using a table format instead.
 }
 \author{
 Ha Eun Choi, Cassy Dorff, Shahryar Minhas

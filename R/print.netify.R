@@ -1,11 +1,28 @@
 #' Print method for netify objects
 #'
-#' `print.netify` takes in a netify object
-#' and defines information to be displayed on print.
+#' Displays a formatted summary of a netify object, including network type,
+#' dimensions, summary statistics, and available attributes.
 #'
-#' @param x object of class netify, produced by get_adjacency
-#' @param ... additional parameters not used
-#' @return text information about the network
+#' @param x A netify object
+#' @param ... Additional parameters (not used)
+#' 
+#' @return Invisibly returns the input netify object. Called for its side effect
+#'   of printing network information to the console.
+#'   
+#' @details
+#' The print method displays:
+#' \itemize{
+#'   \item Network type (unipartite/bipartite, symmetric/asymmetric)
+#'   \item Edge weight specification
+#'   \item Temporal structure (cross-sectional or number of time periods)
+#'   \item Actor counts (total unique actors, or separate row/column counts for bipartite)
+#'   \item Summary statistics (density, reciprocity, transitivity, etc.)
+#'   \item Available nodal and dyadic attributes
+#' }
+#' 
+#' For longitudinal networks, summary statistics are averaged across time periods.
+#' For multilayer networks, statistics are shown separately for each layer.
+#' 
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
 #' @importFrom utils capture.output

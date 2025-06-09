@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_adjacency.R
 \name{get_adjacency}
 \alias{get_adjacency}
-\title{Converts a dyadic data into a network in various formats}
+\title{Create a netify matrix from cross-sectional dyadic data}
 \usage{
 get_adjacency(
   dyad_data,
@@ -17,51 +17,101 @@ get_adjacency(
 )
 }
 \arguments{
-\item{dyad_data}{a dyadic dataframe (or a tibble)}
+\item{dyad_data}{A data.frame containing dyadic observations. Will be coerced
+to data.frame if a tibble or data.table is provided.}
 
-\item{actor1}{character: name of the actor 1 in dyad_data}
+\item{actor1}{Character string specifying the column name for the first actor
+in each dyad.}
 
-\item{actor2}{character: name of the actor 2 in dyad_data}
+\item{actor2}{Character string specifying the column name for the second actor
+in each dyad.}
 
-\item{symmetric}{logical: whether ties are symmetric, default is TRUE}
+\item{symmetric}{Logical. If TRUE (default), treats the network as undirected
+(i.e., edges have no direction). If FALSE, treats the network as directed.}
 
-\item{mode}{character: whether the network is unipartite or bipartite, default is unipartite}
+\item{mode}{Character string specifying network structure. Options are:
+\itemize{
+\item \code{"unipartite"}: One set of actors (default)
+\item \code{"bipartite"}: Two distinct sets of actors
+}}
 
-\item{weight}{character: name of the weighted edges variable, default is NULL}
+\item{weight}{Character string specifying the column name containing edge weights.
+If NULL (default), edges are treated as unweighted (binary).}
 
-\item{sum_dyads}{logical: whether to sum up the \code{weight} value when there exists repeating dyads within the dataset}
+\item{sum_dyads}{Logical. If TRUE, sums weight values when multiple edges exist
+between the same actor pair. If FALSE (default), uses the last observed value.}
 
-\item{diag_to_NA}{logical: whether diagonals should be set to NA, default is TRUE}
+\item{diag_to_NA}{Logical. If TRUE (default), sets diagonal values (self-loops)
+to NA. Automatically set to FALSE for bipartite networks.}
 
-\item{missing_to_zero}{logical: whether missing values should be set to zero, default is TRUE}
+\item{missing_to_zero}{Logical. If TRUE (default), treats missing edges as zeros.
+If FALSE, missing edges remain as NA.}
 }
 \value{
-an adjacency matrix of class netify
+A matrix of class "netify" (a netify matrix) with:
+\itemize{
+\item \strong{Dimensions}: \code{[n_actors x n_actors]} for unipartite networks
+or \code{[n_actors1 x n_actors2]} for bipartite networks
+\item \strong{Class}: "netify" - this is a full netify object compatible
+with all netify functions
+\item \strong{Attributes}: Metadata including network properties and
+processing parameters
+}
+
+The returned object is a netify matrix that can be used with all netify
+functions such as \code{summary()}, \code{plot()}, \code{to_igraph()}, etc.
 }
 \description{
-\code{get_adjacency} takes in a dyadic dataset and outputs an adjacency matrix representation.
+\code{get_adjacency} converts cross-sectional dyadic data into an adjacency matrix
+of class "netify". This function creates a single network matrix representing
+relationships at one point in time.
+}
+\details{
+\strong{Note on usage:}
+
+While this function is exported and available for direct use, the primary and
+recommended way to create netify objects from dyadic data is through the
+\code{netify()} function. The \code{netify()} function:
+\itemize{
+\item Provides a consistent interface for both cross-sectional and longitudinal data
+\item Includes additional data validation and preprocessing options
+\item Can incorporate nodal and dyadic attributes during creation
+\item Offers more comprehensive parameter checking
+}
+
+Use \code{get_adjacency()} directly only when you need a simple adjacency matrix
+creation without additional features.
 }
 \examples{
-
-# load example directed event data from ICEWS
-# this data comes in the form of a dyadic
-# dataframe where all dyad pairs are listed
+# Load example data
 data(icews)
 
-# subset to a particular year
-icews <- icews[icews$year=='2010', ]
+# Subset to one year for cross-sectional analysis
+icews_2010 <- icews[icews$year == 2010, ]
 
-# generate a cross sectional, directed, and weighted network
-# where the weights are verbCoop
-icews_verbCoop <- get_adjacency(
-  dyad_data=icews, actor1='i', actor2='j',
-  symmetric=FALSE, weight='verbCoop' )
-# generate a cross sectional, directed and weighted network
-# where the weights are matlConf
-icews_matlConf <- get_adjacency(
-  dyad_data=icews, actor1='i', actor2='j',
-  symmetric=FALSE, weight='matlConf' )
+# Create a directed network with verbal cooperation weights
+verbCoop_net <- get_adjacency(
+  dyad_data = icews_2010, 
+  actor1 = 'i', 
+  actor2 = 'j',
+  symmetric = FALSE, 
+  weight = 'verbCoop'
+)
 
+# Create a directed network with material conflict weights
+matlConf_net <- get_adjacency(
+  dyad_data = icews_2010, 
+  actor1 = 'i', 
+  actor2 = 'j',
+  symmetric = FALSE, 
+  weight = 'matlConf'
+)
+
+# Verify class
+class(verbCoop_net)  # "netify"
+
+# Check dimensions
+dim(verbCoop_net)
 
 }
 \author{

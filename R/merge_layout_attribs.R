@@ -2,7 +2,7 @@
 #'
 #' This function organizes `netlet` data by integrating x and y positions from `nodes_list` and
 #' connection data from `edges_list` into the node and edge data structures returned by
-#' `decompose_netlet`. It supports both cross-sectional and longitudinal data formats.
+#' `decompose_netify`. It supports both cross-sectional and longitudinal data formats.
 #'
 #' @param netlet A `netify` object containing the network data.
 #' @param nodes_list A list of data frames (or a single data frame for cross-sectional data) containing
@@ -15,9 +15,11 @@
 #' @return A list containing two data frames: `nodal_data` and `edge_data`. Each data frame incorporates
 #'         the corresponding node or edge data along with their spatial coordinates (and time indices for
 #'         longitudinal data).
+#' 
+#' @author Cassy Dorff, Shahryar Minhas
 #'
-#'
-#' @export
+#' @keywords internal
+#' @noRd
 
 merge_layout_attribs <- function(
     netlet, nodes_list, edges_list
@@ -30,7 +32,7 @@ merge_layout_attribs <- function(
 	obj_attrs <- attributes(netlet)
 
     # organize dv, dyadic, and nodal attributes in netlet
-	net_dfs = decompose_netlet( netlet ) 
+	net_dfs = decompose_netify( netlet ) 
 
 	# cross_sec
 	if(obj_attrs$netify_type == 'cross_sec'){

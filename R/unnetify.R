@@ -1,18 +1,119 @@
-#' unnetify
+#' Convert netify objects back to dyadic data frames
 #'
-#' This function converts a netify object and
-#' any associated attributes into a dyadic level
-#' data.frame
+#' `unnetify` (also available as `netify_to_df`) reverses 
+#' the netify transformation by converting network objects back into dyadic 
+#' (edge-level) data frames. This function combines network structure with any 
+#' associated nodal and dyadic attributes, creating a data frame where each row 
+#' represents a dyad (edge) with all relevant attributes attached.
+#'
+#' @param netlet A netify object to be converted to dyadic format.
+#' @param remove_zeros Logical. If TRUE, removes dyads with zero edge weights 
+#'   from the output, resulting in a data frame of only non-zero relationships. 
+#'   If FALSE (default), includes all possible dyads in the network.
+#'
+#' @return A data frame with one row per dyad containing:
+#'   \itemize{
+#'     \item \strong{from}: Name/ID of the first actor in the dyad
+#'     \item \strong{to}: Name/ID of the second actor in the dyad
+#'     \item \strong{time}: Time period (for longitudinal networks)
+#'     \item \strong{weight column}: Edge weight values (column named after 
+#'       the weight parameter used in netify)
+#'     \item \strong{from_id}: Unique identifier combining actor and time (longitudinal only)
+#'     \item \strong{to_id}: Unique identifier combining actor and time (longitudinal only)
+#'     \item \strong{Dyadic attributes}: Any edge-level covariates from the original data
+#'     \item \strong{Nodal attributes}: Actor-level covariates merged onto dyads:
+#'       \itemize{
+#'         \item For directed networks: suffixed with "_from" and "_to"
+#'         \item For undirected networks: suffixed with "_dyad"
+#'       }
+#'   }
+#'
+#' @details
+#' This function essentially reverses the netify process, making it useful for:
+#' \itemize{
+#'   \item Exporting network data for analysis in other software
+#'   \item Creating dyadic datasets for regression analysis
+#'   \item Inspecting network data in familiar data frame format
+#'   \item Merging network results back with other dyadic covariates
+#' }
 #' 
-#' @param netlet a netify object
+#' For directed networks, nodal attributes are attached twice - once for the 
+#' sender (suffixed "_from") and once for the receiver (suffixed "_to"). This 
+#' allows for modeling sender and receiver effects separately.
 #' 
-#' @param remove_zeros Logical. If TRUE, remove edges with zero values.
+#' For undirected networks, nodal attributes are attached once per dyad with 
+#' the suffix "_dyad", since there is no meaningful distinction between sender 
+#' and receiver.
 #' 
-#' @return a data.frame object
+#' The function handles both cross-sectional and longitudinal netify objects, 
+#' automatically detecting the structure and adjusting the output accordingly.
+#'
+#' @note 
+#' For large networks, setting `remove_zeros = FALSE` can result in very large 
+#' data frames, as it includes all possible dyads (n × (n-1) for directed networks 
+#' or n × (n-1) / 2 for undirected networks).
+#'
+#' @examples
+#' # Load example data
+#' data(icews)
 #' 
+#' # Create a netify object with attributes
+#' icews_10 <- icews[icews$year == 2010,]
+#' 
+#' verbCoop_net <- netify(
+#'   dyad_data = icews_10,
+#'   actor1 = 'i', actor2 = 'j',
+#'   symmetric = FALSE,
+#'   weight = 'verbCoop',
+#'   nodal_vars = c('i_polity2', 'i_log_gdp'),
+#'   dyad_vars = c('verbConf', 'matlConf')
+#' )
+#' 
+#' # Convert back to dyadic data frame
+#' dyad_df <- unnetify(verbCoop_net)
+#' 
+#' # Examine structure
+#' head(dyad_df)
+#' names(dyad_df)
+#' 
+#' # Remove zero-weight dyads for more compact output
+#' dyad_df_nonzero <- unnetify(verbCoop_net, remove_zeros = TRUE)
+#' nrow(dyad_df_nonzero)  # Much smaller than full dyadic dataset
+#' 
+#' # Note how nodal attributes are added
+#' # For directed network: _from and _to suffixes
+#' head(dyad_df[, c("from", "to", "i_polity2_from", "i_polity2_to")])
+#' 
+#' # Longitudinal example
+#' verbCoop_longit <- netify(
+#'   dyad_data = icews,
+#'   actor1 = 'i', actor2 = 'j', 
+#'   time = 'year',
+#'   symmetric = FALSE,
+#'   weight = 'verbCoop',
+#'   nodal_vars = c('i_polity2', 'i_log_gdp')
+#' )
+#' 
+#' # Convert longitudinal network
+#' dyad_df_longit <- unnetify(verbCoop_longit, remove_zeros = TRUE)
+#' 
+#' # Check time periods are included
+#' table(dyad_df_longit$time)
+#' 
+#' # Each dyad now has associated time period
+#' # Note: weight column is named after the weight variable (verbCoop)
+#' head(dyad_df_longit[, c("from", "to", "time", "verbCoop")])
+#' 
+#' # Use the output for further analysis
+#' \dontrun{
+#' # For example, regression analysis
+#' lm(verbCoop ~ i_polity2_from + i_polity2_to + verbConf, data = dyad_df)
+#' }
+#'
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
 #' @export unnetify
+#' @aliases netify_to_df
 #' 
 
 unnetify <- function(netlet, remove_zeros=FALSE){
@@ -27,7 +128,7 @@ unnetify <- function(netlet, remove_zeros=FALSE){
 
 	######################
     # get to df format
-    net_dfs = decompose_netlet( netlet, remove_zeros=remove_zeros )
+    net_dfs = decompose_netify( netlet, remove_zeros=remove_zeros )
     edge_data = net_dfs$edge_data
     nodal_data = net_dfs$nodal_data
     rm(net_dfs)
@@ -78,3 +179,7 @@ unnetify <- function(netlet, remove_zeros=FALSE){
     return(edge_data) 
 	######################        
 }
+
+#' @rdname unnetify
+#' @export
+netify_to_df <- unnetify

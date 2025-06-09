@@ -2,6 +2,7 @@
 
 #' check if dependency is installed
 #'
+#' @keywords internal
 #' @noRd
 check_dependency <- function(library_name) {
   flag <- requireNamespace(library_name, quietly = TRUE)
@@ -14,13 +15,41 @@ check_dependency <- function(library_name) {
 }
 assert_dependency <- checkmate::makeAssertionFunction(check_dependency)
 
+#' NULL-coalescing operator
+#' 
+#'
+#' @param x The primary value to check
+#' @param y The fallback value to use if x is NULL
+#'
+#' @return Returns x if x is not NULL, otherwise returns y
+#'
+#' @examples
+#' # Not run (internal function):
+#' # x %||% y  # returns x if x is not NULL, otherwise y
+#' # NULL %||% "default"  # returns "default"
+#' # "value" %||% "default"  # returns "value"
+#'
+#' @author Shahryar Minhas
+#' 
+#' @keywords internal
+#' @noRd
+`%||%` <- function(x, y) { 
+    if (is.null(x)) {
+        y
+    } else {
+        x
+    } 
+}
+
 #' char
 #'
 #' Converts values into characters
 #' @param x vector
 #' @return character vector
 #' @author Shahryar Minhas
-
+#' 
+#' @keywords internal
+#' @noRd
 char <- function(x){
 	as.character(x)
 }
@@ -32,7 +61,9 @@ char <- function(x){
 #' @param x vector
 #' @return numeric vector
 #' @author Shahryar Minhas
-
+#' 
+#' @keywords internal
+#' @noRd
 num <- function(x){
 	as.numeric(char(x))
 }
@@ -44,7 +75,9 @@ num <- function(x){
 #' @param ... vector inputs
 #' @return numeric vector
 #' @author Shahryar Minhas
-
+#' 
+#' @keywords internal
+#' @noRd
 unique_vector <- function(...){
 	u_vec <- unique(c(...))
 	u_vec <- sort(u_vec)
@@ -57,7 +90,9 @@ unique_vector <- function(...){
 #' @param ... objects to check
 #' @return logical indicating whether objects are identical
 #' @author Shahryar Minhas
-
+#' 
+#' @keywords internal
+#' @noRd
 identical_recursive <- function(...){
 
     # org objects to compare
@@ -88,7 +123,9 @@ identical_recursive <- function(...){
 #' @return a character vector of the extracted strings
 #' 
 #' @author Shahryar Minhas
-
+#' 
+#' @keywords internal
+#' @noRd
 split_string <- function(
 	string_to_split, break_by, to_extract, fixed=TRUE){
     str_to_list <- strsplit(string_to_split, break_by, fixed=fixed)
@@ -103,8 +140,9 @@ split_string <- function(
 #' @param preserveAttr logical indicating whether to preserve attributes
 #' @return list object
 #' @author Shahryar Minhas
-#' @export
-
+#' 
+#' @keywords internal
+#' @noRd
 array_to_list <- function(arr, preserveAttr=TRUE){
 
 	# convert to list elements along third mode
@@ -144,8 +182,9 @@ array_to_list <- function(arr, preserveAttr=TRUE){
 #' @param list_of_mats list object
 #' @return three dimensional array
 #' @author Shahryar Minhas
-#' @export
-
+#' 
+#' @keywords internal
+#' @noRd
 list_to_array <- function(list_of_mats){
 
 	# get dim info to create array
@@ -168,34 +207,4 @@ list_to_array <- function(list_of_mats){
 
 	#
 	return(arr)
-}
-
-
-#' gen_symm_id
-#' 
-#' This function creates a symmetric id 
-#' for a given pair of actors
-#' @param dyad_data dyadic data.frame object
-#' @param actor1 name of actor1 column
-#' @param actor2 name of actor2 column
-#' @param time name of time column if relevant
-#' @return a vector of symmetric ids that can be added back to the data.frame object
-#' @author Shahryar Minhas
-#' @export
-#' 
-
-gen_symm_id <- function(
-	dyad_data, actor1, actor2, time=NULL
-){
-	symm_id <- apply(
-		dyad_data, 1, 
-		function(x){
-			actors <- x[c(actor1, actor2)]
-			actors <- sort(actors)
-			out <- paste(actors, collapse='_')
-			if(!is.null(time)){
-				out <- paste(out, x[time], sep='_')
-			}
-			return(out) } )
-	return(symm_id)
 }

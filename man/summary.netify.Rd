@@ -2,75 +2,143 @@
 % Please edit documentation in R/summary.netify.R
 \name{summary.netify}
 \alias{summary.netify}
-\title{Summary method to get graph level statistics for netify objects}
+\title{Calculate graph-level statistics for netify objects}
 \usage{
 \method{summary}{netify}(object, ...)
 }
 \arguments{
-\item{object}{An object of class netify, which should have been created using the function \code{netify}. This object contains the network data structured for analysis.}
+\item{object}{A netify object containing network data}
 
-\item{...}{Additional parameters which can include user-defined statistical functions. These functions should take a matrix as input and return a scalar value. They will be applied to each network slice individually if the netify object represents longitudinal data.
-\itemize{
-\item \code{other_stats}: A named list of functions that take a matrix and return additional actor-level statistics to be included in the output. Each function should accept a matrix as input and return a vector or single value per actor. This allows for the inclusion of custom metrics in the summary output.
+\item{...}{Additional arguments, including:
+\describe{
+\item{\code{other_stats}}{Named list of custom functions to calculate
+additional graph-level statistics. Each function should accept a matrix
+and return a named vector of scalar values.}
 }}
 }
 \value{
-A data frame where each row represents the network-level statistics for a single network or a single time point in a longitudinal study. Depending on the network type and data attributes, the columns can include:
-\itemize{
-\item \code{num_actors}: Number of actors in the network - for bipartite networks number of row and column actors are reported separately.
-\item \code{density}: The proportion of possible connections that are actual connections within the network.
-\item \code{num_edges}: The total number of edges in the network (does not take edge weight into account).
-\item \code{mean_edge_weight}: The average weight of edges in the network, provided only for weighted networks.
-\item \code{sd_edge_weight}: The standard deviation of edge weights in the network, provided only for weighted networks.
-\item \code{median_edge_weight}: The median edge weight in the network, provided only for weighted networks.
-\item \code{prop_edges_missing}: The proportion of potential edges that are missing.
-\item \code{min_edge_weight} and \code{max_edge_weight}: The minimum and maximum edge weights observed in the network, provided only for weighted networks.
-\item \code{competition_row} and \code{competition_col} (defaults to \code{competition} for undirected networks): Measures network competitiveness using the Herfindahl-Hirschman Index (HHI), defined as \eqn{\sum_{i=1}^{n} (s_i)^2}, where \eqn{s_i} is the proportion of interactions by actor \eqn{i} and \eqn{n} is the total number of actors. The index ranges from 1/n (indicating high diversity and competitive interaction across actors) to 1 (one actor dominates all interactions). Refer to Dorff, Gallop, & Minhas (2023) for an application of this measure in conflict networks.
-\item \code{sd_of_row_means} and \code{sd_of_col_means}: Standard deviations of the sending and receiving effects (row and column means). These statistics are meant to describe the variability in actor behavior across the network.
-\item \code{covar_of_row_col_means}: The covariance between sending and receiving effects, always takes weights into account and is only calculated for unipartite networks.
-\item \code{reciprocity}: The reciprocity of the network, defined as the correlation between the adjacency matrix and its transpose, always takes weights into account and is only calculated for unipartite networks.
-\item \code{transitivity}: The overall transitivity or clustering coefficient of the network, reflecting the likelihood that two neighbors of a node are connected (calculated using \code{transitivity} function from \code{igraph}).
+A data frame with one row per network/time period containing:
+
+\strong{Basic network properties:}
+\describe{
+\item{\code{net}}{Network/time identifier}
+\item{\code{layer}}{Layer name (for multilayer networks)}
+\item{\code{num_actors}}{Number of actors (or \code{num_row_actors} and
+\code{num_col_actors} for bipartite networks)}
+\item{\code{density}}{Proportion of possible ties that exist}
+\item{\code{num_edges}}{Total number of edges (unweighted count)}
+\item{\code{prop_edges_missing}}{Proportion of potential edges that are NA}
+}
+
+\strong{For weighted networks only:}
+\describe{
+\item{\code{mean_edge_weight}}{Average weight of existing edges}
+\item{\code{sd_edge_weight}}{Standard deviation of edge weights}
+\item{\code{median_edge_weight}}{Median edge weight}
+\item{\code{min_edge_weight}, \code{max_edge_weight}}{Range of edge weights}
+}
+
+\strong{Structural measures:}
+\describe{
+\item{\code{competition} (or \code{competition_row}/\code{competition_col})}{
+Herfindahl-Hirschman Index measuring concentration of ties. Calculated as
+\eqn{\sum_{i=1}^{n} (s_i)^2} where \eqn{s_i} is actor i's share of total
+ties. Ranges from 1/n (equal distribution) to 1 (one actor has all ties).}
+\item{\code{sd_of_actor_means} (or \code{sd_of_row_means}/\code{sd_of_col_means})}{
+Standard deviation of actors' average tie strengths, measuring heterogeneity
+in actor activity levels}
+\item{\code{transitivity}}{Global clustering coefficient (probability that
+two neighbors of a node are connected)}
+}
+
+\strong{For directed networks only:}
+\describe{
+\item{\code{covar_of_row_col_means}}{Covariance between actors' sending and
+receiving patterns}
+\item{\code{reciprocity}}{Correlation between adjacency matrix and its
+transpose, measuring tendency for mutual ties}
 }
 }
 \description{
-\code{summary.netify} processes a netify object to calculate and return a data frame of graph-level statistics. This function is designed to work with both cross-sectional and longitudinal netify data structures, providing a comprehensive overview of network characteristics such as density, reciprocity, and standard deviations of sending and receiving effects.
+Computes comprehensive graph-level statistics for netify objects, including
+density, reciprocity, centralization measures, and custom metrics. Handles
+cross-sectional and longitudinal networks, as well as multilayer structures.
 }
 \details{
-This function is especially useful to simplify the process of extracting key network statistics across multiple networks in a netify object. It is capable of handling both weighted and unweighted networks and adjusts its calculations based on the nature of the network data (cross-sectional vs. longitudinal).
+The function automatically adapts calculations based on network properties:
+\itemize{
+\item \strong{Bipartite networks}: Reports row and column actors separately
+\item \strong{Directed networks}: Calculates separate statistics for in/out ties
+\item \strong{Weighted networks}: Includes weight-based statistics
+\item \strong{Multilayer networks}: Processes each layer independently
+\item \strong{Longitudinal networks}: Calculates statistics for each time period
+}
+
+\strong{Competition Index Interpretation:}
+
+The competition measure (HHI) captures how concentrated network ties are among
+actors. Low values indicate distributed activity across many actors (competitive),
+while high values indicate concentration among few actors (monopolistic). This
+is particularly useful for analyzing power dynamics or resource distribution in
+networks.
+
+\strong{Custom Statistics:}
+
+Add custom graph-level metrics using the \code{other_stats} parameter:
+
+\preformatted{
+# Example: Community detection
+modularity_stat <- function(mat) {
+  g <- netify_to_igraph(mat)
+  comm <- igraph::cluster_walktrap(g)
+  c(modularity = igraph::modularity(comm),
+    n_communities = length(unique(comm$membership)))
+}
+
+summary(net, other_stats = list(community = modularity_stat))
+}
+}
+\note{
+For large longitudinal or multilayer networks, computation can be intensive.
+Consider using \code{\link{subset_netify}} to analyze specific time periods
+or layers.
+
+Missing edges (NA values) are excluded from density calculations but tracked
+in the \code{prop_edges_missing} statistic.
 }
 \examples{
-
-# load icews data
+# Load example data
 data(icews)
 
-# create netlet
-netlet = netify(
-    dyad_data=icews, actor1='i', actor2='j',
-    time = 'year', symmetric=FALSE, weight='verbCoop' )
+# Basic usage
+net <- netify(
+  icews, 
+  actor1 = 'i', actor2 = 'j', time = 'year',
+  symmetric = FALSE, 
+  weight = 'verbCoop'
+)
 
-# calculate default summary stats
-summ_graph = summary(netlet)
-head(summ_graph)
+# get summary
+summary(net)
 
-# add custom summary stat
-spinglass_ig = function(mat){
-    g = prep_for_igraph(mat)
-    comm = igraph::cluster_spinglass(g)
-    num_comm = length(comm$csize)
-    return( c(
-        num_comm=num_comm,
-        comm_modul = comm$modularity
-    ) )
+\dontrun{
+# Add custom statistics - community detection
+comm_stats <- function(mat) {
+  g <- netify_to_igraph(mat)
+  comm <- igraph::cluster_spinglass(g)
+  c(n_communities = length(comm$csize),
+    modularity = comm$modularity)
 }
 
-# since calculating communities can be intensive
-# lets take subset of time periods
-sub_net = subset_netlet(netlet, when_to_subset = as.character(2013:2014))
+# Apply to subset for efficiency
+sub_net <- subset_netify(net, time = as.character(2013:2014))
+summary(sub_net, other_stats = list(community = comm_stats))
+}
 
-# feed custom summary stat into summary
-summary(sub_net, 
-    other_stats=list(spinglass_ig=spinglass_ig)) 
-
+}
+\references{
+Dorff, C., Gallop, M., & Minhas, S. (2023). "Networks of violence: Predicting
+conflict in Nigeria." \emph{Journal of Politics}, 85(1).
 }
 \author{
 Cassy Dorff, Shahryar Minhas
