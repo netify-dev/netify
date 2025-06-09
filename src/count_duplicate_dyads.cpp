@@ -11,7 +11,8 @@ using namespace Rcpp;
 //' @return an integer count of number of duplicate dyads
 //' @author Shahryar Minhas
 //'
-//' @export count_duplicate_dyads
+//' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
 int count_duplicate_dyads(
   CharacterVector actor1, 
@@ -60,7 +61,8 @@ int count_duplicate_dyads(
 //' @return an integer count of number of duplicate dyads
 //' @author Shahryar Minhas
 //'
-//' @export count_duplicate_dyads_indexed
+//' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
 int count_duplicate_dyads_indexed(
   CharacterVector actor1, 

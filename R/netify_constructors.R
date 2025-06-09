@@ -7,23 +7,10 @@
 #' @author Colin Henry
 #' @keywords netify
 #' @export is_netify
-#' @aliases is.netify is_netlet is.netlet
 
 is_netify <- function(x) {
   "netify" %in% class(x)
 }
-
-#' @rdname is_netify
-#' @export
-is.netify <- is_netify
-
-#' @rdname is_netify
-#' @export
-is_netlet <- is_netify
-
-#' @rdname is_netify
-#' @export
-is.netlet <- is_netify
 ########################################
 
 ########################################
@@ -138,7 +125,6 @@ netify_check <- function(netlet) {
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
 #' @export new_netify
-#' @aliases new_netlet
 
 new_netify <- function(data, ...) {
 
@@ -452,10 +438,6 @@ new_netify <- function(data, ...) {
   #
   return(out)
 }
-
-#' @rdname new_netify
-#' @export
-new_netlet <- new_netify
 ########################################
 
 ########################################

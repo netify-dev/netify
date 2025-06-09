@@ -2,18 +2,9 @@
 % Please edit documentation in R/netify_constructors.R
 \name{is_netify}
 \alias{is_netify}
-\alias{is.netify}
-\alias{is_netlet}
-\alias{is.netlet}
 \title{Is this object a netify object?}
 \usage{
 is_netify(x)
-
-is.netify(x)
-
-is_netlet(x)
-
-is.netlet(x)
 }
 \arguments{
 \item{x}{An R object}

@@ -9,7 +9,8 @@
 #' @return an integer count of number of duplicate dyads
 #' @author Shahryar Minhas
 #'
-#' @export count_duplicate_dyads
+#' @keywords internal
+#' @noRd
 count_duplicate_dyads <- function(actor1, actor2, time) {
     .Call(`_netify_count_duplicate_dyads`, actor1, actor2, time)
 }
@@ -23,7 +24,8 @@ count_duplicate_dyads <- function(actor1, actor2, time) {
 #' @return an integer count of number of duplicate dyads
 #' @author Shahryar Minhas
 #'
-#' @export count_duplicate_dyads_indexed
+#' @keywords internal
+#' @noRd
 count_duplicate_dyads_indexed <- function(actor1, actor2, time) {
     .Call(`_netify_count_duplicate_dyads_indexed`, actor1, actor2, time)
 }
@@ -43,7 +45,8 @@ count_duplicate_dyads_indexed <- function(actor1, actor2, time) {
 #' @return an adjacency matrix
 #' @author Shahryar Minhas, Ha Eun Choi
 #'
-#' @export get_matrix
+#' @keywords internal
+#' @noRd
 get_matrix <- function(n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric, missing_to_zero = TRUE, diag_to_NA = TRUE) {
     .Call(`_netify_get_matrix`, n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric, missing_to_zero, diag_to_NA)
 }
@@ -63,7 +66,8 @@ get_matrix <- function(n_rows, n_cols, actors_rows, actors_cols, matRowIndices, 
 #' @return an integer adjacency matrix
 #' @author Shahryar Minhas, Ha Eun Choi
 #'
-#' @export get_matrix_integer
+#' @keywords internal
+#' @noRd
 get_matrix_integer <- function(n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric, missing_to_zero = TRUE, diag_to_NA = TRUE) {
     .Call(`_netify_get_matrix_integer`, n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric, missing_to_zero, diag_to_NA)
 }
@@ -83,7 +87,8 @@ get_matrix_integer <- function(n_rows, n_cols, actors_rows, actors_cols, matRowI
 #' @return a logical adjacency matrix
 #' @author Shahryar Minhas, Ha Eun Choi
 #'
-#' @export get_matrix_logical
+#' @keywords internal
+#' @noRd
 get_matrix_logical <- function(n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric, missing_to_zero = TRUE, diag_to_NA = TRUE) {
     .Call(`_netify_get_matrix_logical`, n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric, missing_to_zero, diag_to_NA)
 }
@@ -103,7 +108,8 @@ get_matrix_logical <- function(n_rows, n_cols, actors_rows, actors_cols, matRowI
 #' @return a character adjacency matrix
 #' @author Shahryar Minhas, Ha Eun Choi
 #'
-#' @export get_matrix_character
+#' @keywords internal
+#' @noRd
 get_matrix_character <- function(n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric, missing_to_zero = TRUE, diag_to_NA = TRUE) {
     .Call(`_netify_get_matrix_character`, n_rows, n_cols, actors_rows, actors_cols, matRowIndices, matColIndices, value, symmetric, missing_to_zero, diag_to_NA)
 }
@@ -123,7 +129,8 @@ get_matrix_character <- function(n_rows, n_cols, actors_rows, actors_cols, matRo
 #' @return a list of adjacency matrices
 #' @author Shahryar Minhas, Ha Eun Choi
 #'
-#' @export get_matrix_batch
+#' @keywords internal
+#' @noRd
 get_matrix_batch <- function(n_rows_vec, n_cols_vec, actors_rows_list, actors_cols_list, matRowIndices_list, matColIndices_list, value_list, symmetric, missing_to_zero = TRUE, diag_to_NA = TRUE) {
     .Call(`_netify_get_matrix_batch`, n_rows_vec, n_cols_vec, actors_rows_list, actors_cols_list, matRowIndices_list, matColIndices_list, value_list, symmetric, missing_to_zero, diag_to_NA)
 }

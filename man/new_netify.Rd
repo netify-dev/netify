@@ -2,12 +2,9 @@
 % Please edit documentation in R/netify_constructors.R
 \name{new_netify}
 \alias{new_netify}
-\alias{new_netlet}
 \title{Low-level constructor for netify objects}
 \usage{
 new_netify(data, ...)
-
-new_netlet(data, ...)
 }
 \arguments{
 \item{data}{A network data structure to convert:

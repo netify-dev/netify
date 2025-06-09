@@ -16,9 +16,9 @@ using namespace Rcpp;
 //' @return an adjacency matrix
 //' @author Shahryar Minhas, Ha Eun Choi
 //'
-//' @export get_matrix
+//' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
-
 NumericMatrix get_matrix(
     int n_rows,
     int n_cols,
@@ -81,9 +81,6 @@ NumericMatrix get_matrix(
 }
 
 
-#include <Rcpp.h>
-using namespace Rcpp;
-
 //' This function fills in an adjacency matrix based on actors and data (INTEGER VERSION)
 //'
 //' @param n_rows integer specifying number of row actors
@@ -99,7 +96,8 @@ using namespace Rcpp;
 //' @return an integer adjacency matrix
 //' @author Shahryar Minhas, Ha Eun Choi
 //'
-//' @export get_matrix_integer
+//' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
 IntegerMatrix get_matrix_integer(
     int n_rows,
@@ -177,7 +175,8 @@ IntegerMatrix get_matrix_integer(
 //' @return a logical adjacency matrix
 //' @author Shahryar Minhas, Ha Eun Choi
 //'
-//' @export get_matrix_logical
+//' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
 LogicalMatrix get_matrix_logical(
     int n_rows,
@@ -255,7 +254,8 @@ LogicalMatrix get_matrix_logical(
 //' @return a character adjacency matrix
 //' @author Shahryar Minhas, Ha Eun Choi
 //'
-//' @export get_matrix_character
+//' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
 CharacterMatrix get_matrix_character(
     int n_rows,
@@ -334,9 +334,9 @@ CharacterMatrix get_matrix_character(
 //' @return a list of adjacency matrices
 //' @author Shahryar Minhas, Ha Eun Choi
 //'
-//' @export get_matrix_batch
+//' @keywords internal
+//' @noRd
 // [[Rcpp::export]]
-
 List get_matrix_batch(
     IntegerVector n_rows_vec,
     IntegerVector n_cols_vec,
