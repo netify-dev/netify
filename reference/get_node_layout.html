@@ -96,7 +96,8 @@ period gets its own optimized layout.</p></dd>
 <dt id="arg-which-static">which_static<a class="anchor" aria-label="anchor" href="#arg-which-static"></a></dt>
 <dd><p>Integer specifying which time period's layout to use as the
 static template when static_actor_positions is TRUE. If NULL (default), creates
-a static layout based on the aggregated network across all time periods.</p></dd>
+a static layout based on the union of all edges across time periods, giving
+more weight to persistent edges.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -127,8 +128,9 @@ which may better reveal structural changes but makes visual comparison harder</p
 <li><p><strong>Static layouts</strong>: All time periods use the same node positions,
 facilitating visual comparison of network evolution</p></li>
 </ul><p>When using static layouts with which_static = NULL, the function creates a
-composite layout based on the aggregated network structure across all time periods
-(summed for binary networks, averaged for weighted networks).</p>
+composite layout based on the union of all edges across time periods. Edges
+that appear more frequently are given higher weight, producing layouts that
+emphasize the stable core structure of the network.</p>
 <p><strong>Bipartite networks:</strong></p>
 <p>For bipartite networks, the default layout arranges the two node sets in separate
 columns.</p>

@@ -85,8 +85,6 @@ are removed from the edge data frame. If FALSE, zero-weight edges are retained.<
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The function helpful for:</p>
 <p><strong>Edge data processing:</strong></p><ul><li><p>Extracts the adjacency matrix (or array for longitudinal networks) from the netify object</p></li>
-<li><p>Converts it to long format using reshape2::melt</p></li>
-<li><p>Removes self-loops (edges where source equals target)</p></li>
 <li><p>Optionally removes zero-weight edges based on the remove_zeros parameter</p></li>
 <li><p>Merges any dyadic variables stored in the netify object</p></li>
 <li><p>Renames columns to standardized names (from, to, time)</p></li>
@@ -138,12 +136,12 @@ variables remain in the nodal data frame.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ time: chr [1:152] "1" "1" "1" "1" ...</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">decomposed_cs</span><span class="op">$</span><span class="va">edge_data</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        from          to time verbCoop</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   Albania Afghanistan    1        5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   Algeria Afghanistan    1        5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 Argentina Afghanistan    1        2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   Armenia Afghanistan    1       10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7 Australia Afghanistan    1      200</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   Austria Afghanistan    1        2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   Albania Afghanistan    1        5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   Algeria Afghanistan    1        5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 Argentina Afghanistan    1        2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   Armenia Afghanistan    1       10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 Australia Afghanistan    1      200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   Austria Afghanistan    1        2</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">decomposed_cs</span><span class="op">$</span><span class="va">nodal_data</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          name time</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 Afghanistan    1</span>

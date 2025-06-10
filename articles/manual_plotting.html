@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2025-06-09</h4>
+            <h4 data-toc-skip class="date">2025-06-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/manual_plotting.Rmd" class="external-link"><code>vignettes/manual_plotting.Rmd</code></a></small>
       <div class="d-none name"><code>manual_plotting.Rmd</code></div>
@@ -167,62 +167,62 @@ frames that can be passed to <code>ggplot2</code>.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">net_dfs</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## List of 2</span></span>
 <span><span class="co">##  $ edge_data :'data.frame':  12937 obs. of  11 variables:</span></span>
-<span><span class="co">##   ..$ from    : chr [1:12937] "Australia" "Australia" "Australia" "Australia" ...</span></span>
-<span><span class="co">##   ..$ to      : chr [1:12937] "Brazil" "Brazil" "Brazil" "Brazil" ...</span></span>
-<span><span class="co">##   ..$ time    : chr [1:12937] "2002" "2003" "2004" "2005" ...</span></span>
-<span><span class="co">##   ..$ verbCoop: num [1:12937] 3 3 24 27 54 4 26 7 12 5 ...</span></span>
-<span><span class="co">##   ..$ matlCoop: int [1:12937] 0 1 0 0 0 0 0 0 1 0 ...</span></span>
-<span><span class="co">##   ..$ verbConf: int [1:12937] 0 2 0 2 3 0 2 1 0 0 ...</span></span>
-<span><span class="co">##   ..$ matlConf: int [1:12937] 0 0 2 0 1 0 0 0 0 0 ...</span></span>
-<span><span class="co">##   ..$ x1      : num [1:12937] -3.187 -0.3978 -0.0496 -0.3853 -0.5135 ...</span></span>
-<span><span class="co">##   ..$ y1      : num [1:12937] 2.535 -1.3386 0.0651 0.9399 1.4266 ...</span></span>
-<span><span class="co">##   ..$ x2      : num [1:12937] -2.9515 -0.0649 -0.0429 -0.2949 -0.3298 ...</span></span>
-<span><span class="co">##   ..$ y2      : num [1:12937] 2.315 -1.441 -0.148 1.045 1.485 ...</span></span>
+<span><span class="co">##   ..$ from    : chr [1:12937] "Brazil" "Canada" "Chile" "China" ...</span></span>
+<span><span class="co">##   ..$ to      : chr [1:12937] "Australia" "Australia" "Australia" "Australia" ...</span></span>
+<span><span class="co">##   ..$ time    : chr [1:12937] "2002" "2002" "2002" "2002" ...</span></span>
+<span><span class="co">##   ..$ verbCoop: num [1:12937] 5 31 1 518 2 13 22 34 42 483 ...</span></span>
+<span><span class="co">##   ..$ matlCoop: num [1:12937] 0 1 0 6 0 0 1 1 0 6 ...</span></span>
+<span><span class="co">##   ..$ verbConf: num [1:12937] 0 1 1 12 0 1 2 1 0 114 ...</span></span>
+<span><span class="co">##   ..$ matlConf: num [1:12937] 0 2 1 12 0 0 0 4 13 54 ...</span></span>
+<span><span class="co">##   ..$ x1      : num [1:12937] -2.95 -2.9 -3.15 -3.09 -2.83 ...</span></span>
+<span><span class="co">##   ..$ y1      : num [1:12937] 2.32 2.62 2.22 2.53 2.39 ...</span></span>
+<span><span class="co">##   ..$ x2      : num [1:12937] -3.19 -3.19 -3.19 -3.19 -3.19 ...</span></span>
+<span><span class="co">##   ..$ y2      : num [1:12937] 2.54 2.54 2.54 2.54 2.54 ...</span></span>
 <span><span class="co">##  $ nodal_data:'data.frame':  442 obs. of  10 variables:</span></span>
 <span><span class="co">##   ..$ name      : chr [1:442] "Australia" "Australia" "Australia" "Australia" ...</span></span>
 <span><span class="co">##   ..$ time      : chr [1:442] "2002" "2003" "2004" "2005" ...</span></span>
 <span><span class="co">##   ..$ i_polity2 : int [1:442] 10 10 10 10 10 10 10 10 10 10 ...</span></span>
 <span><span class="co">##   ..$ i_log_gdp : num [1:442] 27.6 27.6 27.6 27.7 27.7 ...</span></span>
 <span><span class="co">##   ..$ i_log_pop : num [1:442] 16.8 16.8 16.8 16.8 16.8 ...</span></span>
-<span><span class="co">##   ..$ x         : num [1:442] -3.187 -0.3978 -0.0496 -0.3853 -0.5135 ...</span></span>
-<span><span class="co">##   ..$ y         : num [1:442] 2.535 -1.3386 0.0651 0.9399 1.4266 ...</span></span>
+<span><span class="co">##   ..$ x         : num [1:442] -3.187 -0.0567 -1.115 0.4053 4.7545 ...</span></span>
+<span><span class="co">##   ..$ y         : num [1:442] 2.535 0.445 -3.669 0.282 1.836 ...</span></span>
 <span><span class="co">##   ..$ name_text : chr [1:442] "Australia" "Australia" "Australia" "Australia" ...</span></span>
 <span><span class="co">##   ..$ name_label: chr [1:442] "Australia" "Australia" "Australia" "Australia" ...</span></span>
 <span><span class="co">##   ..$ id        : chr [1:442] "Australia_2002" "Australia_2003" "Australia_2004" "Australia_2005" ...</span></span></code></pre>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check the first few rows of the edge data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">net_dfs</span><span class="op">$</span><span class="va">edge_data</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##        from     to time verbCoop matlCoop verbConf matlConf          x1</span></span>
-<span><span class="co">## 1 Australia Brazil 2002        3        0        0        0 -3.18695808</span></span>
-<span><span class="co">## 2 Australia Brazil 2003        3        1        2        0 -0.39782446</span></span>
-<span><span class="co">## 3 Australia Brazil 2004       24        0        0        2 -0.04957632</span></span>
-<span><span class="co">## 4 Australia Brazil 2005       27        0        2        0 -0.38526735</span></span>
-<span><span class="co">## 5 Australia Brazil 2006       54        0        3        1 -0.51353531</span></span>
-<span><span class="co">## 6 Australia Brazil 2007        4        0        0        0 -0.69085788</span></span>
-<span><span class="co">##            y1          x2         y2</span></span>
-<span><span class="co">## 1  2.53500179 -2.95152256  2.3151148</span></span>
-<span><span class="co">## 2 -1.33861627 -0.06486153 -1.4411348</span></span>
-<span><span class="co">## 3  0.06513246 -0.04293486 -0.1479501</span></span>
-<span><span class="co">## 4  0.93989844 -0.29488038  1.0449019</span></span>
-<span><span class="co">## 5  1.42660061 -0.32983771  1.4847187</span></span>
-<span><span class="co">## 6  1.79965809 -0.86547402  1.7542202</span></span></code></pre>
+<pre><code><span><span class="co">##       from        to time verbCoop matlCoop verbConf matlConf        x1</span></span>
+<span><span class="co">## 1   Brazil Australia 2002        5        0        0        0 -2.951523</span></span>
+<span><span class="co">## 2   Canada Australia 2002       31        1        1        2 -2.895578</span></span>
+<span><span class="co">## 3    Chile Australia 2002        1        0        1        1 -3.150793</span></span>
+<span><span class="co">## 4    China Australia 2002      518        6       12       12 -3.088811</span></span>
+<span><span class="co">## 5 Colombia Australia 2002        2        0        0        0 -2.832835</span></span>
+<span><span class="co">## 6    Egypt Australia 2002       13        0        1        0 -2.962405</span></span>
+<span><span class="co">##         y1        x2       y2</span></span>
+<span><span class="co">## 1 2.315115 -3.186958 2.535002</span></span>
+<span><span class="co">## 2 2.616097 -3.186958 2.535002</span></span>
+<span><span class="co">## 3 2.222567 -3.186958 2.535002</span></span>
+<span><span class="co">## 4 2.532826 -3.186958 2.535002</span></span>
+<span><span class="co">## 5 2.394330 -3.186958 2.535002</span></span>
+<span><span class="co">## 6 2.626167 -3.186958 2.535002</span></span></code></pre>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check the first few rows of the nodal data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">net_dfs</span><span class="op">$</span><span class="va">nodal_data</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##        name time i_polity2 i_log_gdp i_log_pop           x           y</span></span>
-<span><span class="co">## 1 Australia 2002        10  27.55492  16.78568 -3.18695808  2.53500179</span></span>
-<span><span class="co">## 2 Australia 2003        10  27.58556  16.79718 -0.39782446 -1.33861627</span></span>
-<span><span class="co">## 3 Australia 2004        10  27.62686  16.80787 -0.04957632  0.06513246</span></span>
-<span><span class="co">## 4 Australia 2005        10  27.65791  16.82005 -0.38526735  0.93989844</span></span>
-<span><span class="co">## 5 Australia 2006        10  27.68495  16.83354 -0.51353531  1.42660061</span></span>
-<span><span class="co">## 6 Australia 2007        10  27.72203  16.85179 -0.69085788  1.79965809</span></span>
-<span><span class="co">##   name_text name_label             id</span></span>
-<span><span class="co">## 1 Australia  Australia Australia_2002</span></span>
-<span><span class="co">## 2 Australia  Australia Australia_2003</span></span>
-<span><span class="co">## 3 Australia  Australia Australia_2004</span></span>
-<span><span class="co">## 4 Australia  Australia Australia_2005</span></span>
-<span><span class="co">## 5 Australia  Australia Australia_2006</span></span>
-<span><span class="co">## 6 Australia  Australia Australia_2007</span></span></code></pre>
+<pre><code><span><span class="co">##         name time i_polity2 i_log_gdp i_log_pop           x          y</span></span>
+<span><span class="co">## 79 Australia 2002        10  27.55492  16.78568 -3.18695808  2.5350018</span></span>
+<span><span class="co">## 80 Australia 2003        10  27.58556  16.79718 -0.05666548  0.4452790</span></span>
+<span><span class="co">## 81 Australia 2004        10  27.62686  16.80787 -1.11499738 -3.6691981</span></span>
+<span><span class="co">## 82 Australia 2005        10  27.65791  16.82005  0.40527329  0.2821195</span></span>
+<span><span class="co">## 83 Australia 2006        10  27.68495  16.83354  4.75445819  1.8357027</span></span>
+<span><span class="co">## 84 Australia 2007        10  27.72203  16.85179 -0.95933985 -0.8500965</span></span>
+<span><span class="co">##    name_text name_label             id</span></span>
+<span><span class="co">## 79 Australia  Australia Australia_2002</span></span>
+<span><span class="co">## 80 Australia  Australia Australia_2003</span></span>
+<span><span class="co">## 81 Australia  Australia Australia_2004</span></span>
+<span><span class="co">## 82 Australia  Australia Australia_2005</span></span>
+<span><span class="co">## 83 Australia  Australia Australia_2006</span></span>
+<span><span class="co">## 84 Australia  Australia Australia_2007</span></span></code></pre>
 <p>The <code>x</code> and <code>y</code> in <code>nodal_data</code> and
 the <code>x1</code>, <code>y1</code>, <code>x2</code>, and
 <code>y2</code> in <code>edge_data</code> are the coordinates of the
@@ -285,36 +285,36 @@ use the <code>mds</code> algorithm instead:</p>
 <span><span class="co"># see new x-y coordinates</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">plot_data_mds</span><span class="op">$</span><span class="va">net_dfs</span>, <span class="va">head</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $edge_data</span></span>
-<span><span class="co">##        from     to time verbCoop matlCoop verbConf matlConf          x1</span></span>
-<span><span class="co">## 1 Australia Brazil 2002        3        0        0        0 -0.35485450</span></span>
-<span><span class="co">## 2 Australia Brazil 2003        3        1        2        0  0.20857397</span></span>
-<span><span class="co">## 3 Australia Brazil 2004       24        0        0        2 -0.04224981</span></span>
-<span><span class="co">## 4 Australia Brazil 2005       27        0        2        0 -0.06014447</span></span>
-<span><span class="co">## 5 Australia Brazil 2006       54        0        3        1  0.15073774</span></span>
-<span><span class="co">## 6 Australia Brazil 2007        4        0        0        0 -0.03161665</span></span>
+<span><span class="co">##       from        to time verbCoop matlCoop verbConf matlConf          x1</span></span>
+<span><span class="co">## 1   Brazil Australia 2002        5        0        0        0 -0.72811128</span></span>
+<span><span class="co">## 2   Canada Australia 2002       31        1        1        2 -0.03316817</span></span>
+<span><span class="co">## 3    Chile Australia 2002        1        0        1        1 -0.65201941</span></span>
+<span><span class="co">## 4    China Australia 2002      518        6       12       12 -0.03316817</span></span>
+<span><span class="co">## 5 Colombia Australia 2002        2        0        0        0 -1.22997412</span></span>
+<span><span class="co">## 6    Egypt Australia 2002       13        0        1        0  0.36325222</span></span>
 <span><span class="co">##            y1         x2         y2</span></span>
-<span><span class="co">## 1 -0.16803048 -0.7281113  0.3619659</span></span>
-<span><span class="co">## 2 -0.12705283  0.2552975 -0.1025320</span></span>
-<span><span class="co">## 3  0.05123628  0.2101186  0.9327511</span></span>
-<span><span class="co">## 4 -0.02708750  0.4552562  0.1927606</span></span>
-<span><span class="co">## 5  0.46114648  0.1278155  0.3895673</span></span>
-<span><span class="co">## 6 -0.03885021 -0.3606698  0.8028908</span></span>
+<span><span class="co">## 1  0.36196590 -0.3548545 -0.1680305</span></span>
+<span><span class="co">## 2 -0.05312512 -0.3548545 -0.1680305</span></span>
+<span><span class="co">## 3  0.27166650 -0.3548545 -0.1680305</span></span>
+<span><span class="co">## 4 -0.05312512 -0.3548545 -0.1680305</span></span>
+<span><span class="co">## 5 -0.06398966 -0.3548545 -0.1680305</span></span>
+<span><span class="co">## 6  0.13977670 -0.3548545 -0.1680305</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $nodal_data</span></span>
-<span><span class="co">##        name time i_polity2 i_log_gdp i_log_pop           x           y</span></span>
-<span><span class="co">## 1 Australia 2002        10  27.55492  16.78568 -0.35485450 -0.16803048</span></span>
-<span><span class="co">## 2 Australia 2003        10  27.58556  16.79718  0.20857397 -0.12705283</span></span>
-<span><span class="co">## 3 Australia 2004        10  27.62686  16.80787 -0.04224981  0.05123628</span></span>
-<span><span class="co">## 4 Australia 2005        10  27.65791  16.82005 -0.06014447 -0.02708750</span></span>
-<span><span class="co">## 5 Australia 2006        10  27.68495  16.83354  0.15073774  0.46114648</span></span>
-<span><span class="co">## 6 Australia 2007        10  27.72203  16.85179 -0.03161665 -0.03885021</span></span>
-<span><span class="co">##   name_text name_label             id</span></span>
-<span><span class="co">## 1 Australia  Australia Australia_2002</span></span>
-<span><span class="co">## 2 Australia  Australia Australia_2003</span></span>
-<span><span class="co">## 3 Australia  Australia Australia_2004</span></span>
-<span><span class="co">## 4 Australia  Australia Australia_2005</span></span>
-<span><span class="co">## 5 Australia  Australia Australia_2006</span></span>
-<span><span class="co">## 6 Australia  Australia Australia_2007</span></span></code></pre>
+<span><span class="co">##         name time i_polity2 i_log_gdp i_log_pop           x           y</span></span>
+<span><span class="co">## 79 Australia 2002        10  27.55492  16.78568 -0.35485450 -0.16803048</span></span>
+<span><span class="co">## 80 Australia 2003        10  27.58556  16.79718  0.20857397 -0.12705283</span></span>
+<span><span class="co">## 81 Australia 2004        10  27.62686  16.80787 -0.04224981  0.05123628</span></span>
+<span><span class="co">## 82 Australia 2005        10  27.65791  16.82005 -0.06014447 -0.02708750</span></span>
+<span><span class="co">## 83 Australia 2006        10  27.68495  16.83354  0.15073774  0.46114648</span></span>
+<span><span class="co">## 84 Australia 2007        10  27.72203  16.85179 -0.03161665 -0.03885021</span></span>
+<span><span class="co">##    name_text name_label             id</span></span>
+<span><span class="co">## 79 Australia  Australia Australia_2002</span></span>
+<span><span class="co">## 80 Australia  Australia Australia_2003</span></span>
+<span><span class="co">## 81 Australia  Australia Australia_2004</span></span>
+<span><span class="co">## 82 Australia  Australia Australia_2005</span></span>
+<span><span class="co">## 83 Australia  Australia Australia_2006</span></span>
+<span><span class="co">## 84 Australia  Australia Australia_2007</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="add-edge-information">Add Edge Information<a class="anchor" aria-label="anchor" href="#add-edge-information"></a>
@@ -350,20 +350,20 @@ the network. First, let’s create the variable in the edge data.</p>
 <span></span>
 <span><span class="co"># check</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">net_dfs</span><span class="op">$</span><span class="va">edge_data</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##        from     to time verbCoop matlCoop verbConf matlConf          x1</span></span>
-<span><span class="co">## 1 Australia Brazil 2002        3        0        0        0 -3.18695808</span></span>
-<span><span class="co">## 2 Australia Brazil 2003        3        1        2        0 -0.39782446</span></span>
-<span><span class="co">## 3 Australia Brazil 2004       24        0        0        2 -0.04957632</span></span>
-<span><span class="co">## 4 Australia Brazil 2005       27        0        2        0 -0.38526735</span></span>
-<span><span class="co">## 5 Australia Brazil 2006       54        0        3        1 -0.51353531</span></span>
-<span><span class="co">## 6 Australia Brazil 2007        4        0        0        0 -0.69085788</span></span>
-<span><span class="co">##            y1          x2         y2 high_matlConf</span></span>
-<span><span class="co">## 1  2.53500179 -2.95152256  2.3151148         FALSE</span></span>
-<span><span class="co">## 2 -1.33861627 -0.06486153 -1.4411348         FALSE</span></span>
-<span><span class="co">## 3  0.06513246 -0.04293486 -0.1479501         FALSE</span></span>
-<span><span class="co">## 4  0.93989844 -0.29488038  1.0449019         FALSE</span></span>
-<span><span class="co">## 5  1.42660061 -0.32983771  1.4847187         FALSE</span></span>
-<span><span class="co">## 6  1.79965809 -0.86547402  1.7542202         FALSE</span></span></code></pre>
+<pre><code><span><span class="co">##       from        to time verbCoop matlCoop verbConf matlConf        x1</span></span>
+<span><span class="co">## 1   Brazil Australia 2002        5        0        0        0 -2.951523</span></span>
+<span><span class="co">## 2   Canada Australia 2002       31        1        1        2 -2.895578</span></span>
+<span><span class="co">## 3    Chile Australia 2002        1        0        1        1 -3.150793</span></span>
+<span><span class="co">## 4    China Australia 2002      518        6       12       12 -3.088811</span></span>
+<span><span class="co">## 5 Colombia Australia 2002        2        0        0        0 -2.832835</span></span>
+<span><span class="co">## 6    Egypt Australia 2002       13        0        1        0 -2.962405</span></span>
+<span><span class="co">##         y1        x2       y2 high_matlConf</span></span>
+<span><span class="co">## 1 2.315115 -3.186958 2.535002         FALSE</span></span>
+<span><span class="co">## 2 2.616097 -3.186958 2.535002         FALSE</span></span>
+<span><span class="co">## 3 2.222567 -3.186958 2.535002         FALSE</span></span>
+<span><span class="co">## 4 2.532826 -3.186958 2.535002          TRUE</span></span>
+<span><span class="co">## 5 2.394330 -3.186958 2.535002         FALSE</span></span>
+<span><span class="co">## 6 2.626167 -3.186958 2.535002         FALSE</span></span></code></pre>
 <p>Now that we have the new variable in the data.frame, we can plot by
 it but note that we now need a color aesthetic for both points and
 segments, even though <code>ggplot2</code> only supports one legend by
