@@ -232,10 +232,10 @@ time_check <- function(time, dyad_data){
         cli::cli_alert_danger("Error: `time` variable does not exist in the `dyad_data` object.")
         stop() }
     
-    # NEW: Check the actual data type of the time column
+    # 
     time_data <- dyad_data[[time]]
     
-    # Allow numeric, Date, POSIXct, POSIXlt, and character
+    # numeric, Date, POSIXct, POSIXlt, and character
     if(!inherits(time_data, c("numeric", "integer", "Date", "POSIXct", "POSIXlt", "character"))){
         cli::cli_alert_danger(
             "Error: Time variable must be numeric, Date, POSIXct, POSIXlt, or character. Found class: {class(time_data)[1]}"
@@ -243,10 +243,10 @@ time_check <- function(time, dyad_data){
         stop()
     }
     
-    # For character, check if it can be reasonably sorted
+    # if charac, check if it can be reasonably sorted
     if(is.character(time_data)){
-        # Try to detect if it looks like a date
-        sample_vals <- head(unique(time_data), 10)
+        # 
+        sample_vals <- utils::head(unique(time_data), 10)
         cli::cli_alert_info(
             "Time variable is character. Will sort alphabetically. Sample values: {paste(sample_vals, collapse=', ')}"
         )
@@ -277,17 +277,18 @@ time_check <- function(time, dyad_data){
 
 repeat_dyads_check <- function(dyad_data, actor1, actor2, time = NULL) {
 
-    # Convert parameters for C++ function
+    # clean up params
     if (!is.null(time)) {
-    timeVec <- dyad_data[[time]]
+        timeVec <- dyad_data[[time]]
     } else {
-    timeVec <- rep(1, nrow(dyad_data))  # Default time vector if none provided
+        timeVec <- rep(1, nrow(dyad_data))  # Default time vector if none provided
     }
 
+    #
     actor1Vec <- dyad_data[[actor1]]
     actor2Vec <- dyad_data[[actor2]]
 
-    # call c++ fn
+    #  
     out <- count_duplicate_dyads(actor1Vec, actor2Vec, timeVec)
 
     # 

@@ -32,7 +32,7 @@ A list containing two data frames:
 }
 }
 \description{
-\code{decompose_netify} (also available as \code{decompose}) separates a netify
+\code{decompose_netify} separates a netify
 object into its constituent parts: a data frame of edges with attributes and
 a data frame of nodal attributes.
 }

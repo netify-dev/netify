@@ -1,6 +1,6 @@
 #' Decompose a netify object into edge and node data frames
 #'
-#' `decompose_netify` (also available as `decompose`) separates a netify 
+#' `decompose_netify` separates a netify 
 #' object into its constituent parts: a data frame of edges with attributes and 
 #' a data frame of nodal attributes. 
 #'
@@ -123,23 +123,23 @@
 #' @export decompose_netify
 
 decompose_netify <- function(netlet, remove_zeros = TRUE) {
-    
-    # Input validation
+   
+    # input validation
     netify_check(netlet)
     if (!is.logical(remove_zeros) || length(remove_zeros) != 1) {
         stop("remove_zeros must be a single logical value")
     }
-    
-    # cache attributes for efficiency
+
+    # get attrs
     obj_attrs <- attributes(netlet)
     netify_type <- obj_attrs$netify_type
     weight_attr <- obj_attrs$weight
     ego_netlet <- obj_attrs$ego_netlet
 
-    # get measurements
+    # get msrs
     msrmnts <- netify_measurements(netlet)
 
-    # process edge data with
+    # process edge data
     edge_data <- process_edge_data(
         netlet = netlet,
         netify_type = netify_type,
@@ -168,10 +168,13 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
         edge_data$time <- as.character(nodal_data$time[1])
     }
 
-    list(
+    # prepare output
+    out <- list(
         edge_data = edge_data,
         nodal_data = nodal_data
     )
+    
+    return(out)
 }
 
 #' Process edge data from netify object
@@ -228,43 +231,76 @@ process_edge_data <- function(netlet, netify_type, weight_attr, remove_zeros, eg
 #' @keywords internal
 #' @noRd
 merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type) {
-    
-    # convert to meltable format
+   
+    # burn it down
     dyad_data_melted <- melt_dyad_data(dyad_data_attr)
 
+    # 
     if (nrow(dyad_data_melted) == 0) {
-        return(edge_data)
-    }
+        return(edge_data) }
 
     # remove self-loops
-    dyad_data_melted <- dyad_data_melted[
-        dyad_data_melted$Var1 != dyad_data_melted$Var2, 
-    ]
+    self_loop_idx <- dyad_data_melted$Var1 != dyad_data_melted$Var2
+    dyad_data_melted <- dyad_data_melted[self_loop_idx, ]
 
-    # use tapply for efficient reshaping instead of dcast
+    # get unique variables
     var_names <- unique(dyad_data_melted$Var3)
 
-    # create keys for matching
+    # get keys for edge data
     if (netify_type == 'cross_sec') {
         edge_key <- paste(edge_data$Var1, edge_data$Var2, sep = "__|__")
-        dyad_key <- paste(dyad_data_melted$Var1, dyad_data_melted$Var2, sep = "__|__")
     } else {
-        edge_key <- paste(edge_data$Var1, edge_data$Var2, edge_data$L1, sep = "__|__")
-        dyad_key <- paste(dyad_data_melted$Var1, dyad_data_melted$Var2, 
-                                            dyad_data_melted$L1, sep = "__|__")
-    }
+        edge_key <- paste(edge_data$Var1, edge_data$Var2, edge_data$L1, sep = "__|__") }
 
-    # add each variable using match
-    for (var in var_names) {
-        var_data <- dyad_data_melted[dyad_data_melted$Var3 == var, ]
-        var_key <- if (netify_type == 'cross_sec') {
-            paste(var_data$Var1, var_data$Var2, sep = "__|__")
+    # make a lookup table
+    if (length(var_names) > 1) {
+
+        # create combined key including variable name
+        if (netify_type == 'cross_sec') {
+            dyad_full_key <- paste(
+                    dyad_data_melted$Var1, 
+                    dyad_data_melted$Var2, 
+                    dyad_data_melted$Var3, 
+                    sep = "__|__" )
         } else {
-            paste(var_data$Var1, var_data$Var2, var_data$L1, sep = "__|__")
+            dyad_full_key <- paste(
+                    dyad_data_melted$Var1, 
+                    dyad_data_melted$Var2, 
+                    dyad_data_melted$L1, 
+                    dyad_data_melted$Var3, 
+                    sep = "__|__"
+            ) }
+        
+        # create lookup table
+        value_lookup <- setNames(dyad_data_melted$value, dyad_full_key)
+        
+        # batch process all variables
+        var_cols <- lapply(var_names, function(var) {
+            if (netify_type == 'cross_sec') {
+                    lookup_key <- paste(edge_data$Var1, edge_data$Var2, var, sep = "__|__")
+            } else {
+                    lookup_key <- paste(edge_data$Var1, edge_data$Var2, edge_data$L1, var, sep = "__|__")
+            }
+            value_lookup[lookup_key]
+        })
+        
+        # assign all at once
+        edge_data[var_names] <- var_cols
+        
+    } else {
+        # single variable - use simpler approach
+        var <- var_names[1]
+        var_data <- dyad_data_melted[dyad_data_melted$Var3 == var, ]
+        
+        if (netify_type == 'cross_sec') {
+            var_key <- paste(var_data$Var1, var_data$Var2, sep = "__|__")
+        } else {
+            var_key <- paste(var_data$Var1, var_data$Var2, var_data$L1, sep = "__|__")
         }
         
-        match_idx <- match(edge_key, var_key)
-        edge_data[[var]] <- var_data$value[match_idx]
+        # create lookup
+        value_lookup <- setNames(var_data$value, var_key)
+        edge_data[[var]] <- value_lookup[edge_key]
     }
 
     #
@@ -276,28 +312,28 @@ merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type) {
 #' @noRd
 finalize_edge_data <- function(edge_data, netify_type) {
     
-    # Add time column for cross-sectional
+    # add time column for cross-sec if missing
     if (netify_type == 'cross_sec' && !'L1' %in% names(edge_data)) {
-        edge_data$L1 <- "1"
-    }
-    
-    # Ensure L1 exists
+        edge_data$L1 <- "1" }
+
+    # ensure L1 exists
     if (!'L1' %in% names(edge_data)) {
-        edge_data$L1 <- "1"
-    }
-    
-    # Reorder columns
-    id_vars <- c('Var1', 'Var2', 'L1')
-    other_vars <- setdiff(names(edge_data), id_vars)
-    edge_data <- edge_data[, c(id_vars, other_vars), drop = FALSE]
-    
-    # Rename ID columns
+        edge_data$L1 <- "1" }
+
+    # reorder columns efficiently using direct indexing
+    id_cols <- c('Var1', 'Var2', 'L1')
+    other_cols <- setdiff(names(edge_data), id_cols)
+    col_order <- c(id_cols, other_cols)
+
+    # subset and rename in one operation
+    edge_data <- edge_data[, col_order, drop = FALSE]
     names(edge_data)[1:3] <- c('from', 'to', 'time')
-    
-    # Ensure time is character
+
+    # ensure time is character (vectorized)
     edge_data$time <- as.character(edge_data$time)
-    
-    edge_data
+
+    #
+    return(edge_data)
 }
 
 #' Process nodal data from netify object

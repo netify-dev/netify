@@ -172,12 +172,8 @@ print.netify <- function(x, ...){
 
 		# if longit separate year from unit
 		if(ego_longit){
-			ego_units = unique(
-				unlist( lapply( strsplit(
-					ego_ids, '__'), function(x){ x[1] })))
-			ego_pds = unique(
-				unlist( lapply( strsplit(
-					ego_ids, '__'), function(x){ x[2] })))
+			ego_units = unique(extract_ego_name(ego_ids))
+			ego_pds = unique(extract_ego_time(ego_ids))
 		}
 
 		# count up number of egos

@@ -58,3 +58,30 @@ get_ngbd_net_for_ego <- function(
     return(ngbd_actors)
     #####################
 }
+
+
+#' Speedy extraction of time from ego-time concatenated strings
+#' @keywords internal
+#' @noRd
+extract_ego_time <- function(ego_time_vec) {
+    sub("^[^_]+__", "", ego_time_vec) }
+
+#' Fast extraction of ego from ego-time concatenated strings  
+#' @keywords internal
+#' @noRd
+extract_ego_name <- function(ego_time_vec) {
+    # extract everything before "__"
+    sub("__.*$", "", ego_time_vec) }
+
+#' Split ego-time string into components
+#' @keywords internal
+#' @noRd
+split_ego_time <- function(ego_time_vec) {
+    
+    out <- data.frame(
+        ego = sub("__.*$", "", ego_time_vec),
+        time = sub("^[^_]+__", "", ego_time_vec),
+        stringsAsFactors = FALSE )
+
+    #
+    return(out) }
