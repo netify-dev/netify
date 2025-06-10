@@ -27,8 +27,7 @@ in each dyad.}
 \item{actor2}{Character string specifying the column name for the second actor
 in each dyad.}
 
-\item{time}{Character string specifying the column name for time periods. Values
-in this column must be numeric.}
+\item{time}{Character string specifying the column name for time periods.}
 
 \item{symmetric}{Logical. If TRUE (default), treats the network as undirected
 (i.e., edges have no direction). If FALSE, treats the network as directed.}

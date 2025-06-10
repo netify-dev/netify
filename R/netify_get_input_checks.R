@@ -231,6 +231,26 @@ time_check <- function(time, dyad_data){
     if(!time %in% colnames(dyad_data)){
         cli::cli_alert_danger("Error: `time` variable does not exist in the `dyad_data` object.")
         stop() }
+    
+    # NEW: Check the actual data type of the time column
+    time_data <- dyad_data[[time]]
+    
+    # Allow numeric, Date, POSIXct, POSIXlt, and character
+    if(!inherits(time_data, c("numeric", "integer", "Date", "POSIXct", "POSIXlt", "character"))){
+        cli::cli_alert_danger(
+            "Error: Time variable must be numeric, Date, POSIXct, POSIXlt, or character. Found class: {class(time_data)[1]}"
+        )
+        stop()
+    }
+    
+    # For character, check if it can be reasonably sorted
+    if(is.character(time_data)){
+        # Try to detect if it looks like a date
+        sample_vals <- head(unique(time_data), 10)
+        cli::cli_alert_info(
+            "Time variable is character. Will sort alphabetically. Sample values: {paste(sample_vals, collapse=', ')}"
+        )
+    }
 
     #
     return(invisible(NULL))

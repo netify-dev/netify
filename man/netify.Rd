@@ -43,8 +43,10 @@ for data.frame inputs)}
 \item{actor2}{character: name of the actor 2 variable in the data (required
 for data.frame inputs)}
 
-\item{time}{character: name of the time variable in the data, if
-no time is provided then cross-sectional network will be created}
+\item{time}{character: name of the time variable in the data. Can contain
+numeric, Date, POSIXct/POSIXlt, or character values. Non-numeric types
+will be converted to numeric indices while preserving original labels.
+If no time is provided then a cross-sectional network will be created.}
 
 \item{symmetric}{logical: whether ties are symmetric, default is TRUE}
 

@@ -68,6 +68,85 @@ num <- function(x){
 	as.numeric(char(x))
 }
 
+#' Convert various time formats to numeric
+#'
+#' Internal function to convert Date, POSIXct, character, etc. to numeric
+#' values that can be used for creating networks
+#'
+#' @param time_data Vector of time values
+#' @param time_col Name of the time column (for error messages)
+#' 
+#' @return A list with:
+#'   - numeric_time: Numeric version of the time variable
+#'   - time_labels: Character labels for the time periods
+#'   - original_class: The original class of the time data
+#'
+#' @keywords internal
+#' @noRd
+
+convert_time_to_numeric <- function(time_data, time_col = "time") {
+	
+	original_class <- class(time_data)[1]
+
+	if(is.numeric(time_data) || is.integer(time_data)) {
+		# already numeric
+		unique_times <- sort(unique(time_data))
+		return(list(
+			numeric_time = time_data,
+			time_labels = char(unique_times),
+			original_class = original_class
+		))
+	}
+	
+	if(inherits(time_data, "Date")) {
+		# convert dates to numeric (days since origin)
+		# but we'll use unique indices for the network
+		unique_dates <- sort(unique(time_data))
+		time_mapping <- setNames(seq_along(unique_dates), char(unique_dates))
+		
+		return(list(
+			numeric_time = time_mapping[char(time_data)],
+			time_labels = char(unique_dates),
+			original_class = original_class
+		))
+	}
+	
+	if(inherits(time_data, c("POSIXct", "POSIXlt"))) {
+		# convert to date first (ignore time of day)
+		date_data <- as.Date(time_data)
+		unique_dates <- sort(unique(date_data))
+		time_mapping <- setNames(seq_along(unique_dates), char(unique_dates))
+		
+		return(list(
+			numeric_time = time_mapping[char(date_data)],
+			time_labels = char(unique_dates),
+			original_class = original_class
+		))
+	}
+	
+	if(is.character(time_data)) {
+		# for character, create ordered mapping
+		unique_times <- sort(unique(time_data))
+		time_mapping <- setNames(seq_along(unique_times), unique_times)
+		
+		# check if they look like dates and warn if so
+		if(any(grepl("^\\d{4}-\\d{2}-\\d{2}$", head(unique_times, 5)))) {
+			cli::cli_alert_warning(
+				"Character time variable looks like dates. Consider converting to Date class for better handling."
+			)
+		}
+		
+		return(list(
+			numeric_time = time_mapping[time_data],
+			time_labels = unique_times,
+			original_class = original_class
+		))
+	}
+	
+	# this shouldn't happen if time_check is working correctly
+	cli::cli_abort("Unsupported time variable type: {original_class}")
+}
+
 #' unique_vector
 #'
 #' Get unique vector from 

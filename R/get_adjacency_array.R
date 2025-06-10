@@ -12,8 +12,7 @@
 #'   in each dyad.
 #' @param actor2 Character string specifying the column name for the second actor 
 #'   in each dyad.
-#' @param time Character string specifying the column name for time periods. Values 
-#'   in this column must be numeric.
+#' @param time Character string specifying the column name for time periods.
 #' @param symmetric Logical. If TRUE (default), treats the network as undirected 
 #'   (i.e., edges have no direction). If FALSE, treats the network as directed.
 #' @param mode Character string specifying network structure. Options are:
@@ -108,11 +107,14 @@ get_adjacency_array <- function(
     symmetric <- FALSE 
   }
 
-  # check to make sure time variable actually is numeric
+  # convert time to numeric and get labels
+  time_info <- convert_time_to_numeric(dyad_data[[time]], time)
+  dyad_data[[time]] <- time_info$numeric_time
+
+  # time check
   if(!is.numeric(dyad_data[,time])){
-    cli::cli_alert_danger('Values in the time variable must be numeric.')
-    stop()
-  }
+    cli::cli_alert_danger('Failed to convert time variable to numeric format.')
+    stop() }
 
   # add weight if not supplied
   wOrig <- weight
@@ -124,9 +126,9 @@ get_adjacency_array <- function(
   # subset to relevant vars once
   dyad_data <- dyad_data[,c(actor1, actor2, time, weight)]
 
-  # get vector of time periods and convert to character
-  time_pds <- char(unique_vector(dyad_data[,time]))
-  time_pds_num <- as.numeric(time_pds)
+  # get vector of time periods from conversion
+  time_pds <- time_info$time_labels
+  time_pds_num <- sort(unique(time_info$numeric_time))
 
   # get vector of actors - optimized extraction
   actors_rows <- unique_vector(dyad_data[,actor1])
