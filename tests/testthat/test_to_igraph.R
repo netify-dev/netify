@@ -14,10 +14,7 @@ test_that('netify_to_igraph: unweighted cross-sec, asymmetric', {
      g1 <- igraph::graph_from_adjacency_matrix( adjm )
 
     # convert to dyadic so we can pass into netify
-    df <- reshape2::melt(adjm)
-    df <- df[df$value>0,]
-    df$Var1 <- as.character(df$Var1)
-    df$Var2 <- as.character(df$Var2)
+    df <- melt_matrix_sparse(adjm, remove_zeros = TRUE, remove_diagonal = FALSE)
 
     # convert to netify object
     a_matrix <- netify(
@@ -41,9 +38,7 @@ test_that('netify_to_igraph: weighted cross-sec, asymmetric', {
      g1 <- igraph::graph_from_adjacency_matrix( adjm, weighted=TRUE )
 
     # convert to dyadic so we can pass into netify
-    df <- reshape2::melt(adjm)
-    df$Var1 <- as.character(df$Var1)
-    df$Var2 <- as.character(df$Var2)
+    df <- melt_matrix_base(adjm)
 
     # convert to netify object
     a_matrix <- netify(
@@ -71,10 +66,7 @@ test_that('netify_to_igraph: unweighted cross-sec, symmetric', {
      g1 <- igraph::graph_from_adjacency_matrix( adjm, diag=FALSE )
 
     # convert to dyadic so we can pass into netify
-    df <- reshape2::melt(adjm)
-    df$Var1 <- as.character(df$Var1)
-    df$Var2 <- as.character(df$Var2)
-    df = df[df$Var1 != df$Var2,]
+    df <- melt_matrix_sparse(adjm, remove_zeros = FALSE, remove_diagonal = TRUE)
     df = df[df$value==1,]
 
     # convert to netify object
@@ -101,10 +93,7 @@ test_that('netify_to_igraph: weighted cross-sec, symmetric', {
      g1 <- igraph::graph_from_adjacency_matrix( adjm, weighted=TRUE, diag=FALSE )
 
     # convert to dyadic so we can pass into netify
-    df <- reshape2::melt(adjm)
-    df$Var1 <- as.character(df$Var1)
-    df$Var2 <- as.character(df$Var2)
-    df = df[df$Var1 != df$Var2,]
+    df <- melt_matrix_sparse(adjm, remove_zeros = FALSE, remove_diagonal = TRUE)
 
     # convert to netify object
     a_matrix <- netify(
@@ -136,10 +125,7 @@ test_that('netify_to_igraph, bipartite: unweighted cross-sec, asymmetric', {
     g1_raw <- g1_raw[!vtype,vtype]
 
     # convert to dyadic so we can pass into netify
-    df <- reshape2::melt(adjm)
-    df <- df[df$value>0,]
-    df$Var1 <- as.character(df$Var1)
-    df$Var2 <- as.character(df$Var2)
+    df <- melt_matrix_sparse(adjm, remove_zeros = TRUE, remove_diagonal = FALSE)
 
     # convert to netify object
     a_matrix <- netify(
@@ -173,9 +159,7 @@ test_that('netify_to_igraph, bipartite: weighted cross-sec, asymmetric', {
     g1_raw <- g1_raw[!vtype,vtype]
 
     # convert to dyadic so we can pass into netify
-    df <- reshape2::melt(adjm)
-    df$Var1 <- as.character(df$Var1)
-    df$Var2 <- as.character(df$Var2)
+    df <- melt_matrix_base(adjm)
 
     # convert to netify object
     a_matrix <- netify(

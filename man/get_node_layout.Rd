@@ -37,7 +37,8 @@ period gets its own optimized layout.}
 
 \item{which_static}{Integer specifying which time period's layout to use as the
 static template when static_actor_positions is TRUE. If NULL (default), creates
-a static layout based on the aggregated network across all time periods.}
+a static layout based on the union of all edges across time periods, giving
+more weight to persistent edges.}
 
 \item{seed}{Integer for random number generation to ensure reproducible layouts.
 Default is 6886.}
@@ -81,8 +82,9 @@ facilitating visual comparison of network evolution
 }
 
 When using static layouts with which_static = NULL, the function creates a
-composite layout based on the aggregated network structure across all time periods
-(summed for binary networks, averaged for weighted networks).
+composite layout based on the union of all edges across time periods. Edges
+that appear more frequently are given higher weight, producing layouts that
+emphasize the stable core structure of the network.
 
 \strong{Bipartite networks:}
 

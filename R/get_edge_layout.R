@@ -79,47 +79,57 @@
 #'
 #' @export get_edge_layout
 
-get_edge_layout <- function(netlet, nodes_layout) {
+get_edge_layout <- function(netlet, nodes_layout){
 
-    # Ensure the netify object is checked
+    # ensure the netify object is checked
     netify_check(netlet)
-    
-    # Get the igraph object from netlet
-    g <- netify_to_igraph(netlet, 
-		add_nodal_attribs = FALSE, 
-		add_dyad_attribs = FALSE )
 
-	# make sure igraph object is in the right format
-	if(igraph::is_igraph(g)){ g = list(g) }
+    # get the igraph object from netlet
+    g <- netify_to_igraph(netlet, 
+        add_nodal_attribs = FALSE, 
+        add_dyad_attribs = FALSE)
+
+    # make sure igraph object is in the right format
+    if (igraph::is_igraph(g)) {
+        g <- list(g)
+    }
 
     # make sure nodes_layout is in the right format
-    if(!is.list(nodes_layout)){
-        nodes_layout = list(nodes_layout) }
+    if (!is.list(nodes_layout)) {
+        nodes_layout <- list(nodes_layout)
+    }
 
-    # Generate edges list
-    edges_list <- lapply(1:length(g), function(ii) {
+    # pre-allocate result list
+    edges_list <- vector("list", length(g))
+    names(edges_list) <- names(g)
+
+    # generate edges list with optimized matching
+    for (ii in seq_along(g)) {
         g_slice <- g[[ii]]
         edges <- igraph::as_edgelist(g_slice, names = TRUE)
-        edges <- data.frame(edges, stringsAsFactors = FALSE)
-        names(edges) <- c("from", "to")
         
-        # Retrieve node coordinates
+        # convert to data frame efficiently
+        edges_df <- data.frame(
+            from = edges[, 1],
+            to = edges[, 2],
+            stringsAsFactors = FALSE
+        )
+        
+        # retrieve node coordinates
         nodes <- nodes_layout[[ii]]
         
-        # Bind coordinates to edges
-        edges <- merge(
-            edges, nodes[,c('actor','x','y')], 
-            by.x = "from", by.y = "actor", 
-            all.x = TRUE, all.y=FALSE)
-        edges <- merge(
-            edges, nodes[,c('actor','x','y')], 
-            by.x = "to", by.y = "actor", 
-            all.x = TRUE, all.y=FALSE)
-        names(edges)[c(3:6)] <- c("x1", "y1", "x2", "y2")
+        # create lookup vectors for faster matching
+        node_x <- setNames(nodes$x, nodes$actor)
+        node_y <- setNames(nodes$y, nodes$actor)
         
-        return(edges) })
-    names(edges_list) = names(g)
+        # vectorized assignment using the lookup
+        edges_df$x1 <- node_x[edges_df$from]
+        edges_df$y1 <- node_y[edges_df$from]
+        edges_df$x2 <- node_x[edges_df$to]
+        edges_df$y2 <- node_y[edges_df$to]
+        
+        edges_list[[ii]] <- edges_df
+    }
 
-    #    
     return(edges_list)
 }

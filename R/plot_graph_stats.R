@@ -147,7 +147,7 @@ plot_graph_stats <- function(
 
   ######################
   # reshape data for ggplot
-  ggdata <- reshape2::melt( summary_df, id=ids)
+  ggdata <- melt_df( summary_df, id=ids)
   ######################
 
   ######################  

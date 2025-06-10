@@ -21,10 +21,7 @@ test_that('netify_to_statnet: unweighted cross-sec, asymmetric', {
 		)
 
 	# convert to dyadic so we can pass into netify
-	df <- reshape2::melt(adjm)
-	df <- df[df$value>0,]
-	df$Var1 <- as.character(df$Var1)
-	df$Var2 <- as.character(df$Var2)
+df <- melt_matrix_sparse(adjm, remove_zeros = TRUE, remove_diagonal = FALSE)
 
 	# convert to netify object
 	a_matrix <- netify(
@@ -57,9 +54,7 @@ test_that('netify_to_statnet: weighted cross-sec, asymmetric', {
 		)
 
 	# convert to dyadic so we can pass into netify
-	df <- reshape2::melt(adjm)
-	df$Var1 <- as.character(df$Var1)
-	df$Var2 <- as.character(df$Var2)
+df <- melt_matrix_base(adjm)
 
 	# convert to netify object
 	a_matrix <- netify(
@@ -99,9 +94,7 @@ test_that('netify_to_statnet: unweighted cross-sec, symmetric', {
 		)
 
 	# convert to dyadic so we can pass into netify
-	df <- reshape2::melt(adjm)
-	df$Var1 <- as.character(df$Var1)
-	df$Var2 <- as.character(df$Var2)
+df <- melt_matrix_base(adjm)
 	df = df[df$Var1 != df$Var2,]
 	df = df[df$value==1,]
 
@@ -138,9 +131,7 @@ test_that('netify_to_statnet: weighted cross-sec, symmetric', {
 		)
 
 	# convert to dyadic so we can pass into netify
-	df <- reshape2::melt(adjm)
-	df$Var1 <- as.character(df$Var1)
-	df$Var2 <- as.character(df$Var2)
+df <- melt_matrix_base(adjm)
 	df = df[df$Var1 != df$Var2,]
 
 	# convert to netify object
@@ -181,10 +172,7 @@ test_that('netify_to_statnet, bipartite: unweighted cross-sec, asymmetric', {
 		)
 
     # convert to dyadic so we can pass into netify
-    df <- reshape2::melt(adjm)
-    df <- df[df$value>0,]
-    df$Var1 <- as.character(df$Var1)
-    df$Var2 <- as.character(df$Var2)
+    df <- melt_matrix_sparse(adjm, remove_zeros = TRUE, remove_diagonal = FALSE)
 
     # convert to netify object
     a_matrix <- netify(
@@ -220,9 +208,7 @@ test_that('netify_to_statnet, bipartite: weighted cross-sec, asymmetric', {
 		)
 
     # convert to dyadic so we can pass into netify
-    df <- reshape2::melt(adjm)
-    df$Var1 <- as.character(df$Var1)
-    df$Var2 <- as.character(df$Var2)
+    df <- melt_matrix_base(adjm)
 
     # convert to netify object
     a_matrix <- netify(

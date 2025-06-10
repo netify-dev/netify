@@ -3,3 +3,5 @@ docs
 /Meta/
 *.DS_Store
 *.DS_store
+*.rproj
+*.Rproj

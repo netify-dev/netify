@@ -32,8 +32,6 @@
 #' \strong{Edge data processing:}
 #' \itemize{
 #'   \item Extracts the adjacency matrix (or array for longitudinal networks) from the netify object
-#'   \item Converts it to long format using reshape2::melt
-#'   \item Removes self-loops (edges where source equals target)
 #'   \item Optionally removes zero-weight edges based on the remove_zeros parameter
 #'   \item Merges any dyadic variables stored in the netify object
 #'   \item Renames columns to standardized names (from, to, time)
@@ -132,16 +130,16 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
         stop("remove_zeros must be a single logical value")
     }
     
-    # Cache attributes for efficiency
+    # cache attributes for efficiency
     obj_attrs <- attributes(netlet)
     netify_type <- obj_attrs$netify_type
     weight_attr <- obj_attrs$weight
     ego_netlet <- obj_attrs$ego_netlet
-    
-    # Get measurements
+
+    # get measurements
     msrmnts <- netify_measurements(netlet)
-    
-    # Process edge data
+
+    # process edge data with
     edge_data <- process_edge_data(
         netlet = netlet,
         netify_type = netify_type,
@@ -149,8 +147,8 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
         remove_zeros = remove_zeros,
         ego_netlet = ego_netlet
     )
-    
-    # Process dyadic attributes
+
+    # process dyadic attributes if they exist
     if (!is.null(obj_attrs$dyad_data)) {
         edge_data <- merge_dyadic_attributes(
             edge_data = edge_data,
@@ -158,22 +156,18 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
             netify_type = netify_type
         )
     }
-    
-    # Finalize edge data structure
+
+    # finalize edge data structure
     edge_data <- finalize_edge_data(edge_data, netify_type)
-    
-    # Process nodal data 
-    nodal_data <- process_nodal_data(
-        obj_attrs = obj_attrs,
-        netify_type = netify_type
-    )
-    
-    # Synchronize time variables
+
+    # process nodal data
+    nodal_data <- process_nodal_data(obj_attrs, netify_type)
+
+    # synchronize time variables
     if (netify_type == 'cross_sec' && nrow(nodal_data) > 0) {
         edge_data$time <- as.character(nodal_data$time[1])
     }
-    
-    # Return results
+
     list(
         edge_data = edge_data,
         nodal_data = nodal_data
@@ -185,47 +179,48 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
 #' @noRd
 process_edge_data <- function(netlet, netify_type, weight_attr, remove_zeros, ego_netlet) {
     
-    # Extract raw adjacency data
+    # extract raw adjacency data
     raw_data <- get_raw(netlet)
-    
-    # Melt to long format
-    edge_data <- reshape2::melt(raw_data)
-    
-    # Ensure character actor names
-    edge_data$Var1 <- as.character(edge_data$Var1)
-    edge_data$Var2 <- as.character(edge_data$Var2)
-    
-    # Remove self-loops
-    edge_data <- edge_data[edge_data$Var1 != edge_data$Var2, ]
-    
-    # Remove zeros if requested (BEFORE renaming columns)
-    if (remove_zeros && nrow(edge_data) > 0) {
-        edge_data <- edge_data[edge_data$value != 0, ]
-    }
-    
-    # Handle longitudinal array format
-    if (netify_type == 'longit_array') {
-        names(edge_data)[names(edge_data) == 'Var3'] <- 'L1'
-    }
-    
-    # Rename weight column
-    if (!is.null(weight_attr)) {
-        names(edge_data)[names(edge_data) == 'value'] <- weight_attr
-    } else {
-        names(edge_data)[names(edge_data) == 'value'] <- 'net_value'
-    }
-    
-    # Handle ego networks
-    if (netify_type != 'cross_sec' && !is.null(ego_netlet) && ego_netlet) {
-        if ('L1' %in% names(edge_data)) {
-            edge_data$L1 <- vapply(
-                strsplit(edge_data$L1, '__', fixed = TRUE),
-                function(x) if(length(x) >= 2) x[2] else x[1],
-                character(1)
+
+    # handle different data structures
+    if (netify_type == 'cross_sec') {
+            # for cross-sectional, raw_data is a matrix
+            edge_data <- melt_matrix_sparse(
+                    raw_data, 
+                    remove_zeros = remove_zeros,
+                    remove_diagonal = TRUE
             )
-        }
+    } else if (netify_type == 'longit_array') {
+            # for longitudinal array, melt the 3d array
+            edge_data <- melt_array_sparse(
+                    raw_data,
+                    remove_zeros = remove_zeros,
+                    remove_diagonal = TRUE
+            )
+    } else if (netify_type == 'longit_list') {
+            # for longitudinal list, process each time period
+            edge_data <- melt_list_sparse(
+                    raw_data,
+                    remove_zeros = remove_zeros,
+                    remove_diagonal = TRUE
+            )
     }
-    
+
+    # rename weight column
+    if (!is.null(weight_attr)) {
+            names(edge_data)[names(edge_data) == 'value'] <- weight_attr
+    } else {
+            names(edge_data)[names(edge_data) == 'value'] <- 'net_value'
+    }
+
+    # handle ego networks efficiently
+    if (netify_type != 'cross_sec' && !is.null(ego_netlet) && ego_netlet) {
+            if ('L1' %in% names(edge_data)) {
+                    # vectorized extraction
+                    edge_data$L1 <- sub("^[^_]+__", "", edge_data$L1)
+            }
+    }
+
     edge_data
 }
 
@@ -234,38 +229,46 @@ process_edge_data <- function(netlet, netify_type, weight_attr, remove_zeros, eg
 #' @noRd
 merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type) {
     
-    # Convert new structure to meltable format
+    # convert to meltable format
     dyad_data_melted <- melt_dyad_data(dyad_data_attr)
-    
+
     if (nrow(dyad_data_melted) == 0) {
         return(edge_data)
     }
-    
-    # Remove self-loops from dyad data
+
+    # remove self-loops
     dyad_data_melted <- dyad_data_melted[
         dyad_data_melted$Var1 != dyad_data_melted$Var2, 
     ]
-    
-    # Reshape to wide format
-    dyad_data_wide <- reshape2::dcast(
-        dyad_data_melted, 
-        Var1 + Var2 + L1 ~ Var3, 
-        value.var = 'value'
-    )
-    
-    # Determine merge columns
-    merge_by <- if (netify_type == 'cross_sec') {
-        c('Var1', 'Var2')
+
+    # use tapply for efficient reshaping instead of dcast
+    var_names <- unique(dyad_data_melted$Var3)
+
+    # create keys for matching
+    if (netify_type == 'cross_sec') {
+        edge_key <- paste(edge_data$Var1, edge_data$Var2, sep = "__|__")
+        dyad_key <- paste(dyad_data_melted$Var1, dyad_data_melted$Var2, sep = "__|__")
     } else {
-        c('Var1', 'Var2', 'L1')
+        edge_key <- paste(edge_data$Var1, edge_data$Var2, edge_data$L1, sep = "__|__")
+        dyad_key <- paste(dyad_data_melted$Var1, dyad_data_melted$Var2, 
+                                            dyad_data_melted$L1, sep = "__|__")
     }
-    
-    # Remove duplicate columns except merge keys
-    cols_to_keep <- c(merge_by, setdiff(names(dyad_data_wide), names(edge_data)))
-    dyad_data_wide <- dyad_data_wide[, cols_to_keep, drop = FALSE]
-    
-    # Merge
-    merge(edge_data, dyad_data_wide, by = merge_by, all.x = TRUE)
+
+    # add each variable using match
+    for (var in var_names) {
+        var_data <- dyad_data_melted[dyad_data_melted$Var3 == var, ]
+        var_key <- if (netify_type == 'cross_sec') {
+            paste(var_data$Var1, var_data$Var2, sep = "__|__")
+        } else {
+            paste(var_data$Var1, var_data$Var2, var_data$L1, sep = "__|__")
+        }
+        
+        match_idx <- match(edge_key, var_key)
+        edge_data[[var]] <- var_data$value[match_idx]
+    }
+
+    #
+    return(edge_data)
 }
 
 #' Convert dyad_data attribute to meltable format
@@ -273,49 +276,97 @@ merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type) {
 #' @noRd
 melt_dyad_data <- function(dyad_data_attr) {
     
-    melted_list <- list()
-    
-    for (time_period in names(dyad_data_attr)) {
-        var_matrices <- dyad_data_attr[[time_period]]
-        
-        if (length(var_matrices) == 0) next
-        
-        # Get dimensions from first matrix
-        first_matrix <- var_matrices[[1]]
-        n_rows <- nrow(first_matrix)
-        n_cols <- ncol(first_matrix)
-        n_vars <- length(var_matrices)
-        var_names <- names(var_matrices)
-        
-        # Create array for melting
-        time_array <- array(
-            dim = c(n_rows, n_cols, n_vars),
-            dimnames = list(
-                rownames(first_matrix),
-                colnames(first_matrix),
-                var_names
-            )
-        )
-        
-        # Fill array
-        for (i in seq_along(var_names)) {
-            time_array[, , i] <- var_matrices[[i]]
-        }
-        
-        melted_list[[time_period]] <- time_array
-    }
-    
-    if (length(melted_list) == 0) {
+    #
+    if (length(dyad_data_attr) == 0) {
         return(data.frame(
             Var1 = character(0),
             Var2 = character(0),
             Var3 = character(0),
             L1 = character(0),
-            value = numeric(0)
+            value = numeric(0),
+            stringsAsFactors = FALSE
         ))
     }
-    
-    reshape2::melt(melted_list)
+
+    # pre-calculate total size
+    total_rows <- 0
+    for (time_period in names(dyad_data_attr)) {
+        var_matrices <- dyad_data_attr[[time_period]]
+        if (length(var_matrices) > 0) {
+            first_mat <- var_matrices[[1]]
+            n_cells <- nrow(first_mat) * ncol(first_mat)
+            total_rows <- total_rows + n_cells * length(var_matrices)
+        }
+    }
+
+    if (total_rows == 0) {
+        return(data.frame(
+            Var1 = character(0),
+            Var2 = character(0),
+            Var3 = character(0),
+            L1 = character(0),
+            value = numeric(0),
+            stringsAsFactors = FALSE
+        ))
+    }
+
+    # pre-allocate result vectors
+    Var1 <- character(total_rows)
+    Var2 <- character(total_rows)
+    Var3 <- character(total_rows)
+    L1 <- character(total_rows)
+    value <- numeric(total_rows)
+
+    current_row <- 1
+
+    for (time_period in names(dyad_data_attr)) {
+        var_matrices <- dyad_data_attr[[time_period]]
+        
+        if (length(var_matrices) == 0) next
+        
+        # get dimensions from first matrix
+        first_matrix <- var_matrices[[1]]
+        nr <- nrow(first_matrix)
+        nc <- ncol(first_matrix)
+        n_cells <- nr * nc
+        var_names <- names(var_matrices)
+        
+        # get row/col names
+        row_names <- rownames(first_matrix)
+        col_names <- colnames(first_matrix)
+        if (is.null(row_names)) row_names <- as.character(seq_len(nr))
+        if (is.null(col_names)) col_names <- as.character(seq_len(nc))
+        
+        # create indices for one matrix
+        row_idx <- rep(seq_len(nr), nc)
+        col_idx <- rep(seq_len(nc), each = nr)
+        
+        # process each variable
+        for (i in seq_along(var_names)) {
+            var_name <- var_names[i]
+            mat <- var_matrices[[i]]
+            
+            # fill in the pre-allocated vectors
+            rows <- current_row:(current_row + n_cells - 1)
+            Var1[rows] <- row_names[row_idx]
+            Var2[rows] <- col_names[col_idx]
+            Var3[rows] <- var_name
+            L1[rows] <- time_period
+            value[rows] <- as.vector(mat)
+            
+            current_row <- current_row + n_cells
+        }
+    }
+
+    # create final data frame
+    out <- data.frame(
+        Var1 = Var1,
+        Var2 = Var2,
+        Var3 = Var3,
+        L1 = L1,
+        value = value,
+        stringsAsFactors = FALSE )
+    return( out )
 }
 
 #' Finalize edge data structure

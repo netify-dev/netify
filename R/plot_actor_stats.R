@@ -139,7 +139,7 @@ plot_actor_stats <- function(
 
   ######################
   # org data
-  ggdata = reshape2::melt(summary_df, id=ids)
+  ggdata = melt_df(summary_df, id=ids)
   ######################
 
   ######################

@@ -12,7 +12,6 @@ Depends:
   R (>= 3.5.0)
 Imports:
     Rcpp,
-    reshape2 (>= 1.4.4),
     stats,
     cli,
     checkmate,

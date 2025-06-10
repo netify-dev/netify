@@ -375,7 +375,7 @@ new_netify <- function(data, ...) {
       # entry and exit based on min and max in data
       if(!final_params$actor_time_uniform){
         actor_pds <- get_actor_time_info(
-          reshape2::melt(data), 'Var1', 'Var2', 'L1') }
+          melt_list_sparse(data), 'Var1', 'Var2', 'L1') }
     }
 
   } # finished list processing

@@ -26,7 +26,8 @@
 #'   period gets its own optimized layout.
 #' @param which_static Integer specifying which time period's layout to use as the 
 #'   static template when static_actor_positions is TRUE. If NULL (default), creates 
-#'   a static layout based on the aggregated network across all time periods.
+#'   a static layout based on the union of all edges across time periods, giving
+#'   more weight to persistent edges.
 #' @param seed Integer for random number generation to ensure reproducible layouts. 
 #'   Default is 6886.
 #'
@@ -62,14 +63,14 @@
 #' }
 #' 
 #' When using static layouts with which_static = NULL, the function creates a 
-#' composite layout based on the aggregated network structure across all time periods 
-#' (summed for binary networks, averaged for weighted networks).
+#' composite layout based on the union of all edges across time periods. Edges
+#' that appear more frequently are given higher weight, producing layouts that
+#' emphasize the stable core structure of the network.
 #' 
 #' \strong{Bipartite networks:}
 #' 
 #' For bipartite networks, the default layout arranges the two node sets in separate 
 #' columns.
-#'
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
@@ -87,56 +88,39 @@ get_node_layout <- function(
 	# check if netify object
 	netify_check(netlet)		
 
-    # clean up some inputs that need to 
-    # be adjusted if they are set to NULL
-    if(is.null(static_actor_positions)){ static_actor_positions = FALSE }
+	# clean up null inputs
+	if(is.null(static_actor_positions)){ static_actor_positions = FALSE }
 	if(is.null(seed)){ seed = 6886 }
 
-	# pull out attrs
+	# cache attributes once
 	obj_attrs <- attributes(netlet)
-
-	# pull out msrmnts
-	msrmnts <- netify_measurements(netlet)
-
-	# convert to igraph to get
-	# layout positions
+	netify_type <- obj_attrs$netify_type
+	is_bipartite <- obj_attrs$mode == 'bipartite'
+	
+	# convert to igraph without attributes for speed
 	g = netify_to_igraph(netlet, 
 		add_nodal_attribs = FALSE, 
 		add_dyad_attribs = FALSE )
 
-	# check to see if the user has a desired layout
-	# algo from igraph, if not default to nicely
-    # or bipartite depending on the mode
+	# determine layout function
 	if(is.null(layout)){
-
-		# if bipartite then we need to use 
-		# bipartite layout otherwise use nicely
-		if(obj_attrs$mode == 'bipartite'){
-			layout_fun = 'bipartite'
-		} else { layout_fun <- 'nicely' }
-
-    # if the user has specified a layout
-    # then match it using the code below
-    } else {
-	# make sure layout is lowercase
-	layout = tolower(layout)
-
-	# match with avail choices
-    layout_fun <- match.arg(
-        layout, 
-        choices = c(
-            "nicely", "fruchterman.reingold", 
-            "kamada.kawai", "random", "circle", 
-            "star", "grid", "graphopt", 
-            "sugiyama", "drl", "lgl", 'bipartite',
-            'tree', 'randomly', 'dh', 'fr',
-            'kk', 'gem', 'mds'
-            )
-        )
+		layout_fun <- if(is_bipartite) 'bipartite' else 'nicely'
+	} else {
+		# make lowercase and match
+		layout_fun <- match.arg(
+			tolower(layout), 
+			choices = c(
+				"nicely", "fruchterman.reingold", 
+				"kamada.kawai", "random", "circle", 
+				"star", "grid", "graphopt", 
+				"sugiyama", "drl", "lgl", 'bipartite',
+				'tree', 'randomly', 'dh', 'fr',
+				'kk', 'gem', 'mds'
+			)
+		)
 	}
 
-	# based on layout choice or default get the relevant
-	# layout function from igraph and assign it to layout_fun
+	# get the actual layout function from igraph
 	layout_fun <- switch(
 		layout_fun,
 		nicely = igraph::layout_nicely,
@@ -158,111 +142,142 @@ get_node_layout <- function(
 		dh = igraph::layout_with_dh, 
 		gem = igraph::layout_with_gem,
 		mds = igraph::layout_with_mds
-		)
+	)
 
-	# Calculate node positions using the specified layout
-	# if this is a longit then create a list of matrices
-	if(obj_attrs$netify_type != 'cross_sec'){
-
-		# if static actor positions chosen then 
-		# just choose gth object and use that for
-		# setting layout
-		if(static_actor_positions){
-
-			# if no time point chosen to base layout off of then
-			# calculate based on summed/averaged across all time points
-			if(is.null(which_static)){
-				# create aggregated adjacency matrix
-				raw_netlet = get_raw(netlet)
-
-				# if list then turn into an array
-				if(is.list(raw_netlet)){ raw_netlet = list_to_array(raw_netlet) }
-
-				# get static layout
-				if(obj_attrs$weight_binary){
-					raw_netlet_static = apply(raw_netlet, 1:2, sum, na.rm=TRUE)
-				} else { 
-					raw_netlet_static = apply(raw_netlet, 1:2, mean, na.rm=TRUE) }
-
-				# melt and turn into netify object
-				raw_netlet_df = reshape2::melt(raw_netlet_static)
-				raw_netlet_df = raw_netlet_df[raw_netlet_df$Var1 != raw_netlet_df$Var2, ]
-				netlet_static = suppressMessages(suppressWarnings(netify(
-					raw_netlet_df,
-					actor1 = 'Var1', actor2 = 'Var2', 
-					symmetric = obj_attrs$symmetric, mode = obj_attrs$mode,
-					diag_to_NA = obj_attrs$diag_to_NA, missing_to_zero = TRUE )))
-				g_static = netify_to_igraph(netlet_static) }
-
-			# if specific time point chosen to base layout off of then
-			# set g_static based on what was chosen
-			if(!is.null(which_static)){ g_static = g[[which_static]] }
-
-			# set seed
-			set.seed(seed)
-
-			# get layout
-			layout_matrix_static = layout_fun(g_static)
-			rownames(layout_matrix_static) = igraph::V(g_static)$name
-			layout_matrix = rep(list(layout_matrix_static), length(g))
-		} # end if block for static_actor_positions in longit case
-
-		# if static positions not specified then iterate through graph object
-		# and create a separate layout for every graph using the fun
-		# layout chosen
-		if(!static_actor_positions){
-
-			layout_matrix <- lapply(g, function(g_slice){
-
-				# set seed
-				set.seed(seed)
-
-				# apply chosen layout
-				l_matrix_slice = layout_fun(g_slice)
-
-				# set rownames
-				rownames(l_matrix_slice) <- igraph::V(g_slice)$name
-
-				#
-				return(l_matrix_slice) })
-		} # end if block for non static_actor_positions in longit case
-
-		# name list elements
-		names(layout_matrix) = names(g) } # end if block for longit condition
-
-	# cross-sectional case 
-	if(obj_attrs$netify_type == 'cross_sec'){
-
-		# set seed
+	# handle cross-sectional case first (simpler)
+	if(netify_type == 'cross_sec'){
 		set.seed(seed)
-
-		# if cross_sec then just one matrix
 		layout_matrix <- layout_fun(g)
-
-		# set rownames
 		rownames(layout_matrix) <- igraph::V(g)$name
+		
+		# format as data frame
+		nodes_df <- data.frame(
+			index = seq_len(nrow(layout_matrix)),
+			actor = rownames(layout_matrix),
+			x = layout_matrix[,1],
+			y = layout_matrix[,2],
+			stringsAsFactors = FALSE
+		)
+		
+		return(list(nodes_df))
+	}
 
-		# wrap into list for easier processing later
-		layout_matrix = list(layout_matrix) } # end of if block for cross_sec case
-
-	# convert g to list if not already for easier processing
+	# longitudinal case
+	# ensure g is a list
 	if(igraph::is_igraph(g)){ g = list(g) }
+	
+	if(static_actor_positions){
+		# determine which graph to use for static layout
+		if(is.null(which_static)){
+			# create union graph with edge weights based on frequency
+			g_static <- create_union_graph(g, obj_attrs)
+		} else {
+			# use specific time period
+			g_static <- g[[which_static]]
+		}
+		
+		# compute layout once
+		set.seed(seed)
+		layout_matrix_static <- layout_fun(g_static)
+		rownames(layout_matrix_static) <- igraph::V(g_static)$name
+		
+		# create mapping for all actors across time
+		all_actors <- unique(unlist(lapply(g, function(x) igraph::V(x)$name)))
+		actor_positions <- data.frame(
+			actor = all_actors,
+			x = NA_real_,
+			y = NA_real_,
+			stringsAsFactors = FALSE
+		)
+		
+		# fill in positions for actors in static layout
+		match_idx <- match(rownames(layout_matrix_static), actor_positions$actor)
+		actor_positions$x[match_idx] <- layout_matrix_static[,1]
+		actor_positions$y[match_idx] <- layout_matrix_static[,2]
+		
+		# create layout for each time period
+		nodes_list <- lapply(seq_along(g), function(i){
+			actors_t <- igraph::V(g[[i]])$name
+			match_idx <- match(actors_t, actor_positions$actor)
+			
+			data.frame(
+				index = seq_along(actors_t),
+				actor = actors_t,
+				x = actor_positions$x[match_idx],
+				y = actor_positions$y[match_idx],
+				stringsAsFactors = FALSE
+			)
+		})
+		
+	} else {
+		# dynamic layouts for each time period
+		nodes_list <- lapply(seq_along(g), function(i){
+			set.seed(seed + i - 1)  # ensure different but reproducible layouts
+			l_matrix <- layout_fun(g[[i]])
+			
+			data.frame(
+				index = seq_len(nrow(l_matrix)),
+				actor = igraph::V(g[[i]])$name,
+				x = l_matrix[,1],
+				y = l_matrix[,2],
+				stringsAsFactors = FALSE
+			)
+		})
+	}
+	
+	# add names
+	names(nodes_list) <- names(g)
+	
+	return(nodes_list)
+}
 
-	# set up dfs of node layouts into a list with a numeric
-	# index column, actor name column, and relabel the layout
-	# cols generated by igraph to x and y
-	nodes_list = lapply(layout_matrix, function(layout_slice){
+#' Create union graph for static layout
+#' 
+#' creates a weighted union graph from a list of graphs where edge weights
+#' represent the frequency or average weight across time periods
+#' 
+#' @param g_list list of igraph objects
+#' @param obj_attrs attributes from the netify object
+#' @return single igraph object representing the union
+#' @keywords internal
+#' @noRd
 
-		# set up nodes df
-		nodes = data.frame(
-			index = 1:nrow(layout_slice),
-			actor = rownames(layout_slice) )
-		nodes = cbind(nodes, layout_slice)
-		names(nodes)[3:4] = c("x", "y")
-
-		#
-		return(nodes) })
-
-	#
-	return( nodes_list )
+create_union_graph <- function(g_list, obj_attrs){
+	# get all unique actors across time
+	all_actors <- unique(unlist(lapply(g_list, function(x) igraph::V(x)$name)))
+	n_actors <- length(all_actors)
+	
+	# create empty adjacency matrix
+	union_adj <- matrix(0, n_actors, n_actors, 
+		dimnames = list(all_actors, all_actors))
+	
+	# aggregate edges across time periods
+	for(g_t in g_list){
+		# get adjacency matrix for this time period
+		adj_t <- igraph::as_adjacency_matrix(g_t, attr = "weight", sparse = FALSE)
+		
+		# map to union matrix positions
+		actors_t <- rownames(adj_t)
+		idx <- match(actors_t, all_actors)
+		
+		# add to union (increment for binary, sum for weighted)
+		if(obj_attrs$weight_binary){
+			union_adj[idx, idx] <- union_adj[idx, idx] + (adj_t > 0)
+		} else {
+			union_adj[idx, idx] <- union_adj[idx, idx] + adj_t
+		}
+	}
+	
+	# normalize by number of time periods for weighted networks
+	if(!obj_attrs$weight_binary){
+		union_adj <- union_adj / length(g_list)
+	}
+	
+	# create igraph object from union
+	igraph::graph_from_adjacency_matrix(
+		union_adj,
+		mode = ifelse(obj_attrs$symmetric, "undirected", "directed"),
+		weighted = TRUE,
+		diag = FALSE
+	)
 }

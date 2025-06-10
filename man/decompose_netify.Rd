@@ -42,8 +42,6 @@ The function helpful for:
 \strong{Edge data processing:}
 \itemize{
 \item Extracts the adjacency matrix (or array for longitudinal networks) from the netify object
-\item Converts it to long format using reshape2::melt
-\item Removes self-loops (edges where source equals target)
 \item Optionally removes zero-weight edges based on the remove_zeros parameter
 \item Merges any dyadic variables stored in the netify object
 \item Renames columns to standardized names (from, to, time)
