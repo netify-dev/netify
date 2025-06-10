@@ -203,8 +203,8 @@ subset_netify <- function(
     # use peek to subset data with new parameter names
     sub_net <- peek(
         netlet, 
-        rows = from,
-        cols = to,
+        from = from,
+        to = to,
         time = time,
         layers = layers
     )
@@ -237,7 +237,7 @@ subset_netify <- function(
             
             return(mat)
         })
-        names(sub_net) <- names(peek(netlet, rows = from, cols = to, time = time, layers = layers))
+        names(sub_net) <- names(peek(netlet, from = from, to = to, time = time, layers = layers))
     }
 
     # handle structure changes when going from longit to cross-sectional

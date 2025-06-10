@@ -4,27 +4,31 @@
 \alias{peek}
 \title{Preview subsets of network data from netify objects}
 \usage{
-peek(netlet, rows = 3, cols = 3, time = 1, layers = NULL)
+peek(netlet, actors = NULL, from = 3, to = 3, time = 1, layers = NULL)
 }
 \arguments{
 \item{netlet}{A netify object to preview. Can be cross-sectional, longitudinal
 (array or list format), and/or multilayer.}
 
-\item{rows}{Specifies which actors to display as senders of ties (row actors
+\item{actors}{Character vector of actor names or numeric indices to subset.
+Selects these actors as both senders and receivers (extracts subgraph among
+these actors). Overridden by \code{from} and \code{to} if specified.}
+
+\item{from}{Specifies which actors to display as senders of ties (row actors
 in the adjacency matrix). Can be:
 \itemize{
-\item \strong{Single number}: Shows the first n actors (e.g., \code{rows = 5}
+\item \strong{Single number}: Shows the first n actors (e.g., \code{from = 5}
 displays actors 1-5)
-\item \strong{Numeric vector}: Shows specific positions (e.g., \code{rows = c(1,3,5)}
+\item \strong{Numeric vector}: Shows specific positions (e.g., \code{from = c(1,3,5)}
 displays the 1st, 3rd, and 5th actors)
-\item \strong{Character vector}: Shows named actors (e.g., \code{rows = c("USA", "China")}
+\item \strong{Character vector}: Shows named actors (e.g., \code{from = c("USA", "China")}
 displays these specific countries)
 \item \strong{NULL}: Shows all row actors (default is 3)
 }
-In bipartite networks, rows represent actors in the first mode.}
+In bipartite networks, from represents actors in the first mode.}
 
-\item{cols}{Specifies which actors to display as receivers of ties (column actors
-in the adjacency matrix). Accepts the same input types as \code{rows}. In
+\item{to}{Specifies which actors to display as receivers of ties (column actors
+in the adjacency matrix). Accepts the same input types as \code{from}. In
 bipartite networks, columns represent actors in the second mode. Default is 3.}
 
 \item{time}{For longitudinal networks, specifies which time periods to display. Can be:
@@ -89,8 +93,8 @@ This makes it ideal for:
 
 In directed networks:
 \itemize{
-\item \strong{Rows} represent actors sending ties (out-ties)
-\item \strong{Columns} represent actors receiving ties (in-ties)
+\item \strong{From} represents actors sending ties (out-ties)
+\item \strong{To} represents actors receiving ties (in-ties)
 \item Cell \code{[i,j]} contains the tie from actor i to actor j
 }
 
@@ -101,7 +105,7 @@ strength 5 to China.
 
 The function includes several convenience features:
 \itemize{
-\item Single numbers are expanded to ranges (e.g., \code{rows = 5} becomes rows 1-5)
+\item Single numbers are expanded to ranges (e.g., \code{from = 5} becomes first 5 actors)
 \item Out-of-bounds indices are silently ignored (no errors during exploration)
 \item Character names are matched to actor labels
 \item Dimension reduction: if only one time period or layer is selected, that
@@ -135,13 +139,17 @@ net <- netify(
 peek(net)
 
 # See first 5 senders and first 5 receivers
-peek(net, rows = 5, cols = 5)
+peek(net, from = 5, to = 5)
 
 # Example 2: Specific actors by name
 # See ties from US and China to Russia, India, and Brazil
 peek(net,
-  rows = c('United States', 'China'),
-  cols = c('Russia', 'India', 'Brazil'))
+  from = c('United States', 'China'),
+  to = c('Russia', 'India', 'Brazil'))
+  
+# Use actors parameter to see subgraph
+peek(net,
+  actors = c('United States', 'China', 'Russia'))
 
 # Example 3: Longitudinal network
 net_longit <- netify(
@@ -152,24 +160,24 @@ net_longit <- netify(
 
 # See first 5 actors in specific years
 peek(net_longit, 
-  rows = 5, cols = 5,
+  from = 5, to = 5,
   time = c('2002', '2006', '2010'))
 
 # See all actors in year 2010
 peek(net_longit, 
-  rows = NULL, cols = NULL,
+  from = NULL, to = NULL,
   time = '2010')
   
 # Example 4: Using numeric indices
 # See specific positions in the network
 peek(net, 
-  rows = c(1, 3, 5, 7),  # 1st, 3rd, 5th, 7th senders
-  cols = 1:10)           # first 10 receivers
+  from = c(1, 3, 5, 7),  # 1st, 3rd, 5th, 7th senders
+  to = 1:10)             # first 10 receivers
 
 # Example 5: Quick inspection patterns
 # See who USA interacts with
-peek(net, rows = "United States", cols = 10)  # USA's ties to first 10 countries
-peek(net, rows = 10, cols = "United States")  # First 10 countries' ties to USA
+peek(net, from = "United States", to = 10)  # USA's ties to first 10 countries
+peek(net, from = 10, to = "United States")  # First 10 countries' ties to USA
 
 }
 \author{
