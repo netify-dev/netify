@@ -130,7 +130,7 @@ convert_time_to_numeric <- function(time_data, time_col = "time") {
 		time_mapping <- setNames(seq_along(unique_times), unique_times)
 		
 		# check if they look like dates and warn if so
-		if(any(grepl("^\\d{4}-\\d{2}-\\d{2}$", head(unique_times, 5)))) {
+		if(any(grepl("^\\d{4}-\\d{2}-\\d{2}$", utils::head(unique_times, 5)))) {
 			cli::cli_alert_warning(
 				"Character time variable looks like dates. Consider converting to Date class for better handling."
 			)
