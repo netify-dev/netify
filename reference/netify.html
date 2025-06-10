@@ -97,8 +97,10 @@ for data.frame inputs)</p></dd>
 
 
 <dt id="arg-time">time<a class="anchor" aria-label="anchor" href="#arg-time"></a></dt>
-<dd><p>character: name of the time variable in the data, if
-no time is provided then cross-sectional network will be created</p></dd>
+<dd><p>character: name of the time variable in the data. Can contain
+numeric, Date, POSIXct/POSIXlt, or character values. Non-numeric types
+will be converted to numeric indices while preserving original labels.
+If no time is provided then a cross-sectional network will be created.</p></dd>
 
 
 <dt id="arg-symmetric">symmetric<a class="anchor" aria-label="anchor" href="#arg-symmetric"></a></dt>
