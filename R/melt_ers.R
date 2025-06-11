@@ -49,49 +49,78 @@ melt_matrix_base <- function(mat) {
 #' @noRd
 melt_matrix_sparse <- function(mat, remove_zeros = TRUE, remove_diagonal = TRUE) {
     if (is.null(mat) || length(mat) == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
+        return(data.frame(Var1 = character(0), Var2 = character(0), 
+                         value = numeric(0), stringsAsFactors = FALSE))
     }
     
-    # get indices of non-zero/non-na entries
-    if (remove_zeros) {
-        idx <- which(mat != 0 & !is.na(mat), arr.ind = TRUE)
+    # Pre-allocate based on matrix density estimate
+    n <- nrow(mat)
+    m <- ncol(mat)
+    
+    # For sparse matrices, estimate non-zero entries
+    if(remove_zeros) {
+        # Sample to estimate density (faster than checking all)
+        if(n * m > 10000) {
+            sample_idx <- sample(length(mat), min(1000, length(mat)))
+            density_est <- sum(mat[sample_idx] != 0 & !is.na(mat[sample_idx])) / length(sample_idx)
+            est_size <- as.integer(n * m * density_est * 1.1)  # 10% buffer
+        } else {
+            est_size <- sum(mat != 0 & !is.na(mat))
+        }
     } else {
-        idx <- which(!is.na(mat), arr.ind = TRUE)
+        est_size <- n * m
     }
     
-    # remove diagonal if requested
-    if (remove_diagonal && nrow(idx) > 0) {
-        idx <- idx[idx[,1] != idx[,2], , drop = FALSE]
+    if(remove_diagonal && n == m) {
+        est_size <- est_size - n
     }
     
-    # handle empty result
-    if (nrow(idx) == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
-    }
+    # Pre-allocate vectors
+    var1 <- character(est_size)
+    var2 <- character(est_size)
+    values <- numeric(est_size)
     
-    # get names
+    # Get names once
     row_names <- rownames(mat)
     col_names <- colnames(mat)
-    if (is.null(row_names)) row_names <- as.character(seq_len(nrow(mat)))
-    if (is.null(col_names)) col_names <- as.character(seq_len(ncol(mat)))
+    if(is.null(row_names)) row_names <- as.character(seq_len(n))
+    if(is.null(col_names)) col_names <- as.character(seq_len(m))
     
-    # build data.frame directly
-    data.frame(
-        Var1 = row_names[idx[,1]],
-        Var2 = col_names[idx[,2]],
-        value = mat[idx],
-        stringsAsFactors = FALSE
-    )
+    # Single pass through matrix
+    k <- 0
+    for(j in seq_len(m)) {
+        for(i in seq_len(n)) {
+            if(remove_diagonal && i == j) next
+            val <- mat[i, j]
+            if(remove_zeros && (val == 0 || is.na(val))) next
+            
+            k <- k + 1
+            if(k > est_size) {
+                # Extend if needed
+                var1 <- c(var1, character(est_size))
+                var2 <- c(var2, character(est_size))
+                values <- c(values, numeric(est_size))
+                est_size <- est_size * 2
+            }
+            
+            var1[k] <- row_names[i]
+            var2[k] <- col_names[j]
+            values[k] <- val
+        }
+    }
+    
+    # Trim to actual size
+    if(k > 0) {
+        data.frame(
+            Var1 = var1[1:k],
+            Var2 = var2[1:k],
+            value = values[1:k],
+            stringsAsFactors = FALSE
+        )
+    } else {
+        data.frame(Var1 = character(0), Var2 = character(0), 
+                  value = numeric(0), stringsAsFactors = FALSE)
+    }
 }
 
 #' fast sparse array melt for 3d arrays
