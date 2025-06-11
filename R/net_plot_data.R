@@ -156,25 +156,26 @@ net_plot_data <- function(netlet, plot_args=list()) {
     ######################
 
     ######################
-    # get layouts of nodes after checking
-    # whether user has supplied their own
+    #
+    g_list <- netify_to_igraph(netlet, 
+        add_nodal_attribs = FALSE, 
+        add_dyad_attribs = FALSE)
+
+    # Modify get_node_layout to accept pre-converted igraph
     if(is.null(plot_args$point_layout)){
         nodes_list = get_node_layout(
-            netlet, 
-            layout=plot_args$layout, 
-            static_actor_positions=plot_args$static_actor_positions,
-            which_static=plot_args$which_static,
-            seed=plot_args$seed
-            )
-    } else { 
-        nodes_list = plot_args$point_layout
-        if(!is.list(nodes_list)){
-            nodes_list = list(nodes_list) }
-    }
+            netlet=netlet, ig_netlet=g_list,
+            layout = plot_args$layout,
+            static_actor_positions = plot_args$static_actor_positions,
+            which_static = plot_args$which_static,
+            seed = plot_args$seed ) }
 
-    # get info for drawing edge segments
-    edges_list = get_edge_layout( netlet,  nodes_layout=nodes_list )
-    ######################      
+    # Modify get_edge_layout to use the same igraph
+    edges_list = get_edge_layout(
+        netlet=netlet, 
+        nodes_layout=nodes_list, 
+        ig_netlet=g_list )
+    ######################
 
     ######################
     # org the netlet into a  and dyadic df with all the

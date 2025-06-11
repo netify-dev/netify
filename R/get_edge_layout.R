@@ -21,6 +21,8 @@
 #'     \item Each element follows the structure described above
 #'     \item Time period names must match those in the netify object
 #'   }
+#' @param ig_netlet An optional pre-converted igraph object. If provided, this
+#'   function will use it directly instead of converting the netify object again.
 #'
 #' @return Depending on the input netify object:
 #'   \itemize{
@@ -79,17 +81,24 @@
 #'
 #' @export get_edge_layout
 
-get_edge_layout <- function(netlet, nodes_layout) {
+get_edge_layout <- function(
+    netlet, 
+    nodes_layout,
+    ig_netlet = NULL    
+    ) {
 
     # 
     netify_check(netlet)
     
-    # get the igraph object from netlet
-    g <- netify_to_igraph(
-        netlet, 
-        add_nodal_attribs = FALSE, 
-        add_dyad_attribs = FALSE
-    )
+	# convert to igraph without attributes 
+	# cuz we got a need for speed
+	if(is.null(ig_netlet)){
+		g = netify_to_igraph(netlet, 
+			add_nodal_attribs = FALSE, 
+			add_dyad_attribs = FALSE )
+	} else {
+		# use provided igraph object if avail
+		g = ig_netlet }
     
     # make sure igraph object is in the right format
     if (igraph::is_igraph(g)) {
