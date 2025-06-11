@@ -233,7 +233,7 @@ process_edge_data <- function(netlet, netify_type, weight_attr, remove_zeros, eg
 merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type) {
    
     # burn it down
-    dyad_data_melted <- melt_dyad_data(dyad_data_attr)
+    dyad_data_melted <- melt_var_time_list(dyad_data_attr)
 
     # 
     if (nrow(dyad_data_melted) == 0) {

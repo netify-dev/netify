@@ -215,6 +215,7 @@ melt_array_sparse <- function(arr, remove_zeros = TRUE, remove_diagonal = TRUE) 
 }
 
 #' fast sparse list melt for lists of matrices
+#' specifically, for sender, receiver, time
 #' @keywords internal
 #' @noRd
 melt_list_sparse <- function(mat_list, remove_zeros = TRUE, remove_diagonal = TRUE) {
@@ -371,9 +372,10 @@ melt_df <- function(data, id = NULL) {
 }
 
 #' Convert dyad_data attribute to meltable format
+#' specifically for sender, receiver, var, time
 #' @keywords internal
 #' @noRd
-melt_dyad_data <- function(dyad_data_attr) {
+melt_var_time_list <- function(dyad_data_attr) {
     
     #
     if (length(dyad_data_attr) == 0) {
