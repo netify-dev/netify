@@ -88,16 +88,20 @@ set.seed(12345)
 random_indices <- sample(length(select_names), 10)
 random_names <- select_names[random_indices]
 
-plot(mex_network,
+library(patchwork)
+
+p1=plot(mex_network,
      select_text = random_names,
      select_text_display = random_names)
 
-plot(mex_network,
+p2=plot(mex_network,
      select_text = random_names,
      select_text_display = random_names, 
      # log(x+1) to better see range of connects
      weight_transform = log1p
      )
+
+p1 + p2
 ```
 
 ### 2. Weighted Network (Mexican Case)
