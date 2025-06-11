@@ -95,6 +95,18 @@ plot.netify <- function(x, ...){
 	net_dfs = net_plot_info$net_dfs
 	######################	
 
+	######################
+    # weight transformation
+    if (!is.null(plot_args$weight_transform)) {
+        # apply transformation to edge weights
+        weight_col <- attr(x, 'weight')
+        if (!is.null(weight_col) && weight_col %in% names(net_dfs$edge_data)) {
+            transform_fn <- match.fun(plot_args$weight_transform)
+            net_dfs$edge_data[[weight_col]] <- transform_fn(net_dfs$edge_data[[weight_col]])
+        }
+    }
+	######################	
+
 	######################	
 	# start on plot
 	viz = ggplot()

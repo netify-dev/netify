@@ -60,6 +60,14 @@ mex_network <- netify(
   missing_to_zero = TRUE
 )
 
+mex_network_log <- transform_weights(
+  mex_network, 
+  transform_fn = log,
+  add_constant = 1,  # Add 1 before log to handle zeros
+  new_name = "log_events"
+)
+
+
 # Summaries at the graph and actor levels
 summary(mex_network)
 
