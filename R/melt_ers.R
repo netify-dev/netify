@@ -1,3 +1,8 @@
+#### these started off with me wanting to move away from reshape2 
+### then realizing that was hard because my function was slower
+## started iterating with llms then and i learned a lot, anything
+# clever below is from the llm, anything slow is from me
+
 #' melt the face off of matrices
 #' @keywords internal
 #' @noRd
@@ -49,78 +54,51 @@ melt_matrix_base <- function(mat) {
 #' @noRd
 melt_matrix_sparse <- function(mat, remove_zeros = TRUE, remove_diagonal = TRUE) {
     if (is.null(mat) || length(mat) == 0) {
-        return(data.frame(Var1 = character(0), Var2 = character(0), 
-                         value = numeric(0), stringsAsFactors = FALSE))
+        return(data.frame(
+            Var1 = character(0),
+            Var2 = character(0), 
+            value = numeric(0),
+            stringsAsFactors = FALSE
+        ))
     }
     
-    # Pre-allocate based on matrix density estimate
-    n <- nrow(mat)
-    m <- ncol(mat)
-    
-    # For sparse matrices, estimate non-zero entries
-    if(remove_zeros) {
-        # Sample to estimate density (faster than checking all)
-        if(n * m > 10000) {
-            sample_idx <- sample(length(mat), min(1000, length(mat)))
-            density_est <- sum(mat[sample_idx] != 0 & !is.na(mat[sample_idx])) / length(sample_idx)
-            est_size <- as.integer(n * m * density_est * 1.1)  # 10% buffer
-        } else {
-            est_size <- sum(mat != 0 & !is.na(mat))
-        }
+    # get indices of non-zero/non-na entries using which() with arr.ind
+    # This is MUCH faster than iterating through the matrix
+    if (remove_zeros) {
+        idx <- which(mat != 0 & !is.na(mat), arr.ind = TRUE)
     } else {
-        est_size <- n * m
+        idx <- which(!is.na(mat), arr.ind = TRUE)
     }
     
-    if(remove_diagonal && n == m) {
-        est_size <- est_size - n
+    # remove diagonal if requested
+    if (remove_diagonal && nrow(idx) > 0) {
+        keep_idx <- idx[,1] != idx[,2]
+        idx <- idx[keep_idx, , drop = FALSE]
     }
     
-    # Pre-allocate vectors
-    var1 <- character(est_size)
-    var2 <- character(est_size)
-    values <- numeric(est_size)
+    # handle empty result
+    if (nrow(idx) == 0) {
+        return(data.frame(
+            Var1 = character(0),
+            Var2 = character(0),
+            value = numeric(0),
+            stringsAsFactors = FALSE
+        ))
+    }
     
-    # Get names once
+    # get names
     row_names <- rownames(mat)
     col_names <- colnames(mat)
-    if(is.null(row_names)) row_names <- as.character(seq_len(n))
-    if(is.null(col_names)) col_names <- as.character(seq_len(m))
+    if (is.null(row_names)) row_names <- as.character(seq_len(nrow(mat)))
+    if (is.null(col_names)) col_names <- as.character(seq_len(ncol(mat)))
     
-    # Single pass through matrix
-    k <- 0
-    for(j in seq_len(m)) {
-        for(i in seq_len(n)) {
-            if(remove_diagonal && i == j) next
-            val <- mat[i, j]
-            if(remove_zeros && (val == 0 || is.na(val))) next
-            
-            k <- k + 1
-            if(k > est_size) {
-                # Extend if needed
-                var1 <- c(var1, character(est_size))
-                var2 <- c(var2, character(est_size))
-                values <- c(values, numeric(est_size))
-                est_size <- est_size * 2
-            }
-            
-            var1[k] <- row_names[i]
-            var2[k] <- col_names[j]
-            values[k] <- val
-        }
-    }
-    
-    # Trim to actual size
-    if(k > 0) {
-        data.frame(
-            Var1 = var1[1:k],
-            Var2 = var2[1:k],
-            value = values[1:k],
-            stringsAsFactors = FALSE
-        )
-    } else {
-        data.frame(Var1 = character(0), Var2 = character(0), 
-                  value = numeric(0), stringsAsFactors = FALSE)
-    }
+    # build data.frame directly using the indices
+    data.frame(
+        Var1 = row_names[idx[,1]],
+        Var2 = col_names[idx[,2]],
+        value = mat[idx],
+        stringsAsFactors = FALSE
+    )
 }
 
 #' fast sparse array melt for 3d arrays
@@ -149,69 +127,43 @@ melt_array_sparse <- function(arr, remove_zeros = TRUE, remove_diagonal = TRUE) 
     if (is.null(dn[[2]])) dn[[2]] <- as.character(seq_len(dims[2]))
     if (is.null(dn[[3]])) dn[[3]] <- as.character(seq_len(dims[3]))
     
-    # pre-allocate maximum possible size
-    max_size <- prod(dims)
-    if (remove_diagonal) {
-        max_size <- max_size - dims[1] * dims[3]  # subtract diagonal entries
-    }
-    
-    Var1 <- character(max_size)
-    Var2 <- character(max_size)
-    Var3 <- character(max_size)
-    values <- numeric(max_size)
-    
-    current_row <- 1
+    # Use list to collect results from each time slice
+    results_list <- vector("list", dims[3])
     
     # process each time slice
     for (k in seq_len(dims[3])) {
         mat <- arr[, , k]
         
-        # get non-zero indices
-        if (remove_zeros) {
-            idx <- which(mat != 0 & !is.na(mat), arr.ind = TRUE)
-        } else {
-            idx <- which(!is.na(mat), arr.ind = TRUE)
-        }
+        # Use the optimized sparse matrix melt
+        sparse_result <- melt_matrix_sparse(mat, remove_zeros, remove_diagonal)
         
-        # remove diagonal if requested
-        if (remove_diagonal && nrow(idx) > 0) {
-            idx <- idx[idx[,1] != idx[,2], , drop = FALSE]
-        }
-        
-        if (nrow(idx) > 0) {
-            n_entries <- nrow(idx)
-            rows <- current_row:(current_row + n_entries - 1)
-            
-            Var1[rows] <- dn[[1]][idx[,1]]
-            Var2[rows] <- dn[[2]][idx[,2]]
-            Var3[rows] <- dn[[3]][k]
-            values[rows] <- mat[idx]
-            
-            current_row <- current_row + n_entries
+        if (nrow(sparse_result) > 0) {
+            # Add time dimension
+            sparse_result$L1 <- dn[[3]][k]
+            results_list[[k]] <- sparse_result
         }
     }
     
-    # trim to actual size
-    if (current_row > 1) {
-        actual_rows <- seq_len(current_row - 1)
-        result <- data.frame(
-            Var1 = Var1[actual_rows],
-            Var2 = Var2[actual_rows],
-            L1 = Var3[actual_rows],  # note: renamed to L1 for consistency
-            value = values[actual_rows],
-            stringsAsFactors = FALSE
-        )
-    } else {
-        result <- data.frame(
+    # Remove NULL entries and combine
+    results_list <- results_list[!sapply(results_list, is.null)]
+    
+    if (length(results_list) == 0) {
+        return(data.frame(
             Var1 = character(0),
             Var2 = character(0),
             L1 = character(0),
             value = numeric(0),
             stringsAsFactors = FALSE
-        )
+        ))
     }
     
-    result
+    # Combine all results
+    result <- do.call(rbind, results_list)
+    
+    # Reorder columns to match expected output
+    result <- result[, c("Var1", "Var2", "L1", "value")]
+    
+    return(result)
 }
 
 #' fast sparse list melt for lists of matrices
@@ -235,27 +187,8 @@ melt_list_sparse <- function(mat_list, remove_zeros = TRUE, remove_diagonal = TR
         time_names <- as.character(seq_along(mat_list))
     }
     
-    # pre-calculate total size
-    total_size <- 0
-    for (i in seq_along(mat_list)) {
-        mat <- mat_list[[i]]
-        if (!is.null(mat)) {
-            if (remove_diagonal) {
-                # estimate non-zero entries (this is an upper bound)
-                total_size <- total_size + length(mat) - nrow(mat)
-            } else {
-                total_size <- total_size + length(mat)
-            }
-        }
-    }
-    
-    # pre-allocate
-    Var1 <- character(total_size)
-    Var2 <- character(total_size)
-    L1 <- character(total_size)
-    values <- numeric(total_size)
-    
-    current_row <- 1
+    # Use list to collect results
+    results_list <- vector("list", length(mat_list))
     
     # process each matrix in the list
     for (i in seq_along(mat_list)) {
@@ -263,58 +196,36 @@ melt_list_sparse <- function(mat_list, remove_zeros = TRUE, remove_diagonal = TR
         
         if (is.null(mat) || length(mat) == 0) next
         
-        # get non-zero indices
-        if (remove_zeros) {
-            idx <- which(mat != 0 & !is.na(mat), arr.ind = TRUE)
-        } else {
-            idx <- which(!is.na(mat), arr.ind = TRUE)
-        }
+        # Use the optimized sparse matrix melt
+        sparse_result <- melt_matrix_sparse(mat, remove_zeros, remove_diagonal)
         
-        # remove diagonal if requested
-        if (remove_diagonal && nrow(idx) > 0) {
-            idx <- idx[idx[,1] != idx[,2], , drop = FALSE]
-        }
-        
-        if (nrow(idx) > 0) {
-            n_entries <- nrow(idx)
-            rows <- current_row:(current_row + n_entries - 1)
-            
-            # get row/col names
-            row_names <- rownames(mat)
-            col_names <- colnames(mat)
-            if (is.null(row_names)) row_names <- as.character(seq_len(nrow(mat)))
-            if (is.null(col_names)) col_names <- as.character(seq_len(ncol(mat)))
-            
-            Var1[rows] <- row_names[idx[,1]]
-            Var2[rows] <- col_names[idx[,2]]
-            L1[rows] <- time_names[i]
-            values[rows] <- mat[idx]
-            
-            current_row <- current_row + n_entries
+        if (nrow(sparse_result) > 0) {
+            # Add time dimension
+            sparse_result$L1 <- time_names[i]
+            results_list[[i]] <- sparse_result
         }
     }
     
-    # trim to actual size
-    if (current_row > 1) {
-        actual_rows <- seq_len(current_row - 1)
-        result <- data.frame(
-            Var1 = Var1[actual_rows],
-            Var2 = Var2[actual_rows],
-            L1 = L1[actual_rows],
-            value = values[actual_rows],
-            stringsAsFactors = FALSE
-        )
-    } else {
-        result <- data.frame(
+    # Remove NULL entries and combine
+    results_list <- results_list[!sapply(results_list, is.null)]
+    
+    if (length(results_list) == 0) {
+        return(data.frame(
             Var1 = character(0),
             Var2 = character(0),
             L1 = character(0),
             value = numeric(0),
             stringsAsFactors = FALSE
-        )
+        ))
     }
     
-    result
+    # Combine all results
+    result <- do.call(rbind, results_list)
+    
+    # Reorder columns to match expected output
+    result <- result[, c("Var1", "Var2", "L1", "value")]
+    
+    return(result)
 }
 
 #' Melt a data.frame from wide to long format
@@ -376,96 +287,128 @@ melt_df <- function(data, id = NULL) {
 #' @keywords internal
 #' @noRd
 melt_var_time_list <- function(dyad_data_attr) {
-    
-    #
-    if (length(dyad_data_attr) == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            Var3 = character(0),
-            L1 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
-    }
+   
+   # check if dyad_data_attr is empty
+   if (length(dyad_data_attr) == 0) {
+       return(data.frame(
+           Var1 = character(0),
+           Var2 = character(0),
+           Var3 = character(0),
+           L1 = character(0),
+           value = numeric(0),
+           stringsAsFactors = FALSE
+       ))
+   }
 
-    # pre-calculate total size
-    total_rows <- 0
-    for (time_period in names(dyad_data_attr)) {
-        var_matrices <- dyad_data_attr[[time_period]]
-        if (length(var_matrices) > 0) {
-            first_mat <- var_matrices[[1]]
-            n_cells <- nrow(first_mat) * ncol(first_mat)
-            total_rows <- total_rows + n_cells * length(var_matrices)
-        }
-    }
+   # figure out how many rows we need in total
+   total_rows <- 0
+   time_info <- vector("list", length(dyad_data_attr))
+   idx <- 1
+   
+   # iterate over time periods and gather information
+   for (time_period in names(dyad_data_attr)) {
+       var_matrices <- dyad_data_attr[[time_period]]
+       if (length(var_matrices) > 0) {
+           first_mat <- var_matrices[[1]]
+           nr <- nrow(first_mat)
+           nc <- ncol(first_mat)
+           n_vars <- length(var_matrices)
+           n_cells <- nr * nc
+           
+           time_info[[idx]] <- list(
+               time = time_period,
+               n_cells = n_cells,
+               n_vars = n_vars,
+               nr = nr,
+               nc = nc,
+               var_names = names(var_matrices),
+               row_names = rownames(first_mat) %||% as.character(seq_len(nr)),
+               col_names = colnames(first_mat) %||% as.character(seq_len(nc))
+           )
+           
+           total_rows <- total_rows + n_cells * n_vars
+       }
+       idx <- idx + 1
+   }
+   
+   # if no valid time periods, return empty data.frame
+   if (total_rows == 0) {
+       return(data.frame(
+           Var1 = character(0),
+           Var2 = character(0),
+           Var3 = character(0),
+           L1 = character(0),
+           value = numeric(0),
+           stringsAsFactors = FALSE
+       ))
+   }
 
-    if (total_rows == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            Var3 = character(0),
-            L1 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
-    }
+   # pre-allocate vectors for efficiency
+   Var1 <- character(total_rows)
+   Var2 <- character(total_rows)
+   Var3 <- character(total_rows)
+   L1 <- character(total_rows)
+   
+   # figure out the type of the values vector based on the first matrix
+   first_mat <- dyad_data_attr[[1]][[1]]
+   if (is.integer(first_mat)) {
+       values <- integer(total_rows)
+   } else if (is.logical(first_mat)) {
+       values <- logical(total_rows)
+   } else {
+       values <- numeric(total_rows)
+   }
+   
+   # fill the vectors in one pass
+   current_row <- 1
+   
+   for (info in time_info) {
+       if (is.null(info)) next
+       
+       time_period <- info$time
+       var_matrices <- dyad_data_attr[[time_period]]
+       
+       # pre-compute row/column expansions for this time period
+       n_cells <- info$n_cells
+       nr <- info$nr
+       nc <- info$nc
+       
+       # process each variable
+       for (i in seq_along(info$var_names)) {
+           var_name <- info$var_names[i]
+           mat <- var_matrices[[var_name]]
+           
+           # calculate the range of rows to fill
+           cell_start <- current_row
+           cell_end <- current_row + n_cells - 1
+           cell_range <- cell_start:cell_end
+           
+           # fill actor names (Var1 and Var2)
+           Var1[cell_range] <- rep(info$row_names, nc)
+           Var2[cell_range] <- rep(info$col_names, each = nr)
+           
+           # fill variable name and time period
+           Var3[cell_range] <- var_name
+           L1[cell_range] <- time_period
+           
+           # fill matrix values
+           values[cell_range] <- as.vector(mat)
+           
+           # move to the next block of rows
+           current_row <- current_row + n_cells
+       }
+   }
 
-    # pre-allocate result vectors
-    Var1 <- character(total_rows)
-    Var2 <- character(total_rows)
-    Var3 <- character(total_rows)
-    L1 <- character(total_rows)
-    value <- numeric(total_rows)
-
-    current_row <- 1
-
-    for (time_period in names(dyad_data_attr)) {
-        var_matrices <- dyad_data_attr[[time_period]]
-        
-        if (length(var_matrices) == 0) next
-        
-        # get dimensions from first matrix
-        first_matrix <- var_matrices[[1]]
-        nr <- nrow(first_matrix)
-        nc <- ncol(first_matrix)
-        n_cells <- nr * nc
-        var_names <- names(var_matrices)
-        
-        # get row/col names
-        row_names <- rownames(first_matrix)
-        col_names <- colnames(first_matrix)
-        if (is.null(row_names)) row_names <- as.character(seq_len(nr))
-        if (is.null(col_names)) col_names <- as.character(seq_len(nc))
-        
-        # create indices for one matrix
-        row_idx <- rep(seq_len(nr), nc)
-        col_idx <- rep(seq_len(nc), each = nr)
-        
-        # process each variable
-        for (i in seq_along(var_names)) {
-            var_name <- var_names[i]
-            mat <- var_matrices[[i]]
-            
-            # fill in the pre-allocated vectors
-            rows <- current_row:(current_row + n_cells - 1)
-            Var1[rows] <- row_names[row_idx]
-            Var2[rows] <- col_names[col_idx]
-            Var3[rows] <- var_name
-            L1[rows] <- time_period
-            value[rows] <- as.vector(mat)
-            
-            current_row <- current_row + n_cells
-        }
-    }
-
-    # create final data frame
-    out <- data.frame(
-        Var1 = Var1,
-        Var2 = Var2,
-        Var3 = Var3,
-        L1 = L1,
-        value = value,
-        stringsAsFactors = FALSE )
-    return( out )
+   # create the final data frame
+   out <- data.frame(
+       Var1 = Var1,
+       Var2 = Var2,
+       Var3 = Var3,
+       L1 = L1,
+       value = values,
+       stringsAsFactors = FALSE
+   )
+   
+   #
+   return(out)
 }
