@@ -67,6 +67,11 @@ mex_network_log <- transform_weights(
   new_name = "log_events"
 )
 
+mex_bin <- transform_weights(
+  mex_network, 
+  transform_fn = function(x) ifelse(x > 0, 1, 0),
+  new_name = "conflict_present")
+
 
 # Summaries at the graph and actor levels
 summary(mex_network)
@@ -86,6 +91,13 @@ random_names <- select_names[random_indices]
 plot(mex_network,
      select_text = random_names,
      select_text_display = random_names)
+
+plot(mex_network,
+     select_text = random_names,
+     select_text_display = random_names, 
+     # log(x+1) to better see range of connects
+     weight_transform = log1p
+     )
 ```
 
 ### 2. Weighted Network (Mexican Case)

@@ -210,7 +210,6 @@ gg_params <- function(
 
     # label static param list
     label_static_params = list(
-        check_overlap = plot_args$check_overlap,
         alpha = plot_args$label_alpha,
         color = plot_args$label_color,
         fill = plot_args$label_fill,

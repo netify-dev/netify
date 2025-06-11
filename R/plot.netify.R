@@ -95,21 +95,12 @@ plot.netify <- function(x, ...){
 	net_dfs = net_plot_info$net_dfs
 	######################	
 
-	######################
-    # weight transformation
-    if (!is.null(plot_args$weight_transform)) {
-        # apply transformation to edge weights
-        weight_col <- attr(x, 'weight')
-        if (!is.null(weight_col) && weight_col %in% names(net_dfs$edge_data)) {
-            transform_fn <- match.fun(plot_args$weight_transform)
-            net_dfs$edge_data[[weight_col]] <- transform_fn(net_dfs$edge_data[[weight_col]])
-        }
-    }
 	######################	
-
-	######################	
-	# start on plot
-	viz = ggplot()
+	# Build components separately
+	components <- list()
+	
+	# Base plot
+	components$base <- ggplot()
 	######################	
 
 	# build edges #####################
@@ -126,29 +117,40 @@ plot.netify <- function(x, ...){
 
 		# curved edges
 		if(plot_args$curve_edges){
-			viz <- viz + layer(
+			components$edges <- list(
+				geom = GeomCurve,
 				data = net_dfs$edge_data,
 				mapping = aes(!!!edge_aes_list),
-				geom = GeomCurve,
+				params = curve_static_params,
 				stat = "identity",
 				position = "identity",
-				params = curve_static_params,
 				inherit.aes = TRUE,
 				show.legend = NA
 			)
 		} else {
-			viz <- viz + layer(
+			components$edges <- list(
+				geom = GeomSegment,
 				data = net_dfs$edge_data,
 				mapping = aes(!!!edge_aes_list),
-				geom = GeomSegment,
+				params = edge_static_params,
 				stat = "identity",
 				position = "identity",
-				params = edge_static_params,
 				inherit.aes = TRUE,
 				show.legend = NA
 			)
 		}
-
+		
+		# Store edge scale names for documentation
+		components$edge_scales <- list()
+		if(!is.null(plot_args$edge_color_var)) {
+			components$edge_scales$color <- plot_args$edge_color_var
+		}
+		if(!is.null(plot_args$edge_alpha_var)) {
+			components$edge_scales$alpha <- plot_args$edge_alpha_var
+		}
+		if(!is.null(plot_args$edge_linewidth_var)) {
+			components$edge_scales$linewidth <- plot_args$edge_linewidth_var
+		}
 	}
 	######################
 
@@ -163,23 +165,29 @@ plot.netify <- function(x, ...){
 		# point var param list
 		point_aes_list <- ggnet_params$point$var
 
-		# make room for new scales
-		viz <- viz + 
-			ggnewscale::new_scale_color() + 
-			ggnewscale::new_scale_fill() +
-			ggnewscale::new_scale('alpha')
-
-		# create geom_point
-		viz <- viz + layer(
-			data = net_dfs$nodal_data, 
-			mapping = aes(!!!point_aes_list),  
-			geom = GeomPoint,  
-			stat = "identity", 
-			position = "identity",  
+		# create geom_point component
+		components$points <- list(
+			geom = GeomPoint,
+			data = net_dfs$nodal_data,
+			mapping = aes(!!!point_aes_list),
 			params = point_static_params,
-			inherit.aes = TRUE,  
-			show.legend = NA  
+			stat = "identity",
+			position = "identity",
+			inherit.aes = TRUE,
+			show.legend = NA
 		)
+		
+		# Store point scale names
+		components$point_scales <- list()
+		if(!is.null(plot_args$point_color_var)) {
+			components$point_scales$color <- plot_args$point_color_var
+		}
+		if(!is.null(plot_args$point_fill_var)) {
+			components$point_scales$fill <- plot_args$point_fill_var
+		}
+		if(!is.null(plot_args$point_size_var)) {
+			components$point_scales$size <- plot_args$point_size_var
+		}
 	}
 
 	# geom_text
@@ -191,24 +199,17 @@ plot.netify <- function(x, ...){
 		# Prepare a list to conditionally build the aes()
 		text_aes_list <- ggnet_params$text$var
 
-		# make room for new scales
-		viz <- viz + 
-			ggnewscale::new_scale_color() + 
-			ggnewscale::new_scale('alpha') +
-			ggnewscale::new_scale('size')
-
-		# create geom_point
-		viz <- viz + layer(
+		# create geom_text component
+		components$text <- list(
+			geom = GeomText,
 			data = net_dfs$nodal_data,
 			mapping = aes(!!!text_aes_list),
-			geom = GeomText,
+			params = text_static_params,
 			stat = "identity",
 			position = "identity",
-			params = text_static_params,
 			inherit.aes = TRUE,
 			show.legend = NA
 		)
-
 	}
 
 	# geom_label
@@ -220,21 +221,14 @@ plot.netify <- function(x, ...){
 		# Prepare a list to conditionally build the aes()
 		label_aes_list <- ggnet_params$label$var
 
-		# make room for new scales
-		viz <- viz + 
-			ggnewscale::new_scale_color() + 
-			ggnewscale::new_scale('alpha') +
-			ggnewscale::new_scale_fill() +
-			ggnewscale::new_scale('size')
-
-		# create geom_label
-		viz <- viz + layer(
+		# create geom_label component
+		components$label <- list(
+			geom = GeomLabel,
 			data = net_dfs$nodal_data,
 			mapping = aes(!!!label_aes_list),
-			geom = GeomLabel,
+			params = label_static_params,
 			stat = "identity",
 			position = "identity",
-			params = label_static_params,
 			inherit.aes = TRUE,
 			show.legend = NA
 		)
@@ -243,16 +237,215 @@ plot.netify <- function(x, ...){
 
 	# facet instructions #####################
 	if(obj_attrs$netify_type!='cross_sec'){
-		viz = viz + facet_wrap(~time, scales='free')
+		components$facets <- facet_wrap(~time, scales='free')
 	}
 	######################			
 
 	# theme changes #####################
 	if(plot_args$use_theme_netify){
-		viz = viz + theme_netify()
+		components$theme <- theme_netify()
 	}
 	######################			
+	
+	# Store additional info that might be useful
+	components$net_dfs <- net_dfs
+	components$plot_args <- plot_args
+	components$obj_attrs <- obj_attrs
 
-	#
+	######################
+	# If return_components is TRUE, return the list
+	if(isTRUE(plot_args$return_components)) {
+		class(components) <- c("netify_plot_components", "list")
+		return(components)
+	}
+	######################
+	
+	######################
+	# Otherwise, assemble the plot as before
+	viz <- components$base
+	
+	# Add edges
+	if(!is.null(components$edges)) {
+		viz <- viz + layer(
+			geom = components$edges$geom,
+			data = components$edges$data,
+			mapping = components$edges$mapping,
+			stat = components$edges$stat,
+			position = components$edges$position,
+			params = components$edges$params,
+			inherit.aes = components$edges$inherit.aes,
+			show.legend = components$edges$show.legend
+		)
+	}
+	
+	# Reset scales if we have both edges and nodes with color/fill mappings
+	if(!is.null(components$edges) && 
+	   (!is.null(components$points) || !is.null(components$text) || !is.null(components$label))) {
+		if(!is.null(components$edge_scales$color) || 
+		   !is.null(components$point_scales$color) ||
+		   !is.null(components$point_scales$fill)) {
+			viz <- viz + 
+				ggnewscale::new_scale_color() + 
+				ggnewscale::new_scale_fill() +
+				ggnewscale::new_scale('alpha')
+		}
+	}
+	
+	# Add nodes
+	if(!is.null(components$points)) {
+		viz <- viz + layer(
+			geom = components$points$geom,
+			data = components$points$data,
+			mapping = components$points$mapping,
+			stat = components$points$stat,
+			position = components$points$position,
+			params = components$points$params,
+			inherit.aes = components$points$inherit.aes,
+			show.legend = components$points$show.legend
+		)
+	}
+	
+	# Add text
+	if(!is.null(components$text)) {
+		# Reset scales again if needed
+		if(!is.null(components$points)) {
+			viz <- viz + 
+				ggnewscale::new_scale_color() + 
+				ggnewscale::new_scale('alpha') +
+				ggnewscale::new_scale('size')
+		}
+		
+		viz <- viz + layer(
+			geom = components$text$geom,
+			data = components$text$data,
+			mapping = components$text$mapping,
+			stat = components$text$stat,
+			position = components$text$position,
+			params = components$text$params,
+			inherit.aes = components$text$inherit.aes,
+			show.legend = components$text$show.legend
+		)
+	}
+	
+	# Add label
+	if(!is.null(components$label)) {
+		# Reset scales again if needed
+		if(!is.null(components$text) || !is.null(components$points)) {
+			viz <- viz + 
+				ggnewscale::new_scale_color() + 
+				ggnewscale::new_scale('alpha') +
+				ggnewscale::new_scale_fill() +
+				ggnewscale::new_scale('size')
+		}
+		
+		viz <- viz + layer(
+			geom = components$label$geom,
+			data = components$label$data,
+			mapping = components$label$mapping,
+			stat = components$label$stat,
+			position = components$label$position,
+			params = components$label$params,
+			inherit.aes = components$label$inherit.aes,
+			show.legend = components$label$show.legend
+		)
+	}
+	
+	# Add facets
+	if(!is.null(components$facets)) {
+		viz <- viz + components$facets
+	}
+	
+	# Add theme
+	if(!is.null(components$theme)) {
+		viz <- viz + components$theme
+	}
+	
 	return(viz)
+	######################
+}
+
+# Add a print method for the components
+print.netify_plot_components <- function(x, ...) {
+	cat("Netify plot components:\n")
+	cat("  Base plot: ggplot object\n")
+	if(!is.null(x$edges)) cat("  Edges: geom_segment/geom_curve layer\n")
+	if(!is.null(x$points)) cat("  Points: geom_point layer\n")
+	if(!is.null(x$text)) cat("  Text: geom_text layer\n")
+	if(!is.null(x$label)) cat("  Labels: geom_label layer\n")
+	if(!is.null(x$facets)) cat("  Facets: facet_wrap layer\n")
+	if(!is.null(x$theme)) cat("  Theme: theme_netify\n")
+	cat("\nUse build_netify_plot() to assemble or build manually with ggplot2.\n")
+}
+
+# Helper function to build the plot from components
+build_netify_plot <- function(components, 
+                             edge_color_scale = NULL,
+                             edge_alpha_scale = NULL,
+                             edge_size_scale = NULL,
+                             node_color_scale = NULL,
+                             node_fill_scale = NULL,
+                             node_size_scale = NULL,
+                             ...) {
+	
+	if(!inherits(components, "netify_plot_components")) {
+		stop("Input must be netify_plot_components from plot(..., return_components = TRUE)")
+	}
+	
+	# Start with base
+	p <- components$base
+	
+	# Add edges with custom scales
+	if(!is.null(components$edges)) {
+		p <- p + layer(
+			geom = components$edges$geom,
+			data = components$edges$data,
+			mapping = components$edges$mapping,
+			stat = components$edges$stat,
+			position = components$edges$position,
+			params = components$edges$params,
+			inherit.aes = components$edges$inherit.aes,
+			show.legend = components$edges$show.legend
+		)
+		
+		# Add edge scales
+		if(!is.null(edge_color_scale)) p <- p + edge_color_scale
+		if(!is.null(edge_alpha_scale)) p <- p + edge_alpha_scale
+		if(!is.null(edge_size_scale)) p <- p + edge_size_scale
+	}
+	
+	# Reset scales before nodes
+	if(!is.null(components$edges) && !is.null(components$points)) {
+		p <- p + 
+			ggnewscale::new_scale_color() + 
+			ggnewscale::new_scale_fill() +
+			ggnewscale::new_scale('alpha')
+	}
+	
+	# Add nodes with custom scales
+	if(!is.null(components$points)) {
+		p <- p + layer(
+			geom = components$points$geom,
+			data = components$points$data,
+			mapping = components$points$mapping,
+			stat = components$points$stat,
+			position = components$points$position,
+			params = components$points$params,
+			inherit.aes = components$points$inherit.aes,
+			show.legend = components$points$show.legend
+		)
+		
+		# Add node scales
+		if(!is.null(node_color_scale)) p <- p + node_color_scale
+		if(!is.null(node_fill_scale)) p <- p + node_fill_scale
+		if(!is.null(node_size_scale)) p <- p + node_size_scale
+	}
+	
+	# Add other components
+	if(!is.null(components$facets)) p <- p + components$facets
+	if(!is.null(components$theme)) p <- p + components$theme
+	
+	# Add any additional ggplot2 elements passed in ...
+	p <- p + list(...)
+	
+	return(p)
 }

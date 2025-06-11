@@ -151,7 +151,7 @@ We made a network, so let's look at it. First, we might want to take a `peek` at
 ```{r}
 peek(
   mid_long_network, 
-    actors = c(13, 15:24),
+  actors = c(13, 15:24),
   time = c('2012')
   )
 ```
