@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Dorff, Keltner,
 Minhas</h4>
             
-            <h4 data-toc-skip class="date">2025-06-10</h4>
+            <h4 data-toc-skip class="date">2025-06-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/PSSI_workshop_final.Rmd" class="external-link"><code>vignettes/PSSI_workshop_final.Rmd</code></a></small>
       <div class="d-none name"><code>PSSI_workshop_final.Rmd</code></div>
@@ -134,6 +134,19 @@ between actors.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> Warning: there are repeating dyads within time periods in the dataset. When `sum_dyads = TRUE` and `weight` is not supplied, edges in the outputted adjacency matrix represent a count of interactions between actors.</span></span></code></pre>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mex_network_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/transform_weights.html">transform_weights</a></span><span class="op">(</span></span>
+<span>  <span class="va">mex_network</span>, </span>
+<span>  transform_fn <span class="op">=</span> <span class="va">log</span>,</span>
+<span>  add_constant <span class="op">=</span> <span class="fl">1</span>,  <span class="co"># Add 1 before log to handle zeros</span></span>
+<span>  new_name <span class="op">=</span> <span class="st">"log_events"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mex_bin</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/transform_weights.html">transform_weights</a></span><span class="op">(</span></span>
+<span>  <span class="va">mex_network</span>, </span>
+<span>  transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">x</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>,</span>
+<span>  new_name <span class="op">=</span> <span class="st">"conflict_present"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> network has been binarized through transformation</span></span></code></pre>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Summaries at the graph and actor levels</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   num_actors    density num_edges prop_edges_missing mean_edge_weight</span></span>
@@ -142,17 +155,17 @@ between actors.</p>
 <span><span class="co">## 1        113.395                  0               0            3757   0.1371326</span></span>
 <span><span class="co">##   sd_of_actor_means transitivity</span></span>
 <span><span class="co">## 1          21.37264    0.1046512</span></span></code></pre>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">actor_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span><span class="va">actor_stats</span><span class="op">)</span></span></code></pre></div>
 <p><img src="PSSI_workshop_final_files/figure-html/basic_agg_network-1.png" width="1093.75"></p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Visualize the network</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>, add_text <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Removed 69 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_segment()`).</span></span></code></pre>
 <p><img src="PSSI_workshop_final_files/figure-html/basic_agg_network-2.png" width="1093.75"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Show a subset of 10 random actor names for clarity</span></span>
 <span><span class="va">select_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">12345</span><span class="op">)</span></span>
@@ -167,13 +180,82 @@ between actors.</p>
 <pre><code><span><span class="co">## Warning: Removed 64 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_text()`).</span></span></code></pre>
 <p><img src="PSSI_workshop_final_files/figure-html/basic_agg_network-3.png" width="1093.75"></p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
+<span>     select_text <span class="op">=</span> <span class="va">random_names</span>,</span>
+<span>     select_text_display <span class="op">=</span> <span class="va">random_names</span>, </span>
+<span>     <span class="co"># log(x+1) to better see range of connects</span></span>
+<span>     weight_transform <span class="op">=</span> <span class="va">log1p</span></span>
+<span>     <span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Removed 69 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`geom_segment()`).</span></span>
+<span><span class="co">## Removed 64 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`geom_text()`).</span></span></code></pre>
+<p><img src="PSSI_workshop_final_files/figure-html/basic_agg_network-4.png" width="1093.75"></p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># break p2 into pieces</span></span>
+<span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">mex_network</span>,</span>
+<span>  remove_isolates <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  select_text <span class="op">=</span> <span class="va">random_names</span>,</span>
+<span>  select_text_display <span class="op">=</span> <span class="va">random_names</span>,              </span>
+<span>  weight_transform <span class="op">=</span> <span class="va">log1p</span>,</span>
+<span>  return_components <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Basic usage - just edges</span></span>
+<span><span class="va">comp</span><span class="op">$</span><span class="va">base</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="../reference/netify_edge.html">netify_edge</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>alpha<span class="op">=</span><span class="st">'Log(Event Count)'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/reset_scales.html">reset_scales</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/netify_node.html">netify_node</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/netify_text.html">netify_text</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="va">comp</span><span class="op">$</span><span class="va">theme</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Removed 69 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`geom_segment()`).</span></span>
+<span><span class="co">## Removed 64 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`geom_text()`).</span></span></code></pre>
+<p><img src="PSSI_workshop_final_files/figure-html/basic_agg_network-5.png" width="1093.75"></p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># and even simpler</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>, </span>
+<span>     weight_transform <span class="op">=</span> <span class="va">log1p</span>,</span>
+<span>     edge_alpha_label <span class="op">=</span> <span class="st">"Log(Event Count)"</span>,</span>
+<span>     select_text <span class="op">=</span> <span class="va">random_names</span>,</span>
+<span>     select_text_display <span class="op">=</span> <span class="va">random_names</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Removed 69 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`geom_segment()`).</span></span>
+<span><span class="co">## Removed 64 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`geom_text()`).</span></span></code></pre>
+<p><img src="PSSI_workshop_final_files/figure-html/basic_agg_network-6.png" width="1093.75"></p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># add degree centrality </span></span>
+<span><span class="va">mex_network</span> <span class="op">=</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span>
+<span>  <span class="va">mex_network</span>, </span>
+<span>  <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span>, </span>
+<span>  actor<span class="op">=</span><span class="st">'actor'</span> <span class="op">)</span></span>
+<span></span>
+<span><span class="co">#</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>, </span>
+<span>     weight_transform <span class="op">=</span> <span class="va">log1p</span>,</span>
+<span>     edge_alpha_label <span class="op">=</span> <span class="st">"Log(Event Count)"</span>,</span>
+<span>     point_size_var<span class="op">=</span><span class="st">'degree'</span>,</span>
+<span>     point_size_label<span class="op">=</span><span class="st">'Degree'</span>,</span>
+<span>     point_alpha<span class="op">=</span><span class="fl">.5</span></span>
+<span>    <span class="co">#  select_text = random_names,</span></span>
+<span>    <span class="co">#  select_text_display = random_names,</span></span>
+<span>    <span class="co">#  check_overlap=TRUE</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Removed 69 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`geom_segment()`).</span></span></code></pre>
+<p><img src="PSSI_workshop_final_files/figure-html/basic_agg_network-7.png" width="1093.75"></p>
 </div>
 <div class="section level4">
 <h4 id="weighted-network-mexican-case">2. Weighted Network (Mexican Case)<a class="anchor" aria-label="anchor" href="#weighted-network-mexican-case"></a>
 </h4>
 <p>Next, we create a weighted network using the civilian deaths
 variable.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Weighted by civilian deaths</span></span>
 <span><span class="va">mex_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>  <span class="va">mexico</span>,</span>
@@ -194,12 +276,12 @@ variable.</p>
 <span><span class="co">## 1       8.809874                  0               0             380    0.159834</span></span>
 <span><span class="co">##   sd_of_actor_means transitivity</span></span>
 <span><span class="co">## 1          1.594563    0.1458333</span></span></code></pre>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network_civ</span>, add_text <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Removed 46 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_segment()`).</span></span></code></pre>
 <p><img src="PSSI_workshop_final_files/figure-html/weighted_network-1.png" width="1093.75"></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Subset of labels for clarity</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network_civ</span>,</span>
 <span>     select_text <span class="op">=</span> <span class="va">random_names</span>,</span>
@@ -209,7 +291,7 @@ variable.</p>
 <pre><code><span><span class="co">## Warning: Removed 40 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_text()`).</span></span></code></pre>
 <p><img src="PSSI_workshop_final_files/figure-html/weighted_network-2.png" width="1093.75"></p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example: community detection (optimal clustering)</span></span>
 <span><span class="va">i_opt_memb</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="va">ig</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_igraph.html">netify_to_igraph</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
@@ -245,7 +327,7 @@ variable.</p>
 <pre><code><span><span class="co">## Warning: Removed 46 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_segment()`).</span></span></code></pre>
 <p><img src="PSSI_workshop_final_files/figure-html/weighted_network-3.png" width="1093.75"></p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Filter large nodes for labeling</span></span>
 <span><span class="va">large_nodes</span> <span class="op">&lt;-</span> <span class="va">size_by_source_count</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">size_by_source_count</span> <span class="op">&gt;=</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -269,7 +351,7 @@ variable.</p>
 </h4>
 <p>We can also create time-varying networks. Here, we use the
 <strong>year</strong> field to construct a series of networks.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a time-varying network</span></span>
 <span><span class="va">mex_network_long</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>  <span class="va">mexico</span>,</span>
@@ -301,7 +383,7 @@ variable.</p>
 <pre><code><span><span class="co">## Warning: Removed 2169 rows containing non-finite outside the scale range</span></span>
 <span><span class="co">## (`stat_density_ridges()`).</span></span></code></pre>
 <p><img src="PSSI_workshop_final_files/figure-html/longitudinal_network-1.png" width="1093.75"></p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Focus on closeness measure</span></span>
 <span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span><span class="va">summary_actor_mex</span>, </span>
 <span>                 across_actor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -310,7 +392,7 @@ variable.</p>
 <pre><code><span><span class="co">## Warning: Removed 2021 rows containing non-finite outside the scale range</span></span>
 <span><span class="co">## (`stat_density_ridges()`).</span></span></code></pre>
 <p><img src="PSSI_workshop_final_files/figure-html/longitudinal_network-2.png" width="1093.75"></p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Visualize</span></span>
 <span><span class="fu"><a href="../reference/plot.netify.html">plot.netify</a></span><span class="op">(</span><span class="va">mex_network_long</span>,</span>
 <span>            static_actor_positions <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -318,7 +400,7 @@ variable.</p>
 <pre><code><span><span class="co">## Warning: Removed 161 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_segment()`).</span></span></code></pre>
 <p><img src="PSSI_workshop_final_files/figure-html/longitudinal_network-3.png" width="1093.75"></p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example: subset for selected years</span></span>
 <span><span class="va">mex_network_short</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subset_netify.html">subset_netify</a></span><span class="op">(</span><span class="va">mex_network_long</span>,</span>
 <span>                                   time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2006"</span>, <span class="st">"2008"</span>, </span>
@@ -335,7 +417,7 @@ variable.</p>
 <span><span class="co">## deaths_civilians 0.002    0 0.016  0.05</span></span>
 <span><span class="co">## • Nodal Features: None</span></span>
 <span><span class="co">## • Dyad Features: None</span></span></code></pre>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network_short</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Removed 17 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_segment()`).</span></span></code></pre>
@@ -347,7 +429,7 @@ variable.</p>
 </h3>
 <p>Let’s now repeat similar steps for conflict data in Myanmar
 (Burma).</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># UCDP data for Myanmar</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">myanmar</span><span class="op">)</span></span>
 <span></span>
@@ -362,7 +444,7 @@ variable.</p>
 <span>  missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> Warning: there are repeating dyads within time periods in the dataset. When `sum_dyads = TRUE` and `weight` is not supplied, edges in the outputted adjacency matrix represent a count of interactions between actors.</span></span></code></pre>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">my_network</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   num_actors    density num_edges prop_edges_missing mean_edge_weight</span></span>
 <span><span class="co">## 1         27 0.07956104        58                  0         21.00855</span></span>
@@ -370,7 +452,7 @@ variable.</p>
 <span><span class="co">## 1       183.2769                  0               0            2535   0.2944592</span></span>
 <span><span class="co">##   sd_of_actor_means transitivity</span></span>
 <span><span class="co">## 1          56.44117   0.06637168</span></span></code></pre>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Weighted by civilian deaths</span></span>
 <span><span class="va">my_network_civ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>  <span class="va">myanmar</span>,</span>
@@ -393,7 +475,7 @@ variable.</p>
 </h4>
 <p>We define various attribute categories (government, non-government,
 ethnic/ideological, armed, etc.) and add those as node-level data.</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define actor categories</span></span>
 <span><span class="va">gov_actors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Government of Myanmar (Burma)"</span>, <span class="st">"BMA"</span>, <span class="st">"NUG"</span><span class="op">)</span></span>
 <span><span class="va">nongov_actors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -459,7 +541,7 @@ ethnic/ideological, armed, etc.) and add those as node-level data.</p>
 <pre><code><span><span class="co">## Warning: Removed 22 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_segment()`).</span></span></code></pre>
 <p><img src="PSSI_workshop_final_files/figure-html/nodal_attributes-1.png" width="1093.75"></p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">my_network_civ</span>,</span>
 <span>  title <span class="op">=</span> <span class="st">"Myanmar Network"</span>,</span>
@@ -476,7 +558,7 @@ ethnic/ideological, armed, etc.) and add those as node-level data.</p>
 </h4>
 <p>Finally, we illustrate a bipartite network example, focusing on
 interactions between Buddhist and Christian actors in Myanmar.</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define actors by religion</span></span>
 <span><span class="va">buddhist_actors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"PSLF"</span>, <span class="st">"DKBA"</span>, <span class="st">"God's Army"</span>, <span class="st">"Government of Myanmar (Burma)"</span><span class="op">)</span></span>
 <span><span class="va">christian_actors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"KNU"</span>, <span class="st">"KNPP"</span>, <span class="st">"KIO"</span>, <span class="st">"MDA"</span>, <span class="st">"NSCN-K"</span>, <span class="st">"CNF"</span><span class="op">)</span></span>

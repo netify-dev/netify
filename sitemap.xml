@@ -12,6 +12,7 @@
 <url><loc>https://netify-dev.github.io/netify/reference/add_dyad_vars.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/add_node_vars.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/aggregate_dyad.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/assemble_netify_plot.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/decompose_igraph.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/decompose_netify.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/decompose_statnet.html</loc></url>
@@ -24,6 +25,12 @@
 <url><loc>https://netify-dev.github.io/netify/reference/get_edge_layout.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/get_node_layout.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/get_raw.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/ggplot_add.netify_edge.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/ggplot_add.netify_label.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/ggplot_add.netify_labels.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/ggplot_add.netify_node.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/ggplot_add.netify_scale_reset.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/ggplot_add.netify_text.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/icews.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/index.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/is_netify.html</loc></url>
@@ -32,7 +39,12 @@
 <url><loc>https://netify-dev.github.io/netify/reference/myanmar.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/net_plot_data.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/netify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/netify_edge.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/netify_label.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/netify_measurements.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/netify_node.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/netify_scale_labels.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/netify_text.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/netify_to_amen.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/netify_to_igraph.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/netify_to_statnet.html</loc></url>
@@ -42,6 +54,8 @@
 <url><loc>https://netify-dev.github.io/netify/reference/plot_actor_stats.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/plot_graph_stats.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/print.netify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/print.netify_plot_components.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/reset_scales.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/subset.netify.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/subset_netify.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/summary.netify.html</loc></url>
@@ -49,6 +63,7 @@
 <url><loc>https://netify-dev.github.io/netify/reference/theme_netify.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/theme_stat_netify.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/to_netify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/transform_weights.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/unnetify.html</loc></url>
 </urlset>
 

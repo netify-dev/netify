@@ -59,25 +59,39 @@
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments, which can include but are not limited to:
-- <code>point_layout</code>: Optional, user-provided node layout; if not provided, layout will be generated based on <code>layout</code> parameter.
-- <code>layout</code>: Specifies the layout algorithm from 'igraph' to position the nodes if <code>point_layout</code> is not provided. Available options include "nicely", "fruchterman.reingold", "kamada.kawai", "random", "circle", "star", "grid", "graphopt", "sugiyama", "drl", "lgl", "bipartite", "tree", "randomly", "dh", "fr", "kk", "gem", and "mds".
-- <code>remove_isolates</code>: Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
-- <code>static_actor_positions</code> Logical indicating whether to use static positions for actors.
-Useful in longitudinal studies where node positions should remain consistent over time.
-If TRUE, the layout by default is calculated based on a collapsed adjacency matrix across
-all time points. Users can also specify a specific time point to use as the static layout by
-setting <code>which_static</code> to the desired time point.
-- <code>add_edges</code>: Logical; if TRUE, edges will be added to the plot. Default is TRUE.
-- <code>curve_edges</code>: Logical; if TRUE, edges will be curved. Default is FALSE.
-- <code>add_points</code>: Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.
-- <code>add_text</code>: Logical; if TRUE, text annotations will be added. Default is FALSE.
-- <code>add_label</code>: Logical; if TRUE, labels will be added. Default is FALSE.
-- <code>select_text</code>: A vector of node names to specifically add text to; others will not have text.
-- <code>select_label</code>: A vector of node names to specifically add labels to; others will not have labels.
-- <code>point_size</code>: A fixed size for all points, equivalent to <code>geom_point(size = point_size)</code> in <code>ggplot2</code>.
-- <code>point_size_var</code>: A variable from the node data to dynamically size points, equivalent to <code>geom_point(aes(size = point_size_var))</code> in <code>ggplot2</code>.
-These arguments control various aspects of the plot's appearance and functionality.</p></dd>
+<dd><p>Additional arguments, which can include but are not limited to:</p><ul><li><p><code>point_layout</code>: Optional, user-provided node layout; if not provided, layout will be generated based on <code>layout</code> parameter.</p></li>
+<li><p><code>layout</code>: Specifies the layout algorithm from 'igraph' to position the nodes if <code>point_layout</code> is not provided. Available options include:</p><ul><li><p>"nicely"</p></li>
+<li><p>"fruchterman.reingold"</p></li>
+<li><p>"kamada.kawai"</p></li>
+<li><p>"random"</p></li>
+<li><p>"circle"</p></li>
+<li><p>"star"</p></li>
+<li><p>"grid"</p></li>
+<li><p>"graphopt"</p></li>
+<li><p>"sugiyama"</p></li>
+<li><p>"drl"</p></li>
+<li><p>"lgl"</p></li>
+<li><p>"bipartite"</p></li>
+<li><p>"tree"</p></li>
+<li><p>"randomly"</p></li>
+<li><p>"dh"</p></li>
+<li><p>"fr"</p></li>
+<li><p>"kk"</p></li>
+<li><p>"gem"</p></li>
+<li><p>"mds"</p></li>
+</ul></li>
+<li><p><code>remove_isolates</code>: Logical; if <code>TRUE</code>, isolates will be removed from the plot. Default is <code>TRUE</code>.</p></li>
+<li><p><code>static_actor_positions</code>: Logical indicating whether to use static positions for actors. Useful in longitudinal studies where node positions should remain consistent over time. If <code>TRUE</code>, the layout by default is calculated based on a collapsed adjacency matrix across all time points. Users can also specify a specific time point to use as the static layout by setting <code>which_static</code> to the desired time point.</p></li>
+<li><p><code>add_edges</code>: Logical; if <code>TRUE</code>, edges will be added to the plot. Default is <code>TRUE</code>.</p></li>
+<li><p><code>curve_edges</code>: Logical; if <code>TRUE</code>, edges will be curved. Default is <code>FALSE</code>.</p></li>
+<li><p><code>add_points</code>: Logical; if <code>TRUE</code>, points (nodes) will be plotted. Default is <code>TRUE</code>.</p></li>
+<li><p><code>add_text</code>: Logical; if <code>TRUE</code>, text annotations will be added. Default is <code>FALSE</code>.</p></li>
+<li><p><code>add_label</code>: Logical; if <code>TRUE</code>, labels will be added. Default is <code>FALSE</code>.</p></li>
+<li><p><code>select_text</code>: A vector of node names to specifically add text to; others will not have text.</p></li>
+<li><p><code>select_label</code>: A vector of node names to specifically add labels to; others will not have labels.</p></li>
+<li><p><code>point_size</code>: A fixed size for all points, equivalent to <code>geom_point(size = point_size)</code> in <code>ggplot2</code>.</p></li>
+<li><p><code>point_size_var</code>: A variable from the node data to dynamically size points, equivalent to <code>geom_point(aes(size = point_size_var))</code> in <code>ggplot2</code>.</p></li>
+</ul><p>These arguments control various aspects of the plot's appearance and functionality.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -90,9 +104,9 @@ These arguments control various aspects of the plot's appearance and functionali
 <li><p>Whether nodes are displayed as points.</p></li>
 <li><p>Whether to annotate nodes with text or labels.</p></li>
 <li><p>Specific nodes to annotate, allowing selective emphasis within the network.</p></li>
-<li><p>Custom layouts if the automatic placement does not suffice.
-Additional customization options like <code>point_size</code> and <code>point_size_var</code> allow users to apply typical <code>ggplot2</code> methods directly to network visualizations, facilitating easy integration of familiar graphical adjustments.</p></li>
-</ul></div>
+<li><p>Custom layouts if the automatic placement does not suffice.</p></li>
+</ul><p>Additional customization options like <code>point_size</code> and <code>point_size_var</code> allow users to apply typical <code>ggplot2</code> methods directly to network visualizations, facilitating easy integration of familiar graphical adjustments.</p>
+    </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
     <p>Cassy Dorff, Shahryar Minhas</p>
@@ -104,33 +118,34 @@ Additional customization options like <code>point_size</code> and <code>point_si
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># choose attributes</span></span></span>
-<span class="r-in"><span><span class="va">nvars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">'i_polity2'</span>, <span class="st">'i_log_gdp'</span>, <span class="st">'i_log_pop'</span> <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">dvars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">'matlCoop'</span>, <span class="st">'verbConf'</span>, <span class="st">'matlConf'</span> <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">nvars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'i_polity2'</span>, <span class="st">'i_log_gdp'</span>, <span class="st">'i_log_pop'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dvars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'matlCoop'</span>, <span class="st">'verbConf'</span>, <span class="st">'matlConf'</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># create a netify object</span></span></span>
 <span class="r-in"><span><span class="va">netlet</span> <span class="op">=</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">icews</span>, actor1<span class="op">=</span><span class="st">'i'</span>, actor2<span class="op">=</span><span class="st">'j'</span>,</span></span>
+<span class="r-in"><span>    <span class="va">icews</span>, actor1 <span class="op">=</span> <span class="st">'i'</span>, actor2 <span class="op">=</span> <span class="st">'j'</span>,</span></span>
 <span class="r-in"><span>    time <span class="op">=</span> <span class="st">'year'</span>,</span></span>
-<span class="r-in"><span>    symmetric<span class="op">=</span><span class="cn">FALSE</span>, weight<span class="op">=</span><span class="st">'verbCoop'</span>,</span></span>
-<span class="r-in"><span>    mode<span class="op">=</span><span class="st">'unipartite'</span>, sum_dyads<span class="op">=</span><span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>    actor_time_uniform<span class="op">=</span><span class="cn">TRUE</span>, actor_pds<span class="op">=</span><span class="cn">NULL</span>,</span></span>
-<span class="r-in"><span>    diag_to_NA<span class="op">=</span><span class="cn">TRUE</span>, missing_to_zero<span class="op">=</span><span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>    nodal_vars <span class="op">=</span> <span class="va">nvars</span>, </span></span>
+<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>, weight <span class="op">=</span> <span class="st">'verbCoop'</span>,</span></span>
+<span class="r-in"><span>    mode <span class="op">=</span> <span class="st">'unipartite'</span>, sum_dyads <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    actor_time_uniform <span class="op">=</span> <span class="cn">TRUE</span>, actor_pds <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
+<span class="r-in"><span>    diag_to_NA <span class="op">=</span> <span class="cn">TRUE</span>, missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    nodal_vars <span class="op">=</span> <span class="va">nvars</span>,</span></span>
 <span class="r-in"><span>    dyad_vars <span class="op">=</span> <span class="va">dvars</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># add basic summary network stats</span></span></span>
 <span class="r-in"><span><span class="va">netlet</span> <span class="op">=</span> <span class="fu"><a href="add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">netlet</span>, </span></span>
+<span class="r-in"><span>    <span class="va">netlet</span>,</span></span>
 <span class="r-in"><span>    <span class="fu"><a href="summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">netlet</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    actor<span class="op">=</span><span class="st">'actor'</span>, time<span class="op">=</span><span class="st">'time'</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    actor <span class="op">=</span> <span class="st">'actor'</span>, time <span class="op">=</span> <span class="st">'time'</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># plot the network</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">netlet</span>, </span></span>
-<span class="r-in"><span>     edge_color<span class="op">=</span><span class="st">'lightgrey'</span>, </span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">netlet</span>,</span></span>
+<span class="r-in"><span>     edge_color <span class="op">=</span> <span class="st">'lightgrey'</span>,</span></span>
 <span class="r-in"><span>     point_size_var <span class="op">=</span> <span class="st">'degree_total'</span>,</span></span>
 <span class="r-in"><span>     point_color_var <span class="op">=</span> <span class="st">'i_polity2'</span></span></span>
-<span class="r-in"><span>     <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.netify-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

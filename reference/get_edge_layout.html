@@ -55,7 +55,7 @@ determined by a layout algorithm.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_edge_layout</span><span class="op">(</span><span class="va">netlet</span>, <span class="va">nodes_layout</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_edge_layout</span><span class="op">(</span><span class="va">netlet</span>, <span class="va">nodes_layout</span>, ig_netlet <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -76,6 +76,11 @@ of such objects for longitudinal networks. Each element must include columns:</p
 <li><p>Each element follows the structure described above</p></li>
 <li><p>Time period names must match those in the netify object</p></li>
 </ul></dd>
+
+
+<dt id="arg-ig-netlet">ig_netlet<a class="anchor" aria-label="anchor" href="#arg-ig-netlet"></a></dt>
+<dd><p>An optional pre-converted igraph object. If provided, this
+function will use it directly instead of converting the netify object again.</p></dd>
 
 </dl></div>
     <div class="section level2">

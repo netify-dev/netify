@@ -60,7 +60,8 @@ suitable for plotting.</p>
 <span>  layout <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  static_actor_positions <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  which_static <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">6886</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">6886</span>,</span>
+<span>  ig_netlet <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -103,6 +104,11 @@ more weight to persistent edges.</p></dd>
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Integer for random number generation to ensure reproducible layouts.
 Default is 6886.</p></dd>
+
+
+<dt id="arg-ig-netlet">ig_netlet<a class="anchor" aria-label="anchor" href="#arg-ig-netlet"></a></dt>
+<dd><p>An optional pre-converted igraph object. If provided, this
+function will use it directly instead of converting the netify object again.</p></dd>
 
 </dl></div>
     <div class="section level2">
