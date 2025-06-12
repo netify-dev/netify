@@ -16,7 +16,7 @@ Imports:
     cli,
     checkmate,
     igraph,
-    ggplot2 (>= 2.2.1),
+    ggplot2 (>= 3.0.0),
     ggnewscale,
     ggridges,
     ggbeeswarm, 

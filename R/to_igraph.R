@@ -173,34 +173,71 @@ netify_to_igraph = function(
 
   ## longit case
   if(netlet_type %in% c('longit_array','longit_list')){
- 
-    # iterate through netlet
-    igrph <- lapply(1:length(netlet), function(ii){
-
-      # get netlet slice
-      netlet_slice <- netlet[[ii]]
-
-      # get time listing
-      time_val <- names(netlet)[ii]
-
-      # convert to network object
-      igrph_slice <- netify_net_to_igraph(netlet_slice)
-
-      # process nodal attributes if exist
-      if(nodal_data_exist & add_nodal_attribs){
-        igrph_slice <- add_nodal_to_igraph(
-          netlet_slice, attr(netlet, 'nodal_data'),
-          igrph_slice, time_val) }
-
-      # process dyadic attributes if exist
-      if(dyad_data_exist & add_dyad_attribs) {
-        igrph_slice <- add_dyad_to_igraph(
-          netlet_slice, attr(netlet, 'dyad_data'),
-          igrph_slice, time_val) }
-
-      #
-      return(igrph_slice) })
-    names(igrph) = names(netlet)
+    
+    # cache attributes once
+    time_vals <- names(netlet)
+    nodal_data_attr <- attr(netlet, 'nodal_data')
+    dyad_data_attr <- attr(netlet, 'dyad_data')
+    
+    # if no attributes to add, simplify processing
+    if ((!nodal_data_exist || !add_nodal_attribs) && 
+        (!dyad_data_exist || !add_dyad_attribs)) {
+      # just convert to igraph without attributes
+      igrph <- lapply(netlet, netify_net_to_igraph)
+      names(igrph) <- time_vals
+    } else {
+      # pre-process nodal data by time if needed
+      nodal_data_by_time <- NULL
+      if (nodal_data_exist && add_nodal_attribs && !is.null(nodal_data_attr)) {
+        # create time-indexed lookup for faster access
+        time_col <- nodal_data_attr[, 2]
+        nodal_data_by_time <- split(nodal_data_attr, time_col)
+      }
+      
+      # process all time periods
+      igrph <- lapply(seq_along(netlet), function(ii){
+        netlet_slice <- netlet[[ii]]
+        time_val <- time_vals[ii]
+        
+        # convert to igraph
+        igrph_slice <- netify_net_to_igraph(netlet_slice)
+        
+        # add nodal attributes if needed
+        if (nodal_data_exist && add_nodal_attribs && !is.null(nodal_data_by_time[[time_val]])) {
+          node_data_t <- nodal_data_by_time[[time_val]]
+          
+          # match order efficiently
+          igrph_nodes <- names(igraph::V(igrph_slice))
+          node_data_t <- node_data_t[match(igrph_nodes, node_data_t[,1]), ]
+          
+          # vectorized attribute setting
+          node_var_start <- 3  # skip actor and time columns
+          if (ncol(node_data_t) >= node_var_start) {
+            for (col_idx in node_var_start:ncol(node_data_t)) {
+              igrph_slice <- igraph::set_vertex_attr(
+                igrph_slice,
+                name = names(node_data_t)[col_idx],
+                value = node_data_t[, col_idx]
+              )
+            }
+          }
+        }
+        
+        # add dyadic attributes if needed
+        if (dyad_data_exist && add_dyad_attribs) {
+          igrph_slice <- add_dyad_to_igraph(
+            netlet_slice, 
+            dyad_data_attr,
+            igrph_slice, 
+            time_val
+          )
+        }
+        
+        return(igrph_slice)
+      })
+      
+      names(igrph) <- time_vals
+    }
   } # done with longit case
 
   #
@@ -410,57 +447,51 @@ add_nodal_to_igraph <- function(
 #' @keywords internal
 #' @noRd
 
-add_dyad_to_igraph <- function(
-  netlet, dyad_data_list, igraph_object, time=NULL){
+add_dyad_to_igraph <- function(netlet, dyad_data_list, igraph_object, time = NULL) {
 
   # get dyadic data for specified time period
-  if(is.null(time)){
+  if (is.null(time)) {
     var_matrices <- dyad_data_list[[1]]
   } else {
-    # # if ego network, then time variable includes ego name
-    # # modify to pull out year only since that' the only 
-    # # thing that will match with the name of dyad_data_list
-    # ego_netlet = attr(netlet, 'ego_netlet')
-    # if(!is.null(ego_netlet)){
-    #   if(ego_netlet){
-    #     time = strsplit(time, '__')[[1]][2] } }
-
-    # subset to specified time period
     var_matrices <- dyad_data_list[[time]]
   }
-
+  
   # get var names from the list of matrices
   vars <- names(var_matrices)
-
-  # cache netlet attributes for efficiency
+  if (length(vars) == 0) return(igraph_object)
+  
+  # get attrs
   netlet_mode <- attr(netlet, 'mode')
   netlet_diag_to_NA <- attr(netlet, 'diag_to_NA')
   bipartite_logical <- netlet_mode == 'bipartite'
-
-  # iterate through dyadic vars and add into igraph object
-  for(ii in seq_along(vars)){
-    var_name <- vars[ii]
-    
-    # get matrix for this variable
+  
+  # get edge positions
+  ePosIgraph <- adj_igraph_positions(var_matrices[[1]], igraph_object)
+  
+  # go through dyad vars
+  edge_attrs <- lapply(vars, function(var_name) {
     dData <- var_matrices[[var_name]]
-
-    # replace diagonal with 0s
-    if(!bipartite_logical && netlet_diag_to_NA){
-      diag(dData) <- 0 
+    
+    # replace diagonal with 0s if needed
+    if (!bipartite_logical && netlet_diag_to_NA) {
+      diag(dData) <- 0
     }
-
-    # generate matrix that tells us where
-    # in the rows (and presumably cols) an
-    # actor falls
-    ePosIgraph <- adj_igraph_positions(dData, igraph_object)
-
-    # subset dyadic data matrix based on ids
-    # and add edge attr
+    
+    # extract values using pre-computed positions
+    return(dData[ePosIgraph])
+  })
+  
+  # set all edge attributes at once
+  for (i in seq_along(vars)) {
     igraph_object <- igraph::set_edge_attr(
-      igraph_object, name=var_name, value= dData[ePosIgraph] )
+      igraph_object, 
+      name = vars[i], 
+      value = edge_attrs[[i]]
+    )
   }
   
-  return(igraph_object) 
+  #
+  return(igraph_object)
 }
 
 #' adj_igraph_positions
@@ -486,14 +517,6 @@ adj_igraph_positions <- function(adj_mat, igraph_object){
     id = 1:nr, lab=ar, stringsAsFactors=FALSE )
   acKey <- data.frame(
     id = 1:nc, lab=ac, stringsAsFactors=FALSE )
-
-  # # get out edge ids from igraph, igraph
-  # # wants you to merge in ids based on the
-  # # order in which they show up
-  # eVecIgraph = attributes(igraph::E(igraph_object))$vnames
-
-  # # organize into a matrix object
-  # eLabIgraph = do.call('rbind', strsplit(eVecIgraph, '|', fixed=TRUE))
 
   # can simplify the commented above via igraph::as_data_frame
   eLabIgraph = igraph::as_data_frame(igraph_object, what='edges')

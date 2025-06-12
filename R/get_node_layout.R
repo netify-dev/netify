@@ -30,6 +30,8 @@
 #'   more weight to persistent edges.
 #' @param seed Integer for random number generation to ensure reproducible layouts. 
 #'   Default is 6886.
+#' @param ig_netlet An optional pre-converted igraph object. If provided, this
+#'   function will use it directly instead of converting the netify object again.
 #'
 #' @return A list of data frames (one per time period) where each data frame contains:
 #'   \itemize{
@@ -82,7 +84,8 @@ get_node_layout <- function(
 	layout=NULL,
 	static_actor_positions=FALSE,
 	which_static=NULL, 
-	seed=6886
+	seed=6886,
+	ig_netlet=NULL	
 	){
 
 	# check if netify object
@@ -97,10 +100,15 @@ get_node_layout <- function(
 	netify_type <- obj_attrs$netify_type
 	is_bipartite <- obj_attrs$mode == 'bipartite'
 	
-	# convert to igraph without attributes for speed
-	g = netify_to_igraph(netlet, 
-		add_nodal_attribs = FALSE, 
-		add_dyad_attribs = FALSE )
+	# convert to igraph without attributes 
+	# cuz we got a need for speed
+	if(is.null(ig_netlet)){
+		g = netify_to_igraph(netlet, 
+			add_nodal_attribs = FALSE, 
+			add_dyad_attribs = FALSE )
+	} else {
+		# use provided igraph object if avail
+		g = ig_netlet }
 
 	# determine layout function
 	if(is.null(layout)){

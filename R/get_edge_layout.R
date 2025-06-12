@@ -21,6 +21,8 @@
 #'     \item Each element follows the structure described above
 #'     \item Time period names must match those in the netify object
 #'   }
+#' @param ig_netlet An optional pre-converted igraph object. If provided, this
+#'   function will use it directly instead of converting the netify object again.
 #'
 #' @return Depending on the input netify object:
 #'   \itemize{
@@ -79,57 +81,88 @@
 #'
 #' @export get_edge_layout
 
-get_edge_layout <- function(netlet, nodes_layout){
+get_edge_layout <- function(
+    netlet, 
+    nodes_layout,
+    ig_netlet = NULL    
+    ) {
 
-    # ensure the netify object is checked
+    # 
     netify_check(netlet)
-
-    # get the igraph object from netlet
-    g <- netify_to_igraph(netlet, 
-        add_nodal_attribs = FALSE, 
-        add_dyad_attribs = FALSE)
-
+    
+	# convert to igraph without attributes 
+	# cuz we got a need for speed
+	if(is.null(ig_netlet)){
+		g = netify_to_igraph(netlet, 
+			add_nodal_attribs = FALSE, 
+			add_dyad_attribs = FALSE )
+	} else {
+		# use provided igraph object if avail
+		g = ig_netlet }
+    
     # make sure igraph object is in the right format
     if (igraph::is_igraph(g)) {
         g <- list(g)
     }
-
+    
     # make sure nodes_layout is in the right format
     if (!is.list(nodes_layout)) {
         nodes_layout <- list(nodes_layout)
     }
-
-    # pre-allocate result list
-    edges_list <- vector("list", length(g))
-    names(edges_list) <- names(g)
-
-    # generate edges list with optimized matching
-    for (ii in seq_along(g)) {
-        g_slice <- g[[ii]]
+    
+    # vectorized approach for single time period
+    if (length(g) == 1) {
+        g_slice <- g[[1]]
+        nodes <- nodes_layout[[1]]
+        
+        # get all edges at once
         edges <- igraph::as_edgelist(g_slice, names = TRUE)
         
-        # convert to data frame efficiently
-        edges_df <- data.frame(
-            from = edges[, 1],
-            to = edges[, 2],
-            stringsAsFactors = FALSE
-        )
-        
-        # retrieve node coordinates
-        nodes <- nodes_layout[[ii]]
-        
-        # create lookup vectors for faster matching
+        # create lookup vectors for O(1) access
         node_x <- setNames(nodes$x, nodes$actor)
         node_y <- setNames(nodes$y, nodes$actor)
         
-        # vectorized assignment using the lookup
-        edges_df$x1 <- node_x[edges_df$from]
-        edges_df$y1 <- node_y[edges_df$from]
-        edges_df$x2 <- node_x[edges_df$to]
-        edges_df$y2 <- node_y[edges_df$to]
+        # vectorized coordinate assignment
+        edges_df <- data.frame(
+            from = edges[, 1],
+            to = edges[, 2],
+            x1 = node_x[edges[, 1]],
+            y1 = node_y[edges[, 1]],
+            x2 = node_x[edges[, 2]],
+            y2 = node_y[edges[, 2]],
+            stringsAsFactors = FALSE
+        )
         
-        edges_list[[ii]] <- edges_df
+        return(list(edges_df))
     }
-
+    
+    # for multiple time periods, process more efficiently
+    edges_list <- vector("list", length(g))
+    names(edges_list) <- names(g)
+    
+    # pre-process all node lookups
+    node_lookups <- lapply(nodes_layout, function(nodes) {
+        list(
+            x = setNames(nodes$x, nodes$actor),
+            y = setNames(nodes$y, nodes$actor)
+        )
+    })
+    
+    # process each time period
+    for (ii in seq_along(g)) {
+        edges <- igraph::as_edgelist(g[[ii]], names = TRUE)
+        lookup <- node_lookups[[ii]]
+        
+        edges_list[[ii]] <- data.frame(
+            from = edges[, 1],
+            to = edges[, 2],
+            x1 = lookup$x[edges[, 1]],
+            y1 = lookup$y[edges[, 1]],
+            x2 = lookup$x[edges[, 2]],
+            y2 = lookup$y[edges[, 2]],
+            stringsAsFactors = FALSE
+        )
+    }
+    
     return(edges_list)
 }

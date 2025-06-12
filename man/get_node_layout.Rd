@@ -9,7 +9,8 @@ get_node_layout(
   layout = NULL,
   static_actor_positions = FALSE,
   which_static = NULL,
-  seed = 6886
+  seed = 6886,
+  ig_netlet = NULL
 )
 }
 \arguments{
@@ -42,6 +43,9 @@ more weight to persistent edges.}
 
 \item{seed}{Integer for random number generation to ensure reproducible layouts.
 Default is 6886.}
+
+\item{ig_netlet}{An optional pre-converted igraph object. If provided, this
+function will use it directly instead of converting the netify object again.}
 }
 \value{
 A list of data frames (one per time period) where each data frame contains:

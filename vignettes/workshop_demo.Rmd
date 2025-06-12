@@ -151,7 +151,7 @@ We made a network, so let's look at it. First, we might want to take a `peek` at
 ```{r}
 peek(
   mid_long_network, 
-    actors = c(13, 15:24),
+  actors = c(13, 15:24),
   time = c('2012')
   )
 ```
@@ -294,13 +294,11 @@ plot(
     mid_long_network,
     edge_color='grey',
     point_size_var='degree',
-    point_color_var='v2x_polyarchy1'
+    point_color_var='v2x_polyarchy1',
+    point_color_label='Polyarchy',
+    point_size_label='Degree'
     ) + 
-    scale_color_gradient2() +
-  labs(
-    size = 'Degree', 
-    color = 'Polyarchy'
-  )
+    scale_color_gradient2()
 ```
 
 We might also prefer to add labels, but only a select few:
@@ -320,15 +318,13 @@ plot(
     edge_color='grey',
     point_size_var='degree',
     point_color_var='v2x_polyarchy1',
+    point_color_label='Polyarchy',
+    point_size_label='Degree',    
     select_text = cowns,
     select_text_display = cabbs,
     text_size = 3
     ) + 
-    scale_color_gradient2() +
-  labs(
-    size = 'Degree', 
-    color = 'Polyarchy'
-  ) 
+    scale_color_gradient2()
 
 # or we can go with labels only 
 # and remove points
@@ -339,13 +335,10 @@ plot(
     add_label = TRUE,
     label_size_var='degree',
     label_color = 'white',
-    label_fill_var='v2x_polyarchy1'
-    ) + 
-    scale_color_gradient2() +
-  labs(
-    size = 'Degree', 
-    color = 'Polyarchy'
-  )
+    label_fill_var='v2x_polyarchy1',
+    label_fill_label='Polyarchy',
+    label_size_label='Degree'    
+    ) + guides(size='none')
 ```
 
 ## Step 3: Advance 🚀

@@ -4,7 +4,7 @@
 \alias{get_edge_layout}
 \title{Generate edge layout coordinates for netify visualization}
 \usage{
-get_edge_layout(netlet, nodes_layout)
+get_edge_layout(netlet, nodes_layout, ig_netlet = NULL)
 }
 \arguments{
 \item{netlet}{A netify object (class "netify") containing the network structure
@@ -24,6 +24,9 @@ For longitudinal networks, provide a named list where:
 \item Each element follows the structure described above
 \item Time period names must match those in the netify object
 }}
+
+\item{ig_netlet}{An optional pre-converted igraph object. If provided, this
+function will use it directly instead of converting the netify object again.}
 }
 \value{
 Depending on the input netify object:

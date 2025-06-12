@@ -316,9 +316,63 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if(!obj_attrs$symmetric){
 		if(is.null(plot_args$edge_arrow)){
 			plot_args$edge_arrow = arrow(length = unit(0.2, "cm"))
-		} else {
-			plot_args$edge_arrow = NULL
-	} }
+		}
+	} else {
+		# For symmetric networks, no arrows
+		plot_args$edge_arrow = NULL
+	}
+	######################
+
+	######################
+	# set up scale label parameters #####################
+	# edge scale labels
+	if(is.null(plot_args$edge_alpha_label)){ plot_args$edge_alpha_label = NULL }
+	if(is.null(plot_args$edge_color_label)){ plot_args$edge_color_label = NULL }
+	if(is.null(plot_args$edge_linewidth_label)){ plot_args$edge_linewidth_label = NULL }
+	if(is.null(plot_args$edge_linetype_label)){ plot_args$edge_linetype_label = NULL }
+	
+	# node/point scale labels (supporting both node_ and point_ prefixes)
+	if(is.null(plot_args$node_size_label) && is.null(plot_args$point_size_label)){ 
+		plot_args$node_size_label = NULL 
+	} else {
+		plot_args$node_size_label = plot_args$node_size_label %||% plot_args$point_size_label
+	}
+	if(is.null(plot_args$node_color_label) && is.null(plot_args$point_color_label)){ 
+		plot_args$node_color_label = NULL 
+	} else {
+		plot_args$node_color_label = plot_args$node_color_label %||% plot_args$point_color_label
+	}
+	if(is.null(plot_args$node_fill_label) && is.null(plot_args$point_fill_label)){ 
+		plot_args$node_fill_label = NULL 
+	} else {
+		plot_args$node_fill_label = plot_args$node_fill_label %||% plot_args$point_fill_label
+	}
+	if(is.null(plot_args$node_shape_label) && is.null(plot_args$point_shape_label)){ 
+		plot_args$node_shape_label = NULL 
+	} else {
+		plot_args$node_shape_label = plot_args$node_shape_label %||% plot_args$point_shape_label
+	}
+	if(is.null(plot_args$node_alpha_label) && is.null(plot_args$point_alpha_label)){ 
+		plot_args$node_alpha_label = NULL 
+	} else {
+		plot_args$node_alpha_label = plot_args$node_alpha_label %||% plot_args$point_alpha_label
+	}
+	if(is.null(plot_args$node_stroke_label) && is.null(plot_args$point_stroke_label)){ 
+		plot_args$node_stroke_label = NULL 
+	} else {
+		plot_args$node_stroke_label = plot_args$node_stroke_label %||% plot_args$point_stroke_label
+	}
+	
+	# text scale labels
+	if(is.null(plot_args$text_size_label)){ plot_args$text_size_label = NULL }
+	if(is.null(plot_args$text_color_label)){ plot_args$text_color_label = NULL }
+	if(is.null(plot_args$text_alpha_label)){ plot_args$text_alpha_label = NULL }
+	
+	# label (box) scale labels
+	if(is.null(plot_args$label_size_label)){ plot_args$label_size_label = NULL }
+	if(is.null(plot_args$label_color_label)){ plot_args$label_color_label = NULL }
+	if(is.null(plot_args$label_fill_label)){ plot_args$label_fill_label = NULL }
+	if(is.null(plot_args$label_alpha_label)){ plot_args$label_alpha_label = NULL }
 	######################
 
 	# choose weight var #####################
