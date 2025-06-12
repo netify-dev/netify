@@ -1,5 +1,5 @@
 ---
-title: "Netify Workshop"
+title: "Foundations"
 author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -19,7 +19,9 @@ knitr::opts_chunk$set(
 
 ##  Package Overview 
 
-This vignette provides a high level overview of our package from start to finish. The best use of this vignette is to introduce the main components of the package to larger audiences. This overview covers our primary functions with data examples and minimal writing. 
+You supply data and `netify` transforms it into easy to work with network data. The goal of `netify` is to provide R functions that simplify and facilitate common tasks related to network creation, summary, visualization, and modeling. Although our package was built with social scientists (especially peace science scholars) in mind, anyone can use it!
+
+This vignette provides a high level overview of our package from start to finish. The best use of this vignette is to introduce the core components of the package to larger audiences. This overview covers our primary functions with data examples and minimal writing. 
 
 `netify` goals: 
 
@@ -38,7 +40,7 @@ This vignette provides a high level overview of our package from start to finish
 |              |   `plot_graph_stats()`|        |
 |              |   `plot()`|        |
 
-`netify` can take dyadic data or edgelists to get started. 
+`netify` begins with the user's data input. Data types: our core function, `netify`  handles up to 7 different data inputs, including data frames and edgelists, see documentation for more detail.
 
 - The package can also create different types of networks including:
 
@@ -89,16 +91,16 @@ cow_dyads <- create_dyadyears(
 
 Next, create a `netlet` object from the above COW data frame using our package's core function `netify.` There are a number of useful parameters, but the most important ones to highlight are:
 
-- `dyad_data` is a dyadic data.frame that should have at least the following variables used to specify actors:
+- `input` is, in this use case, a dyadic data.frame that should have at the following variables used to specify actors:
 
-  - `actor1`: character indicating actor 1 variable in the data
-  - `actor2`: character indicating actor 2 variable in the data
+  - `actor1`: indicates actor 1 variable in the data
+  - `actor2`: indicates actor 2 variable in the data
   
 - `netify_type` is a type of netlet object (`cross-sec`, `longit_list`, or `longit_array`).
 
 ```{r, eval=TRUE}
 mid_long_network <- netify(
-  cow_dyads,
+  input = cow_dyads,
   actor1='ccode1', actor2='ccode2', time='year',
   weight='cowmidonset', 
   actor_time_uniform=FALSE,
@@ -144,16 +146,14 @@ mid_long_network <- add_dyad_vars(
 )
 ```
 
-## Step 2: Explore 🔎
+## Step 2: Explore and Summarize 🔎
 
-We made a network, so let's look at it. First, we might want to take a `peek` at the network object to see if the matrix looks the way we'd expect it to look. This function lets you glance at a specific slice of the network if it is longitudinal or the entire network if it is cross-sectional.
+We made a network, so let's look at it. First, we might want to take a `peek` at the network object to see if the matrix looks the way we'd expect it to look. This function lets you glance at a specific slice of the network if it is longitudinal or the entire network if it is cross-sectional. (To actually subset the netlet object and make a new object use netify's `subset` function.)
 
 ```{r}
-peek(
-  mid_long_network, 
-  actors = c(13, 15:24),
-  time = c('2012')
-  )
+peek(mid_long_network,
+  from = 5, to = 5,
+  time = c('2009', '2010'))
 ```
 
 Next, let's examine a few basic summary statistics about the network using our`summary()` function.
@@ -170,7 +170,7 @@ We can also make a quick visualization of network statistics over time using the
 plot_graph_stats(mid_long_summary)
 ```
 
-We might also want to look at a summary of actor-level statistics overtime. Our built-in function, `summary_actor` will calculate in-degree, out-degree, average degree, and eigenvector centrality for each actor in each time period. The `across_actors` function allows users to toggle whether they want a summary of a given statistic across all actors (shown in a density plot) or for specific actors:
+These graph statistics are useful for understanding changes overtime at the network level, however, we might also want to look at actor-level statistics overtime. Our built-in function, `summary_actor` will calculate in-degree, out-degree, average degree, and eigenvector centrality for each actor in each time period. The `across_actors` function allows users to toggle whether they want a summary of a given statistic across all actors (shown in a density plot) or for specific actors:
 
 ```{r}
 # every year & every actor 
@@ -260,12 +260,13 @@ We can quickly inspect the object with the `print` function.
 
 
 ```{r}
-# print netlet to make sure they got added to nodal features
+# print netlet obj to make sure they got added to nodal features
 print(mid_long_network)
 ```
 
 
 As well as look at the attributes of the data and specify showing the nodal data information.
+
 ```{r}
 # if you're curious as to where they live
 head(
@@ -343,7 +344,7 @@ plot(
 
 ## Step 3: Advance 🚀
 
-Once we have created and explored our network object, we might want to continue analyzing the data using different modeling approaches. `netify` makes this simple even though those models aren't! And for the sake of convergence lets go with cross-sectional networks. 
+Once we have created and explored our network object, we might want to continue analyzing the data using different modeling approaches. `netify` makes this simple even though those models often aren't! And for the sake of convergence lets go with cross-sectional networks. 
 
 First, prep the data:
 
@@ -451,88 +452,7 @@ ergm_model <- ergm(
   )
 ```
 
-### Bonus Example
 
-A common data type used to create networks is in the structure of event data, where actors are repeated across rows but there is no specific variable that denotes the 'edge' as shown in our previous example.
-
-We show how to use `netify` and UCDP data as just one example of potential applications to intrastate event data. The first step is to go to https://ucdp.uu.se/downloads/ and download the data you want to use. For this tutorial we have downloaded UCDP GED event data version 23.1 and subset the data for the case of Mexico. 
-
-
-```{r}
-data(mexico)
-```
-
-(1) Create an aggregated, weighted network of conflict between actors in Mexico. 
-
-```{r}
-# default to number of events
-mex_network <- netify(
-  mexico,
-  actor1 = 'side_a',
-  actor2 = 'side_b',
-  symmetric = TRUE,
-  sum_dyads = TRUE,
-  diag_to_NA = TRUE,
-  missing_to_zero = TRUE
-)
-
-# A summary of the network object
-summary(mex_network)
-
-# weight using a variable
-mex_network_civ <- netify(
-  mexico,
-  actor1 = 'side_a',
-  actor2 = 'side_b',
-  weight = 'deaths_civilians',
-  symmetric = TRUE,
-  sum_dyads = TRUE,
-  diag_to_NA = TRUE,
-  missing_to_zero = TRUE
-)
-
-summary(mex_network_civ)
-```
-
-(2) Explore
-
-```{r, fig.width=6, fig.height=6}
-# select 10 random indices from 1 to the length of select_names
-select_names <- rownames(mex_network)
-
-set.seed(12345)
-random_indices <- sample(length(select_names), 10)
-
-# select 10 random names using the random indices
-random_names <- select_names[random_indices]
-
-plot(mex_network,
-     add_text = TRUE)
-    
-plot(mex_network,
-     select_text = random_names,
-     select_text_display = random_names)
-
-# different edges, highlight same actors, different netify object:
-plot(mex_network_civ,
-     select_text = random_names,
-     select_text_display = random_names)
-```
-
-We can also apply functions from `igraph`:
-
-```{r, warning=FALSE, message = FALSE}
-i_opt_memb = function(x){
-  ig = netify_to_igraph(x)
-  memb = igraph::cluster_optimal(ig)$membership
-  return(memb)
-  }
-
-# add to summary
-sum_mex <- summary_actor(
-  mex_network, 
-  other_stats = list(i_opt_memb=i_opt_memb))
-```
 
 ## References
 
