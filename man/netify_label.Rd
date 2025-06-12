@@ -7,11 +7,34 @@
 netify_label(comp)
 }
 \arguments{
-\item{comp}{A netify_plot_components object}
+\item{comp}{A netify_plot_components object returned from
+\code{plot(..., return_components = TRUE)}}
 }
 \value{
-A custom object that can be added to ggplot
+A custom object of class "netify_label" that can be added to a ggplot
+object using the + operator. The object contains the label layer with all
+its aesthetic mappings and data.
 }
 \description{
-Extract label layer from netify plot components
+Extracts the label layer from a netify plot components object. Labels display
+actor names or other text annotations with background boxes, making them more
+visible against complex network backgrounds.
+}
+\examples{
+\dontrun{
+# create a netify object
+net <- netify(my_data, actor1 = "from", actor2 = "to")
+
+# get plot components with labels
+comp <- plot(net, add_label = TRUE, return_components = TRUE)
+
+# build custom plot with labels
+library(ggplot2)
+ggplot() + netify_label(comp)
+}
+
+}
+\seealso{
+\code{\link{plot.netify}}, \code{\link{netify_text}},
+\code{\link{assemble_netify_plot}}
 }

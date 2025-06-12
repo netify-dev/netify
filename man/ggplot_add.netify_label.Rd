@@ -2,10 +2,21 @@
 % Please edit documentation in R/plot_helpers.R
 \name{ggplot_add.netify_label}
 \alias{ggplot_add.netify_label}
-\title{Method to add netify_label to ggplot}
+\title{Add netify_label to ggplot}
 \usage{
 \method{ggplot_add}{netify_label}(object, plot, object_name)
 }
+\arguments{
+\item{object}{A netify_label object created by \code{\link{netify_label}}}
+
+\item{plot}{A ggplot object to which the label layer will be added}
+
+\item{object_name}{The name of the object being added (used internally by ggplot2)}
+}
+\value{
+A ggplot object with the label layer added
+}
 \description{
-Method to add netify_label to ggplot
+S3 method to add netify_label objects to ggplot objects. This method is called
+automatically when using the + operator with a netify_label object.
 }

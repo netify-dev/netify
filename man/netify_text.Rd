@@ -7,11 +7,34 @@
 netify_text(comp)
 }
 \arguments{
-\item{comp}{A netify_plot_components object}
+\item{comp}{A netify_plot_components object returned from
+\code{plot(..., return_components = TRUE)}}
 }
 \value{
-A custom object that can be added to ggplot
+A custom object of class "netify_text" that can be added to a ggplot
+object using the + operator. The object contains the text layer with all
+its aesthetic mappings and data.
 }
 \description{
-Extract text layer from netify plot components
+Extracts the text label layer from a netify plot components object. Text labels
+display actor names or other text annotations directly on the plot without
+background boxes.
+}
+\examples{
+\dontrun{
+# create a netify object
+net <- netify(my_data, actor1 = "from", actor2 = "to")
+
+# get plot components with text labels
+comp <- plot(net, add_text = TRUE, return_components = TRUE)
+
+# build custom plot with text
+library(ggplot2)
+ggplot() + netify_text(comp)
+}
+
+}
+\seealso{
+\code{\link{plot.netify}}, \code{\link{netify_label}},
+\code{\link{assemble_netify_plot}}
 }

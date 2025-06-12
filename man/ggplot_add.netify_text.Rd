@@ -2,10 +2,21 @@
 % Please edit documentation in R/plot_helpers.R
 \name{ggplot_add.netify_text}
 \alias{ggplot_add.netify_text}
-\title{Method to add netify_text to ggplot}
+\title{Add netify_text to ggplot}
 \usage{
 \method{ggplot_add}{netify_text}(object, plot, object_name)
 }
+\arguments{
+\item{object}{A netify_text object created by \code{\link{netify_text}}}
+
+\item{plot}{A ggplot object to which the text layer will be added}
+
+\item{object_name}{The name of the object being added (used internally by ggplot2)}
+}
+\value{
+A ggplot object with the text layer added
+}
 \description{
-Method to add netify_text to ggplot
+S3 method to add netify_text objects to ggplot objects. This method is called
+automatically when using the + operator with a netify_text object.
 }

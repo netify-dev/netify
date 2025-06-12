@@ -7,11 +7,42 @@
 assemble_netify_plot(comp)
 }
 \arguments{
-\item{comp}{A netify_plot_components object}
+\item{comp}{A netify_plot_components object returned from
+\code{plot(..., return_components = TRUE)}}
 }
 \value{
-A ggplot object
+A complete ggplot object ready for display or further customization
 }
 \description{
-Assemble netify plot from components
+Assembles a complete network plot from netify plot components. This function
+automatically adds all available layers (edges, nodes, text, labels) in the
+correct order with appropriate scale resets between layers.
+}
+\details{
+This function provides a convenient way to reassemble a plot from its
+components after extracting them with \code{return_components = TRUE}.
+It automatically:
+\itemize{
+\item Adds layers in the correct order (edges, nodes, text, labels)
+\item Inserts scale resets between layers when necessary
+\item Includes facets and themes if present
+}
+}
+\examples{
+\dontrun{
+# create a netify object
+net <- netify(my_data, actor1 = "from", actor2 = "to")
+
+# get plot components
+comp <- plot(net, return_components = TRUE)
+
+# reassemble the plot
+p <- assemble_netify_plot(comp)
+print(p)
+}
+
+}
+\seealso{
+\code{\link{plot.netify}}, \code{\link{netify_edge}},
+\code{\link{netify_node}}
 }

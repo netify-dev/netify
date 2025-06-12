@@ -88,20 +88,60 @@ set.seed(12345)
 random_indices <- sample(length(select_names), 10)
 random_names <- select_names[random_indices]
 
-library(patchwork)
-
-p1=plot(mex_network,
+plot(mex_network,
      select_text = random_names,
      select_text_display = random_names)
 
-p2=plot(mex_network,
+plot(mex_network,
      select_text = random_names,
      select_text_display = random_names, 
      # log(x+1) to better see range of connects
      weight_transform = log1p
      )
 
-p1 + p2
+# break p2 into pieces
+comp <- plot(
+  mex_network,
+  remove_isolates = TRUE,
+  select_text = random_names,
+  select_text_display = random_names,              
+  weight_transform = log1p,
+  return_components = TRUE
+  )
+
+# Basic usage - just edges
+comp$base + 
+  netify_edge(comp) + 
+  labs(alpha='Log(Event Count)') +
+  reset_scales() +
+  netify_node(comp) +
+  netify_text(comp) +
+  comp$theme
+
+# and even simpler
+plot(mex_network, 
+     weight_transform = log1p,
+     edge_alpha_label = "Log(Event Count)",
+     select_text = random_names,
+     select_text_display = random_names)
+
+# add degree centrality 
+mex_network = add_node_vars(
+  mex_network, 
+  summary_actor(mex_network), 
+  actor='actor' )
+
+#
+plot(mex_network, 
+     weight_transform = log1p,
+     edge_alpha_label = "Log(Event Count)",
+     point_size_var='degree',
+     point_size_label='Degree',
+     point_alpha=.5
+    #  select_text = random_names,
+    #  select_text_display = random_names,
+    #  check_overlap=TRUE
+    )
 ```
 
 ### 2. Weighted Network (Mexican Case)

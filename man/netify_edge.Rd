@@ -7,11 +7,35 @@
 netify_edge(comp)
 }
 \arguments{
-\item{comp}{A netify_plot_components object}
+\item{comp}{A netify_plot_components object returned from
+\code{plot(..., return_components = TRUE)}}
 }
 \value{
-A custom object that can be added to ggplot
+A custom object of class "netify_edge" that can be added to a ggplot
+object using the + operator. The object contains the edge layer with all
+its aesthetic mappings and data.
 }
 \description{
-Extract edges layer from netify plot components
+Extracts the edge layer from a netify plot components object, allowing for
+manual plot construction and customization. This function is part of the
+modular plotting system that enables fine-grained control over network
+visualization elements.
+}
+\examples{
+\dontrun{
+# create a netify object
+net <- netify(my_data, actor1 = "from", actor2 = "to")
+
+# get plot components
+comp <- plot(net, return_components = TRUE)
+
+# build custom plot with edges
+library(ggplot2)
+ggplot() + netify_edge(comp)
+}
+
+}
+\seealso{
+\code{\link{plot.netify}}, \code{\link{netify_node}},
+\code{\link{assemble_netify_plot}}
 }

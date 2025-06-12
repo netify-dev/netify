@@ -10,23 +10,43 @@
 \item{x}{A 'netify' object, which contains the network data structured for analysis and visualization.}
 
 \item{...}{Additional arguments, which can include but are not limited to:
-- \code{point_layout}: Optional, user-provided node layout; if not provided, layout will be generated based on \code{layout} parameter.
-- \code{layout}: Specifies the layout algorithm from 'igraph' to position the nodes if \code{point_layout} is not provided. Available options include "nicely", "fruchterman.reingold", "kamada.kawai", "random", "circle", "star", "grid", "graphopt", "sugiyama", "drl", "lgl", "bipartite", "tree", "randomly", "dh", "fr", "kk", "gem", and "mds".
-- \code{remove_isolates}: Logical; if TRUE, isolates will be removed from the plot. Default is TRUE.
-- \code{static_actor_positions} Logical indicating whether to use static positions for actors.
-Useful in longitudinal studies where node positions should remain consistent over time.
-If TRUE, the layout by default is calculated based on a collapsed adjacency matrix across
-all time points. Users can also specify a specific time point to use as the static layout by
-setting \code{which_static} to the desired time point.
-- \code{add_edges}: Logical; if TRUE, edges will be added to the plot. Default is TRUE.
-- \code{curve_edges}: Logical; if TRUE, edges will be curved. Default is FALSE.
-- \code{add_points}: Logical; if TRUE, points (nodes) will be plotted. Default is TRUE.
-- \code{add_text}: Logical; if TRUE, text annotations will be added. Default is FALSE.
-- \code{add_label}: Logical; if TRUE, labels will be added. Default is FALSE.
-- \code{select_text}: A vector of node names to specifically add text to; others will not have text.
-- \code{select_label}: A vector of node names to specifically add labels to; others will not have labels.
-- \code{point_size}: A fixed size for all points, equivalent to \code{geom_point(size = point_size)} in \code{ggplot2}.
-- \code{point_size_var}: A variable from the node data to dynamically size points, equivalent to \code{geom_point(aes(size = point_size_var))} in \code{ggplot2}.
+\itemize{
+\item \code{point_layout}: Optional, user-provided node layout; if not provided, layout will be generated based on \code{layout} parameter.
+\item \code{layout}: Specifies the layout algorithm from 'igraph' to position the nodes if \code{point_layout} is not provided. Available options include:
+\itemize{
+\item "nicely"
+\item "fruchterman.reingold"
+\item "kamada.kawai"
+\item "random"
+\item "circle"
+\item "star"
+\item "grid"
+\item "graphopt"
+\item "sugiyama"
+\item "drl"
+\item "lgl"
+\item "bipartite"
+\item "tree"
+\item "randomly"
+\item "dh"
+\item "fr"
+\item "kk"
+\item "gem"
+\item "mds"
+}
+\item \code{remove_isolates}: Logical; if \code{TRUE}, isolates will be removed from the plot. Default is \code{TRUE}.
+\item \code{static_actor_positions}: Logical indicating whether to use static positions for actors. Useful in longitudinal studies where node positions should remain consistent over time. If \code{TRUE}, the layout by default is calculated based on a collapsed adjacency matrix across all time points. Users can also specify a specific time point to use as the static layout by setting \code{which_static} to the desired time point.
+\item \code{add_edges}: Logical; if \code{TRUE}, edges will be added to the plot. Default is \code{TRUE}.
+\item \code{curve_edges}: Logical; if \code{TRUE}, edges will be curved. Default is \code{FALSE}.
+\item \code{add_points}: Logical; if \code{TRUE}, points (nodes) will be plotted. Default is \code{TRUE}.
+\item \code{add_text}: Logical; if \code{TRUE}, text annotations will be added. Default is \code{FALSE}.
+\item \code{add_label}: Logical; if \code{TRUE}, labels will be added. Default is \code{FALSE}.
+\item \code{select_text}: A vector of node names to specifically add text to; others will not have text.
+\item \code{select_label}: A vector of node names to specifically add labels to; others will not have labels.
+\item \code{point_size}: A fixed size for all points, equivalent to \code{geom_point(size = point_size)} in \code{ggplot2}.
+\item \code{point_size_var}: A variable from the node data to dynamically size points, equivalent to \code{geom_point(aes(size = point_size_var))} in \code{ggplot2}.
+}
+
 These arguments control various aspects of the plot's appearance and functionality.}
 }
 \value{
@@ -43,41 +63,42 @@ This function provides a comprehensive tool to visualize 'netify' objects throug
 \item Whether to annotate nodes with text or labels.
 \item Specific nodes to annotate, allowing selective emphasis within the network.
 \item Custom layouts if the automatic placement does not suffice.
-Additional customization options like \code{point_size} and \code{point_size_var} allow users to apply typical \code{ggplot2} methods directly to network visualizations, facilitating easy integration of familiar graphical adjustments.
 }
+Additional customization options like \code{point_size} and \code{point_size_var} allow users to apply typical \code{ggplot2} methods directly to network visualizations, facilitating easy integration of familiar graphical adjustments.
 }
 \examples{
 # load icews data
 data(icews)
 
 # choose attributes
-nvars = c( 'i_polity2', 'i_log_gdp', 'i_log_pop' )
-dvars = c( 'matlCoop', 'verbConf', 'matlConf' )
+nvars = c('i_polity2', 'i_log_gdp', 'i_log_pop')
+dvars = c('matlCoop', 'verbConf', 'matlConf')
 
 # create a netify object
 netlet = netify(
-    icews, actor1='i', actor2='j',
+    icews, actor1 = 'i', actor2 = 'j',
     time = 'year',
-    symmetric=FALSE, weight='verbCoop',
-    mode='unipartite', sum_dyads=FALSE,
-    actor_time_uniform=TRUE, actor_pds=NULL,
-    diag_to_NA=TRUE, missing_to_zero=TRUE,
-    nodal_vars = nvars, 
+    symmetric = FALSE, weight = 'verbCoop',
+    mode = 'unipartite', sum_dyads = FALSE,
+    actor_time_uniform = TRUE, actor_pds = NULL,
+    diag_to_NA = TRUE, missing_to_zero = TRUE,
+    nodal_vars = nvars,
     dyad_vars = dvars
 )
 
 # add basic summary network stats
 netlet = add_node_vars(
-    netlet, 
+    netlet,
     summary_actor(netlet),
-    actor='actor', time='time')
+    actor = 'actor', time = 'time'
+)
 
 # plot the network
-plot(netlet, 
-     edge_color='lightgrey', 
+plot(netlet,
+     edge_color = 'lightgrey',
      point_size_var = 'degree_total',
      point_color_var = 'i_polity2'
-     )
+)
 
 }
 \author{
