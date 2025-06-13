@@ -3,11 +3,11 @@ pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   ego_networks: ego_networks.html
+  event_data: event_data.html
+  foundations: foundations.html
   manual_plotting: manual_plotting.html
-  PSSI_workshop_final: PSSI_workshop_final.html
   resources: resources.html
-  workshop_demo: workshop_demo.html
-last_built: 2025-06-12T02:46Z
+last_built: 2025-06-13T18:28Z
 urls:
   reference: https://netify-dev.github.io/netify/reference
   article: https://netify-dev.github.io/netify/articles
