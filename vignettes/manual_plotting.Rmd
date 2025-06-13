@@ -4,7 +4,7 @@ author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Netify: Manual Plotting with ggplot2}
+  %\VignetteIndexEntry{4. Netify: Manual Plotting with ggplot2}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

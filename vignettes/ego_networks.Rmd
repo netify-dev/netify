@@ -4,7 +4,7 @@ author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Netify: Ego Networks}
+  %\VignetteIndexEntry{3. Netify: Ego Networks}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

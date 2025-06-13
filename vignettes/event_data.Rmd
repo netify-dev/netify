@@ -4,7 +4,7 @@ author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Conflict Applications}
+  %\VignetteIndexEntry{2. Conflict Application: Event Data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -27,7 +27,8 @@ We show how to use `netify` and UCDP data as just one example of potential appli
 
 
 ```{r}
-data(mexico)
+library(netify)
+library(ggplot2)
 ```
 
 (1) Create: generate an aggregated, weighted network of conflict between actors in Mexico. The default here, when the user does not supply a 'weight' value, is for the function to simply count up interactions and return this as the weight. When this is the case, the user will get the warning shown in the example below.
