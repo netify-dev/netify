@@ -4,7 +4,7 @@ author: "Various Authors"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{5. Helpful Resources}
+  %\VignetteIndexEntry{Helpful Resources}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

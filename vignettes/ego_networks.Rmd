@@ -1,10 +1,10 @@
 ---
-title: "Netify: Ego Networks"
+title: "Ego Networks"
 author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{3. Netify: Ego Networks}
+  %\VignetteIndexEntry{Ego Networks}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

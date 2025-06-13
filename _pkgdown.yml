@@ -2,3 +2,12 @@ url: https://netify-dev.github.io/netify/
 template:
   bootstrap: 5
 
+articles:
+  - title: "Getting Started"
+    navbar: ~
+    contents:
+    - foundations
+    - event_data
+    - ego_networks
+    - manual_plotting
+    - resources
