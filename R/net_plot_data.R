@@ -153,6 +153,9 @@ net_plot_data <- function(netlet, plot_args=list()) {
 
     # pull out msrmnts
     msrmnts <- netify_measurements(netlet)
+
+    # try to set some smart defaults
+    plot_args <- get_smart_defaults(netlet, msrmnts, plot_args)
     ######################
 
     ######################

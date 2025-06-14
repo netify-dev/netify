@@ -133,38 +133,44 @@ gg_params <- function(
     if(!is.null(plot_args$point_alpha_var)){
         point_aes_list$alpha = stats::formula(
             paste0('~', plot_args$point_alpha_var))
-        point_static_params = point_static_params[
-            -which(names(point_static_params)=='alpha')]
+        if('alpha' %in% names(point_static_params)) {
+            point_static_params$alpha <- NULL
+        }
     }
     if(!is.null(plot_args$point_color_var)){
         point_aes_list$color = stats::formula(
             paste0('~', plot_args$point_color_var))
-        point_static_params = point_static_params[
-            -which(names(point_static_params)=='color')]
+        if('color' %in% names(point_static_params)) {
+            point_static_params$color <- NULL
+        }
     }
     if(!is.null(plot_args$point_fill_var)){
         point_aes_list$fill = stats::formula(
             paste0('~', plot_args$point_fill_var))
-        point_static_params = point_static_params[
-            -which(names(point_static_params)=='fill')]
+        if('fill' %in% names(point_static_params)) {
+            point_static_params$fill <- NULL
+        }
     }
     if(!is.null(plot_args$point_shape_var)){
         point_aes_list$shape = stats::formula(
             paste0('~', plot_args$point_shape_var))
-        point_static_params = point_static_params[
-            -which(names(point_static_params)=='shape')]
+        if('shape' %in% names(point_static_params)) {
+            point_static_params$shape <- NULL
+        }
     }
     if(!is.null(plot_args$point_size_var)){
         point_aes_list$size = stats::formula(
             paste0('~', plot_args$point_size_var))
-        point_static_params = point_static_params[
-            -which(names(point_static_params)=='size')]
+        if('size' %in% names(point_static_params)) {
+            point_static_params$size <- NULL
+        }
     }
     if(!is.null(plot_args$point_stroke_var)){
         point_aes_list$stroke = stats::formula(
             paste0('~', plot_args$point_stroke_var))
-        point_static_params = point_static_params[
-            -which(names(point_static_params)=='stroke')]
+        if('stroke' %in% names(point_static_params)) {
+            point_static_params$stroke <- NULL
+        }
     }
     ######################
 
@@ -189,20 +195,23 @@ gg_params <- function(
     if(!is.null(plot_args$text_alpha_var)){
         text_aes_list$alpha <- stats::formula(
             paste0('~', plot_args$text_alpha_var))
-        text_static_params = text_static_params[
-            -which(names(text_static_params)=='alpha')]
+        if('alpha' %in% names(text_static_params)) {
+            text_static_params$alpha <- NULL
+        }
     }
     if(!is.null(plot_args$text_color_var)){
         text_aes_list$color <- stats::formula(
             paste0('~', plot_args$text_color_var))
-        text_static_params = text_static_params[
-            -which(names(text_static_params)=='color')]
+        if('color' %in% names(text_static_params)) {
+            text_static_params$color <- NULL
+        }
     }
     if(!is.null(plot_args$text_size_var)){
         text_aes_list$size <- stats::formula(
             paste0('~', plot_args$text_size_var))
-        text_static_params = text_static_params[
-            -which(names(text_static_params)=='size')]
+        if('size' %in% names(text_static_params)) {
+            text_static_params$size <- NULL
+        }
     }
     ######################
 
@@ -230,26 +239,30 @@ gg_params <- function(
     if(!is.null(plot_args$label_alpha_var)){
         label_aes_list$alpha <- stats::formula(
             paste0('~', plot_args$label_alpha_var) )
-        label_static_params = label_static_params[
-            -which(names(label_static_params)=='alpha')]
+        if('alpha' %in% names(label_static_params)) {
+            label_static_params$alpha <- NULL
+        }
     }
     if(!is.null(plot_args$label_color_var)){
         label_aes_list$color <- stats::formula(
             paste0('~', plot_args$label_color_var) )
-        label_static_params = label_static_params[
-            -which(names(label_static_params)=='color')]
+        if('color' %in% names(label_static_params)) {
+            label_static_params$color <- NULL
+        }
     }
     if(!is.null(plot_args$label_fill_var)){
         label_aes_list$fill <- stats::formula(
             paste0('~', plot_args$label_fill_var) )
-        label_static_params = label_static_params[
-            -which(names(label_static_params)=='fill')]
+        if('fill' %in% names(label_static_params)) {
+            label_static_params$fill <- NULL
+        }
     }
     if(!is.null(plot_args$label_size_var)){
         label_aes_list$size <- stats::formula(
             paste0('~', plot_args$label_size_var) )
-        label_static_params = label_static_params[
-            -which(names(label_static_params)=='size')]
+        if('size' %in% names(label_static_params)) {
+            label_static_params$size <- NULL
+        }
     }
     ######################
 
@@ -272,6 +285,7 @@ gg_params <- function(
     curve_static_params$curvature = plot_args$edge_curvature
     curve_static_params$angle = plot_args$edge_angle
     curve_static_params$ncp = plot_args$edge_ncp
+    curve_static_params$linejoin = NULL
 
     # Prepare a list to conditionally build the aes() for edges
     edge_aes_list <- list(
@@ -283,26 +297,42 @@ gg_params <- function(
     if(!is.null(plot_args$edge_alpha_var)){
         edge_aes_list$alpha <- stats::formula(
             paste0('~', plot_args$edge_alpha_var) )
-        edge_static_params = edge_static_params[
-            -which(names(edge_static_params)=='alpha')]
+        if('alpha' %in% names(edge_static_params)) {
+            edge_static_params$alpha <- NULL
+        }
+        if('alpha' %in% names(curve_static_params)) {
+            curve_static_params$alpha <- NULL
+        }
     }
     if(!is.null(plot_args$edge_color_var)){
         edge_aes_list$color <- stats::formula(
             paste0('~', plot_args$edge_color_var) )
-        edge_static_params = edge_static_params[
-            -which(names(edge_static_params)=='color')]
+        if('color' %in% names(edge_static_params)) {
+            edge_static_params$color <- NULL
+        }
+        if('color' %in% names(curve_static_params)) {
+            curve_static_params$color <- NULL
+        }
     }
     if(!is.null(plot_args$edge_linetype_var)){
         edge_aes_list$linetype <- stats::formula(
             paste0('~', plot_args$edge_linetype_var) )
-        edge_static_params = edge_static_params[
-            -which(names(edge_static_params)=='linetype')]
+        if('linetype' %in% names(edge_static_params)) {
+            edge_static_params$linetype <- NULL
+        }
+        if('linetype' %in% names(curve_static_params)) {
+            curve_static_params$linetype <- NULL
+        }
     }
     if(!is.null(plot_args$edge_linewidth_var)){
         edge_aes_list$linewidth <- stats::formula(
             paste0('~', plot_args$edge_linewidth_var) )
-        edge_static_params = edge_static_params[
-            -which(names(edge_static_params)=='linewidth')]
+        if('linewidth' %in% names(edge_static_params)) {
+            edge_static_params$linewidth <- NULL
+        }
+        if('linewidth' %in% names(curve_static_params)) {
+            curve_static_params$linewidth <- NULL
+        }
     }
     ######################
 

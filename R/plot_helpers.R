@@ -586,26 +586,11 @@ ggplot_add.netify_labels <- function(object, plot, object_name) {
 #' @keywords internal
 #' @noRd
 update_scale_label <- function(plot, aesthetic, label, component_type) {
-    # this is tricky because we need to find the right scale
-    # we'll need to track which scales belong to which component
+    # create the appropriate labs() call
+    # we need to handle all possible aesthetics
+    labs_list <- list()
+    labs_list[[aesthetic]] <- label
     
-    # for now, a simpler approach - add a labs() layer
-    # this will work if scales are properly separated
-    if (aesthetic == "alpha") {
-        plot + labs(alpha = label)
-    } else if (aesthetic == "color") {
-        plot + labs(color = label)
-    } else if (aesthetic == "fill") {
-        plot + labs(fill = label)
-    } else if (aesthetic == "size") {
-        plot + labs(size = label)
-    } else if (aesthetic == "linewidth") {
-        plot + labs(linewidth = label)
-    } else if (aesthetic == "linetype") {
-        plot + labs(linetype = label)
-    } else if (aesthetic == "shape") {
-        plot + labs(shape = label)
-    } else {
-        plot
-    }
+    # apply the labs to the plot
+    plot + do.call(ggplot2::labs, labs_list)
 }

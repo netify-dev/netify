@@ -294,10 +294,10 @@ plot(
 plot(
     mid_long_network,
     edge_color='grey',
-    point_size_var='degree',
-    point_color_var='v2x_polyarchy1',
-    point_color_label='Polyarchy',
-    point_size_label='Degree'
+    node_size_by='degree',
+    node_color_by='v2x_polyarchy1',
+    node_color_label='Polyarchy',
+    node_size_label='Degree'
     ) + 
     scale_color_gradient2()
 ```
@@ -317,10 +317,10 @@ cabbs = countrycode(cowns, 'cown', 'iso3c')
 plot(
     mid_long_network,
     edge_color='grey',
-    point_size_var='degree',
-    point_color_var='v2x_polyarchy1',
-    point_color_label='Polyarchy',
-    point_size_label='Degree',    
+    node_size_by='degree',
+    node_color_by='v2x_polyarchy1',
+    node_color_label='Polyarchy',
+    node_size_label='Degree',
     select_text = cowns,
     select_text_display = cabbs,
     text_size = 3
@@ -334,9 +334,9 @@ plot(
     edge_color='grey',
     add_points = FALSE, 
     add_label = TRUE,
-    label_size_var='degree',
+    label_size_by='degree',
     label_color = 'white',
-    label_fill_var='v2x_polyarchy1',
+    label_fill_by='v2x_polyarchy1',
     label_fill_label='Polyarchy',
     label_size_label='Degree'    
     ) + guides(size='none')

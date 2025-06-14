@@ -1,102 +1,274 @@
-#' Plotting method for 'netify' objects
+#' Plotting method for netify objects
 #'
-#' This function provides a comprehensive tool to visualize 'netify' objects through various graphical representations including points, edges, texts, and labels. It leverages the capabilities of the 'igraph' and 'ggplot' packages to create customizable network visualizations.
+#' Creates customizable network visualizations from netify objects using ggplot2. 
+#' Supports cross-sectional and longitudinal networks with extensive options for 
+#' mapping network attributes to visual properties.
 #'
-#' @param x A 'netify' object, which contains the network data structured for analysis and visualization.
-#' @param ... Additional arguments, which can include but are not limited to:
-#' \itemize{
-#'   \item \code{point_layout}: Optional, user-provided node layout; if not provided, layout will be generated based on \code{layout} parameter.
-#'   \item \code{layout}: Specifies the layout algorithm from 'igraph' to position the nodes if \code{point_layout} is not provided. Available options include:
-#'     \itemize{
-#'       \item "nicely"
-#'       \item "fruchterman.reingold"
-#'       \item "kamada.kawai"
-#'       \item "random"
-#'       \item "circle"
-#'       \item "star"
-#'       \item "grid"
-#'       \item "graphopt"
-#'       \item "sugiyama"
-#'       \item "drl"
-#'       \item "lgl"
-#'       \item "bipartite"
-#'       \item "tree"
-#'       \item "randomly"
-#'       \item "dh"
-#'       \item "fr"
-#'       \item "kk"
-#'       \item "gem"
-#'       \item "mds"
-#'     }
-#'   \item \code{remove_isolates}: Logical; if \code{TRUE}, isolates will be removed from the plot. Default is \code{TRUE}.
-#'   \item \code{static_actor_positions}: Logical indicating whether to use static positions for actors. Useful in longitudinal studies where node positions should remain consistent over time. If \code{TRUE}, the layout by default is calculated based on a collapsed adjacency matrix across all time points. Users can also specify a specific time point to use as the static layout by setting \code{which_static} to the desired time point.
-#'   \item \code{add_edges}: Logical; if \code{TRUE}, edges will be added to the plot. Default is \code{TRUE}.
-#'   \item \code{curve_edges}: Logical; if \code{TRUE}, edges will be curved. Default is \code{FALSE}.
-#'   \item \code{add_points}: Logical; if \code{TRUE}, points (nodes) will be plotted. Default is \code{TRUE}.
-#'   \item \code{add_text}: Logical; if \code{TRUE}, text annotations will be added. Default is \code{FALSE}.
-#'   \item \code{add_label}: Logical; if \code{TRUE}, labels will be added. Default is \code{FALSE}.
-#'   \item \code{select_text}: A vector of node names to specifically add text to; others will not have text.
-#'   \item \code{select_label}: A vector of node names to specifically add labels to; others will not have labels.
-#'   \item \code{point_size}: A fixed size for all points, equivalent to \code{geom_point(size = point_size)} in \code{ggplot2}.
-#'   \item \code{point_size_var}: A variable from the node data to dynamically size points, equivalent to \code{geom_point(aes(size = point_size_var))} in \code{ggplot2}.
+#' @param x A 'netify' object containing network data to visualize.
+#' @param ... Additional arguments controlling plot appearance:
+#' 
+#' @section Layout Parameters:
+#' \describe{
+#'   \item{\code{layout}}{Character string specifying the igraph layout algorithm. 
+#'     Options include: \code{"nicely"} (default), \code{"fr"} (Fruchterman-Reingold), 
+#'     \code{"kk"} (Kamada-Kawai), \code{"circle"}, \code{"star"}, \code{"grid"}, 
+#'     \code{"tree"}, \code{"bipartite"} (for bipartite networks), \code{"randomly"}, 
+#'     and others. See \code{\link{get_node_layout}} for full list.}
+#'   \item{\code{point_layout}}{Optional data.frame or list of data.frames containing 
+#'     pre-computed node positions with columns 'actor', 'x', and 'y'. Overrides 
+#'     \code{layout} if provided.}
+#'   \item{\code{static_actor_positions}}{Logical. For longitudinal networks, should 
+#'     node positions remain constant across time? Default is \code{FALSE}.}
+#'   \item{\code{which_static}}{Integer. When \code{static_actor_positions = TRUE}, 
+#'     which time period's layout to use as template? If \code{NULL} (default), 
+#'     creates composite layout from all time periods.}
+#'   \item{\code{seed}}{Integer for reproducible layouts. Default is 6886.}
+#' }
+#' 
+#' @section Display Control:
+#' \describe{
+#'   \item{\code{add_edges}}{Logical. Display edges? Default is \code{TRUE}.}
+#'   \item{\code{add_points}}{Logical. Display nodes as points? Default is \code{TRUE}.}
+#'   \item{\code{add_text}}{Logical. Add text labels to nodes? Default is \code{FALSE}.}
+#'   \item{\code{add_label}}{Logical. Add boxed labels to nodes? Default is \code{FALSE}.}
+#'   \item{\code{remove_isolates}}{Logical. Remove unconnected nodes? Default is \code{TRUE}.}
+#'   \item{\code{curve_edges}}{Logical. Use curved edges? Default is \code{FALSE}.}
+#'   \item{\code{use_theme_netify}}{Logical. Apply netify theme? Default is \code{TRUE}.}
 #' }
 #'
-#' These arguments control various aspects of the plot's appearance and functionality.
+#' @section Node Aesthetics:
+#' 
+#' Fixed aesthetics (same for all nodes):
+#' \describe{
+#'   \item{\code{node_size} or \code{point_size}}{Numeric. Size of all nodes.}
+#'   \item{\code{node_color} or \code{point_color}}{Color of node borders.}
+#'   \item{\code{node_fill} or \code{point_fill}}{Fill color of nodes (note that fill will only work with certain shapes).}
+#'   \item{\code{node_shape} or \code{point_shape}}{Shape of nodes (see \code{?pch}).}
+#'   \item{\code{node_alpha} or \code{point_alpha}}{Transparency (0-1).}
+#'   \item{\code{node_stroke} or \code{point_stroke}}{Width of node borders.}
+#' }
+#' 
+#' Variable aesthetics (mapped to data):
+#' \describe{
+#'   \item{\code{node_size_by} or \code{point_size_var}}{Column name for size mapping.}
+#'   \item{\code{node_color_by} or \code{point_color_var}}{Column name for border color.}
+#'   \item{\code{node_fill_by} or \code{point_fill_var}}{Column name for fill color (note that fill will only work with certain shapes).}
+#'   \item{\code{node_shape_by} or \code{point_shape_var}}{Column name for shape.}
+#'   \item{\code{node_alpha_by} or \code{point_alpha_var}}{Column name for transparency.}
+#' }
+#' 
+#' @section Edge Aesthetics:
+#' 
+#' Fixed aesthetics:
+#' \describe{
+#'   \item{\code{edge_color}}{Color for all edges. Default is "black".}
+#'   \item{\code{edge_linewidth}}{Width for all edges. Default is 0.5.}
+#'   \item{\code{edge_linetype}}{Line type (1=solid, 2=dashed, etc.).}
+#'   \item{\code{edge_alpha}}{Transparency (0-1).}
+#'   \item{\code{edge_curvature}}{Curvature amount when \code{curve_edges = TRUE}.}
+#'   \item{\code{arrow}}{Arrow specification for directed networks. Example: 
+#'     \code{arrow(length = unit(0.2, "cm"))}.}
+#' }
+#' 
+#' Variable aesthetics:
+#' \describe{
+#'   \item{\code{edge_color_by} or \code{edge_color_var}}{Column name for color mapping.}
+#'   \item{\code{edge_linewidth_by} or \code{edge_linewidth_var}}{Column name for width.}
+#'   \item{\code{edge_linetype_by} or \code{edge_linetype_var}}{Column name for line type.}
+#'   \item{\code{edge_alpha_by} or \code{edge_alpha_var}}{Column name for transparency.
+#'     For weighted networks, defaults to the weight variable if not specified.}
+#' }
+#' 
+#' @section Text and Label Options:
+#' 
+#' Selective labeling:
+#' \describe{
+#'   \item{\code{select_text}}{Character vector of node names to show as text.}
+#'   \item{\code{select_text_display}}{Alternative text to display (same length as 
+#'     \code{select_text}).}
+#'   \item{\code{select_label}}{Character vector of node names to show with boxes.}
+#'   \item{\code{select_label_display}}{Alternative labels (same length as 
+#'     \code{select_label}).}
+#' }
+#' 
+#' Text aesthetics:
+#' \describe{
+#'   \item{\code{text_size}}{Fixed size for all text. Default is 3.88.}
+#'   \item{\code{text_color}}{Fixed color for all text. Default is "black".}
+#'   \item{\code{text_alpha}}{Fixed transparency for text.}
+#'   \item{\code{text_size_by}}{Variable to map to text size.}
+#'   \item{\code{text_color_by}}{Variable to map to text color.}
+#' }
+#' 
+#' Label (boxed text) aesthetics have similar parameters with \code{label_} prefix.
+#' 
+#' @section Scale Labels:
+#' 
+#' Customize legend titles:
+#' \describe{
+#'   \item{\code{node_size_label} or \code{point_size_label}}{Legend title for size.}
+#'   \item{\code{node_color_label} or \code{point_color_label}}{Legend title for color.}
+#'   \item{\code{edge_alpha_label}}{Legend title for edge transparency.}
+#'   \item{\code{edge_color_label}}{Legend title for edge color.}
+#' }
+#' 
+#' @section Special Parameters:
+#' \describe{
+#'   \item{\code{weight_transform}}{Function to transform edge weights before plotting.
+#'     Example: \code{log1p} for log(x+1) transformation. Applied before mapping to
+#'     aesthetics.}
+#'   \item{\code{check_overlap}}{Logical. Avoid text overlap? Default is \code{TRUE}.}
+#'   \item{\code{return_components}}{Logical. Return plot components instead of 
+#'     assembled plot? Useful for manual customization. Default is \code{FALSE}.}
+#'   \item{\code{palette}}{Character string for color palette, see \code{list_palettes()}.}
+#' }
 #'
-#' @return A 'ggplot' plot object that can be further modified or printed.
+#' @return 
+#' A ggplot2 object that can be further customized with additional layers, scales, 
+#' themes, etc. For longitudinal networks, includes facets for each time period.
+#' 
+#' If \code{return_components = TRUE}, returns a list of plot components that can 
+#' be manually assembled or modified.
 #'
 #' @details
-#' \code{plot.netify} creates a network plot with flexible options for customization. It allows the user to specify:
+#' 
+#' \strong{Naming Conventions:}
+#' 
+#' The function supports two naming styles for parameters:
 #' \itemize{
-#'   \item Whether or not to include edges and how they are rendered (straight or curved).
-#'   \item Whether nodes are displayed as points.
-#'   \item Whether to annotate nodes with text or labels.
-#'   \item Specific nodes to annotate, allowing selective emphasis within the network.
-#'   \item Custom layouts if the automatic placement does not suffice.
+#'   \item \strong{Recommended}: Use \code{node_*} for node attributes and 
+#'     \code{*_by} for variable mappings (e.g., \code{node_size_by = "degree"})
+#'   \item \strong{Legacy}: Use \code{point_*} for nodes and \code{*_var} for 
+#'     variables (e.g., \code{point_size_var = "degree"})
 #' }
-#' Additional customization options like \code{point_size} and \code{point_size_var} allow users to apply typical \code{ggplot2} methods directly to network visualizations, facilitating easy integration of familiar graphical adjustments.
-#'
-#' @author Cassy Dorff, Shahryar Minhas
+#' 
+#' \strong{Default Behaviors:}
+#' \itemize{
+#'   \item For weighted networks, edge transparency maps to weight by default
+#'   \item For directed networks, arrows are added automatically
+#'   \item For longitudinal networks, time periods are shown as facets
+#'   \item Isolates are removed by default (set \code{remove_isolates = FALSE} to keep)
+#' }
+#' 
+#' \strong{Customization Tips:}
+#' \itemize{
+#'   \item Use \code{weight_transform} to handle skewed weight distributions
+#'   \item Combine fixed and variable aesthetics (e.g., fixed color with variable size)
+#'   \item Add ggplot2 layers after the plot call for further customization
+#'   \item Use \code{select_text} for selective labeling in dense networks
+#' }
 #'
 #' @examples
-#' # load icews data
+#' # Load example data
 #' data(icews)
 #'
-#' # choose attributes
-#' nvars = c('i_polity2', 'i_log_gdp', 'i_log_pop')
-#' dvars = c('matlCoop', 'verbConf', 'matlConf')
-#'
-#' # create a netify object
-#' netlet = netify(
-#'     icews, actor1 = 'i', actor2 = 'j',
-#'     time = 'year',
-#'     symmetric = FALSE, weight = 'verbCoop',
-#'     mode = 'unipartite', sum_dyads = FALSE,
-#'     actor_time_uniform = TRUE, actor_pds = NULL,
-#'     diag_to_NA = TRUE, missing_to_zero = TRUE,
-#'     nodal_vars = nvars,
-#'     dyad_vars = dvars
+#' # Basic cross-sectional network
+#' icews_10 <- icews[icews$year == 2010,]
+#' net_10 <- netify(
+#'   icews_10,
+#'   actor1 = 'i', actor2 = 'j',
+#'   symmetric = FALSE,
+#'   weight = 'verbCoop'
 #' )
-#'
-#' # add basic summary network stats
-#' netlet = add_node_vars(
-#'     netlet,
-#'     summary_actor(netlet),
-#'     actor = 'actor', time = 'time'
+#' 
+#' # Simple plot
+#' plot(net_10)
+#' 
+#' # add nodal stats to netlet
+#' net_10 <- add_node_vars(
+#'   net_10, 
+#'   summary_actor(net_10), 
+#'   'actor'
 #' )
-#'
-#' # plot the network
-#' plot(netlet,
-#'      edge_color = 'lightgrey',
-#'      point_size_var = 'degree_total',
-#'      point_color_var = 'i_polity2'
+#' 
+#' # Customized plot with new naming convention
+#' plot(net_10,
+#'   edge_color = 'lightgrey',
+#'   node_size_by = 'degree_total',          # Instead of point_size_var
+#'   node_color = 'steelblue',
+#'   edge_alpha_by = 'verbCoop',       # Instead of edge_alpha_var
+#'   node_size_label = 'Degree',
+#'   edge_alpha_label = 'Verbal Cooperation'
 #' )
+#' 
+#' # Longitudinal network example
+#' net_longit <- netify(
+#'   icews,
+#'   actor1 = 'i', actor2 = 'j',
+#'   time = 'year',
+#'   symmetric = FALSE,
+#'   weight = 'verbCoop',
+#'   nodal_vars = c('i_polity2', 'i_log_gdp')
+#' )
+#' 
+#' # Add network statistics
+#' net_longit <- add_node_vars(
+#'   net_longit,
+#'   summary_actor(net_longit),
+#'   actor = 'actor', 
+#'   time = 'time'
+#' )
+#' 
+#' # Plot with multiple aesthetics
+#' plot(net_longit,
+#'   # Edges
+#'   edge_color = 'grey70',
+#'   weight_transform = log1p,         # Transform weights
+#'   # Nodes  
+#'   node_size_by = 'degree_total',
+#'   node_color_by = 'i_polity2',
+#'   # Labels
+#'   node_size_label = 'Total Degree',
+#'   node_color_label = 'Polity Score',
+#'   edge_alpha_label = 'Log(Verbal Coop.)',
+#'   # Layout
+#'   static_actor_positions = TRUE     # Keep positions constant
+#' )
+#' 
+#' # Selective labeling example
+#' plot(net_10,
+#'   node_size_by = 'degree_total',
+#'   select_text = c('United States', 'China', 'Russian Federation'),
+#'   text_size = 3,
+#'   text_color = 'darkred'
+#' )
+#' 
+#' # choose alternative labels for selected text
+#' plot(net_10,
+#'   node_size_by = 'degree_total',
+#'   select_text = c('United States', 'China', 'Russian Federation'),
+#'   select_text_display = c('USA', 'CHN', 'RUS'),
+#'   text_size = 3,
+#'   text_color = 'darkred'
+#' )
+#' 
+#' # use return_components=TRUE
+#' # to get back ggplot2 pieces of plot
+#' g10 <- plot(
+#'   net_10, 
+#'   node_alpha=.8,
+#'   arrow = ggplot2::arrow(length = ggplot2::unit(0.01, "inches")),  
+#'   node_size_by = 'log(degree_total)',
+#'   node_size_label = 'Log(Degree)',
+#'   edge_alpha_label='Log(Verbal Coop.)',
+#'   remove_isolates = TRUE,
+#'   weight_transform = log1p,
+#'   return_components = TRUE )
+#' 
+#' # Manually assemble with custom modifications
+#' # to scale aesthetics such as edges
+#' g10$base +
+#'   netify_edge(g10) +
+#'   ggplot2::scale_alpha_continuous(range = c(0.01, 0.2)) +
+#'   netify_node(g10) +
+#'   theme_netify()
+#'
 #'
 #' @import ggplot2
 #' @importFrom ggnewscale new_scale_color new_scale_fill new_scale
 #'
 #' @export plot.netify
-#' @export
+#' @export 
 
 plot.netify <- function(x, ...) {
 
@@ -496,6 +668,38 @@ plot.netify <- function(x, ...) {
 			viz <- viz + labs(alpha = scale_labels$label_alpha)
 		}
 	}
+
+    # apply color palettes if specified
+    if (!is.null(plot_args$node_color_palette) && !is.null(components$point_scales$color)) {
+        var_data <- net_dfs$nodal_data[[components$point_scales$color]]
+        if (is.numeric(var_data) && length(unique(var_data)) > 10) {
+            viz <- viz + scale_color_distiller(
+                palette = plot_args$node_color_palette,
+                direction = plot_args$node_color_direction %||% 1
+            )
+        } else {
+            viz <- viz + scale_color_brewer(
+                palette = plot_args$node_color_palette,
+                type = "qual"
+            )
+        }
+    }
+    
+    # ditto for fill
+    if (!is.null(plot_args$node_fill_palette) && !is.null(components$point_scales$fill)) {
+        var_data <- net_dfs$nodal_data[[components$point_scales$fill]]
+        if (is.numeric(var_data) && length(unique(var_data)) > 10) {
+            viz <- viz + scale_fill_distiller(
+                palette = plot_args$node_fill_palette,
+                direction = plot_args$node_fill_direction %||% 1
+            )
+        } else {
+            viz <- viz + scale_fill_brewer(
+                palette = plot_args$node_fill_palette,
+                type = "qual"
+            )
+        }
+    }
 
 	# add facets to the plot if they are defined (useful for longitudinal data)
 	if (!is.null(components$facets)) {

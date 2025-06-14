@@ -140,49 +140,6 @@
 #' All color parameters accept standard R color specifications including named 
 #' colors, hex codes, and RGB values.
 #'
-#' @examples 
-#' \dontrun{
-#' # Basic usage with a netify object
-#' data(icews)
-#' icews_10 <- icews[icews$year == 2010,]
-#' 
-#' # Create netify object
-#' net <- netify(
-#'   icews_10,
-#'   actor1 = 'i', actor2 = 'j',
-#'   weight = 'verbCoop'
-#' )
-#' 
-#' # Decompose to get data frames
-#' net_dfs <- decompose_netify(net)
-#' 
-#' # Get object attributes
-#' obj_attrs <- attributes(net)
-#' 
-#' # Prepare plotting arguments with custom settings
-#' plot_args <- list(
-#'   point_size = 3,
-#'   edge_color = "gray50",
-#'   select_text = c("USA", "China", "Russia"),
-#'   curve_edges = TRUE,
-#'   edge_curvature = 0.3
-#' )
-#' 
-#' # Adjust plot arguments
-#' adjusted <- adjust_plot_args(plot_args, net_dfs, obj_attrs)
-#' 
-#' # Access the prepared data
-#' plot_args_final <- adjusted$plot_args
-#' net_dfs_final <- adjusted$net_dfs
-#' 
-#' # Check that defaults were set
-#' plot_args_final$point_color  # "black" (default)
-#' plot_args_final$point_size   # 3 (user-specified)
-#' 
-#' # Check selective labeling columns
-#' table(net_dfs_final$nodal_data$name_text != "")  # Only selected nodes
-#' }
-#'
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
 #' @keywords internal
@@ -202,6 +159,101 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if(is.null(plot_args$check_overlap)){
 		plot_args$check_overlap = TRUE }
 
+	# convert node_* to point_* internally for backward compatibility
+	# allow users to use either node_* or point_* parameters
+	node_to_point_mapping <- list(
+		# Static parameters
+		'node_alpha' = 'point_alpha',
+		'node_color' = 'point_color', 
+		'node_fill' = 'point_fill',
+		'node_shape' = 'point_shape',
+		'node_size' = 'point_size',
+		'node_stroke' = 'point_stroke',
+		# variable parameters - convert both _by and legacy _var
+		'node_alpha_by' = 'point_alpha_var',
+		'node_color_by' = 'point_color_var',
+		'node_fill_by' = 'point_fill_var',
+		'node_shape_by' = 'point_shape_var',
+		'node_size_by' = 'point_size_var',
+		'node_stroke_by' = 'point_stroke_var',
+		# legacy _var support
+		'node_alpha_var' = 'point_alpha_var',
+		'node_color_var' = 'point_color_var',
+		'node_fill_var' = 'point_fill_var',
+		'node_shape_var' = 'point_shape_var',
+		'node_size_var' = 'point_size_var',
+		'node_stroke_var' = 'point_stroke_var' )
+	
+	# apply the mapping
+	for(old_name in names(node_to_point_mapping)) {
+		new_name <- node_to_point_mapping[[old_name]]
+		if(!is.null(plot_args[[old_name]]) && is.null(plot_args[[new_name]])) {
+			plot_args[[new_name]] <- plot_args[[old_name]]
+			plot_args[[old_name]] <- NULL } }
+	
+	# convert _by to _var for all parameters (edge, point, text, label)
+	by_to_var_mapping <- list(
+		# edge parameters
+		'edge_alpha_by' = 'edge_alpha_var',
+		'edge_color_by' = 'edge_color_var',
+		'edge_linewidth_by' = 'edge_linewidth_var',
+		'edge_linetype_by' = 'edge_linetype_var',
+		# point parameters (in case used directly)
+		'point_alpha_by' = 'point_alpha_var',
+		'point_color_by' = 'point_color_var',
+		'point_fill_by' = 'point_fill_var',
+		'point_shape_by' = 'point_shape_var',
+		'point_size_by' = 'point_size_var',
+		'point_stroke_by' = 'point_stroke_var',
+		# text parameters
+		'text_alpha_by' = 'text_alpha_var',
+		'text_color_by' = 'text_color_var',
+		'text_size_by' = 'text_size_var',
+		# label parameters
+		'label_alpha_by' = 'label_alpha_var',
+		'label_color_by' = 'label_color_var',
+		'label_fill_by' = 'label_fill_var',
+		'label_size_by' = 'label_size_var' )
+	
+	# Apply the by to var mapping
+	for(old_name in names(by_to_var_mapping)) {
+		new_name <- by_to_var_mapping[[old_name]]
+		if(!is.null(plot_args[[old_name]]) && is.null(plot_args[[new_name]])) {
+			plot_args[[new_name]] <- plot_args[[old_name]]
+			plot_args[[old_name]] <- NULL } }
+
+	# process palette if provided #####################
+	if(!is.null(plot_args$palette)) {
+	palette_settings <- get_palette(plot_args$palette)
+	
+	if(!is.null(palette_settings)) {
+		# Apply palette settings only if user hasn't explicitly set them
+		if(is.null(plot_args$edge_color)) {
+		plot_args$edge_color <- palette_settings$edge_color
+		}
+		if(is.null(plot_args$edge_alpha) && is.null(plot_args$edge_alpha_var)) {
+		plot_args$edge_alpha <- palette_settings$edge_alpha
+		}
+		if(is.null(plot_args$point_fill) && is.null(plot_args$node_fill)) {
+		plot_args$point_fill <- palette_settings$node_fill
+		}
+		if(is.null(plot_args$point_color) && is.null(plot_args$node_color)) {
+		plot_args$point_color <- palette_settings$node_color
+		}
+		if(is.null(plot_args$curve_edges)) {
+		plot_args$curve_edges <- palette_settings$curve_edges
+		}
+		# Set shape to 21 to use fill color
+		if(is.null(plot_args$point_shape) && is.null(plot_args$node_shape)) {
+		plot_args$point_shape <- 21
+		}
+	} else {
+		cli::cli_alert_warning(
+			"Unknown palette '{plot_args$palette}'. Use list_palettes() to see available options.")
+	}
+	}
+	######################
+
 	# process geom choices #####################
 	if(is.null(plot_args$add_points)){ plot_args$add_points = TRUE }
 	if(is.null(plot_args$add_text)){ plot_args$add_text = FALSE }
@@ -220,18 +272,25 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	# then replace name column for text
 	if(!is.null(plot_args$select_text)){
 
-		# replace name label in net_dfs$nodal_data
-		# with NA if not in to_label
-		net_dfs$nodal_data$name_text = ifelse(
-			net_dfs$nodal_data$name %in% plot_args$select_text,
-			net_dfs$nodal_data$name, '' )
-
 		# if user supplied alternative text in 
 		# select_text_display then use that instead of 
 		# the name in the df
 		if(!is.null(plot_args$select_text_display)){
-			net_dfs$nodal_data$name_text = plot_args$select_text_display[match(
-				net_dfs$nodal_data$name_text, plot_args$select_text)] }
+			# create a mapping from select_text to select_text_display
+			text_mapping <- setNames(plot_args$select_text_display, plot_args$select_text)
+			
+			# apply the mapping, using NA for non-selected nodes
+			net_dfs$nodal_data$name_text = ifelse(
+				net_dfs$nodal_data$name %in% plot_args$select_text,
+				text_mapping[net_dfs$nodal_data$name],
+				NA)
+		} else {
+			# no display text provided, use the actual names for selected nodes
+			net_dfs$nodal_data$name_text = ifelse(
+				net_dfs$nodal_data$name %in% plot_args$select_text,
+				net_dfs$nodal_data$name, 
+				NA)  # Use NA instead of ''
+		}
 
 		# set add_text to TRUE
 		plot_args$add_text = TRUE 	
@@ -241,21 +300,28 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	# then replace name column for label
 	if(!is.null(plot_args$select_label)){
 
-		# replace name label in net_dfs$nodal_data
-		# with NA if not in to_label
-		net_dfs$nodal_data$name_label = ifelse(
-			net_dfs$nodal_data$name %in% plot_args$select_label,
-			net_dfs$nodal_data$name, '' )
-
 		# if user supplied alternative label in 
 		# select_label_display then use that instead of 
 		# the name in the df
 		if(!is.null(plot_args$select_label_display)){
-		net_dfs$nodal_data$name_label = plot_args$select_label_display[match(
-			net_dfs$nodal_data$name_label, plot_args$select_label)] }
+			# create a mapping from select_label to select_label_display
+			label_mapping <- setNames(plot_args$select_label_display, plot_args$select_label)
+			
+			# apply the mapping, using NA for non-selected nodes
+			net_dfs$nodal_data$name_label = ifelse(
+				net_dfs$nodal_data$name %in% plot_args$select_label,
+				label_mapping[net_dfs$nodal_data$name],
+				NA)
+		} else {
+			# no display label provided, use the actual names for selected nodes
+			net_dfs$nodal_data$name_label = ifelse(
+				net_dfs$nodal_data$name %in% plot_args$select_label,
+				net_dfs$nodal_data$name,
+				NA)  # Use NA instead of ''
+		}
 
-		# set add_text to TRUE
-		plot_args$add_label = TRUE 	
+		# set add_label to TRUE
+		plot_args$add_label = TRUE
 	}
 	######################	
 
@@ -309,7 +375,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 
 	# line end/join type
 	if(is.null(plot_args$edge_lineend)){ plot_args$edge_lineend = "butt" }
-	if(is.null(plot_args$edge_linejoin)){ plot_args$edge_lineend = "round" }		
+	if(is.null(plot_args$edge_linejoin)){ plot_args$edge_linejoin = "round" }
 
 	# general arrow
 	plot_args$edge_arrow_fill = NULL
@@ -373,6 +439,17 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if(is.null(plot_args$label_color_label)){ plot_args$label_color_label = NULL }
 	if(is.null(plot_args$label_fill_label)){ plot_args$label_fill_label = NULL }
 	if(is.null(plot_args$label_alpha_label)){ plot_args$label_alpha_label = NULL }
+
+    # Color palette parameters
+    if(is.null(plot_args$node_color_palette)){ plot_args$node_color_palette = NULL }
+    if(is.null(plot_args$node_fill_palette)){ plot_args$node_fill_palette = NULL }
+    if(is.null(plot_args$edge_color_palette)){ plot_args$edge_color_palette = NULL }
+    if(is.null(plot_args$node_color_direction)){ plot_args$node_color_direction = 1 }
+    if(is.null(plot_args$node_fill_direction)){ plot_args$node_fill_direction = 1 }
+    if(is.null(plot_args$edge_color_direction)){ plot_args$edge_color_direction = 1 }
+    
+    # Apply smart palette selection
+    plot_args <- apply_smart_palettes(plot_args, net_dfs)	
 	######################
 
 	# choose weight var #####################

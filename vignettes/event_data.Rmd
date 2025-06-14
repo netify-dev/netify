@@ -53,7 +53,6 @@ summary(mex_network)
 
 actor_stats <- summary_actor(mex_network)
 plot_actor_stats(actor_stats)
-
 ```
 
 (2) Explore: next we can quickly use the basic plot function in the `netify` package to plot network of violent interactions in Mexico.
@@ -66,22 +65,22 @@ random_indices <- sample(length(select_names), 10)
 random_names <- select_names[random_indices]
 
 plot(mex_network,
-     add_text = TRUE)
+  add_text = TRUE)
     
 plot(mex_network,
-     select_text = random_names,
-     select_text_display = random_names)
+  select_text = random_names,
+  select_text_display = random_names)
 ```
 
 The graphs above reveals the need to transform the data to increase interpretability. To do so, we can log the the values of the edges. The `netify` plot function has a built-in parameter for this where the user can pass the function they want to use to transform the weights of the data (see the general `transform_weights` function in the package to transform weights outside of plotting.)
 
 ```{r, fig.width=6, fig.height=6}
 plot(mex_network,
-     select_text = random_names,
-     select_text_display = random_names, 
-     # log(x+1) to better see range of connects
-     weight_transform = log1p
-     )
+  select_text = random_names,
+  select_text_display = random_names, 
+  # log(x+1) to better see range of connects
+  weight_transform = log1p
+  )
 ```
 
 Let's make the same graph as above but this time make sure we remove any isolates from the graph as well as refine the edges. In addition, there are some points that are overlapping and difficult to see. To get ideas about how to improve the plot, we might like to inspect each component of the plot. This is an option when the plot parameter, `return_components = TRUE`. We can also directly modify these components, as shown below by adding a label specification.
@@ -114,10 +113,10 @@ There is, however, a more straightforward way to do this which is via the `edge_
 ```{r, fig.width=6, fig.height=6}
 # and even simpler
 plot(mex_network, 
-     select_text = random_names,
-     select_text_display = random_names,
-     weight_transform = log1p,
-     edge_alpha_label = "Log(Event Count)")
+  select_text = random_names,
+  select_text_display = random_names,
+  weight_transform = log1p,
+  edge_alpha_label = "Log(Event Count)")
 ```
 
 For conflict data, we often like to see which actors are involved in the most conflict. To do this, however, we'd need to calculate degree centrality. To do this we can use the `add_node_vars()` function (there is also a `add_dyad_vars()` function) which takes a netlet object (the network of study), nodal data, and a string to specify the column name in the nodal data that matches with each actor in the network. Below, we use `summary_actor()` to create the nodal data frame. 
@@ -130,12 +129,12 @@ mex_network = add_node_vars(
   actor='actor' )
 
 plot(mex_network, 
-     weight_transform = log1p,
-     edge_alpha_label = "Log(Event Count)",
-     point_size_var='degree',
-     point_size_label='Degree',
-     point_alpha=.5,
-    check_overlap=TRUE
+  weight_transform = log1p,
+  edge_alpha_label = "Log(Event Count)",
+  point_size_by='degree',
+  point_size_label='Degree',
+  point_alpha=.5,
+  check_overlap=TRUE
     )
 ```
 
