@@ -199,6 +199,36 @@ net_plot_data <- function(netlet, plot_args=list()) {
     ggnet_params = gg_params( plot_args )
     ######################  
 
+    ######################
+    # adjust arrow endpoints if requested for directed networks
+    if (!obj_attrs$symmetric && plot_args$adjust_arrow_endpoints && plot_args$add_edges) {
+    
+        # determine node size being used
+        if (!is.null(plot_args$point_size_var)) {
+            # var size - pass column name
+            node_size_info <- plot_args$point_size_var
+        } else {
+            # fixed size - pass numeric value
+            node_size_info <- plot_args$point_size }
+        
+        # calc size scale if not provided
+        if (is.null(plot_args$edge_arrow_size_scale)) {
+            size_scale <- calculate_size_scale(net_dfs$nodal_data)
+        } else {
+            size_scale <- plot_args$edge_arrow_size_scale }
+        
+        # adjust endpoints
+        net_dfs$edge_data <- adjust_edge_endpoints(
+            edge_data = net_dfs$edge_data,
+            node_data = net_dfs$nodal_data,
+            node_size = node_size_info,
+            size_scale = size_scale,
+            edge_arrow_gap = plot_args$edge_arrow_gap,
+            curved = plot_args$curve_edges,
+            curvature = plot_args$edge_curvature %||% 0.5 )
+    }
+    ######################
+
 	######################	
 	# remove isolates
 	if(plot_args$remove_isolates){

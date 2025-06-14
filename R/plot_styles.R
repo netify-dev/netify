@@ -457,6 +457,211 @@ style_dark2 <- function() {
   )
 }
 
+#' Witcher 3 Feline School network style
+#'
+#' A network style inspired by the Cat School armor from The Witcher 3.
+#' Light, agile, with emphasis on critical strikes - translates to sharp 
+#' contrasts and sleek design.
+#'
+#' @return List of plot arguments
+#' @export
+
+style_witcher_feline <- function() {
+  list(
+    # Sharp black edges like cat claws
+    edge_color = "#1C1C1C",      # Almost black
+    edge_alpha = 0.9,
+    edge_linewidth = 0.4,         # Thin and precise
+    
+    # Crimson nodes with silver borders
+    point_fill = "#8B0000",       # Dark red (blood)
+    point_color = "#C0C0C0",      # Silver trim
+    point_stroke = 0.8,
+    point_size = 2,
+    point_shape = 23,             # Diamond - sharp and agile
+    
+    # No curves - direct strikes
+    curve_edges = FALSE,
+    
+    # Precise text
+    text_color = "#8B0000",
+    text_size = 2.5,
+    
+    use_theme_netify = TRUE
+  )
+}
+
+#' Witcher 3 Griffin School network style
+#'
+#' A network style inspired by the Griffin School armor from The Witcher 3.
+#' Balanced between signs and swordplay - moderate, magical aesthetics.
+#'
+#' @return List of plot arguments
+#' @export
+
+style_witcher_griffin <- function() {
+  list(
+    # Magical blue edges
+    edge_color = "#4169E1",       # Royal blue (Aard sign)
+    edge_alpha = 0.7,
+    edge_linewidth = 0.8,
+    
+    # Green nodes with gold borders (magical balance)
+    point_fill = "#228B22",       # Forest green
+    point_color = "#FFD700",      # Gold trim
+    point_stroke = 1.2,
+    point_size = 2.5,
+    point_shape = 21,             # Circle - balanced
+    
+    # Slight curves for magical flow
+    curve_edges = TRUE,
+    edge_curvature = 0.2,
+    
+    # Scholarly text
+    text_color = "#4169E1",
+    text_size = 3,
+    
+    use_theme_netify = TRUE
+  )
+}
+
+#' Witcher 3 Wolven School network style
+#'
+#' A network style inspired by the Wolf School armor from The Witcher 3.
+#' The most balanced school - Geralt's home school at Kaer Morhen.
+#'
+#' @return List of plot arguments
+#' @export
+
+style_witcher_wolven <- function() {
+  list(
+    # Steel gray edges
+    edge_color = "#708090",       # Slate gray (steel sword)
+    edge_alpha = 0.8,
+    edge_linewidth = 1,
+    
+    # White/silver nodes with dark borders
+    point_fill = "#F5F5F5",       # White wolf
+    point_color = "#2F4F4F",      # Dark slate gray
+    point_stroke = 1.5,
+    point_size = 3,
+    point_shape = 21,             # Circle
+    
+    # Moderate curves
+    curve_edges = TRUE,
+    edge_curvature = 0.3,
+    
+    # Clear text
+    text_color = "#2F4F4F",
+    text_size = 3,
+    text_fontface = 2,            # Bold like a wolf
+    
+    use_theme_netify = TRUE
+  )
+}
+
+#' Witcher 3 Ursine School network style
+#'
+#' A network style inspired by the Bear School armor from The Witcher 3.
+#' Heavy, tank-like armor - translates to bold, substantial visuals.
+#'
+#' @return List of plot arguments
+#' @export
+
+style_witcher_ursine <- function() {
+  list(
+    # Heavy brown edges
+    edge_color = "#8B4513",       # Saddle brown (bear fur)
+    edge_alpha = 0.9,
+    edge_linewidth = 2,           # Thick and heavy
+    
+    # Dark nodes with bronze borders
+    point_fill = "#2F2F2F",       # Almost black (bear)
+    point_color = "#CD7F32",      # Bronze trim
+    point_stroke = 2,
+    point_size = 4,               # Large and imposing
+    point_shape = 22,             # Square - sturdy
+    
+    # No curves - straightforward
+    curve_edges = FALSE,
+    
+    # Heavy text
+    text_color = "#8B4513",
+    text_size = 4,
+    text_fontface = 2,            # Bold
+    
+    use_theme_netify = TRUE
+  )
+}
+
+#' Witcher 3 Manticore School network style (bonus)
+#'
+#' A network style inspired by the Manticore School armor from The Witcher 3.
+#' Exotic, alchemical focus - poisonous and mysterious.
+#'
+#' @return List of plot arguments
+#' @export
+
+style_witcher_manticore <- function() {
+  list(
+    # Poison green edges
+    edge_color = "#32CD32",       # Lime green (toxicity)
+    edge_alpha = 0.6,
+    edge_linewidth = 0.7,
+    
+    # Purple nodes with green borders (alchemical)
+    point_fill = "#8B008B",       # Dark magenta
+    point_color = "#00FF00",      # Bright green
+    point_stroke = 1,
+    point_size = 2.5,
+    point_shape = 24,             # Triangle up - exotic
+    
+    # Twisted curves
+    curve_edges = TRUE,
+    edge_curvature = 0.5,         # More curved - mysterious
+    
+    # Mysterious text
+    text_color = "#8B008B",
+    text_size = 2.8,
+    
+    use_theme_netify = TRUE
+  )
+}
+
+#' Witcher 3 Viper School network style (bonus)
+#'
+#' A network style inspired by the Viper School armor from The Witcher 3.
+#' Lethal, assassination-focused - stealth and poison.
+#'
+#' @return List of plot arguments
+#' @export
+
+style_witcher_viper <- function() {
+  list(
+    # Dark green edges (snake)
+    edge_color = "#006400",       # Dark green
+    edge_alpha = 0.5,             # Stealthy
+    edge_linewidth = 0.6,
+    
+    # Black nodes with yellow borders (snake pattern)
+    point_fill = "#000000",       # Black
+    point_color = "#FFFF00",      # Yellow (viper eyes)
+    point_stroke = 0.8,
+    point_size = 1.8,             # Small and deadly
+    point_shape = 23,             # Diamond - fangs
+    
+    # Sinuous curves
+    curve_edges = TRUE,
+    edge_curvature = 0.4,
+    
+    # Subtle text
+    text_color = "#006400",
+    text_size = 2.5,
+    
+    use_theme_netify = TRUE
+  )
+}
+
 #' List available network styles
 #'
 #' Shows all available preset network styles with descriptions
@@ -477,7 +682,13 @@ list_network_styles <- function() {
       "style_tufte",
       "style_pastel",
       "style_retro80s",
-      "style_dark2"
+      "style_dark2",
+      "style_witcher_feline",
+      "style_witcher_griffin",
+      "style_witcher_wolven",
+      "style_witcher_ursine",
+      "style_witcher_manticore",
+      "style_witcher_viper"      
     ),
     description = c(
       "Wes Anderson's Grand Budapest Hotel pastels",
@@ -490,7 +701,13 @@ list_network_styles <- function() {
       "Edward Tufte's minimalist approach",
       "Soft pastel colors for a gentle look",
       "Bold 1980s geometric style",
-      "ColorBrewer Dark2 for accessibility"
+      "ColorBrewer Dark2 for accessibility",
+      "Witcher Cat School - sharp and agile",
+      "Witcher Griffin School - magical balance",
+      "Witcher Wolf School - Geralt's balanced style",
+      "Witcher Bear School - heavy and imposing",
+      "Witcher Manticore School - alchemical and exotic",
+      "Witcher Viper School - stealthy assassin"      
     ),
     background = c(
       "light",
@@ -503,7 +720,13 @@ list_network_styles <- function() {
       "white",
       "white",
       "white",
-      "white"
+      "white",
+      "white",
+      "white",
+      "white",
+      "white",
+      "white",
+      "black"      
     ),
     stringsAsFactors = FALSE
   )

@@ -66,8 +66,15 @@
 #'   \item{\code{edge_linetype}}{Line type (1=solid, 2=dashed, etc.).}
 #'   \item{\code{edge_alpha}}{Transparency (0-1).}
 #'   \item{\code{edge_curvature}}{Curvature amount when \code{curve_edges = TRUE}.}
-#'   \item{\code{arrow}}{Arrow specification for directed networks. Example: 
+#'   \item{\code{edge_arrow}}{Arrow specification for directed networks. Example: 
 #'     \code{arrow(length = unit(0.2, "cm"))}.}
+#'   \item{\code{adjust_arrow_endpoints}}{Logical. Should arrow endpoints be adjusted 
+#'     to stop at node boundaries? Default is \code{FALSE}. Only affects directed networks.}
+#'   \item{\code{edge_arrow_gap}}{Numeric. Additional gap between arrow tip and node boundary 
+#'     as a proportion of node radius (0-1). Default is 0.2. Only used when 
+#'     \code{adjust_arrow_endpoints = TRUE}.}
+#'   \item{\code{edge_arrow_size_scale}}{Numeric. Scale factor for converting node sizes to 
+#'     coordinate units. If \code{NULL} (default), automatically calculated based on plot range.}
 #' }
 #' 
 #' Variable aesthetics:
@@ -121,6 +128,8 @@
 #'   \item{\code{return_components}}{Logical. Return plot components instead of 
 #'     assembled plot? Useful for manual customization. Default is \code{FALSE}.}
 #'   \item{\code{palette}}{Character string for color palette, see \code{list_palettes()}.}
+#'   \item{\code{style}}{A style function (e.g., \code{style_budapest}) or its name as a 
+#'     string. Applies a complete visual style including colors, shapes, and layout preferences.}
 #' }
 #'
 #' @return 
@@ -278,8 +287,30 @@ plot.netify <- function(x, ...) {
 	# extract attributes from the netify object
 	obj_attrs <- attributes(x)
 
+	# anything passed in goes to the plot arg dumpster
+	plot_args <- list(...)
+
+	# style over substance
+	if (!is.null(plot_args$style)) {
+
+		#
+		style_fun <- plot_args$style
+		
+		# if a string get the fn
+		if (is.character(style_fun)) {
+			style_fun <- match.fun(style_fun) }
+		
+		# get style params
+		style_params <- style_fun()
+		
+		# temove style from plot_args
+		plot_args$style <- NULL
+		
+		# merge style params with plot_args
+		plot_args <- c(style_params, plot_args) }
+
 	# get plot data and parameters for ggplot
-	net_plot_info = net_plot_data(x, list(...))
+	net_plot_info = net_plot_data(x, plot_args)
 
 	# extract plot arguments and ggplot parameters
 	plot_args = net_plot_info$plot_args

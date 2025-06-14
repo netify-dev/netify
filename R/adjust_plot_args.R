@@ -142,6 +142,7 @@
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
+#' 
 #' @keywords internal
 #' @noRd
 
@@ -381,7 +382,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	plot_args$edge_arrow_fill = NULL
 	if(!obj_attrs$symmetric){
 		if(is.null(plot_args$edge_arrow)){
-			plot_args$edge_arrow = arrow(length = unit(0.2, "cm"))
+			plot_args$edge_arrow = ggplot2::arrow(length = unit(0.2, "cm"))
 		}
 	} else {
 		# For symmetric networks, no arrows
@@ -469,6 +470,14 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 				net_dfs$edge_data)[4] }
 	}
 	######################
+
+	# ######################
+	# # arrow adjustment parameters
+	# if(is.null(plot_args$adjust_arrow_endpoints)){ plot_args$adjust_arrow_endpoints = FALSE }
+	# if(is.null(plot_args$edge_arrow_gap)){ plot_args$edge_arrow_gap = 0.2 }
+	# # rely on gg
+	# if(is.null(plot_args$edge_arrow_size_scale)){ plot_args$edge_arrow_size_scale = NULL }  
+	# ######################	
 
 	######################
     #
