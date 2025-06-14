@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2025-06-13</h4>
+            <h4 data-toc-skip class="date">2025-06-14</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/foundations.Rmd" class="external-link"><code>vignettes/foundations.Rmd</code></a></small>
       <div class="d-none name"><code>foundations.Rmd</code></div>
@@ -493,17 +493,19 @@ attributes:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
 <span>    edge_color<span class="op">=</span><span class="st">'grey'</span>,</span>
-<span>    point_size_var<span class="op">=</span><span class="st">'degree'</span>,</span>
-<span>    point_color_var<span class="op">=</span><span class="st">'v2x_polyarchy1'</span>,</span>
-<span>    point_color_label<span class="op">=</span><span class="st">'Polyarchy'</span>,</span>
-<span>    point_size_label<span class="op">=</span><span class="st">'Degree'</span></span>
+<span>    node_size_by<span class="op">=</span><span class="st">'degree'</span>,</span>
+<span>    node_color_by<span class="op">=</span><span class="st">'v2x_polyarchy1'</span>,</span>
+<span>    node_color_label<span class="op">=</span><span class="st">'Polyarchy'</span>,</span>
+<span>    node_size_label<span class="op">=</span><span class="st">'Degree'</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span> </span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient2</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Scale for <span style="color: #00BB00;">colour</span> is already present.</span></span>
+<span><span class="co">## Adding another scale for <span style="color: #00BB00;">colour</span>, which will replace the existing scale.</span></span></code></pre>
 <pre><code><span><span class="co">## Warning: Removed 773 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_segment()`).</span></span></code></pre>
 <p><img src="foundations_files/figure-html/unnamed-chunk-16-2.png" width="900"></p>
 <p>We might also prefer to add labels, but only a select few:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vincentarelbundock.github.io/countrycode/" class="external-link">countrycode</a></span><span class="op">)</span></span>
 <span><span class="va">cowns</span> <span class="op">=</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/reference/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -516,21 +518,23 @@ attributes:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
 <span>    edge_color<span class="op">=</span><span class="st">'grey'</span>,</span>
-<span>    point_size_var<span class="op">=</span><span class="st">'degree'</span>,</span>
-<span>    point_color_var<span class="op">=</span><span class="st">'v2x_polyarchy1'</span>,</span>
-<span>    point_color_label<span class="op">=</span><span class="st">'Polyarchy'</span>,</span>
-<span>    point_size_label<span class="op">=</span><span class="st">'Degree'</span>,    </span>
+<span>    node_size_by<span class="op">=</span><span class="st">'degree'</span>,</span>
+<span>    node_color_by<span class="op">=</span><span class="st">'v2x_polyarchy1'</span>,</span>
+<span>    node_color_label<span class="op">=</span><span class="st">'Polyarchy'</span>,</span>
+<span>    node_size_label<span class="op">=</span><span class="st">'Degree'</span>,</span>
 <span>    select_text <span class="op">=</span> <span class="va">cowns</span>,</span>
 <span>    select_text_display <span class="op">=</span> <span class="va">cabbs</span>,</span>
 <span>    text_size <span class="op">=</span> <span class="fl">3</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span> </span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient2</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Scale for <span style="color: #00BB00;">colour</span> is already present.</span></span>
+<span><span class="co">## Adding another scale for <span style="color: #00BB00;">colour</span>, which will replace the existing scale.</span></span></code></pre>
 <pre><code><span><span class="co">## Warning: Removed 773 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_segment()`).</span></span></code></pre>
 <pre><code><span><span class="co">## Warning: Removed 839 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_text()`).</span></span></code></pre>
 <p><img src="foundations_files/figure-html/unnamed-chunk-17-1.png" width="900"></p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># or we can go with labels only </span></span>
 <span><span class="co"># and remove points</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
@@ -538,9 +542,9 @@ attributes:</p>
 <span>    edge_color<span class="op">=</span><span class="st">'grey'</span>,</span>
 <span>    add_points <span class="op">=</span> <span class="cn">FALSE</span>, </span>
 <span>    add_label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    label_size_var<span class="op">=</span><span class="st">'degree'</span>,</span>
+<span>    label_size_by<span class="op">=</span><span class="st">'degree'</span>,</span>
 <span>    label_color <span class="op">=</span> <span class="st">'white'</span>,</span>
-<span>    label_fill_var<span class="op">=</span><span class="st">'v2x_polyarchy1'</span>,</span>
+<span>    label_fill_by<span class="op">=</span><span class="st">'v2x_polyarchy1'</span>,</span>
 <span>    label_fill_label<span class="op">=</span><span class="st">'Polyarchy'</span>,</span>
 <span>    label_size_label<span class="op">=</span><span class="st">'Degree'</span>    </span>
 <span>    <span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>size<span class="op">=</span><span class="st">'none'</span><span class="op">)</span></span></code></pre></div>
@@ -557,7 +561,7 @@ to continue analyzing the data using different modeling approaches.
 aren’t! And for the sake of convergence lets go with cross-sectional
 networks.</p>
 <p>First, prep the data:</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># prep data</span></span>
 <span><span class="va">cow_cross</span> <span class="op">=</span> <span class="va">cow_dyads</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ccode1</span>, <span class="va">ccode2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -602,7 +606,7 @@ networks.</p>
 <span>  <span class="op">)</span></span></code></pre></div>
 <p>Next, let’s take a look at passing our netify object to the
 <code>amen</code> function:</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install (if necessary) and load amen</span></span>
 <span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="st">'amen'</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'amen'</span>, repos<span class="op">=</span><span class="st">'https://cloud.r-project.org'</span><span class="op">)</span> <span class="op">}</span></span>
@@ -631,7 +635,7 @@ networks.</p>
 <span><span class="co">##   ..- attr(*, "dimnames")=List of 2</span></span>
 <span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
 <span><span class="co">##   .. ..$ : chr [1:6] "polity21" "polity22" "wbgdp2011est1" "wbgdp2011est2" ...</span></span></code></pre>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plug and run</span></span>
 <span><span class="va">mid_amen_mod</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/amen/man/ame.html" class="external-link">ame</a></span><span class="op">(</span></span>
 <span>  Y<span class="op">=</span><span class="va">mid_cross_amen</span><span class="op">$</span><span class="va">Y</span>,</span>
@@ -648,7 +652,7 @@ networks.</p>
 <span>  print<span class="op">=</span><span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>We can apply the same process to ERGMs:</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install (if necessary) and load ergm</span></span>
 <span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="st">'ergm'</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'ergm'</span>, repos<span class="op">=</span><span class="st">'https://cloud.r-project.org'</span><span class="op">)</span> <span class="op">}</span></span>
@@ -671,7 +675,7 @@ networks.</p>
 <pre><code><span><span class="co">## 'ergm' 4 is a major update that introduces some backwards-incompatible</span></span>
 <span><span class="co">## changes. Please type 'news(package="ergm")' for a list of major</span></span>
 <span><span class="co">## changes.</span></span></code></pre>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># called netify_to_statnet because it's a reference</span></span>
 <span><span class="co"># to the network library, which is what ergm uses</span></span>
 <span><span class="va">mid_cross_ergm</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify_to_statnet.html">netify_to_statnet</a></span><span class="op">(</span><span class="va">mid_cross_network</span><span class="op">)</span></span>
@@ -698,7 +702,7 @@ networks.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">##  Edge attribute names: </span></span>
 <span><span class="co">##     capdist_e cowmidonset</span></span></code></pre>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plug and run</span></span>
 <span><span class="co"># Fit the ERGM model (well not a real ergm)</span></span>
 <span><span class="va">ergm_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm</a></span><span class="op">(</span></span>
