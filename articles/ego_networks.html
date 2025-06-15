@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2025-06-14</h4>
+            <h4 data-toc-skip class="date">2025-06-15</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/ego_networks.Rmd" class="external-link"><code>vignettes/ego_networks.Rmd</code></a></small>
       <div class="d-none name"><code>ego_networks.Rmd</code></div>
@@ -187,9 +187,10 @@ time):</p>
 <span><span class="co">#&gt; verbCoop 0.755    0 166.934 0.979 0.849</span></span>
 <span><span class="co">#&gt; • Nodal Features: None</span></span>
 <span><span class="co">#&gt; • Dyad Features: None</span></span></code></pre></div>
-<p>We can also obtain summary statistics for all of Pakistan’s ego
-networks across the time series using the netify <code>summary</code>
-function:</p>
+<p>Netify will also calculate summary statistics for ego networks. For
+example, we can obtain summary statistics for all of Pakistan’s ego
+networks across the time series using the netify built-in
+<code>summary</code> function:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              net num_actors   density num_edges prop_edges_missing</span></span>
@@ -222,13 +223,13 @@ function:</p>
 <span><span class="co">#&gt; 6        221.8779              0.9907272   0.9765549    0.9267179</span></span></code></pre></div>
 <p>We can also inspect the ego network via plot.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#plot(pakistan_ego_net)</span></span>
-<span></span>
-<span><span class="co">#test&lt;-subset_netify(pakistan_ego_net,</span></span>
-<span>    <span class="co"># when_to_subset='2013')</span></span>
-<span></span>
-<span><span class="co">#test2&lt;-pakistan_ego_net[[1]]</span></span>
-<span><span class="co">#plot(test2)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span>,</span>
+<span>     edge_color <span class="op">=</span> <span class="st">'grey50'</span>,</span>
+<span>     edge_linewidth <span class="op">=</span> <span class="fl">.2</span>,</span>
+<span>     curved_edges <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>     edge_curvature <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="ego_networks_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
