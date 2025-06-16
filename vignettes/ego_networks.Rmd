@@ -18,7 +18,6 @@ knitr::opts_chunk$set(
 
 This vignette provides an overview of how to create ego networks using `netify`. Generally, ego networks are a kind of network that focuses on the network that surrounds a single individual actor within a larger network. These networks include information about the ego (central node or individual under study), the alters (nodes connected to the ego), and ties (relationships or connections between ego and alters and among alters).
 
-
 Let's load the necessary libraries.
 
 ```{r}
@@ -79,7 +78,7 @@ The print output tells us that across the entire time series, we can see that Pa
 pakistan_ego_net[[1]]
 ```
 
-We can also obtain summary statistics for all of Pakistan's ego networks across the time series using the netify `summary` function:
+Netify will also calculate summary statistics for ego networks. For example, we can  obtain summary statistics for all of Pakistan's ego networks across the time series using the netify built-in `summary` function:
 
 ```{r}
 head(summary(pakistan_ego_net))
@@ -88,13 +87,12 @@ head(summary(pakistan_ego_net))
 We can also inspect the ego network via plot.
 
 ```{r}
-#plot(pakistan_ego_net)
-
-#test<-subset_netify(pakistan_ego_net,
-    # when_to_subset='2013')
-
-#test2<-pakistan_ego_net[[1]]
-#plot(test2)
+plot(pakistan_ego_net,
+     edge_color = 'grey50',
+     edge_linewidth = .2,
+     curved_edges = TRUE,
+     edge_curvature = 1
+)
 ```
 
 ## References
