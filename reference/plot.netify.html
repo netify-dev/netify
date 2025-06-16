@@ -300,6 +300,35 @@ For weighted networks, defaults to the weight variable if not specified.</p></dd
 
 </dl></div>
     <div class="section level2">
+    <h2 id="highlighting-parameters">Highlighting Parameters<a class="anchor" aria-label="anchor" href="#highlighting-parameters"></a></h2>
+
+
+<dl><dt><code>highlight</code></dt>
+<dd><p>Character vector of node names to highlight with different colors.
+Non-highlighted nodes will be colored grey. Highlighted nodes can also be automatically
+enlarged if <code>highlight_size_increase</code> is greater than 1.</p></dd>
+
+<dt><code>highlight_colors</code></dt>
+<dd><p>Named vector of colors for highlighted nodes. If NULL,
+uses default distinct colors (red, blue, green for up to 3 nodes, or a color palette
+for more). Names should match the values in the <code>highlight</code> parameter.
+Example: <code>c('USA' = 'blue', 'China' = 'red', 'Russia' = 'green')</code>.</p></dd>
+
+<dt><code>highlight_legend_title</code></dt>
+<dd><p>Title for the highlight legend. Default is "Highlighted".</p></dd>
+
+<dt><code>highlight_size_increase</code></dt>
+<dd><p>Numeric factor to increase size of highlighted nodes.
+Default is 1.5 (50% larger). Set to 1 for no size change. The size increase is applied
+multiplicatively to any existing size mapping.</p></dd>
+
+<dt><code>show_other_in_legend</code></dt>
+<dd><p>Logical. Include "Other" category in legend? Default is FALSE.
+When FALSE, only highlighted nodes appear in the legend.</p></dd>
+
+
+</dl></div>
+    <div class="section level2">
     <h2 id="special-parameters">Special Parameters<a class="anchor" aria-label="anchor" href="#special-parameters"></a></h2>
 
 

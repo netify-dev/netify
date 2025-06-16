@@ -157,13 +157,18 @@ keeping the default threshold.</p>
 <span></span>
 <span><span class="co"># print</span></span>
 <span><span class="va">pakistan_ego_net</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Hello, you have created a neighborhood network for ego(s) (Pakistan), yay!</span></span>
+<span><span class="co">#&gt; • <span style="color: #BB00BB;">Type: Ego Network</span></span></span>
+<span><span class="co">#&gt; • Ego: Pakistan</span></span>
+<span><span class="co">#&gt; • Direction: Any ties (in or out)</span></span>
+<span><span class="co">#&gt; • Ego included: Yes</span></span>
+<span><span class="co">#&gt; • Threshold: varies by time (19.59, 19.36, ... , 17.21, 18.39)</span></span>
 <span><span class="co">#&gt; • Unipartite</span></span>
 <span><span class="co">#&gt; • Asymmetric</span></span>
 <span><span class="co">#&gt; • Weights from `verbCoop`</span></span>
 <span><span class="co">#&gt; • Longitudinal: 13 Periods</span></span>
-<span><span class="co">#&gt; • # Unique Actors: 82</span></span>
-<span><span class="co">#&gt; Network Summary Statistics (averaged across time):</span></span>
+<span><span class="co">#&gt; • # Unique Egos: 1 | # Unique Alters: 81</span></span>
+<span><span class="co">#&gt; Neighborhood Network Summary Statistics (averaged across time):</span></span>
 <span><span class="co">#&gt;           dens miss    mean recip trans</span></span>
 <span><span class="co">#&gt; verbCoop 0.842    0 165.009 0.978 0.912</span></span>
 <span><span class="co">#&gt; • Nodal Features: i_polity2, i_log_gdp, i_log_pop</span></span>
@@ -175,59 +180,74 @@ specific year we can just subset the object by that year (note that
 time):</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># subset to a specific year</span></span>
-<span><span class="va">pakistan_ego_net</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span>, time <span class="op">=</span> <span class="st">'2010'</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Hello, you have created a neighborhood network for ego(s) (Pakistan), yay!</span></span>
+<span><span class="co">#&gt; • <span style="color: #BB00BB;">Type: Ego Network</span></span></span>
+<span><span class="co">#&gt; • Ego: Pakistan</span></span>
+<span><span class="co">#&gt; • Direction: Any ties (in or out)</span></span>
+<span><span class="co">#&gt; • Ego included: Yes</span></span>
+<span><span class="co">#&gt; • Threshold: 19.59</span></span>
 <span><span class="co">#&gt; • Unipartite</span></span>
 <span><span class="co">#&gt; • Asymmetric</span></span>
 <span><span class="co">#&gt; • Weights from `verbCoop`</span></span>
 <span><span class="co">#&gt; • Cross-Sectional</span></span>
-<span><span class="co">#&gt; • # Unique Actors: 35</span></span>
-<span><span class="co">#&gt; Network Summary Statistics:</span></span>
+<span><span class="co">#&gt; • # Unique Egos: 1 | # Unique Alters: 40</span></span>
+<span><span class="co">#&gt; Neighborhood Network Summary Statistics:</span></span>
 <span><span class="co">#&gt;           dens miss    mean recip trans</span></span>
-<span><span class="co">#&gt; verbCoop 0.755    0 166.934 0.979 0.849</span></span>
-<span><span class="co">#&gt; • Nodal Features: None</span></span>
-<span><span class="co">#&gt; • Dyad Features: None</span></span></code></pre></div>
+<span><span class="co">#&gt; verbCoop 0.881    0 131.743 0.982 0.934</span></span>
+<span><span class="co">#&gt; • Nodal Features: time, i_polity2, i_log_gdp, i_log_pop</span></span>
+<span><span class="co">#&gt; • Dyad Features: matlCoop, verbConf, matlConf</span></span></code></pre></div>
 <p>Netify will also calculate summary statistics for ego networks. For
 example, we can obtain summary statistics for all of Pakistan’s ego
 networks across the time series using the netify built-in
 <code>summary</code> function:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;              net num_actors   density num_edges prop_edges_missing</span></span>
-<span><span class="co">#&gt; 1 Pakistan__2002         35 0.7551020       925                  0</span></span>
-<span><span class="co">#&gt; 2 Pakistan__2003         30 0.8788889       791                  0</span></span>
-<span><span class="co">#&gt; 3 Pakistan__2004         51 0.7274125      1892                  0</span></span>
-<span><span class="co">#&gt; 4 Pakistan__2005         49 0.8167430      1961                  0</span></span>
-<span><span class="co">#&gt; 5 Pakistan__2006         41 0.8221297      1382                  0</span></span>
-<span><span class="co">#&gt; 6 Pakistan__2007         42 0.8707483      1536                  0</span></span>
-<span><span class="co">#&gt;   mean_edge_weight sd_edge_weight median_edge_weight min_edge_weight</span></span>
-<span><span class="co">#&gt; 1        166.93445       514.1573                 14               0</span></span>
-<span><span class="co">#&gt; 2        258.17356       660.1221                 39               0</span></span>
-<span><span class="co">#&gt; 3         95.28745       351.0150                  9               0</span></span>
-<span><span class="co">#&gt; 4        113.05315       410.7403                 14               0</span></span>
-<span><span class="co">#&gt; 5        139.35366       490.6335                 18               0</span></span>
-<span><span class="co">#&gt; 6        174.43148       550.6169                 25               0</span></span>
-<span><span class="co">#&gt;   max_edge_weight competition_row competition_col sd_of_row_means</span></span>
-<span><span class="co">#&gt; 1            6003      0.08100030      0.07897426        229.4351</span></span>
-<span><span class="co">#&gt; 2            5937      0.08397074      0.07807595        323.6456</span></span>
-<span><span class="co">#&gt; 3            5141      0.06014889      0.05662972        138.3784</span></span>
-<span><span class="co">#&gt; 4            6561      0.06493042      0.05954332        168.7123</span></span>
-<span><span class="co">#&gt; 5            7579      0.07655516      0.06874899        206.3296</span></span>
-<span><span class="co">#&gt; 6            7125      0.06715083      0.06141609        238.1953</span></span>
-<span><span class="co">#&gt;   sd_of_col_means covar_of_row_col_means reciprocity transitivity</span></span>
-<span><span class="co">#&gt; 1        224.9583              0.9926160   0.9790484    0.8489611</span></span>
-<span><span class="co">#&gt; 2        304.2249              0.9782197   0.9564141    0.9378381</span></span>
-<span><span class="co">#&gt; 3        132.2361              0.9885674   0.9734966    0.8351142</span></span>
-<span><span class="co">#&gt; 4        158.1764              0.9931345   0.9839155    0.8959472</span></span>
-<span><span class="co">#&gt; 5        190.2663              0.9871813   0.9790556    0.9023721</span></span>
-<span><span class="co">#&gt; 6        221.8779              0.9907272   0.9765549    0.9267179</span></span></code></pre></div>
+<span><span class="co">#&gt;    net num_actors   density num_edges prop_edges_missing mean_edge_weight</span></span>
+<span><span class="co">#&gt; 1 2002         35 0.7551020       925                  0        166.93445</span></span>
+<span><span class="co">#&gt; 2 2003         30 0.8788889       791                  0        258.17356</span></span>
+<span><span class="co">#&gt; 3 2004         51 0.7274125      1892                  0         95.28745</span></span>
+<span><span class="co">#&gt; 4 2005         49 0.8167430      1961                  0        113.05315</span></span>
+<span><span class="co">#&gt; 5 2006         41 0.8221297      1382                  0        139.35366</span></span>
+<span><span class="co">#&gt; 6 2007         42 0.8707483      1536                  0        174.43148</span></span>
+<span><span class="co">#&gt;   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight</span></span>
+<span><span class="co">#&gt; 1       514.1573                 14               0            6003</span></span>
+<span><span class="co">#&gt; 2       660.1221                 39               0            5937</span></span>
+<span><span class="co">#&gt; 3       351.0150                  9               0            5141</span></span>
+<span><span class="co">#&gt; 4       410.7403                 14               0            6561</span></span>
+<span><span class="co">#&gt; 5       490.6335                 18               0            7579</span></span>
+<span><span class="co">#&gt; 6       550.6169                 25               0            7125</span></span>
+<span><span class="co">#&gt;   competition_row competition_col sd_of_row_means sd_of_col_means</span></span>
+<span><span class="co">#&gt; 1      0.08100030      0.07897426        229.4351        224.9583</span></span>
+<span><span class="co">#&gt; 2      0.08397074      0.07807595        323.6456        304.2249</span></span>
+<span><span class="co">#&gt; 3      0.06014889      0.05662972        138.3784        132.2361</span></span>
+<span><span class="co">#&gt; 4      0.06493042      0.05954332        168.7123        158.1764</span></span>
+<span><span class="co">#&gt; 5      0.07655516      0.06874899        206.3296        190.2663</span></span>
+<span><span class="co">#&gt; 6      0.06715083      0.06141609        238.1953        221.8779</span></span>
+<span><span class="co">#&gt;   covar_of_row_col_means reciprocity transitivity</span></span>
+<span><span class="co">#&gt; 1              0.9926160   0.9790484    0.8489611</span></span>
+<span><span class="co">#&gt; 2              0.9782197   0.9564141    0.9378381</span></span>
+<span><span class="co">#&gt; 3              0.9885674   0.9734966    0.8351142</span></span>
+<span><span class="co">#&gt; 4              0.9931345   0.9839155    0.8959472</span></span>
+<span><span class="co">#&gt; 5              0.9871813   0.9790556    0.9023721</span></span>
+<span><span class="co">#&gt; 6              0.9907272   0.9765549    0.9267179</span></span></code></pre></div>
 <p>We can also inspect the ego network via plot.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span>,</span>
+<code class="sourceCode R"><span><span class="va">pakistan_ego_net</span> <span class="op">=</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span>
+<span>  <span class="va">pakistan_ego_net</span>, </span>
+<span>  <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span>, </span>
+<span>  <span class="st">'actor'</span>, <span class="st">'time'</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span>,</span>
 <span>     edge_color <span class="op">=</span> <span class="st">'grey50'</span>,</span>
-<span>     edge_linewidth <span class="op">=</span> <span class="fl">.2</span>,</span>
-<span>     curved_edges <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>     edge_curvature <span class="op">=</span> <span class="fl">1</span></span>
+<span>     weight_transform<span class="op">=</span><span class="va">log1p</span>,</span>
+<span>     node_size_by <span class="op">=</span> <span class="st">'log(strength_avg_total)'</span>,</span>
+<span>     node_size_label <span class="op">=</span> <span class="st">'Log(Strength)'</span>,</span>
+<span>     edge_alpha_label <span class="op">=</span> <span class="st">'Log(Verb. Coop.)'</span>,</span>
+<span>     highlight<span class="op">=</span><span class="st">'Pakistan'</span>,</span>
+<span>     highlight_legend_title<span class="op">=</span><span class="st">''</span>,</span>
+<span>     edge_linewidth <span class="op">=</span> <span class="fl">.2</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="ego_networks_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
 <div class="section level2">
