@@ -662,6 +662,64 @@ style_witcher_viper <- function() {
   )
 }
 
+#' Pokémon-style network style (Pikachu)
+#'
+#' A playful style inspired by Pikachu: energetic yellows, bold outlines, and lightning vibes
+#'
+#' @return List of plot arguments
+#' @export
+style_pokemon_pikachu <- function() {
+  list(
+    edge_color = "#FFD700",        # Electric yellow
+    edge_alpha = 0.8,
+    edge_linewidth = 1,
+    
+    point_fill = "#FFFACD",        # Light yellow node fill
+    point_color = "#DAA520",       # Goldenrod border
+    point_stroke = 1.2,
+    point_size = 3,
+    point_shape = 21,              # Circle
+    
+    curve_edges = TRUE,
+    edge_curvature = 0.25,
+    
+    text_color = "#555555",
+    text_size = 3,
+    
+    use_style_netify = TRUE
+  )
+}
+
+#' Secretariat-style network style
+#'
+#' A powerful, sleek style inspired by Secretariat — clean lines, racing blues, and commanding contrast.
+#'
+#' @return List of plot arguments
+#' @export
+style_secretariat <- function() {
+  list(
+    edge_color = "#1F75FE",         # Racing blue
+    edge_alpha = 0.7,
+    edge_linewidth = 1.2,
+    
+    point_fill = "#FFFFFF",         # White silks
+    point_color = "#1F75FE",        # Blue trim
+    point_stroke = 2,
+    point_size = 3.5,
+    point_shape = 22,               # Square - powerful base
+    
+    curve_edges = FALSE,            # Direct and fast
+     
+    text_color = "#1F1F1F",
+    text_size = 3.2,
+    text_fontface = 2,              # Bold for strength
+    
+    use_style_netify = TRUE
+  )
+}
+
+
+
 #' List available network styles
 #'
 #' Shows all available preset network styles with descriptions
@@ -688,7 +746,9 @@ list_network_styles <- function() {
       "style_witcher_wolven",
       "style_witcher_ursine",
       "style_witcher_manticore",
-      "style_witcher_viper"      
+      "style_witcher_viper",
+      "style_pokemon_pikachu",
+      'style_secretariat'
     ),
     description = c(
       "Wes Anderson's Grand Budapest Hotel pastels",
@@ -707,7 +767,9 @@ list_network_styles <- function() {
       "Witcher Wolf School - Geralt's balanced style",
       "Witcher Bear School - heavy and imposing",
       "Witcher Manticore School - alchemical and exotic",
-      "Witcher Viper School - stealthy assassin"      
+      "Witcher Viper School - stealthy assassin",
+      "Pokémon-inspired Pikachu style",
+      "Secretariat the Horse that ran fast"
     ),
     background = c(
       "light",
@@ -726,7 +788,9 @@ list_network_styles <- function() {
       "white",
       "white",
       "white",
-      "black"      
+      "black",
+      "gray",
+      "white"
     ),
     stringsAsFactors = FALSE
   )

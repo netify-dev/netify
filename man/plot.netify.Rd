@@ -83,6 +83,25 @@ creates composite layout from all time periods.}
 }
 }
 
+\section{Subsetting Parameters}{
+
+\describe{
+\item{\code{node_filter}}{An expression to filter nodes. The expression can reference any
+nodal attribute. For example: \code{node_filter = degree_total > 5} to show only nodes
+with total degree greater than 5. The expression is evaluated in the context of the
+nodal data, so any node-level variable can be used.}
+\item{\code{edge_filter}}{An expression to filter edges. The expression can reference any
+edge attribute (including 'weight' for weighted networks). For example:
+\code{edge_filter = weight > 0.5} to show only edges with weight greater than 0.5.
+The expression is evaluated in the context of the edge data, so any edge-level
+variable can be used.}
+\item{\code{time}}{For longitudinal networks, a vector of time periods to include in the plot.
+Can be numeric indices or character labels matching the time dimension. If NULL
+(default), all time periods are plotted. For cross-sectional networks, this
+parameter is ignored.}
+}
+}
+
 \section{Node Aesthetics}{
 
 
@@ -291,6 +310,16 @@ plot(net_10,
   text_size = 3,
   text_color = 'darkred'
 )
+
+
+# Time subsetting example
+plot(net_longit,
+  time = c('2010', '2011', '2012')
+)
+
+# Node subsetting example
+# democracies with high GDP
+plot(net_longit, node_filter = ~ i_polity2 > 6 & i_log_gdp > 25)
 
 # use return_components=TRUE
 # to get back ggplot2 pieces of plot

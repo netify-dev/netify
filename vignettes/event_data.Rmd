@@ -1,5 +1,5 @@
 ---
-title: "Conflict Application: Event Data"
+title: "Event Data"
 author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

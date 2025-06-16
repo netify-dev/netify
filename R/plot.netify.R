@@ -36,6 +36,23 @@
 #'   \item{\code{use_theme_netify}}{Logical. Apply netify theme? Default is \code{TRUE}.}
 #' }
 #'
+#' @section Subsetting Parameters:
+#' \describe{
+#'   \item{\code{node_filter}}{An expression to filter nodes. The expression can reference any 
+#'     nodal attribute. For example: \code{node_filter = degree_total > 5} to show only nodes 
+#'     with total degree greater than 5. The expression is evaluated in the context of the 
+#'     nodal data, so any node-level variable can be used.}
+#'   \item{\code{edge_filter}}{An expression to filter edges. The expression can reference any 
+#'     edge attribute (including 'weight' for weighted networks). For example:
+#'     \code{edge_filter = weight > 0.5} to show only edges with weight greater than 0.5.
+#'     The expression is evaluated in the context of the edge data, so any edge-level
+#'     variable can be used.}
+#'   \item{\code{time}}{For longitudinal networks, a vector of time periods to include in the plot.
+#'     Can be numeric indices or character labels matching the time dimension. If NULL
+#'     (default), all time periods are plotted. For cross-sectional networks, this
+#'     parameter is ignored.}
+#' }
+#'
 #' @section Node Aesthetics:
 #' 
 #' Fixed aesthetics (same for all nodes):
@@ -268,6 +285,16 @@
 #'   text_color = 'darkred'
 #' )
 #' 
+#' 
+#' # Time subsetting example
+#' plot(net_longit,
+#'   time = c('2010', '2011', '2012')
+#' )
+#' 
+#' # Node subsetting example
+#' # democracies with high GDP
+#' plot(net_longit, node_filter = ~ i_polity2 > 6 & i_log_gdp > 25)
+#' 
 #' # use return_components=TRUE
 #' # to get back ggplot2 pieces of plot
 #' g10 <- plot(
@@ -307,6 +334,28 @@ plot.netify <- function(x, ...) {
 	# anything passed in goes to the plot arg dumpster
 	plot_args <- list(...)
 
+	# NEW: Handle time subsetting if provided
+	if (!is.null(plot_args$time)) {
+		# Extract time parameter before passing to net_plot_data
+		time_subset <- plot_args$time
+		
+		# Check if it's a longitudinal network
+		if (obj_attrs$netify_type != 'cross_sec') {
+			# Subset the netify object for the specified time periods
+			x <- subset(x, time = time_subset)
+			
+			# Update attributes after subsetting
+			obj_attrs <- attributes(x)
+			
+			# Remove time from plot_args since we've already handled it
+			plot_args$time <- NULL
+		} else {
+			# Warn if time is specified for cross-sectional network
+			cli::cli_alert_warning("'time' parameter ignored for cross-sectional networks")
+			plot_args$time <- NULL
+		}
+	}
+
 	# style over substance
 	if (!is.null(plot_args$style)) {
 
@@ -328,6 +377,14 @@ plot.netify <- function(x, ...) {
 	
 	} # end styling
 
+	# Store filter arguments before removing them
+	node_filter <- plot_args$node_filter
+	edge_filter <- plot_args$edge_filter
+	
+	# Remove filter args before passing to net_plot_data
+	plot_args$node_filter <- NULL
+	plot_args$edge_filter <- NULL
+
 	# get plot data and parameters for ggplot
 	net_plot_info = net_plot_data(x, plot_args)
 
@@ -335,6 +392,72 @@ plot.netify <- function(x, ...) {
 	plot_args = net_plot_info$plot_args
 	ggnet_params = net_plot_info$ggnet_params
 	net_dfs = net_plot_info$net_dfs
+
+	# NEW: Handle node filtering if provided
+	if (!is.null(node_filter)) {
+		# Apply the filter to nodal data
+		if (nrow(net_dfs$nodal_data) > 0) {
+			# Apply the filter using helper function
+			filter_result <- apply_node_filter(net_dfs$nodal_data, node_filter)
+			
+			# Apply the filter
+			net_dfs$nodal_data <- net_dfs$nodal_data[filter_result, , drop = FALSE]
+			
+			# Update edge data to remove edges connected to filtered nodes
+			if (nrow(net_dfs$edge_data) > 0) {
+				remaining_nodes <- net_dfs$nodal_data$name
+				
+				# Keep only edges where both endpoints are in remaining nodes
+				edges_to_keep <- net_dfs$edge_data$from %in% remaining_nodes & 
+								 net_dfs$edge_data$to %in% remaining_nodes
+				
+				net_dfs$edge_data <- net_dfs$edge_data[edges_to_keep, , drop = FALSE]
+			}
+		}
+	}
+
+	# NEW: Handle edge filtering if provided
+	if (!is.null(edge_filter)) {
+		# Apply the filter to edge data
+		if (nrow(net_dfs$edge_data) > 0) {
+			# Get weight column name if available
+			weight_col <- attr(x, 'weight')
+			
+			# Apply the filter using the helper function
+			filter_result <- apply_edge_filter(net_dfs$edge_data, edge_filter, weight_col)
+			
+			# Apply the filter
+			net_dfs$edge_data <- net_dfs$edge_data[filter_result, , drop = FALSE]
+			
+			# Update node data to remove orphaned nodes if remove_isolates is TRUE
+			if (plot_args$remove_isolates && nrow(net_dfs$edge_data) > 0) {
+				# Get nodes that still have edges after filtering
+				remaining_nodes <- unique(c(net_dfs$edge_data$from, net_dfs$edge_data$to))
+				
+				# Add time dimension if longitudinal
+				if (obj_attrs$netify_type != 'cross_sec') {
+					remaining_node_time <- unique(net_dfs$edge_data[, c('from', 'to', 'time')])
+					remaining_combos <- unique(rbind(
+						data.frame(name = remaining_node_time$from, time = remaining_node_time$time),
+						data.frame(name = remaining_node_time$to, time = remaining_node_time$time)
+					))
+					
+					# Create ID for matching
+					remaining_combos$id <- paste(remaining_combos$name, remaining_combos$time, sep = '_')
+					net_dfs$nodal_data$id <- paste(net_dfs$nodal_data$name, net_dfs$nodal_data$time, sep = '_')
+					
+					# Keep only nodes that still have connections
+					net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$id %in% remaining_combos$id, ]
+					
+					# Remove temporary id column
+					net_dfs$nodal_data$id <- NULL
+				} else {
+					# Cross-sectional case
+					net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$name %in% remaining_nodes, ]
+				}
+			}
+		}
+	}
 
     # Handle weight transformation
     if (!is.null(plot_args$weight_transform)) {
@@ -792,4 +915,135 @@ plot.netify <- function(x, ...) {
 
 	# return the final assembled plot
 	return(viz)
+}
+
+#' Apply edge filter expression to edge data
+#'
+#' Internal function to safely apply edge filtering expressions
+#'
+#' @param edge_data Data frame containing edge information
+#' @param filter_input A formula, quoted expression, or function to evaluate
+#' @param weight_col Name of the weight column if applicable
+#' 
+#' @return Logical vector indicating which edges to keep
+#' 
+#' @keywords internal
+#' @noRd
+
+apply_edge_filter <- function(edge_data, filter_input, weight_col = NULL) {
+	# Create a safe evaluation environment
+	eval_env <- edge_data
+	
+	# Add 'weight' as an alias if weight column exists
+	if (!is.null(weight_col) && weight_col %in% names(edge_data)) {
+		eval_env$weight <- edge_data[[weight_col]]
+	}
+	
+	# Handle different input types
+	if (inherits(filter_input, "formula")) {
+		# Extract expression from formula
+		filter_expr <- filter_input[[2]]
+	} else if (is.function(filter_input)) {
+		# Apply function directly
+		return(filter_input(eval_env))
+	} else if (is.language(filter_input)) {
+		# Use quoted expression directly
+		filter_expr <- filter_input
+	} else {
+		cli::cli_abort("Edge filter must be a formula (~ expr), quoted expression (quote(expr)), or function")
+	}
+	
+	# Try to evaluate the expression
+	tryCatch({
+		# Evaluate the filter expression
+		result <- eval(filter_expr, envir = eval_env)
+		
+		# Ensure result is logical
+		if (!is.logical(result)) {
+			cli::cli_alert_warning("Edge filter expression must return logical values. Attempting conversion.")
+			result <- as.logical(result)
+		}
+		
+		# Handle NA values
+		result[is.na(result)] <- FALSE
+		
+		# Check length
+		if (length(result) != nrow(edge_data)) {
+			cli::cli_abort("Edge filter expression must return a value for each edge")
+		}
+		
+		return(result)
+		
+	}, error = function(e) {
+		cli::cli_abort(c(
+			"Error evaluating edge filter expression",
+			"x" = e$message,
+			"i" = "Available variables: {paste(names(eval_env), collapse = ', ')}"
+		))
+	})
+}
+
+#' Apply node filter expression to nodal data
+#'
+#' Internal function to safely apply node filtering expressions
+#'
+#' @param nodal_data Data frame containing node information
+#' @param filter_input A formula, quoted expression, or function to evaluate
+#' 
+#' @return Logical vector indicating which nodes to keep
+#' 
+#' @keywords internal
+#' @noRd
+
+apply_node_filter <- function(nodal_data, filter_input) {
+	# Create a safe evaluation environment
+	eval_env <- nodal_data
+	
+	# Add common aliases for convenience
+	if ("name" %in% names(nodal_data)) {
+		eval_env$actor <- nodal_data$name
+	}
+	
+	# Handle different input types
+	if (inherits(filter_input, "formula")) {
+		# Extract expression from formula
+		filter_expr <- filter_input[[2]]
+	} else if (is.function(filter_input)) {
+		# Apply function directly
+		return(filter_input(eval_env))
+	} else if (is.language(filter_input)) {
+		# Use quoted expression directly
+		filter_expr <- filter_input
+	} else {
+		cli::cli_abort("Node filter must be a formula (~ expr), quoted expression (quote(expr)), or function")
+	}
+	
+	# Try to evaluate the expression
+	tryCatch({
+		# Evaluate the filter expression
+		result <- eval(filter_expr, envir = eval_env)
+		
+		# Ensure result is logical
+		if (!is.logical(result)) {
+			cli::cli_alert_warning("Node filter expression must return logical values. Attempting conversion.")
+			result <- as.logical(result)
+		}
+		
+		# Handle NA values
+		result[is.na(result)] <- FALSE
+		
+		# Check length
+		if (length(result) != nrow(nodal_data)) {
+			cli::cli_abort("Node filter expression must return a value for each node")
+		}
+		
+		return(result)
+		
+	}, error = function(e) {
+		cli::cli_abort(c(
+			"Error evaluating node filter expression",
+			"x" = e$message,
+			"i" = "Available variables: {paste(names(eval_env), collapse = ', ')}"
+		))
+	})
 }
