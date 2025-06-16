@@ -75,7 +75,7 @@ The print output tells us that across the entire time series, we can see that Pa
 
 ```{r}
 # subset to a specific year
-pakistan_ego_net[[1]]
+subset(pakistan_ego_net, time = '2010')
 ```
 
 Netify will also calculate summary statistics for ego networks. For example, we can  obtain summary statistics for all of Pakistan's ego networks across the time series using the netify built-in `summary` function:
@@ -87,11 +87,21 @@ head(summary(pakistan_ego_net))
 We can also inspect the ego network via plot.
 
 ```{r}
+pakistan_ego_net = add_node_vars(
+  pakistan_ego_net, 
+  summary_actor(pakistan_ego_net), 
+  'actor', 'time'
+)
+
 plot(pakistan_ego_net,
      edge_color = 'grey50',
-     edge_linewidth = .2,
-     curved_edges = TRUE,
-     edge_curvature = 1
+     weight_transform=log1p,
+     node_size_by = 'log(strength_avg_total)',
+     node_size_label = 'Log(Strength)',
+     edge_alpha_label = 'Log(Verb. Coop.)',
+     highlight='Pakistan',
+     highlight_legend_title='',
+     edge_linewidth = .2
 )
 ```
 

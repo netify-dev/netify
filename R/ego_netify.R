@@ -1,14 +1,14 @@
-#' Create ego networks from a netify object
+#' Create ego network from a netify object
 #'
-#' `ego_netify` extracts ego networks from a 
+#' `ego_netify` extracts an ego network from a 
 #' netify object. An ego network consists of a focal node (ego) and its immediate 
 #' neighbors (alters). For weighted networks, users can define neighborhoods using 
-#' edge weight thresholds. The function returns netify object(s) representing the 
-#' ego network(s).
+#' edge weight thresholds. The function returns a netify object representing the 
+#' ego network.
 #'
-#' @param netlet A netify object (class "netify") from which to extract ego networks.
-#' @param ego Character vector specifying the name(s) of the ego(s) for whom to 
-#'   create ego networks. Must match actor names in the netify object.
+#' @param netlet A netify object (class "netify") from which to extract the ego network.
+#' @param ego Character string specifying the name of the ego for whom to 
+#'   create the ego network. Must match an actor name in the netify object.
 #' @param threshold Numeric value or vector specifying the threshold for including 
 #'   alters in the ego network based on edge weights. For longitudinal networks, 
 #'   can be a vector with length equal to the number of time periods to apply 
@@ -24,28 +24,21 @@
 #' @param include_ego Logical. If TRUE (default), the ego node is included in 
 #'   the ego network. If FALSE, only alters are included.
 #'
-#' @return Depending on the input and number of egos specified:
-#'   \itemize{
-#'     \item \strong{Single ego, cross-sectional}: A netify object representing 
-#'       the ego network
-#'     \item \strong{Multiple egos, cross-sectional}: A list of netify objects, 
-#'       one per ego
-#'     \item \strong{Longitudinal (any number of egos)}: A list of netify objects 
-#'       with ego-time combinations as elements
-#'   }
+#' @return A netify object representing the ego network. For longitudinal networks,
+#'   returns a list of netify objects with one ego network per time period.
 #'   
 #'   Each returned netify object includes additional attributes:
 #'   \itemize{
 #'     \item \code{ego_netify}: TRUE (indicator that this is an ego network)
-#'     \item \code{ego_id}: Identifier of the ego (and time period if longitudinal)
+#'     \item \code{ego_id}: Identifier of the ego
 #'     \item \code{threshold}: Threshold value(s) used
 #'     \item \code{ngbd_direction}: Direction specification used
 #'     \item \code{include_ego}: Whether ego was included
 #'   }
 #'
 #' @details
-#' The function extracts ego networks by identifying all nodes connected to the 
-#' specified ego(s) based on the given criteria:
+#' The function extracts an ego network by identifying all nodes connected to the 
+#' specified ego based on the given criteria:
 #' 
 #' \strong{Neighborhood definition:}
 #' \itemize{
@@ -75,6 +68,9 @@
 #'   \item Currently does not support bipartite networks
 #' }
 #'
+#' @note
+#' To create ego networks for multiple egos, use \code{lapply} or a loop to call
+#' this function for each ego separately.
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
@@ -128,21 +124,17 @@ ego_netify = function(
     ######################
 
     ######################
-    # Check if the ego is a character vector
-    if (!is.character(ego)) {
-        cli::cli_alert_danger("`ego` must be a character value or vector.")
+    # Check if the ego is a single character value
+    if (!is.character(ego) || length(ego) != 1) {
+        cli::cli_alert_danger("`ego` must be a single character value.")
         stop() }
   
     # Check if the ego is in the network
     poss_actors = unique(obj_attrs$actor_pds$actor)
-    oops = ego[!ego %in% poss_actors]
-
-    # if length oops not zero, then print error
-    if(length(oops) > 0) {
+    if(!ego %in% poss_actors) {
       cli::cli_alert_danger(
         paste0(
-          'Error: The following ego(s) are not in the data: ', 
-          paste(oops, collapse = ', '), '.'))
+          'Error: The ego "', ego, '" is not in the data.'))
       stop() }
     
     # add check for ngbd_direction
@@ -192,110 +184,79 @@ ego_netify = function(
     ######################
 
     ######################
-    # define neighborhood for each ego
+    # define neighborhood for ego
     # based on thresh get vector of actors to keep by list element
-    ego_nets = lapply(ego, function(ego_ii){
-        get_ngbd_net_for_ego(
-            raw_net, ego_ii, threshold, include_ego, ngbd_direction) })
-    ego_nets = do.call('c', ego_nets)
+    ego_nets = get_ngbd_net_for_ego(
+        raw_net, ego, threshold, include_ego, ngbd_direction)
     ######################
 
     ######################
     # add back in netify attributes
-    obj_attrs2 = obj_attrs
-    obj_attrs2$ego_netify = TRUE
-    obj_attrs2$threshold = threshold
-    obj_attrs2$ngbd_direction = ngbd_direction    
-    obj_attrs2$include_ego = include_ego
-    obj_attrs2$ego_longit = longitudinal
-    obj_attrs2$ego_vec = paste(ego, collapse = ', ')
-    obj_attrs2$ego_entry = ego
-
-    # get sub netlet attribs
-    # if longit list then use first element
-    if(netlet_type == 'longit_list'){
-        subobj_attrs = attributes(netlet[[1]])
-        subobj_attrs$ego_netify = TRUE
-        subobj_attrs$threshold = threshold
-        subobj_attrs$ngbd_direction = ngbd_direction    
-        subobj_attrs$include_ego = include_ego
-        subobj_attrs$ego_longit = FALSE
-        subobj_attrs$ego_vec = paste(ego, collapse = ', ')
-        subobj_attrs$ego_entry = ego
+    
+    # if cross sec then just work with the single network
+    if(netlet_type == 'cross_sec'){
+        ego_net = ego_nets[[1]]
+        
+        # create new attributes based on original
+        new_attrs = obj_attrs
+        new_attrs$ego_netify = TRUE
+        new_attrs$threshold = threshold
+        new_attrs$ngbd_direction = ngbd_direction    
+        new_attrs$include_ego = include_ego
+        new_attrs$ego_id = ego
+        new_attrs$ego_entry = ego
+        
+        # update dim and dimnames
+        new_attrs[c('dim','dimnames')] = attributes(ego_net)[c('dim', 'dimnames')]
+        
+        # apply attributes
+        attributes(ego_net) = new_attrs
+        
+        return(ego_net)
     }
     
-    # if cross sec then use the entire thing
-    if(netlet_type == 'cross_sec'){ subobj_attrs = obj_attrs2 }
-
-    # add back to each list element replacing the
-    # first two attribute elements with ego_nets
-    ego_list_ids = names(ego_nets)
-    ego_nets = lapply(1:length(ego_nets), function(ii){
-
-        # get net
-        net = ego_nets[[ii]]
-
-        # add info about ego and pd if relev
-        if(longitudinal){
-            # add ego id to subobj_attrs
-            subobj_attrs$ego_id  = gsub(
-                '__', ': ', ego_list_ids[ii], fixed=TRUE)
-            # add ego id to subobj_attrs
-            subobj_attrs$ego_vec = subobj_attrs$ego_id
-            subobj_attrs$ego_entry = subobj_attrs$ego_id }
-                
-        # non longit case
-        if(!longitudinal){
-            subobj_attrs$ego_id = ego_list_ids[ii]
-            subobj_attrs$ego_vec = subobj_attrs$ego_id
-            subobj_attrs$ego_entry = subobj_attrs$ego_id }
+    # if longitudinal, process list of networks
+    if(netlet_type == 'longit_list'){
+        # process each time period
+        ego_nets_processed = lapply(1:length(ego_nets), function(ii){
+            net = ego_nets[[ii]]
+            time_name = names(ego_nets)[ii]
+            
+            # create attributes for this time period
+            subobj_attrs = attributes(netlet[[1]])
+            subobj_attrs$ego_netify = TRUE
+            subobj_attrs$threshold = threshold[ii]
+            subobj_attrs$ngbd_direction = ngbd_direction    
+            subobj_attrs$include_ego = include_ego
+            subobj_attrs$ego_id = ego  # Just the ego name, not ego: time
+            subobj_attrs$ego_entry = ego
+            
+            # update dim and dimnames
+            subobj_attrs[c('dim','dimnames')] = attributes(net)[c('dim', 'dimnames')]
+            
+            # apply attributes
+            attributes(net) = subobj_attrs
+            return(net)
+        })
         
-        # pull out new dim and dimnames for net
-        new_dims = attributes(net)[c('dim', 'dimnames')]
-
-        # replace first two elements of subobj_attrs
-        subobj_attrs[c('dim','dimnames')] = new_dims
-        attributes(net) = subobj_attrs
-        return(net) })
-    names(ego_nets) = ego_list_ids
-
-    # if netify type is not cross sec then add
-    # obj_attrs2 to top level list
-    if(netlet_type != 'cross_sec'){
-
-        # replace names column in obj_attrs2
-        obj_attrs2$names = ego_list_ids
-
-        # add attribs to top level
-        attributes(ego_nets) = obj_attrs2
-
-        # add attrib so this this is explicitly longit
-        obj_attrs2$ego_longit = TRUE }
-
-    # if cross sec and only one element then
-    # pull out from list
-    if(netlet_type == 'cross_sec' & length(ego_nets)==1){
-        ego_nets = ego_nets[[1]] }
-    
-    # if origingally cross sec and more than one ego
-    # was provided modify the top level appropriately
-    if(netlet_type == 'cross_sec' & length(ego)>1){
-
-        # drop dim and dimnames from obj_attrs2
-        obj_attrs2 = obj_attrs2[-match(
-            c('dim','dimnames'), names(obj_attrs2))]
+        # add names - just time periods like regular netify objects
+        names(ego_nets_processed) = names(ego_nets)
         
-        # modify obj_attrs2 to longit_list
-        obj_attrs2$netify_type = 'longit_list'
-
-        # add attrib so this doesnt get confused as longit
-        obj_attrs2$ego_longit = FALSE
-
-        # add back to ego_nets while keeping names
-        attributes(ego_nets) = c(attributes(ego_nets), obj_attrs2) }
+        # add top-level attributes
+        list_attrs = obj_attrs
+        list_attrs$ego_netify = TRUE
+        list_attrs$threshold = threshold
+        list_attrs$ngbd_direction = ngbd_direction    
+        list_attrs$include_ego = include_ego
+        list_attrs$ego_longit = TRUE
+        list_attrs$ego_entry = ego
+        list_attrs$ego_id = ego  # Just the ego name
+        list_attrs$names = names(ego_nets)
+        
+        # apply attributes to list
+        attributes(ego_nets_processed) = list_attrs
+        
+        return(ego_nets_processed)
+    }
     ######################
-
-    ######################
-    return(ego_nets)
-    ###################### 
 }

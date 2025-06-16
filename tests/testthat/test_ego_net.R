@@ -29,7 +29,6 @@ test_that("ego_netify works for single ego in cross-sectional network", {
     
     # check ego network attributes
     expect_equal(attr(ego_a, "ego_id"), "A")
-    expect_equal(attr(ego_a, "ego_vec"), "A")
     
     # check actors in ego network (a and its neighbors: b, c)
     actors <- rownames(ego_a)
@@ -73,12 +72,6 @@ test_that("ego_netify works with multiple egos and direction options", {
     actors_any <- rownames(ego_any)
     # a has any ties with b, c, and d
     expect_equal(sort(actors_any), c("A", "B", "C", "D"))
-    
-    # test multiple egos
-    multi_ego <- ego_netify(net, ego = c("A", "B"))
-    expect_type(multi_ego, "list")
-    expect_equal(length(multi_ego), 2)
-    expect_equal(names(multi_ego), c("A", "B"))
 })
 
 test_that("ego_netify works for longitudinal networks with thresholds", {
@@ -106,28 +99,28 @@ test_that("ego_netify works for longitudinal networks with thresholds", {
     
     # check output is a list with correct names
     expect_type(ego_longit, "list")
-    expect_equal(names(ego_longit), c("A__2010", "A__2011"))
+    expect_equal(names(ego_longit), c("2010", "2011"))
     
     # check each time period is a netify object
-    expect_s3_class(ego_longit[["A__2010"]], "netify")
-    expect_s3_class(ego_longit[["A__2011"]], "netify")
+    expect_s3_class(ego_longit[["2010"]], "netify")
+    expect_s3_class(ego_longit[["2011"]], "netify")
     
     # test with threshold
     ego_thresh <- ego_netify(net_longit, ego = "A", threshold = 15)
     
     # in 2010: a-b (10) < 15, a-c (5) < 15, b-a (20) > 15, c-a (15) = 15
     # only b should be included as neighbor (b->a weight is 20)
-    actors_2010 <- rownames(ego_thresh[["A__2010"]])
+    actors_2010 <- rownames(ego_thresh[["2010"]])
     expect_equal(sort(actors_2010), c("A", "B"))
     
     # in 2011: a-b (30) > 15, a-c (2) < 15, b-a (40) > 15, c-a (35) > 15
     # both b and c should be included
-    actors_2011 <- rownames(ego_thresh[["A__2011"]])
+    actors_2011 <- rownames(ego_thresh[["2011"]])
     expect_equal(sort(actors_2011), c("A", "B", "C"))
     
     # test exclude ego option
     ego_no_self <- ego_netify(net_longit, ego = "A", include_ego = FALSE)
-    actors_no_self <- rownames(ego_no_self[["A__2010"]])
+    actors_no_self <- rownames(ego_no_self[["2010"]])
     expect_false("A" %in% actors_no_self)
     expect_true(all(c("B", "C") %in% actors_no_self))
 })

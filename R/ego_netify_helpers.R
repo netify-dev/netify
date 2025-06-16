@@ -20,7 +20,7 @@ get_ngbd_net_for_ego <- function(
     include_ego = TRUE, ngbd_direction = "any") {
   
     ######################
-    # iteratte through nets to construct ngbds
+    # iterate through nets to construct ngbds
     ngbd_actors <- lapply(1:length(raw_net), function(ii) {
 
         # Get iith net and thresh
@@ -49,8 +49,10 @@ get_ngbd_net_for_ego <- function(
     ######################
     # add names
     if(length(raw_net)>1){
-        names(ngbd_actors) <- paste(ego, names(raw_net), sep = "__")
-    } else { names(ngbd_actors) <- ego }
+        names(ngbd_actors) <- names(raw_net)
+    } else { 
+        names(ngbd_actors) <- ego 
+    }
     ######################
 
     #####################
@@ -58,7 +60,6 @@ get_ngbd_net_for_ego <- function(
     return(ngbd_actors)
     #####################
 }
-
 
 #' Speedy extraction of time from ego-time concatenated strings
 #' @keywords internal

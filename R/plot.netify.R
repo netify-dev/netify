@@ -119,6 +119,23 @@
 #'   \item{\code{edge_color_label}}{Legend title for edge color.}
 #' }
 #' 
+#' @section Highlighting Parameters:
+#' \describe{
+#'   \item{\code{highlight}}{Character vector of node names to highlight with different colors.
+#'     Non-highlighted nodes will be colored grey. Highlighted nodes can also be automatically
+#'     enlarged if \code{highlight_size_increase} is greater than 1.}
+#'   \item{\code{highlight_colors}}{Named vector of colors for highlighted nodes. If NULL,
+#'     uses default distinct colors (red, blue, green for up to 3 nodes, or a color palette
+#'     for more). Names should match the values in the \code{highlight} parameter.
+#'     Example: \code{c('USA' = 'blue', 'China' = 'red', 'Russia' = 'green')}.}
+#'   \item{\code{highlight_legend_title}}{Title for the highlight legend. Default is "Highlighted".}
+#'   \item{\code{highlight_size_increase}}{Numeric factor to increase size of highlighted nodes.
+#'     Default is 1.5 (50% larger). Set to 1 for no size change. The size increase is applied
+#'     multiplicatively to any existing size mapping.}
+#'   \item{\code{show_other_in_legend}}{Logical. Include "Other" category in legend? Default is FALSE.
+#'     When FALSE, only highlighted nodes appear in the legend.}
+#' }
+#' 
 #' @section Special Parameters:
 #' \describe{
 #'   \item{\code{weight_transform}}{Function to transform edge weights before plotting.
@@ -307,7 +324,9 @@ plot.netify <- function(x, ...) {
 		plot_args$style <- NULL
 		
 		# merge style params with plot_args
-		plot_args <- c(style_params, plot_args) }
+		plot_args <- c(style_params, plot_args)
+	
+	} # end styling
 
 	# get plot data and parameters for ggplot
 	net_plot_info = net_plot_data(x, plot_args)
@@ -628,6 +647,10 @@ plot.netify <- function(x, ...) {
 		if (!is.null(scale_labels$node_stroke) && !is.null(components$point_scales$stroke)) {
 			viz <- viz + labs(stroke = scale_labels$node_stroke)
 		}
+		# hide size guide if requested (for highlighting)
+		if (isTRUE(plot_args$point_size_guide == "none") && !is.null(components$point_scales$size)) {
+			viz <- viz + guides(size = "none")
+		}
 	}
 
 	# add text annotations to the plot if they exist
@@ -731,6 +754,25 @@ plot.netify <- function(x, ...) {
             )
         }
     }
+
+	# Apply highlight colors if highlighting is active
+	if (isTRUE(plot_args$is_highlighting)) { 
+		if (!is.null(components$point_scales$fill) && components$point_scales$fill == "highlight_status") {
+			viz <- viz + scale_fill_manual(
+				values = plot_args$highlight_colors,
+				name = plot_args$highlight_legend_title %||% "Highlighted",
+				breaks = names(plot_args$highlight_colors)[names(plot_args$highlight_colors) != "Other"],
+				labels = names(plot_args$highlight_colors)[names(plot_args$highlight_colors) != "Other"]
+			)
+		} else if (!is.null(components$point_scales$color) && components$point_scales$color == "highlight_status") {
+			viz <- viz + scale_color_manual(
+				values = plot_args$highlight_colors,
+				name = plot_args$highlight_legend_title %||% "Highlighted",
+				breaks = names(plot_args$highlight_colors)[names(plot_args$highlight_colors) != "Other"],
+				labels = names(plot_args$highlight_colors)[names(plot_args$highlight_colors) != "Other"]
+			)
+		}
+	}
 
 	# add facets to the plot if they are defined (useful for longitudinal data)
 	if (!is.null(components$facets)) {

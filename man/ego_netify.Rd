@@ -2,7 +2,7 @@
 % Please edit documentation in R/ego_netify.R
 \name{ego_netify}
 \alias{ego_netify}
-\title{Create ego networks from a netify object}
+\title{Create ego network from a netify object}
 \usage{
 ego_netify(
   netlet,
@@ -13,10 +13,10 @@ ego_netify(
 )
 }
 \arguments{
-\item{netlet}{A netify object (class "netify") from which to extract ego networks.}
+\item{netlet}{A netify object (class "netify") from which to extract the ego network.}
 
-\item{ego}{Character vector specifying the name(s) of the ego(s) for whom to
-create ego networks. Must match actor names in the netify object.}
+\item{ego}{Character string specifying the name of the ego for whom to
+create the ego network. Must match an actor name in the netify object.}
 
 \item{threshold}{Numeric value or vector specifying the threshold for including
 alters in the ego network based on edge weights. For longitudinal networks,
@@ -36,35 +36,28 @@ for directed networks. Options are:
 the ego network. If FALSE, only alters are included.}
 }
 \value{
-Depending on the input and number of egos specified:
-\itemize{
-\item \strong{Single ego, cross-sectional}: A netify object representing
-the ego network
-\item \strong{Multiple egos, cross-sectional}: A list of netify objects,
-one per ego
-\item \strong{Longitudinal (any number of egos)}: A list of netify objects
-with ego-time combinations as elements
-}
+A netify object representing the ego network. For longitudinal networks,
+returns a list of netify objects with one ego network per time period.
 
 Each returned netify object includes additional attributes:
 \itemize{
 \item \code{ego_netify}: TRUE (indicator that this is an ego network)
-\item \code{ego_id}: Identifier of the ego (and time period if longitudinal)
+\item \code{ego_id}: Identifier of the ego
 \item \code{threshold}: Threshold value(s) used
 \item \code{ngbd_direction}: Direction specification used
 \item \code{include_ego}: Whether ego was included
 }
 }
 \description{
-\code{ego_netify} extracts ego networks from a
+\code{ego_netify} extracts an ego network from a
 netify object. An ego network consists of a focal node (ego) and its immediate
 neighbors (alters). For weighted networks, users can define neighborhoods using
-edge weight thresholds. The function returns netify object(s) representing the
-ego network(s).
+edge weight thresholds. The function returns a netify object representing the
+ego network.
 }
 \details{
-The function extracts ego networks by identifying all nodes connected to the
-specified ego(s) based on the given criteria:
+The function extracts an ego network by identifying all nodes connected to the
+specified ego based on the given criteria:
 
 \strong{Neighborhood definition:}
 \itemize{
@@ -93,6 +86,10 @@ as relationships change.
 \item Currently does not support multilayer networks
 \item Currently does not support bipartite networks
 }
+}
+\note{
+To create ego networks for multiple egos, use \code{lapply} or a loop to call
+this function for each ego separately.
 }
 \author{
 Cassy Dorff, Shahryar Minhas

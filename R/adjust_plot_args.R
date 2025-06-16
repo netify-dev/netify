@@ -139,6 +139,8 @@
 #' 
 #' All color parameters accept standard R color specifications including named 
 #' colors, hex codes, and RGB values.
+#' 
+#' @importFrom scales hue_pal
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #' 
@@ -361,6 +363,16 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if(is.null(plot_args$label_lineheight)){ plot_args$label_lineheight = 1.2 }
 	#####################
 
+	# highlight parameters #####################
+	# only set defaults if highlight is actually being used
+	if(!is.null(plot_args$highlight) && length(plot_args$highlight) > 0) {
+		if(is.null(plot_args$highlight_colors)){ plot_args$highlight_colors = NULL }
+		if(is.null(plot_args$highlight_legend_title)){ plot_args$highlight_legend_title = NULL }
+		if(is.null(plot_args$highlight_size_increase)){ plot_args$highlight_size_increase = 1.5 }
+		if(is.null(plot_args$show_other_in_legend)){ plot_args$show_other_in_legend = FALSE }
+	}
+	#####################
+
 	# set up geom_segment/curve/arrow defaults ####################
 
 	# general segment
@@ -453,6 +465,106 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
     plot_args <- apply_smart_palettes(plot_args, net_dfs)	
 	######################
 
+	# process highlight nodes #####################
+	if(!is.null(plot_args$highlight) && length(plot_args$highlight) > 0) {
+		# Ensure highlight is a character vector
+		plot_args$highlight <- as.character(plot_args$highlight)
+		
+		# Set highlight defaults based on context
+		if(is.null(plot_args$highlight_colors)){ plot_args$highlight_colors = NULL }
+		if(is.null(plot_args$highlight_legend_title)){ plot_args$highlight_legend_title = NULL }
+		if(is.null(plot_args$show_other_in_legend)){ plot_args$show_other_in_legend = FALSE }
+		
+		# Smart default for highlight_size_increase:
+		# If there's already a size variable, don't resize by default
+		if(is.null(plot_args$highlight_size_increase)){
+			if(!is.null(plot_args$point_size_var)){
+				plot_args$highlight_size_increase = 1  # No additional resize when size is mapped
+			} else {
+				plot_args$highlight_size_increase = 1.5  # Default resize when size is fixed
+			}
+		}
+		
+		# Create a factor variable for highlighting
+		net_dfs$nodal_data$highlight_status <- ifelse(
+			net_dfs$nodal_data$name %in% plot_args$highlight,
+			net_dfs$nodal_data$name,
+			"Other"
+		)
+		
+		# Convert to factor with specific levels (highlighted nodes first, then "Other")
+		highlight_levels <- c(plot_args$highlight, "Other")
+		net_dfs$nodal_data$highlight_status <- factor(
+			net_dfs$nodal_data$highlight_status,
+			levels = highlight_levels[highlight_levels %in% net_dfs$nodal_data$highlight_status]
+		)
+		
+		# If no color variable is set, use highlight_status for coloring
+		if(is.null(plot_args$point_color_var) && is.null(plot_args$point_fill_var)) {
+			# Determine which aesthetic to use based on shape
+			if(!is.null(plot_args$point_shape) && plot_args$point_shape %in% c(21:25)) {
+				# Shapes with fill - use fill
+				plot_args$point_fill_var <- "highlight_status"
+			} else {
+				# Shapes without fill - use color
+				plot_args$point_color_var <- "highlight_status"
+			}
+		}
+		
+		# Set up highlight colors if not provided
+		if(is.null(plot_args$highlight_colors)) {
+			# Default color scheme: highlighted nodes get distinct colors, others get grey
+			n_highlights <- length(plot_args$highlight)
+			if(n_highlights <= 3) {
+				# Manual colors for small number of highlights
+				highlight_node_colors <- c("#E41A1C", "#377EB8", "#4DAF4A")[1:n_highlights]
+			} else {
+				# Use a color palette for more highlights
+				highlight_node_colors <- scales::hue_pal()(n_highlights)
+			}
+			# Add grey for non-highlighted nodes
+			plot_args$highlight_colors <- c(highlight_node_colors, "#999999")
+			names(plot_args$highlight_colors) <- c(plot_args$highlight, "Other")
+		}
+		
+		# Only process size increase if it's not 1 AND we don't have an expression
+		if(plot_args$highlight_size_increase != 1) {
+			if(is.null(plot_args$point_size_var)) {
+				# No existing size variable - create one based on highlight status
+				net_dfs$nodal_data$highlight_size <- ifelse(
+					net_dfs$nodal_data$name %in% plot_args$highlight,
+					plot_args$point_size * plot_args$highlight_size_increase,
+					plot_args$point_size
+				)
+				plot_args$point_size_var <- "highlight_size"
+				
+				# Set flag to hide the size legend since it's redundant with color
+				plot_args$point_size_guide <- "none"
+			} else {
+				# There's already a size variable
+				original_size_var <- plot_args$point_size_var
+				
+				# Only try to modify if it's a simple column reference
+				if(original_size_var %in% names(net_dfs$nodal_data)) {
+					# It's a simple column name - we can multiply it
+					net_dfs$nodal_data$highlight_combined_size <- ifelse(
+						net_dfs$nodal_data$name %in% plot_args$highlight,
+						net_dfs$nodal_data[[original_size_var]] * plot_args$highlight_size_increase,
+						net_dfs$nodal_data[[original_size_var]]
+					)
+					
+					# Update to use the combined size variable
+					plot_args$point_size_var <- "highlight_combined_size"
+				}
+				# If it's an expression, just leave the size variable as-is
+			}
+		}
+		
+		# Store highlight info for legend customization
+		plot_args$is_highlighting <- TRUE
+	}
+	######################
+
 	# choose weight var #####################
 	# if network is weighted and users did not
 	# specify alpha level choose for them
@@ -474,7 +586,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	# ######################
 	# # arrow adjustment parameters
 	# if(is.null(plot_args$adjust_arrow_endpoints)){ plot_args$adjust_arrow_endpoints = FALSE }
-	# if(is.null(plot_args$edge_arrow_gap)){ plot_args$edge_arrow_gap = 0.2 }
+	# if(is.null(plot_args$edge_arrow_gap)){ plot_args$edge_arrow_gap = 0.05 }
 	# # rely on gg
 	# if(is.null(plot_args$edge_arrow_size_scale)){ plot_args$edge_arrow_size_scale = NULL }  
 	# ######################	

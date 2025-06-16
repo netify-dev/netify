@@ -208,10 +208,6 @@ test_that("summary.netify handles ego networks", {
   # Check ego network structure
   expect_true("net" %in% names(summ))
   expect_true(all(grepl("United States", summ$layer)))
-  
-  # For longitudinal ego networks, layer contains ego: time format
-  # Check that all entries contain "United States"
-  expect_true(all(grepl("United States", summ$net)))
 })
 
 test_that("summary.netify produces consistent output structure", {

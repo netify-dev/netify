@@ -174,6 +174,25 @@ Customize legend titles:
 }
 }
 
+\section{Highlighting Parameters}{
+
+\describe{
+\item{\code{highlight}}{Character vector of node names to highlight with different colors.
+Non-highlighted nodes will be colored grey. Highlighted nodes can also be automatically
+enlarged if \code{highlight_size_increase} is greater than 1.}
+\item{\code{highlight_colors}}{Named vector of colors for highlighted nodes. If NULL,
+uses default distinct colors (red, blue, green for up to 3 nodes, or a color palette
+for more). Names should match the values in the \code{highlight} parameter.
+Example: \code{c('USA' = 'blue', 'China' = 'red', 'Russia' = 'green')}.}
+\item{\code{highlight_legend_title}}{Title for the highlight legend. Default is "Highlighted".}
+\item{\code{highlight_size_increase}}{Numeric factor to increase size of highlighted nodes.
+Default is 1.5 (50\% larger). Set to 1 for no size change. The size increase is applied
+multiplicatively to any existing size mapping.}
+\item{\code{show_other_in_legend}}{Logical. Include "Other" category in legend? Default is FALSE.
+When FALSE, only highlighted nodes appear in the legend.}
+}
+}
+
 \section{Special Parameters}{
 
 \describe{

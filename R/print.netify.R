@@ -55,6 +55,18 @@ print.netify <- function(x, ...){
 			include_ego = obj_attrs$include_ego
 			ego_longit = obj_attrs$ego_longit
 			} }
+	
+	# ALSO check the newer attribute name (ego_netify)
+	if(!is.null(obj_attrs$ego_netify)){
+		if(obj_attrs$ego_netify){
+			ego_netlet = TRUE
+			ego_vec = obj_attrs$ego_vec %||% obj_attrs$ego_entry  # fallback
+			ego_entry = obj_attrs$ego_entry
+    		threshold = obj_attrs$threshold
+			ngbd_direction = obj_attrs$ngbd_direction
+			include_ego = obj_attrs$include_ego
+			ego_longit = obj_attrs$ego_longit %||% FALSE
+			} }
 	######################
 
 	######################
@@ -135,7 +147,7 @@ print.netify <- function(x, ...){
 		summ_stats = cbind(
 			layer=attr(netlet, 'layers'), summ_stats ) }
 
-	# # if ego netlet then move net to layer column
+	# # if ego netlet then move net to layer column  
 	# if(ego_netlet){
 	# 	summ_stats$layer = summ_stats$net
 	# 	if(ego_longit){
@@ -216,8 +228,56 @@ print.netify <- function(x, ...){
 		# org printing
 		ulid <- cli::cli_ul()
 
+		# ego net specific info
+		if(ego_netlet){
+			cli::cli_li(cli::col_magenta('Type: Ego Network'))
+			cli::cli_li(paste0('Ego: ', ego_entry))
+			cli::cli_li(paste0('Direction: ', 
+				switch(ngbd_direction,
+					'out' = 'Outgoing ties only',
+					'in' = 'Incoming ties only',
+					'any' = 'Any ties (in or out)')))
+			cli::cli_li(paste0('Ego included: ', ifelse(include_ego, 'Yes', 'No')))
+			if(!is.null(threshold) && any(threshold > 0)){
+				# smart rounding: use signif for very small/large numbers, round for normal range
+				threshold_display_vals <- sapply(threshold, function(x) {
+					if(x == 0) {
+						"0"
+					} else if(abs(x) < 0.01 || abs(x) > 10000) {
+						# scientific notation for very small or very large numbers
+						format(x, scientific = TRUE, digits = 3)
+					} else if(abs(x) < 1) {
+						# small numbers, use significant figures
+						as.character(signif(x, 3))
+					} else {
+						# normal range numbers, round to 2 decimal places
+						as.character(round(x, 2))
+					}
+				})
+				
+				if(length(threshold_display_vals) == 1){
+					threshold_display <- threshold_display_vals
+				} else {
+					# for multiple thresholds, show first 2 and last 2 if more than 4
+					if(length(threshold_display_vals) <= 4){
+						threshold_display <- paste0('varies by time (', 
+							paste(threshold_display_vals, collapse=', '), ')')
+					} else {
+						first_two <- threshold_display_vals[1:2]
+						last_two <- threshold_display_vals[(length(threshold_display_vals)-1):length(threshold_display_vals)]
+						threshold_display <- paste0('varies by time (', 
+							paste(first_two, collapse=', '), 
+							', ... , ',
+							paste(last_two, collapse=', '), ')')
+					}
+				}
+				cli::cli_li(paste0('Threshold: ', threshold_display))
+			}
+			# cli::cli_text("")  # blank line for separation
+		}
+
 		# print out network type info
-		# cli::cli_li( obj_time )
+		# cli::cli_li( obj_time )  
 		cli::cli_li( obj_mode )
 		if(n_layers>1){ cli::cli_li( obj_layer ) }
 		cli::cli_li( obj_symm )
@@ -232,17 +292,20 @@ print.netify <- function(x, ...){
 
 		# print stats
 		cli::cli_text(stat_msg)
-		# tbl <- knitr::kable(summ_stats, align = "r", format = "pandoc")
+		# tbl <- knitr::kable(summ_stats, align = "r", format = "pandoc")  
 		tbl = capture.output(print(summ_stats, right = TRUE))
 		cli::cli_verbatim(tbl)
 
 		# print info about attributes
 		cli::cli_li(nodal_ftrs_label)
 		cli::cli_li(dyad_ftrs_label)
-		# cli::cli_li(graph_ftrs_label)
+		# cli::cli_li(graph_ftrs_label)  
 
 		# end printing
 		cli::cli_end(ulid)
 	})
 	######################
+	
+	# 
+	invisible(netlet)
 }
