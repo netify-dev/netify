@@ -320,3 +320,315 @@ test_that(
         expect_equal(trans_mat, orig_mat^2)
     }
 )
+
+test_that(
+    'transform_weights: standardization (z-scores) transformation', {
+        # create weighted network
+        icews_10 <- icews[icews$year == '2010', ]
+        net <- netify(
+            icews_10, 
+            actor1 = 'i', actor2 = 'j',
+            symmetric = FALSE, 
+            weight = 'verbCoop'
+        )
+        
+        # standardize
+        net_std <- transform_weights(
+            net,
+            transform_fn = function(x) {
+                mean_x <- mean(x, na.rm = TRUE)
+                sd_x <- sd(x, na.rm = TRUE)
+                return((x - mean_x) / sd_x)
+            },
+            new_name = 'verbCoop_standardized'
+        )
+        
+        # check attributes
+        expect_equal(attr(net_std, 'weight'), 'verbCoop_standardized')
+        expect_false(attr(net_std, 'weight_binary'))
+        
+        # verify standardization (mean ~0, sd ~1)
+        trans_mat <- get_raw(net_std)
+        trans_vec <- as.vector(trans_mat)
+        trans_vec <- trans_vec[!is.na(trans_vec)]
+        expect_true(abs(mean(trans_vec)) < 1e-10)  # mean ~0
+        expect_true(abs(sd(trans_vec) - 1) < 1e-10)  # sd ~1
+    }
+)
+
+test_that(
+    'transform_weights: rank transformation', {
+        # create weighted network
+        icews_10 <- icews[icews$year == '2010', ]
+        net <- netify(
+            icews_10, 
+            actor1 = 'i', actor2 = 'j',
+            symmetric = FALSE, 
+            weight = 'verbCoop'
+        )
+        
+        # rank transformation
+        net_rank <- transform_weights(
+            net,
+            transform_fn = function(x) rank(x, na.last = "keep"),
+            new_name = 'verbCoop_ranked'
+        )
+        
+        # check attributes
+        expect_equal(attr(net_rank, 'weight'), 'verbCoop_ranked')
+        expect_false(attr(net_rank, 'weight_binary'))
+        
+        # verify ranks are reasonable (positive, finite)
+        trans_mat <- get_raw(net_rank)
+        trans_vec <- as.vector(trans_mat)
+        trans_vec <- trans_vec[!is.na(trans_vec)]
+        expect_true(all(is.finite(trans_vec)))  # all finite
+        expect_true(min(trans_vec) >= 1)  # ranks start at 1
+        expect_true(max(trans_vec) <= length(trans_vec))  # max rank <= n elements
+    }
+)
+
+test_that(
+    'transform_weights: min-max normalization (0-1 scaling)', {
+        # create weighted network
+        icews_10 <- icews[icews$year == '2010', ]
+        net <- netify(
+            icews_10, 
+            actor1 = 'i', actor2 = 'j',
+            symmetric = FALSE, 
+            weight = 'verbCoop'
+        )
+        
+        # min-max normalization
+        net_norm <- transform_weights(
+            net,
+            transform_fn = function(x) {
+                min_x <- min(x, na.rm = TRUE)
+                max_x <- max(x, na.rm = TRUE)
+                return((x - min_x) / (max_x - min_x))
+            },
+            new_name = 'verbCoop_normalized'
+        )
+        
+        # check attributes
+        expect_equal(attr(net_norm, 'weight'), 'verbCoop_normalized')
+        expect_false(attr(net_norm, 'weight_binary'))
+        
+        # verify normalization (range 0-1)
+        trans_mat <- get_raw(net_norm)
+        trans_vec <- as.vector(trans_mat)
+        trans_vec <- trans_vec[!is.na(trans_vec)]
+        expect_true(min(trans_vec) >= 0)
+        expect_true(max(trans_vec) <= 1)
+        expect_true(abs(min(trans_vec) - 0) < 1e-10)  # min should be 0
+        expect_true(abs(max(trans_vec) - 1) < 1e-10)  # max should be 1
+    }
+)
+
+test_that(
+    'transform_weights: winsorization (cap extreme values)', {
+        # create weighted network
+        icews_10 <- icews[icews$year == '2010', ]
+        net <- netify(
+            icews_10, 
+            actor1 = 'i', actor2 = 'j',
+            symmetric = FALSE, 
+            weight = 'verbCoop'
+        )
+        
+        # winsorization at 95th percentile
+        net_winsor <- transform_weights(
+            net,
+            transform_fn = function(x) {
+                q95 <- quantile(x, 0.95, na.rm = TRUE)
+                return(pmin(x, q95))
+            },
+            new_name = 'verbCoop_winsorized'
+        )
+        
+        # check attributes
+        expect_equal(attr(net_winsor, 'weight'), 'verbCoop_winsorized')
+        expect_false(attr(net_winsor, 'weight_binary'))
+        
+        # verify winsorization
+        orig_mat <- get_raw(net)
+        trans_mat <- get_raw(net_winsor)
+        q95_orig <- quantile(as.vector(orig_mat), 0.95, na.rm = TRUE)
+        
+        # all values should be <= original 95th percentile
+        trans_vec <- as.vector(trans_mat)
+        trans_vec <- trans_vec[!is.na(trans_vec)]
+        expect_true(all(trans_vec <= q95_orig + 1e-10))  # allow for floating point
+    }
+)
+
+test_that(
+    'transform_weights: add constant only (no transformation function)', {
+        # create weighted network
+        icews_10 <- icews[icews$year == '2010', ]
+        net <- netify(
+            icews_10, 
+            actor1 = 'i', actor2 = 'j',
+            symmetric = FALSE, 
+            weight = 'verbCoop'
+        )
+        
+        # add constant only
+        net_shifted <- transform_weights(
+            net,
+            add_constant = 10,
+            new_name = 'verbCoop_shifted'
+        )
+        
+        # check attributes
+        expect_equal(attr(net_shifted, 'weight'), 'verbCoop_shifted')
+        expect_false(attr(net_shifted, 'weight_binary'))
+        
+        # verify constant addition
+        orig_mat <- get_raw(net)
+        trans_mat <- get_raw(net_shifted)
+        expect_equal(trans_mat, orig_mat + 10)
+    }
+)
+
+test_that(
+    'transform_weights: log1p transformation (handles zeros)', {
+        # create weighted network
+        icews_10 <- icews[icews$year == '2010', ]
+        net <- netify(
+            icews_10, 
+            actor1 = 'i', actor2 = 'j',
+            symmetric = FALSE, 
+            weight = 'verbCoop'
+        )
+        
+        # log1p transformation
+        net_log1p <- transform_weights(
+            net,
+            transform_fn = log1p,
+            new_name = 'log1p_verbCoop',
+            keep_original = FALSE
+        )
+        
+        # check attributes
+        expect_equal(attr(net_log1p, 'weight'), 'log1p_verbCoop')
+        expect_false(attr(net_log1p, 'weight_binary'))
+        
+        # verify transformation
+        orig_mat <- get_raw(net)
+        trans_mat <- get_raw(net_log1p)
+        expect_equal(trans_mat, log1p(orig_mat))
+        
+        # verify original not kept
+        expect_null(attr(net_log1p, 'dyad_data')[['1']][['original_weight']])
+    }
+)
+
+test_that(
+    'transform_weights: custom multi-step transformation', {
+        # create weighted network
+        icews_10 <- icews[icews$year == '2010', ]
+        net <- netify(
+            icews_10, 
+            actor1 = 'i', actor2 = 'j',
+            symmetric = FALSE, 
+            weight = 'verbCoop'
+        )
+        
+        # custom transformation: log then standardize
+        net_custom <- transform_weights(
+            net,
+            transform_fn = function(x) {
+                x_log <- log(x + 1)
+                x_std <- (x_log - mean(x_log, na.rm = TRUE)) / sd(x_log, na.rm = TRUE)
+                return(x_std)
+            },
+            new_name = 'verbCoop_log_std'
+        )
+        
+        # check attributes
+        expect_equal(attr(net_custom, 'weight'), 'verbCoop_log_std')
+        expect_false(attr(net_custom, 'weight_binary'))
+        
+        # verify transformation (standardized log should have mean ~0, sd ~1)
+        trans_mat <- get_raw(net_custom)
+        trans_vec <- as.vector(trans_mat)
+        trans_vec <- trans_vec[!is.na(trans_vec)]
+        expect_true(abs(mean(trans_vec)) < 1e-10)
+        expect_true(abs(sd(trans_vec) - 1) < 1e-10)
+    }
+)
+
+test_that(
+    'transform_weights: power transformation', {
+        # create weighted network
+        icews_10 <- icews[icews$year == '2010', ]
+        net <- netify(
+            icews_10, 
+            actor1 = 'i', actor2 = 'j',
+            symmetric = FALSE, 
+            weight = 'verbCoop'
+        )
+        
+        # power transformation (square root)
+        net_power <- transform_weights(
+            net,
+            transform_fn = function(x) x^0.5,
+            new_name = 'verbCoop_power'
+        )
+        
+        # check attributes
+        expect_equal(attr(net_power, 'weight'), 'verbCoop_power')
+        expect_false(attr(net_power, 'weight_binary'))
+        
+        # verify transformation
+        orig_mat <- get_raw(net)
+        trans_mat <- get_raw(net_power)
+        expect_equal(trans_mat, orig_mat^0.5)
+    }
+)
+
+test_that(
+    'transform_weights: transformation without new_name preserves original name', {
+        # create weighted network
+        icews_10 <- icews[icews$year == '2010', ]
+        net <- netify(
+            icews_10, 
+            actor1 = 'i', actor2 = 'j',
+            symmetric = FALSE, 
+            weight = 'verbCoop'
+        )
+        
+        original_weight <- attr(net, 'weight')
+        
+        # transform without new name
+        net_trans <- transform_weights(
+            net,
+            transform_fn = sqrt
+        )
+        
+        # should preserve original weight name
+        expect_equal(attr(net_trans, 'weight'), original_weight)
+    }
+)
+
+test_that(
+    'transform_weights: error handling for missing weight', {
+        # create unweighted network (binary)
+        nigeria <- icews[icews$verbConf > 0, ]
+        nigeria_10 <- nigeria[nigeria$year == '2010', ]
+        
+        net_unweighted <- netify(
+            nigeria_10[, c('i', 'j')], 
+            actor1 = 'i', actor2 = 'j'
+        )
+        
+        # should work since binary networks have weights
+        expect_no_error({
+            net_trans <- transform_weights(
+                net_unweighted,
+                transform_fn = function(x) x * 2
+            )
+        })
+    }
+)
