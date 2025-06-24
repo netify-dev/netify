@@ -662,7 +662,7 @@ style_witcher_viper <- function() {
   )
 }
 
-#' Pokémon-style network style (Pikachu)
+#' Pokemon-style network style (Pikachu)
 #'
 #' A playful style inspired by Pikachu: energetic yellows, bold outlines, and lightning vibes
 #'
@@ -692,7 +692,7 @@ style_pokemon_pikachu <- function() {
 
 #' Secretariat-style network style
 #'
-#' A powerful, sleek style inspired by Secretariat — clean lines, racing blues, and commanding contrast.
+#' A powerful, sleek style inspired by Secretariat - clean lines, racing blues, and commanding contrast.
 #'
 #' @return List of plot arguments
 #' @export
@@ -768,7 +768,7 @@ list_network_styles <- function() {
       "Witcher Bear School - heavy and imposing",
       "Witcher Manticore School - alchemical and exotic",
       "Witcher Viper School - stealthy assassin",
-      "Pokémon-inspired Pikachu style",
+      "Pokemon-inspired Pikachu style",
       "Secretariat the Horse that ran fast"
     ),
     background = c(
