@@ -11,7 +11,7 @@ or applying any custom mathematical transformation to network weights."></head><
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,6 +24,7 @@ or applying any custom mathematical transformation to network weights."></head><
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
@@ -120,18 +121,18 @@ and will show an informational message.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create a weighted network</span></span></span>
 <span class="r-in"><span><span class="va">net</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">icews_2010</span>,</span></span>
-<span class="r-in"><span>  actor1 <span class="op">=</span> <span class="st">'i'</span>, actor2 <span class="op">=</span> <span class="st">'j'</span>,</span></span>
-<span class="r-in"><span>  symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  weight <span class="op">=</span> <span class="st">'verbCoop'</span></span></span>
+<span class="r-in"><span>    <span class="va">icews_2010</span>,</span></span>
+<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
+<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 1: Log transformation (common for skewed data)</span></span></span>
 <span class="r-in"><span><span class="va">net_log</span> <span class="op">&lt;-</span> <span class="fu">transform_weights</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">net</span>,</span></span>
-<span class="r-in"><span>  transform_fn <span class="op">=</span> <span class="va">log</span>,</span></span>
-<span class="r-in"><span>  add_constant <span class="op">=</span> <span class="fl">1</span>,  <span class="co"># log(x + 1) to handle zeros</span></span></span>
-<span class="r-in"><span>  new_name <span class="op">=</span> <span class="st">"log_verbCoop"</span></span></span>
+<span class="r-in"><span>    <span class="va">net</span>,</span></span>
+<span class="r-in"><span>    transform_fn <span class="op">=</span> <span class="va">log</span>,</span></span>
+<span class="r-in"><span>    add_constant <span class="op">=</span> <span class="fl">1</span>, <span class="co"># log(x + 1) to handle zeros</span></span></span>
+<span class="r-in"><span>    new_name <span class="op">=</span> <span class="st">"log_verbCoop"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">net_log</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span>
@@ -148,109 +149,109 @@ and will show an informational message.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 2: Square root transformation (moderate skewness)</span></span></span>
 <span class="r-in"><span><span class="va">net_sqrt</span> <span class="op">&lt;-</span> <span class="fu">transform_weights</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">net</span>,</span></span>
-<span class="r-in"><span>  transform_fn <span class="op">=</span> <span class="va">sqrt</span>,</span></span>
-<span class="r-in"><span>  new_name <span class="op">=</span> <span class="st">"sqrt_verbCoop"</span></span></span>
+<span class="r-in"><span>    <span class="va">net</span>,</span></span>
+<span class="r-in"><span>    transform_fn <span class="op">=</span> <span class="va">sqrt</span>,</span></span>
+<span class="r-in"><span>    new_name <span class="op">=</span> <span class="st">"sqrt_verbCoop"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 3: Binarization (convert to presence/absence)</span></span></span>
 <span class="r-in"><span><span class="va">net_binary</span> <span class="op">&lt;-</span> <span class="fu">transform_weights</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">net</span>,</span></span>
-<span class="r-in"><span>  transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">x</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  new_name <span class="op">=</span> <span class="st">"verbCoop_binary"</span></span></span>
+<span class="r-in"><span>    <span class="va">net</span>,</span></span>
+<span class="r-in"><span>    transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">x</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    new_name <span class="op">=</span> <span class="st">"verbCoop_binary"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> network has been binarized through transformation</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 4: Standardization (z-scores)</span></span></span>
 <span class="r-in"><span><span class="va">net_std</span> <span class="op">&lt;-</span> <span class="fu">transform_weights</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">net</span>,</span></span>
-<span class="r-in"><span>  transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="va">mean_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">sd_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="va">mean_x</span><span class="op">)</span> <span class="op">/</span> <span class="va">sd_x</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="op">}</span>,</span></span>
-<span class="r-in"><span>  new_name <span class="op">=</span> <span class="st">"verbCoop_standardized"</span></span></span>
+<span class="r-in"><span>    <span class="va">net</span>,</span></span>
+<span class="r-in"><span>    transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="va">mean_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="va">sd_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="va">mean_x</span><span class="op">)</span> <span class="op">/</span> <span class="va">sd_x</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span>,</span></span>
+<span class="r-in"><span>    new_name <span class="op">=</span> <span class="st">"verbCoop_standardized"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 5: Rank transformation</span></span></span>
 <span class="r-in"><span><span class="va">net_rank</span> <span class="op">&lt;-</span> <span class="fu">transform_weights</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">net</span>,</span></span>
-<span class="r-in"><span>  transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/rank.html" class="external-link">rank</a></span><span class="op">(</span><span class="va">x</span>, na.last <span class="op">=</span> <span class="st">"keep"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  new_name <span class="op">=</span> <span class="st">"verbCoop_ranked"</span></span></span>
+<span class="r-in"><span>    <span class="va">net</span>,</span></span>
+<span class="r-in"><span>    transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/rank.html" class="external-link">rank</a></span><span class="op">(</span><span class="va">x</span>, na.last <span class="op">=</span> <span class="st">"keep"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    new_name <span class="op">=</span> <span class="st">"verbCoop_ranked"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 6: Power transformation</span></span></span>
 <span class="r-in"><span><span class="va">net_power</span> <span class="op">&lt;-</span> <span class="fu">transform_weights</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">net</span>,</span></span>
-<span class="r-in"><span>  transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">^</span><span class="fl">0.5</span>,  <span class="co"># Square root as power</span></span></span>
-<span class="r-in"><span>  new_name <span class="op">=</span> <span class="st">"verbCoop_power"</span></span></span>
+<span class="r-in"><span>    <span class="va">net</span>,</span></span>
+<span class="r-in"><span>    transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">^</span><span class="fl">0.5</span>, <span class="co"># Square root as power</span></span></span>
+<span class="r-in"><span>    new_name <span class="op">=</span> <span class="st">"verbCoop_power"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 7: Min-max normalization (scale to 0-1)</span></span></span>
 <span class="r-in"><span><span class="va">net_norm</span> <span class="op">&lt;-</span> <span class="fu">transform_weights</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">net</span>,</span></span>
-<span class="r-in"><span>  transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="va">min_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">max_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="va">min_x</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">max_x</span> <span class="op">-</span> <span class="va">min_x</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="op">}</span>,</span></span>
-<span class="r-in"><span>  new_name <span class="op">=</span> <span class="st">"verbCoop_normalized"</span></span></span>
+<span class="r-in"><span>    <span class="va">net</span>,</span></span>
+<span class="r-in"><span>    transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="va">min_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="va">max_x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="va">min_x</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">max_x</span> <span class="op">-</span> <span class="va">min_x</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span>,</span></span>
+<span class="r-in"><span>    new_name <span class="op">=</span> <span class="st">"verbCoop_normalized"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 8: Winsorization (cap extreme values)</span></span></span>
 <span class="r-in"><span><span class="va">net_winsor</span> <span class="op">&lt;-</span> <span class="fu">transform_weights</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">net</span>,</span></span>
-<span class="r-in"><span>  transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="va">q95</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">0.95</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">q95</span><span class="op">)</span><span class="op">)</span>  <span class="co"># Cap at 95th percentile</span></span></span>
-<span class="r-in"><span>  <span class="op">}</span>,</span></span>
-<span class="r-in"><span>  new_name <span class="op">=</span> <span class="st">"verbCoop_winsorized"</span></span></span>
+<span class="r-in"><span>    <span class="va">net</span>,</span></span>
+<span class="r-in"><span>    transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="va">q95</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">0.95</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">q95</span><span class="op">)</span><span class="op">)</span> <span class="co"># Cap at 95th percentile</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span>,</span></span>
+<span class="r-in"><span>    new_name <span class="op">=</span> <span class="st">"verbCoop_winsorized"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 9: Only add constant (no transformation function)</span></span></span>
 <span class="r-in"><span><span class="va">net_shifted</span> <span class="op">&lt;-</span> <span class="fu">transform_weights</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">net</span>,</span></span>
-<span class="r-in"><span>  add_constant <span class="op">=</span> <span class="fl">10</span>,</span></span>
-<span class="r-in"><span>  new_name <span class="op">=</span> <span class="st">"verbCoop_shifted"</span></span></span>
+<span class="r-in"><span>    <span class="va">net</span>,</span></span>
+<span class="r-in"><span>    add_constant <span class="op">=</span> <span class="fl">10</span>,</span></span>
+<span class="r-in"><span>    new_name <span class="op">=</span> <span class="st">"verbCoop_shifted"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 10: Don't keep original weights to save memory</span></span></span>
 <span class="r-in"><span><span class="va">net_log_compact</span> <span class="op">&lt;-</span> <span class="fu">transform_weights</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">net</span>,</span></span>
-<span class="r-in"><span>  transform_fn <span class="op">=</span> <span class="va">log1p</span>,  <span class="co"># log(1 + x), handles zeros automatically</span></span></span>
-<span class="r-in"><span>  new_name <span class="op">=</span> <span class="st">"log1p_verbCoop"</span>,</span></span>
-<span class="r-in"><span>  keep_original <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    <span class="va">net</span>,</span></span>
+<span class="r-in"><span>    transform_fn <span class="op">=</span> <span class="va">log1p</span>, <span class="co"># log(1 + x), handles zeros automatically</span></span></span>
+<span class="r-in"><span>    new_name <span class="op">=</span> <span class="st">"log1p_verbCoop"</span>,</span></span>
+<span class="r-in"><span>    keep_original <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 11: Longitudinal network transformation</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># Create longitudinal network</span></span></span>
 <span class="r-in"><span><span class="va">net_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">icews</span>,</span></span>
-<span class="r-in"><span>  actor1 <span class="op">=</span> <span class="st">'i'</span>, actor2 <span class="op">=</span> <span class="st">'j'</span>, time <span class="op">=</span> <span class="st">'year'</span>,</span></span>
-<span class="r-in"><span>  symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  weight <span class="op">=</span> <span class="st">'verbCoop'</span>,</span></span>
-<span class="r-in"><span>  actor_time_uniform <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    <span class="va">icews</span>,</span></span>
+<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>, time <span class="op">=</span> <span class="st">"year"</span>,</span></span>
+<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span>,</span></span>
+<span class="r-in"><span>    actor_time_uniform <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Transform across all time periods</span></span></span>
 <span class="r-in"><span><span class="va">net_longit_log</span> <span class="op">&lt;-</span> <span class="fu">transform_weights</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">net_longit</span>,</span></span>
-<span class="r-in"><span>  transform_fn <span class="op">=</span> <span class="va">log1p</span>,</span></span>
-<span class="r-in"><span>  new_name <span class="op">=</span> <span class="st">"log_verbCoop"</span></span></span>
+<span class="r-in"><span>    <span class="va">net_longit</span>,</span></span>
+<span class="r-in"><span>    transform_fn <span class="op">=</span> <span class="va">log1p</span>,</span></span>
+<span class="r-in"><span>    new_name <span class="op">=</span> <span class="st">"log_verbCoop"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 12: Custom transformation with multiple operations</span></span></span>
 <span class="r-in"><span><span class="va">net_custom</span> <span class="op">&lt;-</span> <span class="fu">transform_weights</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">net</span>,</span></span>
-<span class="r-in"><span>  transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>    <span class="co"># Complex transformation: log, then standardize</span></span></span>
-<span class="r-in"><span>    <span class="va">x_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">x_std</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">x_log</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x_log</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">x_log</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">x_std</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="op">}</span>,</span></span>
-<span class="r-in"><span>  new_name <span class="op">=</span> <span class="st">"verbCoop_log_std"</span></span></span>
+<span class="r-in"><span>    <span class="va">net</span>,</span></span>
+<span class="r-in"><span>    transform_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>        <span class="co"># Complex transformation: log, then standardize</span></span></span>
+<span class="r-in"><span>        <span class="va">x_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">x</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="va">x_std</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">x_log</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x_log</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">x_log</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">x_std</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">}</span>,</span></span>
+<span class="r-in"><span>    new_name <span class="op">=</span> <span class="st">"verbCoop_log_std"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

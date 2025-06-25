@@ -15,7 +15,7 @@ network regression approaches implemented in amen."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,7 @@ network regression approaches implemented in amen."></head><body>
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
@@ -154,24 +155,24 @@ of nodal column covariates, or NULL if none exist</p></dd>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create a netify object</span></span></span>
 <span class="r-in"><span><span class="va">net</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>,<span class="op">]</span>, </span></span>
-<span class="r-in"><span>  actor1 <span class="op">=</span> <span class="st">'i'</span>, actor2 <span class="op">=</span> <span class="st">'j'</span>,</span></span>
-<span class="r-in"><span>  symmetric <span class="op">=</span> <span class="cn">FALSE</span>, </span></span>
-<span class="r-in"><span>  weight <span class="op">=</span> <span class="st">'verbCoop'</span></span></span>
+<span class="r-in"><span>    <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span>,</span></span>
+<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
+<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Convert to amen format (standard)</span></span></span>
 <span class="r-in"><span><span class="va">amen_data</span> <span class="op">&lt;-</span> <span class="fu">netify_to_amen</span><span class="op">(</span><span class="va">net</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">amen_data</span><span class="op">)</span>  <span class="co"># Y, Xdyad, Xrow, Xcol</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">amen_data</span><span class="op">)</span> <span class="co"># Y, Xdyad, Xrow, Xcol</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Y"     "Xdyad" "Xrow"  "Xcol" </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># For longitudinal data with time-varying composition</span></span></span>
 <span class="r-in"><span><span class="va">longit_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">icews</span>, </span></span>
-<span class="r-in"><span>  actor1 <span class="op">=</span> <span class="st">'i'</span>, actor2 <span class="op">=</span> <span class="st">'j'</span>, time <span class="op">=</span> <span class="st">'year'</span>,</span></span>
-<span class="r-in"><span>  symmetric <span class="op">=</span> <span class="cn">FALSE</span>, </span></span>
-<span class="r-in"><span>  weight <span class="op">=</span> <span class="st">'verbCoop'</span></span></span>
+<span class="r-in"><span>    <span class="va">icews</span>,</span></span>
+<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>, time <span class="op">=</span> <span class="st">"year"</span>,</span></span>
+<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Convert to lame format</span></span></span>

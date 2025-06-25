@@ -13,7 +13,7 @@ time-varying actor composition.'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,6 +26,7 @@ time-varying actor composition.'></head><body>
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
@@ -183,23 +184,23 @@ composition, this function can handle:</p><ul><li><p>New actors appearing in lat
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create a netify list with constant actor composition</span></span></span>
 <span class="r-in"><span><span class="va">icews_list</span> <span class="op">&lt;-</span> <span class="fu">get_adjacency_list</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  dyad_data <span class="op">=</span> <span class="va">icews</span>, </span></span>
-<span class="r-in"><span>  actor1 <span class="op">=</span> <span class="st">'i'</span>, </span></span>
-<span class="r-in"><span>  actor2 <span class="op">=</span> <span class="st">'j'</span>, </span></span>
-<span class="r-in"><span>  time <span class="op">=</span> <span class="st">'year'</span>,</span></span>
-<span class="r-in"><span>  actor_time_uniform <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  symmetric <span class="op">=</span> <span class="cn">FALSE</span>, </span></span>
-<span class="r-in"><span>  weight <span class="op">=</span> <span class="st">'verbConf'</span></span></span>
+<span class="r-in"><span>    dyad_data <span class="op">=</span> <span class="va">icews</span>,</span></span>
+<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>,</span></span>
+<span class="r-in"><span>    actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
+<span class="r-in"><span>    time <span class="op">=</span> <span class="st">"year"</span>,</span></span>
+<span class="r-in"><span>    actor_time_uniform <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbConf"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Verify it's a netify object</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">icews_list</span><span class="op">)</span>  <span class="co"># "netify"</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">icews_list</span><span class="op">)</span> <span class="co"># "netify"</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "netify"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Check structure</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">icews_list</span><span class="op">)</span>  <span class="co"># Number of time periods</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">icews_list</span><span class="op">)</span> <span class="co"># Number of time periods</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 13</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icews_list</span><span class="op">)</span>   <span class="co"># Time period labels</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">icews_list</span><span class="op">)</span> <span class="co"># Time period labels</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2002" "2003" "2004" "2005" "2006" "2007" "2008" "2009" "2010" "2011"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [11] "2012" "2013" "2014"</span>
 <span class="r-in"><span></span></span>

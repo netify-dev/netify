@@ -17,7 +17,7 @@ preprocessing."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,6 +30,7 @@ preprocessing."></head><body>
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
@@ -160,22 +161,22 @@ quadratically.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Cross-sectional example</span></span></span>
-<span class="r-in"><span><span class="va">icews_10</span> <span class="op">&lt;-</span> <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>,<span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">icews_10</span> <span class="op">&lt;-</span> <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create initial netify object</span></span></span>
 <span class="r-in"><span><span class="va">verbCoop_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">icews_10</span>,  <span class="co"># data.frame input</span></span></span>
-<span class="r-in"><span>  actor1 <span class="op">=</span> <span class="st">'i'</span>, actor2 <span class="op">=</span> <span class="st">'j'</span>, </span></span>
-<span class="r-in"><span>  symmetric <span class="op">=</span> <span class="cn">FALSE</span>, </span></span>
-<span class="r-in"><span>  weight <span class="op">=</span> <span class="st">'verbCoop'</span></span></span>
+<span class="r-in"><span>    <span class="va">icews_10</span>, <span class="co"># data.frame input</span></span></span>
+<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
+<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Prepare nodal data - one row per unique actor</span></span></span>
-<span class="r-in"><span><span class="va">nvars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'i_polity2'</span>, <span class="st">'i_gdp'</span>, <span class="st">'i_log_gdp'</span>, <span class="st">'i_pop'</span>, <span class="st">'i_log_pop'</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">nodeData</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews_10</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'i'</span>, <span class="va">nvars</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">nodeData</span><span class="op">)</span>  <span class="co"># "data.frame"</span></span></span>
+<span class="r-in"><span><span class="va">nvars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"i_polity2"</span>, <span class="st">"i_gdp"</span>, <span class="st">"i_log_gdp"</span>, <span class="st">"i_pop"</span>, <span class="st">"i_log_pop"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">nodeData</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews_10</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"i"</span>, <span class="va">nvars</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">nodeData</span><span class="op">)</span> <span class="co"># "data.frame"</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "data.frame"</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">nodeData</span><span class="op">)</span>   <span class="co"># Number of unique actors</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">nodeData</span><span class="op">)</span> <span class="co"># Number of unique actors</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 152</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">nodeData</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 i i_polity2        i_gdp i_log_gdp    i_pop i_log_pop</span>
@@ -187,16 +188,16 @@ quadratically.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11210     Armenia         5   8513508876  22.86492  2946293  14.89606</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Add nodal variables</span></span></span>
-<span class="r-in"><span><span class="va">verbCoop_net</span> <span class="op">&lt;-</span> <span class="fu">add_node_vars</span><span class="op">(</span> </span></span>
-<span class="r-in"><span>  netlet <span class="op">=</span> <span class="va">verbCoop_net</span>,  <span class="co"># netify object</span></span></span>
-<span class="r-in"><span>  node_data <span class="op">=</span> <span class="va">nodeData</span>,   <span class="co"># data.frame with actor attributes</span></span></span>
-<span class="r-in"><span>  actor <span class="op">=</span> <span class="st">'i'</span>,            <span class="co"># column identifying actors</span></span></span>
-<span class="r-in"><span>  node_vars <span class="op">=</span> <span class="va">nvars</span>       <span class="co"># variables to add</span></span></span>
+<span class="r-in"><span><span class="va">verbCoop_net</span> <span class="op">&lt;-</span> <span class="fu">add_node_vars</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    netlet <span class="op">=</span> <span class="va">verbCoop_net</span>, <span class="co"># netify object</span></span></span>
+<span class="r-in"><span>    node_data <span class="op">=</span> <span class="va">nodeData</span>, <span class="co"># data.frame with actor attributes</span></span></span>
+<span class="r-in"><span>    actor <span class="op">=</span> <span class="st">"i"</span>, <span class="co"># column identifying actors</span></span></span>
+<span class="r-in"><span>    node_vars <span class="op">=</span> <span class="va">nvars</span> <span class="co"># variables to add</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Access nodal data (returns data.frame)</span></span></span>
-<span class="r-in"><span><span class="va">node_data_stored</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">verbCoop_net</span>, <span class="st">'nodal_data'</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">node_data_stored</span><span class="op">)</span>  <span class="co"># "data.frame"</span></span></span>
+<span class="r-in"><span><span class="va">node_data_stored</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">verbCoop_net</span>, <span class="st">"nodal_data"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">node_data_stored</span><span class="op">)</span> <span class="co"># "data.frame"</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "data.frame"</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">node_data_stored</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         actor i_polity2        i_gdp i_log_gdp    i_pop i_log_pop</span>
@@ -206,38 +207,38 @@ quadratically.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4      Angola        -2  69938841426  24.97089 23364185  16.96671</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5   Argentina         8 552738161802  27.03815 40788453  17.52391</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6     Armenia         5   8513508876  22.86492  2946293  14.89606</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">node_data_stored</span><span class="op">)</span>  <span class="co"># "actor" plus variable names</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">node_data_stored</span><span class="op">)</span> <span class="co"># "actor" plus variable names</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "actor"     "i_polity2" "i_gdp"     "i_log_gdp" "i_pop"     "i_log_pop"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Longitudinal example</span></span></span>
 <span class="r-in"><span><span class="va">verbCoop_longit_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">icews</span>,  <span class="co"># data.frame input</span></span></span>
-<span class="r-in"><span>  actor1 <span class="op">=</span> <span class="st">'i'</span>, actor2 <span class="op">=</span> <span class="st">'j'</span>, time <span class="op">=</span> <span class="st">'year'</span>,</span></span>
-<span class="r-in"><span>  symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>  weight <span class="op">=</span> <span class="st">'verbCoop'</span></span></span>
+<span class="r-in"><span>    <span class="va">icews</span>, <span class="co"># data.frame input</span></span></span>
+<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>, time <span class="op">=</span> <span class="st">"year"</span>,</span></span>
+<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Prepare longitudinal nodal data - one row per actor-time combination</span></span></span>
-<span class="r-in"><span><span class="va">nodeData_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'i'</span>, <span class="st">'year'</span>, <span class="va">nvars</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">nodeData_longit</span><span class="op">)</span>  <span class="co"># "data.frame"</span></span></span>
+<span class="r-in"><span><span class="va">nodeData_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"i"</span>, <span class="st">"year"</span>, <span class="va">nvars</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">nodeData_longit</span><span class="op">)</span> <span class="co"># "data.frame"</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "data.frame"</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">nodeData_longit</span><span class="op">)</span>   <span class="co"># Number of actor-time combinations</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">nodeData_longit</span><span class="op">)</span> <span class="co"># Number of actor-time combinations</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1976</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Add nodal variables with time dimension</span></span></span>
 <span class="r-in"><span><span class="va">verbCoop_longit_net</span> <span class="op">&lt;-</span> <span class="fu">add_node_vars</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  netlet <span class="op">=</span> <span class="va">verbCoop_longit_net</span>,  <span class="co"># netify object</span></span></span>
-<span class="r-in"><span>  node_data <span class="op">=</span> <span class="va">nodeData_longit</span>,   <span class="co"># data.frame with longitudinal data</span></span></span>
-<span class="r-in"><span>  actor <span class="op">=</span> <span class="st">'i'</span>,                   <span class="co"># column identifying actors</span></span></span>
-<span class="r-in"><span>  time <span class="op">=</span> <span class="st">'year'</span>,                 <span class="co"># column identifying time</span></span></span>
-<span class="r-in"><span>  node_vars <span class="op">=</span> <span class="va">nvars</span>              <span class="co"># variables to add</span></span></span>
+<span class="r-in"><span>    netlet <span class="op">=</span> <span class="va">verbCoop_longit_net</span>, <span class="co"># netify object</span></span></span>
+<span class="r-in"><span>    node_data <span class="op">=</span> <span class="va">nodeData_longit</span>, <span class="co"># data.frame with longitudinal data</span></span></span>
+<span class="r-in"><span>    actor <span class="op">=</span> <span class="st">"i"</span>, <span class="co"># column identifying actors</span></span></span>
+<span class="r-in"><span>    time <span class="op">=</span> <span class="st">"year"</span>, <span class="co"># column identifying time</span></span></span>
+<span class="r-in"><span>    node_vars <span class="op">=</span> <span class="va">nvars</span> <span class="co"># variables to add</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Access longitudinal nodal data</span></span></span>
-<span class="r-in"><span><span class="va">node_data_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">verbCoop_longit_net</span>, <span class="st">'nodal_data'</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">node_data_longit</span><span class="op">)</span>  <span class="co"># "data.frame"</span></span></span>
+<span class="r-in"><span><span class="va">node_data_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">verbCoop_longit_net</span>, <span class="st">"nodal_data"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">node_data_longit</span><span class="op">)</span> <span class="co"># "data.frame"</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "data.frame"</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">node_data_longit</span><span class="op">)</span>   <span class="co"># Now includes time column</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">node_data_longit</span><span class="op">)</span> <span class="co"># Now includes time column</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         actor time i_polity2       i_gdp i_log_gdp    i_pop i_log_pop</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 Afghanistan 2002        NA  7555185296  22.74550 21000256  16.86005</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 Afghanistan 2003        NA  8222480251  22.83014 22645130  16.93546</span>
@@ -248,26 +249,25 @@ quadratically.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Filter to specific time period</span></span></span>
 <span class="r-in"><span><span class="va">node_data_2010</span> <span class="op">&lt;-</span> <span class="va">node_data_longit</span><span class="op">[</span><span class="va">node_data_longit</span><span class="op">$</span><span class="va">time</span> <span class="op">==</span> <span class="st">"2010"</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">node_data_2010</span><span class="op">)</span>  <span class="co"># Number of actors in 2010</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">node_data_2010</span><span class="op">)</span> <span class="co"># Number of actors in 2010</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 152</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example: Add variables from external source</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># Suppose you have additional actor data</span></span></span>
 <span class="r-in"><span><span class="va">external_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews_10</span><span class="op">$</span><span class="va">i</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  democracy_score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews_10</span><span class="op">$</span><span class="va">i</span><span class="op">)</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  trade_openness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews_10</span><span class="op">$</span><span class="va">i</span><span class="op">)</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews_10</span><span class="op">$</span><span class="va">i</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    democracy_score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews_10</span><span class="op">$</span><span class="va">i</span><span class="op">)</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">10</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    trade_openness <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews_10</span><span class="op">$</span><span class="va">i</span><span class="op">)</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">verbCoop_net</span> <span class="op">&lt;-</span> <span class="fu">add_node_vars</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  netlet <span class="op">=</span> <span class="va">verbCoop_net</span>,</span></span>
-<span class="r-in"><span>  node_data <span class="op">=</span> <span class="va">external_data</span>,</span></span>
-<span class="r-in"><span>  actor <span class="op">=</span> <span class="st">'i'</span>,</span></span>
-<span class="r-in"><span>  node_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'democracy_score'</span>, <span class="st">'trade_openness'</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    netlet <span class="op">=</span> <span class="va">verbCoop_net</span>,</span></span>
+<span class="r-in"><span>    node_data <span class="op">=</span> <span class="va">external_data</span>,</span></span>
+<span class="r-in"><span>    actor <span class="op">=</span> <span class="st">"i"</span>,</span></span>
+<span class="r-in"><span>    node_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"democracy_score"</span>, <span class="st">"trade_openness"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -2,12 +2,13 @@ pandoc: 3.1.11
 pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
+  attribute_analysis: attribute_analysis.html
   ego_networks: ego_networks.html
   event_data: event_data.html
   foundations: foundations.html
   manual_plotting: manual_plotting.html
   resources: resources.html
-last_built: 2025-06-24T01:45Z
+last_built: 2025-06-25T21:47Z
 urls:
   reference: https://netify-dev.github.io/netify/reference
   article: https://netify-dev.github.io/netify/articles

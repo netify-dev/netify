@@ -1,6 +1,7 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://netify-dev.github.io/netify/404.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/LICENSE-text.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/articles/attribute_analysis.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/ego_networks.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/event_data.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/foundations.html</loc></url>
@@ -13,9 +14,11 @@
 <url><loc>https://netify-dev.github.io/netify/reference/add_node_vars.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/aggregate_dyad.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/assemble_netify_plot.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/attribute_report.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/decompose_igraph.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/decompose_netify.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/decompose_statnet.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/dyad_correlation.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/ego_netify.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/gen_symm_id.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/get_actor_time_info.html</loc></url>
@@ -31,6 +34,7 @@
 <url><loc>https://netify-dev.github.io/netify/reference/ggplot_add.netify_node.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/ggplot_add.netify_scale_reset.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/ggplot_add.netify_text.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/homophily.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/icews.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/index.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/is_netify.html</loc></url>
@@ -38,6 +42,7 @@
 <url><loc>https://netify-dev.github.io/netify/reference/list_network_styles.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/list_palettes.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/mexico.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/mixing_matrix.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/myanmar.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/net_plot_data.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/netify.html</loc></url>
@@ -56,6 +61,9 @@
 <url><loc>https://netify-dev.github.io/netify/reference/plot.netify.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/plot_actor_stats.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/plot_graph_stats.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/plot_homophily.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/plot_mixing_matrix.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/plot_mixing_matrix_facet.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/plot_with_style.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/print.netify.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/print.netify_plot_components.html</loc></url>

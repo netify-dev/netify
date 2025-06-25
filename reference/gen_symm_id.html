@@ -13,7 +13,7 @@ actors A and B is identical to the relationship between B and A."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,6 +26,7 @@ actors A and B is identical to the relationship between B and A."></head><body>
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
@@ -121,10 +122,10 @@ dyad identifiers.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create example dyadic data</span></span></span>
 <span class="r-in"><span><span class="va">trade_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA"</span>, <span class="st">"China"</span>, <span class="st">"Russia"</span>, <span class="st">"USA"</span>, <span class="st">"Brazil"</span>, <span class="st">"Argentina"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"China"</span>, <span class="st">"USA"</span>, <span class="st">"USA"</span>, <span class="st">"Russia"</span>, <span class="st">"Argentina"</span>, <span class="st">"Brazil"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  trade_value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">50</span>, <span class="fl">75</span>, <span class="fl">30</span>, <span class="fl">25</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2020</span>, <span class="fl">2020</span>, <span class="fl">2021</span>, <span class="fl">2021</span>, <span class="fl">2021</span>, <span class="fl">2021</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"USA"</span>, <span class="st">"China"</span>, <span class="st">"Russia"</span>, <span class="st">"USA"</span>, <span class="st">"Brazil"</span>, <span class="st">"Argentina"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"China"</span>, <span class="st">"USA"</span>, <span class="st">"USA"</span>, <span class="st">"Russia"</span>, <span class="st">"Argentina"</span>, <span class="st">"Brazil"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    trade_value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">50</span>, <span class="fl">75</span>, <span class="fl">30</span>, <span class="fl">25</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2020</span>, <span class="fl">2020</span>, <span class="fl">2021</span>, <span class="fl">2021</span>, <span class="fl">2021</span>, <span class="fl">2021</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Generate symmetric IDs without time</span></span></span>
@@ -153,9 +154,9 @@ dyad identifiers.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Use for aggregation of undirected relationships</span></span></span>
 <span class="r-in"><span><span class="va">trade_df</span><span class="op">$</span><span class="va">total_trade</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/ave.html" class="external-link">ave</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">trade_df</span><span class="op">$</span><span class="va">trade_value</span>, </span></span>
-<span class="r-in"><span>  <span class="va">trade_df</span><span class="op">$</span><span class="va">symm_id_time</span>, </span></span>
-<span class="r-in"><span>  FUN <span class="op">=</span> <span class="va">sum</span></span></span>
+<span class="r-in"><span>    <span class="va">trade_df</span><span class="op">$</span><span class="va">trade_value</span>,</span></span>
+<span class="r-in"><span>    <span class="va">trade_df</span><span class="op">$</span><span class="va">symm_id_time</span>,</span></span>
+<span class="r-in"><span>    FUN <span class="op">=</span> <span class="va">sum</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">trade_df</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"symm_id_time"</span>, <span class="st">"total_trade"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            symm_id_time total_trade</span>
@@ -170,10 +171,10 @@ dyad identifiers.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create symmetric IDs for conflict events</span></span></span>
 <span class="r-in"><span><span class="va">icews_sample</span><span class="op">$</span><span class="va">symm_dyad</span> <span class="op">&lt;-</span> <span class="fu">gen_symm_id</span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="va">icews_sample</span>, </span></span>
-<span class="r-in"><span>  actor1 <span class="op">=</span> <span class="st">"i"</span>, </span></span>
-<span class="r-in"><span>  actor2 <span class="op">=</span> <span class="st">"j"</span>, </span></span>
-<span class="r-in"><span>  time <span class="op">=</span> <span class="st">"year"</span></span></span>
+<span class="r-in"><span>    <span class="va">icews_sample</span>,</span></span>
+<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>,</span></span>
+<span class="r-in"><span>    actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
+<span class="r-in"><span>    time <span class="op">=</span> <span class="st">"year"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Check that symmetric pairs get same ID</span></span></span>
