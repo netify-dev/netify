@@ -96,22 +96,22 @@ data(icews)
 # Create a netify array (longitudinal directed network)
 # with material conflict as edge weights
 icews_array <- get_adjacency_array(
-  dyad_data = icews, 
-  actor1 = 'i', 
-  actor2 = 'j', 
-  time = 'year',
-  symmetric = FALSE, 
-  weight = 'matlConf'
+    dyad_data = icews,
+    actor1 = "i",
+    actor2 = "j",
+    time = "year",
+    symmetric = FALSE,
+    weight = "matlConf"
 )
 
 # Verify it's a netify object
-class(icews_array)  # "netify"
+class(icews_array) # "netify"
 
 # Check dimensions
-dim(icews_array)  # [n_actors, n_actors, n_years]
+dim(icews_array) # [n_actors, n_actors, n_years]
 
 # Access specific time period
-icews_2010 <- icews_array[,,"2010"]
+icews_2010 <- icews_array[, , "2010"]
 
 }
 \author{

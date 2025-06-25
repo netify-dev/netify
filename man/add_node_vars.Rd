@@ -94,85 +94,84 @@ quadratically.
 data(icews)
 
 # Cross-sectional example
-icews_10 <- icews[icews$year == 2010,]
+icews_10 <- icews[icews$year == 2010, ]
 
 # Create initial netify object
 verbCoop_net <- netify(
-  icews_10,  # data.frame input
-  actor1 = 'i', actor2 = 'j', 
-  symmetric = FALSE, 
-  weight = 'verbCoop'
+    icews_10, # data.frame input
+    actor1 = "i", actor2 = "j",
+    symmetric = FALSE,
+    weight = "verbCoop"
 )
 
 # Prepare nodal data - one row per unique actor
-nvars <- c('i_polity2', 'i_gdp', 'i_log_gdp', 'i_pop', 'i_log_pop')
-nodeData <- unique(icews_10[, c('i', nvars)])
-class(nodeData)  # "data.frame"
-nrow(nodeData)   # Number of unique actors
+nvars <- c("i_polity2", "i_gdp", "i_log_gdp", "i_pop", "i_log_pop")
+nodeData <- unique(icews_10[, c("i", nvars)])
+class(nodeData) # "data.frame"
+nrow(nodeData) # Number of unique actors
 head(nodeData)
 
 # Add nodal variables
-verbCoop_net <- add_node_vars( 
-  netlet = verbCoop_net,  # netify object
-  node_data = nodeData,   # data.frame with actor attributes
-  actor = 'i',            # column identifying actors
-  node_vars = nvars       # variables to add
+verbCoop_net <- add_node_vars(
+    netlet = verbCoop_net, # netify object
+    node_data = nodeData, # data.frame with actor attributes
+    actor = "i", # column identifying actors
+    node_vars = nvars # variables to add
 )
 
 # Access nodal data (returns data.frame)
-node_data_stored <- attr(verbCoop_net, 'nodal_data')
-class(node_data_stored)  # "data.frame"
+node_data_stored <- attr(verbCoop_net, "nodal_data")
+class(node_data_stored) # "data.frame"
 head(node_data_stored)
-names(node_data_stored)  # "actor" plus variable names
+names(node_data_stored) # "actor" plus variable names
 
 # Longitudinal example
 verbCoop_longit_net <- netify(
-  icews,  # data.frame input
-  actor1 = 'i', actor2 = 'j', time = 'year',
-  symmetric = FALSE,
-  weight = 'verbCoop'
+    icews, # data.frame input
+    actor1 = "i", actor2 = "j", time = "year",
+    symmetric = FALSE,
+    weight = "verbCoop"
 )
 
 # Prepare longitudinal nodal data - one row per actor-time combination
-nodeData_longit <- unique(icews[, c('i', 'year', nvars)])
-class(nodeData_longit)  # "data.frame"
-nrow(nodeData_longit)   # Number of actor-time combinations
+nodeData_longit <- unique(icews[, c("i", "year", nvars)])
+class(nodeData_longit) # "data.frame"
+nrow(nodeData_longit) # Number of actor-time combinations
 
 # Add nodal variables with time dimension
 verbCoop_longit_net <- add_node_vars(
-  netlet = verbCoop_longit_net,  # netify object
-  node_data = nodeData_longit,   # data.frame with longitudinal data
-  actor = 'i',                   # column identifying actors
-  time = 'year',                 # column identifying time
-  node_vars = nvars              # variables to add
+    netlet = verbCoop_longit_net, # netify object
+    node_data = nodeData_longit, # data.frame with longitudinal data
+    actor = "i", # column identifying actors
+    time = "year", # column identifying time
+    node_vars = nvars # variables to add
 )
 
 # Access longitudinal nodal data
-node_data_longit <- attr(verbCoop_longit_net, 'nodal_data')
-class(node_data_longit)  # "data.frame"
-head(node_data_longit)   # Now includes time column
+node_data_longit <- attr(verbCoop_longit_net, "nodal_data")
+class(node_data_longit) # "data.frame"
+head(node_data_longit) # Now includes time column
 
 # Filter to specific time period
 node_data_2010 <- node_data_longit[node_data_longit$time == "2010", ]
-nrow(node_data_2010)  # Number of actors in 2010
+nrow(node_data_2010) # Number of actors in 2010
 
 # Example: Add variables from external source
 \dontrun{
 # Suppose you have additional actor data
 external_data <- data.frame(
-  i = unique(icews_10$i),
-  democracy_score = runif(length(unique(icews_10$i)), 0, 10),
-  trade_openness = runif(length(unique(icews_10$i)), 0, 100)
+    i = unique(icews_10$i),
+    democracy_score = runif(length(unique(icews_10$i)), 0, 10),
+    trade_openness = runif(length(unique(icews_10$i)), 0, 100)
 )
 
 verbCoop_net <- add_node_vars(
-  netlet = verbCoop_net,
-  node_data = external_data,
-  actor = 'i',
-  node_vars = c('democracy_score', 'trade_openness')
+    netlet = verbCoop_net,
+    node_data = external_data,
+    actor = "i",
+    node_vars = c("democracy_score", "trade_openness")
 )
 }
-
 
 }
 \author{

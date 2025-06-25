@@ -15,7 +15,7 @@ Event data from UCDP for Myanmar
 }
 \examples{
 data(myanmar)
-myanmar[1:3,]
+myanmar[1:3, ]
 }
 \references{
 add UCDP reference

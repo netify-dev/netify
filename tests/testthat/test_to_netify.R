@@ -372,7 +372,7 @@ test_that("to_netify validates and aligns data correctly", {
 
 test_that("to_netify preserves attributes across different input types", {
   # Create equivalent networks in different formats
-  set.seed(123)
+  set.seed(6886)
   adj <- matrix(c(0,1,1,0,
                   1,0,1,1,
                   1,1,0,1,

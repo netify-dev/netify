@@ -8,6 +8,7 @@ articles:
     contents:
     - foundations
     - event_data
+    - attribute_analysis
     - ego_networks
     - manual_plotting
     - resources

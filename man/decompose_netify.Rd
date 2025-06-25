@@ -72,14 +72,14 @@ variables remain in the nodal data frame.
 data(icews)
 
 # Example 1: Cross-sectional network
-icews_10 <- icews[icews$year == 2010,]
+icews_10 <- icews[icews$year == 2010, ]
 
 # Create netify object
 net_cs <- netify(
-  icews_10,
-  actor1 = 'i', actor2 = 'j',
-  symmetric = FALSE,
-  weight = 'verbCoop'
+    icews_10,
+    actor1 = "i", actor2 = "j",
+    symmetric = FALSE,
+    weight = "verbCoop"
 )
 
 # Decompose to data frames
@@ -91,32 +91,32 @@ head(decomposed_cs$edge_data)
 head(decomposed_cs$nodal_data)
 
 # Example 2: Longitudinal network with attributes
-nvars <- c('i_polity2', 'i_log_gdp', 'i_log_pop')
-dvars <- c('matlCoop', 'verbConf', 'matlConf')
+nvars <- c("i_polity2", "i_log_gdp", "i_log_pop")
+dvars <- c("matlCoop", "verbConf", "matlConf")
 
 net_longit <- netify(
-  icews,
-  actor1 = 'i', actor2 = 'j',
-  time = 'year',
-  symmetric = FALSE,
-  weight = 'verbCoop',
-  nodal_vars = nvars,
-  dyad_vars = dvars
+    icews,
+    actor1 = "i", actor2 = "j",
+    time = "year",
+    symmetric = FALSE,
+    weight = "verbCoop",
+    nodal_vars = nvars,
+    dyad_vars = dvars
 )
 
 # Decompose with all attributes
 decomposed_longit <- decompose_netify(net_longit)
 
 # Check that variables are preserved
-names(decomposed_longit$edge_data)  # Includes dyadic variables
-names(decomposed_longit$nodal_data)  # Includes nodal variables
+names(decomposed_longit$edge_data) # Includes dyadic variables
+names(decomposed_longit$nodal_data) # Includes nodal variables
 
 # Example 3: Keep zero-weight edges
 decomposed_with_zeros <- decompose_netify(net_cs, remove_zeros = FALSE)
 
 # Compare edge counts
-nrow(decomposed_cs$edge_data)         # Without zeros
-nrow(decomposed_with_zeros$edge_data)  # With zeros
+nrow(decomposed_cs$edge_data) # Without zeros
+nrow(decomposed_with_zeros$edge_data) # With zeros
 
 # Example 4: Use for visualization prep
 \dontrun{

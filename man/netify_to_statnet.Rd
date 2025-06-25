@@ -82,20 +82,20 @@ after creating the network objects.
 data(icews)
 
 # Cross-sectional example
-icews_10 <- icews[icews$year == 2010,]
+icews_10 <- icews[icews$year == 2010, ]
 
 # Create netify object with attributes
-dvars <- c('matlCoop', 'verbConf', 'matlConf')
-nvars <- c('i_polity2', 'i_log_gdp', 'i_log_pop')
+dvars <- c("matlCoop", "verbConf", "matlConf")
+nvars <- c("i_polity2", "i_log_gdp", "i_log_pop")
 
-verbCoop_net <- netify( 
-  icews_10,
-  actor1 = 'i', actor2 = 'j', 
-  symmetric = FALSE, 
-  weight = 'verbCoop',
-  dyad_vars = dvars,
-  dyad_vars_symmetric = rep(FALSE, length(dvars)),
-  nodal_vars = nvars
+verbCoop_net <- netify(
+    icews_10,
+    actor1 = "i", actor2 = "j",
+    symmetric = FALSE,
+    weight = "verbCoop",
+    dyad_vars = dvars,
+    dyad_vars_symmetric = rep(FALSE, length(dvars)),
+    nodal_vars = nvars
 )
 
 # Convert to statnet network object
@@ -103,39 +103,39 @@ ntwk <- netify_to_statnet(verbCoop_net)
 
 # Examine the result
 ntwk
-network::network.size(ntwk)        # number of vertices
-network::network.edgecount(ntwk)   # number of edges
-network::list.vertex.attributes(ntwk)  # nodal attributes
-network::list.edge.attributes(ntwk)    # edge attributes
+network::network.size(ntwk) # number of vertices
+network::network.edgecount(ntwk) # number of edges
+network::list.vertex.attributes(ntwk) # nodal attributes
+network::list.edge.attributes(ntwk) # edge attributes
 
 # Access specific attributes
-network::get.vertex.attribute(ntwk, 'i_polity2')  # polity scores
-network::get.edge.attribute(ntwk, 'matlCoop')     # material cooperation
+network::get.vertex.attribute(ntwk, "i_polity2") # polity scores
+network::get.edge.attribute(ntwk, "matlCoop") # material cooperation
 
 # Check network properties
-network::is.directed(ntwk)   # TRUE for this example
-network::has.loops(ntwk)     # FALSE (no self-ties)
+network::is.directed(ntwk) # TRUE for this example
+network::has.loops(ntwk) # FALSE (no self-ties)
 
 # Longitudinal example
 verbCoop_longit <- netify(
-  icews,
-  actor1 = 'i', actor2 = 'j', time = 'year',
-  symmetric = FALSE, 
-  weight = 'verbCoop',
-  dyad_vars = dvars,
-  dyad_vars_symmetric = rep(FALSE, length(dvars)),
-  nodal_vars = nvars
+    icews,
+    actor1 = "i", actor2 = "j", time = "year",
+    symmetric = FALSE,
+    weight = "verbCoop",
+    dyad_vars = dvars,
+    dyad_vars_symmetric = rep(FALSE, length(dvars)),
+    nodal_vars = nvars
 )
 
 # Convert to list of network objects
 ntwk_list <- netify_to_statnet(verbCoop_longit)
 
 # Examine structure
-length(ntwk_list)       # number of time periods
-names(ntwk_list)        # time period labels
+length(ntwk_list) # number of time periods
+names(ntwk_list) # time period labels
 
 # Access specific time period
-ntwk_2002 <- ntwk_list[['2002']]
+ntwk_2002 <- ntwk_list[["2002"]]
 ntwk_2002
 
 \dontrun{

@@ -68,20 +68,20 @@ This function requires the igraph package to be installed.
 data(icews)
 
 # Example 1: Cross-sectional network with attributes
-icews_10 <- icews[icews$year == 2010,]
+icews_10 <- icews[icews$year == 2010, ]
 
 # Create netify object with attributes
-dvars <- c('matlCoop', 'verbConf', 'matlConf')
-nvars <- c('i_polity2','i_log_gdp', 'i_log_pop')
+dvars <- c("matlCoop", "verbConf", "matlConf")
+nvars <- c("i_polity2", "i_log_gdp", "i_log_pop")
 
-verbCoop_net <- netify( 
-  icews_10,
-  actor1 = 'i', actor2 = 'j', 
-  symmetric = FALSE, 
-  weight = 'verbCoop',
-  dyad_vars = dvars,
-  dyad_vars_symmetric = rep(FALSE, length(dvars)),
-  nodal_vars = nvars
+verbCoop_net <- netify(
+    icews_10,
+    actor1 = "i", actor2 = "j",
+    symmetric = FALSE,
+    weight = "verbCoop",
+    dyad_vars = dvars,
+    dyad_vars_symmetric = rep(FALSE, length(dvars)),
+    nodal_vars = nvars
 )
 
 # Convert to igraph
@@ -89,47 +89,47 @@ ig <- netify_to_igraph(verbCoop_net)
 
 # Examine the result
 ig
-igraph::vcount(ig)  # number of vertices
-igraph::ecount(ig)  # number of edges
-igraph::vertex_attr_names(ig)  # nodal attributes
-igraph::edge_attr_names(ig)    # edge attributes
+igraph::vcount(ig) # number of vertices
+igraph::ecount(ig) # number of edges
+igraph::vertex_attr_names(ig) # nodal attributes
+igraph::edge_attr_names(ig) # edge attributes
 
 # Access specific attributes
-igraph::V(ig)$i_polity2  # polity scores
-igraph::E(ig)$matlCoop   # material cooperation
+igraph::V(ig)$i_polity2 # polity scores
+igraph::E(ig)$matlCoop # material cooperation
 
 # Example 2: Longitudinal network
 verbCoop_longit <- netify(
-  icews,
-  actor1 = 'i', actor2 = 'j', time = 'year',
-  symmetric = FALSE, 
-  weight = 'verbCoop',
-  dyad_vars = dvars,
-  dyad_vars_symmetric = rep(FALSE, length(dvars)),
-  nodal_vars = nvars
+    icews,
+    actor1 = "i", actor2 = "j", time = "year",
+    symmetric = FALSE,
+    weight = "verbCoop",
+    dyad_vars = dvars,
+    dyad_vars_symmetric = rep(FALSE, length(dvars)),
+    nodal_vars = nvars
 )
 
 # Convert to list of igraph objects
 ig_list <- netify_to_igraph(verbCoop_longit)
 
 # Examine structure
-length(ig_list)       # number of time periods
-names(ig_list)        # time period labels
+length(ig_list) # number of time periods
+names(ig_list) # time period labels
 
 # Access specific time period
-ig_2002 <- ig_list[['2002']]
+ig_2002 <- ig_list[["2002"]]
 ig_2002
 
 # Example 3: Convert without attributes
 ig_structure_only <- netify_to_igraph(
-  verbCoop_net, 
-  add_nodal_attribs = FALSE,
-  add_dyad_attribs = FALSE
+    verbCoop_net,
+    add_nodal_attribs = FALSE,
+    add_dyad_attribs = FALSE
 )
 
 # Only network structure, no attributes
-igraph::vertex_attr_names(ig_structure_only)  # only "name"
-igraph::edge_attr_names(ig_structure_only)    # only "weight" (if present)
+igraph::vertex_attr_names(ig_structure_only) # only "name"
+igraph::edge_attr_names(ig_structure_only) # only "weight" (if present)
 
 }
 \author{

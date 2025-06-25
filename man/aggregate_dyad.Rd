@@ -105,33 +105,33 @@ icews_2010 <- icews[icews$year == 2010, ]
 
 # Aggregate directed cooperation events
 agg_coop <- aggregate_dyad(
-  dyad_data = icews_2010,
-  actor1 = "i", 
-  actor2 = "j",
-  weight = "verbCoop",
-  symmetric = FALSE
+    dyad_data = icews_2010,
+    actor1 = "i",
+    actor2 = "j",
+    weight = "verbCoop",
+    symmetric = FALSE
 )
 
 # Check reduction in observations
-nrow(icews_2010)  # Original observations
-nrow(agg_coop)    # Unique directed dyads
+nrow(icews_2010) # Original observations
+nrow(agg_coop) # Unique directed dyads
 
 # Example 2: Create symmetric trade volumes
 trade_data <- data.frame(
-  exporter = c("USA", "USA", "China", "China", "USA", "China"),
-  importer = c("China", "China", "USA", "USA", "UK", "UK"),
-  year = c(2020, 2020, 2020, 2021, 2021, 2021),
-  trade_value = c(100, 50, 75, 80, 120, 90)
+    exporter = c("USA", "USA", "China", "China", "USA", "China"),
+    importer = c("China", "China", "USA", "USA", "UK", "UK"),
+    year = c(2020, 2020, 2020, 2021, 2021, 2021),
+    trade_value = c(100, 50, 75, 80, 120, 90)
 )
 
 # Aggregate as total trade between countries (undirected)
 total_trade <- aggregate_dyad(
-  dyad_data = trade_data,
-  actor1 = "exporter",
-  actor2 = "importer", 
-  time = "year",
-  weight = "trade_value",
-  symmetric = TRUE
+    dyad_data = trade_data,
+    actor1 = "exporter",
+    actor2 = "importer",
+    time = "year",
+    weight = "trade_value",
+    symmetric = TRUE
 )
 
 # USA-China trade in 2020: 100+50+75 = 225 (appears in both directions)
@@ -139,12 +139,12 @@ total_trade[total_trade$year == 2020, ]
 
 # Example 3: Aggregate across all time periods
 all_time_trade <- aggregate_dyad(
-  dyad_data = trade_data,
-  actor1 = "exporter",
-  actor2 = "importer",
-  time = NULL,  # Aggregate across all years
-  weight = "trade_value",
-  symmetric = FALSE
+    dyad_data = trade_data,
+    actor1 = "exporter",
+    actor2 = "importer",
+    time = NULL, # Aggregate across all years
+    weight = "trade_value",
+    symmetric = FALSE
 )
 
 # USA total exports to China: 100+50 = 150
@@ -156,34 +156,34 @@ trade_data_na$trade_value[2] <- NA
 
 # Ignore missing values (default)
 agg_ignore_na <- aggregate_dyad(
-  dyad_data = trade_data_na,
-  actor1 = "exporter",
-  actor2 = "importer",
-  time = "year",
-  weight = "trade_value",
-  symmetric = FALSE,
-  ignore_missing = TRUE
+    dyad_data = trade_data_na,
+    actor1 = "exporter",
+    actor2 = "importer",
+    time = "year",
+    weight = "trade_value",
+    symmetric = FALSE,
+    ignore_missing = TRUE
 )
 
 # Include missing values
 agg_with_na <- aggregate_dyad(
-  dyad_data = trade_data_na,
-  actor1 = "exporter",
-  actor2 = "importer",
-  time = "year",
-  weight = "trade_value",
-  symmetric = FALSE,
-  ignore_missing = FALSE
+    dyad_data = trade_data_na,
+    actor1 = "exporter",
+    actor2 = "importer",
+    time = "year",
+    weight = "trade_value",
+    symmetric = FALSE,
+    ignore_missing = FALSE
 )
 
 # Compare results for USA->China in 2020
-agg_ignore_na[agg_ignore_na$exporter == "USA" & 
-              agg_ignore_na$importer == "China" & 
-              agg_ignore_na$year == 2020, ]  # 100 (ignored NA)
+agg_ignore_na[agg_ignore_na$exporter == "USA" &
+    agg_ignore_na$importer == "China" &
+    agg_ignore_na$year == 2020, ] # 100 (ignored NA)
 
-agg_with_na[agg_with_na$exporter == "USA" & 
-            agg_with_na$importer == "China" & 
-            agg_with_na$year == 2020, ]  # NA
+agg_with_na[agg_with_na$exporter == "USA" &
+    agg_with_na$importer == "China" &
+    agg_with_na$year == 2020, ] # NA
 
 }
 \author{

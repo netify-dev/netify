@@ -26,11 +26,11 @@ different color mappings for edges and nodes, for example.
 comp <- plot(net, return_components = TRUE)
 
 ggplot() +
-  netify_edge(comp) +
-  scale_color_manual(values = c("gray", "red")) +
-  reset_scales() +  # reset before adding nodes
-  netify_node(comp) +
-  scale_color_viridis_c()
+    netify_edge(comp) +
+    scale_color_manual(values = c("gray", "red")) +
+    reset_scales() + # reset before adding nodes
+    netify_node(comp) +
+    scale_color_viridis_c()
 }
 
 }

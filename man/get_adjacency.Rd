@@ -91,24 +91,24 @@ icews_2010 <- icews[icews$year == 2010, ]
 
 # Create a directed network with verbal cooperation weights
 verbCoop_net <- get_adjacency(
-  dyad_data = icews_2010, 
-  actor1 = 'i', 
-  actor2 = 'j',
-  symmetric = FALSE, 
-  weight = 'verbCoop'
+    dyad_data = icews_2010,
+    actor1 = "i",
+    actor2 = "j",
+    symmetric = FALSE,
+    weight = "verbCoop"
 )
 
 # Create a directed network with material conflict weights
 matlConf_net <- get_adjacency(
-  dyad_data = icews_2010, 
-  actor1 = 'i', 
-  actor2 = 'j',
-  symmetric = FALSE, 
-  weight = 'matlConf'
+    dyad_data = icews_2010,
+    actor1 = "i",
+    actor2 = "j",
+    symmetric = FALSE,
+    weight = "matlConf"
 )
 
 # Verify class
-class(verbCoop_net)  # "netify"
+class(verbCoop_net) # "netify"
 
 # Check dimensions
 dim(verbCoop_net)

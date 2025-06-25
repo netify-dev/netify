@@ -96,7 +96,7 @@ the adjacency matrix and should return a vector with one value per actor:
 max_out <- function(mat) apply(mat, 1, max, na.rm = TRUE)
 max_in <- function(mat) apply(mat, 2, max, na.rm = TRUE)
 
-stats <- summary_actor(net, 
+stats <- summary_actor(net,
   other_stats = list(max_out = max_out, max_in = max_in))
 }
 
@@ -140,10 +140,10 @@ data(icews)
 
 # Basic usage with directed network
 net <- netify(
-  icews, 
-  actor1 = 'i', actor2 = 'j', time = 'year',
-  symmetric = FALSE, 
-  weight = 'verbCoop'
+    icews,
+    actor1 = "i", actor2 = "j", time = "year",
+    symmetric = FALSE,
+    weight = "verbCoop"
 )
 
 # Get actor statistics
@@ -156,26 +156,26 @@ max_out <- function(mat) apply(mat, 1, max, na.rm = TRUE)
 max_in <- function(mat) apply(mat, 2, max, na.rm = TRUE)
 
 actor_stats_custom <- summary_actor(
-  net, 
-  other_stats = list(
-    max_out = max_out, 
-    max_in = max_in
-  )
+    net,
+    other_stats = list(
+        max_out = max_out,
+        max_in = max_in
+    )
 )
 head(actor_stats_custom)
 
 # For networks where weights represent distances
 # (larger values = weaker relationships)
 distance_net <- netify(
-  icews, 
-  actor1 = 'i', actor2 = 'j',
-  weight = 'matlConf'  # conflict measure
+    icews,
+    actor1 = "i", actor2 = "j",
+    weight = "matlConf" # conflict measure
 )
 
 # Don't invert weights for centrality calculations
 actor_stats_dist <- summary_actor(
-  distance_net, 
-  invert_weights_for_igraph = FALSE
+    distance_net,
+    invert_weights_for_igraph = FALSE
 )
 
 }

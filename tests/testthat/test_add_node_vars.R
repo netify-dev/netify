@@ -4,7 +4,7 @@ test_that(
   'add_node_vars: cross_sec', {
 
     # create a fake adjacency matrix
-    set.seed(1234)
+    set.seed(6886)
 
     actors = c('a', 'b', 'c', 'd')
     n= length(actors)
@@ -63,7 +63,7 @@ test_that(
   'add_node_vars: longit_list', {
 
     # create a fake adjacency matrix
-    set.seed(1234)
+    set.seed(6886)
     actors = c('a', 'b', 'c')
     actor1 <- rep(c('a','a','b', 'b', 'c','c'), 3)
     actor2 <- rep(c('b', 'c','a','c','b','a'),3)

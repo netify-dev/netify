@@ -111,23 +111,23 @@ data(icews)
 
 # Create a netify object
 net <- netify(
-  icews[icews$year == 2010,], 
-  actor1 = 'i', actor2 = 'j',
-  symmetric = FALSE, 
-  weight = 'verbCoop'
+    icews[icews$year == 2010, ],
+    actor1 = "i", actor2 = "j",
+    symmetric = FALSE,
+    weight = "verbCoop"
 )
 
 # Convert to amen format (standard)
 amen_data <- netify_to_amen(net)
-names(amen_data)  # Y, Xdyad, Xrow, Xcol
+names(amen_data) # Y, Xdyad, Xrow, Xcol
 
 \dontrun{
 # For longitudinal data with time-varying composition
 longit_net <- netify(
-  icews, 
-  actor1 = 'i', actor2 = 'j', time = 'year',
-  symmetric = FALSE, 
-  weight = 'verbCoop'
+    icews,
+    actor1 = "i", actor2 = "j", time = "year",
+    symmetric = FALSE,
+    weight = "verbCoop"
 )
 
 # Convert to lame format

@@ -30,7 +30,8 @@ comp <- plot(net, return_components = TRUE)
 
 # build custom plot with nodes
 library(ggplot2)
-ggplot() + netify_node(comp)
+ggplot() +
+    netify_node(comp)
 }
 
 }

@@ -135,3 +135,45 @@ get_matrix_batch <- function(n_rows_vec, n_cols_vec, actors_rows_list, actors_co
     .Call(`_netify_get_matrix_batch`, n_rows_vec, n_cols_vec, actors_rows_list, actors_cols_list, matRowIndices_list, matColIndices_list, value_list, symmetric, missing_to_zero, diag_to_NA)
 }
 
+#' Calculate similarity matrix between node attributes
+#'
+#' @param attributes numeric vector of node attributes
+#' @param method character string specifying similarity metric ("correlation", "euclidean", "categorical", "cosine", "jaccard", "manhattan", "hamming")
+#' @return numeric matrix of pairwise similarities
+#' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
+calculate_similarity_matrix_cpp <- function(attributes, method) {
+    .Call(`_netify_calculate_similarity_matrix_cpp`, attributes, method)
+}
+
+#' Correlation calcs for homophily analysis
+#'
+#' @param x numeric vector of similarities
+#' @param y numeric vector of ties (0/1)
+#' @return correlation coefficient
+#' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
+correlation_cpp <- function(x, y) {
+    .Call(`_netify_correlation_cpp`, x, y)
+}
+
+#' Calculate homophily statistics with significance testing
+#'
+#' @param similarity_matrix numeric matrix of pairwise node similarities
+#' @param net_matrix logical matrix of network ties
+#' @param significance_test logical whether to perform permutation test
+#' @param n_permutations integer number of permutations
+#' @param alpha numeric significance level for confidence intervals
+#' @return list containing homophily statistics
+#' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
+calculate_homophily_stats_cpp <- function(similarity_matrix, net_matrix, significance_test, n_permutations, alpha) {
+    .Call(`_netify_calculate_homophily_stats_cpp`, similarity_matrix, net_matrix, significance_test, n_permutations, alpha)
+}
+

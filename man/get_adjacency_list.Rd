@@ -120,21 +120,21 @@ data(icews)
 
 # Create a netify list with constant actor composition
 icews_list <- get_adjacency_list(
-  dyad_data = icews, 
-  actor1 = 'i', 
-  actor2 = 'j', 
-  time = 'year',
-  actor_time_uniform = TRUE,
-  symmetric = FALSE, 
-  weight = 'verbConf'
+    dyad_data = icews,
+    actor1 = "i",
+    actor2 = "j",
+    time = "year",
+    actor_time_uniform = TRUE,
+    symmetric = FALSE,
+    weight = "verbConf"
 )
 
 # Verify it's a netify object
-class(icews_list)  # "netify"
+class(icews_list) # "netify"
 
 # Check structure
-length(icews_list)  # Number of time periods
-names(icews_list)   # Time period labels
+length(icews_list) # Number of time periods
+names(icews_list) # Time period labels
 
 # Access specific time period
 icews_2010 <- icews_list[["2010"]]

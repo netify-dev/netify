@@ -64,7 +64,7 @@ V(g)$type <- sample(c("A", "B"), vcount(g), replace = TRUE)
 
 net <- to_netify(g, weight = "weight")
 
-# From network  
+# From network
 library(network)
 n <- network(rgraph(10, tprob = 0.3))
 set.vertex.attribute(n, "group", sample(1:2, 10, replace = TRUE))
@@ -77,8 +77,8 @@ net <- to_netify(adj_mat)
 
 # From list of matrices (longitudinal)
 mat_list <- list(
-  "2001" = matrix(rnorm(100), 10, 10),
-  "2002" = matrix(rnorm(100), 10, 10)
+    "2001" = matrix(rnorm(100), 10, 10),
+    "2002" = matrix(rnorm(100), 10, 10)
 )
 net <- to_netify(mat_list)
 }

@@ -64,10 +64,10 @@ dyad identifiers.
 \examples{
 # Create example dyadic data
 trade_df <- data.frame(
-  from = c("USA", "China", "Russia", "USA", "Brazil", "Argentina"),
-  to = c("China", "USA", "USA", "Russia", "Argentina", "Brazil"),
-  trade_value = c(100, 100, 50, 75, 30, 25),
-  year = c(2020, 2020, 2021, 2021, 2021, 2021)
+    from = c("USA", "China", "Russia", "USA", "Brazil", "Argentina"),
+    to = c("China", "USA", "USA", "Russia", "Argentina", "Brazil"),
+    trade_value = c(100, 100, 50, 75, 30, 25),
+    year = c(2020, 2020, 2021, 2021, 2021, 2021)
 )
 
 # Generate symmetric IDs without time
@@ -82,9 +82,9 @@ print(trade_df[, c("from", "to", "year", "symm_id_time")])
 
 # Use for aggregation of undirected relationships
 trade_df$total_trade <- ave(
-  trade_df$trade_value, 
-  trade_df$symm_id_time, 
-  FUN = sum
+    trade_df$trade_value,
+    trade_df$symm_id_time,
+    FUN = sum
 )
 print(unique(trade_df[, c("symm_id_time", "total_trade")]))
 
@@ -95,10 +95,10 @@ icews_sample <- icews[1:100, ]
 
 # Create symmetric IDs for conflict events
 icews_sample$symm_dyad <- gen_symm_id(
-  icews_sample, 
-  actor1 = "i", 
-  actor2 = "j", 
-  time = "year"
+    icews_sample,
+    actor1 = "i",
+    actor2 = "j",
+    time = "year"
 )
 
 # Check that symmetric pairs get same ID

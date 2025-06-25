@@ -1,6 +1,6 @@
 Package: netify
 Title: Network Tools
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
   person("Ha Eun", "Choi", email = "choiha3@msu.edu", role = c("ctb")),
   person("Cassy", "Dorff", email = "cassy.dorff@vanderbilt.edu", role = c("aut")),
@@ -13,6 +13,7 @@ Depends:
 Imports:
     Rcpp,
     stats,
+    rlang,
     cli,
     checkmate,
     igraph,
@@ -21,13 +22,13 @@ Imports:
     ggnewscale,
     ggridges,
     ggbeeswarm, 
+    patchwork,
     RColorBrewer
 LinkingTo:
   Rcpp
 Suggests:
     knitr,    
     rmarkdown,
-    rlang,
     abind,    
     tidyr,
     network,

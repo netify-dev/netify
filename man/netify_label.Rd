@@ -30,7 +30,8 @@ comp <- plot(net, add_label = TRUE, return_components = TRUE)
 
 # build custom plot with labels
 library(ggplot2)
-ggplot() + netify_label(comp)
+ggplot() +
+    netify_label(comp)
 }
 
 }

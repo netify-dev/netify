@@ -95,35 +95,45 @@ multilayer data to a single layer produces a single-layer object.
 # load example directed event data from ICEWS
 data(icews)
 
-# generate a longitudional netify object 
+# generate a longitudional netify object
 # with both dyadic and nodal attributes
 icews_matlConf <- netify(
     icews,
-    actor1='i', actor2='j', time='year',
-    symmetric=FALSE, weight='matlConf',
-    nodal_vars=c('i_polity2', 'i_log_gdp', 'i_log_pop'),
-    dyad_vars=c('matlCoop', 'verbCoop', 'verbConf'),
-    dyad_vars_symmetric=c(FALSE, FALSE, FALSE) )  
+    actor1 = "i", actor2 = "j", time = "year",
+    symmetric = FALSE, weight = "matlConf",
+    nodal_vars = c("i_polity2", "i_log_gdp", "i_log_pop"),
+    dyad_vars = c("matlCoop", "verbCoop", "verbConf"),
+    dyad_vars_symmetric = c(FALSE, FALSE, FALSE)
+)
 
 # subset to a few countries using S3 method
 icews_subset <- subset(
-   icews_matlConf,
-   actors=c('United States', 'United Kingdom',
-            'Russian Federation', 'China') )
+    icews_matlConf,
+    actors = c(
+        "United States", "United Kingdom",
+        "Russian Federation", "China"
+    )
+)
 
 # subset to a few countries and a few years
 icews_subset_2 <- subset(
-  icews_matlConf,
-  actors=c('United States', 'United Kingdom',
-           'Russian Federation', 'China'),
-  time=c('2010', '2011') )
+    icews_matlConf,
+    actors = c(
+        "United States", "United Kingdom",
+        "Russian Federation", "China"
+    ),
+    time = c("2010", "2011")
+)
 
 # can also use subset_netify directly
 icews_subset_3 <- subset_netify(
-  netlet=icews_matlConf,
-  actors=c('United States', 'United Kingdom',
-           'Russian Federation', 'China'),
-  time=c('2010', '2011') )
+    netlet = icews_matlConf,
+    actors = c(
+        "United States", "United Kingdom",
+        "Russian Federation", "China"
+    ),
+    time = c("2010", "2011")
+)
 
 }
 \author{

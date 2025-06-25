@@ -115,9 +115,10 @@ data(icews)
 # From a data.frame: generate a longitudional, directed and weighted network
 # where the weights are matlConf
 icews_matlConf <- netify(
-    input=icews,
-    actor1='i', actor2='j', time='year',
-    symmetric=FALSE, weight='matlConf')
+    input = icews,
+    actor1 = "i", actor2 = "j", time = "year",
+    symmetric = FALSE, weight = "matlConf"
+)
 
 # From a matrix
 adj_matrix <- matrix(rbinom(100, 1, 0.3), 10, 10)

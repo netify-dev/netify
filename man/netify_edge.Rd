@@ -31,7 +31,8 @@ comp <- plot(net, return_components = TRUE)
 
 # build custom plot with edges
 library(ggplot2)
-ggplot() + netify_edge(comp)
+ggplot() +
+    netify_edge(comp)
 }
 
 }

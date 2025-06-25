@@ -117,86 +117,85 @@ variables, as each variable requires a full adjacency matrix for storage.
 data(icews)
 
 # Cross-sectional example
-icews_10 <- icews[icews$year == 2010,]
+icews_10 <- icews[icews$year == 2010, ]
 
 # Create initial netify object with just the main weight
 verbCoop_net <- netify(
-  icews_10,  # data.frame input
-  actor1 = 'i', actor2 = 'j', 
-  symmetric = FALSE, 
-  weight = 'verbCoop'
+    icews_10, # data.frame input
+    actor1 = "i", actor2 = "j",
+    symmetric = FALSE,
+    weight = "verbCoop"
 )
 
 # Check class
-class(verbCoop_net)  # "netify"
+class(verbCoop_net) # "netify"
 
 # Add additional dyadic variables
 verbCoop_net <- add_dyad_vars(
-  netlet = verbCoop_net,  # netify object
-  dyad_data = icews_10,   # data.frame with variables to add
-  actor1 = 'i', actor2 = 'j', 
-  dyad_vars = c('matlCoop', 'verbConf', 'matlConf'),
-  dyad_vars_symmetric = rep(FALSE, 3)
+    netlet = verbCoop_net, # netify object
+    dyad_data = icews_10, # data.frame with variables to add
+    actor1 = "i", actor2 = "j",
+    dyad_vars = c("matlCoop", "verbConf", "matlConf"),
+    dyad_vars_symmetric = rep(FALSE, 3)
 )
 
 # Access the dyadic data structure (returns list)
-dyad_data_structure <- attr(verbCoop_net, 'dyad_data')
-class(dyad_data_structure)  # "list"
-names(dyad_data_structure)  # Time periods
-names(dyad_data_structure[["1"]])  # Variables at time 1
+dyad_data_structure <- attr(verbCoop_net, "dyad_data")
+class(dyad_data_structure) # "list"
+names(dyad_data_structure) # Time periods
+names(dyad_data_structure[["1"]]) # Variables at time 1
 
 # Access specific variable matrix
 matlCoop_matrix <- dyad_data_structure[["1"]][["matlCoop"]]
-class(matlCoop_matrix)  # "matrix" "array"
+class(matlCoop_matrix) # "matrix" "array"
 dim(matlCoop_matrix)
-matlCoop_matrix[1:5, 1:5]  # View subset
+matlCoop_matrix[1:5, 1:5] # View subset
 
 # Longitudinal example
 verbCoop_longit_net <- netify(
-  icews,  # data.frame input
-  actor1 = 'i', actor2 = 'j', time = 'year',
-  symmetric = FALSE,
-  weight = 'verbCoop'
+    icews, # data.frame input
+    actor1 = "i", actor2 = "j", time = "year",
+    symmetric = FALSE,
+    weight = "verbCoop"
 )
 
 # Add dyadic variables across all time periods
 verbCoop_longit_net <- add_dyad_vars(
-  netlet = verbCoop_longit_net,  # netify object
-  dyad_data = icews,  # data.frame with longitudinal data
-  actor1 = 'i', actor2 = 'j', time = 'year',
-  dyad_vars = c('matlCoop', 'verbConf', 'matlConf'),
-  dyad_vars_symmetric = rep(FALSE, 3)
+    netlet = verbCoop_longit_net, # netify object
+    dyad_data = icews, # data.frame with longitudinal data
+    actor1 = "i", actor2 = "j", time = "year",
+    dyad_vars = c("matlCoop", "verbConf", "matlConf"),
+    dyad_vars_symmetric = rep(FALSE, 3)
 )
 
 # Access data for specific year (returns list)
-year_2002_data <- attr(verbCoop_longit_net, 'dyad_data')[["2002"]]
-class(year_2002_data)  # "list"
-names(year_2002_data)  # Available variables
+year_2002_data <- attr(verbCoop_longit_net, "dyad_data")[["2002"]]
+class(year_2002_data) # "list"
+names(year_2002_data) # Available variables
 
 # Each variable is stored as a matrix
 matlCoop_2002 <- year_2002_data[["matlCoop"]]
-class(matlCoop_2002)  # "matrix" "array"
+class(matlCoop_2002) # "matrix" "array"
 
 # Example: Add variables from a different source
 \dontrun{
 # Create a new data.frame with trade information
 trade_data <- data.frame(
-  i = icews_10$i,
-  j = icews_10$j,
-  trade_volume = runif(nrow(icews_10), 0, 1000),
-  trade_balance = rnorm(nrow(icews_10))
+    i = icews_10$i,
+    j = icews_10$j,
+    trade_volume = runif(nrow(icews_10), 0, 1000),
+    trade_balance = rnorm(nrow(icews_10))
 )
-class(trade_data)  # "data.frame"
+class(trade_data) # "data.frame"
 
 verbCoop_net <- add_dyad_vars(
-  netlet = verbCoop_net,
-  dyad_data = trade_data,
-  actor1 = 'i', actor2 = 'j',
-  dyad_vars = c('trade_volume', 'trade_balance'),
-  dyad_vars_symmetric = c(FALSE, FALSE)
+    netlet = verbCoop_net,
+    dyad_data = trade_data,
+    actor1 = "i", actor2 = "j",
+    dyad_vars = c("trade_volume", "trade_balance"),
+    dyad_vars_symmetric = c(FALSE, FALSE)
 )
 }
-
 
 }
 \author{

@@ -130,9 +130,9 @@ data(icews)
 # Example 1: Basic usage with cross-sectional network
 icews_10 <- icews[icews$year == 2010, ]
 net <- netify(
-  icews_10, 
-  actor1 = 'i', actor2 = 'j',
-  weight = 'verbCoop'
+    icews_10,
+    actor1 = "i", actor2 = "j",
+    weight = "verbCoop"
 )
 
 # Default: see first 3 actors (both sending and receiving)
@@ -144,40 +144,45 @@ peek(net, from = 5, to = 5)
 # Example 2: Specific actors by name
 # See ties from US and China to Russia, India, and Brazil
 peek(net,
-  from = c('United States', 'China'),
-  to = c('Russia', 'India', 'Brazil'))
-  
+    from = c("United States", "China"),
+    to = c("Russia", "India", "Brazil")
+)
+
 # Use actors parameter to see subgraph
 peek(net,
-  actors = c('United States', 'China', 'Russia'))
+    actors = c("United States", "China", "Russia")
+)
 
 # Example 3: Longitudinal network
 net_longit <- netify(
-  icews, 
-  actor1 = 'i', actor2 = 'j', time = 'year',
-  weight = 'matlConf'
+    icews,
+    actor1 = "i", actor2 = "j", time = "year",
+    weight = "matlConf"
 )
 
 # See first 5 actors in specific years
-peek(net_longit, 
-  from = 5, to = 5,
-  time = c('2002', '2006', '2010'))
+peek(net_longit,
+    from = 5, to = 5,
+    time = c("2002", "2006", "2010")
+)
 
 # See all actors in year 2010
-peek(net_longit, 
-  from = NULL, to = NULL,
-  time = '2010')
-  
+peek(net_longit,
+    from = NULL, to = NULL,
+    time = "2010"
+)
+
 # Example 4: Using numeric indices
 # See specific positions in the network
-peek(net, 
-  from = c(1, 3, 5, 7),  # 1st, 3rd, 5th, 7th senders
-  to = 1:10)             # first 10 receivers
+peek(net,
+    from = c(1, 3, 5, 7), # 1st, 3rd, 5th, 7th senders
+    to = 1:10
+) # first 10 receivers
 
 # Example 5: Quick inspection patterns
 # See who USA interacts with
-peek(net, from = "United States", to = 10)  # USA's ties to first 10 countries
-peek(net, from = 10, to = "United States")  # First 10 countries' ties to USA
+peek(net, from = "United States", to = 10) # USA's ties to first 10 countries
+peek(net, from = 10, to = "United States") # First 10 countries' ties to USA
 
 }
 \author{

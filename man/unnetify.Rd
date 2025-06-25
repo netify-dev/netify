@@ -71,15 +71,15 @@ or n × (n-1) / 2 for undirected networks).
 data(icews)
 
 # Create a netify object with attributes
-icews_10 <- icews[icews$year == 2010,]
+icews_10 <- icews[icews$year == 2010, ]
 
 verbCoop_net <- netify(
-  icews_10,
-  actor1 = 'i', actor2 = 'j',
-  symmetric = FALSE,
-  weight = 'verbCoop',
-  nodal_vars = c('i_polity2', 'i_log_gdp'),
-  dyad_vars = c('verbConf', 'matlConf')
+    icews_10,
+    actor1 = "i", actor2 = "j",
+    symmetric = FALSE,
+    weight = "verbCoop",
+    nodal_vars = c("i_polity2", "i_log_gdp"),
+    dyad_vars = c("verbConf", "matlConf")
 )
 
 # Convert back to dyadic data frame
@@ -91,7 +91,7 @@ names(dyad_df)
 
 # Remove zero-weight dyads for more compact output
 dyad_df_nonzero <- unnetify(verbCoop_net, remove_zeros = TRUE)
-nrow(dyad_df_nonzero)  # Much smaller than full dyadic dataset
+nrow(dyad_df_nonzero) # Much smaller than full dyadic dataset
 
 # Note how nodal attributes are added
 # For directed network: _from and _to suffixes
@@ -99,12 +99,12 @@ head(dyad_df[, c("from", "to", "i_polity2_from", "i_polity2_to")])
 
 # Longitudinal example
 verbCoop_longit <- netify(
-  icews,
-  actor1 = 'i', actor2 = 'j', 
-  time = 'year',
-  symmetric = FALSE,
-  weight = 'verbCoop',
-  nodal_vars = c('i_polity2', 'i_log_gdp')
+    icews,
+    actor1 = "i", actor2 = "j",
+    time = "year",
+    symmetric = FALSE,
+    weight = "verbCoop",
+    nodal_vars = c("i_polity2", "i_log_gdp")
 )
 
 # Convert longitudinal network

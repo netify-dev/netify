@@ -1,7 +1,7 @@
 #' Event data slice from UCDP on Mexico
 #'
 #' Event data from UCDP for Mexico
-#' 
+#'
 #' @name mexico
 #' @docType data
 #' @usage data(mexico)
@@ -14,14 +14,14 @@
 #'
 #' @examples
 #' data(mexico)
-#' mexico[1:3,]
+#' mexico[1:3, ]
 NULL
 
 
 #' Event data slice from UCDP on Myanmar
 #'
 #' Event data from UCDP for Myanmar
-#' 
+#'
 #' @name myanmar
 #' @docType data
 #' @usage data(myanmar)
@@ -34,5 +34,5 @@ NULL
 #'
 #' @examples
 #' data(myanmar)
-#' myanmar[1:3,]
+#' myanmar[1:3, ]
 NULL

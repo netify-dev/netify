@@ -76,21 +76,21 @@ data(icews)
 
 # Create a netify object with verbal cooperation as the main network
 # and material cooperation as a dyadic attribute
-icews_10 <- icews[icews$year == 2010,]
+icews_10 <- icews[icews$year == 2010, ]
 
 net <- netify(
-  icews_10,
-  actor1 = 'i', actor2 = 'j',
-  symmetric = FALSE,
-  weight = 'verbCoop'
+    icews_10,
+    actor1 = "i", actor2 = "j",
+    symmetric = FALSE,
+    weight = "verbCoop"
 )
 
 net <- add_dyad_vars(
-  net,
-  icews_10,
-  actor1 = 'i', actor2 = 'j',
-  dyad_vars = 'matlCoop',
-  dyad_vars_symmetric = FALSE
+    net,
+    icews_10,
+    actor1 = "i", actor2 = "j",
+    dyad_vars = "matlCoop",
+    dyad_vars_symmetric = FALSE
 )
 
 # Check the current network
@@ -98,16 +98,16 @@ print(net)
 
 # Pivot to make material cooperation the main network
 net_pivoted <- pivot_dyad_to_network(
-  net,
-  dyad_var = 'matlCoop',
-  network_var_name = 'verbCoop'
+    net,
+    dyad_var = "matlCoop",
+    network_var_name = "verbCoop"
 )
 
 # The main network is now material cooperation
 print(net_pivoted)
 
 # The old network (verbal cooperation) is preserved as a dyadic attribute
-attr(net_pivoted, 'dyad_data')[['1']][['verbCoop']][1:5, 1:5]
+attr(net_pivoted, "dyad_data")[["1"]][["verbCoop"]][1:5, 1:5]
 
 }
 \author{

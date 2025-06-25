@@ -7,7 +7,7 @@
 #' @param threshold A numeric vector specifying the threshold for including alters in the neighborhood network. Default for unweighted networks is 0 and default for weighted networks is the average edge weight.
 #' @param include_ego Logical; if TRUE, the ego node will be included in the neighborhood network. Default is TRUE.
 #' @param ngbd_direction A character string specifying the type of relationship to consider for directed networks. Options are "out" for outgoing ties, "in" for incoming ties, and "any" for any relationship. Default is "any".
-#' 
+#'
 #' @return A list of neighborhood networks, each represented as a matrix.
 #'
 #' @author Cassy Dorff, Shahryar Minhas
@@ -16,13 +16,11 @@
 #' @noRd
 
 get_ngbd_net_for_ego <- function(
-    raw_net, ego, threshold, 
+    raw_net, ego, threshold,
     include_ego = TRUE, ngbd_direction = "any") {
-  
     ######################
     # iterate through nets to construct ngbds
     ngbd_actors <- lapply(1:length(raw_net), function(ii) {
-
         # Get iith net and thresh
         net <- raw_net[[ii]]
         thresh <- threshold[ii]
@@ -36,22 +34,30 @@ get_ngbd_net_for_ego <- function(
         if (include_ego) {
             ngbd_row <- c(ego, ngbd_row)
             ngbd_col <- c(ego, ngbd_col)
-            ngbd_any <- c(ego, ngbd_any) }
+            ngbd_any <- c(ego, ngbd_any)
+        }
 
         # Construct ngbd net based on ngbd_direction
-        if(ngbd_direction == "out"){ ngbd_net <- net[ngbd_row, ngbd_row] }
-        if(ngbd_direction == "in"){ ngbd_net <- net[ngbd_col, ngbd_col] }
-        if(ngbd_direction == "any"){ ngbd_net <- net[ngbd_any, ngbd_any] }
+        if (ngbd_direction == "out") {
+            ngbd_net <- net[ngbd_row, ngbd_row]
+        }
+        if (ngbd_direction == "in") {
+            ngbd_net <- net[ngbd_col, ngbd_col]
+        }
+        if (ngbd_direction == "any") {
+            ngbd_net <- net[ngbd_any, ngbd_any]
+        }
 
-        return(ngbd_net) })
+        return(ngbd_net)
+    })
     ######################
 
     ######################
     # add names
-    if(length(raw_net)>1){
+    if (length(raw_net) > 1) {
         names(ngbd_actors) <- names(raw_net)
-    } else { 
-        names(ngbd_actors) <- ego 
+    } else {
+        names(ngbd_actors) <- ego
     }
     ######################
 
@@ -65,24 +71,27 @@ get_ngbd_net_for_ego <- function(
 #' @keywords internal
 #' @noRd
 extract_ego_time <- function(ego_time_vec) {
-    sub("^[^_]+__", "", ego_time_vec) }
+    sub("^[^_]+__", "", ego_time_vec)
+}
 
-#' Fast extraction of ego from ego-time concatenated strings  
+#' Fast extraction of ego from ego-time concatenated strings
 #' @keywords internal
 #' @noRd
 extract_ego_name <- function(ego_time_vec) {
     # extract everything before "__"
-    sub("__.*$", "", ego_time_vec) }
+    sub("__.*$", "", ego_time_vec)
+}
 
 #' Split ego-time string into components
 #' @keywords internal
 #' @noRd
 split_ego_time <- function(ego_time_vec) {
-    
     out <- data.frame(
         ego = sub("__.*$", "", ego_time_vec),
         time = sub("^[^_]+__", "", ego_time_vec),
-        stringsAsFactors = FALSE )
+        stringsAsFactors = FALSE
+    )
 
     #
-    return(out) }
+    return(out)
+}

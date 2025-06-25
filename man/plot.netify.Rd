@@ -232,12 +232,12 @@ string. Applies a complete visual style including colors, shapes, and layout pre
 data(icews)
 
 # Basic cross-sectional network
-icews_10 <- icews[icews$year == 2010,]
+icews_10 <- icews[icews$year == 2010, ]
 net_10 <- netify(
-  icews_10,
-  actor1 = 'i', actor2 = 'j',
-  symmetric = FALSE,
-  weight = 'verbCoop'
+    icews_10,
+    actor1 = "i", actor2 = "j",
+    symmetric = FALSE,
+    weight = "verbCoop"
 )
 
 # Simple plot
@@ -245,76 +245,76 @@ plot(net_10)
 
 # add nodal stats to netlet
 net_10 <- add_node_vars(
-  net_10, 
-  summary_actor(net_10), 
-  'actor'
+    net_10,
+    summary_actor(net_10),
+    "actor"
 )
 
 # Customized plot with new naming convention
 plot(net_10,
-  edge_color = 'lightgrey',
-  node_size_by = 'degree_total',          # Instead of point_size_var
-  node_color = 'steelblue',
-  edge_alpha_by = 'verbCoop',       # Instead of edge_alpha_var
-  node_size_label = 'Degree',
-  edge_alpha_label = 'Verbal Cooperation'
+    edge_color = "lightgrey",
+    node_size_by = "degree_total", # Instead of point_size_var
+    node_color = "steelblue",
+    edge_alpha_by = "verbCoop", # Instead of edge_alpha_var
+    node_size_label = "Degree",
+    edge_alpha_label = "Verbal Cooperation"
 )
 
 # Longitudinal network example
 net_longit <- netify(
-  icews,
-  actor1 = 'i', actor2 = 'j',
-  time = 'year',
-  symmetric = FALSE,
-  weight = 'verbCoop',
-  nodal_vars = c('i_polity2', 'i_log_gdp')
+    icews,
+    actor1 = "i", actor2 = "j",
+    time = "year",
+    symmetric = FALSE,
+    weight = "verbCoop",
+    nodal_vars = c("i_polity2", "i_log_gdp")
 )
 
 # Add network statistics
 net_longit <- add_node_vars(
-  net_longit,
-  summary_actor(net_longit),
-  actor = 'actor', 
-  time = 'time'
+    net_longit,
+    summary_actor(net_longit),
+    actor = "actor",
+    time = "time"
 )
 
 # Plot with multiple aesthetics
 plot(net_longit,
-  # Edges
-  edge_color = 'grey70',
-  weight_transform = log1p,         # Transform weights
-  # Nodes  
-  node_size_by = 'degree_total',
-  node_color_by = 'i_polity2',
-  # Labels
-  node_size_label = 'Total Degree',
-  node_color_label = 'Polity Score',
-  edge_alpha_label = 'Log(Verbal Coop.)',
-  # Layout
-  static_actor_positions = TRUE     # Keep positions constant
+    # Edges
+    edge_color = "grey70",
+    weight_transform = log1p, # Transform weights
+    # Nodes
+    node_size_by = "degree_total",
+    node_color_by = "i_polity2",
+    # Labels
+    node_size_label = "Total Degree",
+    node_color_label = "Polity Score",
+    edge_alpha_label = "Log(Verbal Coop.)",
+    # Layout
+    static_actor_positions = TRUE # Keep positions constant
 )
 
 # Selective labeling example
 plot(net_10,
-  node_size_by = 'degree_total',
-  select_text = c('United States', 'China', 'Russian Federation'),
-  text_size = 3,
-  text_color = 'darkred'
+    node_size_by = "degree_total",
+    select_text = c("United States", "China", "Russian Federation"),
+    text_size = 3,
+    text_color = "darkred"
 )
 
 # choose alternative labels for selected text
 plot(net_10,
-  node_size_by = 'degree_total',
-  select_text = c('United States', 'China', 'Russian Federation'),
-  select_text_display = c('USA', 'CHN', 'RUS'),
-  text_size = 3,
-  text_color = 'darkred'
+    node_size_by = "degree_total",
+    select_text = c("United States", "China", "Russian Federation"),
+    select_text_display = c("USA", "CHN", "RUS"),
+    text_size = 3,
+    text_color = "darkred"
 )
 
 
 # Time subsetting example
 plot(net_longit,
-  time = c('2010', '2011', '2012')
+    time = c("2010", "2011", "2012")
 )
 
 # Node subsetting example
@@ -324,23 +324,23 @@ plot(net_longit, node_filter = ~ i_polity2 > 6 & i_log_gdp > 25)
 # use return_components=TRUE
 # to get back ggplot2 pieces of plot
 g10 <- plot(
-  net_10, 
-  node_alpha=.8,
-  arrow = ggplot2::arrow(length = ggplot2::unit(0.01, "inches")),  
-  node_size_by = 'log(degree_total)',
-  node_size_label = 'Log(Degree)',
-  edge_alpha_label='Log(Verbal Coop.)',
-  remove_isolates = TRUE,
-  weight_transform = log1p,
-  return_components = TRUE )
+    net_10,
+    node_alpha = .8,
+    arrow = ggplot2::arrow(length = ggplot2::unit(0.01, "inches")),
+    node_size_by = "log(degree_total)",
+    node_size_label = "Log(Degree)",
+    edge_alpha_label = "Log(Verbal Coop.)",
+    remove_isolates = TRUE,
+    weight_transform = log1p,
+    return_components = TRUE
+)
 
 # Manually assemble with custom modifications
 # to scale aesthetics such as edges
 g10$base +
-  netify_edge(g10) +
-  ggplot2::scale_alpha_continuous(range = c(0.01, 0.2)) +
-  netify_node(g10) +
-  theme_netify()
-
+    netify_edge(g10) +
+    ggplot2::scale_alpha_continuous(range = c(0.01, 0.2)) +
+    netify_node(g10) +
+    theme_netify()
 
 }

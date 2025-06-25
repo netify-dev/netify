@@ -39,12 +39,13 @@ It will issue a warning if used with other ggplot objects.
 \dontrun{
 # set labels for different scales
 plot(my_netify_obj,
-     edge_alpha_var = "weight",
-     point_size_var = "degree") +
-  netify_scale_labels(
-    edge_alpha = "Connection Strength",
-    node_size = "Node Degree"  # node_* is converted to point_*
-  )
+    edge_alpha_var = "weight",
+    point_size_var = "degree"
+) +
+    netify_scale_labels(
+        edge_alpha = "Connection Strength",
+        node_size = "Node Degree" # node_* is converted to point_*
+    )
 }
 
 }

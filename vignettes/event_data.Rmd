@@ -60,7 +60,7 @@ plot_actor_stats(actor_stats)
 ```{r, fig.width=6, fig.height=6}
 # select 10 random names for plotting
 select_names <- rownames(mex_network)
-set.seed(12345)
+set.seed(6886)
 random_indices <- sample(length(select_names), 10)
 random_names <- select_names[random_indices]
 

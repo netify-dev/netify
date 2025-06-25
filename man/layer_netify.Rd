@@ -67,62 +67,61 @@ layers, consider whether all layers are necessary for your analysis.
 data(icews)
 
 # Example 1: Cross-sectional multilayer network
-icews_10 <- icews[icews$year == 2010,]
+icews_10 <- icews[icews$year == 2010, ]
 
 # Create separate networks for different interaction types
 verbal_coop <- netify(
-  icews_10, 
-  actor1 = 'i', actor2 = 'j',
-  symmetric = FALSE, 
-  weight = 'verbCoop',
-  nodal_vars = c('i_log_gdp', 'i_log_pop'),
-  dyad_vars = 'verbConf'
+    icews_10,
+    actor1 = "i", actor2 = "j",
+    symmetric = FALSE,
+    weight = "verbCoop",
+    nodal_vars = c("i_log_gdp", "i_log_pop"),
+    dyad_vars = "verbConf"
 )
 
 material_coop <- netify(
-  icews_10, 
-  actor1 = 'i', actor2 = 'j',
-  symmetric = FALSE, 
-  weight = 'matlCoop',
-  nodal_vars = 'i_polity2',
-  dyad_vars = 'matlConf'
+    icews_10,
+    actor1 = "i", actor2 = "j",
+    symmetric = FALSE,
+    weight = "matlCoop",
+    nodal_vars = "i_polity2",
+    dyad_vars = "matlConf"
 )
 
 # Layer them together
 coop_multilayer <- layer_netify(
-  netlet_list = list(verbal_coop, material_coop),
-  layer_labels = c('Verbal', 'Material')
+    netlet_list = list(verbal_coop, material_coop),
+    layer_labels = c("Verbal", "Material")
 )
 
 # Check structure
-dim(get_raw(coop_multilayer))  # [actors × actors × 2]
-attr(coop_multilayer, 'layers')  # "Verbal" "Material"
+dim(get_raw(coop_multilayer)) # [actors × actors × 2]
+attr(coop_multilayer, "layers") # "Verbal" "Material"
 
 # Example 2: Longitudinal multilayer (array format)
 verbal_longit <- netify(
-  icews, 
-  actor1 = 'i', actor2 = 'j', time = 'year',
-  symmetric = FALSE, 
-  weight = 'verbCoop',
-  output_format = 'longit_array'
+    icews,
+    actor1 = "i", actor2 = "j", time = "year",
+    symmetric = FALSE,
+    weight = "verbCoop",
+    output_format = "longit_array"
 )
 
 material_longit <- netify(
-  icews, 
-  actor1 = 'i', actor2 = 'j', time = 'year',
-  symmetric = FALSE, 
-  weight = 'matlCoop',
-  output_format = 'longit_array'
+    icews,
+    actor1 = "i", actor2 = "j", time = "year",
+    symmetric = FALSE,
+    weight = "matlCoop",
+    output_format = "longit_array"
 )
 
 # Create longitudinal multilayer
 longit_multilayer <- layer_netify(
-  list(verbal_longit, material_longit),
-  layer_labels = c('Verbal', 'Material')
+    list(verbal_longit, material_longit),
+    layer_labels = c("Verbal", "Material")
 )
 
-dim(get_raw(longit_multilayer))  # [actors × actors × 2 × years]
-
+dim(get_raw(longit_multilayer)) # [actors × actors × 2 × years]
 
 }
 \author{

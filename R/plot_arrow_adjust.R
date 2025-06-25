@@ -11,70 +11,69 @@
 #' @param arrow_gap Additional gap between arrow tip and node boundary (0-1)
 #' @param curved Logical indicating whether edges are curved
 #' @param curvature Curvature amount if edges are curved
-#' 
+#'
 #' @return Updated edge_data with adjusted endpoints
-#' 
+#'
 #' @keywords internal
 #' @noRd
 
-adjust_edge_endpoints <- function(edge_data, node_data, node_size = 1.5, 
-                  size_scale = NULL, arrow_gap = 0.05,
-                  curved = FALSE, curvature = 0.5) {
-  
-  # return early if there are no edges to process
-  if (nrow(edge_data) == 0) {
-  return(edge_data)
-  }
-  
-  # create lookup tables for node positions (x and y coordinates)
-  node_x <- setNames(node_data$x, node_data$name)
-  node_y <- setNames(node_data$y, node_data$name)
-  
-  # determine node sizes
-  # if node_size is a column name in node_data, use variable sizes from that column
-  if (is.character(node_size) && length(node_size) == 1 && node_size %in% names(node_data)) {
-  node_sizes <- node_data[[node_size]]
-  } else if (is.numeric(node_size)) {
-  # if node_size is numeric, use a fixed size for all nodes
-  node_sizes <- rep(node_size, nrow(node_data))
-  } else {
-  # fallback to a default size for nodes
-  node_sizes <- rep(1.5, nrow(node_data))
-  }
-  
-  # create a lookup table for node sizes based on node names
-  node_size_lookup <- setNames(node_sizes, node_data$name)
-  
-  # calculate size scale if not provided
-  if (is.null(size_scale)) {
-  # get the range of x and y coordinates to determine the plot range
-  x_range <- diff(range(node_data$x, na.rm = TRUE))
-  y_range <- diff(range(node_data$y, na.rm = TRUE))
-  plot_range <- min(x_range, y_range)
-  
-  # derive a scale factor for node sizes based on the plot range
-  # this formula ensures sizes are proportional to the plot's coordinate system
-  size_scale <- 0.01 * sqrt(plot_range)
-  }
-  
-  # convert node sizes to radii in plot coordinates
-  # ggplot2 sizes roughly represent the diameter, so divide by 2 for radius
-  node_radii <- (node_sizes / 2) * size_scale
-  
-  # add a small gap to the radii to account for arrow spacing
-  node_radii <- node_radii + (arrow_gap * size_scale)
-  
-  # adjust edges based on whether they are straight or curved
-  if (!curved) {
-  # adjust straight edges to account for node positions and radii
-  edge_data <- adjust_straight_edges(edge_data, node_x, node_y, node_radii)
-  } else {
-  # adjust curved edges to account for node positions, radii, and curvature
-  edge_data <- adjust_curved_edges(edge_data, node_x, node_y, node_radii, curvature)
-  }
-  
-  # return the adjusted edge data
-  return(edge_data)
+adjust_edge_endpoints <- function(edge_data, node_data, node_size = 1.5,
+                                  size_scale = NULL, arrow_gap = 0.05,
+                                  curved = FALSE, curvature = 0.5) {
+    # return early if there are no edges to process
+    if (nrow(edge_data) == 0) {
+        return(edge_data)
+    }
+
+    # create lookup tables for node positions (x and y coordinates)
+    node_x <- setNames(node_data$x, node_data$name)
+    node_y <- setNames(node_data$y, node_data$name)
+
+    # determine node sizes
+    # if node_size is a column name in node_data, use variable sizes from that column
+    if (is.character(node_size) && length(node_size) == 1 && node_size %in% names(node_data)) {
+        node_sizes <- node_data[[node_size]]
+    } else if (is.numeric(node_size)) {
+        # if node_size is numeric, use a fixed size for all nodes
+        node_sizes <- rep(node_size, nrow(node_data))
+    } else {
+        # fallback to a default size for nodes
+        node_sizes <- rep(1.5, nrow(node_data))
+    }
+
+    # create a lookup table for node sizes based on node names
+    node_size_lookup <- setNames(node_sizes, node_data$name)
+
+    # calculate size scale if not provided
+    if (is.null(size_scale)) {
+        # get the range of x and y coordinates to determine the plot range
+        x_range <- diff(range(node_data$x, na.rm = TRUE))
+        y_range <- diff(range(node_data$y, na.rm = TRUE))
+        plot_range <- min(x_range, y_range)
+
+        # derive a scale factor for node sizes based on the plot range
+        # this formula ensures sizes are proportional to the plot's coordinate system
+        size_scale <- 0.01 * sqrt(plot_range)
+    }
+
+    # convert node sizes to radii in plot coordinates
+    # ggplot2 sizes roughly represent the diameter, so divide by 2 for radius
+    node_radii <- (node_sizes / 2) * size_scale
+
+    # add a small gap to the radii to account for arrow spacing
+    node_radii <- node_radii + (arrow_gap * size_scale)
+
+    # adjust edges based on whether they are straight or curved
+    if (!curved) {
+        # adjust straight edges to account for node positions and radii
+        edge_data <- adjust_straight_edges(edge_data, node_x, node_y, node_radii)
+    } else {
+        # adjust curved edges to account for node positions, radii, and curvature
+        edge_data <- adjust_curved_edges(edge_data, node_x, node_y, node_radii, curvature)
+    }
+
+    # return the adjusted edge data
+    return(edge_data)
 }
 
 
@@ -84,13 +83,12 @@ adjust_edge_endpoints <- function(edge_data, node_data, node_size = 1.5,
 #' @param node_x Named vector of node x positions
 #' @param node_y Named vector of node y positions
 #' @param node_radii Named vector of node radii in coordinate units
-#' 
+#'
 #' @return Updated edge_data
 #' @keywords internal
 #' @noRd
 
 adjust_straight_edges <- function(edge_data, node_x, node_y, node_radii) {
-
     # get positions of the edges
     x1 <- edge_data$x1
     y1 <- edge_data$y1
@@ -140,13 +138,12 @@ adjust_straight_edges <- function(edge_data, node_x, node_y, node_radii) {
 #' @param node_y Named vector of node y positions
 #' @param node_radii Named vector of node radii
 #' @param curvature Curvature parameter
-#' 
+#'
 #' @return Updated edge_data
 #' @keywords internal
 #' @noRd
 
 adjust_curved_edges <- function(edge_data, node_x, node_y, node_radii, curvature) {
-
     # loop through each edge in the data
     for (i in seq_len(nrow(edge_data))) {
         x1 <- edge_data$x1[i]
@@ -206,23 +203,23 @@ adjust_curved_edges <- function(edge_data, node_x, node_y, node_radii, curvature
 #'
 #' @param node_data Data frame with x and y coordinates
 #' @param base_scale Base scale factor (default 0.015)
-#' 
+#'
 #' @return Adjusted scale factor
 #' @keywords internal
 #' @noRd
 
 calculate_size_scale <- function(node_data, base_scale = 0.01) {
-  # calculate the range of x coordinates
-  x_range <- diff(range(node_data$x, na.rm = TRUE))
-  
-  # calculate the range of y coordinates
-  y_range <- diff(range(node_data$y, na.rm = TRUE))
-  
-  # combine the x and y ranges using the geometric mean
-  # this helps make the scaling more stable and less sensitive to extreme values
-  coord_range <- sqrt(x_range * y_range)
-  
-  # scale the base factor by the square root of the combined coordinate range
-  # this ensures the scaling adjusts gradually based on the size of the data
-  return(base_scale * sqrt(coord_range))
+    # calculate the range of x coordinates
+    x_range <- diff(range(node_data$x, na.rm = TRUE))
+
+    # calculate the range of y coordinates
+    y_range <- diff(range(node_data$y, na.rm = TRUE))
+
+    # combine the x and y ranges using the geometric mean
+    # this helps make the scaling more stable and less sensitive to extreme values
+    coord_range <- sqrt(x_range * y_range)
+
+    # scale the base factor by the square root of the combined coordinate range
+    # this ensures the scaling adjusts gradually based on the size of the data
+    return(base_scale * sqrt(coord_range))
 }

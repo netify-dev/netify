@@ -136,6 +136,45 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calculate_similarity_matrix_cpp
+NumericMatrix calculate_similarity_matrix_cpp(NumericVector attributes, std::string method);
+RcppExport SEXP _netify_calculate_similarity_matrix_cpp(SEXP attributesSEXP, SEXP methodSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type attributes(attributesSEXP);
+    Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
+    rcpp_result_gen = Rcpp::wrap(calculate_similarity_matrix_cpp(attributes, method));
+    return rcpp_result_gen;
+END_RCPP
+}
+// correlation_cpp
+double correlation_cpp(NumericVector x, NumericVector y);
+RcppExport SEXP _netify_correlation_cpp(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(correlation_cpp(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calculate_homophily_stats_cpp
+List calculate_homophily_stats_cpp(NumericMatrix similarity_matrix, LogicalMatrix net_matrix, bool significance_test, int n_permutations, double alpha);
+RcppExport SEXP _netify_calculate_homophily_stats_cpp(SEXP similarity_matrixSEXP, SEXP net_matrixSEXP, SEXP significance_testSEXP, SEXP n_permutationsSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type similarity_matrix(similarity_matrixSEXP);
+    Rcpp::traits::input_parameter< LogicalMatrix >::type net_matrix(net_matrixSEXP);
+    Rcpp::traits::input_parameter< bool >::type significance_test(significance_testSEXP);
+    Rcpp::traits::input_parameter< int >::type n_permutations(n_permutationsSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    rcpp_result_gen = Rcpp::wrap(calculate_homophily_stats_cpp(similarity_matrix, net_matrix, significance_test, n_permutations, alpha));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_netify_count_duplicate_dyads", (DL_FUNC) &_netify_count_duplicate_dyads, 3},
@@ -145,6 +184,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_netify_get_matrix_logical", (DL_FUNC) &_netify_get_matrix_logical, 10},
     {"_netify_get_matrix_character", (DL_FUNC) &_netify_get_matrix_character, 10},
     {"_netify_get_matrix_batch", (DL_FUNC) &_netify_get_matrix_batch, 10},
+    {"_netify_calculate_similarity_matrix_cpp", (DL_FUNC) &_netify_calculate_similarity_matrix_cpp, 2},
+    {"_netify_correlation_cpp", (DL_FUNC) &_netify_correlation_cpp, 2},
+    {"_netify_calculate_homophily_stats_cpp", (DL_FUNC) &_netify_calculate_homophily_stats_cpp, 5},
     {NULL, NULL, 0}
 };
 

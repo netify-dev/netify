@@ -30,7 +30,8 @@ comp <- plot(net, add_text = TRUE, return_components = TRUE)
 
 # build custom plot with text
 library(ggplot2)
-ggplot() + netify_text(comp)
+ggplot() +
+    netify_text(comp)
 }
 
 }

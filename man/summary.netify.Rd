@@ -112,10 +112,10 @@ data(icews)
 
 # Basic usage
 net <- netify(
-  icews, 
-  actor1 = 'i', actor2 = 'j', time = 'year',
-  symmetric = FALSE, 
-  weight = 'verbCoop'
+    icews,
+    actor1 = "i", actor2 = "j", time = "year",
+    symmetric = FALSE,
+    weight = "verbCoop"
 )
 
 # get summary
@@ -124,10 +124,12 @@ summary(net)
 \dontrun{
 # Add custom statistics - community detection
 comm_stats <- function(mat) {
-  g <- netify_to_igraph(mat)
-  comm <- igraph::cluster_spinglass(g)
-  c(n_communities = length(comm$csize),
-    modularity = comm$modularity)
+    g <- netify_to_igraph(mat)
+    comm <- igraph::cluster_spinglass(g)
+    c(
+        n_communities = length(comm$csize),
+        modularity = comm$modularity
+    )
 }
 
 # Apply to subset for efficiency
