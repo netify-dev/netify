@@ -192,7 +192,7 @@ all variables</li>
 <p><code><a href="../reference/attribute_report.html">attribute_report()</a></code>: The Complete Picture in One
 Function</p>
 <ul>
-<li>A kind of swiss army knife for understanding how country
+<li>A kind of Swiss Army knife for understanding how country
 characteristics relate to alliance patterns. Automates running relevant
 analyses and tells you what makes countries influential, who allies with
 whom, and what drives partnership formation.</li>
@@ -274,7 +274,7 @@ countries, and alliance commitments from the ATOP dataset.</p>
 <span><span class="co"># Print object</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">alliance_net</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Prepare nodal data with  country attributes</span></span>
+<code class="sourceCode R"><span><span class="co"># Prepare nodal data with country attributes</span></span>
 <span><span class="va">nodal_data</span> <span class="op">&lt;-</span> <span class="va">cow_2012</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span></span>
 <span>    <span class="va">ccode1</span>, <span class="va">region1</span>, <span class="va">v2x_polyarchy1</span>, </span>
@@ -307,7 +307,7 @@ countries, and alliance commitments from the ATOP dataset.</p>
 <span><span class="co"># Add country names for better interpretation</span></span>
 <span><span class="va">nodal_data</span><span class="op">$</span><span class="va">country_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/reference/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">nodal_data</span><span class="op">$</span><span class="va">actor</span>, <span class="st">"cown"</span>, <span class="st">"country.name"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Add nodl variables to network</span></span>
+<span><span class="co"># Add nodal variables to network</span></span>
 <span><span class="va">alliance_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span><span class="va">alliance_net</span>, <span class="va">nodal_data</span>, actor <span class="op">=</span> <span class="st">"actor"</span><span class="op">)</span></span></code></pre></div>
 <p>Add dyadic (relationship-level) variables:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -367,7 +367,7 @@ attributes.</p>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">## 1                -0.2431161                  -0.3122502            0.06913408</span></span>
 <span><span class="co">##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">## 1       0 0.1246703 0.1546069              3558               11493</span></span></code></pre>
+<span><span class="co">## 1       0 0.1259259 0.1547332              3558               11493</span></span></code></pre>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nDemocracy Homophily Results:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
@@ -410,11 +410,11 @@ pattern</li>
 </ul>
 <p>The democracy homophily analysis reveals a statistically significant
 pattern of democratic countries preferring to form alliances with other
-democracies. With a homophily correlation of 0.14 (p &lt; 0.05), there
+democracies. With a homophily correlation of 0.140 (p &lt; 0.05), there
 is evidence that similarity in democratic values influences alliance
 formation. The negative similarity values (-0.243 for allies vs -0.312
-for non-allies) reflect the correlation method’s use of negative
-absolute differences, where less negative values indicate greater
+for non-allies) reflect the correlation method’s calculation of
+similarity scores, where higher (less negative) values indicate greater
 similarity. This 0.069 difference between allied and non-allied pairs
 demonstrates that countries in alliances tend to have more similar
 democracy scores than those without alliance ties. The finding extends
@@ -444,7 +444,7 @@ democracy similarity relates to alliance formation:</p>
 connected (allied) versus unconnected (non-allied) country pairs. The
 vertical dashed lines indicate the mean similarity for each group. The
 visualization illustrates the moderate democracy homophily effect (r =
-0.14). While both distributions substantially overlap, the allied pairs
+0.140). While both distributions substantially overlap, the allied pairs
 (blue) show a subtle but significant rightward shift compared to
 non-allied pairs (gold). The mean similarity for allied countries
 (-0.243) exceeds that of non-allied countries (-0.312), indicating that
@@ -462,7 +462,7 @@ prove equally or more influential in shaping alliance networks.</p>
 <div class="section level3">
 <h3 id="using-homophily-for-categorical-variables">🔍 Using <code>homophily()</code> for Categorical Variables<a class="anchor" aria-label="anchor" href="#using-homophily-for-categorical-variables"></a>
 </h3>
-<p>Now lets move onto the categorical regime type variable we made:</p>
+<p>Now let’s move onto the categorical regime type variable we made:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">alliance_net</span>, <span class="st">'nodal_data'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   actor                    region democracy  log_gdp mil_capability regime_type</span></span>
@@ -492,8 +492,8 @@ prove equally or more influential in shaping alliance networks.</p>
 <span><span class="co">## 1   1 cooperation regime_type categorical               0             0.1331376</span></span>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">## 1                 0.4098686                     0.26186             0.1480086</span></span>
-<span><span class="co">##   p_value ci_lower  ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">## 1       0 0.119174 0.1471056              4033               14882</span></span></code></pre>
+<span><span class="co">##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs</span></span>
+<span><span class="co">## 1       0 0.1170069 0.1482952              4033               14882</span></span></code></pre>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nRegime Type Homophily Results:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
@@ -502,15 +502,18 @@ prove equally or more influential in shaping alliance networks.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Homophily score:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">regime_homophily</span><span class="op">$</span><span class="va">homophily_correlation</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Homophily score: 0.133</span></span></code></pre>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Same-regime alliances:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">regime_homophily</span><span class="op">$</span><span class="va">mean_similarity_connected</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## - Same-regime alliances: 0.41</span></span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Same-regime alliances:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">regime_homophily</span><span class="op">$</span><span class="va">mean_similarity_connected</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## - Same-regime alliances: 41 %</span></span></code></pre>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Cross-regime alliances:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">regime_homophily</span><span class="op">$</span><span class="va">mean_similarity_unconnected</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## - Cross-regime alliances: 0.262</span></span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Different-regime alliances:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">regime_homophily</span><span class="op">$</span><span class="va">mean_similarity_connected</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## - Different-regime alliances: 59 %</span></span></code></pre>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Expected if random:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">regime_homophily</span><span class="op">$</span><span class="va">mean_similarity_unconnected</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%\n"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## - Expected if random: 26.2 %</span></span></code></pre>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- P-value:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">regime_homophily</span><span class="op">$</span><span class="va">p_value</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - P-value: 0</span></span></code></pre>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="va">regime_homophily</span><span class="op">$</span><span class="va">p_value</span> <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="op">&amp;&amp;</span> <span class="va">regime_homophily</span><span class="op">$</span><span class="va">homophily_correlation</span> <span class="op">&gt;</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"→ Countries strongly prefer allies with similar political systems\n"</span><span class="op">)</span></span>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
@@ -519,13 +522,12 @@ prove equally or more influential in shaping alliance networks.</p>
 <pre><code><span><span class="co">## → Countries strongly prefer allies with similar political systems</span></span></code></pre>
 <p>The regime type analysis also reveals a pattern of political
 homophily in alliance formation. With a homophily score of 0.133 (p &lt;
-0.001), countries demonstrate a clear preference for forming alliances
-with similar regime types. The similarity scores, 41% for allied pairs
-versus 26.2% for non-allied pairs, indicate that countries sharing the
-same regime type (Democracy, Hybrid, or Autocracy) are substantially
-more likely to form alliances. This 14.8 percentage point difference
-suggests that political regime compatibility plays at least some role in
-international cooperation.</p>
+0.05), countries demonstrate a clear preference for forming alliances
+with similar regime types. The similarity scores show that 41% of allied
+pairs share the same regime type, compared to only 26.2% of non-allied
+pairs. This 14.8 percentage point difference suggests that political
+regime compatibility plays at least some role in international
+cooperation.</p>
 <p>The categorical nature of this analysis provides a clearer
 interpretation than continuous measures: when countries form alliances,
 there’s a 41% chance their partner shares the same regime type, compared
@@ -534,7 +536,7 @@ shared political institutions and governance norms facilitate
 international cooperation, though the effect remains moderate enough to
 allow for substantial cross-regime alliances driven by strategic
 necessities – though note that we are not specifically testing the
-democratic peace idea here specifically as we are amalgmating
+democratic peace idea here specifically as we are amalgamating
 autocracy-autocracy and democracy-democracy pairs into our same-regime
 bucket.</p>
 <div class="section level4">
@@ -543,7 +545,7 @@ bucket.</p>
 <p>For categorical variables like regime type, the visualization looks
 different. Instead of continuous similarity distributions, we see
 discrete categories:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Visualize regime type homophily</span></span>
 <span><span class="fu"><a href="../reference/plot_homophily.html">plot_homophily</a></span><span class="op">(</span><span class="va">regime_homophily</span>, <span class="va">alliance_net</span>,</span>
 <span>               type <span class="op">=</span> <span class="st">"distribution"</span>,</span>
@@ -571,7 +573,7 @@ nuance of how similar countries are on the democracy spectrum.</p>
 <p>International relations theory suggests that countries with similar
 levels of economic development tend to form more alliances. Let’s test
 this hypothesis:</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Test if countries with similar GDP levels form more alliances</span></span>
 <span><span class="va">gdp_homophily</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/homophily.html">homophily</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net</span>, </span>
@@ -585,24 +587,24 @@ this hypothesis:</p>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">## 1               -0.08536979                  -0.1056113            0.02024147</span></span>
 <span><span class="co">##   p_value   ci_lower  ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">## 1       0 0.09785752 0.1237175              3902               13864</span></span></code></pre>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<span><span class="co">## 1       0 0.09777057 0.1230806              3902               13864</span></span></code></pre>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nEconomic Development Homophily Results:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## Economic Development Homophily Results:</span></span></code></pre>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Homophily correlation:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">gdp_homophily</span><span class="op">$</span><span class="va">homophily_correlation</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Homophily correlation: 0.11</span></span></code></pre>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Similarity among allies:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">gdp_homophily</span><span class="op">$</span><span class="va">mean_similarity_connected</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Similarity among allies: -0.085</span></span></code></pre>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Similarity among non-allies:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">gdp_homophily</span><span class="op">$</span><span class="va">mean_similarity_unconnected</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Similarity among non-allies: -0.106</span></span></code></pre>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- P-value:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">gdp_homophily</span><span class="op">$</span><span class="va">p_value</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - P-value: 0</span></span></code></pre>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="va">gdp_homophily</span><span class="op">$</span><span class="va">p_value</span> <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="op">&amp;&amp;</span> <span class="va">gdp_homophily</span><span class="op">$</span><span class="va">homophily_correlation</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"→ Countries at similar development levels are more likely to form alliances\n"</span><span class="op">)</span></span>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
@@ -616,7 +618,7 @@ this hypothesis:</p>
 <p>Do countries primarily form alliances within their own regions, or
 are alliances more globally distributed? Regional patterns provide
 another example of categorical homophily:</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Test regional homophily</span></span>
 <span><span class="va">region_homophily</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/homophily.html">homophily</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net</span>, </span>
@@ -630,18 +632,18 @@ another example of categorical homophily:</p>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">## 1                 0.7956856                  0.03420239             0.7614832</span></span>
 <span><span class="co">##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">## 1       0 0.7741058 0.7962057              4033               14882</span></span></code></pre>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<span><span class="co">## 1       0 0.7731082 0.7956386              4033               14882</span></span></code></pre>
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nRegional Clustering Results:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## Regional Clustering Results:</span></span></code></pre>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Homophily score:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">region_homophily</span><span class="op">$</span><span class="va">homophily_correlation</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Homophily score: 0.785</span></span></code></pre>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Within-region alliances:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">region_homophily</span><span class="op">$</span><span class="va">mean_similarity_connected</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Within-region alliances: 0.796</span></span></code></pre>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Cross-region alliances:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">region_homophily</span><span class="op">$</span><span class="va">mean_similarity_unconnected</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Cross-region alliances: 0.034</span></span></code></pre>
 </div>
@@ -656,7 +658,7 @@ connect, but <em>how much</em> and <em>with whom</em>.</p>
 <div class="section level3">
 <h3 id="democracy-mixing-matrix">📊 Democracy Mixing Matrix<a class="anchor" aria-label="anchor" href="#democracy-mixing-matrix"></a>
 </h3>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Analyze mixing patterns by regime type</span></span>
 <span><span class="va">regime_mixing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mixing_matrix.html">mixing_matrix</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net</span>,                <span class="co"># Network object</span></span>
@@ -667,28 +669,28 @@ connect, but <em>how much</em> and <em>with whom</em>.</p>
 <span><span class="co"># Display the mixing matrix</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Regime Type Alliance Matrix:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Regime Type Alliance Matrix:</span></span></code></pre>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">regime_mixing</span><span class="op">$</span><span class="va">mixing_matrices</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##           Autocracy Democracy Hybrid Unknown</span></span>
 <span><span class="co">## Autocracy     0.128     0.100  0.061   0.006</span></span>
 <span><span class="co">## Democracy     0.100     0.241  0.079   0.038</span></span>
 <span><span class="co">## Hybrid        0.061     0.079  0.033   0.010</span></span>
 <span><span class="co">## Unknown       0.006     0.038  0.010   0.008</span></span></code></pre>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Interpret key statistics</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nKey Insights from mixing_matrix():\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## Key Insights from mixing_matrix():</span></span></code></pre>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Assortativity:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">regime_mixing</span><span class="op">$</span><span class="va">summary_stats</span><span class="op">$</span><span class="va">assortativity</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Assortativity: 0.113</span></span></code></pre>
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  (Positive = similar types connect more; Negative = different types connect more)\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   (Positive = similar types connect more; Negative = different types connect more)</span></span></code></pre>
-<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Proportion of within-type alliances:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">regime_mixing</span><span class="op">$</span><span class="va">summary_stats</span><span class="op">$</span><span class="va">diagonal_proportion</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Proportion of within-type alliances: 0.41</span></span></code></pre>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  (Higher values indicate more homophily)\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   (Higher values indicate more homophily)</span></span></code></pre>
 <div class="section level4">
@@ -711,7 +713,7 @@ type</li>
 <div class="section level3">
 <h3 id="regional-alliance-patterns-with-row-normalization">🌍 Regional Alliance Patterns with Row Normalization<a class="anchor" aria-label="anchor" href="#regional-alliance-patterns-with-row-normalization"></a>
 </h3>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Analyze mixing patterns by region</span></span>
 <span><span class="va">region_mixing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mixing_matrix.html">mixing_matrix</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net</span>, </span>
@@ -721,7 +723,7 @@ type</li>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Regional Alliance Matrix (row-normalized):\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Regional Alliance Matrix (row-normalized):</span></span></code></pre>
-<div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">region_mixing</span><span class="op">$</span><span class="va">mixing_matrices</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##                            East Asia &amp; Pacific Europe &amp; Central Asia</span></span>
 <span><span class="co">## East Asia &amp; Pacific                      0.554                 0.215</span></span>
@@ -750,7 +752,7 @@ type</li>
 <div class="section level4">
 <h4 id="visualizing-regional-alliance-patterns">Visualizing Regional Alliance Patterns<a class="anchor" aria-label="anchor" href="#visualizing-regional-alliance-patterns"></a>
 </h4>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb82"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Visualize regional mixing patterns</span></span>
 <span><span class="fu"><a href="../reference/plot_mixing_matrix.html">plot_mixing_matrix</a></span><span class="op">(</span><span class="va">region_mixing</span>,</span>
 <span>                  show_values <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -777,7 +779,7 @@ interests.</p>
 </h3>
 <p>A unique feature of <code><a href="../reference/mixing_matrix.html">mixing_matrix()</a></code> is analyzing
 interactions across different attributes:</p>
-<div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># How do regime types interact across regions?</span></span>
 <span><span class="va">cross_mixing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mixing_matrix.html">mixing_matrix</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net</span>, </span>
@@ -787,7 +789,7 @@ interactions across different attributes:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"How different regime types form alliances across regions:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## How different regime types form alliances across regions:</span></span></code></pre>
-<div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cross_mixing</span><span class="op">$</span><span class="va">mixing_matrices</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##                            Autocracy Democracy Hybrid Unknown</span></span>
 <span><span class="co">## East Asia &amp; Pacific            0.020     0.035  0.020   0.003</span></span>
@@ -810,7 +812,7 @@ predict connections.</p>
 <div class="section level3">
 <h3 id="geographic-distance-and-alliance-formation">🌍 Geographic Distance and Alliance Formation<a class="anchor" aria-label="anchor" href="#geographic-distance-and-alliance-formation"></a>
 </h3>
-<div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Test correlation between geographic distance and alliance formation</span></span>
 <span><span class="va">geo_correlation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dyad_correlation.html">dyad_correlation</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net</span>,                      <span class="co"># Network object</span></span>
@@ -822,16 +824,16 @@ predict connections.</p>
 <span><span class="co"># Display results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Geographic Distance and Alliance Formation (dyad_correlation results):\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Geographic Distance and Alliance Formation (dyad_correlation results):</span></span></code></pre>
-<div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Correlation coefficient:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">geo_correlation</span><span class="op">$</span><span class="va">correlation</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Correlation coefficient: -0.588</span></span></code></pre>
-<div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- P-value:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">geo_correlation</span><span class="op">$</span><span class="va">p_value</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - P-value: 0</span></span></code></pre>
-<div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Number of dyads analyzed:"</span>, <span class="va">geo_correlation</span><span class="op">$</span><span class="va">n_dyads</span>, <span class="st">"\n\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## - Number of dyads analyzed:</span></span></code></pre>
 <div class="sourceCode" id="cb93"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Number of dyads analyzed:"</span>, <span class="va">geo_correlation</span><span class="op">$</span><span class="va">n_dyads</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"\n\n"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## - Number of dyads analyzed:</span></span></code></pre>
+<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Interpret the correlation</span></span>
 <span><span class="kw">if</span><span class="op">(</span><span class="va">geo_correlation</span><span class="op">$</span><span class="va">correlation</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">0.1</span> <span class="op">&amp;&amp;</span> <span class="va">geo_correlation</span><span class="op">$</span><span class="va">p_value</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"✓ Geography matters: Countries form more alliances with nearby nations.\n"</span><span class="op">)</span></span>
@@ -849,7 +851,7 @@ predict connections.</p>
 <div class="section level3">
 <h3 id="analyzing-multiple-dyadic-variables">🤝 Analyzing Multiple Dyadic Variables<a class="anchor" aria-label="anchor" href="#analyzing-multiple-dyadic-variables"></a>
 </h3>
-<div class="sourceCode" id="cb95"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb97"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Test both geographic distance and alliance intensity</span></span>
 <span><span class="va">multi_dyad_correlation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dyad_correlation.html">dyad_correlation</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net</span>,</span>
@@ -861,7 +863,7 @@ predict connections.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nMultiple Dyadic Variables Analysis:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## Multiple Dyadic Variables Analysis:</span></span></code></pre>
-<div class="sourceCode" id="cb97"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb99"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">multi_dyad_correlation</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n"</span>, <span class="va">multi_dyad_correlation</span><span class="op">$</span><span class="va">dyad_var</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, <span class="st">":\n"</span>, sep<span class="op">=</span><span class="st">""</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Correlation:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">multi_dyad_correlation</span><span class="op">$</span><span class="va">correlation</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -884,12 +886,12 @@ predict connections.</p>
 <div class="section level2">
 <h2 id="comprehensive-analysis-with-attribute_report">6. Comprehensive Analysis with <code>attribute_report()</code><a class="anchor" aria-label="anchor" href="#comprehensive-analysis-with-attribute_report"></a>
 </h2>
-<p>The <code><a href="../reference/attribute_report.html">attribute_report()</a></code> tries to combines the previous
+<p>The <code><a href="../reference/attribute_report.html">attribute_report()</a></code> function combines the previous
 analyses into a comprehensive report.</p>
 <div class="section level3">
 <h3 id="running-the-complete-analysis">🚀 Running the Complete Analysis<a class="anchor" aria-label="anchor" href="#running-the-complete-analysis"></a>
 </h3>
-<div class="sourceCode" id="cb99"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run comprehensive analysis with all features</span></span>
 <span><span class="va">comprehensive_analysis</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/attribute_report.html">attribute_report</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net</span>,</span>
@@ -910,35 +912,35 @@ analyses into a comprehensive report.</p>
 <span>  </span>
 <span>  <span class="co"># Perform significance tests</span></span>
 <span>  significance_test <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># The function returns a list with multiple components</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Components of attribute_report output:\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Components of attribute_report output:</span></span></code></pre>
-<div class="sourceCode" id="cb101"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- homophily_analysis: Tests for each node attribute\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## - homophily_analysis: Tests for each node attribute</span></span></code></pre>
-<div class="sourceCode" id="cb103"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- mixing_matrices: Interaction patterns for categorical variables\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## - mixing_matrices: Interaction patterns for categorical variables</span></span></code></pre>
-<div class="sourceCode" id="cb105"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- centrality_correlations: How attributes relate to network position\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## - centrality_correlations: How attributes relate to network position</span></span></code></pre>
-<div class="sourceCode" id="cb107"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- dyadic_correlations: How dyad attributes predict ties\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## - dyadic_correlations: How dyad attributes predict ties</span></span></code></pre>
+<span><span class="op">)</span></span></code></pre></div>
+<p><code>attribute_report</code> returns a list with multiple
+components</p>
+<ul>
+<li>
+<strong><code>homophily_analysis</code></strong>: Tests for each
+node attribute</li>
+<li>
+<strong><code>mixing_matrices</code></strong>: Interaction patterns
+for categorical variables</li>
+<li>
+<strong><code>centrality_correlations</code></strong>: How
+attributes relate to network position</li>
+<li>
+<strong><code>dyadic_correlations</code></strong>: How dyad
+attributes predict ties</li>
+</ul>
 </div>
 <div class="section level3">
 <h3 id="extracting-key-findings-from-the-summary">📋 Extracting Key Findings from the Summary<a class="anchor" aria-label="anchor" href="#extracting-key-findings-from-the-summary"></a>
 </h3>
-<div class="sourceCode" id="cb109"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract and display homophily results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"=== HOMOPHILY ANALYSIS ===\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## === HOMOPHILY ANALYSIS ===</span></span></code></pre>
-<div class="sourceCode" id="cb111"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb104"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Do similar countries form more alliances?\n\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Do similar countries form more alliances?</span></span></code></pre>
-<div class="sourceCode" id="cb113"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb106"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">homophily_summary</span> <span class="op">&lt;-</span> <span class="va">comprehensive_analysis</span><span class="op">$</span><span class="va">homophily_analysis</span></span>
 <span></span>
 <span><span class="co"># Create a more informative display</span></span>
@@ -959,7 +961,14 @@ analyses into a comprehensive report.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">homophily_display</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"attribute"</span>, <span class="st">"method"</span>, <span class="st">"homophily_correlation"</span>, <span class="st">"p_value"</span>, <span class="st">"significance"</span>, <span class="st">"interpretation"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span></span>
+<span>  <span class="va">homophily_display</span><span class="op">[</span>, </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"attribute"</span>, <span class="st">"method"</span>, </span>
+<span>    <span class="st">"homophily_correlation"</span>, </span>
+<span>    <span class="st">"p_value"</span>, <span class="st">"significance"</span>, </span>
+<span>    <span class="st">"interpretation"</span><span class="op">)</span></span>
+<span>    <span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##                     attribute      method homophily_correlation p_value</span></span>
 <span><span class="co">## region                 region categorical            0.78482253       0</span></span>
 <span><span class="co">## regime_type       regime_type categorical            0.13313762       0</span></span>
@@ -972,15 +981,15 @@ analyses into a comprehensive report.</p>
 <span><span class="co">## democracy               *** Moderate homophily</span></span>
 <span><span class="co">## log_gdp                 *** Moderate homophily</span></span>
 <span><span class="co">## mil_capability          ***        Heterophily</span></span></code></pre>
-<div class="sourceCode" id="cb115"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Which attributes correlate with network centrality?</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n=== POWER AND INFLUENCE ===\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## === POWER AND INFLUENCE ===</span></span></code></pre>
-<div class="sourceCode" id="cb117"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb110"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"What makes countries central in the alliance network?\n\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## What makes countries central in the alliance network?</span></span></code></pre>
-<div class="sourceCode" id="cb119"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb112"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">centrality_summary</span> <span class="op">&lt;-</span> <span class="va">comprehensive_analysis</span><span class="op">$</span><span class="va">centrality_correlations</span></span>
 <span></span>
 <span><span class="co"># Show all centrality correlations with interpretation</span></span>
@@ -996,7 +1005,13 @@ analyses into a comprehensive report.</p>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">p_value</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">centrality_display</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"node_var"</span>, <span class="st">"centrality_measure"</span>, <span class="st">"correlation"</span>, <span class="st">"p_value"</span>, <span class="st">"interpretation"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span></span>
+<span>  <span class="va">centrality_display</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"node_var"</span>, <span class="st">"centrality_measure"</span>, </span>
+<span>    <span class="st">"correlation"</span>, <span class="st">"p_value"</span>, </span>
+<span>    <span class="st">"interpretation"</span><span class="op">)</span></span>
+<span>    <span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##            node_var centrality_measure correlation      p_value</span></span>
 <span><span class="co">## cor7 mil_capability        betweenness  0.68113948 6.181020e-28</span></span>
 <span><span class="co">## cor8 mil_capability          closeness  0.35058816 9.306697e-07</span></span>
@@ -1019,15 +1034,15 @@ analyses into a comprehensive report.</p>
 <span><span class="co">## cor6   Moderately associated with centrality</span></span>
 <span><span class="co">## cor1 Not significantly related to centrality</span></span>
 <span><span class="co">## 1    Not significantly related to centrality</span></span></code></pre>
-<div class="sourceCode" id="cb121"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb114"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Dyadic factors</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n=== RELATIONSHIP FACTORS ===\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## === RELATIONSHIP FACTORS ===</span></span></code></pre>
-<div class="sourceCode" id="cb123"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb116"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"What dyadic factors predict alliance formation?\n\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## What dyadic factors predict alliance formation?</span></span></code></pre>
-<div class="sourceCode" id="cb125"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb118"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dyadic_summary</span> <span class="op">&lt;-</span> <span class="va">comprehensive_analysis</span><span class="op">$</span><span class="va">dyadic_correlations</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">dyadic_summary</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dyad_var"</span>, <span class="st">"correlation"</span>, <span class="st">"p_value"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##              dyad_var correlation p_value</span></span>
@@ -1042,7 +1057,7 @@ analyses into a comprehensive report.</p>
 <div class="section level3">
 <h3 id="hypothesis-1-democratic-peace">Hypothesis 1: Democratic Peace<a class="anchor" aria-label="anchor" href="#hypothesis-1-democratic-peace"></a>
 </h3>
-<div class="sourceCode" id="cb127"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb120"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a binary democracy indicator</span></span>
 <span><span class="va">nodal_data_binary</span> <span class="op">&lt;-</span> <span class="va">nodal_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>is_democracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">regime_type</span> <span class="op">==</span> <span class="st">"Democracy"</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
@@ -1061,16 +1076,17 @@ analyses into a comprehensive report.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Democratic Peace Hypothesis Test:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Democratic Peace Hypothesis Test:</span></span></code></pre>
-<div class="sourceCode" id="cb129"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb122"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Effect size:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dem_peace_test</span><span class="op">$</span><span class="va">homophily_correlation</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Effect size: 0.048</span></span></code></pre>
-<div class="sourceCode" id="cb131"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb124"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- P-value:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">dem_peace_test</span><span class="op">$</span><span class="va">p_value</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - P-value: 0</span></span></code></pre>
-<div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Conclusion:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">dem_peace_test</span><span class="op">$</span><span class="va">p_value</span> <span class="op">&lt;</span> <span class="fl">0.05</span>, </span>
-<span>                           <span class="st">"Democracies significantly prefer forming alliances with other democracies"</span>,</span>
-<span>                           <span class="st">"No significant democratic preference"</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb126"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Conclusion:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span></span>
+<span>  <span class="va">dem_peace_test</span><span class="op">$</span><span class="va">p_value</span> <span class="op">&lt;</span> <span class="fl">0.05</span>, </span>
+<span>  <span class="st">"Democracies significantly prefer forming alliances with other democracies"</span>,</span>
+<span>  <span class="st">"No significant democratic preference"</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Conclusion: Democracies significantly prefer forming alliances with other democracies</span></span></code></pre>
 </div>
 <div class="section level3">
@@ -1078,7 +1094,7 @@ analyses into a comprehensive report.</p>
 </h3>
 <p>Do powerful countries (high military capability) primarily form
 alliances with other powerful countries?</p>
-<div class="sourceCode" id="cb135"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb128"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Test military capability homophily</span></span>
 <span><span class="va">power_homophily</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/homophily.html">homophily</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net</span>, </span>
@@ -1089,36 +1105,38 @@ alliances with other powerful countries?</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nPower Politics Hypothesis:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## Power Politics Hypothesis:</span></span></code></pre>
-<div class="sourceCode" id="cb137"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb130"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Correlation:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">power_homophily</span><span class="op">$</span><span class="va">homophily_correlation</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - Correlation: -0.045</span></span></code></pre>
-<div class="sourceCode" id="cb139"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb132"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- P-value:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">power_homophily</span><span class="op">$</span><span class="va">p_value</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## - P-value: 0</span></span></code></pre>
-<div class="sourceCode" id="cb141"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb134"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"- Interpretation:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">power_homophily</span><span class="op">$</span><span class="va">p_value</span> <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="va">power_homophily</span><span class="op">$</span><span class="va">homophily_correlation</span> <span class="op">&gt;</span> <span class="fl">0</span>,</span>
 <span>  <span class="st">"Powerful countries prefer forming alliances with other powerful countries"</span>,</span>
-<span>  <span class="st">"No evidence of power-based alliance preferences"</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## - Interpretation: No evidence of power-based alliance preferences</span></span></code></pre>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">power_homophily</span><span class="op">$</span><span class="va">p_value</span> <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="va">power_homophily</span><span class="op">$</span><span class="va">homophily_correlation</span> <span class="op">&lt;</span> <span class="fl">0</span>,</span>
+<span>    <span class="st">"Powerful countries tend to form alliances with less powerful countries (heterophily)"</span>,</span>
+<span>    <span class="st">"No evidence of power-based alliance preferences"</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## - Interpretation: Powerful countries tend to form alliances with less powerful countries (heterophily)</span></span></code></pre>
 </div>
 </div>
 <div class="section level2">
 <h2 id="visualizing-network-patterns">8. Visualizing Network Patterns<a class="anchor" aria-label="anchor" href="#visualizing-network-patterns"></a>
 </h2>
-<p>And as seen in other vignettes we can we use the
+<p>And as seen in other vignettes we can use the
 <code><a href="../reference/plot.netify.html">plot.netify()</a></code> function to visualize the network with node
 attributes and edge weights:</p>
 <div class="section level3">
 <h3 id="network-visualization-by-attributes">Network Visualization by Attributes<a class="anchor" aria-label="anchor" href="#network-visualization-by-attributes"></a>
 </h3>
-<div class="sourceCode" id="cb143"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb136"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># First add network statistics to the netify object</span></span>
 <span><span class="va">alliance_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net</span>,</span>
 <span>  <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">alliance_net</span><span class="op">)</span>,</span>
 <span>  actor <span class="op">=</span> <span class="st">"actor"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb144"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb137"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># </span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">alliance_net</span>,</span>
 <span>     <span class="co"># Node aesthetics</span></span>
@@ -1142,7 +1160,7 @@ attributes and edge weights:</p>
 <div class="section level3">
 <h3 id="visualizing-homophily-results">Visualizing Homophily Results<a class="anchor" aria-label="anchor" href="#visualizing-homophily-results"></a>
 </h3>
-<div class="sourceCode" id="cb145"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb138"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a visualization of homophily results</span></span>
 <span><span class="va">homophily_viz_data</span> <span class="op">&lt;-</span> <span class="va">comprehensive_analysis</span><span class="op">$</span><span class="va">homophily_analysis</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
@@ -1156,7 +1174,7 @@ attributes and edge weights:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">significant</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">4</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"gray50"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FALSE"</span> <span class="op">=</span> <span class="st">"gray60"</span>, <span class="st">"TRUE"</span> <span class="op">=</span> <span class="st">"#2E86AB"</span><span class="op">)</span>,</span>
-<span>                     labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"(p &lt; 0.05)"</span>, <span class="st">"Not significant"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>                     labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FALSE"</span> <span class="op">=</span> <span class="st">"Not significant"</span>, <span class="st">"TRUE"</span> <span class="op">=</span> <span class="st">"(p &lt; 0.05)"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Homophily Analysis Results"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"Do similar countries form more alliances?"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Homophily Correlation"</span>,</span>
@@ -1171,7 +1189,7 @@ attributes and edge weights:</p>
 </h3>
 <p>We can use the <code><a href="../reference/plot_homophily.html">plot_homophily()</a></code> function to create a
 cleaner comparison visualization:</p>
-<div class="sourceCode" id="cb146"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb139"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Use plot_homophily for a comparison plot</span></span>
 <span><span class="fu"><a href="../reference/plot_homophily.html">plot_homophily</a></span><span class="op">(</span><span class="va">comprehensive_analysis</span><span class="op">$</span><span class="va">homophily_analysis</span>, </span>
 <span>               type <span class="op">=</span> <span class="st">"comparison"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1182,21 +1200,24 @@ cleaner comparison visualization:</p>
 <div class="section level3">
 <h3 id="visualizing-centrality-patterns">Visualizing Centrality Patterns<a class="anchor" aria-label="anchor" href="#visualizing-centrality-patterns"></a>
 </h3>
-<div class="sourceCode" id="cb147"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb140"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Prepare data for centrality visualization</span></span>
 <span><span class="va">centrality_viz</span> <span class="op">&lt;-</span> <span class="va">comprehensive_analysis</span><span class="op">$</span><span class="va">centrality_correlations</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">p_value</span> <span class="op">&lt;</span> <span class="fl">0.1</span><span class="op">)</span> <span class="op">|&gt;</span>  <span class="co"># Show marginally significant results</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    significant <span class="op">=</span> <span class="va">p_value</span> <span class="op">&lt;</span> <span class="fl">0.05</span>,</span>
 <span>    node_var <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">node_var</span><span class="op">)</span>,</span>
-<span>    centrality_measure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">centrality_measure</span>, </span>
-<span>                               levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"degree"</span>, <span class="st">"betweenness"</span>, <span class="st">"closeness"</span><span class="op">)</span><span class="op">)</span></span>
+<span>    centrality_measure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span></span>
+<span>      <span class="va">centrality_measure</span>,</span>
+<span>      levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"degree"</span>, <span class="st">"betweenness"</span>, <span class="st">"closeness"</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">centrality_viz</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">centrality_viz</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">correlation</span>, y <span class="op">=</span> <span class="va">node_var</span>, color <span class="op">=</span> <span class="va">significant</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">0</span>, xend <span class="op">=</span> <span class="va">correlation</span>, y <span class="op">=</span> <span class="va">node_var</span>, yend <span class="op">=</span> <span class="va">node_var</span><span class="op">)</span>,</span>
-<span>                 size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
+<span>        x <span class="op">=</span> <span class="fl">0</span>, xend <span class="op">=</span> <span class="va">correlation</span>, y <span class="op">=</span> <span class="va">node_var</span>, yend <span class="op">=</span> <span class="va">node_var</span><span class="op">)</span>,</span>
+<span>      size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">centrality_measure</span>, ncol <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"gray50"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1218,11 +1239,13 @@ cleaner comparison visualization:</p>
 </h3>
 <p>We can use the <code><a href="../reference/plot_mixing_matrix.html">plot_mixing_matrix()</a></code> function to create a
 cleaner visualization of the mixing patterns:</p>
-<div class="sourceCode" id="cb148"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb141"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a heatmap of the regime mixing matrix using plot_mixing_matrix</span></span>
-<span><span class="fu"><a href="../reference/plot_mixing_matrix.html">plot_mixing_matrix</a></span><span class="op">(</span><span class="va">regime_mixing</span>, </span>
-<span>                  show_values <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                  diagonal_emphasis <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="../reference/plot_mixing_matrix.html">plot_mixing_matrix</a></span><span class="op">(</span></span>
+<span>    <span class="va">regime_mixing</span>,</span>
+<span>    show_values <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    diagonal_emphasis <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Regime Type Alliance Patterns"</span>,</span>
 <span>       subtitle <span class="op">=</span> <span class="st">"How different regime types interact in the network"</span>,</span>
 <span>       x <span class="op">=</span> <span class="st">"Allied with..."</span>,</span>
@@ -1232,9 +1255,9 @@ cleaner visualization of the mixing patterns:</p>
 regime types. The diagonal cells (emphasized with black borders)
 represent within-type alliances, while off-diagonal cells show
 cross-type alliances. Darker blue indicates higher proportions of
-alliances. The assortativity coefficient of 0.126 and diagonal
-proportion of 0.405 confirm the moderate tendency for regime type
-homophily in alliance formation.</p>
+alliances. The assortativity coefficient of 0.113 (not 0.126) and
+diagonal proportion of 0.41 (not 0.405) confirm the moderate tendency
+for regime type homophily in alliance formation.</p>
 </div>
 </div>
 <div class="section level2">
