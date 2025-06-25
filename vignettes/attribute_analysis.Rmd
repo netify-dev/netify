@@ -60,9 +60,9 @@ We'll focus on how to do some exploratory statistical analysis with **netify**:
      - **Binary network options**: Analyze tie presence vs. strength separately
      - **Comprehensive diagnostics**: Descriptive stats for all variables
 
-4. `attribute_report()`:  The Complete Picture in One Function
+4. `attribute_report()`: The Complete Picture in One Function
 
-   - A kind of swiss army knife for understanding how country characteristics relate to alliance patterns. Automates running relevant analyses and tells you what makes countries influential, who allies with whom, and what drives partnership formation.
+   - A kind of Swiss Army knife for understanding how country characteristics relate to alliance patterns. Automates running relevant analyses and tells you what makes countries influential, who allies with whom, and what drives partnership formation.
    - Comprehensive wrapper combining homophily analysis, mixing matrices, dyadic correlations, and centrality-attribute relationships. Tries to automatically determine appropriate methods based on variable types.
 
 ```{r}
@@ -138,7 +138,7 @@ print(alliance_net)
 
 
 ```{r}
-# Prepare nodal data with  country attributes
+# Prepare nodal data with country attributes
 nodal_data <- cow_2012 |>
   select(
     ccode1, region1, v2x_polyarchy1, 
@@ -171,7 +171,7 @@ nodal_data <- cow_2012 |>
 # Add country names for better interpretation
 nodal_data$country_name <- countrycode(nodal_data$actor, "cown", "country.name")
 
-# Add nodl variables to network
+# Add nodal variables to network
 alliance_net <- add_node_vars(alliance_net, nodal_data, actor = "actor")
 ```
 
@@ -200,7 +200,7 @@ alliance_net <- add_dyad_vars(
 )
 ```
 
-## 1. Testing the Democratic Peace  with `homophily()`
+## 1. Testing the Democratic Peace with `homophily()`
 
 The democratic peace theory posits that democracies rarely engage in conflict with one another, driven by shared liberal norms, institutional constraints on executive power, and transparency in political decision-making. Here we examine whether these same mechanisms that reduce conflict might also promote cooperation, specifically, whether democratic states demonstrate a preference for forming alliances with other democracies.
 
@@ -240,7 +240,7 @@ if(democracy_homophily$p_value < 0.05) {
 - **mean_similarity_unconnected**: Average similarity among unconnected pairs
 - **p_value**: Statistical significance of the homophily pattern
 
-The democracy homophily analysis reveals a statistically significant pattern of democratic countries preferring to form alliances with other democracies. With a homophily correlation of 0.14 (p < 0.05), there is evidence that similarity in democratic values influences alliance formation. The negative similarity values (-0.243 for allies vs -0.312 for non-allies) reflect the correlation method's use of negative absolute differences, where less negative values indicate greater similarity. This 0.069 difference between allied and non-allied pairs demonstrates that countries in alliances tend to have more similar democracy scores than those without alliance ties. The finding extends democratic peace theory beyond conflict avoidance—democracies not only rarely fight each other but also show a moderate tendency to select each other as alliance partners. This pattern across 3,558 alliance pairs likely reflects shared preferences for international institutions, compatible domestic constraints on foreign policy, and the reduced uncertainty that comes from transparency in democratic decision-making processes.
+The democracy homophily analysis reveals a statistically significant pattern of democratic countries preferring to form alliances with other democracies. With a homophily correlation of 0.140 (p < 0.05), there is evidence that similarity in democratic values influences alliance formation. The negative similarity values (-0.243 for allies vs -0.312 for non-allies) reflect the correlation method's calculation of similarity scores, where higher (less negative) values indicate greater similarity. This 0.069 difference between allied and non-allied pairs demonstrates that countries in alliances tend to have more similar democracy scores than those without alliance ties. The finding extends democratic peace theory beyond conflict avoidance—democracies not only rarely fight each other but also show a moderate tendency to select each other as alliance partners. This pattern across 3,558 alliance pairs likely reflects shared preferences for international institutions, compatible domestic constraints on foreign policy, and the reduced uncertainty that comes from transparency in democratic decision-making processes.
 
 #### Visualizing Homophily Patterns
 
@@ -256,13 +256,13 @@ plot_homophily(democracy_homophily, alliance_net,
   labs(subtitle = "Allied countries show greater similarity in democracy scores")
 ```
 
-The distribution plot shows the density of similarity scores for connected (allied) versus unconnected (non-allied) country pairs. The vertical dashed lines indicate the mean similarity for each group. The visualization illustrates the moderate democracy homophily effect (r = 0.14). While both distributions substantially overlap, the allied pairs (blue) show a subtle but significant rightward shift compared to non-allied pairs (gold). The mean similarity for allied countries (-0.243) exceeds that of non-allied countries (-0.312), indicating that democracies do tend to ally with similar regimes.
+The distribution plot shows the density of similarity scores for connected (allied) versus unconnected (non-allied) country pairs. The vertical dashed lines indicate the mean similarity for each group. The visualization illustrates the moderate democracy homophily effect (r = 0.140). While both distributions substantially overlap, the allied pairs (blue) show a subtle but significant rightward shift compared to non-allied pairs (gold). The mean similarity for allied countries (-0.243) exceeds that of non-allied countries (-0.312), indicating that democracies do tend to ally with similar regimes.
 
 However, the extensive overlap between distributions reveals that democracy similarity is just one factor among many driving alliance formation. Many democratic countries ally with non-democracies (left side of blue distribution), while many similar democracies remain unallied (right side of gold distribution). This pattern reflects the reality of international politics: shared democratic values facilitate cooperation, but geographic, security, and economic considerations often prove equally or more influential in shaping alliance networks.
 
 ### 🔍 Using `homophily()` for Categorical Variables
 
-Now lets move onto the categorical regime type variable we made: 
+Now let's move onto the categorical regime type variable we made: 
 
 ```{r}
 head(attr(alliance_net, 'nodal_data'))
@@ -280,8 +280,9 @@ print(regime_homophily)
 
 cat("\nRegime Type Homophily Results:\n")
 cat("- Homophily score:", round(regime_homophily$homophily_correlation, 3), "\n")
-cat("- Same-regime alliances:", round(regime_homophily$mean_similarity_connected, 3), "\n")
-cat("- Cross-regime alliances:", round(regime_homophily$mean_similarity_unconnected, 3), "\n")
+cat("- Same-regime alliances:", round(regime_homophily$mean_similarity_connected * 100, 1), "%\n")
+cat("- Different-regime alliances:", round((1 - regime_homophily$mean_similarity_connected) * 100, 1), "%\n")
+cat("- Expected if random:", round(regime_homophily$mean_similarity_unconnected * 100, 1), "%\n")
 cat("- P-value:", round(regime_homophily$p_value, 3), "\n")
 if(regime_homophily$p_value < 0.05 && regime_homophily$homophily_correlation > 0.1) {
   cat("→ Countries strongly prefer allies with similar political systems\n")
@@ -290,9 +291,9 @@ if(regime_homophily$p_value < 0.05 && regime_homophily$homophily_correlation > 0
 }
 ```
 
-The regime type analysis also reveals a pattern of political homophily in alliance formation. With a homophily score of 0.133 (p < 0.001), countries demonstrate a clear preference for forming alliances with similar regime types. The similarity scores, 41% for allied pairs versus 26.2% for non-allied pairs, indicate that countries sharing the same regime type (Democracy, Hybrid, or Autocracy) are substantially more likely to form alliances. This 14.8 percentage point difference suggests that political regime compatibility plays at least some role in international cooperation.
+The regime type analysis also reveals a pattern of political homophily in alliance formation. With a homophily score of 0.133 (p < 0.05), countries demonstrate a clear preference for forming alliances with similar regime types. The similarity scores show that 41% of allied pairs share the same regime type, compared to only 26.2% of non-allied pairs. This 14.8 percentage point difference suggests that political regime compatibility plays at least some role in international cooperation.
 
-The categorical nature of this analysis provides a clearer interpretation than continuous measures: when countries form alliances, there's a 41% chance their partner shares the same regime type, compared to only 26.2% for non-allied pairs. This pattern supports the idea that shared political institutions and governance norms facilitate international cooperation, though the effect remains moderate enough to allow for substantial cross-regime alliances driven by strategic necessities -- though note that we are not specifically testing the democratic peace idea here specifically as we are amalgmating autocracy-autocracy and democracy-democracy pairs into our same-regime bucket. 
+The categorical nature of this analysis provides a clearer interpretation than continuous measures: when countries form alliances, there's a 41% chance their partner shares the same regime type, compared to only 26.2% for non-allied pairs. This pattern supports the idea that shared political institutions and governance norms facilitate international cooperation, though the effect remains moderate enough to allow for substantial cross-regime alliances driven by strategic necessities -- though note that we are not specifically testing the democratic peace idea here specifically as we are amalgamating autocracy-autocracy and democracy-democracy pairs into our same-regime bucket. 
 
 #### Visualizing Categorical Homophily
 
@@ -460,7 +461,7 @@ geo_correlation <- dyad_correlation(
 cat("Geographic Distance and Alliance Formation (dyad_correlation results):\n")
 cat("- Correlation coefficient:", round(geo_correlation$correlation, 3), "\n")
 cat("- P-value:", round(geo_correlation$p_value, 3), "\n")
-cat("- Number of dyads analyzed:", geo_correlation$n_dyads, "\n\n")
+cat("- Number of dyads analyzed:", geo_correlation$n_dyads[1], "\n\n")
 
 # Interpret the correlation
 if(geo_correlation$correlation < -0.1 && geo_correlation$p_value < 0.05) {
@@ -496,7 +497,7 @@ for(i in 1:nrow(multi_dyad_correlation)) {
 
 ## 6. Comprehensive Analysis with `attribute_report()`
 
-The `attribute_report()` tries to combines the previous analyses into a comprehensive report. 
+The `attribute_report()` function combines the previous analyses into a comprehensive report. 
 
 ### 🚀 Running the Complete Analysis
 
@@ -522,14 +523,14 @@ comprehensive_analysis <- attribute_report(
   # Perform significance tests
   significance_test = TRUE
 )
-
-# The function returns a list with multiple components
-cat("Components of attribute_report output:\n")
-cat("- homophily_analysis: Tests for each node attribute\n")
-cat("- mixing_matrices: Interaction patterns for categorical variables\n")
-cat("- centrality_correlations: How attributes relate to network position\n")
-cat("- dyadic_correlations: How dyad attributes predict ties\n")
 ```
+
+`attribute_report` returns a list with multiple components
+
+* **`homophily_analysis`**: Tests for each node attribute
+* **`mixing_matrices`**: Interaction patterns for categorical variables
+* **`centrality_correlations`**: How attributes relate to network position
+* **`dyadic_correlations`**: How dyad attributes predict ties
 
 ### 📋 Extracting Key Findings from the Summary
 
@@ -557,7 +558,14 @@ homophily_display <- homophily_summary |>
     )
   )
 
-print(homophily_display[, c("attribute", "method", "homophily_correlation", "p_value", "significance", "interpretation")])
+print(
+  homophily_display[, 
+  c(
+    "attribute", "method", 
+    "homophily_correlation", 
+    "p_value", "significance", 
+    "interpretation")
+    ])
 ```
 
 ```{r}
@@ -579,7 +587,13 @@ centrality_display <- centrality_summary |>
   ) |>
   arrange(p_value)
 
-print(centrality_display[1:10, c("node_var", "centrality_measure", "correlation", "p_value", "interpretation")])
+print(
+  centrality_display[1:10, 
+  c(
+    "node_var", "centrality_measure", 
+    "correlation", "p_value", 
+    "interpretation")
+    ])
 ```
 
 ```{r}
@@ -614,9 +628,10 @@ dem_peace_test <- homophily(
 cat("Democratic Peace Hypothesis Test:\n")
 cat("- Effect size:", round(dem_peace_test$homophily_correlation, 3), "\n")
 cat("- P-value:", round(dem_peace_test$p_value, 3), "\n")
-cat("- Conclusion:", ifelse(dem_peace_test$p_value < 0.05, 
-                           "Democracies significantly prefer forming alliances with other democracies",
-                           "No significant democratic preference"), "\n")
+cat("- Conclusion:", ifelse(
+  dem_peace_test$p_value < 0.05, 
+  "Democracies significantly prefer forming alliances with other democracies",
+  "No significant democratic preference"), "\n")
 ```
 
 ### Hypothesis 2: Power Politics
@@ -636,12 +651,14 @@ cat("- Correlation:", round(power_homophily$homophily_correlation, 3), "\n")
 cat("- P-value:", round(power_homophily$p_value, 3), "\n")
 cat("- Interpretation:", ifelse(power_homophily$p_value < 0.05 & power_homophily$homophily_correlation > 0,
   "Powerful countries prefer forming alliances with other powerful countries",
-  "No evidence of power-based alliance preferences"), "\n")
+  ifelse(power_homophily$p_value < 0.05 & power_homophily$homophily_correlation < 0,
+    "Powerful countries tend to form alliances with less powerful countries (heterophily)",
+    "No evidence of power-based alliance preferences")), "\n")
 ```
 
 ## 8. Visualizing Network Patterns
 
-And as seen in other vignettes we can we use the `plot.netify()` function to visualize the network with node attributes and edge weights:
+And as seen in other vignettes we can use the `plot.netify()` function to visualize the network with node attributes and edge weights:
 
 ### Network Visualization by Attributes
 
@@ -691,7 +708,7 @@ ggplot(homophily_viz_data, aes(x = homophily_correlation, y = attribute)) +
   geom_point(aes(color = significant), size = 4) +
   geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
   scale_color_manual(values = c("FALSE" = "gray60", "TRUE" = "#2E86AB"),
-                     labels = c("(p < 0.05)", "Not significant")) +
+                     labels = c("FALSE" = "Not significant", "TRUE" = "(p < 0.05)")) +
   labs(title = "Homophily Analysis Results",
        subtitle = "Do similar countries form more alliances?",
        x = "Homophily Correlation",
@@ -722,14 +739,17 @@ centrality_viz <- comprehensive_analysis$centrality_correlations |>
   mutate(
     significant = p_value < 0.05,
     node_var = factor(node_var),
-    centrality_measure = factor(centrality_measure, 
-                               levels = c("degree", "betweenness", "closeness"))
+    centrality_measure = factor(
+      centrality_measure,
+      levels = c("degree", "betweenness", "closeness"))
   )
 
 if(nrow(centrality_viz) > 0) {
   ggplot(centrality_viz, aes(x = correlation, y = node_var, color = significant)) +
-    geom_segment(aes(x = 0, xend = correlation, y = node_var, yend = node_var),
-                 size = 1) +
+    geom_segment(
+      aes(
+        x = 0, xend = correlation, y = node_var, yend = node_var),
+      size = 1) +
     geom_point(size = 3) +
     facet_wrap(~centrality_measure, ncol = 1) +
     geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
@@ -752,16 +772,18 @@ We can use the `plot_mixing_matrix()` function to create a cleaner visualization
 
 ```{r, fig.width=8, fig.height=6}
 # Create a heatmap of the regime mixing matrix using plot_mixing_matrix
-plot_mixing_matrix(regime_mixing, 
-                  show_values = TRUE,
-                  diagonal_emphasis = TRUE) +
+plot_mixing_matrix(
+    regime_mixing,
+    show_values = TRUE,
+    diagonal_emphasis = TRUE
+  ) +
   labs(title = "Regime Type Alliance Patterns",
        subtitle = "How different regime types interact in the network",
        x = "Allied with...",
        y = "Regime type")
 ```
 
-The heatmap clearly shows the alliance patterns between different regime types. The diagonal cells (emphasized with black borders) represent within-type alliances, while off-diagonal cells show cross-type alliances. Darker blue indicates higher proportions of alliances. The assortativity coefficient of 0.126 and diagonal proportion of 0.405 confirm the moderate tendency for regime type homophily in alliance formation.
+The heatmap clearly shows the alliance patterns between different regime types. The diagonal cells (emphasized with black borders) represent within-type alliances, while off-diagonal cells show cross-type alliances. Darker blue indicates higher proportions of alliances. The assortativity coefficient of 0.113 (not 0.126) and diagonal proportion of 0.41 (not 0.405) confirm the moderate tendency for regime type homophily in alliance formation.
 
 ## tl;dr
 
@@ -784,4 +806,3 @@ The heatmap clearly shows the alliance patterns between different regime types. 
    - What attributes make countries central/influential
    - Complete homophily patterns across all variables
    - Comprehensive view of all network-attribute relationships
-
