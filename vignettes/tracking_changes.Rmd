@@ -1,0 +1,661 @@
+---
+title: "Tracking Changes in Cooperation and Conflict: Comparing Networks"
+author: "Cassy Dorff and Shahryar Minhas"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Tracking Changes in Cooperation and Conflict: Comparing Networks}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  dev = 'png', dpi = 150,
+  cache = FALSE,
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+## Vignette Summary
+
+This vignette demonstrates how to use **netify**'s `compare_networks()` function to analyze changes in international relations over time using data from the Integrated Crisis Early Warning System (ICEWS). We'll explore some fun questions about how countries interact:
+
+1. **Talk vs. Action**: Do countries that cooperate verbally (diplomatic statements) also cooperate materially (aid, trade)?
+2. **Friend or Foe**: Are cooperation and conflict separate networks, or do countries that cooperate also tend to have conflicts?
+3. **Temporal Stability**: Which international relationships persist over time and which are fleeting?
+4. **Structural Evolution**: How do the overall patterns of international interactions change across years?
+
+We'll use `compare_networks()` to answer these questions:
+
+**`compare_networks()`:**
+
+- Compares networks across multiple dimensions - edges, structure, nodes, and attributes. Think of it as running a comprehensive diagnostic between any two (or more) networks to understand what's similar, what's different, and why it matters.
+- Function notes:
+  - **Multi-method flexibility**: Choose from correlation, for example, Jaccard, Hamming, QAP, or "all"
+  - **Four comparison modes**: Compare edges (who connects to whom), structure (density, clustering), nodes (actor composition), or attributes (actor characteristics)
+  - **Statistical rigor**: Built-in permutation tests for significance
+  - **Output**: Returns information on edge changes, similarity metrics, and structural differences
+
+```{r}
+library(netify)
+library(ggplot2)
+library(tidyverse)
+library(patchwork)
+```
+
+## Understanding ICEWS Data
+
+The Integrated Crisis Early Warning System (ICEWS) provides event-level data on interactions between international actors. Each event captures:
+
+- **Who**: Source and target countries
+- **What**: Type of interaction (cooperation or conflict, verbal or material)
+- **When**: Date of the event
+- **How Much**: Intensity scores on cooperation/conflict scales
+
+```{r}
+# Load ICEWS data
+data(icews)
+
+# Take a peek
+head(icews)
+```
+
+The four types of interactions in ICEWS:
+- `verbCoop`: Verbal cooperation (diplomatic statements, promises)
+- `matlCoop`: Material cooperation (aid, trade agreements)
+- `verbConf`: Verbal conflict (threats, accusations)
+- `matlConf`: Material conflict (sanctions, military actions)
+
+## Creating Networks for Comparison
+
+First, let's create separate networks for different types of interactions in a single year:
+
+```{r}
+# Create networks for different interaction types in 2002
+icews_2002 <- icews[icews$year == 2002, ]
+
+# Verbal cooperation network
+verb_coop_2002 <- netify(
+  icews_2002,
+  actor1 = 'i', actor2 = 'j',
+  weight = 'verbCoop',
+  symmetric = FALSE
+)
+
+# Material cooperation network  
+matl_coop_2002 <- netify(
+  icews_2002,
+  actor1 = 'i', actor2 = 'j',
+  weight = 'matlCoop',
+  symmetric = FALSE
+)
+
+# Verbal conflict network
+verb_conf_2002 <- netify(
+  icews_2002,
+  actor1 = 'i', actor2 = 'j',
+  weight = 'verbConf',
+  symmetric = FALSE
+)
+
+# Material conflict network
+matl_conf_2002 <- netify(
+  icews_2002,
+  actor1 = 'i', actor2 = 'j',
+  weight = 'matlConf',
+  symmetric = FALSE
+)
+```
+
+## 1. Comparing Cooperation Networks: Verbal vs. Material
+
+Do countries that cooperate verbally also cooperate materially? Let's use `compare_networks()` with `method = "all"` to get a comprehensive comparison:
+
+```{r}
+# Compare verbal vs material cooperation
+coop_comparison <- compare_networks(
+  list(
+    verbal = verb_coop_2002,
+    material = matl_coop_2002
+  ),
+  method = "all"
+)
+
+print(coop_comparison)
+
+# Interpret results
+cat("\n=== INTERPRETATION ===\n")
+if(coop_comparison$summary$correlation > 0.7) {
+  cat("Strong alignment: Countries that cooperate verbally tend to cooperate materially\n")
+} else if(coop_comparison$summary$correlation > 0.4) {
+  cat("Moderate alignment: Verbal and material cooperation partially overlap\n")
+} else {
+  cat("Weak alignment: Verbal promises don't strongly translate to material actions\n")
+}
+```
+
+### Understanding the Output
+
+Let's break down what each metric tells us:
+
+**Network Comparison Results Header:**
+- `Type: cross_network` - Indicates we're comparing separate networks (not time periods)
+- `Method: all` - We requested all comparison metrics
+- `Networks compared: 2` - Confirms we're comparing two networks
+
+**Summary Statistics Table:**
+- **correlation (0.507)**: Measures how similar the edge weights are between networks. A value of 0.507 indicates moderate positive correlation - when verbal cooperation is high between two countries, material cooperation tends to be somewhat higher too, but the relationship isn't perfect.
+- **jaccard (0.190)**: Only 19% of possible edges exist in BOTH networks. This low value tells us that most country pairs engage in either verbal OR material cooperation, but not both.
+- **hamming (0.308)**: About 31% of all possible edges differ between the two networks. This measures the proportion of country pairs that have different connection patterns.
+- **qap_correlation (0.507) with qap_pvalue (0)**: The QAP test confirms the correlation is statistically significant (p < 0.001). This isn't due to random chance.
+
+**Edge Changes:**
+- `111 added`: 111 country pairs have material cooperation but NO verbal cooperation
+- `7016 removed`: 7,016 country pairs have verbal cooperation but NO material cooperation
+- `1676 maintained`: 1,676 country pairs have BOTH verbal and material cooperation
+
+This tells us verbal cooperation is much more common than material cooperation, and most verbal promises don't translate into material actions.
+
+### Visualizing Domain Differences
+
+```{r, fig.width=8, fig.height=6}
+# Extract edge change information
+edge_changes <- coop_comparison$edge_changes[[1]]
+
+# Create summary of changes
+change_summary <- data.frame(
+  Type = c("Verbal Only", "Material Only", "Both"),
+  Count = c(
+    edge_changes$removed,  # In verbal but not material
+    edge_changes$added,    # In material but not verbal  
+    edge_changes$maintained # In both
+  )
+)
+
+# Visualize
+ggplot(change_summary, aes(x = Type, y = Count)) +
+  geom_col(fill = "gray30") +
+  labs(title = "Verbal vs Material Cooperation Networks",
+       subtitle = "Which relationships exist in each domain?",
+       y = "Number of Dyadic Relationships") +
+  theme_minimal()
+```
+
+The visualization makes the pattern clear: verbal cooperation (cheap talk) is far more common than material cooperation (costly actions).
+
+## 2. Cooperation vs. Conflict: Testing Network Relationships
+
+Are cooperation and conflict networks related? Let's use the QAP (Quadratic Assignment Procedure) method for statistical testing:
+
+```{r}
+# Perform QAP test between cooperation and conflict
+coop_conf_qap <- compare_networks(
+  list(
+    cooperation = verb_coop_2002,
+    conflict = verb_conf_2002
+  ),
+  method = "qap",
+  n_permutations = 500  # Reduced for vignette speed
+)
+
+cat("QAP Test Results:\n")
+cat("- Observed correlation:", round(coop_conf_qap$summary$qap_correlation, 3), "\n")
+cat("- P-value:", round(coop_conf_qap$summary$qap_pvalue, 3), "\n")
+
+if(coop_conf_qap$summary$qap_pvalue < 0.05) {
+  if(coop_conf_qap$summary$qap_correlation > 0) {
+    cat("→ Cooperation and conflict networks are positively correlated\n")
+    cat("  (Countries interact through both cooperation AND conflict)\n")
+  } else {
+    cat("→ Cooperation and conflict networks are negatively correlated\n")  
+    cat("  (Different countries engage in cooperation vs conflict)\n")
+  }
+} else {
+  cat("→ No significant relationship between cooperation and conflict patterns\n")
+}
+```
+
+### Understanding QAP Results
+
+The positive correlation (0.506) with p-value of 0 tells us that countries that cooperate also tend to have conflicts. This counterintuitive finding suggests that international interaction is multifaceted - countries that engage diplomatically experience both positive and negative interactions, while countries that don't interact have neither cooperation nor conflict.
+
+## 3. Temporal Evolution: Tracking Network Changes
+
+How do international networks evolve over time? When you pass a longitudinal netify object to `compare_networks()`, it automatically compares consecutive time periods:
+
+```{r}
+# Create networks for multiple years
+years_to_compare <- seq(2002, 2014, by=4)
+
+# Create cooperation networks for each year
+coop_net_longit <- netify(
+  icews[icews$year %in% years_to_compare, ],
+  actor1 = 'i', actor2 = 'j',
+  time = 'year',
+  weight = 'verbCoop',
+  symmetric = FALSE,
+  output_format = 'longit_list'
+)
+
+# Compare across time - automatic pairwise comparisons
+temporal_comparison <- compare_networks(
+    coop_net_longit, 
+    method = "all"
+)
+print(temporal_comparison)
+```
+
+### Understanding Temporal Comparison Output
+
+**Header Changes:**
+- `Type: temporal` - Indicates we're comparing time periods from the same longitudinal network
+- `Networks compared: 4` - We have 4 time periods (2002, 2006, 2010, 2014)
+
+**Summary Statistics Table:**
+Instead of a single comparison, we now see summary statistics across ALL pairwise comparisons:
+- **mean correlation (0.828)**: On average, networks are highly correlated across time
+- **sd (0.034)**: Very low standard deviation indicates consistent similarity
+- **min (0.771) to max (0.874)**: Even the least similar pair of years has correlation > 0.77
+
+This high correlation tells us that cooperation networks are quite stable over time - the same countries tend to cooperate across years.
+
+**Edge Changes Section:**
+Shows all pairwise comparisons (not just consecutive years):
+- `2002_vs_2006`: First comparison
+- `2010_vs_2014`: Last consecutive comparison
+- Notice that as time gaps increase, more edges are added/removed
+
+### Visualizing Temporal Changes
+
+```{r, fig.width=10, fig.height=6}
+# Extract edge changes over time
+edge_change_data <- data.frame(
+  Comparison = names(temporal_comparison$edge_changes),
+  Added = sapply(temporal_comparison$edge_changes, function(x) x$added),
+  Removed = sapply(temporal_comparison$edge_changes, function(x) x$removed),
+  Maintained = sapply(temporal_comparison$edge_changes, function(x) x$maintained)
+)
+
+# Reshape for plotting
+edge_change_long <- edge_change_data %>%
+  pivot_longer(cols = c(Added, Removed, Maintained), 
+               names_to = "Change_Type", 
+               values_to = "Count")
+
+# Plot edge changes
+ggplot(edge_change_long, aes(x = Comparison, y = Count, fill = Change_Type)) +
+  geom_col(position = "dodge") +
+  scale_fill_manual(
+    values = c(
+      "Added" = "#A8D5BA",
+      "Removed" = "#E8B4B8",
+      "Maintained" = "#95A99C")) +
+  labs(
+    title = "Edge Changes Between Years",
+    subtitle = "Tracking relationship dynamics over time",
+    x = "Year Comparison",
+    y = "Number of Edges") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(
+      angle = 45, hjust = 1)
+    )
+```
+
+Notice that "Maintained" edges dominate - most relationships persist across time periods, confirming the stability we observed in the correlation metrics.
+
+## 4. Structural Evolution: Beyond Individual Edges
+
+The `what = "structure"` option compares network-level properties rather than individual edges:
+
+```{r}
+# Compare structural properties across years
+struct_comparison <- compare_networks(
+  coop_net_longit,
+  what = "structure"
+)
+
+print(struct_comparison)
+```
+
+### Understanding Structural Comparison Output
+
+This table shows how network-wide properties evolve:
+
+- **n_nodes (152)**: Number of countries remains constant - same actors throughout
+- **n_edges**: Increases from 8,692 (2002) to 9,774 (2014) - more connections over time
+- **density**: Increases from 0.376 to 0.423 - the network becomes denser
+- **reciprocity**: Stays very high (0.97-0.98) - if country A cooperates with B, B almost always cooperates with A
+- **transitivity**: Around 0.61-0.64 - moderate clustering (friend of a friend is often a friend)
+- **mean_degree**: Increases from 57.2 to 64.3 - average country has more partners over time
+
+The increasing density and mean degree suggest growing interconnectedness in international cooperation.
+
+### Visualizing Structural Changes
+
+```{r, fig.width=10, fig.height=8}
+# Prepare data for visualization
+# struct_comparison$summary contains a 
+# data.frame with structural metrics over time
+struct_data <- struct_comparison$summary
+
+# Calculate percent changes from baseline
+baseline_year <- struct_data$network[1]
+struct_long <- struct_data %>%
+  select(-n_nodes) %>%  # Remove n_nodes since it doesn't change much
+  pivot_longer(cols = -network, names_to = "metric", values_to = "value") %>%
+  group_by(metric) %>%
+  mutate(
+    first_value = value[1],
+    percent_change = (value - first_value) / first_value * 100
+  ) %>%
+  ungroup()
+
+# Create heatmap of changes
+ggplot(filter(struct_long, network != baseline_year), 
+       aes(x = network, y = metric, fill = percent_change)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = round(percent_change, 1)), color = "black", size = 3) +
+  scale_fill_gradient2(low = "#d73027", mid = "white", high = "#1a9850", 
+                      midpoint = 0, name = "% Change") +
+  labs(title = "Structural Changes Heatmap",
+       subtitle = paste("Percent change from", baseline_year),
+       x = "Year", y = "Network Property") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0))
+```
+
+The heatmap reveals that density, number of edges, and mean degree all increase by about 14-15% from 2002 to 2010, while reciprocity slightly decreases and transitivity shows modest growth.
+
+Many ways to visualize structural changes ... could also just do a line plot: 
+
+```{r, fig.width=10, fig.height=6}
+# Reshape data for visualization
+struct_long <- struct_data %>%
+  select(-n_nodes) %>%  # Remove n_nodes since it doesn't change
+  pivot_longer(cols = -network, names_to = "metric", values_to = "value") %>%
+  group_by(metric) %>%
+  mutate(
+    # Calculate percent change from first year
+    first_value = value[1],
+    percent_change = (value - first_value) / first_value * 100,
+    # Also calculate year-to-year change
+    yoy_change = (value - lag(value)) / lag(value) * 100
+  ) %>%
+  ungroup()
+
+# Visualize structural changes over time
+ggplot(struct_long, aes(x = network, y = value, group = metric)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 3) +
+  facet_wrap(~ metric, scales = "free_y", ncol = 2) +
+  labs(title = "Structural Properties Over Time",
+       subtitle = "Evolution of network characteristics",
+       x = "Year", y = "Value") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+## 5. Node Composition: Tracking Actor Dynamics
+
+The `what = "nodes"` option tracks which actors enter and exit the network:
+
+```{r}
+# Compare node composition
+node_comparison <- compare_networks(
+  coop_net_longit,
+  what = "nodes"
+)
+
+print(node_comparison)
+```
+
+
+The table shows:
+- All networks have 152 nodes (countries)
+- `mean_overlap = 152`: All 152 countries appear in all comparisons
+
+This is by design in our example since we filtered the data to only include certain countries. In real-world datasets, you might see actors entering or exiting the network over time.
+
+## 6. Deep Dive: Using return_details for Comprehensive Analysis
+
+The `return_details = TRUE` option provides access to full comparison matrices:
+
+```{r}
+# Compare 2002 and 2014 cooperation networks with full details
+early_late_comp <- compare_networks(
+  # note subset here is 
+  # subset.netify() function
+  subset(
+    coop_net_longit, 
+    time=c("2002", "2014")
+    ),
+    method = "all",
+    return_details = TRUE
+)
+
+# Access detailed comparison matrices
+names(early_late_comp$details)
+
+# Get edge changes
+changes <- early_late_comp$edge_changes[[1]]
+
+# Summary of relationship dynamics
+cat("\nRelationship Dynamics 2002-2014:\n")
+cat("- Stable relationships:", changes$maintained, "\n")
+cat("- New relationships:", changes$added, "\n")
+cat("- Ended relationships:", changes$removed, "\n")
+cat("- Total change rate:", 
+    round((changes$added + changes$removed) / 
+          (changes$maintained + changes$added + changes$removed) * 100, 1), "%\n")
+
+# Weight correlation for maintained edges
+if(!is.na(changes$weight_correlation)) {
+  cat("- Weight correlation for maintained edges:", 
+      round(changes$weight_correlation, 3), "\n")
+  
+  if(changes$weight_correlation > 0.7) {
+    cat("  → Stable cooperation intensities for continuing relationships\n")
+  } else {
+    cat("  → Cooperation intensities vary even for maintained relationships\n")
+  }
+}
+```
+
+### Understanding Detailed Output
+
+With `return_details = TRUE`, you get:
+- Access to full similarity matrices (correlation_matrix, jaccard_matrix, hamming_matrix)
+- These allow custom analysis and visualization of network similarities
+
+The relationship dynamics show:
+- 6,633 stable relationships persist from 2002 to 2014
+- 3,141 new relationships formed
+- 2,059 relationships ended
+- 43.9% total change rate indicates moderate network evolution
+- Weight correlation of 0.762 means cooperation intensity is fairly stable for continuing relationships
+
+With this detailed information you could create custom visualizations or further statistical tests, such as detecting structural breaks in time series.
+
+## 7. Putting It All Together: Comprehensive Network Comparison Report
+
+Let's create a complete visual report comparing two time periods:
+
+```{r, fig.width=10, fig.height=8}
+create_comparison_report <- function(net1, net2, label1, label2) {
+  # Edge comparison
+  edge_comp <- compare_networks(list(net1, net2), method = "all")
+  
+  # Structure comparison  
+  struct_comp <- compare_networks(list(net1, net2), what = "structure")
+  
+  # Node comparison
+  node_comp <- compare_networks(list(net1, net2), what = "nodes")
+  
+  # 1. Similarity metrics plot
+  metrics <- edge_comp$summary[1, -1]  # Remove comparison column
+  metrics_df <- data.frame(
+    metric = names(metrics),
+    value = as.numeric(metrics)
+  ) %>%
+    mutate(metric = factor(metric, levels = metric))
+  
+  p1 <- ggplot(metrics_df, aes(x = metric, y = value)) +
+    geom_col(fill = "gray30", width = 0.7) +
+    geom_text(aes(label = round(value, 3)), 
+              vjust = -0.5, size = 3.5) +
+    scale_y_continuous(limits = c(0, 1.1), 
+                       breaks = seq(0, 1, 0.2)) +
+    labs(title = "Edge Similarity Metrics",
+         x = NULL, y = "Similarity Score") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          plot.title = element_text(face = "bold", size = 12))
+  
+  # 2. Edge changes - Replace pie chart with horizontal bar chart
+  changes <- edge_comp$edge_changes[[1]]
+  edge_changes_df <- data.frame(
+    category = c("Maintained", "Added", "Removed"),
+    count = c(changes$maintained, changes$added, changes$removed)
+  ) %>%
+    mutate(category = factor(category, 
+                            levels = c("Removed", "Added", "Maintained")),
+           percentage = count / sum(count) * 100)
+  
+  p2 <- ggplot(edge_changes_df, aes(x = count, y = category)) +
+    geom_col(fill = "gray30", width = 0.7) +
+    geom_text(aes(label = paste0(count, " (", round(percentage, 1), "%)")), 
+              hjust = -0.1, size = 3.5) +
+    scale_x_continuous(expand = expansion(mult = c(0, 0.2))) +
+    labs(title = "Edge Changes",
+         x = "Number of Edges", y = NULL) +
+    theme_minimal() +
+    theme(plot.title = element_text(face = "bold", size = 12))
+  
+  # 3. Structural changes
+  if(!is.null(struct_comp$summary$changes)) {
+    struct_changes_df <- struct_comp$summary$changes %>%
+      mutate(metric = factor(metric, levels = metric))
+    
+    p3 <- ggplot(struct_changes_df, aes(x = metric, y = percent_change)) +
+      geom_col(fill = "gray30", width = 0.7) +
+      geom_text(aes(label = round(percent_change, 1)), 
+                vjust = ifelse(struct_changes_df$percent_change >= 0, -0.5, 1.5),
+                size = 3.5) +
+      geom_hline(yintercept = 0, linetype = "dashed", alpha = 0.5) +
+      labs(title = "Structural Changes (%)",
+           x = NULL, y = "Percent Change") +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1),
+            plot.title = element_text(face = "bold", size = 12))
+  } else {
+    # Create empty plot if no structural changes
+    p3 <- ggplot() + 
+      annotate("text", x = 0.5, y = 0.5, 
+               label = "No structural changes data available",
+               size = 4, color = "gray50") +
+      theme_void() +
+      labs(title = "Structural Changes (%)") +
+      theme(plot.title = element_text(face = "bold", size = 12))
+  }
+  
+  # 4. Node changes
+  node_changes <- node_comp$node_changes[[1]]
+  node_changes_df <- data.frame(
+    category = c("Maintained", "Added", "Removed"),
+    count = c(node_changes$n_maintained, 
+              node_changes$n_added, 
+              node_changes$n_removed)
+  ) %>%
+    mutate(category = factor(category, levels = category))
+  
+  p4 <- ggplot(node_changes_df, aes(x = category, y = count)) +
+    geom_col(fill = "gray30", width = 0.7) +
+    geom_text(aes(label = count), vjust = -0.5, size = 3.5) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+    labs(title = "Node Composition Changes",
+         x = NULL, y = "Number of Nodes") +
+    theme_minimal() +
+    theme(plot.title = element_text(face = "bold", size = 12))
+  
+  # Combine plots using patchwork
+  combined_plot <- (p1 | p2) / (p3 | p4) +
+    plot_annotation(
+      title = paste("Network Comparison:", label1, "vs", label2),
+      theme = theme(plot.title = element_text(face = "bold", size = 16))
+    )
+  
+  # Display the plot
+  print(combined_plot)
+  
+  # Return summary
+  list(
+    edge_similarity = metrics,
+    structural_changes = struct_comp$summary,
+    node_dynamics = node_comp$summary,
+    plot = combined_plot
+  )
+}
+
+# Generate report comparing 2002 and 2014
+report <- create_comparison_report(
+  coop_net_longit[["2002"]], 
+  coop_net_longit[["2014"]],
+  "2002", "2014"
+)
+```
+
+### Understanding the Comprehensive Report
+
+This four-panel visualization synthesizes all comparison aspects:
+
+**Top Left - Edge Similarity Metrics**: Shows all similarity measures at once
+- Correlation and QAP correlation are identical (0.771) - confirming significance
+- Jaccard (0.561) shows moderate edge overlap
+- Hamming (0.225) indicates about 22.5% of edges differ
+
+**Top Right - Edge Changes**: Visualizes the flow of relationships
+- Most edges (6,633) are maintained
+- Roughly equal numbers added (3,141) and removed (2,059)
+
+**Bottom Left - Structural Changes**: Percent changes in network properties
+- All metrics increase, indicating network growth
+- Largest changes in density and transitivity
+
+**Bottom Right - Node Composition**: Shows stable actor set (152 maintained, 0 changes)
+
+## tl;dr
+
+The `compare_networks()` function is your go-to tool for understanding how networks differ and change:
+
+**Basic usage:**
+```r
+# Compare two networks
+comparison <- compare_networks(list(net1, net2))
+
+# Compare longitudinal networks automatically
+comparison <- compare_networks(longitudinal_netify_object)
+```
+
+**Key parameters to remember:**
+- `method`: "correlation" (default), "jaccard", "hamming", "qap", or "all"
+- `what`: "edges" (default), "structure", "nodes", or "attributes"
+- `return_details`: Set TRUE to get full comparison matrices
+- `n_permutations`: For QAP significance testing (default 1000)
+
+**What you get:**
+- **Summary statistics**: Correlation, Jaccard similarity, Hamming distance
+- **Edge changes**: Detailed counts of added, removed, and maintained edges
+- **Statistical tests**: Permutation tests for significance
+- **Flexible comparisons**: Works with any number of networks, automatically handles longitudinal data
+
+**Pro tips:**
+1. Use `method = "all"` for initial exploration
+2. Use `what = "structure"` to compare network-level properties
+3. Set `return_details = TRUE` when you need the full comparison matrices
+4. For longitudinal data, just pass your netify object - it handles the rest
+
+This function shines when you need to understand not just *that* networks are different, but *how* and *why* they differ.
