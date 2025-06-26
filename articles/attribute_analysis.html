@@ -35,6 +35,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
     <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
@@ -64,7 +65,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2025-06-25</h4>
+            <h4 data-toc-skip class="date">2025-06-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/attribute_analysis.Rmd" class="external-link"><code>vignettes/attribute_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>attribute_analysis.Rmd</code></div>
@@ -367,7 +368,7 @@ attributes.</p>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">## 1                -0.2431161                  -0.3122502            0.06913408</span></span>
 <span><span class="co">##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">## 1       0 0.1259259 0.1547332              3558               11493</span></span></code></pre>
+<span><span class="co">## 1       0 0.1256137 0.1567365              3558               11493</span></span></code></pre>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nDemocracy Homophily Results:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
@@ -493,7 +494,7 @@ prove equally or more influential in shaping alliance networks.</p>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">## 1                 0.4098686                     0.26186             0.1480086</span></span>
 <span><span class="co">##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">## 1       0 0.1170069 0.1482952              4033               14882</span></span></code></pre>
+<span><span class="co">## 1       0 0.1170247 0.1482854              4033               14882</span></span></code></pre>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nRegime Type Homophily Results:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
@@ -586,8 +587,8 @@ this hypothesis:</p>
 <span><span class="co">## 1   1 cooperation   log_gdp correlation               0             0.1104911</span></span>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">## 1               -0.08536979                  -0.1056113            0.02024147</span></span>
-<span><span class="co">##   p_value   ci_lower  ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">## 1       0 0.09777057 0.1230806              3902               13864</span></span></code></pre>
+<span><span class="co">##   p_value   ci_lower ci_upper n_connected_pairs n_unconnected_pairs</span></span>
+<span><span class="co">## 1       0 0.09806942 0.124794              3902               13864</span></span></code></pre>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nEconomic Development Homophily Results:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
@@ -632,7 +633,7 @@ another example of categorical homophily:</p>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">## 1                 0.7956856                  0.03420239             0.7614832</span></span>
 <span><span class="co">##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">## 1       0 0.7731082 0.7956386              4033               14882</span></span></code></pre>
+<span><span class="co">## 1       0 0.7737927 0.7956787              4033               14882</span></span></code></pre>
 <div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nRegional Clustering Results:\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>

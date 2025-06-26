@@ -8,6 +8,7 @@
 <url><loc>https://netify-dev.github.io/netify/articles/index.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/manual_plotting.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/resources.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/articles/tracking_changes.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/authors.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/index.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/add_dyad_vars.html</loc></url>
@@ -15,6 +16,7 @@
 <url><loc>https://netify-dev.github.io/netify/reference/aggregate_dyad.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/assemble_netify_plot.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/attribute_report.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/compare_networks.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/decompose_igraph.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/decompose_netify.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/decompose_statnet.html</loc></url>
@@ -66,6 +68,7 @@
 <url><loc>https://netify-dev.github.io/netify/reference/plot_mixing_matrix_facet.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/plot_with_style.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/print.netify.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/print.netify_comparison.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/print.netify_plot_components.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/reset_scales.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/style_538.html</loc></url>
