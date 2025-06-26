@@ -296,7 +296,15 @@ plot_homophily_comparison <- function(homophily_results, colors, ...) {
 
         # add attribute_name column if it doesn't exist
         if (!"attribute_name" %in% names(comparison_data)) {
-            comparison_data$attribute_name <- comparison_data$attribute
+            if ("attribute" %in% names(comparison_data)) {
+                comparison_data$attribute_name <- comparison_data$attribute
+            } else {
+                # If no attribute column, use row names or index
+                comparison_data$attribute_name <- rownames(comparison_data)
+                if (is.null(comparison_data$attribute_name)) {
+                    comparison_data$attribute_name <- paste0("Attribute_", seq_len(nrow(comparison_data)))
+                }
+            }
         }
     } else {
         cli::cli_abort(
@@ -307,8 +315,22 @@ plot_homophily_comparison <- function(homophily_results, colors, ...) {
         )
     }
 
-    # add a col to indicate stat sig
-    comparison_data$significant <- comparison_data$p_value < 0.05
+    # add a col to indicate stat sig - always recalculate to ensure accuracy
+    # First check if there's already a 'significant' column and remove it to avoid conflicts
+    if ("significant" %in% names(comparison_data)) {
+        comparison_data$significant <- NULL
+    }
+    
+    # Check if p_value exists, if not check for p.value (different naming conventions)
+    if ("p_value" %in% names(comparison_data)) {
+        comparison_data$significant <- comparison_data$p_value < 0.05
+    } else if ("p.value" %in% names(comparison_data)) {
+        comparison_data$significant <- comparison_data$p.value < 0.05
+    } else {
+        # If no p-value column found, default to FALSE
+        cli::cli_alert_warning("No p-value column found in homophily results. Setting all to non-significant.")
+        comparison_data$significant <- FALSE
+    }
 
     # reorder rows by homophily correlation for better visualization
     ord <- order(comparison_data$homophily_correlation)
@@ -344,7 +366,7 @@ plot_homophily_comparison <- function(homophily_results, colors, ...) {
         # customize the color scale for significance
         scale_color_manual(
             values = c("FALSE" = "gray60", "TRUE" = colors[1]),
-            labels = c("Not significant", "Significant (p < 0.05)")
+            labels = c("FALSE" = "Not significant", "TRUE" = "Significant (p < 0.05)")
         ) +
 
         # add titles and axis labels to the plot

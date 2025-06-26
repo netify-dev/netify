@@ -12,6 +12,8 @@ plot_mixing_matrix(
   color_scale = c("#F18F01", "white", "#2E86AB"),
   midpoint = NULL,
   text_size = 4,
+  text_color = "black",
+  text_color_threshold = NULL,
   tile_border_color = "white",
   tile_border_size = 0.5,
   reorder_categories = FALSE,
@@ -37,6 +39,11 @@ Default uses a diverging color scale.}
 automatically calculates based on data range.}
 
 \item{text_size}{Numeric. Size of value labels in tiles. Default 4.}
+
+\item{text_color}{Character. Color of text labels. Default "black".}
+
+\item{text_color_threshold}{Numeric. If provided, values above this threshold (0-1 scale)
+will use white text, values below will use black text. Default NULL uses text_color for all.}
 
 \item{tile_border_color}{Character. Color of tile borders. Default "white".}
 

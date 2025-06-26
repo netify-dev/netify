@@ -18,7 +18,7 @@ compare_networks(
 }
 \arguments{
 \item{nets}{Either a list of netify objects to compare, or a single netify
-object (for longitudinal or by-group comparisons).}
+object (for longitudinal, multilayer, or by-group comparisons).}
 
 \item{method}{Character string specifying comparison method:
 \describe{
@@ -26,6 +26,9 @@ object (for longitudinal or by-group comparisons).}
 \item{"jaccard"}{Jaccard similarity for binary networks}
 \item{"hamming"}{Hamming distance (proportion of differing edges)}
 \item{"qap"}{Quadratic Assignment Procedure with permutation test}
+\item{"spectral"}{Spectral distance based on eigenvalue spectra. Measures
+global structural differences by comparing the sorted eigenvalues of network
+Laplacian matrices. Useful for detecting fundamental structural changes.}
 \item{"all"}{Applies all applicable methods}
 }}
 
@@ -55,7 +58,7 @@ determine edge presence. Default is 0 (any positive weight).}
 \value{
 A list of class "netify_comparison" containing:
 \describe{
-\item{comparison_type}{Character string: "cross_network", "temporal", or "by_group"}
+\item{comparison_type}{Character string: "cross_network", "temporal", "multilayer", or "by_group"}
 \item{method}{Comparison method(s) used}
 \item{n_networks}{Number of networks compared}
 \item{summary}{Data frame with comparison statistics}
@@ -75,8 +78,8 @@ The function supports four types of comparisons:
 
 \strong{Edge comparison (what = "edges"):}
 Compares edge patterns between networks using correlation, Jaccard similarity,
-Hamming distance, or QAP permutation tests. Returns detailed edge changes showing
-which edges are added, removed, or maintained between networks.
+Hamming distance, spectral distance, or QAP permutation tests. Returns detailed
+edge changes showing which edges are added, removed, or maintained between networks.
 
 \strong{Structure comparison (what = "structure"):}
 Compares network-level properties like density, reciprocity, transitivity, and
@@ -93,6 +96,12 @@ statistical tests (KS test for continuous, total variation distance for categori
 \strong{Automatic handling of longitudinal data:}
 When passed a single longitudinal netify object, the function automatically
 extracts time periods and performs pairwise comparisons between them.
+
+\strong{Automatic handling of multilayer networks:}
+When passed a single multilayer netify object (created with \code{layer_netify()}),
+the function automatically extracts layers and performs pairwise comparisons between
+them. This works for cross-sectional multilayer (3D arrays), longitudinal multilayer
+(4D arrays), and longitudinal list multilayer formats.
 
 \strong{Summary statistics interpretation:}
 \itemize{
@@ -135,6 +144,32 @@ longit_net <- netify(
 
 # Automatic temporal comparison
 temporal_comp <- compare_networks(longit_net, method = "all")
+
+# Create multilayer network example
+\dontrun{
+# Create separate networks for different interaction types
+verbal_coop <- netify(
+  icews[icews$year == 2010,],
+  actor1 = "i", actor2 = "j",
+  weight = "verbCoop"
+)
+
+material_coop <- netify(
+  icews[icews$year == 2010,],
+  actor1 = "i", actor2 = "j",
+  weight = "matlCoop"
+)
+
+# Combine into multilayer network
+multilayer <- layer_netify(
+  list(verbal = verbal_coop, material = material_coop)
+)
+
+# Automatic multilayer comparison
+layer_comp <- compare_networks(multilayer, method = "all")
+print(layer_comp)
+# Will show comparison between verbal and material cooperation layers
+}
 
 # Get detailed matrices
 detailed_comp <- compare_networks(

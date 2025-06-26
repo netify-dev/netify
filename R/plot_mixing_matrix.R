@@ -14,6 +14,9 @@
 #' @param midpoint Numeric. The midpoint for the diverging color scale. Default NULL
 #'   automatically calculates based on data range.
 #' @param text_size Numeric. Size of value labels in tiles. Default 4.
+#' @param text_color Character. Color of text labels. Default "black".
+#' @param text_color_threshold Numeric. If provided, values above this threshold (0-1 scale) 
+#'   will use white text, values below will use black text. Default NULL uses text_color for all.
 #' @param tile_border_color Character. Color of tile borders. Default "white".
 #' @param tile_border_size Numeric. Width of tile borders. Default 0.5.
 #' @param reorder_categories Logical. Whether to reorder categories by similarity. Default FALSE.
@@ -61,6 +64,8 @@ plot_mixing_matrix <- function(
     color_scale = c("#F18F01", "white", "#2E86AB"),
     midpoint = NULL,
     text_size = 4,
+    text_color = "black",
+    text_color_threshold = NULL,
     tile_border_color = "white",
     tile_border_size = 0.5,
     reorder_categories = FALSE,
@@ -146,8 +151,19 @@ plot_mixing_matrix <- function(
         }
     }
 
-    # calculate text colors for value labels based on their relationship to the midpoint
-    text_colors <- ifelse(df_long$value > midpoint, "white", "black")
+    # determine text colors for value labels
+    if (!is.null(text_color_threshold)) {
+        # If threshold is provided, use white text for values above the threshold
+        # First normalize values to 0-1 scale for comparison
+        value_range <- range(df_long$value, na.rm = TRUE)
+        normalized_values <- (df_long$value - value_range[1]) / (value_range[2] - value_range[1])
+        
+        # Apply threshold to determine text colors
+        text_colors <- ifelse(normalized_values > text_color_threshold, "white", "black")
+    } else {
+        # Default: use the provided text_color for all cells
+        text_colors <- text_color
+    }
 
     # create the base plot using ggplot2
     p <- ggplot(df_long, aes(x = .data$to, y = .data$from, fill = .data$value)) +

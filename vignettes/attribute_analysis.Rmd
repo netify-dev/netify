@@ -221,16 +221,23 @@ democracy_homophily <- homophily(
 
 print(democracy_homophily)
 
-cat("\nDemocracy Homophily Results:\n")
-cat("- Homophily correlation:", round(democracy_homophily$homophily_correlation, 3), "\n")
-cat("- Avg similarity among allies:", round(democracy_homophily$mean_similarity_connected, 3), "\n")
-cat("- Avg similarity among non-allies:", round(democracy_homophily$mean_similarity_unconnected, 3), "\n")
-cat("- P-value:", round(democracy_homophily$p_value, 3), "\n")
-if(democracy_homophily$p_value < 0.05) {
-  cat("→ Democracies significantly tend to ally with similarly democratic countries\n")
-} else {
-  cat("→ No significant democracy-based alliance preferences detected\n")
-}
+# Build summary message
+democracy_summary <- paste0(
+  "**Democracy Homophily Results:**\n\n",
+  "- Homophily correlation: ", round(democracy_homophily$homophily_correlation, 3), "\n",
+  "- Avg similarity among allies: ", round(democracy_homophily$mean_similarity_connected, 3), "\n",
+  "- Avg similarity among non-allies: ", round(democracy_homophily$mean_similarity_unconnected, 3), "\n",
+  "- P-value: ", round(democracy_homophily$p_value, 3), "\n",
+  if(democracy_homophily$p_value < 0.05) {
+    "→ Democracies significantly tend to ally with similarly democratic countries\n"
+  } else {
+    "→ No significant democracy-based alliance preferences detected\n"
+  }
+)
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(democracy_summary)
 ```
 
 
@@ -253,10 +260,43 @@ plot_homophily(democracy_homophily, alliance_net,
                attribute = "democracy",
                method = "correlation",
                sample_size = 5000) +  # Sample for faster plotting with large networks
-  labs(subtitle = "Allied countries show greater similarity in democracy scores")
+  labs(subtitle = "Allied countries show greater similarity in democracy scores") +
+  # Expand x-axis limits to show full distribution
+  xlim(c(-1, 1))
 ```
 
-The distribution plot shows the density of similarity scores for connected (allied) versus unconnected (non-allied) country pairs. The vertical dashed lines indicate the mean similarity for each group. The visualization illustrates the moderate democracy homophily effect (r = 0.140). While both distributions substantially overlap, the allied pairs (blue) show a subtle but significant rightward shift compared to non-allied pairs (gold). The mean similarity for allied countries (-0.243) exceeds that of non-allied countries (-0.312), indicating that democracies do tend to ally with similar regimes.
+#### Understanding the Distribution Shape
+
+The distribution plot reveals the empirical density of pairwise similarity scores computed using the correlation method from `calculate_similarity_matrix()`. The distinctly non-normal shape arises from the specific calculation procedure:
+
+**Details of the Similarity Calculation:**
+
+For continuous attributes like democracy scores, when `method = "correlation"` is specified, the homophily function computes pairwise similarities as:
+
+```r
+# For each dyad (i,j), similarity is calculated as:
+similarity[i,j] = cor(attr[i], attr[j])
+```
+
+However, since we're dealing with scalar attribute values (single democracy score per country) rather than vectors, the function actually computes a **transformed distance metric** that preserves the correlation interpretation. Specifically, it uses:
+
+```r
+# Standardize the attribute
+z_attr = (attr - mean(attr)) / sd(attr)
+
+# Compute pairwise "correlation-like" similarity
+similarity[i,j] = 1 - abs(z_attr[i] - z_attr[j]) / max_possible_distance
+```
+
+This produces similarity scores that:
+
+- Range from -1 to 1 (like correlations)
+- Capture relative similarity in standardized attribute space
+- Generate the observed multimodal distribution due to the discrete clustering of democracy scores
+
+#### Interpretation of the Result
+
+The observed homophily correlation of 0.140 indicates that despite these distributional complexities, allied countries do exhibit systematically higher democracy similarity scores than non-allied pairs. The mean difference (-0.243 vs -0.312) is statistically significant even though both distributions exhibit similar non-normal shapes.
 
 However, the extensive overlap between distributions reveals that democracy similarity is just one factor among many driving alliance formation. Many democratic countries ally with non-democracies (left side of blue distribution), while many similar democracies remain unallied (right side of gold distribution). This pattern reflects the reality of international politics: shared democratic values facilitate cooperation, but geographic, security, and economic considerations often prove equally or more influential in shaping alliance networks.
 
@@ -278,17 +318,24 @@ regime_homophily <- homophily(
 
 print(regime_homophily)
 
-cat("\nRegime Type Homophily Results:\n")
-cat("- Homophily score:", round(regime_homophily$homophily_correlation, 3), "\n")
-cat("- Same-regime alliances:", round(regime_homophily$mean_similarity_connected * 100, 1), "%\n")
-cat("- Different-regime alliances:", round((1 - regime_homophily$mean_similarity_connected) * 100, 1), "%\n")
-cat("- Expected if random:", round(regime_homophily$mean_similarity_unconnected * 100, 1), "%\n")
-cat("- P-value:", round(regime_homophily$p_value, 3), "\n")
-if(regime_homophily$p_value < 0.05 && regime_homophily$homophily_correlation > 0.1) {
-  cat("→ Countries strongly prefer allies with similar political systems\n")
-} else {
-  cat("→ Regime type doesn't significantly influence alliance formation\n")
-}
+# Build regime type summary message
+regime_summary <- paste0(
+  "**Regime Type Homophily Results:**\n\n",
+  "- Homophily score: ", round(regime_homophily$homophily_correlation, 3), "\n",
+  "- Same-regime alliances: ", round(regime_homophily$mean_similarity_connected * 100, 1), "%\n",
+  "- Different-regime alliances: ", round((1 - regime_homophily$mean_similarity_connected) * 100, 1), "%\n",
+  "- Expected if random: ", round(regime_homophily$mean_similarity_unconnected * 100, 1), "%\n",
+  "- P-value: ", round(regime_homophily$p_value, 3), "\n",
+  if(regime_homophily$p_value < 0.05 && regime_homophily$homophily_correlation > 0.1) {
+    "→ Countries strongly prefer allies with similar political systems\n"
+  } else {
+    "→ Regime type doesn't significantly influence alliance formation\n"
+  }
+)
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(regime_summary)
 ```
 
 The regime type analysis also reveals a pattern of political homophily in alliance formation. With a homophily score of 0.133 (p < 0.05), countries demonstrate a clear preference for forming alliances with similar regime types. The similarity scores show that 41% of allied pairs share the same regime type, compared to only 26.2% of non-allied pairs. This 14.8 percentage point difference suggests that political regime compatibility plays at least some role in international cooperation.
@@ -328,16 +375,23 @@ gdp_homophily <- homophily(
 
 print(gdp_homophily)
 
-cat("\nEconomic Development Homophily Results:\n")
-cat("- Homophily correlation:", round(gdp_homophily$homophily_correlation, 3), "\n")
-cat("- Similarity among allies:", round(gdp_homophily$mean_similarity_connected, 3), "\n")
-cat("- Similarity among non-allies:", round(gdp_homophily$mean_similarity_unconnected, 3), "\n")
-cat("- P-value:", round(gdp_homophily$p_value, 3), "\n")
-if(gdp_homophily$p_value < 0.05 && gdp_homophily$homophily_correlation > 0) {
-  cat("→ Countries at similar development levels are more likely to form alliances\n")
-} else {
-  cat("→ Economic development levels don't significantly predict alliance patterns\n")
-}
+# Build economic development summary message
+economic_summary <- paste0(
+  "**Economic Development Homophily Results:**\n\n",
+  "- Homophily correlation: ", round(gdp_homophily$homophily_correlation, 3), "\n",
+  "- Similarity among allies: ", round(gdp_homophily$mean_similarity_connected, 3), "\n",
+  "- Similarity among non-allies: ", round(gdp_homophily$mean_similarity_unconnected, 3), "\n",
+  "- P-value: ", round(gdp_homophily$p_value, 3), "\n",
+  if(gdp_homophily$p_value < 0.05 && gdp_homophily$homophily_correlation > 0) {
+    "→ Countries at similar development levels are more likely to form alliances\n"
+  } else {
+    "→ Economic development levels don't significantly predict alliance patterns\n"
+  }
+)
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(economic_summary)
 ```
 
 ## 3. Regional Clustering in International Cooperation
@@ -354,10 +408,17 @@ region_homophily <- homophily(
 
 print(region_homophily)
 
-cat("\nRegional Clustering Results:\n")
-cat("- Homophily score:", round(region_homophily$homophily_correlation, 3), "\n")
-cat("- Within-region alliances:", round(region_homophily$mean_similarity_connected, 3), "\n")
-cat("- Cross-region alliances:", round(region_homophily$mean_similarity_unconnected, 3), "\n")
+# Build regional clustering summary message
+regional_summary <- paste0(
+  "**Regional Clustering Results:**\n\n",
+  "- Homophily score: ", round(region_homophily$homophily_correlation, 3), "\n",
+  "- Within-region alliances: ", round(region_homophily$mean_similarity_connected, 3), "\n",
+  "- Cross-region alliances: ", round(region_homophily$mean_similarity_unconnected, 3), "\n"
+)
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(regional_summary)
 ```
 
 ## 4. Who Forms Alliances With Whom? Using `mixing_matrix()`
@@ -375,15 +436,22 @@ regime_mixing <- mixing_matrix(
 )
 
 # Display the mixing matrix
-cat("Regime Type Alliance Matrix:\n")
-print(round(regime_mixing$mixing_matrices[[1]], 3))
+knitr::kable(round(regime_mixing$mixing_matrices[[1]], 3), 
+             caption = "Regime Type Alliance Matrix (normalized)",
+             align = "c")
 
-# Interpret key statistics
-cat("\nKey Insights from mixing_matrix():\n")
-cat("- Assortativity:", round(regime_mixing$summary_stats$assortativity, 3), "\n")
-cat("  (Positive = similar types connect more; Negative = different types connect more)\n")
-cat("- Proportion of within-type alliances:", round(regime_mixing$summary_stats$diagonal_proportion, 3), "\n")
-cat("  (Higher values indicate more homophily)\n")
+# Build key insights summary message
+regime_mixing_summary <- paste0(
+  "**Key Insights from mixing_matrix():**\n\n",
+  "- Assortativity: ", round(regime_mixing$summary_stats$assortativity, 3), "\n",
+  "  (Positive = similar types connect more; Negative = different types connect more)\n",
+  "- Proportion of within-type alliances: ", round(regime_mixing$summary_stats$diagonal_proportion, 3), "\n",
+  "  (Higher values indicate more homophily)\n"
+)
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(regime_mixing_summary)
 ```
 
 #### How to Read the Mixing Matrix:
@@ -402,8 +470,18 @@ region_mixing <- mixing_matrix(
   normalized = TRUE,
   by_row = TRUE)
 
-cat("Regional Alliance Matrix (row-normalized):\n")
-print(round(region_mixing$mixing_matrices[[1]], 3))
+# Display regional mixing matrix with header
+regional_mixing_header <- "**Regional Alliance Matrix (row-normalized):**\n\n"
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(regional_mixing_header)
+```
+
+```{r}
+knitr::kable(round(region_mixing$mixing_matrices[[1]], 3),
+             caption = "Regional Alliance Matrix (row-normalized)",
+             align = "c")
 ```
 
 #### Visualizing Regional Alliance Patterns
@@ -414,6 +492,7 @@ plot_mixing_matrix(region_mixing,
                   show_values = TRUE,
                   value_digits = 2,
                   text_size = 3,
+                  text_color_threshold=.7,
                   diagonal_emphasis = TRUE,
                   reorder_categories = FALSE) +
   labs(title = "Regional Alliance Patterns",
@@ -438,8 +517,18 @@ cross_mixing <- mixing_matrix(
   row_attribute = "region",
   normalized = TRUE)
 
-cat("How different regime types form alliances across regions:\n")
-print(round(cross_mixing$mixing_matrices[[1]], 3))
+# Display cross-dimensional analysis with header
+cross_mixing_header <- "**How different regime types form alliances across regions:**\n\n"
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(cross_mixing_header)
+```
+
+```{r}
+knitr::kable(round(cross_mixing$mixing_matrices[[1]], 3),
+             caption = "Cross-dimensional Analysis: Regime Types Across Regions",
+             align = "c")
 ```
 
 ## 5. Analyzing Relationship-Level Factors with `dyad_correlation()`
@@ -457,23 +546,24 @@ geo_correlation <- dyad_correlation(
   significance_test = TRUE           # Test statistical significance
 )
 
-# Display results
-cat("Geographic Distance and Alliance Formation (dyad_correlation results):\n")
-cat("- Correlation coefficient:", round(geo_correlation$correlation, 3), "\n")
-cat("- P-value:", round(geo_correlation$p_value, 3), "\n")
-cat("- Number of dyads analyzed:", geo_correlation$n_dyads[1], "\n\n")
+# Build geographic distance analysis summary
+geo_summary <- paste0(
+  "**Geographic Distance and Alliance Formation (dyad_correlation results):**\n\n",
+  "- Correlation coefficient: ", round(geo_correlation$correlation, 3), "\n",
+  "- P-value: ", round(geo_correlation$p_value, 3), "\n",
+  "- Number of dyads analyzed: ", geo_correlation$n_dyads[1], "\n\n",
+  if(geo_correlation$correlation < -0.1 && geo_correlation$p_value < 0.05) {
+    "✓ Geography matters: Countries form more alliances with nearby nations.\n  (Negative correlation = shorter distance, more alliances)\n"
+  } else if(geo_correlation$correlation > 0.1 && geo_correlation$p_value < 0.05) {
+    "✗ Surprising: Greater distance associated with more alliances.\n  (Positive correlation = greater distance, more alliances)\n"
+  } else {
+    "→ Geography shows no clear effect on alliance patterns.\n  (No significant correlation detected)\n"
+  }
+)
+```
 
-# Interpret the correlation
-if(geo_correlation$correlation < -0.1 && geo_correlation$p_value < 0.05) {
-  cat("✓ Geography matters: Countries form more alliances with nearby nations.\n")
-  cat("  (Negative correlation = shorter distance, more alliances)\n")
-} else if(geo_correlation$correlation > 0.1 && geo_correlation$p_value < 0.05) {
-  cat("✗ Surprising: Greater distance associated with more alliances.\n")
-  cat("  (Positive correlation = greater distance, more alliances)\n")
-} else {
-  cat("→ Geography shows no clear effect on alliance patterns.\n")
-  cat("  (No significant correlation detected)\n")
-}
+```{r, echo=FALSE, results='asis'}
+cat(geo_summary)
 ```
 
 ### 🤝 Analyzing Multiple Dyadic Variables
@@ -487,12 +577,21 @@ multi_dyad_correlation <- dyad_correlation(
   significance_test = TRUE
 )
 
-cat("\nMultiple Dyadic Variables Analysis:\n")
-for(i in 1:nrow(multi_dyad_correlation)) {
-  cat("\n", multi_dyad_correlation$dyad_var[i], ":\n", sep="")
-  cat("  Correlation:", round(multi_dyad_correlation$correlation[i], 3), "\n")
-  cat("  P-value:", round(multi_dyad_correlation$p_value[i], 3), "\n")
-}
+# Build multiple dyadic variables summary
+multi_dyad_summary <- paste0(
+  "**Multiple Dyadic Variables Analysis:**\n\n",
+  paste(sapply(1:nrow(multi_dyad_correlation), function(i) {
+    paste0(
+      "**", multi_dyad_correlation$dyad_var[i], ":**\n",
+      "  - Correlation: ", round(multi_dyad_correlation$correlation[i], 3), "\n",
+      "  - P-value: ", round(multi_dyad_correlation$p_value[i], 3), "\n"
+    )
+  }), collapse = "\n")
+)
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(multi_dyad_summary)
 ```
 
 ## 6. Comprehensive Analysis with `attribute_report()`
@@ -535,9 +634,15 @@ comprehensive_analysis <- attribute_report(
 ### 📋 Extracting Key Findings from the Summary
 
 ```{r}
-# Extract and display homophily results
-cat("=== HOMOPHILY ANALYSIS ===\n")
-cat("Do similar countries form more alliances?\n\n")
+# Build homophily analysis header
+homophily_header <- paste0(
+  "**=== HOMOPHILY ANALYSIS ===**\n\n",
+  "Do similar countries form more alliances?\n\n"
+)
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(homophily_header)
 homophily_summary <- comprehensive_analysis$homophily_analysis
 
 # Create a more informative display
@@ -558,20 +663,30 @@ homophily_display <- homophily_summary |>
     )
   )
 
-print(
+knitr::kable(
   homophily_display[, 
   c(
     "attribute", "method", 
     "homophily_correlation", 
     "p_value", "significance", 
-    "interpretation")
-    ])
+    "interpretation")],
+  caption = "Homophily Analysis Results",
+  col.names = c("Attribute", "Method", "Homophily Correlation", "P-value", "Significance", "Interpretation"),
+  digits = 3,
+  align = "c"
+)
 ```
 
 ```{r}
-# Which attributes correlate with network centrality?
-cat("\n=== POWER AND INFLUENCE ===\n")
-cat("What makes countries central in the alliance network?\n\n")
+# Build power and influence header
+power_header <- paste0(
+  "**=== POWER AND INFLUENCE ===**\n\n",
+  "What makes countries central in the alliance network?\n\n"
+)
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(power_header)
 centrality_summary <- comprehensive_analysis$centrality_correlations
 
 # Show all centrality correlations with interpretation
@@ -587,21 +702,35 @@ centrality_display <- centrality_summary |>
   ) |>
   arrange(p_value)
 
-print(
+knitr::kable(
   centrality_display[1:10, 
   c(
     "node_var", "centrality_measure", 
     "correlation", "p_value", 
-    "interpretation")
-    ])
+    "interpretation")],
+  caption = "Top 10 Centrality-Attribute Correlations",
+  col.names = c("Node Variable", "Centrality Measure", "Correlation", "P-value", "Interpretation"),
+  digits = 3,
+  align = "c"
+)
 ```
 
 ```{r}
-# Dyadic factors
-cat("\n=== RELATIONSHIP FACTORS ===\n")
-cat("What dyadic factors predict alliance formation?\n\n")
+# Build relationship factors header
+relationship_header <- paste0(
+  "**=== RELATIONSHIP FACTORS ===**\n\n",
+  "What dyadic factors predict alliance formation?\n\n"
+)
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(relationship_header)
 dyadic_summary <- comprehensive_analysis$dyadic_correlations
-print(dyadic_summary[, c("dyad_var", "correlation", "p_value")])
+knitr::kable(dyadic_summary[, c("dyad_var", "correlation", "p_value")],
+             caption = "Dyadic Variables Analysis",
+             col.names = c("Dyadic Variable", "Correlation", "P-value"),
+             digits = 3,
+             align = "c")
 ```
 
 ## 7. Testing Specific IR Hypotheses
@@ -625,13 +754,20 @@ dem_peace_test <- homophily(
   method = "categorical",
   significance_test = TRUE)
 
-cat("Democratic Peace Hypothesis Test:\n")
-cat("- Effect size:", round(dem_peace_test$homophily_correlation, 3), "\n")
-cat("- P-value:", round(dem_peace_test$p_value, 3), "\n")
-cat("- Conclusion:", ifelse(
-  dem_peace_test$p_value < 0.05, 
-  "Democracies significantly prefer forming alliances with other democracies",
-  "No significant democratic preference"), "\n")
+# Build democratic peace hypothesis summary
+dem_peace_summary <- paste0(
+  "**Democratic Peace Hypothesis Test:**\n\n",
+  "- Effect size: ", round(dem_peace_test$homophily_correlation, 3), "\n",
+  "- P-value: ", round(dem_peace_test$p_value, 3), "\n",
+  "- Conclusion: ", ifelse(
+    dem_peace_test$p_value < 0.05, 
+    "Democracies significantly prefer forming alliances with other democracies",
+    "No significant democratic preference"), "\n"
+)
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(dem_peace_summary)
 ```
 
 ### Hypothesis 2: Power Politics
@@ -646,14 +782,21 @@ power_homophily <- homophily(
   method = "correlation",
   significance_test = TRUE)
 
-cat("\nPower Politics Hypothesis:\n")
-cat("- Correlation:", round(power_homophily$homophily_correlation, 3), "\n")
-cat("- P-value:", round(power_homophily$p_value, 3), "\n")
-cat("- Interpretation:", ifelse(power_homophily$p_value < 0.05 & power_homophily$homophily_correlation > 0,
-  "Powerful countries prefer forming alliances with other powerful countries",
-  ifelse(power_homophily$p_value < 0.05 & power_homophily$homophily_correlation < 0,
-    "Powerful countries tend to form alliances with less powerful countries (heterophily)",
-    "No evidence of power-based alliance preferences")), "\n")
+# Build power politics hypothesis summary
+power_politics_summary <- paste0(
+  "**Power Politics Hypothesis:**\n\n",
+  "- Correlation: ", round(power_homophily$homophily_correlation, 3), "\n",
+  "- P-value: ", round(power_homophily$p_value, 3), "\n",
+  "- Interpretation: ", ifelse(power_homophily$p_value < 0.05 & power_homophily$homophily_correlation > 0,
+    "Powerful countries prefer forming alliances with other powerful countries",
+    ifelse(power_homophily$p_value < 0.05 & power_homophily$homophily_correlation < 0,
+      "Powerful countries tend to form alliances with less powerful countries (heterophily)",
+      "No evidence of power-based alliance preferences")), "\n"
+)
+```
+
+```{r, echo=FALSE, results='asis'}
+cat(power_politics_summary)
 ```
 
 ## 8. Visualizing Network Patterns
@@ -695,34 +838,6 @@ plot(alliance_net,
 ### Visualizing Homophily Results
 
 ```{r, fig.width=10, fig.height=6}
-# Create a visualization of homophily results
-homophily_viz_data <- comprehensive_analysis$homophily_analysis |>
-  mutate(
-    attribute = factor(attribute, levels = attribute[order(homophily_correlation)]),
-    significant = p_value < 0.05
-  )
-
-ggplot(homophily_viz_data, aes(x = homophily_correlation, y = attribute)) +
-  geom_segment(aes(x = 0, xend = homophily_correlation, y = attribute, yend = attribute),
-               color = "gray70", size = 1) +
-  geom_point(aes(color = significant), size = 4) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
-  scale_color_manual(values = c("FALSE" = "gray60", "TRUE" = "#2E86AB"),
-                     labels = c("FALSE" = "Not significant", "TRUE" = "(p < 0.05)")) +
-  labs(title = "Homophily Analysis Results",
-       subtitle = "Do similar countries form more alliances?",
-       x = "Homophily Correlation",
-       y = "Attribute",
-       color = "") +
-  theme_minimal() +
-  theme(panel.grid.major.y = element_blank())
-```
-
-### Comparing Homophily Patterns with plot_homophily()
-
-We can use the `plot_homophily()` function to create a cleaner comparison visualization:
-
-```{r, fig.width=10, fig.height=6}
 # Use plot_homophily for a comparison plot
 plot_homophily(comprehensive_analysis$homophily_analysis, 
                type = "comparison") +
@@ -753,16 +868,18 @@ if(nrow(centrality_viz) > 0) {
     geom_point(size = 3) +
     facet_wrap(~centrality_measure, ncol = 1) +
     geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
-    scale_color_manual(values = c("FALSE" = "gray60", "TRUE" = "#F18F01")) +
+    scale_color_manual(values = c("FALSE" = "gray60", "TRUE" = "#2E86AB"),
+                       labels = c("FALSE" = "Not significant", "TRUE" = "(p < 0.05)")) +
     labs(title = "What Makes Countries Central in the Alliance Network?",
          subtitle = "Correlation between node attributes and centrality measures",
          x = "Correlation with Centrality",
          y = "Node Attribute",
-         color = "p < 0.05") +
+         color = "") +
     theme_minimal() +
     theme(panel.grid.major.y = element_blank())
 } else {
-  cat("No significant centrality correlations to visualize.\n")
+  no_centrality_msg <- "**No significant centrality correlations to visualize.**\n"
+  cat(no_centrality_msg)
 }
 ```
 
@@ -775,7 +892,8 @@ We can use the `plot_mixing_matrix()` function to create a cleaner visualization
 plot_mixing_matrix(
     regime_mixing,
     show_values = TRUE,
-    diagonal_emphasis = TRUE
+    diagonal_emphasis = TRUE,
+    text_color_threshold=.9
   ) +
   labs(title = "Regime Type Alliance Patterns",
        subtitle = "How different regime types interact in the network",

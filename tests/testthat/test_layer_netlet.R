@@ -307,4 +307,35 @@ test_that(
         expect_equal(dimnames(raw_multi)[[2]], colnames(raw_verb))
     })
 
+test_that(
+    'layer_netify: handles named lists correctly', {
+        
+        # Test with named list (should work)
+        named_list <- list(
+            verbal = icews_verbCoop_10, 
+            material = icews_matlCoop_10
+        )
+        multi_net_named <- layer_netify(named_list)
+        
+        # Check it works and uses list names as layer labels
+        expect_s3_class(multi_net_named, 'netify')
+        expect_equal(attr(multi_net_named, 'layers'), c('verbal', 'material'))
+        
+        # Test explicit layer_labels override list names
+        multi_net_override <- layer_netify(
+            named_list,
+            layer_labels = c('VerbCoop', 'MatlCoop')
+        )
+        expect_equal(attr(multi_net_override, 'layers'), c('VerbCoop', 'MatlCoop'))
+        
+        # Test mixed named/unnamed elements
+        mixed_list <- list(
+            verbal = icews_verbCoop_10,
+            icews_matlCoop_10,
+            conflict = icews_verbConf_10
+        )
+        multi_net_mixed <- layer_netify(mixed_list)
+        expect_equal(attr(multi_net_mixed, 'layers'), c('verbal', 'layer2', 'conflict'))
+    })
+
 ################################################

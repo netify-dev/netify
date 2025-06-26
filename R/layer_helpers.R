@@ -24,7 +24,18 @@ set_layer_labels <- function(netlet_list, layer_labels) {
     # if layer labels not present see if we can pull them from
     # the list object
     if (is.null(layer_labels)) {
-        layer_labels <- names(netlet_list) %||% paste0("layer", seq_along(netlet_list))
+        existing_names <- names(netlet_list)
+        if (is.null(existing_names)) {
+            # no names at all, generate generic labels
+            layer_labels <- paste0("layer", seq_along(netlet_list))
+        } else {
+            # some names exist, fill in missing ones
+            layer_labels <- existing_names
+            missing_names <- which(is.na(existing_names) | existing_names == "")
+            if (length(missing_names) > 0) {
+                layer_labels[missing_names] <- paste0("layer", missing_names)
+            }
+        }
     }
 
     #

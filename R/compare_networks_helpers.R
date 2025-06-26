@@ -38,6 +38,7 @@ compare_edges <- function(
    hamming_mat <- matrix(NA, n_nets, n_nets, dimnames = list(net_names, net_names))
    qap_mat <- matrix(NA, n_nets, n_nets, dimnames = list(net_names, net_names))
    qap_pval_mat <- matrix(NA, n_nets, n_nets, dimnames = list(net_names, net_names))
+   spectral_mat <- matrix(NA, n_nets, n_nets, dimnames = list(net_names, net_names))
    
    # track edge changes between networks
    edge_changes <- list()
@@ -55,19 +56,26 @@ compare_edges <- function(
        })
    }
    
-   # compare all pairs of networks
-   for (i in 1:(n_nets-1)) {
-       for (j in (i+1):n_nets) {
-           # get aligned matrices
-           if (n_nets > 5) {
-               mat1 <- aligned_list[[i]]
-               mat2 <- aligned_list[[j]]
-           } else {
-               # align the matrices so they have same actors
-               mats <- align_matrices(nets_list[[i]], nets_list[[j]], include_diagonal)
-               mat1 <- mats$mat1
-               mat2 <- mats$mat2
-           }
+    # compare all pairs of networks
+    for (i in 1:(n_nets-1)) {
+        for (j in (i+1):n_nets) {
+            # check if networks have different loop settings
+            loops1 <- attributes(nets_list[[i]])$loops %||% FALSE
+            loops2 <- attributes(nets_list[[j]])$loops %||% FALSE
+            
+            # if networks have different loop settings, we need to include diagonal
+            force_include_diagonal <- include_diagonal || (loops1 != loops2)
+            
+            # get aligned matrices
+            if (n_nets > 5) {
+                mat1 <- aligned_list[[i]]
+                mat2 <- aligned_list[[j]]
+            } else {
+                # align the matrices so they have same actors
+                mats <- align_matrices(nets_list[[i]], nets_list[[j]], force_include_diagonal)
+                mat1 <- mats$mat1
+                mat2 <- mats$mat2
+            }
            
            # figure out edge thresholds
            if (is.function(edge_threshold)) {
@@ -77,17 +85,40 @@ compare_edges <- function(
                threshold1 <- threshold2 <- edge_threshold
            }
            
-           # calculate similarity metrics based on method
-           if (method %in% c("correlation", "all")) {
-               # flatten matrices and calc correlation
-               vec1 <- as.vector(mat1)
-               vec2 <- as.vector(mat2)
-               complete <- !is.na(vec1) & !is.na(vec2)
-               if (sum(complete) >= 3) {
-                   correlation_mat[i,j] <- correlation_mat[j,i] <- 
-                       correlation_cpp(vec1[complete], vec2[complete])
-               }
-           }
+            # calculate similarity metrics based on method
+            if (method %in% c("correlation", "all")) {
+                # flatten matrices and calc correlation
+                vec1 <- as.vector(mat1)
+                vec2 <- as.vector(mat2)
+                complete <- !is.na(vec1) & !is.na(vec2)
+                if (sum(complete) >= 3) {
+                    # check for constant vectors (e.g., all zeros or all ones)
+                    var1 <- var(vec1[complete])
+                    var2 <- var(vec2[complete])
+                    
+                    if (var1 > 0 && var2 > 0) {
+                        correlation_mat[i,j] <- correlation_mat[j,i] <- 
+                            correlation_cpp(vec1[complete], vec2[complete])
+                    } else if (var1 == 0 && var2 == 0) {
+                        # both constant - if same value then perfect correlation, else 0
+                        if (all(vec1[complete] == vec1[complete][1]) && 
+                            all(vec2[complete] == vec2[complete][1]) &&
+                            vec1[complete][1] == vec2[complete][1]) {
+                            correlation_mat[i,j] <- correlation_mat[j,i] <- 1
+                        } else {
+                            correlation_mat[i,j] <- correlation_mat[j,i] <- 0
+                        }
+                    } else {
+                        # one constant, one varying - correlation is 0
+                        correlation_mat[i,j] <- correlation_mat[j,i] <- 0
+                    }
+                } else {
+                    # not enough data points - set to 0 for empty networks
+                    if (sum(vec1 != 0, na.rm = TRUE) == 0 || sum(vec2 != 0, na.rm = TRUE) == 0) {
+                        correlation_mat[i,j] <- correlation_mat[j,i] <- 0
+                    }
+                }
+            }
            
            if (method %in% c("jaccard", "all")) {
                jaccard_mat[i,j] <- jaccard_mat[j,i] <- 
@@ -105,6 +136,11 @@ compare_edges <- function(
                qap_pval_mat[i,j] <- qap_pval_mat[j,i] <- qap_result$p_value
            }
            
+           if (method %in% c("spectral", "all")) {
+               spectral_mat[i,j] <- spectral_mat[j,i] <- 
+                   calculate_spectral_distance(mat1, mat2)
+           }
+           
            # track what edges changed between these two networks
            edge_key <- paste(net_names[i], net_names[j], sep = "_vs_")
            edge_changes[[edge_key]] <- calculate_edge_changes_fast(mat1, mat2, threshold1, threshold2)
@@ -115,6 +151,7 @@ compare_edges <- function(
    diag(correlation_mat) <- 1
    diag(jaccard_mat) <- 1
    diag(hamming_mat) <- 0
+   diag(spectral_mat) <- 0
    if (test) {
        diag(qap_mat) <- 1
        diag(qap_pval_mat) <- 0
@@ -122,35 +159,37 @@ compare_edges <- function(
    
    # create summary dataframe
    summary_df <- create_edge_summary(correlation_mat, jaccard_mat, hamming_mat, 
-                                    qap_mat, qap_pval_mat, method)
+                                    qap_mat, qap_pval_mat, spectral_mat, method)
    
-   # build results list - make sure n_networks is included!
-   results <- list(
-       # comparison_type = "edges",
-       method = method,
-       n_networks = n_nets,  
-       summary = summary_df,
-       edge_changes = edge_changes
-   )
-   
-   # add significance tests if requested
-   if (test) {
-       results$significance_tests <- list(
-           qap_correlations = qap_mat,
-           qap_pvalues = qap_pval_mat
-       )
-   }
-   
-   # add detailed matrices if user wants them
-   if (return_details) {
-       results$details <- list(
-           correlation_matrix = correlation_mat,
-           jaccard_matrix = jaccard_mat,
-           hamming_matrix = hamming_mat
-       )
-   }
-   
-   return(results)
+    # build results list - make sure n_networks is included!
+    results <- list(
+        # comparison_type = "edges",
+        method = method,
+        n_networks = n_nets,  
+        summary = summary_df,
+        edge_changes = edge_changes
+    )
+    
+    # add significance tests if requested
+    if (test) {
+        results$significance_tests <- list(
+            qap_correlations = qap_mat,
+            qap_pvalues = qap_pval_mat
+        )
+    }
+    
+    # add detailed matrices if user wants them
+    if (return_details) {
+        # always return full matrices but ensure they're properly named
+        results$details <- list(
+            correlation_matrix = correlation_mat,
+            jaccard_matrix = jaccard_mat,
+            hamming_matrix = hamming_mat,
+            spectral_matrix = spectral_mat
+        )
+    }
+    
+    return(results)
 }
 
 #' Compare Structural Properties Between Networks
@@ -168,76 +207,100 @@ compare_edges <- function(
 #' @noRd
 
 compare_structure <- function(nets_list, test){
-  
-   # get network names
-   net_names <- names(nets_list)
-   if (is.null(net_names)) {
-       net_names <- paste0("net", seq_along(nets_list))
-   }
-   
-   # calc structural properties for each network using summary()
-   struct_props <- lapply(seq_along(nets_list), function(i) {
-       net <- nets_list[[i]]
-       
-       # use netify's built-in summary function
-       net_summary <- summary(net)
-       
-       # pull out key structural properties
-       props <- data.frame(
-           network = net_names[i],
-           n_nodes = net_summary$num_actors %||% net_summary$num_row_actors,
-           n_edges = net_summary$num_edges,
-           density = net_summary$density,
-           reciprocity = net_summary$reciprocity %||% NA,
-           transitivity = net_summary$transitivity %||% NA,
-           mean_degree = net_summary$num_edges / (net_summary$num_actors %||% net_summary$num_row_actors),
-           stringsAsFactors = FALSE
-       )
-       
-       # add centralization if available
-       if (!is.null(net_summary$competition)) {
-           props$centralization <- net_summary$competition
-       }
-       
-       props
-   })
-   
-   # combine into single dataframe
-   struct_df <- do.call(rbind, struct_props)
-   
-   # if only 2 networks, calculate changes between them
-   if (length(nets_list) == 2) {
-       props1 <- struct_props[[1]]
-       props2 <- struct_props[[2]]
-       
-       # calc changes for all numeric columns
-       numeric_cols <- setdiff(names(props1), c("network"))
-       changes <- data.frame(
-           metric = numeric_cols,
-           value_net1 = unlist(props1[numeric_cols]),
-           value_net2 = unlist(props2[numeric_cols]),
-           stringsAsFactors = FALSE
-       )
-       changes$absolute_change <- changes$value_net2 - changes$value_net1
-       changes$percent_change <- ifelse(changes$value_net1 != 0,
-                                      100 * changes$absolute_change / changes$value_net1,
-                                      NA)
-       
-       struct_df <- list(
-           properties = struct_df,
-           changes = changes
-       )
-   }
-   
-   # build results 
-   results <- list(
-       # comparison_type = "structure",
-       method = "structural_comparison",
-       n_networks = length(nets_list),  
-       summary = struct_df
-   )
-   
-   return(results)
+    
+    # get network names
+    net_names <- names(nets_list)
+    if (is.null(net_names)) {
+        net_names <- paste0("net", seq_along(nets_list))
+    }
+    
+    # calc structural properties for each network using summary()
+    struct_props <- lapply(seq_along(nets_list), function(i) {
+        net <- nets_list[[i]]
+        
+        # use netify's built-in summary function
+        net_summary <- summary(net)
+        
+        # extract matrix to calculate additional metrics if needed
+        mat <- extract_matrix(net)
+        n_actors <- nrow(mat)
+        n_edges <- net_summary$num_edges %||% sum(mat > 0, na.rm = TRUE)
+        
+        # calculate mean degree based on network type
+        is_directed <- !(attributes(net)$symmetric %||% FALSE)
+        if (is_directed) {
+            mean_deg <- n_edges / n_actors
+        } else {
+            # for undirected, edges are counted once but each contributes to 2 degrees
+            mean_deg <- (2 * n_edges) / n_actors
+        }
+        
+        # pull out key structural properties
+        props <- data.frame(
+            network = net_names[i],
+            n_nodes = n_actors,
+            n_edges = n_edges,
+            density = net_summary$density %||% (n_edges / (n_actors * (n_actors - 1))),
+            reciprocity = net_summary$reciprocity %||% NA,
+            transitivity = net_summary$transitivity %||% NA,
+            mean_degree = mean_deg,
+            stringsAsFactors = FALSE
+        )
+        
+        # add centralization if available
+        if (!is.null(net_summary$competition)) {
+            props$centralization <- net_summary$competition
+        }
+        
+        props
+    })
+    
+    # combine into single dataframe
+    struct_df <- do.call(rbind, struct_props)
+    
+    # if only 2 networks, calculate changes between them
+    if (length(nets_list) == 2) {
+        props1 <- struct_props[[1]]
+        props2 <- struct_props[[2]]
+        
+        # calc changes for all numeric columns
+        numeric_cols <- setdiff(names(props1), c("network"))
+        changes <- data.frame(
+            metric = numeric_cols,
+            value_net1 = unlist(props1[numeric_cols]),
+            value_net2 = unlist(props2[numeric_cols]),
+            stringsAsFactors = FALSE
+        )
+        changes$absolute_change <- changes$value_net2 - changes$value_net1
+        changes$percent_change <- ifelse(changes$value_net1 != 0 & !is.na(changes$value_net1),
+                                       100 * changes$absolute_change / changes$value_net1,
+                                       NA)
+        
+        struct_df <- list(
+            properties = struct_df,
+            changes = changes
+        )
+    }
+    
+    # build results 
+    results <- list(
+        # comparison_type = "structure",
+        method = "structural_comparison",
+        n_networks = length(nets_list),  
+        # if struct_df is a list (with properties and changes), use properties
+        summary = if (is.list(struct_df) && "properties" %in% names(struct_df)) {
+            struct_df$properties
+        } else {
+            struct_df
+        }
+    )
+    
+    # if we have changes data (2 networks), add it separately
+    if (is.list(struct_df) && "changes" %in% names(struct_df)) {
+        results$changes <- struct_df$changes
+    }
+    
+    return(results)
 }
 
 #' Compare Node Composition Between Networks
@@ -417,13 +480,13 @@ compare_attributes <- function(
    
    summary_df <- do.call(rbind, summary_list[!sapply(summary_list, is.null)])
    
-   results <- list(
-       # comparison_type = "attributes",
-       method = "attribute_distribution",
-       n_networks = length(nets_list),  
-       summary = summary_df,
-       by_attribute = attr_comparisons
-   )
+    results <- list(
+        # comparison_type = "attributes", 
+        method = "attribute_comparison",
+        n_networks = length(nets_list),  
+        summary = summary_df,
+        by_attribute = attr_comparisons
+    )
    
    if (return_details) {
        results$details <- lapply(attr_comparisons, function(x) x$details)
@@ -452,15 +515,102 @@ extract_network_list <- function(net){
    #
    attrs <- attributes(net)
    
+   # check if this is a multilayer network
+   has_layers <- !is.null(attrs$layers)
+   
    if (attrs$netify_type == "longit_list") {
-       return(net)
-   } else if (attrs$netify_type == "longit_array") {
-       # check sparsity to decide best approach
-       dims <- dim(net)
-       time_names <- dimnames(net)[[3]]
-       if (is.null(time_names)) {
-           time_names <- as.character(1:dims[3])
+       # for longitudinal list, check if it's multilayer
+       if (has_layers && length(dim(net[[1]])) == 3) {
+           # multilayer longitudinal list - extract layers from first time period
+           layer_names <- attrs$layers
+           n_layers <- length(layer_names)
+           
+           # extract each layer across all time periods
+           layer_list <- vector("list", n_layers)
+           names(layer_list) <- layer_names
+           
+           for (l in seq_len(n_layers)) {
+               # create longitudinal list for this layer
+               time_list <- vector("list", length(net))
+               names(time_list) <- names(net)
+               
+               for (t in seq_along(net)) {
+                   # extract layer l from time t
+                   layer_slice <- net[[t]][,,l]
+                   
+                   # preserve attributes
+                   attr(layer_slice, "netify_type") <- "cross_sec"
+                   attr(layer_slice, "symmetric") <- attrs$symmetric
+                   attr(layer_slice, "mode") <- attrs$mode
+                   attr(layer_slice, "weight") <- attrs$weight
+                   attr(layer_slice, "layer") <- layer_names[l]
+                   class(layer_slice) <- "netify"
+                   
+                   time_list[[t]] <- layer_slice
+               }
+               
+               # wrap as longitudinal list
+               attr(time_list, "netify_type") <- "longit_list"
+               attr(time_list, "symmetric") <- attrs$symmetric
+               attr(time_list, "mode") <- attrs$mode
+               attr(time_list, "weight") <- attrs$weight
+               attr(time_list, "layer") <- layer_names[l]
+               class(time_list) <- "netify"
+               
+               layer_list[[l]] <- time_list
+           }
+           
+           return(layer_list)
+       } else {
+           # regular longitudinal list
+           return(net)
        }
+   } else if (attrs$netify_type == "longit_array") {
+       # check if multilayer (4D array)
+       if (has_layers && length(dim(net)) == 4) {
+           # multilayer longitudinal array [actors × actors × layers × time]
+           dims <- dim(net)
+           layer_names <- attrs$layers
+           time_names <- dimnames(net)[[4]]
+           if (is.null(time_names)) {
+               time_names <- as.character(1:dims[4])
+           }
+           
+           # extract each layer
+           layer_list <- vector("list", dims[3])
+           names(layer_list) <- layer_names
+           
+           for (l in seq_len(dims[3])) {
+               # extract 3D array for this layer [actors × actors × time]
+               layer_array <- net[,,l,]
+               
+               # set proper dimensions
+               dim(layer_array) <- c(dims[1], dims[2], dims[4])
+               dimnames(layer_array) <- list(
+                   dimnames(net)[[1]], 
+                   dimnames(net)[[2]], 
+                   time_names
+               )
+               
+               # preserve attributes
+               attr(layer_array, "netify_type") <- "longit_array"
+               attr(layer_array, "symmetric") <- attrs$symmetric
+               attr(layer_array, "mode") <- attrs$mode
+               attr(layer_array, "weight") <- attrs$weight
+               attr(layer_array, "layer") <- layer_names[l]
+               class(layer_array) <- "netify"
+               
+               layer_list[[l]] <- layer_array
+           }
+           
+           return(layer_list)
+       } else {
+           # regular longitudinal array (3D)
+           dims <- dim(net)
+           time_names <- dimnames(net)[[3]]
+           if (is.null(time_names)) {
+               time_names <- as.character(1:dims[3])
+           }
        
        # check sparsity
        total_elements <- prod(dims)
@@ -490,7 +640,7 @@ extract_network_list <- function(net){
                attr(mat, "symmetric") <- attrs$symmetric
                attr(mat, "mode") <- attrs$mode
                attr(mat, "weight") <- attrs$weight
-               attr(mat, "layers") <- attrs$layers
+               # don't preserve layers attribute for non-multilayer
                class(mat) <- "netify"
                mat
            })
@@ -505,7 +655,7 @@ extract_network_list <- function(net){
                attr(time_slice, "symmetric") <- attrs$symmetric
                attr(time_slice, "mode") <- attrs$mode
                attr(time_slice, "weight") <- attrs$weight
-               attr(time_slice, "layers") <- attrs$layers
+               # don't preserve layers attribute for non-multilayer
                class(time_slice) <- "netify"
                
                net_list[[t]] <- time_slice
@@ -514,8 +664,40 @@ extract_network_list <- function(net){
        
        names(net_list) <- time_names
        return(net_list)
+       }
+   } else if (attrs$netify_type == "cross_sec") {
+       # check if multilayer (3D array)
+       if (has_layers && length(dim(net)) == 3) {
+           # multilayer cross-sectional [actors × actors × layers]
+           dims <- dim(net)
+           layer_names <- attrs$layers
+           
+           # extract each layer
+           layer_list <- vector("list", dims[3])
+           names(layer_list) <- layer_names
+           
+           for (l in seq_len(dims[3])) {
+               # extract layer slice
+               layer_slice <- net[,,l]
+               
+               # preserve attributes
+               attr(layer_slice, "netify_type") <- "cross_sec"
+               attr(layer_slice, "symmetric") <- attrs$symmetric
+               attr(layer_slice, "mode") <- attrs$mode
+               attr(layer_slice, "weight") <- attrs$weight
+               attr(layer_slice, "layer") <- layer_names[l]
+               class(layer_slice) <- "netify"
+               
+               layer_list[[l]] <- layer_slice
+           }
+           
+           return(layer_list)
+       } else {
+           # single cross-sectional network
+           return(list(network = net))
+       }
    } else {
-       # single network
+       # unknown type - return as single network
        return(list(network = net))
    }
 }
@@ -731,16 +913,20 @@ align_to_actors <- function(net, all_actors, include_diagonal = FALSE) {
 
 calculate_jaccard_fast <- function(mat1, mat2, threshold1, threshold2){
 
-   # binarize matrices based on thresholds
-   bin1 <- (mat1 > threshold1) & !is.na(mat1)
-   bin2 <- (mat2 > threshold2) & !is.na(mat2)
-   
-   # vectorized calculation
-   intersection <- sum(bin1 & bin2, na.rm = TRUE)
-   union <- sum(bin1 | bin2, na.rm = TRUE)
-   
-   if (union == 0) return(0)
-   return(intersection / union)
+    # binarize matrices based on thresholds
+    bin1 <- (mat1 > threshold1) & !is.na(mat1)
+    bin2 <- (mat2 > threshold2) & !is.na(mat2)
+    
+    # vectorized calculation
+    intersection <- sum(bin1 & bin2, na.rm = TRUE)
+    union <- sum(bin1 | bin2, na.rm = TRUE)
+    
+    # handle edge cases
+    if (union == 0) {
+        # both networks are empty - jaccard is considered 0 (no similarity)
+        return(0)
+    }
+    return(intersection / union)
 }
 
 #' Calculate Hamming Distance Between Networks (Fast Version)
@@ -900,33 +1086,36 @@ calculate_edge_changes_fast <- function(mat1, mat2, threshold1, threshold2){
 #' @noRd
 
 create_edge_summary <- function(
-   correlation_mat, jaccard_mat, hamming_mat, 
-   qap_mat, qap_pval_mat, method){
-  
-   # create summary dataframe based on number of networks
-   n <- nrow(correlation_mat)
-   if (n == 2) {
-       # simple two-network comparison
-       summary_df <- data.frame(
-           comparison = paste(rownames(correlation_mat)[1], "vs", 
-                            rownames(correlation_mat)[2]),
-           stringsAsFactors = FALSE
-       )
-       
-       if (method %in% c("correlation", "all")) {
-           summary_df$correlation <- correlation_mat[1,2]
-       }
-       if (method %in% c("jaccard", "all")) {
-           summary_df$jaccard <- jaccard_mat[1,2]
-       }
-       if (method %in% c("hamming", "all")) {
-           summary_df$hamming <- hamming_mat[1,2]
-       }
-       if (method %in% c("qap", "all") && !is.na(qap_mat[1,2])) {
-           summary_df$qap_correlation <- qap_mat[1,2]
-           summary_df$qap_pvalue <- qap_pval_mat[1,2]
-       }
-   } else {
+    correlation_mat, jaccard_mat, hamming_mat, 
+    qap_mat, qap_pval_mat, spectral_mat, method){
+    
+    # create summary dataframe based on number of networks
+    n <- nrow(correlation_mat)
+    if (n == 2) {
+        # simple two-network comparison
+        summary_df <- data.frame(
+            comparison = paste(rownames(correlation_mat)[1], "vs", 
+                             rownames(correlation_mat)[2]),
+            stringsAsFactors = FALSE
+        )
+        
+        if (method %in% c("correlation", "all")) {
+            summary_df$correlation <- correlation_mat[1,2]
+        }
+        if (method %in% c("jaccard", "all")) {
+            summary_df$jaccard <- jaccard_mat[1,2]
+        }
+        if (method %in% c("hamming", "all")) {
+            summary_df$hamming <- hamming_mat[1,2]
+        }
+        if (method %in% c("qap", "all") && !is.na(qap_mat[1,2])) {
+            summary_df$qap_correlation <- qap_mat[1,2]
+            summary_df$qap_pvalue <- qap_pval_mat[1,2]
+        }
+        if (method %in% c("spectral", "all")) {
+            summary_df$spectral <- spectral_mat[1,2]
+        }
+    } else {
        # multiple network comparison - return average similarities
        summary_df <- data.frame(
            metric = character(),
@@ -969,6 +1158,18 @@ create_edge_summary <- function(
                sd = sd(hams, na.rm = TRUE),
                min = min(hams, na.rm = TRUE),
                max = max(hams, na.rm = TRUE),
+               stringsAsFactors = FALSE
+           ))
+       }
+       
+       if (method %in% c("spectral", "all")) {
+           specs <- spectral_mat[lower.tri(spectral_mat)]
+           summary_df <- rbind(summary_df, data.frame(
+               metric = "spectral",
+               mean = mean(specs, na.rm = TRUE),
+               sd = sd(specs, na.rm = TRUE),
+               min = min(specs, na.rm = TRUE),
+               max = max(specs, na.rm = TRUE),
                stringsAsFactors = FALSE
            ))
        }
@@ -1108,23 +1309,44 @@ compare_single_attribute <- function(
 #' @noRd
 
 compare_distributions <- function(vals1, vals2) {
-   # simple approach: correlation of empirical CDFs
-   
-   # create empirical CDFs
-   all_vals <- sort(unique(c(vals1, vals2)))
-   ecdf1 <- ecdf(vals1)
-   ecdf2 <- ecdf(vals2)
-   
-   # evaluate at common points
-   cdf1 <- ecdf1(all_vals)
-   cdf2 <- ecdf2(all_vals)
-   
-   # return correlation of CDFs
-   if (length(all_vals) > 1) {
-       return(cor(cdf1, cdf2))
-   } else {
-       return(NA)
-   }
+    # simple approach: correlation of empirical CDFs
+    
+    # check for empty or all-NA values first
+    if (length(vals1) == 0 || all(is.na(vals1)) || 
+        length(vals2) == 0 || all(is.na(vals2))) {
+        return(NA)
+    }
+    
+    # remove NAs
+    vals1 <- vals1[!is.na(vals1)]
+    vals2 <- vals2[!is.na(vals2)]
+    
+    # check again after removing NAs
+    if (length(vals1) == 0 || length(vals2) == 0) {
+        return(NA)
+    }
+    
+    # create empirical CDFs
+    all_vals <- sort(unique(c(vals1, vals2)))
+    
+    # handle case where all values are identical
+    if (length(all_vals) == 1) {
+        return(1)  # perfect similarity if all values are the same
+    }
+    
+    ecdf1 <- ecdf(vals1)
+    ecdf2 <- ecdf(vals2)
+    
+    # evaluate at common points
+    cdf1 <- ecdf1(all_vals)
+    cdf2 <- ecdf2(all_vals)
+    
+    # return correlation of CDFs
+    if (length(all_vals) > 1) {
+        return(cor(cdf1, cdf2))
+    } else {
+        return(NA)
+    }
 }
 
 #' Compare Categorical Distributions
@@ -1213,4 +1435,91 @@ print.netify_comparison <- function(x, ...) {
    }
    
    invisible(x)
+}
+
+#' Calculate Spectral Distance Between Networks
+#'
+#' Computes the spectral distance between two networks based on their eigenvalue
+#' spectra. The spectral distance quantifies how different two graphs are by
+#' comparing their eigenvalues.
+#'
+#' @param mat1 First adjacency matrix
+#' @param mat2 Second adjacency matrix  
+#' @param laplacian Logical; whether to use Laplacian eigenvalues (default TRUE)
+#'   instead of adjacency matrix eigenvalues
+#'
+#' @return Numeric spectral distance between 0 and sqrt(2*n) where n is the
+#'   number of nodes. Lower values indicate more similar networks.
+#'
+#' @details
+#' The spectral distance is calculated as:
+#' \deqn{d_{spectral}(G_1, G_2) = \sqrt{\sum_{i=1}^n (\lambda_i^{(1)} - \lambda_i^{(2)})^2}}
+#' 
+#' where \eqn{\lambda_i^{(1)}} and \eqn{\lambda_i^{(2)}} are the sorted eigenvalues
+#' of the two networks' Laplacian (or adjacency) matrices.
+#' 
+#' For directed networks, we symmetrize by averaging with the transpose.
+#' Missing values are replaced with zeros.
+#'
+#' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
+calculate_spectral_distance <- function(mat1, mat2, laplacian = TRUE) {
+    # handle missing values
+    mat1[is.na(mat1)] <- 0
+    mat2[is.na(mat2)] <- 0
+    
+    # ensure matrices are same size
+    n1 <- nrow(mat1)
+    n2 <- nrow(mat2)
+    
+    if (n1 != n2) {
+        # pad smaller matrix with zeros
+        n <- max(n1, n2)
+        if (n1 < n) {
+            mat1_new <- matrix(0, n, n)
+            mat1_new[1:n1, 1:n1] <- mat1
+            mat1 <- mat1_new
+        }
+        if (n2 < n) {
+            mat2_new <- matrix(0, n, n)
+            mat2_new[1:n2, 1:n2] <- mat2
+            mat2 <- mat2_new
+        }
+    }
+    
+    # symmetrize if not symmetric (for directed networks)
+    if (!isSymmetric(mat1)) {
+        mat1 <- (mat1 + t(mat1)) / 2
+    }
+    if (!isSymmetric(mat2)) {
+        mat2 <- (mat2 + t(mat2)) / 2
+    }
+    
+    # calculate eigenvalues
+    if (laplacian) {
+        # compute laplacian matrices
+        deg1 <- rowSums(mat1)
+        deg2 <- rowSums(mat2)
+        L1 <- diag(deg1) - mat1
+        L2 <- diag(deg2) - mat2
+        
+        # get eigenvalues
+        eigen1 <- eigen(L1, symmetric = TRUE, only.values = TRUE)$values
+        eigen2 <- eigen(L2, symmetric = TRUE, only.values = TRUE)$values
+    } else {
+        # use adjacency matrix eigenvalues
+        eigen1 <- eigen(mat1, symmetric = TRUE, only.values = TRUE)$values
+        eigen2 <- eigen(mat2, symmetric = TRUE, only.values = TRUE)$values
+    }
+    
+    # sort eigenvalues in decreasing order
+    eigen1 <- sort(eigen1, decreasing = TRUE)
+    eigen2 <- sort(eigen2, decreasing = TRUE)
+    
+    # calculate spectral distance
+    spectral_dist <- sqrt(sum((eigen1 - eigen2)^2))
+    
+    return(spectral_dist)
 }

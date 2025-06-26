@@ -159,11 +159,19 @@ homophily <- function(
         # convert to list format for processing
         netlet_list <- switch(netify_type,
             "cross_sec" = list("1" = netlet),
-            "longitudinal_array" = {
-                dimnames_list <- dimnames(netlet)
-                array_to_list(netlet, dimnames_list)
+            "longit_array" = {
+                # extract time periods from array
+                time_names <- dimnames(netlet)[[3]]
+                if (is.null(time_names)) {
+                    time_names <- as.character(seq_len(dim(netlet)[3]))
+                }
+                net_list <- list()
+                for (t in seq_along(time_names)) {
+                    net_list[[time_names[t]]] <- netlet[,,t]
+                }
+                net_list
             },
-            "longitudinal_list" = netlet
+            "longit_list" = netlet
         )
 
         # calculate homophily for each time period
@@ -197,6 +205,10 @@ homophily <- function(
             }
             node_attrs <- node_attrs[attr_indices]
 
+            # track missing values
+            n_missing_attrs <- sum(is.na(node_attrs))
+            n_total_actors <- length(node_attrs)
+            
             # remove actors with missing attributes
             complete_cases <- !is.na(node_attrs)
             if (sum(complete_cases) < 2) {
@@ -251,7 +263,7 @@ homophily <- function(
             }
 
             # format results
-            data.frame(
+            result_df <- data.frame(
                 net = time_id,
                 layer = layer,
                 attribute = attribute,
@@ -260,6 +272,12 @@ homophily <- function(
                 homophily_stats,
                 stringsAsFactors = FALSE
             )
+            
+            # add missing data info
+            result_df$n_missing <- n_missing_attrs
+            result_df$n_pairs <- n_total_actors * (n_total_actors - 1) / 2
+            
+            result_df
         })
 
         # combine results for this layer
@@ -277,7 +295,24 @@ homophily <- function(
 
     if (length(results) == 0) {
         cli::cli_warn("No valid results obtained from homophily analysis")
-        return(NULL)
+        # return empty data frame with expected structure instead of NULL
+        return(data.frame(
+            net = character(0),
+            layer = character(0),
+            attribute = character(0),
+            method = character(0),
+            threshold_value = numeric(0),
+            homophily_correlation = numeric(0),
+            mean_similarity_connected = numeric(0),
+            mean_similarity_unconnected = numeric(0),
+            similarity_difference = numeric(0),
+            p_value = numeric(0),
+            ci_lower = numeric(0),
+            ci_upper = numeric(0),
+            n_connected_pairs = integer(0),
+            n_unconnected_pairs = integer(0),
+            stringsAsFactors = FALSE
+        ))
     }
 
     final_results <- do.call(rbind, results)

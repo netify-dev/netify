@@ -5,13 +5,16 @@
 #' and node compositions across multiple networks or within subgroups.
 #'
 #' @param nets Either a list of netify objects to compare, or a single netify
-#'   object (for longitudinal or by-group comparisons).
+#'   object (for longitudinal, multilayer, or by-group comparisons).
 #' @param method Character string specifying comparison method:
 #'   \describe{
 #'     \item{"correlation"}{Pearson correlation of edge weights (default)}
 #'     \item{"jaccard"}{Jaccard similarity for binary networks}
 #'     \item{"hamming"}{Hamming distance (proportion of differing edges)}
 #'     \item{"qap"}{Quadratic Assignment Procedure with permutation test}
+#'     \item{"spectral"}{Spectral distance based on eigenvalue spectra. Measures
+#'       global structural differences by comparing the sorted eigenvalues of network
+#'       Laplacian matrices. Useful for detecting fundamental structural changes.}
 #'     \item{"all"}{Applies all applicable methods}
 #'   }
 #' @param by Character vector of nodal attributes. If specified, compares networks
@@ -33,7 +36,7 @@
 #'
 #' @return A list of class "netify_comparison" containing:
 #'   \describe{
-#'     \item{comparison_type}{Character string: "cross_network", "temporal", or "by_group"}
+#'     \item{comparison_type}{Character string: "cross_network", "temporal", "multilayer", or "by_group"}
 #'     \item{method}{Comparison method(s) used}
 #'     \item{n_networks}{Number of networks compared}
 #'     \item{summary}{Data frame with comparison statistics}
@@ -48,8 +51,8 @@
 #' 
 #' \strong{Edge comparison (what = "edges"):}
 #' Compares edge patterns between networks using correlation, Jaccard similarity,
-#' Hamming distance, or QAP permutation tests. Returns detailed edge changes showing
-#' which edges are added, removed, or maintained between networks.
+#' Hamming distance, spectral distance, or QAP permutation tests. Returns detailed 
+#' edge changes showing which edges are added, removed, or maintained between networks.
 #' 
 #' \strong{Structure comparison (what = "structure"):}
 #' Compares network-level properties like density, reciprocity, transitivity, and 
@@ -66,6 +69,12 @@
 #' \strong{Automatic handling of longitudinal data:}
 #' When passed a single longitudinal netify object, the function automatically
 #' extracts time periods and performs pairwise comparisons between them.
+#' 
+#' \strong{Automatic handling of multilayer networks:}
+#' When passed a single multilayer netify object (created with \code{layer_netify()}),
+#' the function automatically extracts layers and performs pairwise comparisons between
+#' them. This works for cross-sectional multilayer (3D arrays), longitudinal multilayer
+#' (4D arrays), and longitudinal list multilayer formats.
 #' 
 #' \strong{Summary statistics interpretation:}
 #' \itemize{
@@ -109,6 +118,32 @@
 #' # Automatic temporal comparison
 #' temporal_comp <- compare_networks(longit_net, method = "all")
 #' 
+#' # Create multilayer network example
+#' \dontrun{
+#' # Create separate networks for different interaction types
+#' verbal_coop <- netify(
+#'   icews[icews$year == 2010,],
+#'   actor1 = "i", actor2 = "j",
+#'   weight = "verbCoop"
+#' )
+#' 
+#' material_coop <- netify(
+#'   icews[icews$year == 2010,],
+#'   actor1 = "i", actor2 = "j",
+#'   weight = "matlCoop"
+#' )
+#' 
+#' # Combine into multilayer network
+#' multilayer <- layer_netify(
+#'   list(verbal = verbal_coop, material = material_coop)
+#' )
+#' 
+#' # Automatic multilayer comparison
+#' layer_comp <- compare_networks(multilayer, method = "all")
+#' print(layer_comp)
+#' # Will show comparison between verbal and material cooperation layers
+#' }
+#' 
 #' # Get detailed matrices
 #' detailed_comp <- compare_networks(
 #'   list(net_2002, net_2003), 
@@ -144,7 +179,21 @@ compare_networks <- function(
     } else if (is_netify(nets)) {
         # single netify without 'by' - extract time periods or layers
         nets_list <- extract_network_list(nets)
-        comparison_type <- "temporal"
+        
+        # determine comparison type based on what was extracted
+        attrs <- attributes(nets)
+        # check if this is a true multilayer network (not just having layers="TRUE")
+        is_multilayer <- !is.null(attrs$layers) && 
+                        is.character(attrs$layers) && 
+                        length(attrs$layers) > 1
+        
+        if (is_multilayer) {
+            comparison_type <- "multilayer"
+        } else if (attrs$netify_type %in% c("longit_array", "longit_list")) {
+            comparison_type <- "temporal"
+        } else {
+            comparison_type <- "cross_network"
+        }
     } else {
         # list of netify objects
         nets_list <- nets
@@ -161,7 +210,7 @@ compare_networks <- function(
     }
     
     # validate params
-    checkmate::assert_choice(method, c("correlation", "jaccard", "hamming", "qap", "all"))
+    checkmate::assert_choice(method, c("correlation", "jaccard", "hamming", "qap", "spectral", "all"))
     checkmate::assert_choice(what, c("edges", "structure", "nodes", "attributes"))
     checkmate::assert_logical(test, len = 1)
     checkmate::assert_count(n_permutations, positive = TRUE)

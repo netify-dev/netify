@@ -172,20 +172,27 @@ unique_vector <- function(...) {
 #' @keywords internal
 #' @noRd
 identical_recursive <- function(...) {
-    # org objects to compare
-    to_compare <- c(...)
+    # get objects to compare - use list() instead of c() to preserve structure
+    args <- list(...)
+    
+    # if called with a single list argument, use that list
+    if (length(args) == 1 && is.list(args[[1]])) {
+        to_compare <- args[[1]]
+    } else {
+        to_compare <- args
+    }
 
     # if just two, then just compare
     if (length(to_compare) == 2) {
         ident_logic <- identical(
-            to_compare[1], to_compare[2]
+            to_compare[[1]], to_compare[[2]]
         )
     }
 
     # if more than two, then recursively call fn
     if (length(to_compare) > 2) {
         ident_logic <- c(
-            identical(to_compare[1], to_compare[2]),
+            identical(to_compare[[1]], to_compare[[2]]),
             identical_recursive(to_compare[-1])
         )
     }
