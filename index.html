@@ -58,44 +58,332 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="netify">netify<a class="anchor" aria-label="anchor" href="#netify"></a>
+<div class="page-header"><h1 id="netify-">netify <img src="reference/figures/hex.png" align="right" alt="hex" width="200px"><a class="anchor" aria-label="anchor" href="#netify-"></a>
 </h1></div>
 <div class="section level2">
-<h2 id="overview-">Overview <img src="https://raw.githubusercontent.com/netify-dev/netify/main/man/figures/hex.png" align="right" alt="hex" width="200px"><a class="anchor" aria-label="anchor" href="#overview-"></a>
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>Netify makes networks!</p>
-<p>You supply data and <code>netify</code> transforms it into easy to work with network data. The goal of netify is to provide R functions that simplify and facilitate common tasks related to network creation, summary, visualization, and modeling. Although our package was built with social scientists (especially peace science scholars) in mind, anyone can use it!</p>
+<p>netify is an R package for working with relational data. It converts edge lists, matrices, and data frames into network objects that you can analyze and visualize using a consistent set of functions.</p>
+<p>We built netify while doing our own network research in social science. It handles common tasks like temporal network analysis, ego network extraction, and multiplex relationships without requiring multiple packages or data format conversions.</p>
+<!-- ![](man/figures/netify_workflow_simple.png) -->
 </div>
 <div class="section level2">
-<h2 id="installation-via-devtools--github">Installation via devtools + github<a class="anchor" aria-label="anchor" href="#installation-via-devtools--github"></a>
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>  <span class="co"># install devtools</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(devtools)) {</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">"devtools"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  }</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="fu">library</span>(devtools)</span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="fu">install_github</span>(<span class="st">"netify-dev/netify"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Install from GitHub</span></span>
+<span><span class="co"># install.packages("devtools")</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"netify-dev/netify"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+<h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<p>See our <code>workshop_demo</code> vignette for more information. To get started, supply a dyadic data set (or edgelist) to netify. You can add information such as nodal or dyadic covariates, time, as well as specify weights for the edges of the network. For example, to generate a longitudinal, directed and weighted network use the code below:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>  <span class="fu">library</span>(netify)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="fu">data</span>(icews)</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  icews_conflict <span class="ot">&lt;-</span> <span class="fu">netify</span>(</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>    icews,</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>    <span class="at">actor1=</span><span class="st">'i'</span>, <span class="at">actor2=</span><span class="st">'j'</span>,</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>    <span class="at">time=</span><span class="st">'year'</span>,</span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>    <span class="at">symmetric=</span><span class="cn">FALSE</span>, <span class="at">weight=</span><span class="st">'matlConf'</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  icews_conflict</span></code></pre></div>
+<p>Transform your relational data into a network object with just one function:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/netify/">netify</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create a network from dyadic data</span></span>
+<span><span class="va">icews_conflict</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/netify.html">netify</a></span><span class="op">(</span></span>
+<span>  <span class="va">icews</span>,</span>
+<span>  actor1 <span class="op">=</span> <span class="st">'i'</span>, </span>
+<span>  actor2 <span class="op">=</span> <span class="st">'j'</span>,</span>
+<span>  time <span class="op">=</span> <span class="st">'year'</span>,</span>
+<span>  symmetric <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>  weight <span class="op">=</span> <span class="st">'matlConf'</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Print the netify object</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">icews_conflict</span><span class="op">)</span></span></code></pre></div>
+<pre><code>✔ Hello, you have created network data, yay!
+• Unipartite
+• Asymmetric
+• Weights from `matlConf`
+• Longitudinal: 13 Periods
+• # Unique Actors: 152
+Network Summary Statistics (averaged across time):
+          dens miss  mean recip trans
+matlConf 0.113    0 1.471 0.594 0.387
+• Nodal Features: None
+• Dyad Features: None</code></pre>
+<div class="section level3">
+<h3 id="quick-visualization">Quick visualization<a class="anchor" aria-label="anchor" href="#quick-visualization"></a>
+</h3>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Plot the network</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">icews_conflict</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/icews_plot.png"></p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="what-can-you-do-with-a-netify-object">What can you do with a netify object?<a class="anchor" aria-label="anchor" href="#what-can-you-do-with-a-netify-object"></a>
+</h2>
+<div class="section level3">
+<h3 id="get-network-statistics">Get network statistics<a class="anchor" aria-label="anchor" href="#get-network-statistics"></a>
+</h3>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">icews_conflict</span><span class="op">)</span></span></code></pre></div>
+<p>This returns a data frame with network statistics for each time period:</p>
+<table class="table">
+<colgroup>
+<col width="8%">
+<col width="11%">
+<col width="12%">
+<col width="10%">
+<col width="18%">
+<col width="18%">
+<col width="20%">
+</colgroup>
+<thead><tr class="header">
+<th>Year</th>
+<th>Actors</th>
+<th>Density</th>
+<th>Edges</th>
+<th>Mean Weight</th>
+<th>Reciprocity</th>
+<th>Transitivity</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>2002</td>
+<td>152</td>
+<td>0.090</td>
+<td>2069</td>
+<td>1.12</td>
+<td>0.200</td>
+<td>0.354</td>
+</tr>
+<tr class="even">
+<td>2003</td>
+<td>152</td>
+<td>0.095</td>
+<td>2193</td>
+<td>1.54</td>
+<td>0.294</td>
+<td>0.358</td>
+</tr>
+<tr class="odd">
+<td>2004</td>
+<td>152</td>
+<td>0.115</td>
+<td>2666</td>
+<td>1.64</td>
+<td>0.647</td>
+<td>0.391</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<p>(Table shows first few rows - actual output includes all time periods)</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="key-functions">Key functions<a class="anchor" aria-label="anchor" href="#key-functions"></a>
+</h2>
+<div class="section level3">
+<h3 id="building-networks">Building networks<a class="anchor" aria-label="anchor" href="#building-networks"></a>
+</h3>
+<ul>
+<li>
+<code><a href="reference/netify.html">netify()</a></code> - Turn your data into a network object</li>
+<li>
+<code><a href="reference/ego_netify.html">ego_netify()</a></code> - Extract ego networks</li>
+<li>
+<code><a href="reference/layer_netify.html">layer_netify()</a></code> - Stack multiple relationships into multilayer networks</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="adding-information">Adding information<a class="anchor" aria-label="anchor" href="#adding-information"></a>
+</h3>
+<ul>
+<li>
+<code><a href="reference/add_node_vars.html">add_node_vars()</a></code> - Attach attributes to actors (like GDP, democracy scores)</li>
+<li>
+<code><a href="reference/add_dyad_vars.html">add_dyad_vars()</a></code> - Attach attributes to relationships (like trade volume, conflict events)</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="wrangling-networks">Wrangling networks<a class="anchor" aria-label="anchor" href="#wrangling-networks"></a>
+</h3>
+<ul>
+<li>
+<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> - Pull out specific time periods or actors</li>
+<li>
+<code><a href="reference/transform_weights.html">transform_weights()</a></code> - Log-transform, normalize, or otherwise modify edge weights</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="analysis">Analysis<a class="anchor" aria-label="anchor" href="#analysis"></a>
+</h3>
+<ul>
+<li>
+<code><a href="reference/netify_measurements.html">measurements()</a></code> - Measurements of your network size and composition</li>
+<li>
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> - Get a quick overview of your network</li>
+<li>
+<code><a href="reference/summary_actor.html">summary_actor()</a></code> - See how individual actors fit into the network</li>
+<li>
+<code><a href="reference/compare_networks.html">compare_networks()</a></code> - See how similar two networks are</li>
+<li>
+<code><a href="reference/homophily.html">homophily()</a></code> - Do similar actors tend to connect?</li>
+<li>
+<code><a href="reference/mixing_matrix.html">mixing_matrix()</a></code> - Who connects with whom?</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="visualization">Visualization<a class="anchor" aria-label="anchor" href="#visualization"></a>
+</h3>
+<ul>
+<li>
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> - Create network diagrams with sensible defaults</li>
+<li>
+<code><a href="reference/plot_actor_stats.html">plot_actor_stats()</a></code> - Visualize node-level statistics</li>
+<li>
+<code><a href="reference/plot_graph_stats.html">plot_graph_stats()</a></code> - Show how network properties change over time</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="working-with-other-packages">Working with other packages<a class="anchor" aria-label="anchor" href="#working-with-other-packages"></a>
+</h3>
+<ul>
+<li>
+<code><a href="reference/netify_to_igraph.html">to_igraph()</a></code> / <code><a href="reference/netify_to_statnet.html">to_network()</a></code> - When you need something we don’t have</li>
+<li>
+<code><a href="reference/netify_to_amen.html">to_amen()</a></code> - For fitting AME or SRM models</li>
+<li>
+<code><a href="reference/unnetify.html">unnetify()</a></code> - Get back to a regular data frame</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="quick-reference">Quick Reference<a class="anchor" aria-label="anchor" href="#quick-reference"></a>
+</h2>
+<div class="section level3">
+<h3 id="essential-functions">Essential Functions<a class="anchor" aria-label="anchor" href="#essential-functions"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="24%">
+<col width="40%">
+<col width="36%">
+</colgroup>
+<thead><tr class="header">
+<th>Task</th>
+<th>Function</th>
+<th>Example</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Create network</td>
+<td><code><a href="reference/netify.html">netify()</a></code></td>
+<td><code>netify(data, actor1="from", actor2="to")</code></td>
+</tr>
+<tr class="even">
+<td>Extract ego network</td>
+<td><code><a href="reference/ego_netify.html">ego_netify()</a></code></td>
+<td><code>ego_netify(net, ego="USA")</code></td>
+</tr>
+<tr class="odd">
+<td>Create multilayer</td>
+<td><code><a href="reference/layer_netify.html">layer_netify()</a></code></td>
+<td><code>layer_netify(list(net1, net2))</code></td>
+</tr>
+<tr class="even">
+<td>Add node data</td>
+<td><code><a href="reference/add_node_vars.html">add_node_vars()</a></code></td>
+<td><code>add_node_vars(net, node_df, actor="id")</code></td>
+</tr>
+<tr class="odd">
+<td>Subset network</td>
+<td><code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code></td>
+<td><code>subset(net, time="2020")</code></td>
+</tr>
+<tr class="even">
+<td>Get summary</td>
+<td><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code></td>
+<td><code>summary(net)</code></td>
+</tr>
+<tr class="odd">
+<td>Plot network</td>
+<td><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code></td>
+<td><code>plot(net) + style_nature()</code></td>
+</tr>
+<tr class="even">
+<td>Convert to igraph</td>
+<td><code><a href="reference/netify_to_igraph.html">to_igraph()</a></code></td>
+<td><code>g &lt;- to_igraph(net)</code></td>
+</tr>
+<tr class="odd">
+<td>Convert to amen</td>
+<td><code><a href="reference/netify_to_amen.html">to_amen()</a></code></td>
+<td><code>amen_data &lt;- to_amen(net)</code></td>
+</tr>
+<tr class="even">
+<td>Back to data frame</td>
+<td><code><a href="reference/unnetify.html">unnetify()</a></code></td>
+<td><code>df &lt;- unnetify(net)</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section level2">
+<h2 id="when-you-might-need-something-else">When you might need something else<a class="anchor" aria-label="anchor" href="#when-you-might-need-something-else"></a>
+</h2>
+<p>netify handles most network analysis tasks, but sometimes you need specialized tools:</p>
+<ul>
+<li>
+<strong>Advanced statistical models</strong>: Use <code><a href="reference/netify_to_amen.html">to_amen()</a></code> to fit latent factor models or <code><a href="reference/netify_to_statnet.html">to_network()</a></code> for ERGMs</li>
+<li>
+<strong>Graph algorithms we don’t have</strong>: Convert with <code><a href="reference/netify_to_igraph.html">to_igraph()</a></code>
+</li>
+<li>
+<strong>Your own analysis</strong>: Use <code><a href="reference/unnetify.html">unnetify()</a></code> to get back to a data frame</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="getting-help">Getting help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
+</h2>
+<ul>
+<li>Browse vignettes for detailed guides: <code>browseVignettes("netify")</code>
+</li>
+<li>Check function documentation: <code><a href="reference/netify.html">?netify</a></code>, <code><a href="reference/plot.netify.html">?plot.netify</a></code>, etc.</li>
+<li>Report bugs: <a href="https://github.com/netify-dev/netify/issues" class="external-link">GitHub Issues</a>
+</li>
+<li>Ask questions: <a href="https://github.com/netify-dev/netify/discussions" class="external-link">GitHub Discussions</a>
+</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>If you use netify in your research, please cite:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"netify"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="contributors">Contributors<a class="anchor" aria-label="anchor" href="#contributors"></a>
 </h2>
-<p>Cassy Dorff (Vanderbilt University) and Shahryar Minhas (Michigan State University) are co-PI’s on the collaborative NSF grant funding this work, as such, they acknowledge support from National Science Foundation (NSF) Awards #2017162 and #2017180. Additional contributors include Ha Eun Choi (Ph.D. Candidate, Michigan State University) and Colin Henry (Ph.D. Candidate, Vanderbilt University). We also thank Sophia Tannir (M.S. Data Science, Vanderbilt University) for important feedback.</p>
+<p>netify is developed by: - <strong>Cassy Dorff</strong> (Vanderbilt University) - <strong>Shahryar Minhas</strong> (Michigan State University)</p>
+<p>With contributions from: - Ha Eun Choi (Michigan State University) - Colin Henry (Vanderbilt University) - Tosin Salau (Michigan State University)</p>
+<p>This work is supported by National Science Foundation Awards #2017162 and #2017180.</p>
+</div>
+<div class="section level2">
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+</h2>
+<p>MIT License - see <a href="LICENSE">LICENSE</a> file for details.</p>
+<hr>
+<p align="center">
+Made with ❤️ for the network analysis community
+</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
