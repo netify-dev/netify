@@ -114,7 +114,10 @@ cow_dyads <- cow_dyads |>
     # Log transform some variables
     log_gdp1 = log(wbgdp2011est1 + 1),
     log_gdp2 = log(wbgdp2011est2 + 1),
-    log_capdist = log(capdist + 1)
+    log_capdist = log(capdist + 1),
+    # Renaming to make stuff easier down the road
+    alliance_intensity = alliance_norm,    
+    defense_alliance = atop_defense
   )
 
 # Filter to 2012 for cross-sectional analysis
@@ -902,6 +905,202 @@ plot_mixing_matrix(
 ```
 
 The heatmap clearly shows the alliance patterns between different regime types. The diagonal cells (emphasized with black borders) represent within-type alliances, while off-diagonal cells show cross-type alliances. Darker blue indicates higher proportions of alliances. The assortativity coefficient of 0.113 (not 0.126) and diagonal proportion of 0.41 (not 0.405) confirm the moderate tendency for regime type homophily in alliance formation.
+
+## 9. Working with Longitudinal Networks
+
+All the attribute analysis functions in netify work seamlessly with longitudinal networks. Let's demonstrate this by creating a longitudinal alliance network and running the same analyses across multiple time periods.
+
+### Creating a Longitudinal Network
+
+```{r}
+# Create longitudinal alliance network (2010-2014)
+alliance_net_longit <- netify(
+  cow_dyads,  # Uses full dataset with all years
+  actor1 = 'ccode1', 
+  actor2 = 'ccode2',
+  time = 'year',     # Specify time variable
+  symmetric = TRUE,
+  weight = 'cooperation'
+)
+
+# Print to see longitudinal structure
+print(alliance_net_longit)
+```
+
+### Adding Attributes to Longitudinal Networks
+
+```{r}
+# Prepare nodal data for all time periods
+nodal_data_longit <- cow_dyads |>
+  select(year, ccode1, region1, v2x_polyarchy1, log_gdp1, cinc1) |>
+  distinct() |>
+  rename(
+    time = year,
+    actor = ccode1,
+    region = region1,
+    democracy = v2x_polyarchy1,
+    log_gdp = log_gdp1,
+    mil_capability = cinc1
+  ) |>
+  mutate(
+    regime_type = case_when(
+      democracy >= 0.6 ~ "Democracy",
+      democracy >= 0.4 ~ "Hybrid",
+      democracy < 0.4 ~ "Autocracy",
+      TRUE ~ "Unknown"
+    )
+  )
+
+# Add nodal variables (automatically matched by time)
+alliance_net_longit <- add_node_vars(
+  alliance_net_longit, 
+  nodal_data_longit, 
+  actor = "actor",
+  time = "time"
+)
+
+# Add dyadic variables
+dyad_data_longit <- cow_dyads |>
+  select(year, ccode1, ccode2, log_capdist, alliance_intensity, defense_alliance) |>
+  rename(
+    time = year,
+    actor1 = ccode1,
+    actor2 = ccode2,
+    geographic_distance = log_capdist
+  )
+
+alliance_net_longit <- add_dyad_vars(
+  alliance_net_longit,
+  dyad_data = dyad_data_longit,
+  actor1 = "actor1",
+  actor2 = "actor2",
+  time = "time",
+  dyad_vars = c("geographic_distance", "alliance_intensity", "defense_alliance"),
+  dyad_vars_symmetric = c(TRUE, TRUE, TRUE)
+)
+```
+
+### Homophily Analysis Across Time
+
+```{r}
+# Test democracy homophily across all time periods
+democracy_homophily_longit <- homophily(
+  alliance_net_longit,
+  attribute = "democracy",
+  method = "correlation",
+  significance_test = TRUE
+)
+
+# Results show homophily for each time period
+print(democracy_homophily_longit)
+
+# Create a summary of trends
+homophily_trends <- democracy_homophily_longit |>
+  group_by(net) |>
+  summarise(
+    avg_homophily = mean(homophily_correlation, na.rm = TRUE),
+    significant = any(p_value < 0.05, na.rm = TRUE)
+  )
+
+knitr::kable(homophily_trends, 
+             caption = "Democracy Homophily Trends Over Time",
+             digits = 3)
+```
+
+### Visualizing Longitudinal Homophily
+
+```{r, fig.width=10, fig.height=6}
+# Plot homophily patterns across time
+ggplot(democracy_homophily_longit, aes(x = net, y = homophily_correlation)) +
+  geom_point(size = 3) +
+  geom_line(group = 1) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_errorbar(aes(ymin = homophily_correlation - 1.96 * 0.05, 
+                    ymax = homophily_correlation + 1.96 * 0.05),
+                width = 0.2) +
+  labs(title = "Democracy Homophily in Alliance Networks Over Time",
+       subtitle = "Tendency for democracies to ally with other democracies",
+       x = "Year",
+       y = "Homophily Correlation") +
+  theme_minimal()
+```
+
+### Mixing Matrices Over Time
+
+```{r}
+# Analyze regime type mixing patterns across time
+regime_mixing_longit <- mixing_matrix(
+  alliance_net_longit,
+  attribute = "regime_type",
+  normalized = TRUE
+)
+
+# The function returns results for each time period
+# Let's look at the summary statistics
+mixing_summary <- regime_mixing_longit$summary_stats |>
+  select(net, assortativity, diagonal_proportion) |>
+  mutate(across(where(is.numeric), round, 3))
+
+knitr::kable(mixing_summary,
+             caption = "Regime Type Mixing Patterns Over Time",
+             col.names = c("Year", "Assortativity", "Within-Type %"))
+```
+
+### Dyadic Correlations Across Time
+
+```{r}
+# Test geographic distance effects over time
+geo_correlation_longit <- dyad_correlation(
+  alliance_net_longit,
+  dyad_vars = "geographic_distance",
+  method = "pearson",
+  significance_test = TRUE
+)
+
+# Display results
+geo_summary_longit <- geo_correlation_longit |>
+  select(net, correlation, p_value, n_pairs) |>
+  mutate(
+    significant = ifelse(p_value < 0.05, "*", ""),
+    correlation = round(correlation, 3),
+    p_value = round(p_value, 3)
+  )
+
+knitr::kable(geo_summary_longit,
+             caption = "Geographic Distance and Alliance Formation Over Time",
+             col.names = c("Year", "Correlation", "P-value", "N Dyads", "Sig."))
+```
+
+### Comprehensive Longitudinal Analysis
+
+```{r}
+# Run comprehensive analysis on longitudinal network
+comprehensive_longit <- attribute_report(
+  alliance_net_longit,
+  node_vars = c("region", "regime_type", "democracy", "log_gdp"),
+  dyad_vars = c("geographic_distance", "alliance_intensity"),
+  include_centrality = TRUE,
+  include_homophily = TRUE,
+  include_mixing = TRUE,
+  include_dyadic_correlations = TRUE,
+  centrality_measures = c("degree", "betweenness"),
+  significance_test = TRUE
+)
+
+# Extract key longitudinal patterns
+longit_patterns <- comprehensive_longit$homophily_analysis |>
+  filter(attribute == "democracy") |>
+  select(net, homophily_correlation, p_value) |>
+  mutate(
+    trend = case_when(
+      net == min(net) ~ "Start",
+      net == max(net) ~ "End",
+      TRUE ~ "Middle"
+    )
+  )
+
+print(longit_patterns)
+```
 
 ## tl;dr
 
