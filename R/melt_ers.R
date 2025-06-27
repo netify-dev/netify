@@ -1,413 +1,330 @@
-#### these started off with me wanting to move away from reshape2
-### then realizing that was hard because my function was slower
-## started iterating with llms then and i learned a lot, anything
-# clever below is from the llm, anything slow is from me
+#' Melt methods for netify objects
+#'
+#' Convert netify matrices/arrays to long format data frames.
+#' These methods provide a consistent interface for melting different
+#' types of netify objects while leveraging C++ for performance.
+#'
+#' @param data An object to be melted (e.g., a netify object)
+#' @param ... Additional arguments passed to methods
+#'
+#' @name melt
+#' @rdname melt
+#' @export
+melt <- function(data, ...) {
+    UseMethod("melt")
+}
 
-#' melt the face off of matrices
+#' @method melt netify
+#' @export
+#' @param data A netify object
+#' @param ... Additional arguments:
+#'   \describe{
+#'     \item{remove_diagonal}{Logical. Remove diagonal elements (default: TRUE)}
+#'     \item{remove_zeros}{Logical. Remove zero values (default: TRUE)}
+#'     \item{na.rm}{Logical. Remove NA values (default: TRUE)}
+#'     \item{value.name}{Character. Name for value column (default: "value")}
+#'   }
+#' @return Data frame with columns: row, col, value (and optionally time/layer)
+melt.netify <- function(data, ..., 
+                       remove_diagonal = TRUE, 
+                       remove_zeros = TRUE, 
+                       na.rm = TRUE,
+                       value.name = "value") {
+    
+    attrs <- attributes(data)
+    netify_type <- attrs$netify_type
+    
+    if (netify_type == "cross_sec") {
+        # Simple matrix case
+        return(melt_matrix(as.matrix(data), 
+                          remove_diagonal = remove_diagonal,
+                          remove_zeros = remove_zeros, 
+                          na.rm = na.rm,
+                          value.name = value.name))
+        
+    } else if (netify_type == "longit_array") {
+        # 3D array case
+        return(melt_array(data, 
+                         remove_diagonal = remove_diagonal,
+                         remove_zeros = remove_zeros,
+                         na.rm = na.rm,
+                         value.name = value.name))
+        
+    } else if (netify_type == "longit_list") {
+        # List of matrices case
+        results <- lapply(seq_along(data), function(i) {
+            df <- melt_matrix(data[[i]], 
+                            remove_diagonal = remove_diagonal,
+                            remove_zeros = remove_zeros,
+                            na.rm = na.rm,
+                            value.name = value.name)
+            if (nrow(df) > 0) {
+                df$time <- names(data)[i]
+            }
+            df
+        })
+        
+        # Combine results
+        result <- do.call(rbind, results[sapply(results, nrow) > 0])
+        rownames(result) <- NULL
+        return(result)
+        
+    } else if (netify_type == "multilayer") {
+        # Multilayer case
+        layer_names <- names(data)
+        results <- lapply(seq_along(data), function(i) {
+            df <- melt.netify(data[[i]], 
+                            remove_diagonal = remove_diagonal,
+                            remove_zeros = remove_zeros,
+                            na.rm = na.rm,
+                            value.name = value.name)
+            if (nrow(df) > 0) {
+                df$layer <- layer_names[i]
+            }
+            df
+        })
+        
+        # Combine results
+        result <- do.call(rbind, results[sapply(results, nrow) > 0])
+        rownames(result) <- NULL
+        return(result)
+    }
+    
+    stop("Unknown netify type: ", netify_type)
+}
+
+#' Melt array to long format
+#'
+#' Internal function to melt 3D arrays
+#'
+#' @param arr 3D array
+#' @param remove_diagonal Remove diagonal elements
+#' @param remove_zeros Remove zero values  
+#' @param na.rm Remove NA values
+#' @param value.name Name for value column
+#' @return Data frame with row, col, time, and value columns
+#'
+#' @keywords internal
+#' @noRd
+melt_array <- function(arr, remove_diagonal = TRUE, remove_zeros = TRUE, 
+                      na.rm = TRUE, value.name = "value") {
+    
+    dims <- dim(arr)
+    dn <- dimnames(arr)
+    
+    # Process each time slice
+    results <- lapply(seq_len(dims[3]), function(k) {
+        df <- melt_matrix(arr[,,k], 
+                         remove_diagonal = remove_diagonal,
+                         remove_zeros = remove_zeros,
+                         na.rm = na.rm,
+                         value.name = value.name)
+        if (nrow(df) > 0) {
+            df$time <- if (!is.null(dn[[3]])) dn[[3]][k] else as.character(k)
+        }
+        df
+    })
+    
+    # Combine
+    result <- do.call(rbind, results[sapply(results, nrow) > 0])
+    rownames(result) <- NULL
+    
+    # Reorder columns
+    time_col <- which(names(result) == "time")
+    other_cols <- setdiff(seq_along(result), time_col)
+    result[c(other_cols[1:2], time_col, other_cols[3:length(other_cols)])]
+}
+
+#' Legacy function names for backwards compatibility
 #' @keywords internal
 #' @noRd
 melt_matrix_base <- function(mat) {
-    if (is.null(mat) || length(mat) == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
-    }
-
-    # get dimensions
-    nr <- nrow(mat)
-    nc <- ncol(mat)
-
-    # handle edge cases
-    if (nr == 0 || nc == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
-    }
-
-    # create indices efficiently
-    row_idx <- rep(seq_len(nr), nc)
-    col_idx <- rep(seq_len(nc), each = nr)
-
-    # get names with fallback
-    row_names <- rownames(mat)
-    col_names <- colnames(mat)
-    if (is.null(row_names)) row_names <- as.character(seq_len(nr))
-    if (is.null(col_names)) col_names <- as.character(seq_len(nc))
-
-    # create data.frame directly
-    data.frame(
-        Var1 = row_names[row_idx],
-        Var2 = col_names[col_idx],
-        value = as.vector(mat),
-        stringsAsFactors = FALSE
-    )
+    melt_matrix(mat, remove_diagonal = FALSE, remove_zeros = FALSE, na.rm = FALSE)
 }
 
-#' fast sparse matrix melt - only non-zero/non-na entries
 #' @keywords internal
 #' @noRd
 melt_matrix_sparse <- function(mat, remove_zeros = TRUE, remove_diagonal = TRUE) {
-    if (is.null(mat) || length(mat) == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
-    }
-
-    # get indices of non-zero/non-na entries using which() with arr.ind
-    # This is MUCH faster than iterating through the matrix
-    if (remove_zeros) {
-        idx <- which(mat != 0 & !is.na(mat), arr.ind = TRUE)
-    } else {
-        idx <- which(!is.na(mat), arr.ind = TRUE)
-    }
-
-    # remove diagonal if requested
-    if (remove_diagonal && nrow(idx) > 0) {
-        keep_idx <- idx[, 1] != idx[, 2]
-        idx <- idx[keep_idx, , drop = FALSE]
-    }
-
-    # handle empty result
-    if (nrow(idx) == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
-    }
-
-    # get names
-    row_names <- rownames(mat)
-    col_names <- colnames(mat)
-    if (is.null(row_names)) row_names <- as.character(seq_len(nrow(mat)))
-    if (is.null(col_names)) col_names <- as.character(seq_len(ncol(mat)))
-
-    # build data.frame directly using the indices
-    data.frame(
-        Var1 = row_names[idx[, 1]],
-        Var2 = col_names[idx[, 2]],
-        value = mat[idx],
-        stringsAsFactors = FALSE
-    )
+    result <- melt_matrix(mat, remove_diagonal = remove_diagonal, remove_zeros = remove_zeros, na.rm = TRUE)
+    # Ensure consistent column names for backward compatibility
+    names(result)[names(result) == "row"] <- "Var1" 
+    names(result)[names(result) == "col"] <- "Var2"
+    return(result)
 }
 
-#' fast sparse array melt for 3d arrays
 #' @keywords internal
 #' @noRd
 melt_array_sparse <- function(arr, remove_zeros = TRUE, remove_diagonal = TRUE) {
-    if (is.null(arr) || length(arr) == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            Var3 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
-    }
+    melt_array(arr, remove_diagonal = remove_diagonal, remove_zeros = remove_zeros, na.rm = TRUE)
+}
 
-    # get dimensions
-    dims <- dim(arr)
-    if (length(dims) != 3) {
-        stop("input must be a 3d array")
-    }
-
-    # get dimnames
-    dn <- dimnames(arr)
-    if (is.null(dn[[1]])) dn[[1]] <- as.character(seq_len(dims[1]))
-    if (is.null(dn[[2]])) dn[[2]] <- as.character(seq_len(dims[2]))
-    if (is.null(dn[[3]])) dn[[3]] <- as.character(seq_len(dims[3]))
-
-    # Use list to collect results from each time slice
-    results_list <- vector("list", dims[3])
-
-    # process each time slice
-    for (k in seq_len(dims[3])) {
-        mat <- arr[, , k]
-
-        # Use the optimized sparse matrix melt
-        sparse_result <- melt_matrix_sparse(mat, remove_zeros, remove_diagonal)
-
-        if (nrow(sparse_result) > 0) {
-            # Add time dimension
-            sparse_result$L1 <- dn[[3]][k]
-            results_list[[k]] <- sparse_result
+#' @keywords internal
+#' @noRd
+melt_list_sparse <- function(lst, remove_zeros = TRUE, remove_diagonal = TRUE) {
+    results <- lapply(seq_along(lst), function(i) {
+        df <- melt_matrix(lst[[i]], 
+                        remove_diagonal = remove_diagonal,
+                        remove_zeros = remove_zeros,
+                        na.rm = TRUE)
+        if (nrow(df) > 0) {
+            df$L1 <- names(lst)[i]
         }
-    }
+        df
+    })
+    
+    # Combine results
+    result <- do.call(rbind, results[sapply(results, nrow) > 0])
+    rownames(result) <- NULL
+    
+    # Reorder columns to match expected format
+    time_col <- which(names(result) == "L1")
+    other_cols <- setdiff(seq_along(result), time_col)
+    result[c(other_cols[1:2], time_col, other_cols[3:length(other_cols)])]
+}
 
-    # Remove NULL entries and combine
-    results_list <- results_list[!sapply(results_list, is.null)]
-
-    if (length(results_list) == 0) {
+#' Melt variable time list
+#' @keywords internal
+#' @noRd
+melt_var_time_list <- function(var_time_list) {
+    if (length(var_time_list) == 0) {
         return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            L1 = character(0),
-            value = numeric(0),
+            Var1 = character(),
+            Var2 = character(),
+            Var3 = character(),
+            L1 = character(),
+            value = numeric(),
             stringsAsFactors = FALSE
         ))
     }
-
+    
+    # Process each time period in the list (for cross-sectional, this is typically "1")
+    results <- lapply(names(var_time_list), function(time_name) {
+        time_data <- var_time_list[[time_name]]
+        
+        if (is.list(time_data)) {
+            # This is a list of variables for this time period
+            var_results <- lapply(names(time_data), function(var_name) {
+                mat <- time_data[[var_name]]
+                if (!is.null(mat) && length(mat) > 0) {
+                    # Handle character matrices differently
+                    if (is.character(mat)) {
+                        df <- melt_matrix_character(mat, remove_diagonal = TRUE)
+                    } else {
+                        df <- melt_matrix(mat, remove_diagonal = TRUE, remove_zeros = FALSE, na.rm = FALSE)
+                    }
+                    if (nrow(df) > 0) {
+                        df$Var3 <- var_name
+                        df$L1 <- time_name
+                        df
+                    }
+                }
+            })
+            do.call(rbind, Filter(Negate(is.null), var_results))
+        } else if (is.matrix(time_data)) {
+            # This is a single matrix (shouldn't happen with proper structure)
+            # Handle character matrices differently
+            if (is.character(time_data)) {
+                df <- melt_matrix_character(time_data, remove_diagonal = TRUE)
+            } else {
+                df <- melt_matrix(time_data, remove_diagonal = TRUE, remove_zeros = FALSE, na.rm = FALSE)
+            }
+            if (nrow(df) > 0) {
+                df$Var3 <- time_name  # Use time_name as variable name in this case
+                df$L1 <- "1"
+                df
+            }
+        }
+    })
+    
     # Combine all results
-    result <- do.call(rbind, results_list)
-
-    # Reorder columns to match expected output
-    result <- result[, c("Var1", "Var2", "L1", "value")]
-
-    return(result)
-}
-
-#' fast sparse list melt for lists of matrices
-#' specifically, for sender, receiver, time
-#' @keywords internal
-#' @noRd
-melt_list_sparse <- function(mat_list, remove_zeros = TRUE, remove_diagonal = TRUE) {
-    if (is.null(mat_list) || length(mat_list) == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            L1 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
-    }
-
-    # get time period names
-    time_names <- names(mat_list)
-    if (is.null(time_names)) {
-        time_names <- as.character(seq_along(mat_list))
-    }
-
-    # Use list to collect results
-    results_list <- vector("list", length(mat_list))
-
-    # process each matrix in the list
-    for (i in seq_along(mat_list)) {
-        mat <- mat_list[[i]]
-
-        if (is.null(mat) || length(mat) == 0) next
-
-        # Use the optimized sparse matrix melt
-        sparse_result <- melt_matrix_sparse(mat, remove_zeros, remove_diagonal)
-
-        if (nrow(sparse_result) > 0) {
-            # Add time dimension
-            sparse_result$L1 <- time_names[i]
-            results_list[[i]] <- sparse_result
-        }
-    }
-
-    # Remove NULL entries and combine
-    results_list <- results_list[!sapply(results_list, is.null)]
-
-    if (length(results_list) == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            L1 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
-    }
-
-    # Combine all results
-    result <- do.call(rbind, results_list)
-
-    # Reorder columns to match expected output
-    result <- result[, c("Var1", "Var2", "L1", "value")]
-
-    return(result)
-}
-
-#' Melt a data.frame from wide to long format
-#'
-#' @param data A data.frame to melt
-#' @param id Character vector of column names to use as id variables.
-#'   If NULL, all columns are melted.
-#' @return A melted data.frame with columns for id variables (if any),
-#'   'variable', and 'value'
-#' @keywords internal
-#' @noRd
-melt_df <- function(data, id = NULL) {
-    # ensure it's a data.frame
-    if (!is.data.frame(data)) {
-        stop("data must be a data.frame")
-    }
-
-    # get dimensions
-    n <- nrow(data)
-
-    # handle different id specifications
-    if (is.null(id)) {
-        # no id vars - melt everything
-        if (n == 0 || ncol(data) == 0) {
-            return(data.frame(
-                variable = character(0),
-                value = numeric(0),
-                stringsAsFactors = FALSE
-            ))
-        }
-
-        return(data.frame(
-            variable = rep(names(data), each = n),
-            value = unlist(data, use.names = FALSE),
-            stringsAsFactors = FALSE
-        ))
-    }
-
-    # with id vars
-    measure_vars <- setdiff(names(data), id)
-
-    # nothing to melt
-    if (length(measure_vars) == 0) {
-        return(data)
-    }
-
-    # create melted data.frame
-    data.frame(
-        data[rep(seq_len(n), length(measure_vars)), id, drop = FALSE],
-        variable = factor(rep(measure_vars, each = n), levels = measure_vars),
-        value = unlist(data[measure_vars], use.names = FALSE),
-        row.names = NULL,
-        stringsAsFactors = FALSE
-    )
-}
-
-#' Convert dyad_data attribute to meltable format
-#' specifically for sender, receiver, var, time
-#' @keywords internal
-#' @noRd
-melt_var_time_list <- function(dyad_data_attr) {
-    # check if dyad_data_attr is empty
-    if (length(dyad_data_attr) == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            Var3 = character(0),
-            L1 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
-    }
-
-    # figure out how many rows we need in total
-    total_rows <- 0
-    time_info <- vector("list", length(dyad_data_attr))
-    idx <- 1
-
-    # iterate over time periods and gather information
-    for (time_period in names(dyad_data_attr)) {
-        var_matrices <- dyad_data_attr[[time_period]]
-        if (length(var_matrices) > 0) {
-            first_mat <- var_matrices[[1]]
-            nr <- nrow(first_mat)
-            nc <- ncol(first_mat)
-            n_vars <- length(var_matrices)
-            n_cells <- nr * nc
-
-            time_info[[idx]] <- list(
-                time = time_period,
-                n_cells = n_cells,
-                n_vars = n_vars,
-                nr = nr,
-                nc = nc,
-                var_names = names(var_matrices),
-                row_names = rownames(first_mat) %||% as.character(seq_len(nr)),
-                col_names = colnames(first_mat) %||% as.character(seq_len(nc))
-            )
-
-            total_rows <- total_rows + n_cells * n_vars
-        }
-        idx <- idx + 1
-    }
-
-    # if no valid time periods, return empty data.frame
-    if (total_rows == 0) {
-        return(data.frame(
-            Var1 = character(0),
-            Var2 = character(0),
-            Var3 = character(0),
-            L1 = character(0),
-            value = numeric(0),
-            stringsAsFactors = FALSE
-        ))
-    }
-
-    # pre-allocate vectors for efficiency
-    Var1 <- character(total_rows)
-    Var2 <- character(total_rows)
-    Var3 <- character(total_rows)
-    L1 <- character(total_rows)
-
-    # figure out the type of the values vector based on the first matrix
-    first_mat <- dyad_data_attr[[1]][[1]]
-    if (is.integer(first_mat)) {
-        values <- integer(total_rows)
-    } else if (is.logical(first_mat)) {
-        values <- logical(total_rows)
+    result <- do.call(rbind, Filter(Negate(is.null), results))
+    if (!is.null(result) && nrow(result) > 0) {
+        rownames(result) <- NULL
+        # Reorder columns: Var1, Var2, Var3, L1, value
+        result[c("Var1", "Var2", "Var3", "L1", "value")]
     } else {
-        values <- numeric(total_rows)
+        data.frame(
+            Var1 = character(),
+            Var2 = character(),
+            Var3 = character(),
+            L1 = character(),
+            value = numeric(),
+            stringsAsFactors = FALSE
+        )
     }
+}
 
-    # fill the vectors in one pass
-    current_row <- 1
-
-    for (info in time_info) {
-        if (is.null(info)) next
-
-        time_period <- info$time
-        var_matrices <- dyad_data_attr[[time_period]]
-
-        # pre-compute row/column expansions for this time period
-        n_cells <- info$n_cells
-        nr <- info$nr
-        nc <- info$nc
-
-        # process each variable
-        for (i in seq_along(info$var_names)) {
-            var_name <- info$var_names[i]
-            mat <- var_matrices[[var_name]]
-
-            # calculate the range of rows to fill
-            cell_start <- current_row
-            cell_end <- current_row + n_cells - 1
-            cell_range <- cell_start:cell_end
-
-            # fill actor names (Var1 and Var2)
-            Var1[cell_range] <- rep(info$row_names, nc)
-            Var2[cell_range] <- rep(info$col_names, each = nr)
-
-            # fill variable name and time period
-            Var3[cell_range] <- var_name
-            L1[cell_range] <- time_period
-
-            # fill matrix values
-            values[cell_range] <- as.vector(mat)
-
-            # move to the next block of rows
-            current_row <- current_row + n_cells
-        }
+#' Melt character matrix
+#' @keywords internal
+#' @noRd
+melt_matrix_character <- function(mat, remove_diagonal = TRUE) {
+    if (!is.matrix(mat)) {
+        mat <- as.matrix(mat)
     }
-
-    # create the final data frame
-    out <- data.frame(
-        Var1 = Var1,
-        Var2 = Var2,
-        Var3 = Var3,
-        L1 = L1,
+    
+    # Get dimensions
+    n_rows <- nrow(mat)
+    n_cols <- ncol(mat)
+    
+    # Get row and column names
+    row_names <- rownames(mat)
+    col_names <- colnames(mat)
+    
+    if (is.null(row_names)) row_names <- as.character(1:n_rows)
+    if (is.null(col_names)) col_names <- as.character(1:n_cols)
+    
+    # Create indices
+    rows <- rep(row_names, times = n_cols)
+    cols <- rep(col_names, each = n_rows)
+    values <- as.vector(mat)
+    
+    # Create data frame
+    result <- data.frame(
+        Var1 = rows,
+        Var2 = cols,
         value = values,
         stringsAsFactors = FALSE
     )
+    
+    # Remove diagonal if requested
+    if (remove_diagonal) {
+        diag_idx <- result$Var1 != result$Var2
+        result <- result[diag_idx, ]
+    }
+    
+    # Remove rows with NA values
+    result <- result[!is.na(result$value), ]
+    
+    rownames(result) <- NULL
+    return(result)
+}
 
-    #
-    return(out)
+#' Melt data frame for plotting
+#' @keywords internal
+#' @noRd
+melt_df <- function(data, id) {
+    # Get value columns (all columns not in id)
+    value_cols <- setdiff(names(data), id)
+    
+    # Create a list to store melted data
+    melted_list <- list()
+    
+    # Process each value column
+    for (var in value_cols) {
+        # Create a subset with id columns and current value column
+        subset_data <- data[c(id, var)]
+        subset_data$variable <- var
+        names(subset_data)[names(subset_data) == var] <- "value"
+        melted_list[[var]] <- subset_data
+    }
+    
+    # Combine all melted data
+    result <- do.call(rbind, melted_list)
+    rownames(result) <- NULL
+    
+    # Reorder columns to put variable before value
+    col_order <- c(id, "variable", "value")
+    result <- result[, col_order]
+    
+    return(result)
 }

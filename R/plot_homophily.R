@@ -550,8 +550,8 @@ extract_similarity_data <- function(netlet, attribute, method) {
     binary_net <- (net_matrix > 0) & !is.na(net_matrix)
 
     # extract upper triangle of similarity and binary matrices
-    similarity_melted <- melt_matrix_sparse(similarity_matrix, remove_zeros = FALSE, remove_diagonal = TRUE)
-    binary_melted <- melt_matrix_sparse(binary_net, remove_zeros = FALSE, remove_diagonal = TRUE)
+    similarity_melted <- melt_matrix(similarity_matrix, remove_zeros = FALSE, remove_diagonal = TRUE)
+    binary_melted <- melt_matrix(binary_net, remove_zeros = FALSE, remove_diagonal = TRUE)
 
     # create unique keys for matching rows between melted matrices
     sim_keys <- paste(similarity_melted$Var1, similarity_melted$Var2, sep = "_")

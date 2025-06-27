@@ -17,6 +17,7 @@
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #'
+#' @importFrom stats var
 #' @keywords internal
 #' @noRd
 
@@ -44,16 +45,12 @@ compare_edges <- function(
    edge_changes <- list()
    
    # pre-compute all actors for alignment efficiency
-   all_actors <- sort(unique(unlist(lapply(nets_list, function(net) {
-       mat <- extract_matrix(net)
-       c(rownames(mat), colnames(mat))
-   }))))
+   all_actors <- get_all_actors(nets_list)
    
    # pre-align all matrices if we have many networks
    if (n_nets > 5) {
-       aligned_list <- lapply(nets_list, function(net) {
-           align_to_actors(net, all_actors, include_diagonal)
-       })
+       mats <- lapply(nets_list, extract_matrix)
+       aligned_list <- batch_align_matrices_cpp(mats, all_actors, include_diagonal)
    }
    
     # compare all pairs of networks
@@ -72,7 +69,8 @@ compare_edges <- function(
                 mat2 <- aligned_list[[j]]
             } else {
                 # align the matrices so they have same actors
-                mats <- align_matrices(nets_list[[i]], nets_list[[j]], force_include_diagonal)
+                mats <- align_matrices(nets_list[[i]], nets_list[[j]], 
+                                     include_diagonal = force_include_diagonal)
                 mat1 <- mats$mat1
                 mat2 <- mats$mat2
             }
@@ -122,16 +120,16 @@ compare_edges <- function(
            
            if (method %in% c("jaccard", "all")) {
                jaccard_mat[i,j] <- jaccard_mat[j,i] <- 
-                   calculate_jaccard_fast(mat1, mat2, threshold1, threshold2)
+                   calculate_jaccard_cpp(mat1, mat2, threshold1, threshold2)
            }
            
            if (method %in% c("hamming", "all")) {
                hamming_mat[i,j] <- hamming_mat[j,i] <- 
-                   calculate_hamming_fast(mat1, mat2, threshold1, threshold2)
+                   calculate_hamming_cpp(mat1, mat2, threshold1, threshold2)
            }
            
            if (method %in% c("qap", "all") && test) {
-               qap_result <- qap_correlation_fast(mat1, mat2, n_permutations)
+               qap_result <- qap_correlation_cpp(mat1, mat2, n_permutations)
                qap_mat[i,j] <- qap_mat[j,i] <- qap_result$correlation
                qap_pval_mat[i,j] <- qap_pval_mat[j,i] <- qap_result$p_value
            }
@@ -143,7 +141,7 @@ compare_edges <- function(
            
            # track what edges changed between these two networks
            edge_key <- paste(net_names[i], net_names[j], sep = "_vs_")
-           edge_changes[[edge_key]] <- calculate_edge_changes_fast(mat1, mat2, threshold1, threshold2)
+           edge_changes[[edge_key]] <- calculate_edge_changes_cpp(mat1, mat2, threshold1, threshold2)
        }
    }
    
@@ -774,299 +772,6 @@ analyze_by_group <- function(results, nets_list, by){
        message = "By-group analysis not fully implemented"
    ))
 }
-
-#' Extract Matrix from Netify Object
-#'
-#' `extract_matrix` extracts the adjacency matrix from different types of netify objects, handling cross-sectional, longitudinal array, and longitudinal list formats.
-#'
-#' @param net A netify object of any type.
-#'
-#' @return A matrix representing the network adjacency matrix.
-#'
-#' @author Cassy Dorff, Shahryar Minhas
-#'
-#' @keywords internal
-#' @noRd
-
-extract_matrix <- function(net){
-
-   #
-   attrs <- attributes(net)
-   
-   if (attrs$netify_type == "cross_sec") {
-       # remove class to get plain matrix
-       mat <- unclass(net)
-       attributes(mat) <- attributes(mat)[c("dim", "dimnames")]
-       return(mat)
-   } else if (attrs$netify_type == "longit_list") {
-       # return first time period with warning
-       cli::cli_alert_warning("Using first time period for comparison. Consider subsetting first.")
-       mat <- unclass(net[[1]])
-       attributes(mat) <- attributes(mat)[c("dim", "dimnames")]
-       return(mat)
-   } else if (attrs$netify_type == "longit_array") {
-       # return first time period
-       cli::cli_alert_warning("Using first time period for comparison. Consider subsetting first.")
-       return(net[,,1])
-   }
-}
-
-#' Align Network Matrices for Comparison
-#'
-#' `align_matrices` ensures two network matrices have the same dimensions and actor ordering by creating aligned versions with all actors from both networks.
-#'
-#' @param net1 First netify object to align.
-#' @param net2 Second netify object to align.
-#' @param include_diagonal Logical; whether to preserve diagonal values.
-#'
-#' @return A list containing two aligned matrices with same dimensions and actor ordering.
-#'
-#' @author Cassy Dorff, Shahryar Minhas
-#'
-#' @keywords internal
-#' @noRd
-
-align_matrices <- function(net1, net2, include_diagonal = FALSE) {
-   # extract matrices
-   mat1 <- extract_matrix(net1)
-   mat2 <- extract_matrix(net2)
-   
-   # get all actors more efficiently
-   all_actors <- sort(unique(c(
-       rownames(mat1), colnames(mat1),
-       rownames(mat2), colnames(mat2)
-   )))
-   
-   n <- length(all_actors)
-   aligned1 <- aligned2 <- matrix(0, n, n, dimnames = list(all_actors, all_actors))
-   
-   # vectorized indexing for efficiency
-   idx1_rows <- match(rownames(mat1), all_actors)
-   idx1_cols <- match(colnames(mat1), all_actors)
-   aligned1[idx1_rows, idx1_cols] <- mat1
-   
-   idx2_rows <- match(rownames(mat2), all_actors)
-   idx2_cols <- match(colnames(mat2), all_actors)
-   aligned2[idx2_rows, idx2_cols] <- mat2
-   
-   if (!include_diagonal) {
-       diag(aligned1) <- diag(aligned2) <- NA
-   }
-   
-   return(list(mat1 = aligned1, mat2 = aligned2))
-}
-
-#' Align Single Network to Actor Set
-#'
-#' `align_to_actors` aligns a single network to a pre-specified set of actors.
-#'
-#' @param net A netify object to align.
-#' @param all_actors Character vector of all actors to align to.
-#' @param include_diagonal Logical; whether to preserve diagonal values.
-#'
-#' @return An aligned matrix with dimensions matching all_actors.
-#'
-#' @author Cassy Dorff, Shahryar Minhas
-#'
-#' @keywords internal
-#' @noRd
-
-align_to_actors <- function(net, all_actors, include_diagonal = FALSE) {
-   mat <- extract_matrix(net)
-   
-   n <- length(all_actors)
-   aligned <- matrix(0, n, n, dimnames = list(all_actors, all_actors))
-   
-   # vectorized indexing
-   idx_rows <- match(rownames(mat), all_actors)
-   idx_cols <- match(colnames(mat), all_actors)
-   idx_rows <- idx_rows[!is.na(idx_rows)]
-   idx_cols <- idx_cols[!is.na(idx_cols)]
-   
-   if (length(idx_rows) > 0 && length(idx_cols) > 0) {
-       aligned[idx_rows, idx_cols] <- mat[rownames(mat) %in% all_actors[idx_rows], 
-                                         colnames(mat) %in% all_actors[idx_cols]]
-   }
-   
-   if (!include_diagonal) {
-       diag(aligned) <- NA
-   }
-   
-   return(aligned)
-}
-
-#' Calculate Jaccard Similarity Between Networks (Fast Version)
-#'
-#' `calculate_jaccard_fast` computes the Jaccard similarity coefficient between two networks after binarizing based on specified thresholds.
-#'
-#' @param mat1 First network matrix.
-#' @param mat2 Second network matrix.
-#' @param threshold1 Threshold for binarizing first matrix.
-#' @param threshold2 Threshold for binarizing second matrix.
-#'
-#' @return Numeric Jaccard similarity coefficient between 0 and 1.
-#'
-#' @author Cassy Dorff, Shahryar Minhas
-#'
-#' @keywords internal
-#' @noRd
-
-calculate_jaccard_fast <- function(mat1, mat2, threshold1, threshold2){
-
-    # binarize matrices based on thresholds
-    bin1 <- (mat1 > threshold1) & !is.na(mat1)
-    bin2 <- (mat2 > threshold2) & !is.na(mat2)
-    
-    # vectorized calculation
-    intersection <- sum(bin1 & bin2, na.rm = TRUE)
-    union <- sum(bin1 | bin2, na.rm = TRUE)
-    
-    # handle edge cases
-    if (union == 0) {
-        # both networks are empty - jaccard is considered 0 (no similarity)
-        return(0)
-    }
-    return(intersection / union)
-}
-
-#' Calculate Hamming Distance Between Networks (Fast Version)
-#'
-#' `calculate_hamming_fast` computes the normalized Hamming distance (proportion of differing edges) between two networks after binarizing.
-#'
-#' @param mat1 First network matrix.
-#' @param mat2 Second network matrix.
-#' @param threshold1 Threshold for binarizing first matrix.
-#' @param threshold2 Threshold for binarizing second matrix.
-#'
-#' @return Numeric Hamming distance between 0 and 1.
-#'
-#' @author Cassy Dorff, Shahryar Minhas
-#'
-#' @keywords internal
-#' @noRd
-
-calculate_hamming_fast <- function(mat1, mat2, threshold1, threshold2){
-
-   # binarize
-   bin1 <- (mat1 > threshold1) & !is.na(mat1)
-   bin2 <- (mat2 > threshold2) & !is.na(mat2)
-   
-   # vectorized calculation
-   valid <- !is.na(bin1) & !is.na(bin2)
-   total <- sum(valid)
-   if (total == 0) return(NA)
-   
-   different <- sum(bin1[valid] != bin2[valid])
-   return(different / total)
-}
-
-#' Perform QAP Correlation Test (Fast Version)
-#'
-#' `qap_correlation_fast` calculates the correlation between two networks and tests its significance using the Quadratic Assignment Procedure with permutation testing.
-#'
-#' @param mat1 First network matrix.
-#' @param mat2 Second network matrix.
-#' @param n_permutations Integer; number of permutations for significance testing.
-#'
-#' @return A list containing the observed correlation and p-value from permutation test.
-#'
-#' @author Cassy Dorff, Shahryar Minhas
-#'
-#' @keywords internal
-#' @noRd
-
-qap_correlation_fast <- function(mat1, mat2, n_permutations){
-
-   # calc observed correlation using cpp function
-   vec1 <- as.vector(mat1)
-   vec2 <- as.vector(mat2)
-   complete <- !is.na(vec1) & !is.na(vec2)
-   
-   if (sum(complete) < 3) {
-       return(list(correlation = NA, p_value = NA))
-   }
-   
-   obs_cor <- correlation_cpp(vec1[complete], vec2[complete])
-   
-   # vectorized permutation test
-   n <- nrow(mat1)
-   
-   # create permutation matrix all at once for efficiency
-   perm_matrix <- replicate(n_permutations, sample(n))
-   
-   # vectorized correlation calculation
-   perm_cors <- apply(perm_matrix, 2, function(perm) {
-       mat1_perm <- mat1[perm, perm]
-       vec1_perm <- as.vector(mat1_perm)
-       complete_perm <- !is.na(vec1_perm) & !is.na(vec2)
-       if (sum(complete_perm) >= 3) {
-           correlation_cpp(vec1_perm[complete_perm], vec2[complete_perm])
-       } else {
-           NA
-       }
-   })
-   
-   # calc p-value
-   valid_perms <- !is.na(perm_cors)
-   p_value <- if(sum(valid_perms) > 0) {
-       mean(abs(perm_cors[valid_perms]) >= abs(obs_cor))
-   } else {
-       NA
-   }
-   
-   return(list(correlation = obs_cor, p_value = p_value))
-}
-
-#' Calculate Edge Changes Between Networks (Fast Version)
-#'
-#' `calculate_edge_changes_fast` identifies edges that are added, removed, or maintained between two networks and calculates weight correlation for maintained edges.
-#'
-#' @param mat1 First network matrix.
-#' @param mat2 Second network matrix.
-#' @param threshold1 Threshold for determining edge presence in first matrix.
-#' @param threshold2 Threshold for determining edge presence in second matrix.
-#'
-#' @return A list containing counts of added, removed, and maintained edges plus weight correlation.
-#'
-#' @author Cassy Dorff, Shahryar Minhas
-#'
-#' @keywords internal
-#' @noRd
-
-calculate_edge_changes_fast <- function(mat1, mat2, threshold1, threshold2){
-
-   # binarize
-   bin1 <- (mat1 > threshold1) & !is.na(mat1)
-   bin2 <- (mat2 > threshold2) & !is.na(mat2)
-   
-   # calc changes - vectorized
-   added <- sum(bin2 & !bin1, na.rm = TRUE)
-   removed <- sum(bin1 & !bin2, na.rm = TRUE)
-   maintained <- sum(bin1 & bin2, na.rm = TRUE)
-   
-   # weight correlation for maintained edges using cpp function
-   maintained_edges <- bin1 & bin2
-   if (sum(maintained_edges, na.rm = TRUE) > 0) {
-       vals1 <- mat1[maintained_edges]
-       vals2 <- mat2[maintained_edges]
-       complete <- !is.na(vals1) & !is.na(vals2)
-       if (sum(complete) > 0) {
-           weight_cor <- correlation_cpp(vals1[complete], vals2[complete])
-       } else {
-           weight_cor <- NA
-       }
-   } else {
-       weight_cor <- NA
-   }
-   
-   return(list(
-       added = added,
-       removed = removed,
-       maintained = maintained,
-       weight_correlation = weight_cor
-   ))
-}
-
 #' Create Edge Comparison Summary
 #'
 #' `create_edge_summary` formats the results of edge comparisons into a summary data frame, handling both pairwise and multiple network comparisons.

@@ -10,3 +10,5 @@
 ^pkgdown$
 ^Meta$
 ^\.claude$
+^examples$
+^test_compare_speedup\.R$

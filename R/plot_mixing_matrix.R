@@ -108,8 +108,8 @@ plot_mixing_matrix <- function(
         )
     }
 
-    # convert the matrix to a long format using the `melt_matrix_base` function
-    df_long <- melt_matrix_base(matrix_data)
+    # convert the matrix to a long format
+    df_long <- melt_matrix(matrix_data, remove_diagonal = FALSE, remove_zeros = FALSE, na.rm = FALSE)
     names(df_long) <- c("from", "to", "value")
 
     # reorder categories if requested and if the matrix is square

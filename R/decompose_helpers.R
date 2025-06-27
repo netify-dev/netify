@@ -9,14 +9,14 @@ process_edge_data <- function(netlet, netify_type, weight_attr, remove_zeros, eg
     # handle different data structures
     if (netify_type == "cross_sec") {
         # for cross-sectional, raw_data is a matrix
-        edge_data <- melt_matrix_sparse(
+        edge_data <- melt_matrix(
             raw_data,
             remove_zeros = remove_zeros,
             remove_diagonal = TRUE
         )
     } else if (netify_type == "longit_array") {
         # for longitudinal array, melt the 3d array
-        edge_data <- melt_array_sparse(
+        edge_data <- melt_array(
             raw_data,
             remove_zeros = remove_zeros,
             remove_diagonal = TRUE

@@ -7,6 +7,8 @@ Authors@R: c(
   person("Colin", "Henry", email = "colin.henry@vanderbilt.edu", role = c("ctb")),
   person("Shahryar", "Minhas", email = "minhassh@msu.edu", role = c("aut", "cre"))
   )
+Author: Cassy Dorff [aut], Shahryar Minhas [aut, cre]
+Maintainer: Shahryar Minhas <minhassh@msu.edu>
 Description: Provides functions for building, analyzing, and visualizing network data.
 Depends:
   R (>= 3.5.0)
@@ -25,7 +27,8 @@ Imports:
     patchwork,
     RColorBrewer
 LinkingTo:
-  Rcpp
+  Rcpp,
+  RcppEigen
 Suggests:
     knitr,    
     rmarkdown,
