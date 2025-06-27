@@ -1010,19 +1010,29 @@ knitr::kable(homophily_trends,
 ### Visualizing Longitudinal Homophily
 
 ```{r, fig.width=10, fig.height=6}
-# Plot homophily patterns across time
-ggplot(democracy_homophily_longit, aes(x = net, y = homophily_correlation)) +
-  geom_point(size = 3) +
-  geom_line(group = 1) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-  geom_errorbar(aes(ymin = homophily_correlation - 1.96 * 0.05, 
-                    ymax = homophily_correlation + 1.96 * 0.05),
-                width = 0.2) +
+# Use plot_homophily with type = "temporal" for longitudinal data
+plot_homophily(democracy_homophily_longit, type = "temporal") +
   labs(title = "Democracy Homophily in Alliance Networks Over Time",
-       subtitle = "Tendency for democracies to ally with other democracies",
-       x = "Year",
-       y = "Homophily Correlation") +
-  theme_minimal()
+       subtitle = "Tendency for democracies to ally with other democracies")
+```
+
+If you want to see the distribution for a specific time period, you can extract that period first:
+
+```{r, fig.width=8, fig.height=5}
+# Extract 2012 data for distribution plot using subset
+alliance_2012 <- subset(alliance_net_longit, time = '2012')
+democracy_homo_2012 <- homophily(
+  alliance_2012,
+  attribute = "democracy", 
+  method = "correlation"
+)
+
+# Now plot the distribution for just 2012
+plot_homophily(democracy_homo_2012, alliance_2012, 
+               type = "distribution",
+               attribute = "democracy",
+               method = "correlation") +
+  labs(subtitle = "Distribution of democracy similarity scores in 2012 alliance network")
 ```
 
 ### Mixing Matrices Over Time
