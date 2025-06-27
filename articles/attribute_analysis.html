@@ -370,8 +370,8 @@ attributes.</p>
 <span><span class="co">## 1   1 cooperation democracy correlation               0             0.1402454</span></span>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">## 1                -0.2431161                  -0.3122502            0.06913408</span></span>
-<span><span class="co">##   p_value  ci_lower ci_upper n_connected_pairs n_unconnected_pairs n_missing</span></span>
-<span><span class="co">## 1       0 0.1262862 0.155271              3558               11493        21</span></span>
+<span><span class="co">##   p_value ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing</span></span>
+<span><span class="co">## 1       0 0.124643 0.1559048              3558               11493        21</span></span>
 <span><span class="co">##   n_pairs</span></span>
 <span><span class="co">## 1   18915</span></span></code></pre>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -532,7 +532,7 @@ prove equally or more influential in shaping alliance networks.</p>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">## 1                 0.4098686                     0.26186             0.1480086</span></span>
 <span><span class="co">##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing</span></span>
-<span><span class="co">## 1       0 0.1186619 0.1488275              4033               14882         0</span></span>
+<span><span class="co">## 1       0 0.1174613 0.1487551              4033               14882         0</span></span>
 <span><span class="co">##   n_pairs</span></span>
 <span><span class="co">## 1   18915</span></span></code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
@@ -626,7 +626,7 @@ this hypothesis:</p>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">## 1               -0.08536979                  -0.1056113            0.02024147</span></span>
 <span><span class="co">##   p_value   ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing</span></span>
-<span><span class="co">## 1       0 0.09802697 0.1220418              3902               13864         6</span></span>
+<span><span class="co">## 1       0 0.09677224 0.1232393              3902               13864         6</span></span>
 <span><span class="co">##   n_pairs</span></span>
 <span><span class="co">## 1   18915</span></span></code></pre>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -672,7 +672,7 @@ another example of categorical homophily:</p>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">## 1                 0.7956856                  0.03420239             0.7614832</span></span>
 <span><span class="co">##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing</span></span>
-<span><span class="co">## 1       0 0.7744235 0.7958435              4033               14882         0</span></span>
+<span><span class="co">## 1       0 0.7738695 0.7954795              4033               14882         0</span></span>
 <span><span class="co">##   n_pairs</span></span>
 <span><span class="co">## 1   18915</span></span></code></pre>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
@@ -1648,11 +1648,11 @@ periods.</p>
 <span><span class="co">## 4                -0.2457439                  -0.3086910            0.06294710</span></span>
 <span><span class="co">## 5                -0.2483152                  -0.3071912            0.05887602</span></span>
 <span><span class="co">##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing</span></span>
-<span><span class="co">## 1       0 0.1332232 0.1622827              3484               11394        22</span></span>
-<span><span class="co">## 2       0 0.1320233 0.1617105              3484               11567        21</span></span>
-<span><span class="co">## 3       0 0.1264136 0.1556658              3558               11493        21</span></span>
-<span><span class="co">## 4       0 0.1144613 0.1446418              3632               11419        21</span></span>
-<span><span class="co">## 5       0 0.1059274 0.1360072              3633               11418        21</span></span>
+<span><span class="co">## 1       0 0.1340397 0.1643048              3484               11394        22</span></span>
+<span><span class="co">## 2       0 0.1329215 0.1617093              3484               11567        21</span></span>
+<span><span class="co">## 3       0 0.1246605 0.1547783              3558               11493        21</span></span>
+<span><span class="co">## 4       0 0.1154052 0.1451958              3632               11419        21</span></span>
+<span><span class="co">## 5       0 0.1051631 0.1369238              3633               11418        21</span></span>
 <span><span class="co">##   n_pairs</span></span>
 <span><span class="co">## 1   18915</span></span>
 <span><span class="co">## 2   18915</span></span>
@@ -1711,25 +1711,34 @@ periods.</p>
 <h3 id="visualizing-longitudinal-homophily">Visualizing Longitudinal Homophily<a class="anchor" aria-label="anchor" href="#visualizing-longitudinal-homophily"></a>
 </h3>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Plot homophily patterns across time</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">democracy_homophily_longit</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">net</span>, y <span class="op">=</span> <span class="va">homophily_correlation</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>group <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>, color <span class="op">=</span> <span class="st">"gray50"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_errorbar</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>ymin <span class="op">=</span> <span class="va">homophily_correlation</span> <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="fl">0.05</span>, </span>
-<span>                    ymax <span class="op">=</span> <span class="va">homophily_correlation</span> <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="fl">0.05</span><span class="op">)</span>,</span>
-<span>                width <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span></span>
+<code class="sourceCode R"><span><span class="co"># Use plot_homophily with type = "temporal" for longitudinal data</span></span>
+<span><span class="fu"><a href="../reference/plot_homophily.html">plot_homophily</a></span><span class="op">(</span><span class="va">democracy_homophily_longit</span>, type <span class="op">=</span> <span class="st">"temporal"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Democracy Homophily in Alliance Networks Over Time"</span>,</span>
-<span>       subtitle <span class="op">=</span> <span class="st">"Tendency for democracies to ally with other democracies"</span>,</span>
-<span>       x <span class="op">=</span> <span class="st">"Year"</span>,</span>
-<span>       y <span class="op">=</span> <span class="st">"Homophily Correlation"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span>       subtitle <span class="op">=</span> <span class="st">"Tendency for democracies to ally with other democracies"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="attribute_analysis_files/figure-html/unnamed-chunk-49-1.png" width="1500"></p>
+<p>If you want to see the distribution for a specific time period, you
+can extract that period first:</p>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Extract 2012 data for distribution plot using subset</span></span>
+<span><span class="va">alliance_2012</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">alliance_net_longit</span>, time <span class="op">=</span> <span class="st">'2012'</span><span class="op">)</span></span>
+<span><span class="va">democracy_homo_2012</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/homophily.html">homophily</a></span><span class="op">(</span></span>
+<span>  <span class="va">alliance_2012</span>,</span>
+<span>  attribute <span class="op">=</span> <span class="st">"democracy"</span>, </span>
+<span>  method <span class="op">=</span> <span class="st">"correlation"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Now plot the distribution for just 2012</span></span>
+<span><span class="fu"><a href="../reference/plot_homophily.html">plot_homophily</a></span><span class="op">(</span><span class="va">democracy_homo_2012</span>, <span class="va">alliance_2012</span>, </span>
+<span>               type <span class="op">=</span> <span class="st">"distribution"</span>,</span>
+<span>               attribute <span class="op">=</span> <span class="st">"democracy"</span>,</span>
+<span>               method <span class="op">=</span> <span class="st">"correlation"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>subtitle <span class="op">=</span> <span class="st">"Distribution of democracy similarity scores in 2012 alliance network"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="attribute_analysis_files/figure-html/unnamed-chunk-50-1.png" width="1200"></p>
 </div>
 <div class="section level3">
 <h3 id="mixing-matrices-over-time">Mixing Matrices Over Time<a class="anchor" aria-label="anchor" href="#mixing-matrices-over-time"></a>
 </h3>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Analyze regime type mixing patterns across time</span></span>
 <span><span class="va">regime_mixing_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mixing_matrix.html">mixing_matrix</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net_longit</span>,</span>
@@ -1785,7 +1794,7 @@ periods.</p>
 <div class="section level3">
 <h3 id="dyadic-correlations-across-time">Dyadic Correlations Across Time<a class="anchor" aria-label="anchor" href="#dyadic-correlations-across-time"></a>
 </h3>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Test geographic distance effects over time</span></span>
 <span><span class="va">geo_correlation_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dyad_correlation.html">dyad_correlation</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net_longit</span>,</span>
@@ -1857,7 +1866,7 @@ periods.</p>
 <div class="section level3">
 <h3 id="comprehensive-longitudinal-analysis">Comprehensive Longitudinal Analysis<a class="anchor" aria-label="anchor" href="#comprehensive-longitudinal-analysis"></a>
 </h3>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run comprehensive analysis on longitudinal network</span></span>
 <span><span class="va">comprehensive_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/attribute_report.html">attribute_report</a></span><span class="op">(</span></span>
 <span>  <span class="va">alliance_net_longit</span>,</span>
