@@ -29,7 +29,7 @@ across all time periods.'></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Multilayer Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
@@ -71,7 +71,8 @@ across all time periods.</p>
 <span>  weight <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sum_dyads <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  diag_to_NA <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  nodelist <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -128,6 +129,13 @@ to NA. Automatically set to FALSE for bipartite networks.</p></dd>
 <dt id="arg-missing-to-zero">missing_to_zero<a class="anchor" aria-label="anchor" href="#arg-missing-to-zero"></a></dt>
 <dd><p>Logical. If TRUE (default), treats missing edges as zeros.
 If FALSE, missing edges remain as NA.</p></dd>
+
+
+<dt id="arg-nodelist">nodelist<a class="anchor" aria-label="anchor" href="#arg-nodelist"></a></dt>
+<dd><p>Character vector of actor names to include in the network.
+If provided, ensures all listed actors appear in the network even if they
+have no edges (isolates). Useful when working with edgelists that only
+contain active dyads.</p></dd>
 
 </dl></div>
     <div class="section level2">

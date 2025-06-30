@@ -23,7 +23,7 @@ arrays, lists, igraph objects, or network objects) and outputs a netify object."
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Multilayer Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
@@ -70,6 +70,7 @@ arrays, lists, igraph objects, or network objects) and outputs a netify object.<
 <span>  dyad_vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dyad_vars_symmetric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">symmetric</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">dyad_vars</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  input_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"dyad_df"</span>, <span class="st">"netify_obj"</span><span class="op">)</span>,</span>
+<span>  nodelist <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -178,6 +179,13 @@ to use the same choice as the symmetric argument</p></dd>
 Options are "auto" (default), "dyad_df", or "netify_obj". Use "dyad_df"
 to force data.frame interpretation or "netify_obj" to force matrix/array/
 igraph/network interpretation.</p></dd>
+
+
+<dt id="arg-nodelist">nodelist<a class="anchor" aria-label="anchor" href="#arg-nodelist"></a></dt>
+<dd><p>character vector: optional list of all actors (nodes) that should
+be included in the network. This ensures isolates (nodes with no edges) are
+properly represented. Particularly useful when working with edgelists that
+only contain active dyads.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

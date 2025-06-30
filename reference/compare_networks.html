@@ -25,7 +25,7 @@ and node compositions across multiple networks or within subgroups."></head><bod
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Multilayer Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
@@ -61,10 +61,20 @@ and node compositions across multiple networks or within subgroups.</p>
 <span>  by <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  what <span class="op">=</span> <span class="st">"edges"</span>,</span>
 <span>  test <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  n_permutations <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  n_permutations <span class="op">=</span> <span class="fl">5000</span>,</span>
 <span>  include_diagonal <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  return_details <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  edge_threshold <span class="op">=</span> <span class="fl">0</span></span>
+<span>  edge_threshold <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  permutation_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"classic"</span>, <span class="st">"degree_preserving"</span>, <span class="st">"freedman_lane"</span>, <span class="st">"dsp_mrqap"</span><span class="op">)</span>,</span>
+<span>  correlation_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pearson"</span>, <span class="st">"spearman"</span><span class="op">)</span>,</span>
+<span>  binary_metric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"phi"</span>, <span class="st">"simple_matching"</span>, <span class="st">"mean_centered"</span><span class="op">)</span>,</span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  p_adjust <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"holm"</span>, <span class="st">"BH"</span>, <span class="st">"BY"</span><span class="op">)</span>,</span>
+<span>  adaptive_stop <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  max_permutations <span class="op">=</span> <span class="fl">20000</span>,</span>
+<span>  spectral_rank <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  attr_metric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ecdf_cor"</span>, <span class="st">"wasserstein"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -130,7 +140,7 @@ within and between attribute groups rather than across input networks.
 
 
 <dt id="arg-n-permutations">n_permutations<a class="anchor" aria-label="anchor" href="#arg-n-permutations"></a></dt>
-<dd><p>Integer. Number of permutations for QAP test. Default 1000.</p></dd>
+<dd><p>Integer. Number of permutations for QAP test. Default 5000.</p></dd>
 
 
 <dt id="arg-include-diagonal">include_diagonal<a class="anchor" aria-label="anchor" href="#arg-include-diagonal"></a></dt>
@@ -144,6 +154,81 @@ within and between attribute groups rather than across input networks.
 <dt id="arg-edge-threshold">edge_threshold<a class="anchor" aria-label="anchor" href="#arg-edge-threshold"></a></dt>
 <dd><p>Numeric or function. For weighted networks, threshold to
 determine edge presence. Default is 0 (any positive weight).</p></dd>
+
+
+<dt id="arg-permutation-type">permutation_type<a class="anchor" aria-label="anchor" href="#arg-permutation-type"></a></dt>
+<dd><p>Character string specifying permutation scheme:</p><dl><dt>"classic"</dt>
+<dd><p>Standard label permutation QAP (default)</p></dd>
+
+<dt>"degree_preserving"</dt>
+<dd><p>Preserves degree sequence (binary networks only)</p></dd>
+
+<dt>"freedman_lane"</dt>
+<dd><p>Freeman-Lane MRQAP for controlling autocorrelation</p></dd>
+
+<dt>"dsp_mrqap"</dt>
+<dd><p>Double-Semi-Partialling MRQAP</p></dd>
+
+
+</dl></dd>
+
+
+<dt id="arg-correlation-type">correlation_type<a class="anchor" aria-label="anchor" href="#arg-correlation-type"></a></dt>
+<dd><p>Character string. "pearson" (default) or "spearman" for
+rank-based correlation.</p></dd>
+
+
+<dt id="arg-binary-metric">binary_metric<a class="anchor" aria-label="anchor" href="#arg-binary-metric"></a></dt>
+<dd><p>Character string for binary network correlation:</p><dl><dt>"phi"</dt>
+<dd><p>Standard phi coefficient (default)</p></dd>
+
+<dt>"simple_matching"</dt>
+<dd><p>Proportion of matching edges</p></dd>
+
+<dt>"mean_centered"</dt>
+<dd><p>Mean-centered phi coefficient</p></dd>
+
+
+</dl></dd>
+
+
+<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
+<dd><p>Integer. Random seed for reproducible permutations. Default NULL.</p></dd>
+
+
+<dt id="arg-p-adjust">p_adjust<a class="anchor" aria-label="anchor" href="#arg-p-adjust"></a></dt>
+<dd><p>Character string for multiple testing correction:
+"none" (default), "holm", "BH" (Benjamini-Hochberg), or "BY".</p></dd>
+
+
+<dt id="arg-adaptive-stop">adaptive_stop<a class="anchor" aria-label="anchor" href="#arg-adaptive-stop"></a></dt>
+<dd><p>Logical. Whether to use adaptive stopping for permutations.
+Default FALSE. (Currently not implemented)</p></dd>
+
+
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dd><p>Numeric. Significance level for adaptive stopping. Default 0.05.</p></dd>
+
+
+<dt id="arg-max-permutations">max_permutations<a class="anchor" aria-label="anchor" href="#arg-max-permutations"></a></dt>
+<dd><p>Integer. Maximum permutations for adaptive stopping. Default 20000.</p></dd>
+
+
+<dt id="arg-spectral-rank">spectral_rank<a class="anchor" aria-label="anchor" href="#arg-spectral-rank"></a></dt>
+<dd><p>Integer. Number of eigenvalues to use for spectral distance.
+Default 0 (use all). Set to a smaller value (e.g., 50-100) for large networks
+to improve performance while maintaining accuracy.</p></dd>
+
+
+<dt id="arg-attr-metric">attr_metric<a class="anchor" aria-label="anchor" href="#arg-attr-metric"></a></dt>
+<dd><p>Character string for continuous attribute comparison:</p><dl><dt>"ecdf_cor"</dt>
+<dd><p>Correlation of empirical CDFs (default)</p></dd>
+
+<dt>"wasserstein"</dt>
+<dd><p>Wasserstein-1 (Earth Mover's) distance</p></dd>
+
+
+</dl></dd>
 
 </dl></div>
     <div class="section level2">
@@ -202,7 +287,11 @@ them. This works for cross-sectional multilayer (3D arrays), longitudinal multil
 <li><p>Jaccard: Ranges from 0 to 1, proportion of edges present in both networks</p></li>
 <li><p>Hamming: Ranges from 0 to 1, proportion of differing edges</p></li>
 <li><p>QAP p-value: Significance of observed correlation under random permutation</p></li>
-</ul></div>
+</ul><p><strong>Permutation methods:</strong>
+When <code>permutation_type = "degree_preserving"</code>, the first network must be
+binary (0/1). This method preserves the degree sequence during permutations,
+which is important when degree heterogeneity could inflate Type I error rates.</p>
+    </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
     <p>Cassy Dorff, Shahryar Minhas</p>
@@ -233,6 +322,9 @@ them. This works for cross-sectional multilayer (3D arrays), longitudinal multil
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Comparison focus: <span style="color: #00BB00;">edges</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Method: <span style="color: #00BB00;">correlation</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Algorithm: <span style="color: #00BB00;">correlation</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Permutation type: <span style="color: #00BB00;">classic</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Correlation type: <span style="color: #00BB00;">pearson</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Random seed: <span style="color: #0000BB;">1608854729</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ────────────────────────────────────────────────────────────────────────────────</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Edge Comparison Summary</span> ──</span>
@@ -242,18 +334,6 @@ them. This works for cross-sectional multilayer (3D arrays), longitudinal multil
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Edge Changes </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">2002_vs_2003</span>:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Added: <span style="color: #0000BB;">1366</span> | Removed: <span style="color: #0000BB;">1198</span> | Maintained: <span style="color: #0000BB;">1866</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Statistical Tests</span> ──</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ── qap_correlations </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      2002 2003</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2002    1   NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2003   NA    1</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ── qap_pvalues </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      2002 2003</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2002    0   NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2003   NA    0</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Structural comparison</span></span></span>
 <span class="r-in"><span><span class="va">struct_comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span></span></span>

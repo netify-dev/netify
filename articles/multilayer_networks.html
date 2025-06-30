@@ -36,7 +36,7 @@
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Multilayer Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
@@ -280,8 +280,8 @@ cooperation type?</p>
 <span><span class="co">#&gt; 1                 -6.964294                   -7.444698             0.4804043</span></span>
 <span><span class="co">#&gt; 2                 -7.016653                   -7.279288             0.2626347</span></span>
 <span><span class="co">#&gt;   p_value     ci_lower   ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">#&gt; 1   0.000  0.022994964 0.06095765              4453                6573</span></span>
-<span><span class="co">#&gt; 2   0.115 -0.004516326 0.03398272              1201                9825</span></span>
+<span><span class="co">#&gt; 1   0.000  0.023079017 0.06249189              4453                6573</span></span>
+<span><span class="co">#&gt; 2   0.126 -0.005851066 0.03528723              1201                9825</span></span>
 <span><span class="co">#&gt;   n_missing n_pairs</span></span>
 <span><span class="co">#&gt; 1         3   11476</span></span>
 <span><span class="co">#&gt; 2         3   11476</span></span></code></pre></div>
@@ -515,7 +515,9 @@ friend/foe categories.</p>
 <span><span class="co">#&gt; Material 0.4718002 1.0000000</span></span>
 <span><span class="co">#&gt;          Verbal Material</span></span>
 <span><span class="co">#&gt; Verbal        0        0</span></span>
-<span><span class="co">#&gt; Material      0        0</span></span></code></pre></div>
+<span><span class="co">#&gt; Material      0        0</span></span>
+<span><span class="co">#&gt; attr(,"n_perm")</span></span>
+<span><span class="co">#&gt; [1] 5000</span></span></code></pre></div>
 <p><strong>Key Metrics Explained</strong>:</p>
 <ul>
 <li>
