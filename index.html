@@ -347,24 +347,64 @@ matlConf 0.113    0 1.471 0.594 0.387
 <td><code>add_node_vars(net, node_df, actor="id")</code></td>
 </tr>
 <tr class="odd">
+<td>Add dyad data</td>
+<td><code><a href="reference/add_dyad_vars.html">add_dyad_vars()</a></code></td>
+<td><code>add_dyad_vars(net, dyad_df, actor1="from", actor2="to")</code></td>
+</tr>
+<tr class="even">
 <td>Subset network</td>
 <td><code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code></td>
 <td><code>subset(net, time="2020")</code></td>
 </tr>
-<tr class="even">
-<td>Get summary</td>
+<tr class="odd">
+<td>Get graph level summary statistics</td>
 <td><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code></td>
 <td><code>summary(net)</code></td>
 </tr>
+<tr class="even">
+<td>Get actor level summary statistics</td>
+<td><code><a href="reference/summary_actor.html">summary_actor()</a></code></td>
+<td><code>summary_actor(net)</code></td>
+</tr>
 <tr class="odd">
-<td>Plot network</td>
-<td><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code></td>
-<td><code>plot(net) + style_nature()</code></td>
+<td>Test homophily</td>
+<td><code><a href="reference/homophily.html">homophily()</a></code></td>
+<td><code>homophily(net, attribute="democracy", method="correlation")</code></td>
 </tr>
 <tr class="even">
+<td>Create mixing matrix</td>
+<td><code><a href="reference/mixing_matrix.html">mixing_matrix()</a></code></td>
+<td><code>mixing_matrix(net, attribute="regime_type", normalized=TRUE)</code></td>
+</tr>
+<tr class="odd">
+<td>Test dyadic correlations</td>
+<td><code><a href="reference/dyad_correlation.html">dyad_correlation()</a></code></td>
+<td><code>dyad_correlation(net, dyad_vars="geographic_distance")</code></td>
+</tr>
+<tr class="even">
+<td>Comprehensive attribute analysis</td>
+<td><code><a href="reference/attribute_report.html">attribute_report()</a></code></td>
+<td><code>attribute_report(net, node_vars=c("region", "democracy"), dyad_vars="distance")</code></td>
+</tr>
+<tr class="odd">
+<td>Compare networks</td>
+<td><code><a href="reference/compare_networks.html">compare_networks()</a></code></td>
+<td><code>compare_networks(list(net1, net2), method="all")</code></td>
+</tr>
+<tr class="even">
+<td>Plot network</td>
+<td><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code></td>
+<td><code>plot(net)</code></td>
+</tr>
+<tr class="odd">
 <td>Convert to igraph</td>
 <td><code><a href="reference/netify_to_igraph.html">to_igraph()</a></code></td>
 <td><code>g &lt;- to_igraph(net)</code></td>
+</tr>
+<tr class="even">
+<td>Convert to statnet/network</td>
+<td><code><a href="reference/netify_to_statnet.html">to_statnet()</a></code></td>
+<td><code>g &lt;- to_statnet(net)</code></td>
 </tr>
 <tr class="odd">
 <td>Convert to amen</td>
@@ -383,16 +423,16 @@ matlConf 0.113    0 1.471 0.594 0.387
 <div class="section level2">
 <h2 id="when-you-might-need-something-else">When you might need something else<a class="anchor" aria-label="anchor" href="#when-you-might-need-something-else"></a>
 </h2>
-<p>netify handles most network analysis tasks, but sometimes you need specialized tools:</p>
+<p>netify handles a lot, but there’s an awesome world of network packages out there! If you need to venture beyond our walls, we’ve built bridges to get you there:</p>
 <ul>
 <li>
-<strong>Advanced statistical models</strong>: Use <code><a href="reference/netify_to_amen.html">to_amen()</a></code> to fit latent factor models or <code><a href="reference/netify_to_statnet.html">to_network()</a></code> for ERGMs</li>
+<strong>Fancy statistical models</strong>: Use <code><a href="reference/netify_to_amen.html">to_amen()</a></code> for latent factor models or <code><a href="reference/netify_to_statnet.html">to_statnet()</a></code> for ERGMs</li>
 <li>
-<strong>Graph algorithms we don’t have</strong>: Convert with <code><a href="reference/netify_to_igraph.html">to_igraph()</a></code>
-</li>
+<strong>Graph algorithms we don’t have (yet!)</strong>: Convert with <code><a href="reference/netify_to_igraph.html">to_igraph()</a></code> to access igraph’s vast toolkit</li>
 <li>
-<strong>Your own analysis</strong>: Use <code><a href="reference/unnetify.html">unnetify()</a></code> to get back to a data frame</li>
+<strong>Roll your own analysis</strong>: Use <code><a href="reference/unnetify.html">unnetify()</a></code> to get back to a data frame and do your own thing</li>
 </ul>
+<p>We play well with others! 🤝</p>
 </div>
 <div class="section level2">
 <h2 id="getting-help">Getting help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
