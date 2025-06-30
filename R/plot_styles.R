@@ -105,7 +105,7 @@ style_budapest <- function() {
         point_shape = 21,
 
         # Curved edges for whimsical feel
-        curve_edges = TRUE,
+        curve_edges = FALSE,
         edge_curvature = 0.3,
 
         # Labels in dark purple
@@ -210,7 +210,7 @@ style_solarized <- function() {
         point_shape = 21,
 
         # Slight curves
-        curve_edges = TRUE,
+        curve_edges = FALSE,
         edge_curvature = 0.15,
 
         # Readable text
@@ -376,7 +376,7 @@ style_pastel <- function() {
         point_shape = 21,
 
         # Soft curves
-        curve_edges = TRUE,
+        curve_edges = FALSE,
         edge_curvature = 0.4,
 
         # Soft gray text
@@ -442,7 +442,7 @@ style_dark2 <- function() {
         point_shape = 21,
 
         # Slight curves
-        curve_edges = TRUE,
+        curve_edges = FALSE,
         edge_curvature = 0.2,
 
         # Dark text
@@ -508,7 +508,7 @@ style_witcher_griffin <- function() {
         point_shape = 21, # Circle - balanced
 
         # Slight curves for magical flow
-        curve_edges = TRUE,
+        curve_edges = FALSE,
         edge_curvature = 0.2,
 
         # Scholarly text
@@ -541,7 +541,7 @@ style_witcher_wolven <- function() {
         point_shape = 21, # Circle
 
         # Moderate curves
-        curve_edges = TRUE,
+        curve_edges = FALSE,
         edge_curvature = 0.3,
 
         # Clear text
@@ -610,7 +610,7 @@ style_witcher_manticore <- function() {
         point_shape = 24, # Triangle up - exotic
 
         # Twisted curves
-        curve_edges = TRUE,
+        curve_edges = FALSE,
         edge_curvature = 0.5, # More curved - mysterious
 
         # Mysterious text
@@ -643,7 +643,7 @@ style_witcher_viper <- function() {
         point_shape = 23, # Diamond - fangs
 
         # Sinuous curves
-        curve_edges = TRUE,
+        curve_edges = FALSE,
         edge_curvature = 0.4,
 
         # Subtle text
@@ -670,7 +670,7 @@ style_pokemon_pikachu <- function() {
         point_size = 3,
         point_shape = 21, # Circle
 
-        curve_edges = TRUE,
+        curve_edges = FALSE,
         edge_curvature = 0.25,
         text_color = "#555555",
         text_size = 3,
@@ -804,7 +804,7 @@ style_random <- function(seed = NULL) {
     )
 
     selected <- sample(styles, 1)
-    message(paste("Using", selected))
+    cli::cli_inform("Using {.fn {selected}}")
 
     # Call the selected style function
     do.call(selected, list())

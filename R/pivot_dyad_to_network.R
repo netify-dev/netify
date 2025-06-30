@@ -96,9 +96,7 @@ pivot_dyad_to_network <- function(
     symmetric = NULL,
     weight_type = NULL,
     diag_to_NA = NULL,
-    missing_to_zero = NULL
-    ){
-        
+    missing_to_zero = NULL) {
     # validate inputs
     netify_check(netlet)
     checkmate::assert_string(dyad_var)
@@ -145,7 +143,7 @@ pivot_dyad_to_network <- function(
     # handle bipartite networks by forcing them to be asymmetric
     if (netlet_attrs$mode == "bipartite") {
         if (!is.null(symmetric) && symmetric) {
-            warning("Bipartite networks must be asymmetric. Setting symmetric = FALSE.")
+            cli::cli_warn("Bipartite networks must be asymmetric. Setting {.arg symmetric} = {.val FALSE}.")
         }
         symmetric <- FALSE
     } else {

@@ -11,9 +11,9 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
-  dev = 'png', dpi = 150,
-  cache = FALSE,
-  echo = TRUE
+    dev = "png", dpi = 150,
+    cache = FALSE,
+    echo = TRUE
 )
 ```
 
@@ -30,8 +30,9 @@ library(ggplot2)
 We'll also use the `ggnewscale` package to create multiple legends when necessary in the same plot (e.g., if you want to have legends for a color aesthetic for both nodes and edges).
 
 ```{r}
-if(!'ggnewscale' %in% rownames(installed.packages())){
-  install.packages('ggnewscale', repos='https://cloud.r-project.org') }
+if (!"ggnewscale" %in% rownames(installed.packages())) {
+    install.packages("ggnewscale", repos = "https://cloud.r-project.org")
+}
 library(ggnewscale)
 ```
 
@@ -44,41 +45,42 @@ First lets create a `netlet` object from some dyadic data (ICEWS data) using the
 data(icews)
 
 # choose attributes
-nvars = c( 'i_polity2', 'i_log_gdp', 'i_log_pop' )
-dvars = c( 'matlCoop', 'verbConf', 'matlConf' )
+nvars <- c("i_polity2", "i_log_gdp", "i_log_pop")
+dvars <- c("matlCoop", "verbConf", "matlConf")
 
 # create a netify object
-netlet = netify(
-    icews, 
-    actor1='i', actor2='j',
-    time = 'year',
-    symmetric=FALSE, weight='verbCoop',
-    mode='unipartite', sum_dyads=FALSE,
-    actor_time_uniform=TRUE, actor_pds=NULL,
-    diag_to_NA=TRUE, missing_to_zero=TRUE,
-    nodal_vars = nvars, 
+netlet <- netify(
+    icews,
+    actor1 = "i", actor2 = "j",
+    time = "year",
+    symmetric = FALSE, weight = "verbCoop",
+    mode = "unipartite", sum_dyads = FALSE,
+    actor_time_uniform = TRUE, actor_pds = NULL,
+    diag_to_NA = TRUE, missing_to_zero = TRUE,
+    nodal_vars = nvars,
     dyad_vars = dvars
 )
 
 # subset to a few actors
-actors_to_keep = c(
-  'Australia', 'Brazil',
-  'Canada', 'Chile', 'China',
-  'Colombia', 'Egypt', 'Ethiopia',
-  'France', 'Germany', 'Ghana', 
-  'Hungary', 'India', 'Indonesia', 
-  'Iran, Islamic Republic Of', 
-  'Israel', 'Italy', 'Japan', 'Kenya', 
-  "Korea, Democratic People's Republic Of",
-  'Korea, Republic Of', 'Nigeria', 'Pakistan', 
-  'Qatar', 'Russian Federation', 'Saudi Arabia',
-  'South Africa', 'Spain', 'Sudan', 
-  'Syrian Arab Republic', 'Thailand', 
-  'United Kingdom', 'United States', 
-  'Zimbabwe' )
-netlet = subset_netify(
-  netlet, 
-  actors = actors_to_keep
+actors_to_keep <- c(
+    "Australia", "Brazil",
+    "Canada", "Chile", "China",
+    "Colombia", "Egypt", "Ethiopia",
+    "France", "Germany", "Ghana",
+    "Hungary", "India", "Indonesia",
+    "Iran, Islamic Republic Of",
+    "Israel", "Italy", "Japan", "Kenya",
+    "Korea, Democratic People's Republic Of",
+    "Korea, Republic Of", "Nigeria", "Pakistan",
+    "Qatar", "Russian Federation", "Saudi Arabia",
+    "South Africa", "Spain", "Sudan",
+    "Syrian Arab Republic", "Thailand",
+    "United Kingdom", "United States",
+    "Zimbabwe"
+)
+netlet <- subset_netify(
+    netlet,
+    actors = actors_to_keep
 )
 
 # print
@@ -91,10 +93,10 @@ Next, we use the `net_plot_data` function to create a data frame for `ggplot2`. 
 
 ```{r}
 # create a data frame for plotting
-plot_data = net_plot_data(netlet)
+plot_data <- net_plot_data(netlet)
 
 # get relevant dfs
-net_dfs = plot_data$net_dfs
+net_dfs <- plot_data$net_dfs
 
 # check structure of what's here
 str(net_dfs)
@@ -113,34 +115,34 @@ The `x` and `y` in `nodal_data` and the `x1`, `y1`, `x2`, and `y2` in `edge_data
 Now that we have the data, we can create a plot using `ggplot2`. We'll use the `geom_segment` and `geom_point` (or, `geom_label`, `geom_text`, and the `ggrepel package equivalents) functions to plot the edges and nodes, respectively.
 
 ```{r, fig.width=9, fig.height=8}
-ggplot() + 
-	geom_segment(
-		data = net_dfs$edge_data,
-		aes(
-			x=x1, 
-			y=y1, 
-			xend=x2, 
-			yend=y2
-		),
-		color='lightgrey',
-		alpha=.2
-	) +
-	geom_point(
-		data = net_dfs$nodal_data,
-		aes(
-			x=x, 
-			y=y,
-			size=i_log_pop, 
-			color=i_polity2
-		)
-	) +
-  labs(
-    color='Polity', 
-    size='Log(Pop.)'
-  ) +
-	scale_color_gradient(low='#a6bddb', high='#014636') +
-	facet_wrap(~time, scales='free') +
-	theme_netify()
+ggplot() +
+    geom_segment(
+        data = net_dfs$edge_data,
+        aes(
+            x = x1,
+            y = y1,
+            xend = x2,
+            yend = y2
+        ),
+        color = "lightgrey",
+        alpha = .2
+    ) +
+    geom_point(
+        data = net_dfs$nodal_data,
+        aes(
+            x = x,
+            y = y,
+            size = i_log_pop,
+            color = i_polity2
+        )
+    ) +
+    labs(
+        color = "Polity",
+        size = "Log(Pop.)"
+    ) +
+    scale_color_gradient(low = "#a6bddb", high = "#014636") +
+    facet_wrap(~time, scales = "free") +
+    theme_netify()
 ```
 
 ### Changing the layout
@@ -148,12 +150,13 @@ ggplot() +
 By default layouts for node positions are drawn from the `layout_nicely` algorithm in the `igraph` package. Users can specify other layouts as, for example, say that you wanted to use the `mds` algorithm instead:
 
 ```{r}
-# create a df using mds instead 
-plot_data_mds = net_plot_data(netlet, 
+# create a df using mds instead
+plot_data_mds <- net_plot_data(
+    netlet,
     list(
-        layout='mds'
-        )
+        layout = "mds"
     )
+)
 
 # see new x-y coordinates
 lapply(plot_data_mds$net_dfs, head)
@@ -165,15 +168,16 @@ lapply(plot_data_mds$net_dfs, head)
 So far, we have focused on using color to convey information about nodal attributes in the network (population size and polity score). Now, let's add more edge information to the plot. For example, we can include information about the `matlConf` dyadic attribute. Imagine we want to highlight edges of verbal cooperation that occur at the same time as when higher than average levels of material conflict occur in the network. First, let's create the variable in the edge data.
 
 ```{r}
-if(!'dplyr' %in% rownames(installed.packages())){
-  install.packages('dplyr', repos='https://cloud.r-project.org') }
+if (!"dplyr" %in% rownames(installed.packages())) {
+    install.packages("dplyr", repos = "https://cloud.r-project.org")
+}
 library(dplyr)
 
 # create high_matlConf variable
-net_dfs$edge_data = net_dfs$edge_data |>
+net_dfs$edge_data <- net_dfs$edge_data |>
     group_by(time) |>
     mutate(
-        high_matlConf = matlConf > mean(matlConf, na.rm=TRUE)
+        high_matlConf = matlConf > mean(matlConf, na.rm = TRUE)
     ) |>
     ungroup() |>
     as.data.frame()
@@ -186,44 +190,45 @@ Now that we have the new variable in the data.frame, we can plot by it but note 
 
 ```{r, fig.width=9, fig.height=8}
 # color line segments by this new variable
-ggplot() + 
-	geom_segment(
-		data = net_dfs$edge_data,
-		aes(
-			x=x1, 
-			y=y1, 
-			xend=x2, 
-			yend=y2,
-            color=high_matlConf
-		),
-		alpha=.2
-	) +
+ggplot() +
+    geom_segment(
+        data = net_dfs$edge_data,
+        aes(
+            x = x1,
+            y = y1,
+            xend = x2,
+            yend = y2,
+            color = high_matlConf
+        ),
+        alpha = .2
+    ) +
     scale_color_manual(
-      name='', 
-      values=c('grey', 'red'),
-      labels=c('Below Avg. Matl. Conf', 'Above Avg.')
-      ) +
+        name = "",
+        values = c("grey", "red"),
+        labels = c("Below Avg. Matl. Conf", "Above Avg.")
+    ) +
     new_scale_color() +
-	geom_point(
-		data = net_dfs$nodal_data,
-		aes(
-			x=x, 
-			y=y,
-			size=i_log_pop, 
-			color=i_polity2
-		)
-	) +
-	scale_color_gradient(
-	  name='Polity',
-	  low='#a6bddb', high='#014636') +
-  labs(
-    size='Log(Pop.)'
-  ) +
-	facet_wrap(~time, scales='free') +
-	theme_netify() +
-  theme(
-    legend.position='right'
-  )
+    geom_point(
+        data = net_dfs$nodal_data,
+        aes(
+            x = x,
+            y = y,
+            size = i_log_pop,
+            color = i_polity2
+        )
+    ) +
+    scale_color_gradient(
+        name = "Polity",
+        low = "#a6bddb", high = "#014636"
+    ) +
+    labs(
+        size = "Log(Pop.)"
+    ) +
+    facet_wrap(~time, scales = "free") +
+    theme_netify() +
+    theme(
+        legend.position = "right"
+    )
 ```
 
 ## References

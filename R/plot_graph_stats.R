@@ -95,23 +95,28 @@ plot_graph_stats <- function(
 
     ######################
     # determine if summary_df is summarizing multiple time points
-    if (length(unique(summary_df$net)) == 1) {
-        longitudinal <- FALSE
-        summary_df <- summary_df[, -which(colnames(summary_df) == "net")]
+    # Check if 'net' column exists first
+    if ("net" %in% colnames(summary_df)) {
+        if (length(unique(summary_df$net)) == 1) {
+            longitudinal <- FALSE
+            summary_df <- summary_df[, -which(colnames(summary_df) == "net")]
+        } else {
+            longitudinal <- TRUE
+        }
     } else {
-        longitudinal <- TRUE
+        # If no 'net' column, it's not longitudinal
+        longitudinal <- FALSE
     }
     ######################
 
     ######################
     # check if data has more than one row
     if (!multilayer & !longitudinal) {
-        cli::cli_alert_danger(
-            "Error: The `summary_df` provided only has one row of data.
-			Consider an alternative way of depicting this information such as a table."
-        )
         print(summary_df)
-        stop()
+        cli::cli_abort(c(
+            "The {.arg summary_df} provided only has one row of data.",
+            "i" = "Consider an alternative way of depicting this information such as a table."
+        ))
     }
     ######################
 
@@ -197,6 +202,14 @@ plot_graph_stats <- function(
                 fill = !!sym("layer")
             )
         )
+    }
+
+    # Ensure viz is defined - this should not happen but just in case
+    if (!exists("viz")) {
+        cli::cli_alert_danger(
+            "Error: Unable to determine plot configuration for the provided data."
+        )
+        stop()
     }
 
     # choose geom based on user input

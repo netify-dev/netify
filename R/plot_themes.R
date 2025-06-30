@@ -130,7 +130,8 @@ get_smart_defaults <- function(netlet, msrmnts = NULL, plot_args = list()) {
     }
 
     # 3. Text labels for small networks
-    if (is.null(plot_args$add_text) && is.null(plot_args$select_text)) {
+    # Only set add_text if neither add_text nor add_text_repel is already set
+    if (is.null(plot_args$add_text) && is.null(plot_args$add_text_repel) && is.null(plot_args$select_text)) {
         smart_defaults$add_text <- n_nodes <= 15
     }
 

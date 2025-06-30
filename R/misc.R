@@ -174,7 +174,7 @@ unique_vector <- function(...) {
 identical_recursive <- function(...) {
     # get objects to compare - use list() instead of c() to preserve structure
     args <- list(...)
-    
+
     # if called with a single list argument, use that list
     if (length(args) == 1 && is.list(args[[1]])) {
         to_compare <- args[[1]]

@@ -31,7 +31,8 @@ icews_conflict <- netify(
   actor2 = 'j',
   time = 'year',
   symmetric = FALSE, 
-  weight = 'matlConf'
+  weight = 'matlConf',
+  nodal_vars = c('i_polity2', 'i_log_gdp', 'i_region')
 )
 
 # Print the netify object
@@ -60,6 +61,53 @@ plot(icews_conflict)
 ```
 
 ![](man/figures/icews_plot.png)
+
+### More involved visualization
+
+netify's plotting system is highly customizable. Here's how you can create a more sophisticated visualization:
+
+```r
+# Create democracy indicator
+icews$i_democ <- factor(
+  ifelse(icews$i_polity2 >= 6, 1, 0), 
+  levels = c(0, 1), 
+  labels = c("Non-democracy", "Democracy")
+)
+
+# Add it to the network
+icews_conflict <- add_node_vars(
+  icews_conflict, icews,
+  actor = 'i', time = 'year',
+  node_vars = 'i_democ'
+)
+
+# 
+plot(
+  icews_conflict, 
+  # Log transform weights
+  mutate_weight = log1p, 
+  # Map node attributes to aesthetics
+  node_color_by = 'i_region', 
+  node_size_by = 'i_log_gdp', 
+  node_shape_by = 'i_democ',
+  # set global node alpha
+  node_alpha = .7,
+  # set global edge alpha
+  edge_linewidth = .1,
+  # Filter data
+  node_filter = ~ !is.na(i_democ),
+  time_filter = c('2002', '2004', '2008', '2014')
+  # clean up plot labels
+  edge_alpha_label = 'Log(Matl.\n Conf.)',
+  node_color_label = '',
+  node_size_label = 'Log(GDP)',
+  node_shape_label = ''
+  ) +
+  theme(legend.position = 'right') + 
+  scale_color_brewer(palette = 'Set1')
+```
+
+![](man/figures/icews_advanced_plot.png)
 
 ## What can you do with a netify object?
 
@@ -93,7 +141,7 @@ This returns a data frame with network statistics for each time period:
 
 ### Wrangling networks
 - `subset()` - Pull out specific time periods or actors
-- `transform_weights()` - Log-transform, normalize, or otherwise modify edge weights
+- `mutate_weights()` - Log-transform, normalize, or otherwise modify edge weights
 
 ### Analysis
 - `measurements()` - Measurements of your network size and composition

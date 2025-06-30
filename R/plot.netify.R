@@ -13,7 +13,10 @@
 #'     Options include: \code{"nicely"} (default), \code{"fr"} (Fruchterman-Reingold),
 #'     \code{"kk"} (Kamada-Kawai), \code{"circle"}, \code{"star"}, \code{"grid"},
 #'     \code{"tree"}, \code{"bipartite"} (for bipartite networks), \code{"randomly"},
-#'     and others. See \code{\link{get_node_layout}} for full list.}
+#'     and others. For ego networks, additional options are available: \code{"radial"}
+#'     (ego-centric with optional grouping) and \code{"concentric"} (ego at center with
+#'     alters in rings). See \code{\link{get_node_layout}} and \code{\link{get_ego_layout}}
+#'     for full details.}
 #'   \item{\code{point_layout}}{Optional data.frame or list of data.frames containing
 #'     pre-computed node positions with columns 'actor', 'x', and 'y'. Overrides
 #'     \code{layout} if provided.}
@@ -30,10 +33,22 @@
 #'   \item{\code{add_edges}}{Logical. Display edges? Default is \code{TRUE}.}
 #'   \item{\code{add_points}}{Logical. Display nodes as points? Default is \code{TRUE}.}
 #'   \item{\code{add_text}}{Logical. Add text labels to nodes? Default is \code{FALSE}.}
+#'   \item{\code{add_text_repel}}{Logical. Add text labels with automatic repositioning to avoid overlaps?
+#'     Default is \code{FALSE}. When \code{TRUE}, overrides \code{add_text}. Uses ggrepel for positioning.}
 #'   \item{\code{add_label}}{Logical. Add boxed labels to nodes? Default is \code{FALSE}.}
+#'   \item{\code{add_label_repel}}{Logical. Add boxed labels with automatic repositioning to avoid overlaps?
+#'     Default is \code{FALSE}. When \code{TRUE}, overrides \code{add_label}. Uses ggrepel for positioning.}
 #'   \item{\code{remove_isolates}}{Logical. Remove unconnected nodes? Default is \code{TRUE}.}
 #'   \item{\code{curve_edges}}{Logical. Use curved edges? Default is \code{FALSE}.}
 #'   \item{\code{use_theme_netify}}{Logical. Apply netify theme? Default is \code{TRUE}.}
+#'   \item{\code{facet_type}}{Character. For multilayer longitudinal networks, controls
+#'     faceting style: \code{"grid"} (default) creates a 2D grid with time × layer,
+#'     \code{"wrap"} creates wrapped facets with combined time-layer labels.}
+#'   \item{\code{facet_ncol}}{Integer. Number of columns for facet_wrap layouts. Only
+#'     used when \code{facet_type = "wrap"} or for single-dimension faceting.}
+#'   \item{\code{rescale_edge_weights}}{Logical. For multilayer networks, should edge weights
+#'     be rescaled to a common 0-1 range across all layers? This is useful when layers have
+#'     very different weight scales. Default is \code{FALSE}.}
 #' }
 #'
 #' @section Subsetting Parameters:
@@ -47,7 +62,7 @@
 #'     \code{edge_filter = weight > 0.5} to show only edges with weight greater than 0.5.
 #'     The expression is evaluated in the context of the edge data, so any edge-level
 #'     variable can be used.}
-#'   \item{\code{time}}{For longitudinal networks, a vector of time periods to include in the plot.
+#'   \item{\code{time_filter}}{For longitudinal networks, a vector of time periods to include in the plot.
 #'     Can be numeric indices or character labels matching the time dimension. If NULL
 #'     (default), all time periods are plotted. For cross-sectional networks, this
 #'     parameter is ignored.}
@@ -107,10 +122,12 @@
 #'
 #' Selective labeling:
 #' \describe{
-#'   \item{\code{select_text}}{Character vector of node names to show as text.}
+#'   \item{\code{select_text}}{Character vector of node names to show as text. When used,
+#'     text labels will automatically use \code{geom_text_repel} to avoid overlaps.}
 #'   \item{\code{select_text_display}}{Alternative text to display (same length as
 #'     \code{select_text}).}
-#'   \item{\code{select_label}}{Character vector of node names to show with boxes.}
+#'   \item{\code{select_label}}{Character vector of node names to show with boxes. When used,
+#'     labels will automatically use \code{geom_label_repel} to avoid overlaps.}
 #'   \item{\code{select_label_display}}{Alternative labels (same length as
 #'     \code{select_label}).}
 #' }
@@ -125,6 +142,22 @@
 #' }
 #'
 #' Label (boxed text) aesthetics have similar parameters with \code{label_} prefix.
+#'
+#' Text repel parameters (when \code{add_text_repel = TRUE}):
+#' \describe{
+#'   \item{\code{text_repel_force}}{Force of repulsion between overlapping text. Default is 1.}
+#'   \item{\code{text_repel_max_overlaps}}{Maximum number of overlaps to tolerate. Default is 10.}
+#'   \item{\code{text_repel_box_padding}}{Padding around text. Default is 0.25.}
+#'   \item{\code{text_repel_point_padding}}{Padding around points. Default is 0.}
+#'   \item{\code{text_repel_segment_color}}{Color of connecting segments. Default is "grey50".}
+#' }
+#'
+#' Label repel parameters (when \code{add_label_repel = TRUE}):
+#' \describe{
+#'   \item{Similar to text_repel but with \code{label_repel_} prefix}{}
+#'   \item{\code{label_repel_label_padding}}{Padding around label boxes. Default is 0.25.}
+#'   \item{\code{label_repel_label_r}}{Radius of label box corners. Default is 0.15.}
+#' }
 #'
 #' @section Scale Labels:
 #'
@@ -141,29 +174,50 @@
 #'   \item{\code{highlight}}{Character vector of node names to highlight with different colors.
 #'     Non-highlighted nodes will be colored grey. Highlighted nodes can also be automatically
 #'     enlarged if \code{highlight_size_increase} is greater than 1.}
-#'   \item{\code{highlight_colors}}{Named vector of colors for highlighted nodes. If NULL,
+#'   \item{\code{highlight_color}}{Named vector of colors for highlighted nodes. If NULL,
 #'     uses default distinct colors (red, blue, green for up to 3 nodes, or a color palette
 #'     for more). Names should match the values in the \code{highlight} parameter.
 #'     Example: \code{c('USA' = 'blue', 'China' = 'red', 'Russia' = 'green')}.}
-#'   \item{\code{highlight_legend_title}}{Title for the highlight legend. Default is "Highlighted".}
-#'   \item{\code{highlight_size_increase}}{Numeric factor to increase size of highlighted nodes.
-#'     Default is 1.5 (50% larger). Set to 1 for no size change. The size increase is applied
-#'     multiplicatively to any existing size mapping.}
+#'   \item{\code{highlight_label}}{Title for the highlight legend. Default is "Highlighted".}
+#'   \item{\code{highlight_size_increase}}{Numeric factor(s) to increase size of highlighted nodes.
+#'     Can be a single value (applied to all highlighted nodes) or a vector of length
+#'     \code{length(highlight) + 1} where each value corresponds to a highlighted node
+#'     and the last value applies to "Other" nodes. Default is 1 (no size increase).
+#'     Example: \code{c(3, 1, 1, 0.5)} for 3 highlighted
+#'     nodes where the first is 3x larger, the next two are normal size, and all
+#'     others are half size.}
 #'   \item{\code{show_other_in_legend}}{Logical. Include "Other" category in legend? Default is FALSE.
 #'     When FALSE, only highlighted nodes appear in the legend.}
 #' }
 #'
+#' @section Ego Layout Parameters:
+#' 
+#' For ego networks (created with \code{\link{ego_netify}}), additional layout options
+#' control the ego-centric visualization:
+#' \describe{
+#'   \item{\code{ego_group_by}}{Character string specifying a nodal attribute to use for
+#'     grouping alters in ego layouts. For "radial" layout, creates sectors. For 
+#'     "concentric" layout, determines ring assignment.}
+#'   \item{\code{ego_order_by}}{Character string specifying a nodal attribute to use for
+#'     ordering alters within groups or rings. Common options include "degree_total".}
+#'   \item{\code{ego_weight_to_distance}}{Logical. For weighted networks with "radial"
+#'     layout, should edge weights determine distance from ego? Higher weights place
+#'     alters closer to ego. Default is \code{FALSE}.}
+#'   \item{\code{ego_ring_gap}}{Numeric (0-1). Gap between concentric rings as proportion
+#'     of radius. Only for "concentric" layout. Default is 0.3.}
+#'   \item{\code{ego_size}}{Numeric. Relative size of central area reserved for ego.
+#'     Larger values create more space between ego and alters. Default is 0.1.}
+#' }
+#'
 #' @section Special Parameters:
 #' \describe{
-#'   \item{\code{weight_transform}}{Function to transform edge weights before plotting.
+#'   \item{\code{mutate_weight}}{Function to transform edge weights before plotting.
 #'     Example: \code{log1p} for log(x+1) transformation. Applied before mapping to
 #'     aesthetics.}
-#'   \item{\code{check_overlap}}{Logical. Avoid text overlap? Default is \code{TRUE}.}
 #'   \item{\code{return_components}}{Logical. Return plot components instead of
 #'     assembled plot? Useful for manual customization. Default is \code{FALSE}.}
-#'   \item{\code{palette}}{Character string for color palette, see \code{list_palettes()}.}
-#'   \item{\code{style}}{A style function (e.g., \code{style_budapest}) or its name as a
-#'     string. Applies a complete visual style including colors, shapes, and layout preferences.}
+#'   \item{\code{style}}{A style function (e.g., \code{style_budapest}).
+#'     Applies a complete visual style including colors, shapes, and layout preferences.}
 #' }
 #'
 #' @return
@@ -195,7 +249,7 @@
 #'
 #' \strong{Customization Tips:}
 #' \itemize{
-#'   \item Use \code{weight_transform} to handle skewed weight distributions
+#'   \item Use \code{mutate_weight} to handle skewed weight distributions
 #'   \item Combine fixed and variable aesthetics (e.g., fixed color with variable size)
 #'   \item Add ggplot2 layers after the plot call for further customization
 #'   \item Use \code{select_text} for selective labeling in dense networks
@@ -256,7 +310,7 @@
 #' plot(net_longit,
 #'     # Edges
 #'     edge_color = "grey70",
-#'     weight_transform = log1p, # Transform weights
+#'     mutate_weight = log1p, # Transform weights
 #'     # Nodes
 #'     node_size_by = "degree_total",
 #'     node_color_by = "i_polity2",
@@ -288,7 +342,7 @@
 #'
 #' # Time subsetting example
 #' plot(net_longit,
-#'     time = c("2010", "2011", "2012")
+#'     time_filter = c("2010", "2011", "2012")
 #' )
 #'
 #' # Node subsetting example
@@ -301,11 +355,11 @@
 #'     net_10,
 #'     node_alpha = .8,
 #'     arrow = ggplot2::arrow(length = ggplot2::unit(0.01, "inches")),
-#'     node_size_by = "log(degree_total)",
+#'     node_size_by = "degree_total",
 #'     node_size_label = "Log(Degree)",
 #'     edge_alpha_label = "Log(Verbal Coop.)",
 #'     remove_isolates = TRUE,
-#'     weight_transform = log1p,
+#'     mutate_weight = log1p,
 #'     return_components = TRUE
 #' )
 #'
@@ -319,6 +373,7 @@
 #'
 #' @import ggplot2
 #' @importFrom ggnewscale new_scale_color new_scale_fill new_scale
+#' @importFrom ggrepel GeomTextRepel GeomLabelRepel
 #'
 #' @export plot.netify
 #' @export
@@ -332,11 +387,14 @@ plot.netify <- function(x, ...) {
 
     # anything passed in goes to the plot arg dumpster
     plot_args <- list(...)
+    
+    # Validate parameters and warn about common mistakes
+    validate_plot_params(plot_args, ...)
 
-    # NEW: Handle time subsetting if provided
-    if (!is.null(plot_args$time)) {
-        # Extract time parameter before passing to net_plot_data
-        time_subset <- plot_args$time
+    # NEW: Handle time_filter subsetting if provided
+    if (!is.null(plot_args$time_filter)) {
+        # Extract time_filter parameter before passing to net_plot_data
+        time_subset <- plot_args$time_filter
 
         # Check if it's a longitudinal network
         if (obj_attrs$netify_type != "cross_sec") {
@@ -346,12 +404,12 @@ plot.netify <- function(x, ...) {
             # Update attributes after subsetting
             obj_attrs <- attributes(x)
 
-            # Remove time from plot_args since we've already handled it
-            plot_args$time <- NULL
+            # Remove time_filter from plot_args since we've already handled it
+            plot_args$time_filter <- NULL
         } else {
-            # Warn if time is specified for cross-sectional network
-            cli::cli_alert_warning("'time' parameter ignored for cross-sectional networks")
-            plot_args$time <- NULL
+            # Warn if time_filter is specified for cross-sectional network
+            cli::cli_alert_warning("'time_filter' parameter ignored for cross-sectional networks")
+            plot_args$time_filter <- NULL
         }
     }
 
@@ -458,11 +516,11 @@ plot.netify <- function(x, ...) {
     }
 
     # Handle weight transformation
-    if (!is.null(plot_args$weight_transform)) {
+    if (!is.null(plot_args$mutate_weight)) {
         # Apply transformation to edge data
         weight_col <- attr(x, "weight")
         if (!is.null(weight_col) && weight_col %in% names(net_dfs$edge_data)) {
-            transform_fn <- match.fun(plot_args$weight_transform)
+            transform_fn <- match.fun(plot_args$mutate_weight)
             net_dfs$edge_data[[weight_col]] <- transform_fn(net_dfs$edge_data[[weight_col]])
         }
     }
@@ -504,6 +562,30 @@ plot.netify <- function(x, ...) {
     # pour labels into components
     components$scale_labels <- scale_labels
 
+    # Pre-process data for faceting if needed
+    # This must happen before creating geoms that reference net_dfs
+    is_longitudinal <- obj_attrs$netify_type != "cross_sec"
+    is_multilayer <- isTRUE(plot_args$is_multilayer)
+
+    if (is_multilayer && is_longitudinal) {
+        facet_type <- plot_args$facet_type %||% "grid"
+        if (facet_type == "wrap") {
+            # Create combined time_layer column before geoms are created
+            if ("layer" %in% names(net_dfs$nodal_data) && "time" %in% names(net_dfs$nodal_data)) {
+                net_dfs$nodal_data$time_layer <- paste(net_dfs$nodal_data$time,
+                    net_dfs$nodal_data$layer,
+                    sep = " - "
+                )
+                if (!is.null(net_dfs$edge_data) && nrow(net_dfs$edge_data) > 0) {
+                    net_dfs$edge_data$time_layer <- paste(net_dfs$edge_data$time,
+                        net_dfs$edge_data$layer,
+                        sep = " - "
+                    )
+                }
+            }
+        }
+    }
+
     # add edges to the plot if specified
     if (plot_args$add_edges) {
         # static parameters for edges
@@ -520,24 +602,24 @@ plot.netify <- function(x, ...) {
             components$edges <- list(
                 geom = GeomCurve,
                 data = net_dfs$edge_data,
-                mapping = aes(!!!edge_aes_list),
+                mapping = do.call(aes, edge_aes_list),
                 params = curve_static_params,
                 stat = "identity",
                 position = "identity",
                 inherit.aes = TRUE,
-                show.legend = NA
+                show.legend = if (length(edge_aes_list) > 0) TRUE else NA
             )
         } else {
             # add straight edges otherwise
             components$edges <- list(
                 geom = GeomSegment,
                 data = net_dfs$edge_data,
-                mapping = aes(!!!edge_aes_list),
+                mapping = do.call(aes, edge_aes_list),
                 params = edge_static_params,
                 stat = "identity",
                 position = "identity",
                 inherit.aes = TRUE,
-                show.legend = NA
+                show.legend = if (length(edge_aes_list) > 0) TRUE else NA
             )
         }
 
@@ -569,7 +651,7 @@ plot.netify <- function(x, ...) {
         components$points <- list(
             geom = GeomPoint,
             data = net_dfs$nodal_data,
-            mapping = aes(!!!point_aes_list),
+            mapping = do.call(aes, point_aes_list),
             params = point_static_params,
             stat = "identity",
             position = "identity",
@@ -611,7 +693,7 @@ plot.netify <- function(x, ...) {
         components$text <- list(
             geom = GeomText,
             data = net_dfs$nodal_data,
-            mapping = aes(!!!text_aes_list),
+            mapping = do.call(aes, text_aes_list),
             params = text_static_params,
             stat = "identity",
             position = "identity",
@@ -632,6 +714,39 @@ plot.netify <- function(x, ...) {
         }
     }
 
+    # add text_repel annotations to the plot if specified
+    if (plot_args$add_text_repel) {
+        # static parameters for text_repel
+        text_repel_static_params <- ggnet_params$text_repel$static
+
+        # dynamic aesthetic mappings for text_repel
+        text_repel_aes_list <- ggnet_params$text_repel$var
+
+        # create the geom_text_repel component
+        components$text_repel <- list(
+            geom = ggrepel::GeomTextRepel,
+            data = net_dfs$nodal_data,
+            mapping = do.call(aes, text_repel_aes_list),
+            params = text_repel_static_params,
+            stat = "identity",
+            position = "identity",
+            inherit.aes = TRUE,
+            show.legend = NA
+        )
+
+        # store text_repel scale names (same as text)
+        components$text_repel_scales <- list()
+        if (!is.null(plot_args$text_color_var)) {
+            components$text_repel_scales$color <- plot_args$text_color_var
+        }
+        if (!is.null(plot_args$text_alpha_var)) {
+            components$text_repel_scales$alpha <- plot_args$text_alpha_var
+        }
+        if (!is.null(plot_args$text_size_var)) {
+            components$text_repel_scales$size <- plot_args$text_size_var
+        }
+    }
+
     # add labels to the plot if specified
     if (plot_args$add_label) {
         # static parameters for labels
@@ -644,7 +759,7 @@ plot.netify <- function(x, ...) {
         components$label <- list(
             geom = GeomLabel,
             data = net_dfs$nodal_data,
-            mapping = aes(!!!label_aes_list),
+            mapping = do.call(aes, label_aes_list),
             params = label_static_params,
             stat = "identity",
             position = "identity",
@@ -668,8 +783,67 @@ plot.netify <- function(x, ...) {
         }
     }
 
-    # add facets for longitudinal data if applicable
-    if (obj_attrs$netify_type != "cross_sec") {
+    # add label_repel annotations to the plot if specified
+    if (plot_args$add_label_repel) {
+        # static parameters for label_repel
+        label_repel_static_params <- ggnet_params$label_repel$static
+
+        # dynamic aesthetic mappings for label_repel
+        label_repel_aes_list <- ggnet_params$label_repel$var
+
+        # create the geom_label_repel component
+        components$label_repel <- list(
+            geom = ggrepel::GeomLabelRepel,
+            data = net_dfs$nodal_data,
+            mapping = do.call(aes, label_repel_aes_list),
+            params = label_repel_static_params,
+            stat = "identity",
+            position = "identity",
+            inherit.aes = TRUE,
+            show.legend = NA
+        )
+
+        # store label_repel scale names (same as label)
+        components$label_repel_scales <- list()
+        if (!is.null(plot_args$label_color_var)) {
+            components$label_repel_scales$color <- plot_args$label_color_var
+        }
+        if (!is.null(plot_args$label_fill_var)) {
+            components$label_repel_scales$fill <- plot_args$label_fill_var
+        }
+        if (!is.null(plot_args$label_alpha_var)) {
+            components$label_repel_scales$alpha <- plot_args$label_alpha_var
+        }
+        if (!is.null(plot_args$label_size_var)) {
+            components$label_repel_scales$size <- plot_args$label_size_var
+        }
+    }
+
+    # add facets for longitudinal and/or multilayer data
+    # (variables already defined earlier)
+
+    # Determine faceting based on data structure and user preferences
+    if (is_multilayer && is_longitudinal) {
+        # Both multilayer and longitudinal
+        facet_type <- plot_args$facet_type %||% "grid" # Default to grid for 2D faceting
+
+        if (facet_type == "grid") {
+            components$facets <- facet_grid(time ~ layer)
+        } else if (facet_type == "wrap") {
+            # time_layer column was already created earlier
+            components$facets <- facet_wrap(~time_layer,
+                scales = "free",
+                ncol = plot_args$facet_ncol %||% NULL
+            )
+        }
+    } else if (is_multilayer) {
+        # Only multilayer
+        components$facets <- facet_wrap(~layer,
+            scales = "free",
+            ncol = plot_args$facet_ncol %||% NULL
+        )
+    } else if (is_longitudinal) {
+        # Only longitudinal (original behavior)
         components$facets <- facet_wrap(~time, scales = "free")
     }
 
@@ -682,6 +856,7 @@ plot.netify <- function(x, ...) {
     components$net_dfs <- net_dfs
     components$plot_args <- plot_args
     components$obj_attrs <- obj_attrs
+    components$ggnet_params <- ggnet_params
 
     # return components if requested
     if (isTRUE(plot_args$return_components)) {
@@ -708,6 +883,8 @@ plot.netify <- function(x, ...) {
         # apply edge scale labels if they are defined
         if (!is.null(scale_labels$edge_alpha) && !is.null(components$edge_scales$alpha)) {
             viz <- viz + labs(alpha = scale_labels$edge_alpha)
+            # Explicitly add alpha scale to ensure legend appears (critical for multilayer networks)
+            viz <- viz + scale_alpha_continuous()
         }
         if (!is.null(scale_labels$edge_color) && !is.null(components$edge_scales$color)) {
             viz <- viz + labs(color = scale_labels$edge_color)
@@ -723,12 +900,17 @@ plot.netify <- function(x, ...) {
     # reset scales if both edges and nodes have color or fill mappings
     if (!is.null(components$edges) &&
         (!is.null(components$points) || !is.null(components$text) || !is.null(components$label))) {
-        if (!is.null(components$edge_scales$color) ||
-            !is.null(components$point_scales$color) ||
-            !is.null(components$point_scales$fill)) {
+        # Only reset color and fill scales if there's a conflict
+        if (!is.null(components$edge_scales$color) &&
+            (!is.null(components$point_scales$color) || !is.null(components$point_scales$fill))) {
             viz <- viz +
                 ggnewscale::new_scale_color() +
-                ggnewscale::new_scale_fill() +
+                ggnewscale::new_scale_fill()
+        }
+        # Only reset alpha scale if both edges and points use alpha
+        if (!is.null(components$edge_scales$alpha) &&
+            !is.null(components$point_scales$alpha)) {
+            viz <- viz +
                 ggnewscale::new_scale("alpha")
         }
     }
@@ -804,6 +986,39 @@ plot.netify <- function(x, ...) {
         }
     }
 
+    # add text_repel annotations to the plot if they exist
+    if (!is.null(components$text_repel)) {
+        # reset scales again if needed
+        if (!is.null(components$points)) {
+            viz <- viz +
+                ggnewscale::new_scale_color() +
+                ggnewscale::new_scale("alpha") +
+                ggnewscale::new_scale("size")
+        }
+
+        viz <- viz + layer(
+            geom = components$text_repel$geom,
+            data = components$text_repel$data,
+            mapping = components$text_repel$mapping,
+            stat = components$text_repel$stat,
+            position = components$text_repel$position,
+            params = components$text_repel$params,
+            inherit.aes = components$text_repel$inherit.aes,
+            show.legend = components$text_repel$show.legend
+        )
+
+        # apply text scale labels if they are defined (same as regular text)
+        if (!is.null(scale_labels$text_size) && !is.null(components$text_repel_scales$size)) {
+            viz <- viz + labs(size = scale_labels$text_size)
+        }
+        if (!is.null(scale_labels$text_color) && !is.null(components$text_repel_scales$color)) {
+            viz <- viz + labs(color = scale_labels$text_color)
+        }
+        if (!is.null(scale_labels$text_alpha) && !is.null(components$text_repel_scales$alpha)) {
+            viz <- viz + labs(alpha = scale_labels$text_alpha)
+        }
+    }
+
     # add labels to the plot if they exist
     if (!is.null(components$label)) {
         # reset scales again if needed
@@ -837,6 +1052,43 @@ plot.netify <- function(x, ...) {
             viz <- viz + labs(fill = scale_labels$label_fill)
         }
         if (!is.null(scale_labels$label_alpha) && !is.null(components$label_scales$alpha)) {
+            viz <- viz + labs(alpha = scale_labels$label_alpha)
+        }
+    }
+
+    # add label_repel annotations to the plot if they exist
+    if (!is.null(components$label_repel)) {
+        # reset scales again if needed
+        if (!is.null(components$text) || !is.null(components$text_repel) || !is.null(components$points)) {
+            viz <- viz +
+                ggnewscale::new_scale_color() +
+                ggnewscale::new_scale("alpha") +
+                ggnewscale::new_scale_fill() +
+                ggnewscale::new_scale("size")
+        }
+
+        viz <- viz + layer(
+            geom = components$label_repel$geom,
+            data = components$label_repel$data,
+            mapping = components$label_repel$mapping,
+            stat = components$label_repel$stat,
+            position = components$label_repel$position,
+            params = components$label_repel$params,
+            inherit.aes = components$label_repel$inherit.aes,
+            show.legend = components$label_repel$show.legend
+        )
+
+        # apply label scale labels if they are defined (same as regular label)
+        if (!is.null(scale_labels$label_size) && !is.null(components$label_repel_scales$size)) {
+            viz <- viz + labs(size = scale_labels$label_size)
+        }
+        if (!is.null(scale_labels$label_color) && !is.null(components$label_repel_scales$color)) {
+            viz <- viz + labs(color = scale_labels$label_color)
+        }
+        if (!is.null(scale_labels$label_fill) && !is.null(components$label_repel_scales$fill)) {
+            viz <- viz + labs(fill = scale_labels$label_fill)
+        }
+        if (!is.null(scale_labels$label_alpha) && !is.null(components$label_repel_scales$alpha)) {
             viz <- viz + labs(alpha = scale_labels$label_alpha)
         }
     }
@@ -877,17 +1129,17 @@ plot.netify <- function(x, ...) {
     if (isTRUE(plot_args$is_highlighting)) {
         if (!is.null(components$point_scales$fill) && components$point_scales$fill == "highlight_status") {
             viz <- viz + scale_fill_manual(
-                values = plot_args$highlight_colors,
-                name = plot_args$highlight_legend_title %||% "Highlighted",
-                breaks = names(plot_args$highlight_colors)[names(plot_args$highlight_colors) != "Other"],
-                labels = names(plot_args$highlight_colors)[names(plot_args$highlight_colors) != "Other"]
+                values = plot_args$highlight_color,
+                name = plot_args$highlight_label %||% "Highlighted",
+                breaks = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"],
+                labels = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"]
             )
         } else if (!is.null(components$point_scales$color) && components$point_scales$color == "highlight_status") {
             viz <- viz + scale_color_manual(
-                values = plot_args$highlight_colors,
-                name = plot_args$highlight_legend_title %||% "Highlighted",
-                breaks = names(plot_args$highlight_colors)[names(plot_args$highlight_colors) != "Other"],
-                labels = names(plot_args$highlight_colors)[names(plot_args$highlight_colors) != "Other"]
+                values = plot_args$highlight_color,
+                name = plot_args$highlight_label %||% "Highlighted",
+                breaks = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"],
+                labels = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"]
             )
         }
     }
@@ -895,6 +1147,13 @@ plot.netify <- function(x, ...) {
     # add facets to the plot if they are defined (useful for longitudinal data)
     if (!is.null(components$facets)) {
         viz <- viz + components$facets
+    }
+
+    # add axis limits for facet_grid centering
+    if (!is.null(plot_args$xlim) && !is.null(plot_args$ylim)) {
+        viz <- viz +
+            coord_cartesian(xlim = plot_args$xlim, ylim = plot_args$ylim) +
+            theme(aspect.ratio = 1) # Ensure square panels
     }
 
     # add the theme to the plot if it is defined

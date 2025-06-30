@@ -120,7 +120,6 @@
 #' @export layer_netify
 
 layer_netify <- function(netlet_list, layer_labels = NULL) {
-    
     # user input checks - use lapply instead of vapply since netify_check doesn't return a value
     lapply(netlet_list, netify_check)
 
@@ -151,7 +150,14 @@ layer_netify <- function(netlet_list, layer_labels = NULL) {
 
     # generate weights value for multilayer case - optimized
     weight_collapse <- vapply(attribs_list, function(x) {
-        x$weight %||% "NULL"
+        w <- x$weight
+        if (is.null(w)) {
+            "NULL"
+        } else if (is.logical(w)) {
+            if (w) "edge_value" else "NULL"
+        } else {
+            as.character(w)
+        }
     }, character(1))
     weight_collapse <- paste(weight_collapse, collapse = ", ")
 

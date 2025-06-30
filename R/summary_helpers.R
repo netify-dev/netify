@@ -16,6 +16,16 @@
 #' @noRd
 
 graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
+    # If mat is a netify object, we'll use it for igraph conversion later
+    # but extract the plain matrix for calculations
+    netify_obj <- NULL
+    if (inherits(mat, "netify")) {
+        netify_obj <- mat
+        mat <- unclass(mat)
+        # Keep only dim and dimnames attributes for matrix operations
+        attributes(mat) <- attributes(mat)[c("dim", "dimnames")]
+    }
+
     # Cache dimensions
     n_row <- nrow(mat)
     n_col <- ncol(mat)
@@ -80,7 +90,18 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
     }
 
     # Create igraph object only when needed
-    g <- netify_to_igraph(mat)
+    # Use netify object if available, otherwise create temporary one
+    if (!is.null(netify_obj)) {
+        g <- netify_to_igraph(netify_obj)
+    } else {
+        # Create temporary netify object from matrix for igraph conversion
+        temp_netify <- mat
+        class(temp_netify) <- "netify"
+        attr(temp_netify, "netify_type") <- "cross_sec"
+        attr(temp_netify, "symmetric") <- obj_attrs$symmetric
+        attr(temp_netify, "mode") <- obj_attrs$mode
+        g <- netify_to_igraph(temp_netify)
+    }
     transitivity <- igraph::transitivity(g)
 
     # Build output vector

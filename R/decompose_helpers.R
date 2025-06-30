@@ -2,7 +2,6 @@
 #' @keywords internal
 #' @noRd
 process_edge_data <- function(netlet, netify_type, weight_attr, remove_zeros, ego_netlet) {
-    
     # extract raw adjacency data
     raw_data <- get_raw(netlet)
 
@@ -52,7 +51,6 @@ process_edge_data <- function(netlet, netify_type, weight_attr, remove_zeros, eg
 #' @keywords internal
 #' @noRd
 merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type) {
-
     # melt dyad data once
     dyad_data_melted <- melt_var_time_list(dyad_data_attr)
 
@@ -173,7 +171,6 @@ merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type) {
 #' @keywords internal
 #' @noRd
 finalize_edge_data <- function(edge_data, netify_type) {
-
     # add time column for cross-sec if missing
     if (netify_type == "cross_sec" && !"L1" %in% names(edge_data)) {
         edge_data$L1 <- "1"
@@ -204,7 +201,6 @@ finalize_edge_data <- function(edge_data, netify_type) {
 #' @keywords internal
 #' @noRd
 process_nodal_data <- function(obj_attrs, netify_type) {
-
     # check if nodal data exists in obj_attrs
     # if not, try to build it from actor_pds
     if (!is.null(obj_attrs$nodal_data)) {
@@ -233,7 +229,7 @@ process_nodal_data <- function(obj_attrs, netify_type) {
     # standardize column order for consistency
     if (nrow(nodal_data) > 0) {
         id_vars <- c("actor", "time")
-        
+
         # check if "actor" column exists
         # if not, try to guess it based on common names or position
         if (!"actor" %in% names(nodal_data)) {
@@ -263,6 +259,6 @@ process_nodal_data <- function(obj_attrs, netify_type) {
         nodal_data$time <- as.character(nodal_data$time)
     }
 
-    # 
+    #
     return(nodal_data)
 }

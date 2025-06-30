@@ -2,17 +2,48 @@
 % Please edit documentation in R/melt_ers.R
 \name{melt}
 \alias{melt}
+\alias{melt.netify}
 \title{Melt methods for netify objects}
 \usage{
 melt(data, ...)
+
+\method{melt}{netify}(
+  data,
+  ...,
+  remove_diagonal = TRUE,
+  remove_zeros = TRUE,
+  na.rm = TRUE,
+  value.name = "value"
+)
 }
 \arguments{
-\item{data}{An object to be melted (e.g., a netify object)}
+\item{data}{A netify object}
 
-\item{...}{Additional arguments passed to methods}
+\item{...}{Additional arguments (see details)}
+
+\item{remove_diagonal}{Logical. Remove diagonal elements (default: TRUE)}
+
+\item{remove_zeros}{Logical. Remove zero values (default: TRUE)}
+
+\item{na.rm}{Logical. Remove NA values (default: TRUE)}
+
+\item{value.name}{Character. Name for value column (default: "value")}
+}
+\value{
+Data frame with columns: row, col, value (and optionally time/layer)
 }
 \description{
 Convert netify matrices/arrays to long format data frames.
 These methods provide a consistent interface for melting different
 types of netify objects while leveraging C++ for performance.
+}
+\details{
+The melt method converts netify objects from their matrix representation to
+a long format data frame suitable for analysis and visualization. The output
+format depends on the type of netify object:
+\itemize{
+\item Cross-sectional: Returns columns row, col, value
+\item Longitudinal: Returns columns row, col, time, value
+\item Multilayer: Returns columns row, col, layer, value (and time if longitudinal)
+}
 }

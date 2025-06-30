@@ -32,6 +32,9 @@
 #'   Default is 6886.
 #' @param ig_netlet An optional pre-converted igraph object. If provided, this
 #'   function will use it directly instead of converting the netify object again.
+#' @param ... Additional arguments passed to ego-specific layout functions when
+#'   layout is "radial" or "concentric". See \code{\link{get_ego_layout}} for
+#'   available options (ego_group_by, ego_order_by, ego_weight_to_distance, etc.).
 #'
 #' @return A list of data frames (one per time period) where each data frame contains:
 #'   \itemize{
@@ -52,7 +55,8 @@
 #'
 #' The function provides access to all major igraph layout algorithms. The default
 #' "nicely" option automatically selects an appropriate algorithm based on the
-#' network structure.
+#' network structure. For ego networks, specialized layouts ("radial" and "concentric")
+#' are available that emphasize the ego-alter structure.
 #'
 #' \strong{Longitudinal layouts:}
 #'
@@ -85,8 +89,8 @@ get_node_layout <- function(
     static_actor_positions = FALSE,
     which_static = NULL,
     seed = 6886,
-    ig_netlet = NULL){
-    
+    ig_netlet = NULL,
+    ...) {
     # check if netify object
     netify_check(netlet)
 
@@ -102,6 +106,75 @@ get_node_layout <- function(
     obj_attrs <- attributes(netlet)
     netify_type <- obj_attrs$netify_type
     is_bipartite <- obj_attrs$mode == "bipartite"
+    is_ego <- obj_attrs$ego_netify %||% FALSE
+    
+    # Check if this is an ego network and layout is ego-specific
+    ego_layouts <- c("radial", "concentric", "hierarchical", "ego_centric")
+    if (is_ego && !is.null(layout) && tolower(layout) %in% ego_layouts) {
+        # For hierarchical and ego_centric layouts, use specialized functions
+        if (tolower(layout) == "hierarchical") {
+            # Extract min_radius and max_radius from ... parameters
+            dots <- list(...)
+            min_radius <- dots$min_radius %||% 1.5
+            max_radius <- dots$max_radius %||% 4.5
+            
+            return(create_hierarchical_ego_layout(
+                netlet = netlet,
+                min_radius = min_radius,
+                max_radius = max_radius,
+                seed = seed
+            ))
+        } else if (tolower(layout) == "ego_centric") {
+            # Extract buffer_radius and transition_zone from ... parameters
+            dots <- list(...)
+            buffer_radius <- dots$buffer_radius %||% 1.5
+            transition_zone <- dots$transition_zone %||% 0.5
+            
+            return(create_ego_centric_layout(
+                netlet = netlet,
+                buffer_radius = buffer_radius,
+                transition_zone = transition_zone,
+                seed = seed
+            ))
+        } else {
+            # For radial layout, use custom implementation
+            if (tolower(layout) == "radial") {
+                dots <- list(...)
+                n_rings <- dots$n_rings %||% 4
+                min_radius <- dots$min_radius %||% 1.5
+                max_radius <- dots$max_radius %||% 5
+                ego_name <- dots$ego_name %||% NULL
+                
+                return(create_radial_ego_layout(
+                    netlet = netlet,
+                    ego_name = ego_name,
+                    n_rings = n_rings,
+                    min_radius = min_radius,
+                    max_radius = max_radius,
+                    seed = seed
+                ))
+            } else {
+                # For concentric, use get_ego_layout
+                # Extract ego-specific parameters from ...
+                dots <- list(...)
+                ego_params <- dots[grep("^ego_", names(dots))]
+                
+                # Remove "ego_" prefix for the ego layout function
+                if (length(ego_params) > 0) {
+                    names(ego_params) <- gsub("^ego_", "", names(ego_params))
+                }
+                
+                return(do.call(get_ego_layout, c(
+                    list(
+                        netlet = netlet,
+                        layout = layout,
+                        seed = seed
+                    ),
+                    ego_params
+                )))
+            }
+        }
+    }
 
     # convert to igraph without attributes
     # cuz we got a need for speed

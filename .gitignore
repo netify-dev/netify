@@ -6,3 +6,7 @@ docs
 *.rproj
 *.Rproj
 .claude
+Rplots.pdf
+ego_networks.md
+figure/
+minimal_repro.R

@@ -72,11 +72,26 @@ plot_homophily <- function(
     method = "correlation",
     sample_size = NULL,
     colors = c("#2E86AB", "#F18F01"),
-    ...
-    ){
-
+    ...) {
     # what we doing
     type <- match.arg(type)
+
+    # For distribution plots, we need both netlet and attribute
+    if (type == "distribution" && (is.null(netlet) || is.null(attribute))) {
+        cli::cli_abort(c(
+            "x" = "Distribution plots require both 'netlet' and 'attribute' parameters.",
+            "i" = "Try: plot_homophily(homophily_results, netlet = your_network, attribute = 'your_attribute')"
+        ))
+    }
+
+    # Check if this is a multilayer network and suggest alternative
+    if (type == "distribution" && !is.null(netlet)) {
+        obj_attrs <- attributes(netlet)
+        layers <- obj_attrs$layers
+        if (length(layers) > 1 && obj_attrs$netify_type == "cross_sec") {
+            cli::cli_alert_warning("Distribution plots for multilayer networks may have issues. Consider extracting individual layers first.")
+        }
+    }
 
     # go do a thing
     switch(type,
@@ -129,11 +144,18 @@ plot_homophily_distribution <- function(
     similarity_data <- extract_similarity_data(netlet, attribute, method)
 
     # check if similarity data was successfully extracted
-    if (is.null(similarity_data)) {
+    if (is.null(similarity_data) || nrow(similarity_data) == 0) {
         cli::cli_abort(c(
-            "x" = "Could not extract similarity data from the network."
+            "x" = "Could not extract similarity data from the network.",
+            "i" = "This often happens when the network matrix and attribute data cannot be properly matched.",
+            "i" = "For multilayer networks, try plotting individual layers separately."
         ))
     }
+
+    # Debug: Check the structure of similarity_data
+    cli::cli_alert_info("Similarity data dimensions: {nrow(similarity_data)} rows x {ncol(similarity_data)} cols")
+    cli::cli_alert_info("Connected levels: {paste(levels(similarity_data$connected), collapse=', ')}")
+    cli::cli_alert_info("Connected counts: Connected={sum(similarity_data$connected == 'Connected')}, Not Connected={sum(similarity_data$connected == 'Not Connected')}")
 
     # sample the data if a sample size is provided and the data is larger than the sample size
     if (!is.null(sample_size) && nrow(similarity_data) > sample_size) {
@@ -161,8 +183,22 @@ plot_homophily_distribution <- function(
         # create a contingency table of similarity and connection status
         cont_table <- table(similarity_data$similarity, similarity_data$connected)
 
+        # Check if table is valid
+        if (nrow(cont_table) == 0 || ncol(cont_table) == 0) {
+            cli::cli_abort(c(
+                "x" = "Unable to create contingency table from similarity data.",
+                "i" = "This might happen if all pairs have the same similarity or connection status."
+            ))
+        }
+
         # calculate proportions for each connection status
         col_sums <- colSums(cont_table)
+        if (any(col_sums == 0)) {
+            cli::cli_abort(c(
+                "x" = "One or more connection categories have zero counts.",
+                "i" = "Cannot calculate proportions when column sums are zero."
+            ))
+        }
         prop_table <- sweep(cont_table, 2, col_sums, "/")
 
         # convert the contingency table to a data frame for plotting
@@ -208,6 +244,17 @@ plot_homophily_distribution <- function(
     } else {
         # for continuous variables, create a density plot
 
+        # Final check before plotting
+        n_connected <- sum(similarity_data$connected == "Connected")
+        n_not_connected <- sum(similarity_data$connected == "Not Connected")
+
+        if (n_connected == 0 || n_not_connected == 0) {
+            cli::cli_abort(c(
+                "x" = "Cannot create distribution plot: data contains only one connection type.",
+                "i" = "Connected: {n_connected}, Not Connected: {n_not_connected}"
+            ))
+        }
+
         # create the density plot using ggplot
         p <- ggplot(similarity_data, aes(x = .data$similarity, fill = .data$connected)) +
             geom_density(alpha = 0.7, adjust = 1.5) +
@@ -220,8 +267,7 @@ plot_homophily_distribution <- function(
                 color = colors[2], linetype = "dashed", linewidth = 1
             ) +
             scale_fill_manual(
-                values = setNames(colors, c("Connected", "Not Connected")),
-                labels = c("Connected", "Not Connected")
+                values = c("Connected" = colors[1], "Not Connected" = colors[2])
             ) +
             labs(
                 title = paste0(attribute, " Similarity Distribution by Connection Status"),
@@ -320,7 +366,7 @@ plot_homophily_comparison <- function(homophily_results, colors, ...) {
     if ("significant" %in% names(comparison_data)) {
         comparison_data$significant <- NULL
     }
-    
+
     # Check if p_value exists, if not check for p.value (different naming conventions)
     if ("p_value" %in% names(comparison_data)) {
         comparison_data$significant <- comparison_data$p_value < 0.05
@@ -332,11 +378,18 @@ plot_homophily_comparison <- function(homophily_results, colors, ...) {
         comparison_data$significant <- FALSE
     }
 
+    # Create unique labels if we have layers
+    if ("layer" %in% names(comparison_data) && length(unique(comparison_data$layer)) > 1) {
+        comparison_data$plot_label <- paste0(comparison_data$attribute_name, " (", comparison_data$layer, ")")
+    } else {
+        comparison_data$plot_label <- comparison_data$attribute_name
+    }
+
     # reorder rows by homophily correlation for better visualization
     ord <- order(comparison_data$homophily_correlation)
-    comparison_data$attribute_name <- factor(
-        comparison_data$attribute_name,
-        levels = comparison_data$attribute_name[ord]
+    comparison_data$plot_label <- factor(
+        comparison_data$plot_label,
+        levels = unique(comparison_data$plot_label[ord])
     )
 
     # make viz
@@ -344,7 +397,7 @@ plot_homophily_comparison <- function(homophily_results, colors, ...) {
         comparison_data,
         aes(
             x = .data$homophily_correlation,
-            y = .data$attribute_name
+            y = .data$plot_label
         )
     ) +
 
@@ -352,7 +405,7 @@ plot_homophily_comparison <- function(homophily_results, colors, ...) {
         geom_segment(
             aes(
                 x = .data$ci_lower, xend = .data$ci_upper,
-                y = .data$attribute_name, yend = .data$attribute_name
+                y = .data$plot_label, yend = .data$plot_label
             ),
             color = "gray50", linewidth = 2, alpha = 0.5
         ) +
@@ -501,6 +554,7 @@ extract_similarity_data <- function(netlet, attribute, method) {
     obj_attrs <- attributes(netlet)
     nodal_data <- obj_attrs$nodal_data
     netify_type <- obj_attrs$netify_type
+    layers <- obj_attrs$layers
 
     # only handle cross-sectional data for now
     if (netify_type != "cross_sec") {
@@ -528,8 +582,20 @@ extract_similarity_data <- function(netlet, attribute, method) {
         }
     }
 
-    # convert the network object to a matrix
-    net_matrix <- as.matrix(netlet)
+    # Handle multilayer networks - use first layer
+    if (length(layers) > 1 && netify_type == "cross_sec") {
+        cli::cli_alert_info("Distribution plots for multilayer networks will use the first layer: {layers[1]}")
+        # Extract first layer as matrix
+        net_matrix <- netlet[, , 1]
+        # Ensure row/column names are preserved
+        if (is.null(rownames(net_matrix))) {
+            rownames(net_matrix) <- dimnames(netlet)[[1]]
+            colnames(net_matrix) <- dimnames(netlet)[[2]]
+        }
+    } else {
+        # convert the network object to a matrix
+        net_matrix <- as.matrix(netlet)
+    }
 
     # check if node attributes exist and if the specified attribute is valid
     if (is.null(nodal_data) || !attribute %in% names(nodal_data)) {
@@ -560,19 +626,52 @@ extract_similarity_data <- function(netlet, attribute, method) {
     # calculate similarity matrix (uses some external function)
     similarity_matrix <- calculate_similarity_matrix(node_attrs, method)
 
+    # IMPORTANT: Set row/column names to match the network matrix
+    # The calculate_similarity_matrix function returns a matrix without names
+    rownames(similarity_matrix) <- rownames(net_matrix)
+    colnames(similarity_matrix) <- colnames(net_matrix)
+
     # turn the network into a binary matrix
     binary_net <- (net_matrix > 0) & !is.na(net_matrix)
+
+    # Debug: check matrix dimensions before melting
+    cli::cli_alert_info("Similarity matrix: {nrow(similarity_matrix)}x{ncol(similarity_matrix)}")
+    cli::cli_alert_info("Binary network: {nrow(binary_net)}x{ncol(binary_net)}")
 
     # extract upper triangle of similarity and binary matrices
     similarity_melted <- melt_matrix(similarity_matrix, remove_zeros = FALSE, remove_diagonal = TRUE)
     binary_melted <- melt_matrix(binary_net, remove_zeros = FALSE, remove_diagonal = TRUE)
 
+    # Check if melting produced valid results
+    if (nrow(similarity_melted) == 0 || nrow(binary_melted) == 0) {
+        cli::cli_alert_danger("Matrix melting produced empty results.")
+        return(NULL)
+    }
+
+    # Debug: Check column names
+    if (!"Var1" %in% names(similarity_melted) || !"Var2" %in% names(similarity_melted)) {
+        cli::cli_alert_danger("Similarity melted data missing Var1/Var2 columns. Columns: {paste(names(similarity_melted), collapse=', ')}")
+        return(NULL)
+    }
+    if (!"Var1" %in% names(binary_melted) || !"Var2" %in% names(binary_melted)) {
+        cli::cli_alert_danger("Binary melted data missing Var1/Var2 columns. Columns: {paste(names(binary_melted), collapse=', ')}")
+        return(NULL)
+    }
+
     # create unique keys for matching rows between melted matrices
     sim_keys <- paste(similarity_melted$Var1, similarity_melted$Var2, sep = "_")
     bin_keys <- paste(binary_melted$Var1, binary_melted$Var2, sep = "_")
 
+    # Debug: check key lengths
+    cli::cli_alert_info("Similarity keys: {length(sim_keys)}, Binary keys: {length(bin_keys)}")
+
     # find matching rows
     match_idx <- match(sim_keys, bin_keys)
+
+    # Debug: check match results
+    n_matched <- sum(!is.na(match_idx))
+    n_unmatched <- sum(is.na(match_idx))
+    cli::cli_alert_info("Matched: {n_matched}, Unmatched: {n_unmatched}")
 
     # check for any unmatched rows
     if (any(is.na(match_idx))) {
@@ -583,11 +682,46 @@ extract_similarity_data <- function(netlet, attribute, method) {
         match_idx <- match_idx[valid_idx]
     }
 
+    # Check if we have any valid matches
+    if (length(match_idx) == 0 || nrow(similarity_melted) == 0) {
+        cli::cli_alert_danger("No valid similarity-network pairs found.")
+        return(NULL)
+    }
+
+    # Check that match_idx values are within bounds
+    if (any(match_idx > nrow(binary_melted))) {
+        cli::cli_alert_danger("Match indices exceed binary matrix bounds.")
+        return(NULL)
+    }
+
+    # Check that binary_melted has the expected structure
+    if (!"value" %in% names(binary_melted)) {
+        cli::cli_alert_danger("Binary network data doesn't have expected 'value' column.")
+        return(NULL)
+    }
+
+    # Extract connection values safely
+    connection_values <- binary_melted$value[match_idx]
+
+    # Check if we got valid connection values
+    if (length(connection_values) == 0 || all(is.na(connection_values))) {
+        cli::cli_alert_danger("No valid connection values found after matching.")
+        return(NULL)
+    }
+
     # build the final data frame
+    # First create the connected labels
+    connected_labels <- ifelse(connection_values == 1, "Connected", "Not Connected")
+
+    # Check that we have both levels
+    if (!("Connected" %in% connected_labels) || !("Not Connected" %in% connected_labels)) {
+        cli::cli_alert_warning("Data may only contain one type of connection status.")
+    }
+
     similarity_data <- data.frame(
         similarity = similarity_melted$value,
         connected = factor(
-            ifelse(binary_melted$value[match_idx] == 1, "Connected", "Not Connected"),
+            connected_labels,
             levels = c("Connected", "Not Connected")
         ),
         stringsAsFactors = FALSE
@@ -596,6 +730,21 @@ extract_similarity_data <- function(netlet, attribute, method) {
     # drop rows with any missing values
     complete_idx <- which(complete.cases(similarity_data))
     similarity_data <- similarity_data[complete_idx, ]
+
+    # Final check: ensure we have some data to return
+    if (nrow(similarity_data) == 0) {
+        cli::cli_alert_danger("No valid similarity data remaining after filtering.")
+        return(NULL)
+    }
+
+    # Ensure factor levels are properly set
+    similarity_data$connected <- droplevels(similarity_data$connected)
+
+    # One more check
+    if (length(levels(similarity_data$connected)) == 0) {
+        cli::cli_alert_danger("Connected factor has no levels.")
+        return(NULL)
+    }
 
     #
     return(similarity_data)

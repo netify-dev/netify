@@ -1,6 +1,6 @@
 Package: netify
 Title: Network Tools
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
   person("Ha Eun", "Choi", email = "choiha3@msu.edu", role = c("ctb")),
   person("Cassy", "Dorff", email = "cassy.dorff@vanderbilt.edu", role = c("aut")),
@@ -25,7 +25,8 @@ Imports:
     ggridges,
     ggbeeswarm, 
     patchwork,
-    RColorBrewer
+    RColorBrewer,
+    ggrepel
 LinkingTo:
   Rcpp,
   RcppEigen

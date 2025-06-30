@@ -50,7 +50,7 @@
 #' for each time period. Dyadic variables should be stored as matrices with rows
 #' and columns corresponding to network actors. Missing values are handled using
 #' pairwise complete observations.
-#' 
+#'
 #' @author Cassy Dorff, Shahryar Minhas
 #'
 #' @export dyad_correlation
@@ -66,9 +66,7 @@ dyad_correlation <- function(
     alpha = 0.05,
     partial_correlations = FALSE,
     other_stats = NULL,
-    ...
-    ){
-
+    ...) {
     # input validation
     netify_check(netlet)
     checkmate::assert_character(dyad_vars, null.ok = TRUE)
@@ -114,19 +112,33 @@ dyad_correlation <- function(
     results_list <- list()
 
     # process each layer
-    for (layer in layers) {
+    for (layer_index in seq_along(layers)) {
+        layer <- layers[layer_index]
         # convert to list format for processing
         netlet_list <- switch(netify_type,
             "cross_sec" = list("1" = netlet),
             "longit_array" = {
-                # extract time periods from array
-                time_names <- dimnames(netlet)[[3]]
-                if (is.null(time_names)) {
-                    time_names <- as.character(seq_len(dim(netlet)[3]))
-                }
-                net_list <- list()
-                for (t in seq_along(time_names)) {
-                    net_list[[time_names[t]]] <- netlet[,,t]
+                # Check if this is multilayer longitudinal (4D) or single layer (3D)
+                if (length(dim(netlet)) == 4) {
+                    # Multilayer longitudinal: extract time periods from 4th dimension
+                    time_names <- dimnames(netlet)[[4]]
+                    if (is.null(time_names)) {
+                        time_names <- as.character(seq_len(dim(netlet)[4]))
+                    }
+                    net_list <- list()
+                    for (t in seq_along(time_names)) {
+                        net_list[[time_names[t]]] <- netlet[, , , t]
+                    }
+                } else {
+                    # Single layer longitudinal: extract from 3rd dimension
+                    time_names <- dimnames(netlet)[[3]]
+                    if (is.null(time_names)) {
+                        time_names <- as.character(seq_len(dim(netlet)[3]))
+                    }
+                    net_list <- list()
+                    for (t in seq_along(time_names)) {
+                        net_list[[time_names[t]]] <- netlet[, , t]
+                    }
                 }
                 net_list
             },
@@ -137,8 +149,16 @@ dyad_correlation <- function(
         for (time_id in names(netlet_list)) {
             # get network matrix for this time period
             net_matrix <- netlet_list[[time_id]]
-            if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
-                net_matrix <- net_matrix[, , layer]
+
+            # Extract specific layer for multilayer networks
+            if (length(layers) > 1) {
+                if (netify_type == "cross_sec") {
+                    # For cross-sectional multilayer: 3D array [actors, actors, layers]
+                    net_matrix <- netlet[, , layer_index]
+                } else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
+                    # For longitudinal multilayer: 4D array [actors, actors, layers, time]
+                    net_matrix <- net_matrix[, , layer_index]
+                }
             }
 
             # get dyadic data for this time period
@@ -154,8 +174,16 @@ dyad_correlation <- function(
                 # get edge matrix (either from layer or use main network)
                 if (edge_var == layer || edge_var == "network") {
                     edge_matrix <- net_matrix
-                } else if (netify_type == "longit_array" && edge_var %in% layers) {
-                    edge_matrix <- netlet_list[[time_id]][, , edge_var]
+                } else if (edge_var %in% layers) {
+                    # Extract a different layer as edge variable
+                    edge_layer_idx <- which(layers == edge_var)
+                    if (netify_type == "cross_sec") {
+                        edge_matrix <- netlet[, , edge_layer_idx]
+                    } else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
+                        edge_matrix <- netlet_list[[time_id]][, , edge_layer_idx]
+                    } else if (netify_type == "longit_list") {
+                        edge_matrix <- netlet_list[[time_id]][, , edge_layer_idx]
+                    }
                 } else {
                     cli::cli_warn("Edge variable {edge_var} not found for time {time_id}")
                     next

@@ -44,7 +44,7 @@ variables (e.g., \code{point_size_var = "degree"})
 
 \strong{Customization Tips:}
 \itemize{
-\item Use \code{weight_transform} to handle skewed weight distributions
+\item Use \code{mutate_weight} to handle skewed weight distributions
 \item Combine fixed and variable aesthetics (e.g., fixed color with variable size)
 \item Add ggplot2 layers after the plot call for further customization
 \item Use \code{select_text} for selective labeling in dense networks
@@ -57,7 +57,10 @@ variables (e.g., \code{point_size_var = "degree"})
 Options include: \code{"nicely"} (default), \code{"fr"} (Fruchterman-Reingold),
 \code{"kk"} (Kamada-Kawai), \code{"circle"}, \code{"star"}, \code{"grid"},
 \code{"tree"}, \code{"bipartite"} (for bipartite networks), \code{"randomly"},
-and others. See \code{\link{get_node_layout}} for full list.}
+and others. For ego networks, additional options are available: \code{"radial"}
+(ego-centric with optional grouping) and \code{"concentric"} (ego at center with
+alters in rings). See \code{\link{get_node_layout}} and \code{\link{get_ego_layout}}
+for full details.}
 \item{\code{point_layout}}{Optional data.frame or list of data.frames containing
 pre-computed node positions with columns 'actor', 'x', and 'y'. Overrides
 \code{layout} if provided.}
@@ -76,10 +79,22 @@ creates composite layout from all time periods.}
 \item{\code{add_edges}}{Logical. Display edges? Default is \code{TRUE}.}
 \item{\code{add_points}}{Logical. Display nodes as points? Default is \code{TRUE}.}
 \item{\code{add_text}}{Logical. Add text labels to nodes? Default is \code{FALSE}.}
+\item{\code{add_text_repel}}{Logical. Add text labels with automatic repositioning to avoid overlaps?
+Default is \code{FALSE}. When \code{TRUE}, overrides \code{add_text}. Uses ggrepel for positioning.}
 \item{\code{add_label}}{Logical. Add boxed labels to nodes? Default is \code{FALSE}.}
+\item{\code{add_label_repel}}{Logical. Add boxed labels with automatic repositioning to avoid overlaps?
+Default is \code{FALSE}. When \code{TRUE}, overrides \code{add_label}. Uses ggrepel for positioning.}
 \item{\code{remove_isolates}}{Logical. Remove unconnected nodes? Default is \code{TRUE}.}
 \item{\code{curve_edges}}{Logical. Use curved edges? Default is \code{FALSE}.}
 \item{\code{use_theme_netify}}{Logical. Apply netify theme? Default is \code{TRUE}.}
+\item{\code{facet_type}}{Character. For multilayer longitudinal networks, controls
+faceting style: \code{"grid"} (default) creates a 2D grid with time × layer,
+\code{"wrap"} creates wrapped facets with combined time-layer labels.}
+\item{\code{facet_ncol}}{Integer. Number of columns for facet_wrap layouts. Only
+used when \code{facet_type = "wrap"} or for single-dimension faceting.}
+\item{\code{rescale_edge_weights}}{Logical. For multilayer networks, should edge weights
+be rescaled to a common 0-1 range across all layers? This is useful when layers have
+very different weight scales. Default is \code{FALSE}.}
 }
 }
 
@@ -95,7 +110,7 @@ edge attribute (including 'weight' for weighted networks). For example:
 \code{edge_filter = weight > 0.5} to show only edges with weight greater than 0.5.
 The expression is evaluated in the context of the edge data, so any edge-level
 variable can be used.}
-\item{\code{time}}{For longitudinal networks, a vector of time periods to include in the plot.
+\item{\code{time_filter}}{For longitudinal networks, a vector of time periods to include in the plot.
 Can be numeric indices or character labels matching the time dimension. If NULL
 (default), all time periods are plotted. For cross-sectional networks, this
 parameter is ignored.}
@@ -161,10 +176,12 @@ For weighted networks, defaults to the weight variable if not specified.}
 
 Selective labeling:
 \describe{
-\item{\code{select_text}}{Character vector of node names to show as text.}
+\item{\code{select_text}}{Character vector of node names to show as text. When used,
+text labels will automatically use \code{geom_text_repel} to avoid overlaps.}
 \item{\code{select_text_display}}{Alternative text to display (same length as
 \code{select_text}).}
-\item{\code{select_label}}{Character vector of node names to show with boxes.}
+\item{\code{select_label}}{Character vector of node names to show with boxes. When used,
+labels will automatically use \code{geom_label_repel} to avoid overlaps.}
 \item{\code{select_label_display}}{Alternative labels (same length as
 \code{select_label}).}
 }
@@ -179,6 +196,22 @@ Text aesthetics:
 }
 
 Label (boxed text) aesthetics have similar parameters with \code{label_} prefix.
+
+Text repel parameters (when \code{add_text_repel = TRUE}):
+\describe{
+\item{\code{text_repel_force}}{Force of repulsion between overlapping text. Default is 1.}
+\item{\code{text_repel_max_overlaps}}{Maximum number of overlaps to tolerate. Default is 10.}
+\item{\code{text_repel_box_padding}}{Padding around text. Default is 0.25.}
+\item{\code{text_repel_point_padding}}{Padding around points. Default is 0.}
+\item{\code{text_repel_segment_color}}{Color of connecting segments. Default is "grey50".}
+}
+
+Label repel parameters (when \code{add_label_repel = TRUE}):
+\describe{
+\item{Similar to text_repel but with \code{label_repel_} prefix}{}
+\item{\code{label_repel_label_padding}}{Padding around label boxes. Default is 0.25.}
+\item{\code{label_repel_label_r}}{Radius of label box corners. Default is 0.15.}
+}
 }
 
 \section{Scale Labels}{
@@ -199,31 +232,54 @@ Customize legend titles:
 \item{\code{highlight}}{Character vector of node names to highlight with different colors.
 Non-highlighted nodes will be colored grey. Highlighted nodes can also be automatically
 enlarged if \code{highlight_size_increase} is greater than 1.}
-\item{\code{highlight_colors}}{Named vector of colors for highlighted nodes. If NULL,
+\item{\code{highlight_color}}{Named vector of colors for highlighted nodes. If NULL,
 uses default distinct colors (red, blue, green for up to 3 nodes, or a color palette
 for more). Names should match the values in the \code{highlight} parameter.
 Example: \code{c('USA' = 'blue', 'China' = 'red', 'Russia' = 'green')}.}
-\item{\code{highlight_legend_title}}{Title for the highlight legend. Default is "Highlighted".}
-\item{\code{highlight_size_increase}}{Numeric factor to increase size of highlighted nodes.
-Default is 1.5 (50\% larger). Set to 1 for no size change. The size increase is applied
-multiplicatively to any existing size mapping.}
+\item{\code{highlight_label}}{Title for the highlight legend. Default is "Highlighted".}
+\item{\code{highlight_size_increase}}{Numeric factor(s) to increase size of highlighted nodes.
+Can be a single value (applied to all highlighted nodes) or a vector of length
+\code{length(highlight) + 1} where each value corresponds to a highlighted node
+and the last value applies to "Other" nodes. Default is 1 (no size increase).
+Example: \code{c(3, 1, 1, 0.5)} for 3 highlighted
+nodes where the first is 3x larger, the next two are normal size, and all
+others are half size.}
 \item{\code{show_other_in_legend}}{Logical. Include "Other" category in legend? Default is FALSE.
 When FALSE, only highlighted nodes appear in the legend.}
+}
+}
+
+\section{Ego Layout Parameters}{
+
+
+For ego networks (created with \code{\link{ego_netify}}), additional layout options
+control the ego-centric visualization:
+\describe{
+\item{\code{ego_group_by}}{Character string specifying a nodal attribute to use for
+grouping alters in ego layouts. For "radial" layout, creates sectors. For
+"concentric" layout, determines ring assignment.}
+\item{\code{ego_order_by}}{Character string specifying a nodal attribute to use for
+ordering alters within groups or rings. Common options include "degree_total".}
+\item{\code{ego_weight_to_distance}}{Logical. For weighted networks with "radial"
+layout, should edge weights determine distance from ego? Higher weights place
+alters closer to ego. Default is \code{FALSE}.}
+\item{\code{ego_ring_gap}}{Numeric (0-1). Gap between concentric rings as proportion
+of radius. Only for "concentric" layout. Default is 0.3.}
+\item{\code{ego_size}}{Numeric. Relative size of central area reserved for ego.
+Larger values create more space between ego and alters. Default is 0.1.}
 }
 }
 
 \section{Special Parameters}{
 
 \describe{
-\item{\code{weight_transform}}{Function to transform edge weights before plotting.
+\item{\code{mutate_weight}}{Function to transform edge weights before plotting.
 Example: \code{log1p} for log(x+1) transformation. Applied before mapping to
 aesthetics.}
-\item{\code{check_overlap}}{Logical. Avoid text overlap? Default is \code{TRUE}.}
 \item{\code{return_components}}{Logical. Return plot components instead of
 assembled plot? Useful for manual customization. Default is \code{FALSE}.}
-\item{\code{palette}}{Character string for color palette, see \code{list_palettes()}.}
-\item{\code{style}}{A style function (e.g., \code{style_budapest}) or its name as a
-string. Applies a complete visual style including colors, shapes, and layout preferences.}
+\item{\code{style}}{A style function (e.g., \code{style_budapest}).
+Applies a complete visual style including colors, shapes, and layout preferences.}
 }
 }
 
@@ -282,7 +338,7 @@ net_longit <- add_node_vars(
 plot(net_longit,
     # Edges
     edge_color = "grey70",
-    weight_transform = log1p, # Transform weights
+    mutate_weight = log1p, # Transform weights
     # Nodes
     node_size_by = "degree_total",
     node_color_by = "i_polity2",
@@ -314,7 +370,7 @@ plot(net_10,
 
 # Time subsetting example
 plot(net_longit,
-    time = c("2010", "2011", "2012")
+    time_filter = c("2010", "2011", "2012")
 )
 
 # Node subsetting example
@@ -327,11 +383,11 @@ g10 <- plot(
     net_10,
     node_alpha = .8,
     arrow = ggplot2::arrow(length = ggplot2::unit(0.01, "inches")),
-    node_size_by = "log(degree_total)",
+    node_size_by = "degree_total",
     node_size_label = "Log(Degree)",
     edge_alpha_label = "Log(Verbal Coop.)",
     remove_isolates = TRUE,
-    weight_transform = log1p,
+    mutate_weight = log1p,
     return_components = TRUE
 )
 

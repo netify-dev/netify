@@ -116,30 +116,32 @@ them. This works for cross-sectional multilayer (3D arrays), longitudinal multil
 data(icews)
 
 # Create networks for different years
-net_2002 <- netify(icews[icews$year == 2002,], 
-                   actor1 = "i", actor2 = "j", 
-                   weight = "matlConf")
-net_2003 <- netify(icews[icews$year == 2003,], 
-                   actor1 = "i", actor2 = "j", 
-                   weight = "matlConf")
-                   
+net_2002 <- netify(icews[icews$year == 2002, ],
+    actor1 = "i", actor2 = "j",
+    weight = "matlConf"
+)
+net_2003 <- netify(icews[icews$year == 2003, ],
+    actor1 = "i", actor2 = "j",
+    weight = "matlConf"
+)
+
 # Basic edge comparison
 comp <- compare_networks(list("2002" = net_2002, "2003" = net_2003))
 print(comp)
 
 # Structural comparison
 struct_comp <- compare_networks(
-  list(net_2002, net_2003), 
-  what = "structure"
+    list(net_2002, net_2003),
+    what = "structure"
 )
 
 # Create longitudinal network for automatic temporal comparison
 longit_net <- netify(
-  icews,
-  actor1 = "i", actor2 = "j", 
-  time = "year",
-  weight = "verbCoop",
-  output_format = "longit_list"
+    icews,
+    actor1 = "i", actor2 = "j",
+    time = "year",
+    weight = "verbCoop",
+    output_format = "longit_list"
 )
 
 # Automatic temporal comparison
@@ -149,20 +151,20 @@ temporal_comp <- compare_networks(longit_net, method = "all")
 \dontrun{
 # Create separate networks for different interaction types
 verbal_coop <- netify(
-  icews[icews$year == 2010,],
-  actor1 = "i", actor2 = "j",
-  weight = "verbCoop"
+    icews[icews$year == 2010, ],
+    actor1 = "i", actor2 = "j",
+    weight = "verbCoop"
 )
 
 material_coop <- netify(
-  icews[icews$year == 2010,],
-  actor1 = "i", actor2 = "j",
-  weight = "matlCoop"
+    icews[icews$year == 2010, ],
+    actor1 = "i", actor2 = "j",
+    weight = "matlCoop"
 )
 
 # Combine into multilayer network
 multilayer <- layer_netify(
-  list(verbal = verbal_coop, material = material_coop)
+    list(verbal = verbal_coop, material = material_coop)
 )
 
 # Automatic multilayer comparison
@@ -173,10 +175,10 @@ print(layer_comp)
 
 # Get detailed matrices
 detailed_comp <- compare_networks(
-  list(net_2002, net_2003), 
-  return_details = TRUE
+    list(net_2002, net_2003),
+    return_details = TRUE
 )
-names(detailed_comp$details)  # Shows available matrices
+names(detailed_comp$details) # Shows available matrices
 
 }
 \author{

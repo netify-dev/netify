@@ -15,16 +15,17 @@ A complete ggplot object ready for display or further customization
 }
 \description{
 Assembles a complete network plot from netify plot components. This function
-automatically adds all available layers (edges, nodes, text, labels) in the
-correct order with appropriate scale resets between layers.
+automatically adds all available layers (edges, nodes, text, labels, and their
+repel versions) in the correct order with appropriate scale resets between layers.
 }
 \details{
 This function provides a convenient way to reassemble a plot from its
 components after extracting them with \code{return_components = TRUE}.
 It automatically:
 \itemize{
-\item Adds layers in the correct order (edges, nodes, text, labels)
+\item Adds layers in the correct order (edges, nodes, text/text_repel, labels/label_repel)
 \item Inserts scale resets between layers when necessary
+\item Handles both standard and repel versions of text and label layers
 \item Includes facets and themes if present
 }
 }

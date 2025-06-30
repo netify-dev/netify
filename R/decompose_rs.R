@@ -123,7 +123,6 @@
 #' @export decompose_netify
 
 decompose_netify <- function(netlet, remove_zeros = TRUE) {
-    
     # input validation
     netify_check(netlet)
     if (!is.logical(remove_zeros) || length(remove_zeros) != 1) {

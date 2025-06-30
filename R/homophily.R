@@ -21,7 +21,7 @@
 #'   it should take the network matrix and return a logical matrix. Default is 0
 #'   (any positive weight is a tie). Common values: 0 (default), mean(weights),
 #'   median(weights), or quantile-based thresholds. For pre-binarized networks,
-#'   consider using \code{transform_weights()} first.
+#'   consider using \code{mutate_weights()} first.
 #' @param significance_test Logical. Whether to perform permutation test. Default TRUE.
 #' @param n_permutations Number of permutations for significance testing. Default 1000.
 #' @param alpha Significance level for confidence intervals. Default 0.05.
@@ -47,7 +47,7 @@
 #'
 #' @details
 #' \strong{Similarity Metrics:}
-#' 
+#'
 #' For continuous attributes:
 #' \itemize{
 #'   \item \code{correlation}: Based on absolute difference, good general purpose metric
@@ -55,16 +55,16 @@
 #'   \item \code{manhattan}: Less sensitive to outliers than euclidean
 #'   \item \code{cosine}: Useful for normalized data or when sign matters
 #' }
-#' 
+#'
 #' For categorical/binary attributes:
 #' \itemize{
 #'   \item \code{categorical}: Simple matching (1 if same, 0 if different)
 #'   \item \code{jaccard}: For binary data, emphasizes shared presence over shared absence
 #'   \item \code{hamming}: Counts positions where values differ (negated for similarity)
 #' }
-#' 
+#'
 #' \strong{Threshold Parameter:}
-#' 
+#'
 #' For weighted networks, the \code{threshold} parameter determines what edge weights
 #' constitute a "connection". You can specify:
 #' \itemize{
@@ -77,42 +77,42 @@
 #'       \item \code{function(x) quantile(x, 0.75, na.rm = TRUE)} - 75th percentile
 #'     }
 #' }
-#' 
+#'
 #' For more complex binarization needs (e.g., different thresholds by time period),
-#' consider using \code{transform_weights()} to pre-process your network.
+#' consider using \code{mutate_weights()} to pre-process your network.
 #'
 #' @examples
 #' \dontrun{
 #' # Basic homophily analysis with default threshold (> 0)
 #' homophily_default <- homophily(net, attribute = "group")
-#' 
+#'
 #' # Using different similarity metrics for continuous data
 #' homophily_manhattan <- homophily(
-#'   net, 
-#'   attribute = "age",
-#'   method = "manhattan"  # Less sensitive to outliers
+#'     net,
+#'     attribute = "age",
+#'     method = "manhattan" # Less sensitive to outliers
 #' )
-#' 
+#'
 #' # For binary attributes (e.g., gender, membership)
 #' homophily_jaccard <- homophily(
-#'   net,
-#'   attribute = "member", 
-#'   method = "jaccard"  # Better for binary data than correlation
+#'     net,
+#'     attribute = "member",
+#'     method = "jaccard" # Better for binary data than correlation
 #' )
-#' 
+#'
 #' # For categorical attributes
 #' homophily_categorical <- homophily(
-#'   net,
-#'   attribute = "department",
-#'   method = "categorical"
+#'     net,
+#'     attribute = "department",
+#'     method = "categorical"
 #' )
-#' 
+#'
 #' # Combining method and threshold
 #' homophily_combined <- homophily(
-#'   net,
-#'   attribute = "score",
-#'   method = "manhattan",
-#'   threshold = function(x) quantile(x, 0.75, na.rm = TRUE)
+#'     net,
+#'     attribute = "score",
+#'     method = "manhattan",
+#'     threshold = function(x) quantile(x, 0.75, na.rm = TRUE)
 #' )
 #' }
 #'
@@ -126,14 +126,15 @@ homophily <- function(
     n_permutations = 1000,
     alpha = 0.05,
     other_stats = NULL,
-    ...
-    ){
+    ...){
 
     # input validation
     netify_check(netlet)
     checkmate::assert_string(attribute)
-    checkmate::assert_choice(method, c("correlation", "euclidean", "manhattan", 
-                                       "cosine", "categorical", "jaccard", "hamming"))
+    checkmate::assert_choice(method, c(
+        "correlation", "euclidean", "manhattan",
+        "cosine", "categorical", "jaccard", "hamming"
+    ))
     if (!is.numeric(threshold) && !is.function(threshold)) {
         cli::cli_abort("threshold must be numeric or a function that returns a numeric value")
     }
@@ -146,28 +147,76 @@ homophily <- function(
     layers <- obj_attrs$layers
     nodal_data <- obj_attrs$nodal_data
     netify_type <- obj_attrs$netify_type
-    is_binary_network <- obj_attrs$weight_binary %||% FALSE
+
+    # handle weight_binary which might be a vector for multilayer networks
+    weight_binary <- obj_attrs$weight_binary %||% FALSE
+    if (length(weight_binary) > 1) {
+        # for multilayer, take the first value or check if all are the same
+        is_binary_network <- weight_binary[1]
+    } else {
+        is_binary_network <- weight_binary
+    }
 
     # check if attribute exists in nodal data
-    if (is.null(nodal_data) || !attribute %in% names(nodal_data)) {
-        cli::cli_abort(
-          "Attribute '{attribute}' not found in nodal_data. Available attributes: {paste(names(nodal_data), collapse = ', ')}"
-          ) }
+    if (is.null(nodal_data)) {
+        cli::cli_abort("No nodal_data found in netify object.")
+    }
+
+    # check attr availability depending on data struct
+    if (netify_type == "cross_sec") {
+        if (!attribute %in% names(nodal_data)) {
+            cli::cli_abort(
+                "Attribute '{attribute}' not found in nodal_data. Available attributes: {paste(names(nodal_data), collapse = ', ')}"
+            )
+        }
+    } else {
+        # for longit data, nodal_data can be either a list or a data.frame
+        if (is.data.frame(nodal_data)) {
+            # deprc format with time column
+            if (!attribute %in% names(nodal_data)) {
+                cli::cli_abort(
+                    "Attribute '{attribute}' not found in nodal_data. Available attributes: {paste(setdiff(names(nodal_data), c('actor', 'time')), collapse = ', ')}"
+                )
+            }
+        } else if (is.list(nodal_data)) {
+            # list format - check in the first time period
+            first_time <- names(nodal_data)[1]
+            if (!is.null(first_time) && !attribute %in% names(nodal_data[[first_time]])) {
+                cli::cli_abort(
+                    "Attribute '{attribute}' not found in nodal_data. Available attributes: {paste(names(nodal_data[[first_time]]), collapse = ', ')}"
+                )
+            }
+        }
+    }
 
     # process each layer
-    results <- lapply(layers, function(layer) {
+    results <- lapply(seq_along(layers), function(layer_index) {
+        layer <- layers[layer_index]
         # convert to list format for processing
         netlet_list <- switch(netify_type,
             "cross_sec" = list("1" = netlet),
             "longit_array" = {
-                # extract time periods from array
-                time_names <- dimnames(netlet)[[3]]
-                if (is.null(time_names)) {
-                    time_names <- as.character(seq_len(dim(netlet)[3]))
-                }
-                net_list <- list()
-                for (t in seq_along(time_names)) {
-                    net_list[[time_names[t]]] <- netlet[,,t]
+                # check if this is multilayer longitudinal (4D) or single layer (3D)
+                if (length(dim(netlet)) == 4) {
+                    # multilayer longit: extract time periods from 4th dimension
+                    time_names <- dimnames(netlet)[[4]]
+                    if (is.null(time_names)) {
+                        time_names <- as.character(seq_len(dim(netlet)[4]))
+                    }
+                    net_list <- list()
+                    for (t in seq_along(time_names)) {
+                        net_list[[time_names[t]]] <- netlet[, , , t]
+                    }
+                } else {
+                    # single layer longit: extract from 3rd dimension
+                    time_names <- dimnames(netlet)[[3]]
+                    if (is.null(time_names)) {
+                        time_names <- as.character(seq_len(dim(netlet)[3]))
+                    }
+                    net_list <- list()
+                    for (t in seq_along(time_names)) {
+                        net_list[[time_names[t]]] <- netlet[, , t]
+                    }
                 }
                 net_list
             },
@@ -178,8 +227,15 @@ homophily <- function(
         time_results <- lapply(names(netlet_list), function(time_id) {
             # get network matrix for this time period
             net_matrix <- netlet_list[[time_id]]
-            if (netify_type == "longitudinal_array" && length(dim(netlet)) == 4) {
-                net_matrix <- net_matrix[, , layer]
+            # extract specific layer for multilayer networks
+            if (length(layers) > 1) {
+                if (netify_type == "cross_sec") {
+                    # for cross-sec multilayer: 3D array [actors, actors, layers]
+                    net_matrix <- netlet[, , layer_index]
+                } else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
+                    # for longit multilayer: 4D array [actors, actors, layers, time]
+                    net_matrix <- net_matrix[, , layer_index]
+                }
             }
 
             # get nodal attributes for this time period
@@ -187,9 +243,20 @@ homophily <- function(
                 node_attrs <- nodal_data[[attribute]]
                 actors <- nodal_data$actor
             } else {
-                time_data <- nodal_data[nodal_data$time == time_id, ]
-                node_attrs <- time_data[[attribute]]
-                actors <- time_data$actor
+                # longit data, nodal_data is a list by time period
+                if (is.list(nodal_data) && time_id %in% names(nodal_data)) {
+                    time_data <- nodal_data[[time_id]]
+                    node_attrs <- time_data[[attribute]]
+                    actors <- time_data$actor
+                } else if (is.data.frame(nodal_data)) {
+                    # deprc format with time column
+                    time_data <- nodal_data[nodal_data$time == time_id, ]
+                    node_attrs <- time_data[[attribute]]
+                    actors <- time_data$actor
+                } else {
+                    cli::cli_warn("Could not extract nodal data for time {time_id}")
+                    return(NULL)
+                }
             }
 
             # match actors to matrix rows/columns
@@ -208,7 +275,7 @@ homophily <- function(
             # track missing values
             n_missing_attrs <- sum(is.na(node_attrs))
             n_total_actors <- length(node_attrs)
-            
+
             # remove actors with missing attributes
             complete_cases <- !is.na(node_attrs)
             if (sum(complete_cases) < 2) {
@@ -223,7 +290,14 @@ homophily <- function(
             similarity_matrix <- calculate_similarity_matrix(node_attrs, method)
 
             # determine threshold value for this time period/layer
-            if (is_binary_network) {
+            # for multilayer networks, check weight_binary for this specific layer
+            if (length(weight_binary) > 1) {
+                layer_is_binary <- weight_binary[layer_index]
+            } else {
+                layer_is_binary <- weight_binary
+            }
+
+            if (layer_is_binary) {
                 # for binary networks, threshold is not applicable
                 threshold_value <- NA
                 binary_net <- net_matrix
@@ -238,7 +312,7 @@ homophily <- function(
                 } else {
                     threshold_value <- threshold
                 }
-                
+
                 # create binary network based on threshold
                 binary_net <- (net_matrix > threshold_value) & !is.na(net_matrix)
             }
@@ -272,11 +346,11 @@ homophily <- function(
                 homophily_stats,
                 stringsAsFactors = FALSE
             )
-            
+
             # add missing data info
             result_df$n_missing <- n_missing_attrs
             result_df$n_pairs <- n_total_actors * (n_total_actors - 1) / 2
-            
+
             result_df
         })
 
@@ -358,7 +432,7 @@ homophily <- function(
 #' Missing values in attributes will propagate to the similarity matrix.
 #'
 #' @author Shahryar Minhas
-#' 
+#'
 #' @keywords internal
 #' @noRd
 calculate_similarity_matrix <- function(attributes, method) {
@@ -366,12 +440,12 @@ calculate_similarity_matrix <- function(attributes, method) {
     if (method == "categorical" && !is.numeric(attributes)) {
         attributes <- as.numeric(as.factor(attributes))
     }
-    
+
     # ensure attributes is numeric
     if (!is.numeric(attributes)) {
         stop("Attributes must be numeric or convertible to numeric")
     }
-    
+
     # call the cpp version
     calculate_similarity_matrix_cpp(attributes, method)
 }
@@ -422,27 +496,25 @@ calculate_similarity_matrix <- function(attributes, method) {
 #' in either matrix are removed pairwise.
 #'
 #' @author Shahryar Minhas
-#' 
+#'
 #' @keywords internal
 #' @noRd
 calculate_homophily_stats <- function(
     similarity_matrix, net_matrix,
-    significance_test, n_permutations, alpha
-    ){
-    
+    significance_test, n_permutations, alpha) {
     # convert network to logical matrix for cpp function
     binary_net <- (net_matrix > 0) & !is.na(net_matrix)
-    
+
     # ensure diagonals are NA for the cpp function
     diag(similarity_matrix) <- NA
     diag(binary_net) <- NA
-    
+
     # call the cpp version
     calculate_homophily_stats_cpp(
-        similarity_matrix, 
+        similarity_matrix,
         binary_net,
-        significance_test, 
-        n_permutations, 
+        significance_test,
+        n_permutations,
         alpha
     )
 }

@@ -1,6 +1,6 @@
-#' Transform edge weights in a netify object
+#' Mutate edge weights in a netify object
 #'
-#' `transform_weights` applies mathematical transformations to edge weights in a netify object.
+#' `mutate_weights` applies mathematical transformations to edge weights in a netify object.
 #' This is useful for normalizing data, handling skewed distributions, creating binary networks,
 #' or applying any custom mathematical transformation to network weights.
 #'
@@ -51,7 +51,7 @@
 #' )
 #'
 #' # Example 1: Log transformation (common for skewed data)
-#' net_log <- transform_weights(
+#' net_log <- mutate_weights(
 #'     net,
 #'     transform_fn = log,
 #'     add_constant = 1, # log(x + 1) to handle zeros
@@ -60,21 +60,21 @@
 #' print(net_log)
 #'
 #' # Example 2: Square root transformation (moderate skewness)
-#' net_sqrt <- transform_weights(
+#' net_sqrt <- mutate_weights(
 #'     net,
 #'     transform_fn = sqrt,
 #'     new_name = "sqrt_verbCoop"
 #' )
 #'
 #' # Example 3: Binarization (convert to presence/absence)
-#' net_binary <- transform_weights(
+#' net_binary <- mutate_weights(
 #'     net,
 #'     transform_fn = function(x) ifelse(x > 0, 1, 0),
 #'     new_name = "verbCoop_binary"
 #' )
 #'
 #' # Example 4: Standardization (z-scores)
-#' net_std <- transform_weights(
+#' net_std <- mutate_weights(
 #'     net,
 #'     transform_fn = function(x) {
 #'         mean_x <- mean(x, na.rm = TRUE)
@@ -85,21 +85,21 @@
 #' )
 #'
 #' # Example 5: Rank transformation
-#' net_rank <- transform_weights(
+#' net_rank <- mutate_weights(
 #'     net,
 #'     transform_fn = function(x) rank(x, na.last = "keep"),
 #'     new_name = "verbCoop_ranked"
 #' )
 #'
 #' # Example 6: Power transformation
-#' net_power <- transform_weights(
+#' net_power <- mutate_weights(
 #'     net,
 #'     transform_fn = function(x) x^0.5, # Square root as power
 #'     new_name = "verbCoop_power"
 #' )
 #'
 #' # Example 7: Min-max normalization (scale to 0-1)
-#' net_norm <- transform_weights(
+#' net_norm <- mutate_weights(
 #'     net,
 #'     transform_fn = function(x) {
 #'         min_x <- min(x, na.rm = TRUE)
@@ -110,7 +110,7 @@
 #' )
 #'
 #' # Example 8: Winsorization (cap extreme values)
-#' net_winsor <- transform_weights(
+#' net_winsor <- mutate_weights(
 #'     net,
 #'     transform_fn = function(x) {
 #'         q95 <- quantile(x, 0.95, na.rm = TRUE)
@@ -120,14 +120,14 @@
 #' )
 #'
 #' # Example 9: Only add constant (no transformation function)
-#' net_shifted <- transform_weights(
+#' net_shifted <- mutate_weights(
 #'     net,
 #'     add_constant = 10,
 #'     new_name = "verbCoop_shifted"
 #' )
 #'
 #' # Example 10: Don't keep original weights to save memory
-#' net_log_compact <- transform_weights(
+#' net_log_compact <- mutate_weights(
 #'     net,
 #'     transform_fn = log1p, # log(1 + x), handles zeros automatically
 #'     new_name = "log1p_verbCoop",
@@ -146,7 +146,7 @@
 #' )
 #'
 #' # Transform across all time periods
-#' net_longit_log <- transform_weights(
+#' net_longit_log <- mutate_weights(
 #'     net_longit,
 #'     transform_fn = log1p,
 #'     new_name = "log_verbCoop"
@@ -154,7 +154,7 @@
 #' }
 #'
 #' # Example 12: Custom transformation with multiple operations
-#' net_custom <- transform_weights(
+#' net_custom <- mutate_weights(
 #'     net,
 #'     transform_fn = function(x) {
 #'         # Complex transformation: log, then standardize
@@ -167,9 +167,9 @@
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #'
-#' @export transform_weights
+#' @export mutate_weights
 
-transform_weights <- function(
+mutate_weights <- function(
     netlet, transform_fn = NULL,
     add_constant = 0, new_name = NULL,
     keep_original = TRUE) {

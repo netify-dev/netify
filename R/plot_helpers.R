@@ -32,10 +32,10 @@
 #' @export
 netify_edge <- function(comp) {
     if (!inherits(comp, "netify_plot_components")) {
-        stop("Input must be netify_plot_components from plot(..., return_components = TRUE)")
+        cli::cli_abort("Input must be netify_plot_components from {.code plot(..., return_components = TRUE)}")
     }
     if (is.null(comp$edges)) {
-        stop("No edges in this plot")
+        cli::cli_abort("No edges in this plot")
     }
 
     # create the layer
@@ -105,10 +105,10 @@ ggplot_add.netify_edge <- function(object, plot, object_name) {
 #' @export
 netify_node <- function(comp) {
     if (!inherits(comp, "netify_plot_components")) {
-        stop("Input must be netify_plot_components from plot(..., return_components = TRUE)")
+        cli::cli_abort("Input must be netify_plot_components from {.code plot(..., return_components = TRUE)}")
     }
     if (is.null(comp$points)) {
-        stop("No nodes in this plot")
+        cli::cli_abort("No nodes in this plot")
     }
 
     # create the layer
@@ -178,10 +178,10 @@ ggplot_add.netify_node <- function(object, plot, object_name) {
 #' @export
 netify_text <- function(comp) {
     if (!inherits(comp, "netify_plot_components")) {
-        stop("Input must be netify_plot_components from plot(..., return_components = TRUE)")
+        cli::cli_abort("Input must be netify_plot_components from {.code plot(..., return_components = TRUE)}")
     }
     if (is.null(comp$text)) {
-        stop("No text in this plot")
+        cli::cli_abort("No text in this plot")
     }
 
     layer <- ggplot2::layer(
@@ -249,10 +249,10 @@ ggplot_add.netify_text <- function(object, plot, object_name) {
 #' @export
 netify_label <- function(comp) {
     if (!inherits(comp, "netify_plot_components")) {
-        stop("Input must be netify_plot_components from plot(..., return_components = TRUE)")
+        cli::cli_abort("Input must be netify_plot_components from {.code plot(..., return_components = TRUE)}")
     }
     if (is.null(comp$label)) {
-        stop("No labels in this plot")
+        cli::cli_abort("No labels in this plot")
     }
 
     layer <- ggplot2::layer(
@@ -283,6 +283,148 @@ netify_label <- function(comp) {
 #' @method ggplot_add netify_label
 #' @export
 ggplot_add.netify_label <- function(object, plot, object_name) {
+    plot$layers <- append(plot$layers, object)
+    plot
+}
+
+#' Extract text_repel layer from netify plot components
+#'
+#' Extracts the text_repel layer from a netify plot components object. Text repel labels
+#' display actor names with automatic repositioning to avoid overlaps, making them more
+#' readable in dense networks.
+#'
+#' @param comp A netify_plot_components object returned from
+#'   \code{plot(..., return_components = TRUE)}
+#'
+#' @return A custom object of class "netify_text_repel" that can be added to a ggplot
+#'   object using the + operator. The object contains the text_repel layer with all
+#'   its aesthetic mappings and data.
+#'
+#' @examples
+#' \dontrun{
+#' # create a netify object
+#' net <- netify(my_data, actor1 = "from", actor2 = "to")
+#'
+#' # get plot components with text_repel
+#' comp <- plot(net, add_text_repel = TRUE, return_components = TRUE)
+#'
+#' # build custom plot with repelled text
+#' library(ggplot2)
+#' ggplot() +
+#'     netify_text_repel(comp)
+#' }
+#'
+#' @seealso \code{\link{plot.netify}}, \code{\link{netify_text}},
+#'   \code{\link{assemble_netify_plot}}
+#'
+#' @export
+netify_text_repel <- function(comp) {
+    if (!inherits(comp, "netify_plot_components")) {
+        cli::cli_abort("Input must be netify_plot_components from {.code plot(..., return_components = TRUE)}")
+    }
+    if (is.null(comp$text_repel)) {
+        cli::cli_abort("No text_repel in this plot")
+    }
+
+    layer <- ggplot2::layer(
+        geom = comp$text_repel$geom,
+        data = comp$text_repel$data,
+        mapping = comp$text_repel$mapping,
+        stat = comp$text_repel$stat,
+        position = comp$text_repel$position,
+        params = comp$text_repel$params,
+        inherit.aes = comp$text_repel$inherit.aes,
+        show.legend = comp$text_repel$show.legend
+    )
+
+    structure(list(layer), class = c("netify_text_repel", "list"))
+}
+
+#' Add netify_text_repel to ggplot
+#'
+#' S3 method to add netify_text_repel objects to ggplot objects. This method is called
+#' automatically when using the + operator with a netify_text_repel object.
+#'
+#' @param object A netify_text_repel object created by \code{\link{netify_text_repel}}
+#' @param plot A ggplot object to which the text_repel layer will be added
+#' @param object_name The name of the object being added (used internally by ggplot2)
+#'
+#' @return A ggplot object with the text_repel layer added
+#'
+#' @method ggplot_add netify_text_repel
+#' @export
+ggplot_add.netify_text_repel <- function(object, plot, object_name) {
+    plot$layers <- append(plot$layers, object)
+    plot
+}
+
+#' Extract label_repel layer from netify plot components
+#'
+#' Extracts the label_repel layer from a netify plot components object. Label repel
+#' annotations display actor names with background boxes and automatic repositioning
+#' to avoid overlaps, providing optimal readability in dense networks.
+#'
+#' @param comp A netify_plot_components object returned from
+#'   \code{plot(..., return_components = TRUE)}
+#'
+#' @return A custom object of class "netify_label_repel" that can be added to a ggplot
+#'   object using the + operator. The object contains the label_repel layer with all
+#'   its aesthetic mappings and data.
+#'
+#' @examples
+#' \dontrun{
+#' # create a netify object
+#' net <- netify(my_data, actor1 = "from", actor2 = "to")
+#'
+#' # get plot components with label_repel
+#' comp <- plot(net, add_label_repel = TRUE, return_components = TRUE)
+#'
+#' # build custom plot with repelled labels
+#' library(ggplot2)
+#' ggplot() +
+#'     netify_label_repel(comp)
+#' }
+#'
+#' @seealso \code{\link{plot.netify}}, \code{\link{netify_label}},
+#'   \code{\link{assemble_netify_plot}}
+#'
+#' @export
+netify_label_repel <- function(comp) {
+    if (!inherits(comp, "netify_plot_components")) {
+        cli::cli_abort("Input must be netify_plot_components from {.code plot(..., return_components = TRUE)}")
+    }
+    if (is.null(comp$label_repel)) {
+        cli::cli_abort("No label_repel in this plot")
+    }
+
+    layer <- ggplot2::layer(
+        geom = comp$label_repel$geom,
+        data = comp$label_repel$data,
+        mapping = comp$label_repel$mapping,
+        stat = comp$label_repel$stat,
+        position = comp$label_repel$position,
+        params = comp$label_repel$params,
+        inherit.aes = comp$label_repel$inherit.aes,
+        show.legend = comp$label_repel$show.legend
+    )
+
+    structure(list(layer), class = c("netify_label_repel", "list"))
+}
+
+#' Add netify_label_repel to ggplot
+#'
+#' S3 method to add netify_label_repel objects to ggplot objects. This method is called
+#' automatically when using the + operator with a netify_label_repel object.
+#'
+#' @param object A netify_label_repel object created by \code{\link{netify_label_repel}}
+#' @param plot A ggplot object to which the label_repel layer will be added
+#' @param object_name The name of the object being added (used internally by ggplot2)
+#'
+#' @return A ggplot object with the label_repel layer added
+#'
+#' @method ggplot_add netify_label_repel
+#' @export
+ggplot_add.netify_label_repel <- function(object, plot, object_name) {
     plot$layers <- append(plot$layers, object)
     plot
 }
@@ -345,8 +487,8 @@ ggplot_add.netify_scale_reset <- function(object, plot, object_name) {
 #' Assemble netify plot from components
 #'
 #' Assembles a complete network plot from netify plot components. This function
-#' automatically adds all available layers (edges, nodes, text, labels) in the
-#' correct order with appropriate scale resets between layers.
+#' automatically adds all available layers (edges, nodes, text, labels, and their
+#' repel versions) in the correct order with appropriate scale resets between layers.
 #'
 #' @param comp A netify_plot_components object returned from
 #'   \code{plot(..., return_components = TRUE)}
@@ -358,8 +500,9 @@ ggplot_add.netify_scale_reset <- function(object, plot, object_name) {
 #' components after extracting them with \code{return_components = TRUE}.
 #' It automatically:
 #' \itemize{
-#'   \item Adds layers in the correct order (edges, nodes, text, labels)
+#'   \item Adds layers in the correct order (edges, nodes, text/text_repel, labels/label_repel)
 #'   \item Inserts scale resets between layers when necessary
+#'   \item Handles both standard and repel versions of text and label layers
 #'   \item Includes facets and themes if present
 #' }
 #'
@@ -382,7 +525,7 @@ ggplot_add.netify_scale_reset <- function(object, plot, object_name) {
 #' @export
 assemble_netify_plot <- function(comp) {
     if (!inherits(comp, "netify_plot_components")) {
-        stop("Input must be netify_plot_components from plot(..., return_components = TRUE)")
+        cli::cli_abort("Input must be netify_plot_components from {.code plot(..., return_components = TRUE)}")
     }
 
     p <- comp$base
@@ -413,12 +556,28 @@ assemble_netify_plot <- function(comp) {
         p <- p + netify_text(comp)
     }
 
+    # add text_repel if present
+    if (!is.null(comp$text_repel)) {
+        if (!is.null(comp$points)) {
+            p <- p + reset_scales()
+        }
+        p <- p + netify_text_repel(comp)
+    }
+
     # add labels if present
     if (!is.null(comp$label)) {
-        if (!is.null(comp$text) || !is.null(comp$points)) {
+        if (!is.null(comp$text) || !is.null(comp$text_repel) || !is.null(comp$points)) {
             p <- p + reset_scales()
         }
         p <- p + netify_label(comp)
+    }
+
+    # add label_repel if present
+    if (!is.null(comp$label_repel)) {
+        if (!is.null(comp$label) || !is.null(comp$text) || !is.null(comp$text_repel) || !is.null(comp$points)) {
+            p <- p + reset_scales()
+        }
+        p <- p + netify_label_repel(comp)
     }
 
     # add facets
@@ -458,15 +617,26 @@ assemble_netify_plot <- function(comp) {
 #' @method print netify_plot_components
 #' @export
 print.netify_plot_components <- function(x, ...) {
-    cat("Netify plot components:\n")
-    cat("  Base plot: ggplot object\n")
-    if (!is.null(x$edges)) cat("  Edges: geom_segment/geom_curve layer\n")
-    if (!is.null(x$points)) cat("  Points: geom_point layer\n")
-    if (!is.null(x$text)) cat("  Text: geom_text layer\n")
-    if (!is.null(x$label)) cat("  Labels: geom_label layer\n")
-    if (!is.null(x$facets)) cat("  Facets: facet_wrap layer\n")
-    if (!is.null(x$theme)) cat("  Theme: theme_netify\n")
-    cat("\nUse assemble_netify_plot() to build or construct manually with netify_edge(), netify_node(), etc.\n")
+    cli::cli_h2("Netify plot components")
+    cli::cli_ul(c("Base plot: ggplot object"))
+    
+    components <- c()
+    if (!is.null(x$edges)) components <- c(components, "Edges: geom_segment/geom_curve layer")
+    if (!is.null(x$points)) components <- c(components, "Points: geom_point layer")
+    if (!is.null(x$text)) components <- c(components, "Text: geom_text layer")
+    if (!is.null(x$text_repel)) components <- c(components, "Text Repel: geom_text_repel layer")
+    if (!is.null(x$label)) components <- c(components, "Labels: geom_label layer")
+    if (!is.null(x$label_repel)) components <- c(components, "Label Repel: geom_label_repel layer")
+    if (!is.null(x$facets)) components <- c(components, "Facets: facet_wrap layer")
+    if (!is.null(x$theme)) components <- c(components, "Theme: theme_netify")
+    
+    if (length(components) > 0) {
+        cli::cli_ul(components)
+    }
+    
+    cli::cli_inform(c(
+        "i" = "Use {.fn assemble_netify_plot} to build or construct manually with {.fn netify_edge}, {.fn netify_node}, etc."
+    ))
     invisible(x)
 }
 
@@ -541,7 +711,7 @@ ggplot_add.netify_labels <- function(object, plot, object_name) {
     if (!is.null(plot$plot_env$last_netify_components)) {
         components <- plot$plot_env$last_netify_components
     } else {
-        warning("netify_scale_labels only works with netify plots")
+        cli::cli_warn("netify_scale_labels only works with netify plots")
         return(plot)
     }
 

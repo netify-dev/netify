@@ -22,7 +22,6 @@
 #' @noRd
 
 merge_layout_attribs <- function(netlet, nodes_list, edges_list) {
-    
     # check if the input is a valid netify object
     netify_check(netlet)
 

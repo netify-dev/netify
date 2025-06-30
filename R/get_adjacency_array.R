@@ -93,9 +93,7 @@ get_adjacency_array <- function(
     actor1 = NULL, actor2 = NULL, time = NULL,
     symmetric = TRUE, mode = "unipartite",
     weight = NULL, sum_dyads = FALSE,
-    diag_to_NA = TRUE, missing_to_zero = TRUE
-    ){
-        
+    diag_to_NA = TRUE, missing_to_zero = TRUE) {
     # create weight string for storage as attribute in netify object
     weight_label <- weight_string_label(weight, sum_dyads)
 

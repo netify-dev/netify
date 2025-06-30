@@ -15,7 +15,7 @@
 #'   automatically calculates based on data range.
 #' @param text_size Numeric. Size of value labels in tiles. Default 4.
 #' @param text_color Character. Color of text labels. Default "black".
-#' @param text_color_threshold Numeric. If provided, values above this threshold (0-1 scale) 
+#' @param text_color_threshold Numeric. If provided, values above this threshold (0-1 scale)
 #'   will use white text, values below will use black text. Default NULL uses text_color for all.
 #' @param tile_border_color Character. Color of tile borders. Default "white".
 #' @param tile_border_size Numeric. Width of tile borders. Default 0.5.
@@ -157,7 +157,7 @@ plot_mixing_matrix <- function(
         # First normalize values to 0-1 scale for comparison
         value_range <- range(df_long$value, na.rm = TRUE)
         normalized_values <- (df_long$value - value_range[1]) / (value_range[2] - value_range[1])
-        
+
         # Apply threshold to determine text colors
         text_colors <- ifelse(normalized_values > text_color_threshold, "white", "black")
     } else {

@@ -1,0 +1,137 @@
+add_dyad_vars           Add dyadic variables to a netify object
+add_node_vars           Add nodal variables to a netify object
+aggregate_dyad          Aggregate dyadic event data by actor pairs
+assemble_netify_plot    Assemble netify plot from components
+attribute_report        Comprehensive summary of network-attribute
+                        relationships
+compare_networks        Compare networks across time, layers, or
+                        attributes
+decompose_igraph        Decompose an igraph object into base R
+                        components
+decompose_netify        Decompose a netify object into edge and node
+                        data frames
+decompose_statnet       Decompose a network object into base R
+                        components
+dyad_correlation        Analyze correlations between dyadic attributes
+                        and network ties
+ego_layouts             Create ego-centric layouts for ego networks
+ego_netify              Create ego network from a netify object
+gen_symm_id             Generate symmetric identifiers for dyadic data
+get_actor_time_info     Extract actor time range information from
+                        dyadic data
+get_adjacency           Create a netify matrix from cross-sectional
+                        dyadic data
+get_adjacency_array     Create a netify array from longitudinal dyadic
+                        data
+get_adjacency_list      Create a netify list from longitudinal dyadic
+                        data
+get_edge_layout         Generate edge layout coordinates for netify
+                        visualization
+get_ego_layout          Calculate ego-centric layout positions for
+                        network visualization
+get_node_layout         Calculate node layout positions for netify
+                        visualization
+get_raw                 Get raw network data without netify attributes
+ggplot_add.netify_edge
+                        Add netify_edge to ggplot
+ggplot_add.netify_label
+                        Add netify_label to ggplot
+ggplot_add.netify_label_repel
+                        Add netify_label_repel to ggplot
+ggplot_add.netify_labels
+                        Add netify scale labels to ggplot
+ggplot_add.netify_node
+                        Add netify_node to ggplot
+ggplot_add.netify_scale_reset
+                        Add scale resets to ggplot
+ggplot_add.netify_text
+                        Add netify_text to ggplot
+ggplot_add.netify_text_repel
+                        Add netify_text_repel to ggplot
+homophily               Analyze homophily in network data
+icews                   Event data slice from ICEWS
+is_netify               Is this object a netify object?
+layer_netify            Create multilayer networks from multiple netify
+                        objects
+list_network_styles     List available network styles
+list_palettes           List available color palettes
+melt                    Melt methods for netify objects
+mexico                  Event data slice from UCDP on Mexico
+mixing_matrix           Create attribute mixing matrices for network
+                        data
+mutate_weights          Mutate edge weights in a netify object
+myanmar                 Event data slice from UCDP on Myanmar
+net_plot_data           Prepare netify data for network visualization
+netify                  Create network object from various data types
+netify_edge             Extract edges layer from netify plot components
+netify_label            Extract label layer from netify plot components
+netify_label_repel      Extract label_repel layer from netify plot
+                        components
+netify_measurements     Extract measurements and dimensions from a
+                        netify object
+netify_node             Extract nodes layer from netify plot components
+netify_scale_labels     Set scale labels for netify plots
+netify_text             Extract text layer from netify plot components
+netify_text_repel       Extract text_repel layer from netify plot
+                        components
+netify_to_amen          Convert netify objects to amen format
+netify_to_igraph        Convert netify objects to igraph format
+netify_to_statnet       Convert netify objects to statnet network
+                        format
+new_netify              Low-level constructor for netify objects
+peek                    Preview subsets of network data from netify
+                        objects
+pivot_dyad_to_network   Pivot a dyadic variable to become the network
+plot.netify             Plotting method for netify objects
+plot_actor_stats        Visualize actor-level network statistics
+plot_graph_stats        Visualize network-level statistics
+plot_homophily          Visualize homophily analysis results
+plot_mixing_matrix      Visualize attribute mixing matrix results
+plot_mixing_matrix_facet
+                        Create a multi-panel mixing matrix
+                        visualization
+plot_with_style         Apply style to netify plot
+print.netify            Print method for netify objects
+print.netify_comparison
+                        Print method for netify_comparison objects
+print.netify_plot_components
+                        Print netify plot components
+remove_ego_edges        Remove ego-alter edges from ego network
+reset_scales            Reset aesthetic scales in ggplot
+style_538               FiveThirtyEight-inspired network style
+style_bipartite_network
+                        Preset style for bipartite networks
+style_budapest          Wes Anderson-inspired network style (Grand
+                        Budapest Hotel)
+style_cyberpunk         Cyberpunk-inspired network style
+style_dark2             ColorBrewer Dark2-based network style
+style_economist         Economist-style network style
+style_nature            Nature journal-inspired network style
+style_pastel            Pastel rainbow network style
+style_pokemon_pikachu   Pokemon-style network style (Pikachu)
+style_random            Apply random network style
+style_retro80s          Retro 80s-inspired network style
+style_secretariat       Secretariat-style network style
+style_solarized         Solarized-inspired network style
+style_stata             Stata-inspired network style
+style_temporal_network
+                        Preset style for temporal/longitudinal networks
+style_tufte             Minimal Tufte-inspired network style
+style_witcher_feline    Witcher 3 Feline School network style
+style_witcher_griffin   Witcher 3 Griffin School network style
+style_witcher_manticore
+                        Witcher 3 Manticore School network style
+                        (bonus)
+style_witcher_ursine    Witcher 3 Ursine School network style
+style_witcher_viper     Witcher 3 Viper School network style (bonus)
+style_witcher_wolven    Witcher 3 Wolven School network style
+subset.netify           Subset netify objects
+summary.netify          Calculate graph-level statistics for netify
+                        objects
+summary_actor           Calculate actor-level network statistics
+theme_netify            theme_netify function
+theme_stat_netify       theme_stat_netify function
+to_netify               Convert igraph, network, or matrix objects to
+                        netify format
+unnetify                Convert netify objects back to dyadic data
+                        frames

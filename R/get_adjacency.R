@@ -96,9 +96,7 @@ get_adjacency <- function(
     actor1 = NULL, actor2 = NULL,
     symmetric = TRUE, mode = "unipartite",
     weight = NULL, sum_dyads = FALSE,
-    diag_to_NA = TRUE, missing_to_zero = TRUE
-    ){
-        
+    diag_to_NA = TRUE, missing_to_zero = TRUE) {
     # if bipartite network then force diag_to_NA to be FALSE
     # and force asymmetric, create copy to preserve user choice
     user_symmetric <- symmetric

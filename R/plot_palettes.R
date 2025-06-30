@@ -15,7 +15,7 @@ get_palette <- function(palette_name) {
             node_fill = "#9A8C98", # Purple
             node_color = "#C9ADA7", # Light purple border
             edge_alpha = 0.6,
-            curve_edges = TRUE
+            curve_edges = FALSE
         ),
         economist = list(
             edge_color = "#E3120B", # Economist red
@@ -43,14 +43,14 @@ get_palette <- function(palette_name) {
             node_fill = "#9EDAC0", # Mint green
             node_color = "#FEB1D3", # Pink border
             edge_alpha = 0.7,
-            curve_edges = TRUE
+            curve_edges = FALSE
         ),
         solarized = list(
             edge_color = "#B58900", # Yellow
             node_fill = "#268BD2", # Blue
             node_color = "#CB4B16", # Orange
             edge_alpha = 0.5,
-            curve_edges = TRUE
+            curve_edges = FALSE
         ),
         viridis = list(
             edge_color = "#440154", # Dark purple
@@ -71,14 +71,14 @@ get_palette <- function(palette_name) {
             node_fill = "#FFE66D", # Yellow
             node_color = "#4ECDC4", # Turquoise
             edge_alpha = 0.7,
-            curve_edges = TRUE
+            curve_edges = FALSE
         ),
         ocean = list(
             edge_color = "#006994", # Deep blue
             node_fill = "#00A8CC", # Light blue
             node_color = "#0C7B93", # Medium blue
             edge_alpha = 0.6,
-            curve_edges = TRUE
+            curve_edges = FALSE
         )
     )
 

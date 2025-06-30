@@ -65,16 +65,14 @@
 
 get_actor_time_info <- function(
     dyad_data,
-    actor1, actor2, 
-    time
-    ){
-
+    actor1, actor2,
+    time) {
     # input validation
     checkmate::assert_data_frame(dyad_data)
     checkmate::assert_string(actor1)
     checkmate::assert_string(actor2)
     checkmate::assert_string(time)
-    
+
     # check that specified columns exist in the data
     checkmate::assert_choice(actor1, names(dyad_data))
     checkmate::assert_choice(actor2, names(dyad_data))

@@ -37,7 +37,7 @@ If numeric, edges with weights > threshold are considered ties. If a function,
 it should take the network matrix and return a logical matrix. Default is 0
 (any positive weight is a tie). Common values: 0 (default), mean(weights),
 median(weights), or quantile-based thresholds. For pre-binarized networks,
-consider using \code{transform_weights()} first.}
+consider using \code{mutate_weights()} first.}
 
 \item{significance_test}{Logical. Whether to perform permutation test. Default TRUE.}
 
@@ -106,7 +106,7 @@ constitute a "connection". You can specify:
 }
 
 For more complex binarization needs (e.g., different thresholds by time period),
-consider using \code{transform_weights()} to pre-process your network.
+consider using \code{mutate_weights()} to pre-process your network.
 }
 \examples{
 \dontrun{
@@ -115,31 +115,31 @@ homophily_default <- homophily(net, attribute = "group")
 
 # Using different similarity metrics for continuous data
 homophily_manhattan <- homophily(
-  net, 
-  attribute = "age",
-  method = "manhattan"  # Less sensitive to outliers
+    net,
+    attribute = "age",
+    method = "manhattan" # Less sensitive to outliers
 )
 
 # For binary attributes (e.g., gender, membership)
 homophily_jaccard <- homophily(
-  net,
-  attribute = "member", 
-  method = "jaccard"  # Better for binary data than correlation
+    net,
+    attribute = "member",
+    method = "jaccard" # Better for binary data than correlation
 )
 
 # For categorical attributes
 homophily_categorical <- homophily(
-  net,
-  attribute = "department",
-  method = "categorical"
+    net,
+    attribute = "department",
+    method = "categorical"
 )
 
 # Combining method and threshold
 homophily_combined <- homophily(
-  net,
-  attribute = "score",
-  method = "manhattan",
-  threshold = function(x) quantile(x, 0.75, na.rm = TRUE)
+    net,
+    attribute = "score",
+    method = "manhattan",
+    threshold = function(x) quantile(x, 0.75, na.rm = TRUE)
 )
 }
 

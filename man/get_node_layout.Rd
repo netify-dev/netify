@@ -10,7 +10,8 @@ get_node_layout(
   static_actor_positions = FALSE,
   which_static = NULL,
   seed = 6886,
-  ig_netlet = NULL
+  ig_netlet = NULL,
+  ...
 )
 }
 \arguments{
@@ -46,6 +47,10 @@ Default is 6886.}
 
 \item{ig_netlet}{An optional pre-converted igraph object. If provided, this
 function will use it directly instead of converting the netify object again.}
+
+\item{...}{Additional arguments passed to ego-specific layout functions when
+layout is "radial" or "concentric". See \code{\link{get_ego_layout}} for
+available options (ego_group_by, ego_order_by, ego_weight_to_distance, etc.).}
 }
 \value{
 A list of data frames (one per time period) where each data frame contains:
@@ -73,7 +78,8 @@ networks with several key features:
 
 The function provides access to all major igraph layout algorithms. The default
 "nicely" option automatically selects an appropriate algorithm based on the
-network structure.
+network structure. For ego networks, specialized layouts ("radial" and "concentric")
+are available that emphasize the ego-alter structure.
 
 \strong{Longitudinal layouts:}
 

@@ -119,9 +119,7 @@ get_adjacency_list <- function(
     weight = NULL, sum_dyads = FALSE,
     actor_time_uniform = FALSE,
     actor_pds = NULL,
-    diag_to_NA = TRUE, missing_to_zero = TRUE
-    ){
-        
+    diag_to_NA = TRUE, missing_to_zero = TRUE) {
     # create weight string for storage as attribute in netify object
     weight_label <- weight_string_label(weight, sum_dyads)
 

@@ -11,9 +11,9 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
-  dev = 'png', dpi = 150,
-  cache = FALSE,
-  echo = TRUE
+    dev = "png", dpi = 150,
+    cache = FALSE,
+    echo = TRUE
 )
 ```
 
@@ -64,10 +64,12 @@ Begin by loading packages and supplying the data. We will use the `peacesciencer
 library(netify)
 
 # install extra packages for this vignette
-if(!'tidyverse' %in% rownames(installed.packages())){
-  install.packages('tidyverse', repos='https://cloud.r-project.org') }
-if(!'peacesciencer' %in% rownames(installed.packages())){
-  install.packages('peacesciencer', repos='https://cloud.r-project.org') }
+if (!"tidyverse" %in% rownames(installed.packages())) {
+    install.packages("tidyverse", repos = "https://cloud.r-project.org")
+}
+if (!"peacesciencer" %in% rownames(installed.packages())) {
+    install.packages("peacesciencer", repos = "https://cloud.r-project.org")
+}
 # load necessary packages for this vignette
 library(peacesciencer)
 library(tidyverse)
@@ -76,9 +78,9 @@ library(tidyverse)
 peacesciencer::download_extdata()
 
 # create dyadic data set over time using peacesciencer
-cow_dyads <- create_dyadyears( 
-     subset_years = c(1995:2014)
-     ) |>
+cow_dyads <- create_dyadyears(
+    subset_years = c(1995:2014)
+) |>
     # add mids
     add_cow_mids() |>
     # add capital distance
@@ -100,16 +102,16 @@ Next, create a `netlet` object from the above COW data frame using our package's
 
 ```{r, eval=TRUE}
 mid_long_network <- netify(
-  input = cow_dyads,
-  actor1='ccode1', actor2='ccode2', time='year',
-  weight='cowmidonset', 
-  actor_time_uniform=FALSE,
-  sum_dyads=FALSE, symmetric=TRUE,
-  diag_to_NA=TRUE, missing_to_zero=TRUE,
-  nodal_vars = c('v2x_polyarchy1', 'v2x_polyarchy2'),
-  dyad_vars = c('capdist'),
-  dyad_vars_symmetric = c(TRUE)
-  )
+    input = cow_dyads,
+    actor1 = "ccode1", actor2 = "ccode2", time = "year",
+    weight = "cowmidonset",
+    actor_time_uniform = FALSE,
+    sum_dyads = FALSE, symmetric = TRUE,
+    diag_to_NA = TRUE, missing_to_zero = TRUE,
+    nodal_vars = c("v2x_polyarchy1", "v2x_polyarchy2"),
+    dyad_vars = c("capdist"),
+    dyad_vars_symmetric = c(TRUE)
+)
 ```
 
 **Congratulations** you have created a network object! 🎉
@@ -120,7 +122,7 @@ Let's assume that we had information about each actor in the network that we'd l
 
 ```{r, eval=TRUE}
 # create a vector of nodal data
-node_data <- unique(cow_dyads[,c("ccode1", "year", "wbgdppc2011est2")])
+node_data <- unique(cow_dyads[, c("ccode1", "year", "wbgdppc2011est2")])
 node_data$wbgdppc2011est2_log <- log(node_data$wbgdppc2011est2)
 
 # add nodal variable to netlet object
@@ -132,17 +134,17 @@ mid_long_network <- add_node_vars(
 )
 
 # create another dyadic var in cow
-cow_dyads$log_capdist = log(cow_dyads$capdist + 1)
+cow_dyads$log_capdist <- log(cow_dyads$capdist + 1)
 
 # now lets add this to the netlet
 mid_long_network <- add_dyad_vars(
-  netlet = mid_long_network, 
-  dyad_data= cow_dyads,
-  actor1= 'ccode1',
-  actor2='ccode2',
-  time='year',
-  dyad_vars = 'log_capdist',
-  dyad_vars_symmetric = TRUE
+    netlet = mid_long_network,
+    dyad_data = cow_dyads,
+    actor1 = "ccode1",
+    actor2 = "ccode2",
+    time = "year",
+    dyad_vars = "log_capdist",
+    dyad_vars_symmetric = TRUE
 )
 ```
 
@@ -152,14 +154,15 @@ We made a network, so let's look at it. First, we might want to take a `peek` at
 
 ```{r}
 peek(mid_long_network,
-  from = 5, to = 5,
-  time = c('2009', '2010'))
+    from = 5, to = 5,
+    time = c("2009", "2010")
+)
 ```
 
 Next, let's examine a few basic summary statistics about the network using our`summary()` function.
 
 ```{r}
-# create data.frame that provides network-level summary stats 
+# create data.frame that provides network-level summary stats
 # for each year of the network
 mid_long_summary <- summary(mid_long_network)
 ```
@@ -173,7 +176,7 @@ plot_graph_stats(mid_long_summary)
 These graph statistics are useful for understanding changes overtime at the network level, however, we might also want to look at actor-level statistics overtime. Our built-in function, `summary_actor` will calculate in-degree, out-degree, average degree, and eigenvector centrality for each actor in each time period. The `across_actors` function allows users to toggle whether they want a summary of a given statistic across all actors (shown in a density plot) or for specific actors:
 
 ```{r}
-# every year & every actor 
+# every year & every actor
 summary_actor_mids <- summary_actor(mid_long_network)
 head(summary_actor_mids)
 ```
@@ -184,9 +187,9 @@ We can look at the distribution of the statistic for all actors over time:
 # density plot across all actors
 # for each stat
 plot_actor_stats(
-  summary_actor_mids,
-  across_actor= TRUE,
-  )
+    summary_actor_mids,
+    across_actor = TRUE,
+)
 ```
 
 Or we might like to select a specific statistic to focus on across actors over time:
@@ -194,10 +197,10 @@ Or we might like to select a specific statistic to focus on across actors over t
 ```{r, fig.width=6, fig.height=6}
 # focus on closeness
 plot_actor_stats(
-  summary_actor_mids,
-  across_actor = TRUE,
-  specific_stats='closeness'
-  )
+    summary_actor_mids,
+    across_actor = TRUE,
+    specific_stats = "closeness"
+)
 ```
 
 Say that we wanted to showcase actor-specific statistics over time. We can use the plot_actor_stats function for this as well, though it's **highly recommended** to subset to a few actors for a more legible plot.
@@ -208,21 +211,21 @@ top_5 <- c("2", "710", "740", "255", "750")
 
 #
 plot_actor_stats(
-  summary_actor_mids, 
-  across_actor = FALSE, 
-  specific_actors = top_5
+    summary_actor_mids,
+    across_actor = FALSE,
+    specific_actors = top_5
 )
 ```
 
 We can also zoom into a specific time slice of the network:
 
 ```{r, fig.width=6, fig.height=6}
-summary_df_static = summary_actor_mids[summary_actor_mids$time == 2011,]
+summary_df_static <- summary_actor_mids[summary_actor_mids$time == 2011, ]
 
 plot_actor_stats(
-  summary_df_static,
-  across_actor=FALSE,
-  specific_actors=top_5
+    summary_df_static,
+    across_actor = FALSE,
+    specific_actors = top_5
 )
 ```
 
@@ -233,14 +236,15 @@ Our goal was to make this super easy for plotting time-varying attributes or act
 ```{r, fig.width=6, fig.height=6}
 # default plot
 plot.netify(mid_long_network,
-            static_actor_positions = TRUE,
-            remove_isolates = FALSE)
+    static_actor_positions = TRUE,
+    remove_isolates = FALSE
+)
 
 # a little cleaner
 plot(
     mid_long_network,
-    edge_color='grey',
-    node_size=2
+    edge_color = "grey",
+    node_size = 2
 )
 ```
 
@@ -248,11 +252,11 @@ We can also use `netify` functions to explore actor level summary statistics in 
 
 ```{r}
 # add actor variables from summary_actor_mids
-mid_long_network = add_node_vars(
-    mid_long_network, 
+mid_long_network <- add_node_vars(
+    mid_long_network,
     summary_actor_mids,
-    actor='actor', time='time',
-    node_vars = c('degree', 'prop_ties', 'eigen_vector'),
+    actor = "actor", time = "time",
+    node_vars = c("degree", "prop_ties", "eigen_vector"),
 )
 ```
 
@@ -270,13 +274,13 @@ As well as look at the attributes of the data and specify showing the nodal data
 ```{r}
 # if you're curious as to where they live
 head(
-  attr(
-    mid_long_network, 
-    'nodal_data'
-  )
+    attr(
+        mid_long_network,
+        "nodal_data"
+    )
 )
 
-#i.e., 
+# i.e.,
 head(attributes(mid_long_network)$nodal_data)
 ```
 
@@ -286,19 +290,19 @@ And now return to our network graph by highlighting specific nodal attributes:
 # vary node size by degree
 plot(
     mid_long_network,
-    edge_color='grey',
-    point_size_var='degree'
+    edge_color = "grey",
+    point_size_var = "degree"
 )
 
 # vary node color by polyarchy
 plot(
     mid_long_network,
-    edge_color='grey',
-    node_size_by='degree',
-    node_color_by='v2x_polyarchy1',
-    node_color_label='Polyarchy',
-    node_size_label='Degree'
-    ) + 
+    edge_color = "grey",
+    node_size_by = "degree",
+    node_color_by = "v2x_polyarchy1",
+    node_color_label = "Polyarchy",
+    node_size_label = "Degree"
+) +
     scale_color_gradient2()
 ```
 
@@ -306,40 +310,41 @@ We might also prefer to add labels, but only a select few:
 
 ```{r, fig.width=6, fig.height=6}
 library(countrycode)
-cowns = countrycode(
+cowns <- countrycode(
     c(
-      'United States', 'China', 'Russia', 
-      'France', 'Germany', 'United Kingdom'), 
-    'country.name', 'cown'
-    ) 
-cabbs = countrycode(cowns, 'cown', 'iso3c')
+        "United States", "China", "Russia",
+        "France", "Germany", "United Kingdom"
+    ),
+    "country.name", "cown"
+)
+cabbs <- countrycode(cowns, "cown", "iso3c")
 
 plot(
     mid_long_network,
-    edge_color='grey',
-    node_size_by='degree',
-    node_color_by='v2x_polyarchy1',
-    node_color_label='Polyarchy',
-    node_size_label='Degree',
+    edge_color = "grey",
+    node_size_by = "degree",
+    node_color_by = "v2x_polyarchy1",
+    node_color_label = "Polyarchy",
+    node_size_label = "Degree",
     select_text = cowns,
     select_text_display = cabbs,
     text_size = 3
-    ) + 
+) +
     scale_color_gradient2()
 
-# or we can go with labels only 
+# or we can go with labels only
 # and remove points
 plot(
     mid_long_network,
-    edge_color='grey',
-    add_points = FALSE, 
+    edge_color = "grey",
+    add_points = FALSE,
     add_label = TRUE,
-    label_size_by='degree',
-    label_color = 'white',
-    label_fill_by='v2x_polyarchy1',
-    label_fill_label='Polyarchy',
-    label_size_label='Degree'    
-    ) + guides(size='none')
+    label_size_by = "degree",
+    label_color = "white",
+    label_fill_by = "v2x_polyarchy1",
+    label_fill_label = "Polyarchy",
+    label_size_label = "Degree"
+) + guides(size = "none")
 ```
 
 ## Step 3: Advance 🚀
@@ -350,55 +355,57 @@ First, prep the data:
 
 ```{r, warning=FALSE, message = FALSE}
 # prep data
-cow_cross = cow_dyads |> 
-  group_by(ccode1, ccode2) |>
-  summarize(
-    cowmidonset = ifelse(any(cowmidonset>0), 1, 0),
-    capdist = mean(capdist),
-    polity21 = mean(polity21, na.rm=TRUE),
-    polity22 = mean(polity22, na.rm=TRUE),
-    wbgdp2011est1 = mean(wbgdp2011est1, na.rm=TRUE),
-    wbgdp2011est2 = mean(wbgdp2011est2, na.rm=TRUE),
-    wbpopest1 = mean(wbpopest1, na.rm=TRUE),
-    wbpopest2 = mean(wbpopest2, na.rm=TRUE)
-  ) |>
-  ungroup() |>
-  mutate(
-    capdist = log(capdist+1)
-  )
+cow_cross <- cow_dyads |>
+    group_by(ccode1, ccode2) |>
+    summarize(
+        cowmidonset = ifelse(any(cowmidonset > 0), 1, 0),
+        capdist = mean(capdist),
+        polity21 = mean(polity21, na.rm = TRUE),
+        polity22 = mean(polity22, na.rm = TRUE),
+        wbgdp2011est1 = mean(wbgdp2011est1, na.rm = TRUE),
+        wbgdp2011est2 = mean(wbgdp2011est2, na.rm = TRUE),
+        wbpopest1 = mean(wbpopest1, na.rm = TRUE),
+        wbpopest2 = mean(wbpopest2, na.rm = TRUE)
+    ) |>
+    ungroup() |>
+    mutate(
+        capdist = log(capdist + 1)
+    )
 
 # subset set to actors with 10mil pop
-actor_to_keep = cow_cross |>
-  select(ccode1, wbpopest1) |>
-  filter(wbpopest1>log(10000000)) |>
-  distinct(ccode1)
+actor_to_keep <- cow_cross |>
+    select(ccode1, wbpopest1) |>
+    filter(wbpopest1 > log(10000000)) |>
+    distinct(ccode1)
 
 # filter cow_cross by actor_to_keep
-cow_cross = cow_cross |>
-  filter(ccode1 %in% actor_to_keep$ccode1) |>
-  filter(ccode2 %in% actor_to_keep$ccode1)
+cow_cross <- cow_cross |>
+    filter(ccode1 %in% actor_to_keep$ccode1) |>
+    filter(ccode2 %in% actor_to_keep$ccode1)
 
 # create netlet
 mid_cross_network <- netify(
-  cow_cross,
-  actor1='ccode1', actor2='ccode2',
-  weight='cowmidonset', 
-  sum_dyads=FALSE, symmetric=TRUE,
-  diag_to_NA=TRUE, missing_to_zero=FALSE,
-  nodal_vars = c(
-    'polity21', 'polity22', 'wbgdp2011est1', 
-    'wbgdp2011est2', 'wbpopest1', 'wbpopest2'),
-  dyad_vars = c('capdist'),
-  dyad_vars_symmetric = c(TRUE)
-  )
+    cow_cross,
+    actor1 = "ccode1", actor2 = "ccode2",
+    weight = "cowmidonset",
+    sum_dyads = FALSE, symmetric = TRUE,
+    diag_to_NA = TRUE, missing_to_zero = FALSE,
+    nodal_vars = c(
+        "polity21", "polity22", "wbgdp2011est1",
+        "wbgdp2011est2", "wbpopest1", "wbpopest2"
+    ),
+    dyad_vars = c("capdist"),
+    dyad_vars_symmetric = c(TRUE)
+)
 ```
 
 Next, let's take a look at passing our netify object to the `amen` function:
 
 ```{r}
 # install (if necessary) and load amen
-if(!'amen' %in% rownames(installed.packages())){
-  install.packages('amen', repos='https://cloud.r-project.org') }
+if (!"amen" %in% rownames(installed.packages())) {
+    install.packages("amen", repos = "https://cloud.r-project.org")
+}
 library(amen)
 
 # prep for amen
@@ -408,19 +415,19 @@ mid_cross_amen <- netify_to_amen(mid_cross_network)
 str(mid_cross_amen)
 
 # plug and run
-mid_amen_mod = ame(
-  Y=mid_cross_amen$Y,
-  Xdyad=mid_cross_amen$Xdyad,
-  Xrow=mid_cross_amen$Xrow,
-  family='bin',
-  R=0,
-  symmetric=TRUE,
-  seed=6886,
-  nscan=50, 
-  burn=10, 
-  odens=1, 
-  plot=FALSE, 
-  print=FALSE
+mid_amen_mod <- ame(
+    Y = mid_cross_amen$Y,
+    Xdyad = mid_cross_amen$Xdyad,
+    Xrow = mid_cross_amen$Xrow,
+    family = "bin",
+    R = 0,
+    symmetric = TRUE,
+    seed = 6886,
+    nscan = 50,
+    burn = 10,
+    odens = 1,
+    plot = FALSE,
+    print = FALSE
 )
 ```
 
@@ -428,15 +435,16 @@ We can apply the same process to ERGMs:
 
 ```{r}
 # install (if necessary) and load ergm
-if(!'ergm' %in% rownames(installed.packages())){
-  install.packages('ergm', repos='https://cloud.r-project.org') }
+if (!"ergm" %in% rownames(installed.packages())) {
+    install.packages("ergm", repos = "https://cloud.r-project.org")
+}
 library(ergm)
 
 # called netify_to_statnet because it's a reference
 # to the network library, which is what ergm uses
-mid_cross_ergm = netify_to_statnet(mid_cross_network)
+mid_cross_ergm <- netify_to_statnet(mid_cross_network)
 
-# attributes should all be loaded into the 
+# attributes should all be loaded into the
 # appropriate slot
 # notice edge attribtues get a _e suffix added
 mid_cross_ergm
@@ -444,12 +452,12 @@ mid_cross_ergm
 # plug and run
 # Fit the ERGM model (well not a real ergm)
 ergm_model <- ergm(
-  formula = mid_cross_ergm ~ 
-     edges  +
-     nodecov("polity21") + 
-     nodecov("wbgdp2011est2") +
-     nodecov("wbpopest2")
-  )
+    formula = mid_cross_ergm ~
+        edges +
+        nodecov("polity21") +
+        nodecov("wbgdp2011est2") +
+        nodecov("wbpopest2")
+)
 ```
 
 

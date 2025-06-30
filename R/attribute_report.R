@@ -42,7 +42,7 @@
 #' for faster computation. Centrality measures use igraph functions.
 #'
 #' @author Cassy Dorff, Shahryar Minhas
-#' 
+#'
 #' @export attribute_report
 
 attribute_report <- function(
@@ -57,9 +57,7 @@ attribute_report <- function(
     categorical_threshold = 10,
     significance_test = TRUE,
     other_stats = NULL,
-    ...
-    ){
-    
+    ...) {
     # input validation
     netify_check(netlet)
     checkmate::assert_character(node_vars, null.ok = TRUE)
@@ -76,6 +74,7 @@ attribute_report <- function(
     obj_attrs <- attributes(netlet)
     nodal_data <- obj_attrs$nodal_data
     dyad_data <- obj_attrs$dyad_data
+    netify_type <- obj_attrs$netify_type
 
     # determine available variables
     if (!is.null(nodal_data)) {
@@ -130,21 +129,33 @@ attribute_report <- function(
                 {
                     # Determine appropriate similarity method based on variable type
                     if (!is.null(nodal_data)) {
-                        var_values <- nodal_data[[var]]
-                        n_unique <- length(unique(var_values[!is.na(var_values)]))
-
-                        method <- if (is.character(var_values) || is.factor(var_values) || n_unique <= categorical_threshold) {
-                            "categorical"
+                        # Extract variable values depending on data structure
+                        if (netify_type == "cross_sec") {
+                            var_values <- nodal_data[[var]]
+                        } else if (is.list(nodal_data)) {
+                            # For longitudinal, get values from first time period
+                            first_time <- names(nodal_data)[1]
+                            var_values <- nodal_data[[first_time]][[var]]
                         } else {
-                            "correlation"
+                            var_values <- NULL
                         }
 
-                        homophily_result <- homophily(
-                            netlet,
-                            attribute = var, method = method,
-                            significance_test = significance_test, ...
-                        )
-                        homophily_results[[var]] <- homophily_result
+                        if (!is.null(var_values)) {
+                            n_unique <- length(unique(var_values[!is.na(var_values)]))
+
+                            method <- if (is.character(var_values) || is.factor(var_values) || n_unique <= categorical_threshold) {
+                                "categorical"
+                            } else {
+                                "correlation"
+                            }
+
+                            homophily_result <- homophily(
+                                netlet,
+                                attribute = var, method = method,
+                                significance_test = significance_test, ...
+                            )
+                            homophily_results[[var]] <- homophily_result
+                        }
                     }
                 },
                 error = function(e) {
@@ -269,21 +280,51 @@ calculate_centrality_correlations <- function(netlet, node_vars, centrality_meas
     # convert to list format for processing
     netlet_list <- switch(netify_type,
         "cross_sec" = list("1" = netlet),
-        "longitudinal_array" = {
-            dimnames_list <- dimnames(netlet)
-            array_to_list(netlet, dimnames_list)
+        "longit_array" = {
+            # Check if this is multilayer longitudinal (4D) or single layer (3D)
+            if (length(dim(netlet)) == 4) {
+                # Multilayer longitudinal: extract time periods from 4th dimension
+                time_names <- dimnames(netlet)[[4]]
+                if (is.null(time_names)) {
+                    time_names <- as.character(seq_len(dim(netlet)[4]))
+                }
+                net_list <- list()
+                for (t in seq_along(time_names)) {
+                    net_list[[time_names[t]]] <- netlet[, , , t]
+                }
+                net_list
+            } else {
+                # Single layer longitudinal: extract from 3rd dimension
+                time_names <- dimnames(netlet)[[3]]
+                if (is.null(time_names)) {
+                    time_names <- as.character(seq_len(dim(netlet)[3]))
+                }
+                net_list <- list()
+                for (t in seq_along(time_names)) {
+                    net_list[[time_names[t]]] <- netlet[, , t]
+                }
+                net_list
+            }
         },
-        "longitudinal_list" = netlet
+        "longit_list" = netlet
     )
 
     results_list <- list()
 
-    for (layer in layers) {
+    for (layer_index in seq_along(layers)) {
+        layer <- layers[layer_index]
         for (time_id in names(netlet_list)) {
             # get network matrix
             net_matrix <- netlet_list[[time_id]]
-            if (netify_type == "longitudinal_array" && length(dim(netlet)) == 4) {
-                net_matrix <- net_matrix[, , layer]
+            # Extract specific layer for multilayer networks
+            if (length(layers) > 1) {
+                if (netify_type == "cross_sec") {
+                    # For cross-sectional multilayer: 3D array [actors, actors, layers]
+                    net_matrix <- netlet[, , layer_index]
+                } else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
+                    # For longitudinal multilayer: 4D array [actors, actors, layers, time]
+                    net_matrix <- net_matrix[, , layer_index]
+                }
             }
 
             # calculate centrality measures

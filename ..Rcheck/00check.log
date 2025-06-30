@@ -1,0 +1,123 @@
+* using log directory ‘/Users/sminhas/Research/netify_dev/netify/..Rcheck’
+* using R version 4.5.1 (2025-06-13)
+* using platform: aarch64-apple-darwin20
+* R was compiled by
+    Apple clang version 16.0.0 (clang-1600.0.26.6)
+    GNU Fortran (GCC) 14.2.0
+* running under: macOS Sequoia 15.5
+* using session charset: UTF-8
+* using options ‘--no-manual --no-vignettes’
+* checking for file ‘./DESCRIPTION’ ... OK
+* this is package ‘netify’ version ‘0.1.1’
+* package encoding: UTF-8
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... WARNING
+Subdirectory ‘netify/src’ contains apparent object files/libraries
+  RcppExports.o code.o compare_networks_cpp.o count_duplicate_dyads.o
+  get_matrix.o matrix_utils.o netify.so similarity_functions.o
+Object files/libraries should not be included in a source package.
+
+In addition to the above warning(s), found the following notes:
+
+Found the following apparent object files/libraries:
+  netify.Rcheck/00_pkg_src/netify/src/RcppExports.o
+  netify.Rcheck/00_pkg_src/netify/src/code.o
+  netify.Rcheck/00_pkg_src/netify/src/compare_networks_cpp.o
+  netify.Rcheck/00_pkg_src/netify/src/count_duplicate_dyads.o
+  netify.Rcheck/00_pkg_src/netify/src/get_matrix.o
+  netify.Rcheck/00_pkg_src/netify/src/matrix_utils.o
+  netify.Rcheck/00_pkg_src/netify/src/netify.so
+  netify.Rcheck/00_pkg_src/netify/src/similarity_functions.o
+  netify.Rcheck/netify/libs/netify.so
+Object files/libraries should not be included in a source package.
+
+Subdirectory ‘.’ seems to contain an installed version of the package.
+* checking if there is a namespace ... OK
+* checking for executable files ... WARNING
+Found the following executable file:
+  netify.Rcheck/netify/help/netify.rdb
+Source packages should not contain undeclared executable files.
+See section ‘Package structure’ in the ‘Writing R Extensions’ manual.
+* checking for hidden files and directories ... NOTE
+Found the following hidden files and directories:
+  .DS_Store
+  .github/.gitignore
+  .gitignore
+  src/.gitignore
+  tests/.DS_Store
+  vignettes/.gitignore
+  ..Rcheck
+  .claude
+  .git
+  .github
+  .vscode
+These were most likely included in error. See section ‘Package
+structure’ in the ‘Writing R Extensions’ manual.
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘netify’ can be installed ... OK
+* used C++ compiler: ‘Apple clang version 16.0.0 (clang-1600.0.26.6)’
+* used SDK: ‘MacOSX15.2.sdk’
+* checking installed package size ... INFO
+  installed size is  7.3Mb
+  sub-directories of 1Mb or more:
+    data   2.9Mb
+    libs   3.2Mb
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... NOTE
+Checking should be performed on sources prepared by ‘R CMD build’.
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... WARNING
+Found the following directories with names of check directories:
+  ./..Rcheck
+  ./netify.Rcheck
+Most likely, these were included erroneously.
+* checking code files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... OK
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking contents of ‘data’ directory ... OK
+* checking data for non-ASCII characters ... OK
+* checking data for ASCII and uncompressed saves ... OK
+* checking line endings in C/C++/Fortran sources/headers ... OK
+* checking compiled code ... WARNING
+File ‘netify/libs/netify.so’:
+  Found ‘___assert_rtn’, possibly from ‘assert’ (C)
+    Object: ‘compare_networks_cpp.o’
+  Found ‘_abort’, possibly from ‘abort’ (C)
+    Objects: ‘RcppExports.o’, ‘get_matrix.o’, ‘matrix_utils.o’,
+      ‘similarity_functions.o’
+
+Compiled code should not call entry points which might terminate R nor
+write to stdout/stderr instead of to the console, nor use Fortran I/O
+nor system RNGs nor [v]sprintf.
+
+See ‘Writing portable packages’ in the ‘Writing R Extensions’ manual.
+* checking files in ‘vignettes’ ... WARNING
+Files in the 'vignettes' directory but no files in 'inst/doc':
+  ‘attribute_analysis.Rmd’ ‘attribute_analysis.html’ ‘ego_networks.Rmd’
+  ‘ego_networks.html’ ‘event_data.R’ ‘event_data.Rmd’ ‘event_data.html’
+  ‘foundations.Rmd’ ‘foundations.html’ ‘manual_plotting.Rmd’
+  ‘manual_plotting.html’ ‘multilayer_networks.Rmd’
+  ‘multilayer_networks.html’ ‘resources.Rmd’ ‘resources.html’
+  ‘tracking_changes.Rmd’ ‘tracking_changes.html’
+* checking examples ...
