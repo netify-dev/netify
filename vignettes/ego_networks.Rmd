@@ -305,7 +305,7 @@ How stable are relationships over time?
 
 ```{r}
 # Analyze year-to-year changes
-pakistan_comparison <- compare_networks(pakistan_ego_net)
+pakistan_comparison <- compare_networks(pakistan_ego_net, what = "edges")
 
 # Look at a specific transition
 changes_2010_2011 <- pakistan_comparison$edge_changes$`2010_vs_2011`
@@ -437,6 +437,6 @@ plot(remove_ego_edges(ego_net))     # Focus on alter-alter ties
 
 # Advanced analysis
 homophily(ego_net, attribute = "democracy")     # Test homophily
-compare_networks(ego_net)                       # Temporal comparison
-compare_networks(list(ego1, ego2))              # Cross-sectional comparison
+compare_networks(ego_net, what = "edges")       # Temporal comparison
+compare_networks(list(ego1, ego2), what = "edges")  # Cross-sectional comparison
 ```

@@ -245,6 +245,7 @@ cat(democracy_summary)
 
 
 #### Understanding the Output:
+
 - **homophily_correlation**: Measures tendency for similar values to connect (0 to 1)
 - **mean_similarity_connected**: Average similarity among connected pairs
 - **mean_similarity_unconnected**: Average similarity among unconnected pairs
@@ -458,6 +459,7 @@ cat(regime_mixing_summary)
 ```
 
 #### How to Read the Mixing Matrix:
+
 - **Rows**: Source regime type
 - **Columns**: Target regime type  
 - **Values**: Proportion of ties from row type to column type

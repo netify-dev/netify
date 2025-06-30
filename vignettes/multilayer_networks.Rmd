@@ -313,7 +313,7 @@ US-Russia tops the list despite tensions, showing how former adversaries maintai
 
 ```{r}
 # Comprehensive layer comparison
-layer_comparison <- compare_networks(multilayer_net, method = "all")
+layer_comparison <- compare_networks(multilayer_net, what = "edges", method = "all")
 print(layer_comparison)
 ```
 
@@ -406,7 +406,7 @@ The post-9/11 period shows network evolution. Both layers densify from 2001 to 2
 
 1. **For regime type effects**: Use `homophily()` with "correlation" method for continuous variables like polity scores
 2. **For regional/categorical patterns**: Use `mixing_matrix()` to see full interaction patterns
-3. **For relationship strength**: Use `compare_networks()` with method="all" for comprehensive comparison
+3. **For relationship strength**: Use `compare_networks()` with `what="edges"` and `method="all"` for comprehensive comparison
 4. **For individual actors**: Use `summary_actor()` and examine layer-specific centralities
 
 ## tl;dr

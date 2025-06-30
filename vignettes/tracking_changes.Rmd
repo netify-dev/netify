@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 ## Vignette Summary
 
-This vignette demonstrates how to use **netify**'s `compare_networks()` function to analyze changes in international relations over time using data from the Integrated Crisis Early Warning System (ICEWS). We'll explore some fun questions about how countries interact:
+This vignette demonstrates how to use **netify** to analyze changes in international relations over time using data from the Integrated Crisis Early Warning System (ICEWS). We'll explore some fun questions about how countries interact:
 
 1. **Talk vs. Action**: Do countries that cooperate verbally (diplomatic statements) also cooperate materially (aid, trade)?
 2. **Friend or Foe**: Are cooperation and conflict separate networks, or do countries that cooperate also tend to have conflicts?
@@ -33,6 +33,7 @@ We'll use `compare_networks()` to answer these questions:
 **`compare_networks()`:**
 
 - Compares networks across multiple dimensions - edges, structure, nodes, and attributes. Think of it as running a comprehensive diagnostic between any two (or more) networks to understand what's similar, what's different, and why it matters.
+
 - Function notes:
   - **Multi-method flexibility**: Choose from correlation, Jaccard, Hamming, QAP, spectral distance, or "all"
   - **Four comparison modes**: Compare edges (who connects to whom), structure (density, clustering), nodes (actor composition), or attributes (actor characteristics)
@@ -177,9 +178,9 @@ Let's break down what each metric tells us:
 **Summary Statistics Table:**
 
 - **correlation (0.507)**: Measures how similar the edge weights are between networks. A value of 0.507 indicates moderate positive correlation - when verbal cooperation is high between two countries, material cooperation tends to be somewhat higher too, but the relationship isn't perfect.
-- **jaccard (0.190)**: Only 19% of possible edges exist in BOTH networks. This low value tells us that most country pairs engage in either verbal OR material cooperation, but not both.
-- **hamming (0.308)**: About 31% of all possible edges differ between the two networks. This measures the proportion of country pairs that have different connection patterns.
-- **qap_correlation (0.507) with qap_pvalue (0)**: The QAP test confirms the correlation is statistically significant (p < 0.001). This isn't due to random chance.
+- **jaccard (0.190)**: 19% of the dyads that appear in at least one of the two networks appear in both. This low value tells us that most country pairs engage in either verbal OR material cooperation, but not both.
+- **hamming (0.308)**: About 31% of dyads (after NA handling) differ between the two networks. This measures the proportion of comparable country pairs that have different connection patterns.
+- **qap_correlation (0.507) with qap_pvalue (0)**: The QAP test confirms the correlation is statistically significant (p < 1/5000 ≈ 0.0002). This isn't due to random chance.
 
 **Edge Changes:**
 
@@ -216,7 +217,7 @@ ggplot(change_summary, aes(x = Type, y = Count)) +
     theme_minimal()
 ```
 
-The visualization makes the pattern clear: verbal cooperation (cheap talk) is far more common than material cooperation (costly actions).
+The visualization makes the pattern clear: verbal cooperation (cheap talk) is far more common than material cooperation (costly actions). Note that this pattern may partly reflect reporting bias in event data, as verbal events (statements, promises) are more likely to be captured in news sources than material actions.
 
 ## 2. Cooperation vs. Conflict: Testing Network Relationships
 
@@ -238,7 +239,9 @@ coop_conf_qap <- compare_networks(
 qap_msg <- paste0(
     "**QAP Test Results:**\n\n",
     "- Observed correlation: ", round(coop_conf_qap$summary$qap_correlation, 3), "\n",
-    "- P-value: ", round(coop_conf_qap$summary$qap_pvalue, 3), "\n"
+    "- P-value: ", ifelse(coop_conf_qap$summary$qap_pvalue == 0, 
+                         "< 0.002 (1/500 permutations)", 
+                         round(coop_conf_qap$summary$qap_pvalue, 3)), "\n"
 )
 
 # Add interpretation based on significance
@@ -269,11 +272,11 @@ cat(qap_msg)
 
 ### Understanding QAP Results
 
-The positive correlation (0.506) with p-value of 0 tells us that countries that cooperate also tend to have conflicts. This counterintuitive finding suggests that international interaction is multifaceted - countries that engage diplomatically experience both positive and negative interactions, while countries that don't interact have neither cooperation nor conflict.
+The positive correlation (0.506) with p-value < 0.002 tells us that countries that cooperate also tend to have conflicts. This counterintuitive finding reflects the multiplex nature of international relations: countries that appear frequently in international news tend to have both cooperative and conflictual interactions. High-interaction dyads accumulate both cooperative and conflictual events; the correlation therefore captures activity rather than affinity. In contrast, countries that rarely interact have neither cooperation nor conflict events recorded. This pattern is well-documented in the international relations literature as the "interaction density" effect.
 
 ### Advanced QAP Options: Different Permutation Schemes
 
-The updated `compare_networks()` function now supports multiple permutation schemes for more sophisticated hypothesis testing:
+The `compare_networks()` function supports multiple permutation schemes for more sophisticated hypothesis testing:
 
 ```{r}
 # Compare different permutation schemes
@@ -327,11 +330,7 @@ knitr::kable(qap_results,
 - **Freedman-Lane**: Controls for network autocorrelation by residualizing before permutation.
 - **DSP-MRQAP**: Double Semi-Partialling - removes mutual influence between networks.
 
-Note that MRQAP methods (Freedman-Lane and DSP) often yield higher p-values as they account for network dependencies.
-
-## 3. Temporal Evolution: Tracking Network Changes
-
-How do international networks evolve over time? When you pass a longitudinal netify object to `compare_networks()`, it automatically compares consecutive time periods:
+Note that MRQAP methods (Freedman-Lane and DSP) often yield higher p-values as they account for network dependencies. Because Freedman-Lane and DSP residualize the matrices before permutation, the point estimate can shrink and occasionally flip sign; what matters is the (non-)significance after accounting for structural autocorrelation.
 
 ### Correlation Types: Pearson vs. Spearman
 
@@ -412,7 +411,7 @@ knitr::kable(
 
 **Summary Statistics Table:**
 
-Instead of a single comparison, we now see summary statistics across ALL pairwise comparisons:
+Instead of a single comparison, we see summary statistics across ALL pairwise comparisons:
 
 - **mean correlation (0.828)**: On average, networks are highly correlated across time
 - **sd (0.034)**: Very low standard deviation indicates consistent similarity
@@ -502,6 +501,7 @@ knitr::kable(
 ```
 
 **Available p-value adjustment methods:**
+
 - `"none"`: No adjustment (default)
 - `"holm"`: Holm's method (controls family-wise error rate)
 - `"BH"`: Benjamini-Hochberg (controls false discovery rate)
@@ -629,7 +629,8 @@ node_comparison <- compare_networks(
 knitr::kable(node_comparison$summary,
     caption = "Node Composition Across Time Periods",
     digits = 0,
-    align = "c"
+    align = "c",
+    row.names = FALSE
 )
 ```
 
@@ -709,6 +710,7 @@ With `return_details = TRUE`, you get:
 - These allow custom analysis and visualization of network similarities
 
 The relationship dynamics show:
+
 - 6,633 stable relationships persist from 2002 to 2014
 - 3,141 new relationships formed
 - 2,059 relationships ended
@@ -749,13 +751,13 @@ spec_msg <- paste0(
 )
 
 # Add interpretation
-interpretation <- if (spec_dist < 10) {
-    "Low spectral distance: Networks have very similar structural properties\n"
-} else if (spec_dist < 50) {
-    "Moderate spectral distance: Networks show some structural differences\n"
-} else {
-    "High spectral distance: Networks have substantially different structures\n"
-}
+# Note: Spectral distance should be interpreted relative to other comparisons
+# in your study, as the scale depends on network size
+interpretation <- paste0(
+    "→ The spectral distance of ", round(spec_dist, 0), 
+    " should be interpreted relative to other network comparisons in your study.\n",
+    "  Larger values indicate greater structural differences."
+)
 
 # Combine and print
 cat(paste0(spec_msg, "→ ", interpretation))
@@ -766,7 +768,7 @@ cat(paste0(spec_msg, "→ ", interpretation))
 Spectral distance measures how different two networks are by comparing their eigenvalue spectra. It captures global structural properties that other metrics might miss:
 
 - **What it measures**: The distance between the sorted eigenvalues of two network Laplacian matrices
-- **Scale**: Ranges from 0 (identical spectra) to potentially large values
+- **Scale**: Ranges from 0 (identical spectra) to potentially large values depending on network size
 - **Advantages**: 
   - Captures global network structure
   - Sensitive to community structure and clustering patterns
@@ -785,11 +787,11 @@ For large networks (>1000 nodes), computing all eigenvalues can be computational
 spectral_comp_fast <- compare_networks(
     list(large_net1, large_net2),
     method = "spectral",
-    spectral_rank = 50  # Use only top 50 eigenvalues
+    spectral_rank = 50  # Use only top 50 eigenvalues (rule of thumb: round(sqrt(n)))
 )
 ```
 
-The top eigenvalues capture the most significant structural features, so using 50-100 eigenvalues often provides a good balance between accuracy and performance.
+The top eigenvalues capture the most significant structural features. A good rule of thumb is to use `round(sqrt(n))` eigenvalues, where n is the number of nodes.
 
 ### Combining with Other Methods
 
@@ -1009,7 +1011,7 @@ comparison <- compare_networks(longitudinal_netify_object)
 - `correlation_type`: "pearson" (default) or "spearman"
 - `seed`: Set for reproducible permutation tests
 - `p_adjust`: "none" (default), "holm", "BH", or "BY" for multiple testing correction
-- `spectral_rank`: Number of eigenvalues for spectral distance (0 = all, default)
+- `spectral_rank`: Number of eigenvalues for spectral distance (0 = all, default). Rule of thumb: `round(sqrt(n))` for networks with many nodes
 
 **What you get:**
 
@@ -1025,4 +1027,196 @@ comparison <- compare_networks(longitudinal_netify_object)
 5. Use `permutation_type = "freedman_lane"` or `"dsp_mrqap"` when comparing networks that may have autocorrelation
 6. Set `correlation_type = "spearman"` for networks with skewed weight distributions
 7. Use `p_adjust` when making multiple comparisons to control false discovery rate
+8. Set `spectral_rank = round(sqrt(n))` for large networks to improve performance
+
+### When to Use Advanced Options
+
+The `compare_networks()` function includes several advanced parameters that help tailor the analysis to your specific network characteristics:
+
+**Permutation Types:**
+
+- **`classic`** (default): Standard node label permutation. Use for general network comparisons.
+- **`degree_preserving`**: Maintains degree sequences through edge swaps. Essential for sparse, binary networks with high degree heterogeneity.
+- **`freedman_lane`**: Residualizes before permutation. Use when you suspect network autocorrelation (e.g., geographic networks, social influence).
+- **`dsp_mrqap`**: Double semi-partialling. Most conservative option; use for multiple regression-style comparisons or when networks have strong mutual dependencies.
+
+**Correlation Types:**
+
+- **`pearson`** (default): Standard linear correlation. Appropriate for normally distributed edge weights.
+- **`spearman`**: Rank-based correlation. Use when edge weights are skewed, zero-inflated, or contain outliers.
+
+**P-value Adjustments:**
+
+- **`none`** (default): No adjustment. Fine for single comparisons.
+- **`holm`**: Controls family-wise error rate. Use for a small number of planned comparisons.
+- **`BH`** (Benjamini-Hochberg): Controls false discovery rate. Best for many comparisons (e.g., comparing all time periods).
+- **`BY`** (Benjamini-Yekutieli): More conservative FDR control. Use when comparisons are strongly dependent.
+
+**Binary Metrics** (for binary networks):
+
+- **`phi`**: Phi coefficient. Standard choice, but sensitive to marginal imbalance.
+- **`simple_matching`**: Proportion of matching edges. Use when absence of edges is as meaningful as presence.
+- **`mean_centered`**: Centers matrices before correlation. Reduces bias from density differences.
+
+## Using `compare_networks()` in Your Research Workflow
+
+### Where `compare_networks()` Fits in Network Analysis
+
+The `compare_networks()` function serves as a comprehensive diagnostic tool that should be used throughout your network analysis workflow:
+
+| Analysis Stage | Key Questions | How `compare_networks()` Helps |
+|----------------|---------------|----------------------------------|
+| **Data cleaning** | Have I built the networks correctly? | Quick edge & node sanity checks |
+| **Exploration** | Where are the major differences? | Multi-metric similarity diagnostics |
+| **Theory building** | Which dimensions matter (time, layer, subgroup)? | Temporal/multilayer/by-group comparisons highlight mechanisms |
+| **Model specification** | Which terms belong in my ERGM/SAOM? | Structural summaries reveal relevant patterns |
+| **Model validation** | Does my model capture observed differences? | Compare observed vs. simulated networks |
+
+### Recommended Pre-Modeling Workflow
+
+Before fitting ERGMs, SAOMs, or latent space models, follow this systematic approach:
+
+1. **Sanity Check**: `compare_networks(nets, method="all", what="edges")`
+   - Identify duplicate edges, missing dyads, density anomalies
+   - Clean data or adjust `netify()` parameters as needed
+
+2. **Cross-Domain Analysis**: Compare different relationship types
+   - Example: verbal vs. material cooperation
+   - Decides whether to model layers jointly (multiplex ERGM) or separately
+
+3. **Temporal Stability**: `compare_networks(longit_nets, method="all")`
+   - How quickly do ties appear/disappear?
+   - Informs SAOM rate functions or ERGM temporal windows
+
+4. **Actor Dynamics**: `compare_networks(nets, what="nodes")`
+   - Track actor turnover
+   - Choose between relational event models vs. panel frameworks
+
+5. **Structural Evolution**: `compare_networks(nets, what="structure")`
+   - Identify density, reciprocity, transitivity trends
+   - Suggests candidate ERGM terms or SAOM effects
+
+6. **Global Shifts**: `compare_networks(nets, method="spectral")`
+   - Detect regime-change style discontinuities
+   - May require sample breaks or change-point models
+
+7. **Statistical Validation**: `compare_networks(nets, method="qap", permutation_type="...")`
+   - Test if correlations are spurious under network constraints
+   - Guides which controls must enter your model
+
+### Interpreting Results for Model Building
+
+**For ERGMs:**
+
+- High transitivity → include GWESP terms
+- Degree heterogeneity → add degree-based terms (e.g., `gwidegree`)
+- Reciprocity changes → include mutual edge terms
+- Spectral distance jumps → consider time-varying parameters
+
+**For SAOMs:**
+
+- Edge turnover rates → set appropriate rate functions
+- Structural stability → choose evaluation vs. creation effects
+- Actor composition changes → include composition change effects
+
+**For Latent Space Models:**
+
+- Spectral distance magnitude → suggests latent dimensionality
+- Community structure (from eigenvalues) → number of latent positions
+- Temporal stability → fixed vs. dynamic latent positions
+
+### Computational Considerations
+
+For large networks (>1000 nodes):
+
+- Set `spectral_rank = round(sqrt(n))` for faster spectral comparisons
+- Use `n_permutations = 1000` for initial exploration, increase for final analysis
+- Consider `correlation_type = "spearman"` for heavy-tailed weight distributions
+- Always use `p_adjust` when making many comparisons
+
+### Example: Complete Pre-Modeling Diagnostic
+
+```{r, eval=FALSE}
+# Comprehensive diagnostic before ERGM fitting
+diagnostic_results <- compare_networks(
+    network_list,
+    method = "all",
+    what = "edges",
+    permutation_type = "degree_preserving",  # For sparse networks
+    correlation_type = "spearman",           # For skewed weights
+    n_permutations = 10000,                  # For publication
+    p_adjust = "BH",                         # Multiple comparisons
+    spectral_rank = 75,                      # Large network optimization
+    return_details = TRUE,                   # For custom analysis
+    seed = 12345                             # Reproducibility
+)
+
+# Extract insights for model specification
+if (diagnostic_results$summary$transitivity > 0.3) {
+    # High clustering suggests including triadic closure terms
+    ergm_formula <- formula(net ~ edges + gwesp(0.5, fixed=TRUE))
+}
+
+if (diagnostic_results$spectral > 100) {
+    # Large spectral distance suggests structural regime change
+    # Consider separate models for different periods
+}
+```
+
+### Metric Interpretation Guidelines
+
+**Edge-level Metrics:**
+
+- **Correlation** (-1 to 1): Linear association between edge weights
+  - 0.7+ = Strong alignment
+  - 0.4-0.7 = Moderate relationship  
+  - <0.4 = Weak or specialized overlap
+- **Jaccard** (0 to 1): Proportion of dyads that appear in at least one of the two networks that appear in both
+  - Context-dependent: 0.25 is high for sparse international relations data
+  - 0.5+ indicates substantial structural similarity
+- **Hamming** (0 to 1): Proportion of dyads that differ
+  - The denominator is the count of dyads observed in both matrices after NA handling
+  - 0.2 = 20% edge turnover (moderate change)
+  - 0.5+ = Major restructuring
+- **Spectral Distance**: No fixed scale; interpret relatively
+  - Doubling from baseline often indicates structural regime change
+  - Compare within same study/time period
+
+**QAP p-values:**
+
+- Interpret conditional on permutation engine used
+- `degree_preserving` typically more conservative than `classic`
+- Small p-values more credible with more permutations
+
+### Computational Performance Guide
+
+| Method | Time Complexity | Memory Usage | When to Optimize |
+|--------|----------------|--------------|------------------|
+| Correlation | O(n²) | Low | Rarely needed |
+| Jaccard/Hamming | O(n²) | Low | Rarely needed |
+| Spectral | O(n³) | O(n²) | Use `spectral_rank` for n>1000 |
+| QAP Classic | O(R×n²) | Moderate | Reduce permutations for exploration |
+| QAP Degree-Preserving | O(R×m) | High | Most expensive; use selectively |
+
+R = number of permutations, n = number of nodes, m = number of edges
+
+### Common Pitfalls and Solutions
+
+1. **Binary vs. Weighted Networks**
+   - If your "weighted" network is actually binary (0/1), set `binary_metric` appropriately
+   - Different density networks need `binary_metric = "simple_matching"`
+
+2. **Temporal Comparisons**
+   - Always check actor composition first with `what = "nodes"`
+   - High node turnover invalidates edge-level comparisons
+
+3. **Multiple Testing**
+   - With 10+ comparisons, always use `p_adjust`
+   - Report both raw and adjusted p-values in publications
+
+4. **Reproducibility**
+   - Always set `seed` for permutation tests
+   - The function captures and reports the seed used
+
+The `compare_networks()` function is your comprehensive pre-modeling diagnostic tool. Use it early and often to ensure your subsequent modeling choices are well-informed and defensible.
 
