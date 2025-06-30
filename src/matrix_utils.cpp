@@ -18,10 +18,12 @@ using namespace Rcpp;
 //' @keywords internal
 //' @noRd
 // [[Rcpp::export]]
-DataFrame melt_matrix_cpp(NumericMatrix mat, 
-                         bool remove_diagonal = true,
-                         bool remove_zeros = true,
-                         bool na_rm = true) {
+DataFrame melt_matrix_cpp(
+    NumericMatrix mat,
+    bool remove_diagonal = true,
+    bool remove_zeros = true,
+    bool na_rm = true
+){
     
     CharacterVector row_names;
     CharacterVector col_names;
@@ -145,8 +147,10 @@ CharacterVector get_all_actors_cpp(List nets_list) {
 //' @keywords internal
 //' @noRd
 // [[Rcpp::export]]
-List align_matrices_cpp(NumericMatrix mat1, NumericMatrix mat2,
-                       Nullable<CharacterVector> all_actors_arg = R_NilValue) {
+List align_matrices_cpp(
+    NumericMatrix mat1, NumericMatrix mat2,
+    Nullable<CharacterVector> all_actors_arg = R_NilValue
+    ){
     
     CharacterVector all_actors;
     
@@ -283,10 +287,12 @@ List align_matrices_cpp(NumericMatrix mat1, NumericMatrix mat2,
 //' @keywords internal
 //' @noRd
 // [[Rcpp::export]]
-List batch_align_matrices_cpp(List nets_list,
-                             Nullable<CharacterVector> all_actors_arg = R_NilValue,
-                             bool include_diagonal = false) {
-    
+List batch_align_matrices_cpp(
+    List nets_list,
+    Nullable<CharacterVector> all_actors_arg = R_NilValue,
+    bool include_diagonal = false
+    ){
+
     CharacterVector all_actors;
     
     if (all_actors_arg.isNotNull()) {

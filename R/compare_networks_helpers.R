@@ -12,18 +12,47 @@
 #' @param include_diagonal Logical; whether to include diagonal values in comparison.
 #' @param edge_threshold Numeric or function; threshold for determining edge presence in weighted networks.
 #' @param return_details Logical; whether to return detailed comparison matrices.
+#' @param spectral_rank Integer; number of eigenvalues to use for spectral distance (0 = all).
 #'
 #' @return A list containing comparison results including summary statistics, edge changes, and optionally detailed matrices.
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #'
-#' @importFrom stats var
+#' @importFrom stats var p.adjust
 #' @keywords internal
 #' @noRd
 
 compare_edges <- function(
     nets_list, method, test, n_permutations,
-    include_diagonal, edge_threshold, return_details) {
+    include_diagonal, edge_threshold, return_details,
+    permutation_type = "classic",
+    correlation_type = "pearson",
+    binary_metric = "phi",
+    p_adjust = "none",
+    adaptive_stop = FALSE,
+    alpha = 0.05,
+    max_permutations = 20000,
+    seed_used = NULL,
+    spectral_rank = 0) {
+    
+    # Handle adaptive stopping warning
+    if (adaptive_stop) {
+        warning("Adaptive stopping is not yet implemented. Using fixed n_permutations.")
+        adaptive_stop <- FALSE
+    }
+    
+    # Check binary requirement for degree_preserving
+    if (permutation_type == "degree_preserving") {
+        # Check first network is binary
+        mat1 <- extract_matrix(nets_list[[1]])
+        vec1 <- as.vector(mat1)
+        vec1 <- vec1[!is.na(vec1)]
+        if (!all(vec1 %in% c(0, 1))) {
+            stop("Degree-preserving permutation requires the first network to be binary (containing only 0/1 values). ",
+                 "The first network in your list contains non-binary values. ",
+                 "Please ensure the first network is binary or use a different permutation_type.")
+        }
+    }
     # grab network names if they exist
     net_names <- names(nets_list)
     if (is.null(net_names)) {
@@ -41,15 +70,46 @@ compare_edges <- function(
 
     # track edge changes between networks
     edge_changes <- list()
+    
+    # helper switches for correlation functions
+    cor_fun <- switch(correlation_type,
+                      pearson = stats::cor,
+                      spearman = function(x, y) stats::cor(x, y, method = "spearman"))
+    
+    bin_cor <- switch(binary_metric,
+                      phi = function(a, b) {
+                          # Handle constant vectors
+                          if (length(unique(a)) == 1 && length(unique(b)) == 1) {
+                              # Both constant - if same value then 1, else 0
+                              return(ifelse(a[1] == b[1], 1, 0))
+                          } else if (length(unique(a)) == 1 || length(unique(b)) == 1) {
+                              # One constant - correlation is 0
+                              return(0)
+                          }
+                          stats::cor(a, b)
+                      },
+                      simple_matching = function(a, b) mean(a == b),
+                      mean_centered = function(a, b) {
+                          a <- a - mean(a); b <- b - mean(b)
+                          # Handle case where centering makes them all 0
+                          if (all(a == 0) || all(b == 0)) return(0)
+                          stats::cor(a, b)
+                      })
+    
+    qap_fun <- switch(permutation_type,
+                      classic = qap_correlation_cpp,
+                      degree_preserving = function(A, B, ...) qap_degree_cpp(A, B, ..., swaps_factor = 10),
+                      freedman_lane = qap_freeman_lane_cpp,
+                      dsp_mrqap = qap_dsp_cpp,
+                      stop("Unknown permutation_type"))
 
     # pre-compute all actors for alignment efficiency
     all_actors <- get_all_actors(nets_list)
 
-    # pre-align all matrices if we have many networks
-    if (n_nets > 5) {
-        mats <- lapply(nets_list, extract_matrix)
-        aligned_list <- batch_align_matrices_cpp(mats, all_actors, include_diagonal)
-    }
+    # ALWAYS pre-align all matrices to avoid redundant work in the loop
+    # This is O(k * V^2) instead of O(k^2 * V^2)
+    mats <- lapply(nets_list, extract_matrix)
+    aligned_list <- batch_align_matrices_cpp(mats, all_actors, include_diagonal)
 
     # compare all pairs of networks
     for (i in 1:(n_nets - 1)) {
@@ -61,12 +121,13 @@ compare_edges <- function(
             # if networks have different loop settings, we need to include diagonal
             force_include_diagonal <- include_diagonal || (loops1 != loops2)
 
-            # get aligned matrices
-            if (n_nets > 5) {
-                mat1 <- aligned_list[[i]]
-                mat2 <- aligned_list[[j]]
-            } else {
-                # align the matrices so they have same actors
+            # get pre-aligned matrices
+            mat1 <- aligned_list[[i]]
+            mat2 <- aligned_list[[j]]
+            
+            # If diagonal handling differs, we need to re-align
+            if (force_include_diagonal && !include_diagonal) {
+                # Re-align with diagonal included
                 mats <- align_matrices(nets_list[[i]], nets_list[[j]],
                     include_diagonal = force_include_diagonal
                 )
@@ -89,25 +150,36 @@ compare_edges <- function(
                 vec2 <- as.vector(mat2)
                 complete <- !is.na(vec1) & !is.na(vec2)
                 if (sum(complete) >= 3) {
-                    # check for constant vectors (e.g., all zeros or all ones)
-                    var1 <- var(vec1[complete])
-                    var2 <- var(vec2[complete])
+                    # check if both are binary
+                    is_binary1 <- all(vec1[complete] %in% c(0, 1))
+                    is_binary2 <- all(vec2[complete] %in% c(0, 1))
+                    
+                    if (is_binary1 && is_binary2) {
+                        # Use binary-specific correlation
+                        correlation_mat[i, j] <- correlation_mat[j, i] <- 
+                            bin_cor(vec1[complete], vec2[complete])
+                    } else {
+                        # Use standard correlation
+                        # check for constant vectors (e.g., all zeros or all ones)
+                        var1 <- var(vec1[complete])
+                        var2 <- var(vec2[complete])
 
-                    if (var1 > 0 && var2 > 0) {
-                        correlation_mat[i, j] <- correlation_mat[j, i] <-
-                            correlation_cpp(vec1[complete], vec2[complete])
-                    } else if (var1 == 0 && var2 == 0) {
-                        # both constant - if same value then perfect correlation, else 0
-                        if (all(vec1[complete] == vec1[complete][1]) &&
-                            all(vec2[complete] == vec2[complete][1]) &&
-                            vec1[complete][1] == vec2[complete][1]) {
-                            correlation_mat[i, j] <- correlation_mat[j, i] <- 1
+                        if (var1 > 0 && var2 > 0) {
+                            correlation_mat[i, j] <- correlation_mat[j, i] <-
+                                cor_fun(vec1[complete], vec2[complete])
+                        } else if (var1 == 0 && var2 == 0) {
+                            # both constant - if same value then perfect correlation, else 0
+                            if (all(vec1[complete] == vec1[complete][1]) &&
+                                all(vec2[complete] == vec2[complete][1]) &&
+                                vec1[complete][1] == vec2[complete][1]) {
+                                correlation_mat[i, j] <- correlation_mat[j, i] <- 1
+                            } else {
+                                correlation_mat[i, j] <- correlation_mat[j, i] <- 0
+                            }
                         } else {
+                            # one constant, one varying - correlation is 0
                             correlation_mat[i, j] <- correlation_mat[j, i] <- 0
                         }
-                    } else {
-                        # one constant, one varying - correlation is 0
-                        correlation_mat[i, j] <- correlation_mat[j, i] <- 0
                     }
                 } else {
                     # not enough data points - set to 0 for empty networks
@@ -128,14 +200,15 @@ compare_edges <- function(
             }
 
             if (method %in% c("qap", "all") && test) {
-                qap_result <- qap_correlation_cpp(mat1, mat2, n_permutations)
+                qap_result <- qap_fun(mat1, mat2, n_permutations,
+                                      seed = if(is.null(seed_used)) -1 else seed_used)
                 qap_mat[i, j] <- qap_mat[j, i] <- qap_result$correlation
                 qap_pval_mat[i, j] <- qap_pval_mat[j, i] <- qap_result$p_value
             }
 
             if (method %in% c("spectral", "all")) {
                 spectral_mat[i, j] <- spectral_mat[j, i] <-
-                    calculate_spectral_distance(mat1, mat2)
+                    calculate_spectral_distance_cpp(mat1, mat2, spectral_rank)
             }
 
             # track what edges changed between these two networks
@@ -152,6 +225,17 @@ compare_edges <- function(
     if (test) {
         diag(qap_mat) <- 1
         diag(qap_pval_mat) <- 0
+        
+        # Store raw p-values before adjustment
+        qap_pval_mat_raw <- qap_pval_mat
+        
+        # Apply multiple test correction if requested
+        if (p_adjust != "none" && n_nets > 2) {
+            flat <- qap_pval_mat[lower.tri(qap_pval_mat)]
+            adjusted <- p.adjust(flat, method = p_adjust)
+            qap_pval_mat[lower.tri(qap_pval_mat)] <- adjusted
+            qap_pval_mat[upper.tri(qap_pval_mat)] <- t(qap_pval_mat)[upper.tri(qap_pval_mat)]
+        }
     }
 
     # create summary dataframe
@@ -166,15 +250,30 @@ compare_edges <- function(
         method = method,
         n_networks = n_nets,
         summary = summary_df,
-        edge_changes = edge_changes
+        edge_changes = edge_changes,
+        permutation_type = permutation_type,
+        correlation_type = correlation_type,
+        binary_metric = binary_metric,
+        p_adjust = p_adjust,
+        seed_used = seed_used,
+        spectral_rank = spectral_rank
     )
 
-    # add significance tests if requested
-    if (test) {
+    # add significance tests if requested and QAP was actually performed
+    if (test && method %in% c("qap", "all")) {
+        # Add n_permutations as attribute to qap_pvalues
+        attr(qap_pval_mat, "n_perm") <- n_permutations
+        
         results$significance_tests <- list(
             qap_correlations = qap_mat,
             qap_pvalues = qap_pval_mat
         )
+        
+        # Store raw p-values if adjustment was applied
+        if (p_adjust != "none" && n_nets > 2) {
+            attr(qap_pval_mat_raw, "n_perm") <- n_permutations
+            results$significance_tests$qap_pvalues_raw = qap_pval_mat_raw
+        }
     }
 
     # add detailed matrices if user wants them
@@ -382,11 +481,19 @@ compare_nodes <- function(nets_list, return_details = FALSE) {
         )
     } else {
         # summary for multiple networks
+        # Calculate mean Jaccard excluding self-comparisons
+        mean_jaccard_vec <- numeric(n_nets)
+        for (i in 1:n_nets) {
+            # Get Jaccard values for network i, excluding diagonal
+            jaccard_values <- jaccard_node_mat[i, -i]
+            mean_jaccard_vec[i] <- mean(jaccard_values, na.rm = TRUE)
+        }
+        
         summary_df <- data.frame(
             network = net_names,
             n_nodes = sapply(node_sets, length),
             mean_overlap = rowMeans(overlap_mat, na.rm = TRUE),
-            mean_jaccard = rowMeans(jaccard_node_mat, na.rm = TRUE) - 1 / (n_nets),
+            mean_jaccard = mean_jaccard_vec,
             stringsAsFactors = FALSE
         )
     }
@@ -418,6 +525,7 @@ compare_nodes <- function(nets_list, return_details = FALSE) {
 #' @param test Logical; whether to perform KS tests for continuous attributes.
 #' @param n_permutations Integer; number of permutations for significance testing (currently unused).
 #' @param return_details Logical; whether to return detailed attribute values and test matrices.
+#' @param attr_metric Character string specifying method for continuous attribute comparison.
 #'
 #' @return A list containing attribute similarity comparisons across networks.
 #'
@@ -428,7 +536,7 @@ compare_nodes <- function(nets_list, return_details = FALSE) {
 
 compare_attributes <- function(
     nets_list, test = TRUE, n_permutations = 1000,
-    return_details = FALSE) {
+    return_details = FALSE, attr_metric = "ecdf_cor") {
     # get network names
     net_names <- names(nets_list)
     if (is.null(net_names)) {
@@ -461,7 +569,7 @@ compare_attributes <- function(
     for (attr in common_attrs) {
         attr_result <- compare_single_attribute(
             nets_list, attrs_list, attr,
-            test, n_permutations
+            test, n_permutations, attr_metric
         )
         attr_comparisons[[attr]] <- attr_result
     }
@@ -995,6 +1103,7 @@ create_edge_summary <- function(
 #' @param attribute Character string specifying which attribute to compare.
 #' @param test Logical; whether to perform statistical testing.
 #' @param n_permutations Integer; number of permutations (currently unused).
+#' @param attr_metric Character string specifying method for continuous comparison.
 #'
 #' @return A list containing similarity comparisons and optional test results.
 #'
@@ -1007,7 +1116,7 @@ create_edge_summary <- function(
 
 compare_single_attribute <- function(
     nets_list, attrs_list, attribute,
-    test = TRUE, n_permutations = 1000) {
+    test = TRUE, n_permutations = 1000, attr_metric = "ecdf_cor") {
     n_nets <- length(nets_list)
     net_names <- names(nets_list)
     if (is.null(net_names)) {
@@ -1054,8 +1163,15 @@ compare_single_attribute <- function(
                     }
 
                     # compare distributions
-                    comparison_mat[i, j] <- comparison_mat[j, i] <-
-                        compare_distributions(vals1, vals2)
+                    if (attr_metric == "ecdf_cor") {
+                        comparison_mat[i, j] <- comparison_mat[j, i] <-
+                            compare_distributions(vals1, vals2)
+                    } else if (attr_metric == "wasserstein") {
+                        # Wasserstein distance - convert to similarity (1 / (1 + distance))
+                        w_dist <- calculate_wasserstein_cpp(vals1, vals2)
+                        comparison_mat[i, j] <- comparison_mat[j, i] <-
+                            1 / (1 + w_dist)
+                    }
                 } else {
                     # for categorical, compare frequency distributions
                     comparison_mat[i, j] <- comparison_mat[j, i] <-

@@ -39,6 +39,22 @@ print.netify_comparison <- function(x, ..., n = 20) {
         cli::cli_text("Algorithm: {.field {x$comparison_method}}")
     }
     
+    # Show additional settings for edge comparisons
+    if (x$what == "edges") {
+        if (!is.null(x$permutation_type)) {
+            cli::cli_text("Permutation type: {.field {x$permutation_type}}")
+        }
+        if (!is.null(x$correlation_type)) {
+            cli::cli_text("Correlation type: {.field {x$correlation_type}}")
+        }
+        if (!is.null(x$p_adjust) && x$p_adjust != "none") {
+            cli::cli_text("P-value adjustment: {.field {x$p_adjust}}")
+        }
+        if (!is.null(x$seed_used)) {
+            cli::cli_text("Random seed: {.val {x$seed_used}}")
+        }
+    }
+    
     cli::cli_rule()
     
     # Print summary based on what was compared
@@ -123,6 +139,14 @@ print.netify_comparison <- function(x, ..., n = 20) {
     # Print significance tests if available
     if (!is.null(x$significance_tests)) {
         cli::cli_h2("Statistical Tests")
+        
+        # Show number of permutations if available
+        if (!is.null(x$significance_tests$qap_pvalues)) {
+            n_perm <- attr(x$significance_tests$qap_pvalues, "n_perm")
+            if (!is.null(n_perm)) {
+                cli::cli_text("Permutations: {.val {n_perm}}")
+            }
+        }
         
         if (is.data.frame(x$significance_tests)) {
             print(x$significance_tests)

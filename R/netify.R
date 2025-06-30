@@ -56,6 +56,10 @@
 #'   Options are "auto" (default), "dyad_df", or "netify_obj". Use "dyad_df"
 #'   to force data.frame interpretation or "netify_obj" to force matrix/array/
 #'   igraph/network interpretation.
+#' @param nodelist character vector: optional list of all actors (nodes) that should
+#'   be included in the network. This ensures isolates (nodes with no edges) are
+#'   properly represented. Particularly useful when working with edgelists that
+#'   only contain active dyads.
 #' @param ... additional arguments passed to `to_netify` when processing network objects
 #'
 #' @return a netify object
@@ -105,6 +109,7 @@ netify <- function(
     dyad_vars = NULL,
     dyad_vars_symmetric = rep(symmetric, length(dyad_vars)),
     input_type = c("auto", "dyad_df", "netify_obj"),
+    nodelist = NULL,
     ...) {
     # Match input type argument
     input_type <- match.arg(input_type)
@@ -212,7 +217,8 @@ netify <- function(
             weight = weight,
             sum_dyads = sum_dyads,
             diag_to_NA = diag_to_NA,
-            missing_to_zero = missing_to_zero
+            missing_to_zero = missing_to_zero,
+            nodelist = nodelist
         )
     }
 
@@ -223,7 +229,8 @@ netify <- function(
             actor1 = actor1, actor2 = actor2, time = time,
             symmetric = symmetric, mode = mode,
             weight = weight, sum_dyads = sum_dyads,
-            diag_to_NA = diag_to_NA, missing_to_zero = missing_to_zero
+            diag_to_NA = diag_to_NA, missing_to_zero = missing_to_zero,
+            nodelist = nodelist
         )
     }
 
@@ -236,7 +243,8 @@ netify <- function(
             weight = weight, sum_dyads = sum_dyads,
             actor_time_uniform = actor_time_uniform,
             actor_pds = actor_pds,
-            diag_to_NA = diag_to_NA, missing_to_zero = missing_to_zero
+            diag_to_NA = diag_to_NA, missing_to_zero = missing_to_zero,
+            nodelist = nodelist
         )
     }
 

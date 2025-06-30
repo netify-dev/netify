@@ -37,6 +37,10 @@
 #'   to NA. Automatically set to FALSE for bipartite networks.
 #' @param missing_to_zero Logical. If TRUE (default), treats missing edges as zeros.
 #'   If FALSE, missing edges remain as NA.
+#' @param nodelist Character vector of actor names to include in the network.
+#'   If provided, ensures all listed actors appear in the network even if they
+#'   have no edges (isolates). Useful when working with edgelists that only
+#'   contain active dyads.
 #'
 #' @return A list of class "netify" (a netify list) with:
 #'   \itemize{
@@ -119,7 +123,8 @@ get_adjacency_list <- function(
     weight = NULL, sum_dyads = FALSE,
     actor_time_uniform = FALSE,
     actor_pds = NULL,
-    diag_to_NA = TRUE, missing_to_zero = TRUE) {
+    diag_to_NA = TRUE, missing_to_zero = TRUE,
+    nodelist = NULL) {
     # create weight string for storage as attribute in netify object
     weight_label <- weight_string_label(weight, sum_dyads)
 

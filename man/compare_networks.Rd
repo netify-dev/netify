@@ -10,10 +10,20 @@ compare_networks(
   by = NULL,
   what = "edges",
   test = TRUE,
-  n_permutations = 1000,
+  n_permutations = 5000,
   include_diagonal = FALSE,
   return_details = FALSE,
-  edge_threshold = 0
+  edge_threshold = 0,
+  permutation_type = c("classic", "degree_preserving", "freedman_lane", "dsp_mrqap"),
+  correlation_type = c("pearson", "spearman"),
+  binary_metric = c("phi", "simple_matching", "mean_centered"),
+  seed = NULL,
+  p_adjust = c("none", "holm", "BH", "BY"),
+  adaptive_stop = FALSE,
+  alpha = 0.05,
+  max_permutations = 20000,
+  spectral_rank = 0,
+  attr_metric = c("ecdf_cor", "wasserstein")
 )
 }
 \arguments{
@@ -46,7 +56,7 @@ within and between attribute groups rather than across input networks.
 
 \item{test}{Logical. Whether to perform significance testing. Default TRUE.}
 
-\item{n_permutations}{Integer. Number of permutations for QAP test. Default 1000.}
+\item{n_permutations}{Integer. Number of permutations for QAP test. Default 5000.}
 
 \item{include_diagonal}{Logical. Whether to include diagonal in comparison. Default FALSE.}
 
@@ -54,6 +64,46 @@ within and between attribute groups rather than across input networks.
 
 \item{edge_threshold}{Numeric or function. For weighted networks, threshold to
 determine edge presence. Default is 0 (any positive weight).}
+
+\item{permutation_type}{Character string specifying permutation scheme:
+\describe{
+\item{"classic"}{Standard label permutation QAP (default)}
+\item{"degree_preserving"}{Preserves degree sequence (binary networks only)}
+\item{"freedman_lane"}{Freeman-Lane MRQAP for controlling autocorrelation}
+\item{"dsp_mrqap"}{Double-Semi-Partialling MRQAP}
+}}
+
+\item{correlation_type}{Character string. "pearson" (default) or "spearman" for
+rank-based correlation.}
+
+\item{binary_metric}{Character string for binary network correlation:
+\describe{
+\item{"phi"}{Standard phi coefficient (default)}
+\item{"simple_matching"}{Proportion of matching edges}
+\item{"mean_centered"}{Mean-centered phi coefficient}
+}}
+
+\item{seed}{Integer. Random seed for reproducible permutations. Default NULL.}
+
+\item{p_adjust}{Character string for multiple testing correction:
+"none" (default), "holm", "BH" (Benjamini-Hochberg), or "BY".}
+
+\item{adaptive_stop}{Logical. Whether to use adaptive stopping for permutations.
+Default FALSE. (Currently not implemented)}
+
+\item{alpha}{Numeric. Significance level for adaptive stopping. Default 0.05.}
+
+\item{max_permutations}{Integer. Maximum permutations for adaptive stopping. Default 20000.}
+
+\item{spectral_rank}{Integer. Number of eigenvalues to use for spectral distance.
+Default 0 (use all). Set to a smaller value (e.g., 50-100) for large networks
+to improve performance while maintaining accuracy.}
+
+\item{attr_metric}{Character string for continuous attribute comparison:
+\describe{
+\item{"ecdf_cor"}{Correlation of empirical CDFs (default)}
+\item{"wasserstein"}{Wasserstein-1 (Earth Mover's) distance}
+}}
 }
 \value{
 A list of class "netify_comparison" containing:
@@ -110,6 +160,11 @@ them. This works for cross-sectional multilayer (3D arrays), longitudinal multil
 \item Hamming: Ranges from 0 to 1, proportion of differing edges
 \item QAP p-value: Significance of observed correlation under random permutation
 }
+
+\strong{Permutation methods:}
+When \code{permutation_type = "degree_preserving"}, the first network must be
+binary (0/1). This method preserves the degree sequence during permutations,
+which is important when degree heterogeneity could inflate Type I error rates.
 }
 \examples{
 # Load example data

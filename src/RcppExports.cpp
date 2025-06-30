@@ -11,73 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// calculate_jaccard_cpp
-double calculate_jaccard_cpp(NumericMatrix mat1, NumericMatrix mat2, double threshold1, double threshold2);
-RcppExport SEXP _netify_calculate_jaccard_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP threshold1SEXP, SEXP threshold2SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat1(mat1SEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat2(mat2SEXP);
-    Rcpp::traits::input_parameter< double >::type threshold1(threshold1SEXP);
-    Rcpp::traits::input_parameter< double >::type threshold2(threshold2SEXP);
-    rcpp_result_gen = Rcpp::wrap(calculate_jaccard_cpp(mat1, mat2, threshold1, threshold2));
-    return rcpp_result_gen;
-END_RCPP
-}
-// calculate_hamming_cpp
-double calculate_hamming_cpp(NumericMatrix mat1, NumericMatrix mat2, double threshold1, double threshold2);
-RcppExport SEXP _netify_calculate_hamming_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP threshold1SEXP, SEXP threshold2SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat1(mat1SEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat2(mat2SEXP);
-    Rcpp::traits::input_parameter< double >::type threshold1(threshold1SEXP);
-    Rcpp::traits::input_parameter< double >::type threshold2(threshold2SEXP);
-    rcpp_result_gen = Rcpp::wrap(calculate_hamming_cpp(mat1, mat2, threshold1, threshold2));
-    return rcpp_result_gen;
-END_RCPP
-}
-// calculate_edge_changes_cpp
-List calculate_edge_changes_cpp(NumericMatrix mat1, NumericMatrix mat2, double threshold1, double threshold2);
-RcppExport SEXP _netify_calculate_edge_changes_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP threshold1SEXP, SEXP threshold2SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat1(mat1SEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat2(mat2SEXP);
-    Rcpp::traits::input_parameter< double >::type threshold1(threshold1SEXP);
-    Rcpp::traits::input_parameter< double >::type threshold2(threshold2SEXP);
-    rcpp_result_gen = Rcpp::wrap(calculate_edge_changes_cpp(mat1, mat2, threshold1, threshold2));
-    return rcpp_result_gen;
-END_RCPP
-}
-// qap_correlation_cpp
-List qap_correlation_cpp(NumericMatrix mat1, NumericMatrix mat2, int n_permutations);
-RcppExport SEXP _netify_qap_correlation_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP n_permutationsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat1(mat1SEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat2(mat2SEXP);
-    Rcpp::traits::input_parameter< int >::type n_permutations(n_permutationsSEXP);
-    rcpp_result_gen = Rcpp::wrap(qap_correlation_cpp(mat1, mat2, n_permutations));
-    return rcpp_result_gen;
-END_RCPP
-}
-// calculate_spectral_distance_cpp
-double calculate_spectral_distance_cpp(NumericMatrix mat1, NumericMatrix mat2);
-RcppExport SEXP _netify_calculate_spectral_distance_cpp(SEXP mat1SEXP, SEXP mat2SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat1(mat1SEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type mat2(mat2SEXP);
-    rcpp_result_gen = Rcpp::wrap(calculate_spectral_distance_cpp(mat1, mat2));
-    return rcpp_result_gen;
-END_RCPP
-}
 // count_duplicate_dyads
 int count_duplicate_dyads(CharacterVector actor1, CharacterVector actor2, NumericVector time);
 RcppExport SEXP _netify_count_duplicate_dyads(SEXP actor1SEXP, SEXP actor2SEXP, SEXP timeSEXP) {
@@ -255,6 +188,141 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calculate_wasserstein_cpp
+double calculate_wasserstein_cpp(NumericVector x, NumericVector y);
+RcppExport SEXP _netify_calculate_wasserstein_cpp(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(calculate_wasserstein_cpp(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calculate_jaccard_cpp
+double calculate_jaccard_cpp(NumericMatrix mat1, NumericMatrix mat2, double threshold1, double threshold2);
+RcppExport SEXP _netify_calculate_jaccard_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP threshold1SEXP, SEXP threshold2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat1(mat1SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat2(mat2SEXP);
+    Rcpp::traits::input_parameter< double >::type threshold1(threshold1SEXP);
+    Rcpp::traits::input_parameter< double >::type threshold2(threshold2SEXP);
+    rcpp_result_gen = Rcpp::wrap(calculate_jaccard_cpp(mat1, mat2, threshold1, threshold2));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calculate_hamming_cpp
+double calculate_hamming_cpp(NumericMatrix mat1, NumericMatrix mat2, double threshold1, double threshold2);
+RcppExport SEXP _netify_calculate_hamming_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP threshold1SEXP, SEXP threshold2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat1(mat1SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat2(mat2SEXP);
+    Rcpp::traits::input_parameter< double >::type threshold1(threshold1SEXP);
+    Rcpp::traits::input_parameter< double >::type threshold2(threshold2SEXP);
+    rcpp_result_gen = Rcpp::wrap(calculate_hamming_cpp(mat1, mat2, threshold1, threshold2));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calculate_edge_changes_cpp
+List calculate_edge_changes_cpp(NumericMatrix mat1, NumericMatrix mat2, double threshold1, double threshold2);
+RcppExport SEXP _netify_calculate_edge_changes_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP threshold1SEXP, SEXP threshold2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat1(mat1SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat2(mat2SEXP);
+    Rcpp::traits::input_parameter< double >::type threshold1(threshold1SEXP);
+    Rcpp::traits::input_parameter< double >::type threshold2(threshold2SEXP);
+    rcpp_result_gen = Rcpp::wrap(calculate_edge_changes_cpp(mat1, mat2, threshold1, threshold2));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calculate_spectral_distance_cpp
+double calculate_spectral_distance_cpp(NumericMatrix mat1, NumericMatrix mat2, int spectral_rank);
+RcppExport SEXP _netify_calculate_spectral_distance_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP spectral_rankSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat1(mat1SEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat2(mat2SEXP);
+    Rcpp::traits::input_parameter< int >::type spectral_rank(spectral_rankSEXP);
+    rcpp_result_gen = Rcpp::wrap(calculate_spectral_distance_cpp(mat1, mat2, spectral_rank));
+    return rcpp_result_gen;
+END_RCPP
+}
+// double_center_cpp
+NumericMatrix double_center_cpp(const NumericMatrix& A);
+RcppExport SEXP _netify_double_center_cpp(SEXP ASEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type A(ASEXP);
+    rcpp_result_gen = Rcpp::wrap(double_center_cpp(A));
+    return rcpp_result_gen;
+END_RCPP
+}
+// qap_correlation_cpp
+List qap_correlation_cpp(const NumericMatrix& mat1, const NumericMatrix& mat2, int n_permutations, int seed);
+RcppExport SEXP _netify_qap_correlation_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP n_permutationsSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type mat1(mat1SEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type mat2(mat2SEXP);
+    Rcpp::traits::input_parameter< int >::type n_permutations(n_permutationsSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(qap_correlation_cpp(mat1, mat2, n_permutations, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
+// qap_degree_cpp
+List qap_degree_cpp(const NumericMatrix& mat1, const NumericMatrix& mat2, int n_permutations, int swaps_factor, int seed);
+RcppExport SEXP _netify_qap_degree_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP n_permutationsSEXP, SEXP swaps_factorSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type mat1(mat1SEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type mat2(mat2SEXP);
+    Rcpp::traits::input_parameter< int >::type n_permutations(n_permutationsSEXP);
+    Rcpp::traits::input_parameter< int >::type swaps_factor(swaps_factorSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(qap_degree_cpp(mat1, mat2, n_permutations, swaps_factor, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
+// qap_freeman_lane_cpp
+List qap_freeman_lane_cpp(const NumericMatrix& mat1, const NumericMatrix& mat2, int n_permutations, int seed);
+RcppExport SEXP _netify_qap_freeman_lane_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP n_permutationsSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type mat1(mat1SEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type mat2(mat2SEXP);
+    Rcpp::traits::input_parameter< int >::type n_permutations(n_permutationsSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(qap_freeman_lane_cpp(mat1, mat2, n_permutations, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
+// qap_dsp_cpp
+List qap_dsp_cpp(const NumericMatrix& mat1, const NumericMatrix& mat2, int n_permutations, int seed);
+RcppExport SEXP _netify_qap_dsp_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP n_permutationsSEXP, SEXP seedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type mat1(mat1SEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type mat2(mat2SEXP);
+    Rcpp::traits::input_parameter< int >::type n_permutations(n_permutationsSEXP);
+    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(qap_dsp_cpp(mat1, mat2, n_permutations, seed));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calculate_similarity_matrix_cpp
 NumericMatrix calculate_similarity_matrix_cpp(NumericVector attributes, std::string method);
 RcppExport SEXP _netify_calculate_similarity_matrix_cpp(SEXP attributesSEXP, SEXP methodSEXP) {
@@ -296,11 +364,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_netify_calculate_jaccard_cpp", (DL_FUNC) &_netify_calculate_jaccard_cpp, 4},
-    {"_netify_calculate_hamming_cpp", (DL_FUNC) &_netify_calculate_hamming_cpp, 4},
-    {"_netify_calculate_edge_changes_cpp", (DL_FUNC) &_netify_calculate_edge_changes_cpp, 4},
-    {"_netify_qap_correlation_cpp", (DL_FUNC) &_netify_qap_correlation_cpp, 3},
-    {"_netify_calculate_spectral_distance_cpp", (DL_FUNC) &_netify_calculate_spectral_distance_cpp, 2},
     {"_netify_count_duplicate_dyads", (DL_FUNC) &_netify_count_duplicate_dyads, 3},
     {"_netify_count_duplicate_dyads_indexed", (DL_FUNC) &_netify_count_duplicate_dyads_indexed, 3},
     {"_netify_get_matrix", (DL_FUNC) &_netify_get_matrix, 10},
@@ -312,6 +375,16 @@ static const R_CallMethodDef CallEntries[] = {
     {"_netify_get_all_actors_cpp", (DL_FUNC) &_netify_get_all_actors_cpp, 1},
     {"_netify_align_matrices_cpp", (DL_FUNC) &_netify_align_matrices_cpp, 3},
     {"_netify_batch_align_matrices_cpp", (DL_FUNC) &_netify_batch_align_matrices_cpp, 3},
+    {"_netify_calculate_wasserstein_cpp", (DL_FUNC) &_netify_calculate_wasserstein_cpp, 2},
+    {"_netify_calculate_jaccard_cpp", (DL_FUNC) &_netify_calculate_jaccard_cpp, 4},
+    {"_netify_calculate_hamming_cpp", (DL_FUNC) &_netify_calculate_hamming_cpp, 4},
+    {"_netify_calculate_edge_changes_cpp", (DL_FUNC) &_netify_calculate_edge_changes_cpp, 4},
+    {"_netify_calculate_spectral_distance_cpp", (DL_FUNC) &_netify_calculate_spectral_distance_cpp, 3},
+    {"_netify_double_center_cpp", (DL_FUNC) &_netify_double_center_cpp, 1},
+    {"_netify_qap_correlation_cpp", (DL_FUNC) &_netify_qap_correlation_cpp, 4},
+    {"_netify_qap_degree_cpp", (DL_FUNC) &_netify_qap_degree_cpp, 5},
+    {"_netify_qap_freeman_lane_cpp", (DL_FUNC) &_netify_qap_freeman_lane_cpp, 4},
+    {"_netify_qap_dsp_cpp", (DL_FUNC) &_netify_qap_dsp_cpp, 4},
     {"_netify_calculate_similarity_matrix_cpp", (DL_FUNC) &_netify_calculate_similarity_matrix_cpp, 2},
     {"_netify_correlation_cpp", (DL_FUNC) &_netify_correlation_cpp, 2},
     {"_netify_calculate_homophily_stats_cpp", (DL_FUNC) &_netify_calculate_homophily_stats_cpp, 5},

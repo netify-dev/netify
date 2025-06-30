@@ -28,11 +28,41 @@
 #'     \item{"attributes"}{Compare networks based on node attribute distributions}
 #'   }
 #' @param test Logical. Whether to perform significance testing. Default TRUE.
-#' @param n_permutations Integer. Number of permutations for QAP test. Default 1000.
+#' @param n_permutations Integer. Number of permutations for QAP test. Default 5000.
 #' @param include_diagonal Logical. Whether to include diagonal in comparison. Default FALSE.
 #' @param return_details Logical. Whether to return detailed comparison matrices. Default FALSE.
 #' @param edge_threshold Numeric or function. For weighted networks, threshold to
 #'   determine edge presence. Default is 0 (any positive weight).
+#' @param permutation_type Character string specifying permutation scheme:
+#'   \describe{
+#'     \item{"classic"}{Standard label permutation QAP (default)}
+#'     \item{"degree_preserving"}{Preserves degree sequence (binary networks only)}
+#'     \item{"freedman_lane"}{Freeman-Lane MRQAP for controlling autocorrelation}
+#'     \item{"dsp_mrqap"}{Double-Semi-Partialling MRQAP}
+#'   }
+#' @param correlation_type Character string. "pearson" (default) or "spearman" for 
+#'   rank-based correlation.
+#' @param binary_metric Character string for binary network correlation:
+#'   \describe{
+#'     \item{"phi"}{Standard phi coefficient (default)}
+#'     \item{"simple_matching"}{Proportion of matching edges}
+#'     \item{"mean_centered"}{Mean-centered phi coefficient}
+#'   }
+#' @param seed Integer. Random seed for reproducible permutations. Default NULL.
+#' @param p_adjust Character string for multiple testing correction:
+#'   "none" (default), "holm", "BH" (Benjamini-Hochberg), or "BY".
+#' @param adaptive_stop Logical. Whether to use adaptive stopping for permutations.
+#'   Default FALSE. (Currently not implemented)
+#' @param alpha Numeric. Significance level for adaptive stopping. Default 0.05.
+#' @param max_permutations Integer. Maximum permutations for adaptive stopping. Default 20000.
+#' @param spectral_rank Integer. Number of eigenvalues to use for spectral distance.
+#'   Default 0 (use all). Set to a smaller value (e.g., 50-100) for large networks
+#'   to improve performance while maintaining accuracy.
+#' @param attr_metric Character string for continuous attribute comparison:
+#'   \describe{
+#'     \item{"ecdf_cor"}{Correlation of empirical CDFs (default)}
+#'     \item{"wasserstein"}{Wasserstein-1 (Earth Mover's) distance}
+#'   }
 #'
 #' @return A list of class "netify_comparison" containing:
 #'   \describe{
@@ -83,6 +113,11 @@
 #'   \item Hamming: Ranges from 0 to 1, proportion of differing edges
 #'   \item QAP p-value: Significance of observed correlation under random permutation
 #' }
+#' 
+#' \strong{Permutation methods:}
+#' When \code{permutation_type = "degree_preserving"}, the first network must be 
+#' binary (0/1). This method preserves the degree sequence during permutations, 
+#' which is important when degree heterogeneity could inflate Type I error rates.
 #'
 #' @examples
 #' # Load example data
@@ -163,10 +198,44 @@ compare_networks <- function(
     by = NULL,
     what = "edges",
     test = TRUE,
-    n_permutations = 1000,
+    n_permutations = 5000,
     include_diagonal = FALSE,
     return_details = FALSE,
-    edge_threshold = 0) {
+    edge_threshold = 0,
+    permutation_type = c("classic", "degree_preserving", 
+                         "freedman_lane", "dsp_mrqap"),
+    correlation_type = c("pearson", "spearman"),
+    binary_metric = c("phi", "simple_matching", "mean_centered"),
+    seed = NULL,
+    p_adjust = c("none", "holm", "BH", "BY"),
+    adaptive_stop = FALSE,
+    alpha = 0.05,
+    max_permutations = 20000,
+    spectral_rank = 0,
+    attr_metric = c("ecdf_cor", "wasserstein")) {
+    # match arguments
+    permutation_type <- match.arg(permutation_type)
+    correlation_type <- match.arg(correlation_type)
+    binary_metric <- match.arg(binary_metric)
+    p_adjust <- match.arg(p_adjust)
+    attr_metric <- match.arg(attr_metric)
+    
+    # RNG handling - generate seed if not provided for reproducibility
+    if (is.null(seed)) {
+        seed <- sample.int(.Machine$integer.max, 1)
+    }
+    
+    # Save and restore RNG state
+    old_rng <- if (exists(".Random.seed", .GlobalEnv)) .Random.seed else NULL
+    set.seed(seed)
+    on.exit({
+        if (!is.null(old_rng)) {
+            assign(".Random.seed", old_rng, envir = .GlobalEnv)
+        } else if (exists(".Random.seed", .GlobalEnv)) {
+            rm(.Random.seed, envir = .GlobalEnv)
+        }
+    })
+    
     # input validation
     if (!is.list(nets) && !is_netify(nets)) {
         cli::cli_abort("Input must be a list of netify objects or a single netify object")
@@ -229,14 +298,17 @@ compare_networks <- function(
     if (what == "edges") {
         comp_results <- compare_edges(
             nets_list, method, test, n_permutations,
-            include_diagonal, edge_threshold, return_details
+            include_diagonal, edge_threshold, return_details,
+            permutation_type, correlation_type, binary_metric,
+            p_adjust, adaptive_stop, alpha, max_permutations, seed_used = seed,
+            spectral_rank = spectral_rank
         )
     } else if (what == "structure") {
         comp_results <- compare_structure(nets_list, test)
     } else if (what == "nodes") {
         comp_results <- compare_nodes(nets_list, return_details)
     } else if (what == "attributes") {
-        comp_results <- compare_attributes(nets_list, test, n_permutations, return_details)
+        comp_results <- compare_attributes(nets_list, test, n_permutations, return_details, attr_metric)
     }
 
     # Merge comparison results with initial results

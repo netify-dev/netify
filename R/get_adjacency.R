@@ -25,6 +25,10 @@
 #'   to NA. Automatically set to FALSE for bipartite networks.
 #' @param missing_to_zero Logical. If TRUE (default), treats missing edges as zeros.
 #'   If FALSE, missing edges remain as NA.
+#' @param nodelist Character vector of actor names to include in the network.
+#'   If provided, ensures all listed actors appear in the network even if they
+#'   have no edges (isolates). Useful when working with edgelists that only
+#'   contain active dyads.
 #'
 #' @return A matrix of class "netify" (a netify matrix) with:
 #'   \itemize{
@@ -96,7 +100,8 @@ get_adjacency <- function(
     actor1 = NULL, actor2 = NULL,
     symmetric = TRUE, mode = "unipartite",
     weight = NULL, sum_dyads = FALSE,
-    diag_to_NA = TRUE, missing_to_zero = TRUE) {
+    diag_to_NA = TRUE, missing_to_zero = TRUE,
+    nodelist = NULL) {
     # if bipartite network then force diag_to_NA to be FALSE
     # and force asymmetric, create copy to preserve user choice
     user_symmetric <- symmetric
@@ -132,7 +137,25 @@ get_adjacency <- function(
     actors_rows <- unique_vector(dyad_data[, actor1])
     actors_cols <- unique_vector(dyad_data[, actor2])
     actors <- unique_vector(actors_rows, actors_cols)
-    if (mode == "unipartite") {
+    
+    # Incorporate nodelist if provided
+    if (!is.null(nodelist)) {
+        # Convert to character to ensure consistency
+        nodelist <- as.character(nodelist)
+        
+        # Add any missing actors from nodelist
+        if (mode == "unipartite") {
+            actors <- unique_vector(actors, nodelist)
+            actors_rows <- actors_cols <- actors
+        } else {
+            # For bipartite, assume nodelist contains all actors
+            # User should specify which are row/col actors
+            cli::cli_alert_info("For bipartite networks, nodelist should contain all actors. Assigning to both row and column actors.")
+            actors_rows <- unique_vector(actors_rows, nodelist)
+            actors_cols <- unique_vector(actors_cols, nodelist)
+            actors <- unique_vector(actors_rows, actors_cols)
+        }
+    } else if (mode == "unipartite") {
         actors_rows <- actors_cols <- actors
     }
 

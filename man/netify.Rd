@@ -22,6 +22,7 @@ netify(
   dyad_vars = NULL,
   dyad_vars_symmetric = rep(symmetric, length(dyad_vars)),
   input_type = c("auto", "dyad_df", "netify_obj"),
+  nodelist = NULL,
   ...
 )
 }
@@ -95,6 +96,11 @@ to use the same choice as the symmetric argument}
 Options are "auto" (default), "dyad_df", or "netify_obj". Use "dyad_df"
 to force data.frame interpretation or "netify_obj" to force matrix/array/
 igraph/network interpretation.}
+
+\item{nodelist}{character vector: optional list of all actors (nodes) that should
+be included in the network. This ensures isolates (nodes with no edges) are
+properly represented. Particularly useful when working with edgelists that
+only contain active dyads.}
 
 \item{...}{additional arguments passed to \code{to_netify} when processing network objects}
 }
