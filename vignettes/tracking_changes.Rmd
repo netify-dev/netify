@@ -130,10 +130,31 @@ coop_comparison <- compare_networks(
 )
 
 # Display comparison results
-coop_comparison
+# Extract key metrics for cleaner display
+knitr::kable(
+    coop_comparison$summary,
+    caption = "Verbal vs Material Cooperation Comparison Metrics",
+    digits = 3,
+    align = "c"
+)
+
+# Display edge changes
+edge_changes_df <- data.frame(
+    Change_Type = c("Added", "Removed", "Maintained"),
+    Count = c(
+        coop_comparison$edge_changes[[1]]$added,
+        coop_comparison$edge_changes[[1]]$removed,
+        coop_comparison$edge_changes[[1]]$maintained
+    )
+)
+knitr::kable(
+    edge_changes_df,
+    caption = "Edge Changes Between Networks",
+    align = "c"
+)
 
 # Interpret results
-cat("\n=== INTERPRETATION ===\n")
+cat("\n**INTERPRETATION**\n")
 if (coop_comparison$summary$correlation > 0.7) {
     cat("Strong alignment: Countries that cooperate verbally tend to cooperate materially\n")
 } else if (coop_comparison$summary$correlation > 0.4) {
@@ -209,7 +230,8 @@ coop_conf_qap <- compare_networks(
         conflict = verb_conf_2002
     ),
     method = "qap",
-    n_permutations = 500 # Reduced for vignette speed
+    n_permutations = 500, # Reduced for vignette speed
+    seed = 12345 # For reproducibility
 )
 
 # Construct message
@@ -249,6 +271,105 @@ cat(qap_msg)
 
 The positive correlation (0.506) with p-value of 0 tells us that countries that cooperate also tend to have conflicts. This counterintuitive finding suggests that international interaction is multifaceted - countries that engage diplomatically experience both positive and negative interactions, while countries that don't interact have neither cooperation nor conflict.
 
+### Advanced QAP Options: Different Permutation Schemes
+
+The updated `compare_networks()` function now supports multiple permutation schemes for more sophisticated hypothesis testing:
+
+```{r}
+# Compare different permutation schemes
+qap_methods <- list(
+    classic = compare_networks(
+        list(cooperation = verb_coop_2002, conflict = verb_conf_2002),
+        method = "qap",
+        permutation_type = "classic",
+        n_permutations = 500,
+        seed = 12345
+    ),
+    freedman_lane = compare_networks(
+        list(cooperation = verb_coop_2002, conflict = verb_conf_2002),
+        method = "qap",
+        permutation_type = "freedman_lane",
+        n_permutations = 500,
+        seed = 12345
+    ),
+    dsp_mrqap = compare_networks(
+        list(cooperation = verb_coop_2002, conflict = verb_conf_2002),
+        method = "qap",
+        permutation_type = "dsp_mrqap",
+        n_permutations = 500,
+        seed = 12345
+    )
+)
+
+# Compare results
+qap_results <- data.frame(
+    Permutation_Type = c("Classic", "Freedman-Lane", "DSP-MRQAP"),
+    Correlation = c(
+        qap_methods$classic$summary$qap_correlation,
+        qap_methods$freedman_lane$summary$qap_correlation,
+        qap_methods$dsp_mrqap$summary$qap_correlation
+    ),
+    P_Value = c(
+        qap_methods$classic$summary$qap_pvalue,
+        qap_methods$freedman_lane$summary$qap_pvalue,
+        qap_methods$dsp_mrqap$summary$qap_pvalue
+    )
+)
+
+knitr::kable(qap_results, 
+             caption = "QAP Results with Different Permutation Schemes",
+             digits = 3)
+```
+
+**Understanding Different Permutation Types:**
+
+- **Classic**: Standard node label permutation. Fast and widely used.
+- **Freedman-Lane**: Controls for network autocorrelation by residualizing before permutation.
+- **DSP-MRQAP**: Double Semi-Partialling - removes mutual influence between networks.
+
+Note that MRQAP methods (Freedman-Lane and DSP) often yield higher p-values as they account for network dependencies.
+
+## 3. Temporal Evolution: Tracking Network Changes
+
+How do international networks evolve over time? When you pass a longitudinal netify object to `compare_networks()`, it automatically compares consecutive time periods:
+
+### Correlation Types: Pearson vs. Spearman
+
+For networks with skewed weight distributions, Spearman correlation may be more appropriate:
+
+```{r}
+# Compare using different correlation types
+cor_comparison <- data.frame(
+    Correlation_Type = c("Pearson", "Spearman"),
+    Cooperation_Networks = c(
+        compare_networks(
+            list(verbal = verb_coop_2002, material = matl_coop_2002),
+            correlation_type = "pearson"
+        )$summary$correlation,
+        compare_networks(
+            list(verbal = verb_coop_2002, material = matl_coop_2002),
+            correlation_type = "spearman"
+        )$summary$correlation
+    ),
+    Conflict_Networks = c(
+        compare_networks(
+            list(verbal = verb_conf_2002, material = matl_conf_2002),
+            correlation_type = "pearson"
+        )$summary$correlation,
+        compare_networks(
+            list(verbal = verb_conf_2002, material = matl_conf_2002),
+            correlation_type = "spearman"
+        )$summary$correlation
+    )
+)
+
+knitr::kable(cor_comparison,
+             caption = "Pearson vs. Spearman Correlations",
+             digits = 3)
+```
+
+Spearman correlation is rank-based and more robust to outliers, which is useful when edge weights have extreme values.
+
 ## 3. Temporal Evolution: Tracking Network Changes
 
 How do international networks evolve over time? When you pass a longitudinal netify object to `compare_networks()`, it automatically compares consecutive time periods:
@@ -273,7 +394,13 @@ temporal_comparison <- compare_networks(
     method = "all"
 )
 # Display temporal comparison results
-temporal_comparison
+# Show summary statistics in a cleaner format
+knitr::kable(
+    temporal_comparison$summary,
+    caption = "Temporal Network Comparison Summary",
+    digits = 3,
+    align = "c"
+)
 ```
 
 ### Understanding Temporal Comparison Output
@@ -345,6 +472,42 @@ ggplot(edge_change_long, aes(x = Comparison, y = Count, fill = Change_Type)) +
 ```
 
 Notice that "Maintained" edges dominate - most relationships persist across time periods, confirming the stability we observed in the correlation metrics.
+
+### Multiple Testing Correction
+
+When comparing multiple networks, it's important to adjust p-values for multiple comparisons. The `p_adjust` parameter offers several correction methods:
+
+```{r}
+# Demonstrate multiple testing correction
+# Compare all years pairwise with QAP
+multi_year_comparison <- compare_networks(
+    coop_net_longit,
+    method = "qap",
+    n_permutations = 500,  # Lower for vignette
+    p_adjust = "BH",  # Benjamini-Hochberg correction
+    seed = 123
+)
+
+# Show adjusted p-values
+cat("Number of pairwise comparisons:", 
+    choose(length(names(coop_net_longit)), 2), "\n")
+cat("P-value adjustment method: Benjamini-Hochberg (FDR)\n\n")
+
+# Display the p-value matrix
+knitr::kable(
+    round(multi_year_comparison$significance_tests$qap_pvalues, 4),
+    caption = "QAP P-values (Adjusted using BH method)",
+    align = "c"
+)
+```
+
+**Available p-value adjustment methods:**
+- `"none"`: No adjustment (default)
+- `"holm"`: Holm's method (controls family-wise error rate)
+- `"BH"`: Benjamini-Hochberg (controls false discovery rate)
+- `"BY"`: Benjamini-Yekutieli (more conservative FDR control)
+
+Use p-value adjustment when making many comparisons to avoid inflated Type I error rates.
 
 ## 4. Structural Evolution: Beyond Individual Edges
 
@@ -492,7 +655,8 @@ early_late_comp <- compare_networks(
         time = c("2002", "2014")
     ),
     method = "all",
-    return_details = TRUE
+    return_details = TRUE,
+    n_permutations = 1000 # Lower for vignette speed
 )
 
 # Access detailed comparison matrices
@@ -567,15 +731,20 @@ spectral_comp <- compare_networks(
     method = "spectral"
 )
 
-# Display spectral comparison results
-spectral_comp
+# Display spectral comparison results in a cleaner format
+knitr::kable(
+    spectral_comp$summary,
+    caption = "Spectral Distance Results",
+    digits = 2,
+    align = "c"
+)
 
 # Interpretation
 # Build spectral interpretation message
 spec_dist <- spectral_comp$summary$spectral
 
 spec_msg <- paste0(
-    "=== SPECTRAL DISTANCE INTERPRETATION ===\n\n",
+    "**SPECTRAL DISTANCE INTERPRETATION**\n\n",
     "- Spectral distance: ", round(spec_dist, 2), "\n"
 )
 
@@ -606,6 +775,21 @@ Spectral distance measures how different two networks are by comparing their eig
   - Detecting fundamental structural changes over time
   - Comparing networks with different connectivity patterns
   - Identifying networks with similar spectral properties (useful for network classification)
+
+### Performance Optimization for Large Networks
+
+For large networks (>1000 nodes), computing all eigenvalues can be computationally expensive. The `spectral_rank` parameter allows you to use only the top-k eigenvalues:
+
+```{r, eval=FALSE}
+# For large networks, use spectral_rank to improve performance
+spectral_comp_fast <- compare_networks(
+    list(large_net1, large_net2),
+    method = "spectral",
+    spectral_rank = 50  # Use only top 50 eigenvalues
+)
+```
+
+The top eigenvalues capture the most significant structural features, so using 50-100 eigenvalues often provides a good balance between accuracy and performance.
 
 ### Combining with Other Methods
 
@@ -719,7 +903,13 @@ multilayer_2010 <- layer_netify(
 # Compare layers automatically
 layer_comparison <- compare_networks(multilayer_2010, method = "all")
 # Display multilayer comparison results
-layer_comparison
+# Extract summary for cleaner display
+knitr::kable(
+    layer_comparison$summary,
+    caption = "Multilayer Network Comparison Summary",
+    digits = 3,
+    align = "c"
+)
 ```
 
 ### Understanding Multilayer Comparison Output
@@ -814,7 +1004,12 @@ comparison <- compare_networks(longitudinal_netify_object)
 - `method`: "correlation" (default), "jaccard", "hamming", "qap", "spectral", or "all"
 - `what`: "edges" (default), "structure", "nodes", or "attributes"
 - `return_details`: Set TRUE to get full comparison matrices
-- `n_permutations`: For QAP significance testing (default 1000)
+- `n_permutations`: For QAP significance testing (default 5000)
+- `permutation_type`: "classic" (default), "degree_preserving", "freedman_lane", or "dsp_mrqap"
+- `correlation_type`: "pearson" (default) or "spearman"
+- `seed`: Set for reproducible permutation tests
+- `p_adjust`: "none" (default), "holm", "BH", or "BY" for multiple testing correction
+- `spectral_rank`: Number of eigenvalues for spectral distance (0 = all, default)
 
 **What you get:**
 
@@ -823,11 +1018,11 @@ comparison <- compare_networks(longitudinal_netify_object)
 - **Statistical tests**: Permutation tests for significance
 - **Flexible comparisons**: Works with any number of networks, automatically handles longitudinal data
 
-**Pro tips:**
-
 1. Use `method = "all"` for initial exploration
 2. Use `what = "structure"` to compare network-level properties
 3. Set `return_details = TRUE` when you need the full comparison matrices
 4. For longitudinal data, just pass your netify object - it handles the rest
+5. Use `permutation_type = "freedman_lane"` or `"dsp_mrqap"` when comparing networks that may have autocorrelation
+6. Set `correlation_type = "spearman"` for networks with skewed weight distributions
+7. Use `p_adjust` when making multiple comparisons to control false discovery rate
 
-This function shines when you need to understand not just *that* networks are different, but *how* and *why* they differ.

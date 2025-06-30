@@ -222,7 +222,7 @@ democracy_homophily <- homophily(
   significance_test = TRUE       # Perform statistical significance test
 )
 
-print(democracy_homophily)
+knitr::kable(democracy_homophily, digits=3, align='c')
 
 # Build summary message
 democracy_summary <- paste0(
@@ -319,7 +319,7 @@ regime_homophily <- homophily(
   method = "categorical",
   significance_test = TRUE)
 
-print(regime_homophily)
+knitr::kable(regime_homophily, digits=3, align='c')
 
 # Build regime type summary message
 regime_summary <- paste0(
@@ -376,7 +376,7 @@ gdp_homophily <- homophily(
   method = "correlation",
   significance_test = TRUE)
 
-print(gdp_homophily)
+knitr::kable(gdp_homophily, digits=3, align='c')
 
 # Build economic development summary message
 economic_summary <- paste0(
@@ -409,7 +409,7 @@ region_homophily <- homophily(
   method = "categorical",
   significance_test = TRUE)
 
-print(region_homophily)
+knitr::kable(region_homophily, digits=3, align='c')
 
 # Build regional clustering summary message
 regional_summary <- paste0(
@@ -1097,19 +1097,24 @@ comprehensive_longit <- attribute_report(
   significance_test = TRUE
 )
 
-# Extract key longitudinal patterns
-longit_patterns <- comprehensive_longit$homophily_analysis |>
-  filter(attribute == "democracy") |>
-  select(net, homophily_correlation, p_value) |>
-  mutate(
-    trend = case_when(
-      net == min(net) ~ "Start",
-      net == max(net) ~ "End",
-      TRUE ~ "Middle"
+# Extract key longitudinal patterns if available
+if (!is.null(comprehensive_longit$homophily_analysis)) {
+  longit_patterns <- comprehensive_longit$homophily_analysis |>
+    filter(attribute == "democracy") |>
+    select(net, homophily_correlation, p_value) |>
+    mutate(
+      trend = case_when(
+        net == min(net) ~ "Start",
+        net == max(net) ~ "End",
+        TRUE ~ "Middle"
+      )
     )
-  )
-
-print(longit_patterns)
+  
+  print(longit_patterns)
+} else {
+  cat("Note: Homophily analysis for longitudinal networks is currently limited.\n")
+  cat("For comprehensive longitudinal analysis, analyze each time period separately.\n")
+}
 ```
 
 ## tl;dr
