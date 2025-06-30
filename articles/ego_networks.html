@@ -460,7 +460,7 @@ bilateral while cooperation tends to be multilateral.</p>
 <p>How stable are relationships over time?</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Analyze year-to-year changes</span></span>
-<span><span class="va">pakistan_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span></span>
+<span><span class="va">pakistan_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span>, what <span class="op">=</span> <span class="st">"edges"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Look at a specific transition</span></span>
 <span><span class="va">changes_2010_2011</span> <span class="op">&lt;-</span> <span class="va">pakistan_comparison</span><span class="op">$</span><span class="va">edge_changes</span><span class="op">$</span><span class="va">`2010_vs_2011`</span></span>
@@ -683,8 +683,8 @@ unique relationships (2,222 vs 1,104).</p>
 <span></span>
 <span><span class="co"># Advanced analysis</span></span>
 <span><span class="fu"><a href="../reference/homophily.html">homophily</a></span><span class="op">(</span><span class="va">ego_net</span>, attribute <span class="op">=</span> <span class="st">"democracy"</span><span class="op">)</span>     <span class="co"># Test homophily</span></span>
-<span><span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">ego_net</span><span class="op">)</span>                       <span class="co"># Temporal comparison</span></span>
-<span><span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">ego1</span>, <span class="va">ego2</span><span class="op">)</span><span class="op">)</span>              <span class="co"># Cross-sectional comparison</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">ego_net</span>, what <span class="op">=</span> <span class="st">"edges"</span><span class="op">)</span>       <span class="co"># Temporal comparison</span></span>
+<span><span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">ego1</span>, <span class="va">ego2</span><span class="op">)</span>, what <span class="op">=</span> <span class="st">"edges"</span><span class="op">)</span>  <span class="co"># Cross-sectional comparison</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

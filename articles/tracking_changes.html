@@ -77,11 +77,10 @@ Shahryar Minhas</h4>
 <div class="section level2">
 <h2 id="vignette-summary">Vignette Summary<a class="anchor" aria-label="anchor" href="#vignette-summary"></a>
 </h2>
-<p>This vignette demonstrates how to use <strong>netify</strong>’s
-<code><a href="../reference/compare_networks.html">compare_networks()</a></code> function to analyze changes in
-international relations over time using data from the Integrated Crisis
-Early Warning System (ICEWS). We’ll explore some fun questions about how
-countries interact:</p>
+<p>This vignette demonstrates how to use <strong>netify</strong> to
+analyze changes in international relations over time using data from the
+Integrated Crisis Early Warning System (ICEWS). We’ll explore some fun
+questions about how countries interact:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Talk vs. Action</strong>: Do countries that cooperate
@@ -102,11 +101,12 @@ of international interactions change across years?</li>
 questions:</p>
 <p><strong><code><a href="../reference/compare_networks.html">compare_networks()</a></code>:</strong></p>
 <ul>
-<li>Compares networks across multiple dimensions - edges, structure,
+<li><p>Compares networks across multiple dimensions - edges, structure,
 nodes, and attributes. Think of it as running a comprehensive diagnostic
 between any two (or more) networks to understand what’s similar, what’s
-different, and why it matters.</li>
-<li>Function notes:
+different, and why it matters.</p></li>
+<li>
+<p>Function notes:</p>
 <ul>
 <li>
 <strong>Multi-method flexibility</strong>: Choose from correlation,
@@ -370,17 +370,19 @@ positive correlation - when verbal cooperation is high between two
 countries, material cooperation tends to be somewhat higher too, but the
 relationship isn’t perfect.</li>
 <li>
-<strong>jaccard (0.190)</strong>: Only 19% of possible edges exist
-in BOTH networks. This low value tells us that most country pairs engage
-in either verbal OR material cooperation, but not both.</li>
+<strong>jaccard (0.190)</strong>: 19% of the dyads that appear in at
+least one of the two networks appear in both. This low value tells us
+that most country pairs engage in either verbal OR material cooperation,
+but not both.</li>
 <li>
-<strong>hamming (0.308)</strong>: About 31% of all possible edges
-differ between the two networks. This measures the proportion of country
-pairs that have different connection patterns.</li>
+<strong>hamming (0.308)</strong>: About 31% of dyads (after NA
+handling) differ between the two networks. This measures the proportion
+of comparable country pairs that have different connection
+patterns.</li>
 <li>
 <strong>qap_correlation (0.507) with qap_pvalue (0)</strong>: The
 QAP test confirms the correlation is statistically significant (p &lt;
-0.001). This isn’t due to random chance.</li>
+1/5000 ≈ 0.0002). This isn’t due to random chance.</li>
 </ul>
 <p><strong>Edge Changes:</strong></p>
 <ul>
@@ -426,7 +428,10 @@ actions.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="tracking_changes_files/figure-html/unnamed-chunk-5-1.png" width="1200"></p>
 <p>The visualization makes the pattern clear: verbal cooperation (cheap
-talk) is far more common than material cooperation (costly actions).</p>
+talk) is far more common than material cooperation (costly actions).
+Note that this pattern may partly reflect reporting bias in event data,
+as verbal events (statements, promises) are more likely to be captured
+in news sources than material actions.</p>
 </div>
 </div>
 <div class="section level2">
@@ -450,7 +455,9 @@ talk) is far more common than material cooperation (costly actions).</p>
 <span><span class="va">qap_msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
 <span>    <span class="st">"**QAP Test Results:**\n\n"</span>,</span>
 <span>    <span class="st">"- Observed correlation: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">coop_conf_qap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_correlation</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span>,</span>
-<span>    <span class="st">"- P-value: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">coop_conf_qap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_pvalue</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span></span>
+<span>    <span class="st">"- P-value: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">coop_conf_qap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_pvalue</span> <span class="op">==</span> <span class="fl">0</span>, </span>
+<span>                         <span class="st">"&lt; 0.002 (1/500 permutations)"</span>, </span>
+<span>                         <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">coop_conf_qap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_pvalue</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Add interpretation based on significance</span></span>
@@ -480,25 +487,29 @@ talk) is far more common than material cooperation (costly actions).</p>
 <pre><code><span><span class="co">## **QAP Test Results:**</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## - Observed correlation: 0.506</span></span>
-<span><span class="co">## - P-value: 0</span></span>
+<span><span class="co">## - P-value: &lt; 0.002 (1/500 permutations)</span></span>
 <span><span class="co">## → Cooperation and conflict networks are positively correlated</span></span>
 <span><span class="co">##   (Countries interact through both cooperation AND conflict)</span></span></code></pre>
 <div class="section level3">
 <h3 id="understanding-qap-results">Understanding QAP Results<a class="anchor" aria-label="anchor" href="#understanding-qap-results"></a>
 </h3>
-<p>The positive correlation (0.506) with p-value of 0 tells us that
-countries that cooperate also tend to have conflicts. This
-counterintuitive finding suggests that international interaction is
-multifaceted - countries that engage diplomatically experience both
-positive and negative interactions, while countries that don’t interact
-have neither cooperation nor conflict.</p>
+<p>The positive correlation (0.506) with p-value &lt; 0.002 tells us
+that countries that cooperate also tend to have conflicts. This
+counterintuitive finding reflects the multiplex nature of international
+relations: countries that appear frequently in international news tend
+to have both cooperative and conflictual interactions. High-interaction
+dyads accumulate both cooperative and conflictual events; the
+correlation therefore captures activity rather than affinity. In
+contrast, countries that rarely interact have neither cooperation nor
+conflict events recorded. This pattern is well-documented in the
+international relations literature as the “interaction density”
+effect.</p>
 </div>
 <div class="section level3">
 <h3 id="advanced-qap-options-different-permutation-schemes">Advanced QAP Options: Different Permutation Schemes<a class="anchor" aria-label="anchor" href="#advanced-qap-options-different-permutation-schemes"></a>
 </h3>
-<p>The updated <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function now supports
-multiple permutation schemes for more sophisticated hypothesis
-testing:</p>
+<p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function supports multiple
+permutation schemes for more sophisticated hypothesis testing:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare different permutation schemes</span></span>
 <span><span class="va">qap_methods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -581,15 +592,11 @@ by residualizing before permutation.</li>
 influence between networks.</li>
 </ul>
 <p>Note that MRQAP methods (Freedman-Lane and DSP) often yield higher
-p-values as they account for network dependencies.</p>
+p-values as they account for network dependencies. Because Freedman-Lane
+and DSP residualize the matrices before permutation, the point estimate
+can shrink and occasionally flip sign; what matters is the
+(non-)significance after accounting for structural autocorrelation.</p>
 </div>
-</div>
-<div class="section level2">
-<h2 id="temporal-evolution-tracking-network-changes">3. Temporal Evolution: Tracking Network Changes<a class="anchor" aria-label="anchor" href="#temporal-evolution-tracking-network-changes"></a>
-</h2>
-<p>How do international networks evolve over time? When you pass a
-longitudinal netify object to <code><a href="../reference/compare_networks.html">compare_networks()</a></code>, it
-automatically compares consecutive time periods:</p>
 <div class="section level3">
 <h3 id="correlation-types-pearson-vs--spearman">Correlation Types: Pearson vs. Spearman<a class="anchor" aria-label="anchor" href="#correlation-types-pearson-vs--spearman"></a>
 </h3>
@@ -649,7 +656,7 @@ is useful when edge weights have extreme values.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="temporal-evolution-tracking-network-changes-1">3. Temporal Evolution: Tracking Network Changes<a class="anchor" aria-label="anchor" href="#temporal-evolution-tracking-network-changes-1"></a>
+<h2 id="temporal-evolution-tracking-network-changes">3. Temporal Evolution: Tracking Network Changes<a class="anchor" aria-label="anchor" href="#temporal-evolution-tracking-network-changes"></a>
 </h2>
 <p>How do international networks evolve over time? When you pass a
 longitudinal netify object to <code><a href="../reference/compare_networks.html">compare_networks()</a></code>, it
@@ -734,8 +741,8 @@ from the same longitudinal network</li>
 2006, 2010, 2014)</li>
 </ul>
 <p><strong>Summary Statistics Table:</strong></p>
-<p>Instead of a single comparison, we now see summary statistics across
-ALL pairwise comparisons:</p>
+<p>Instead of a single comparison, we see summary statistics across ALL
+pairwise comparisons:</p>
 <ul>
 <li>
 <strong>mean correlation (0.828)</strong>: On average, networks are
@@ -878,11 +885,20 @@ several correction methods:</p>
 </tr>
 </tbody>
 </table>
-<p><strong>Available p-value adjustment methods:</strong> -
-<code>"none"</code>: No adjustment (default) - <code>"holm"</code>:
-Holm’s method (controls family-wise error rate) - <code>"BH"</code>:
-Benjamini-Hochberg (controls false discovery rate) - <code>"BY"</code>:
-Benjamini-Yekutieli (more conservative FDR control)</p>
+<p><strong>Available p-value adjustment methods:</strong></p>
+<ul>
+<li>
+<code>"none"</code>: No adjustment (default)</li>
+<li>
+<code>"holm"</code>: Holm’s method (controls family-wise error
+rate)</li>
+<li>
+<code>"BH"</code>: Benjamini-Hochberg (controls false discovery
+rate)</li>
+<li>
+<code>"BY"</code>: Benjamini-Yekutieli (more conservative FDR
+control)</li>
+</ul>
 <p>Use p-value adjustment when making many comparisons to avoid inflated
 Type I error rates.</p>
 </div>
@@ -1082,12 +1098,12 @@ exit the network:</p>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">node_comparison</span><span class="op">$</span><span class="va">summary</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"Node Composition Across Time Periods"</span>,</span>
 <span>    digits <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>    align <span class="op">=</span> <span class="st">"c"</span></span>
+<span>    align <span class="op">=</span> <span class="st">"c"</span>,</span>
+<span>    row.names <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <caption>Node Composition Across Time Periods</caption>
 <thead><tr class="header">
-<th align="left"></th>
 <th align="center">network</th>
 <th align="center">n_nodes</th>
 <th align="center">mean_overlap</th>
@@ -1095,28 +1111,24 @@ exit the network:</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">2002</td>
 <td align="center">2002</td>
 <td align="center">152</td>
 <td align="center">152</td>
 <td align="center">1</td>
 </tr>
 <tr class="even">
-<td align="left">2006</td>
 <td align="center">2006</td>
 <td align="center">152</td>
 <td align="center">152</td>
 <td align="center">1</td>
 </tr>
 <tr class="odd">
-<td align="left">2010</td>
 <td align="center">2010</td>
 <td align="center">152</td>
 <td align="center">152</td>
 <td align="center">1</td>
 </tr>
 <tr class="even">
-<td align="left">2014</td>
 <td align="center">2014</td>
 <td align="center">152</td>
 <td align="center">152</td>
@@ -1211,11 +1223,15 @@ jaccard_matrix, hamming_matrix)</li>
 <li>These allow custom analysis and visualization of network
 similarities</li>
 </ul>
-<p>The relationship dynamics show: - 6,633 stable relationships persist
-from 2002 to 2014 - 3,141 new relationships formed - 2,059 relationships
-ended - 43.9% total change rate indicates moderate network evolution -
-Weight correlation of 0.762 means cooperation intensity is fairly stable
-for continuing relationships</p>
+<p>The relationship dynamics show:</p>
+<ul>
+<li>6,633 stable relationships persist from 2002 to 2014</li>
+<li>3,141 new relationships formed</li>
+<li>2,059 relationships ended</li>
+<li>43.9% total change rate indicates moderate network evolution</li>
+<li>Weight correlation of 0.762 means cooperation intensity is fairly
+stable for continuing relationships</li>
+</ul>
 <p>With this detailed information you could create custom visualizations
 or further statistical tests, such as detecting structural breaks in
 time series.</p>
@@ -1268,20 +1284,21 @@ al 2016</a> for a useful introduction):</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Add interpretation</span></span>
-<span><span class="va">interpretation</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">spec_dist</span> <span class="op">&lt;</span> <span class="fl">10</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="st">"Low spectral distance: Networks have very similar structural properties\n"</span></span>
-<span><span class="op">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">spec_dist</span> <span class="op">&lt;</span> <span class="fl">50</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="st">"Moderate spectral distance: Networks show some structural differences\n"</span></span>
-<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>    <span class="st">"High spectral distance: Networks have substantially different structures\n"</span></span>
-<span><span class="op">}</span></span>
+<span><span class="co"># Note: Spectral distance should be interpreted relative to other comparisons</span></span>
+<span><span class="co"># in your study, as the scale depends on network size</span></span>
+<span><span class="va">interpretation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
+<span>    <span class="st">"→ The spectral distance of "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">spec_dist</span>, <span class="fl">0</span><span class="op">)</span>, </span>
+<span>    <span class="st">" should be interpreted relative to other network comparisons in your study.\n"</span>,</span>
+<span>    <span class="st">"  Larger values indicate greater structural differences."</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Combine and print</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">spec_msg</span>, <span class="st">"→ "</span>, <span class="va">interpretation</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## **SPECTRAL DISTANCE INTERPRETATION**</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## - Spectral distance: 14369.14</span></span>
-<span><span class="co">## → High spectral distance: Networks have substantially different structures</span></span></code></pre>
+<span><span class="co">## → → The spectral distance of 14369 should be interpreted relative to other network comparisons in your study.</span></span>
+<span><span class="co">##   Larger values indicate greater structural differences.</span></span></code></pre>
 <div class="section level3">
 <h3 id="understanding-spectral-distance">Understanding Spectral Distance<a class="anchor" aria-label="anchor" href="#understanding-spectral-distance"></a>
 </h3>
@@ -1294,7 +1311,7 @@ properties that other metrics might miss:</p>
 eigenvalues of two network Laplacian matrices</li>
 <li>
 <strong>Scale</strong>: Ranges from 0 (identical spectra) to
-potentially large values</li>
+potentially large values depending on network size</li>
 <li>
 <strong>Advantages</strong>:
 <ul>
@@ -1325,11 +1342,11 @@ allows you to use only the top-k eigenvalues:</p>
 <span><span class="va">spectral_comp_fast</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">large_net1</span>, <span class="va">large_net2</span><span class="op">)</span>,</span>
 <span>    method <span class="op">=</span> <span class="st">"spectral"</span>,</span>
-<span>    spectral_rank <span class="op">=</span> <span class="fl">50</span>  <span class="co"># Use only top 50 eigenvalues</span></span>
+<span>    spectral_rank <span class="op">=</span> <span class="fl">50</span>  <span class="co"># Use only top 50 eigenvalues (rule of thumb: round(sqrt(n)))</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>The top eigenvalues capture the most significant structural features,
-so using 50-100 eigenvalues often provides a good balance between
-accuracy and performance.</p>
+<p>The top eigenvalues capture the most significant structural features.
+A good rule of thumb is to use <code>round(sqrt(n))</code> eigenvalues,
+where n is the number of nodes.</p>
 </div>
 <div class="section level3">
 <h3 id="combining-with-other-methods">Combining with Other Methods<a class="anchor" aria-label="anchor" href="#combining-with-other-methods"></a>
@@ -1655,7 +1672,8 @@ matrices</li>
 multiple testing correction</li>
 <li>
 <code>spectral_rank</code>: Number of eigenvalues for spectral
-distance (0 = all, default)</li>
+distance (0 = all, default). Rule of thumb: <code>round(sqrt(n))</code>
+for networks with many nodes</li>
 </ul>
 <p><strong>What you get:</strong></p>
 <ul>
@@ -1687,7 +1705,403 @@ autocorrelation</li>
 skewed weight distributions</li>
 <li>Use <code>p_adjust</code> when making multiple comparisons to
 control false discovery rate</li>
+<li>Set <code>spectral_rank = round(sqrt(n))</code> for large networks
+to improve performance</li>
 </ol>
+<div class="section level3">
+<h3 id="when-to-use-advanced-options">When to Use Advanced Options<a class="anchor" aria-label="anchor" href="#when-to-use-advanced-options"></a>
+</h3>
+<p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function includes several
+advanced parameters that help tailor the analysis to your specific
+network characteristics:</p>
+<p><strong>Permutation Types:</strong></p>
+<ul>
+<li>
+<strong><code>classic</code></strong> (default): Standard node label
+permutation. Use for general network comparisons.</li>
+<li>
+<strong><code>degree_preserving</code></strong>: Maintains degree
+sequences through edge swaps. Essential for sparse, binary networks with
+high degree heterogeneity.</li>
+<li>
+<strong><code>freedman_lane</code></strong>: Residualizes before
+permutation. Use when you suspect network autocorrelation (e.g.,
+geographic networks, social influence).</li>
+<li>
+<strong><code>dsp_mrqap</code></strong>: Double semi-partialling.
+Most conservative option; use for multiple regression-style comparisons
+or when networks have strong mutual dependencies.</li>
+</ul>
+<p><strong>Correlation Types:</strong></p>
+<ul>
+<li>
+<strong><code>pearson</code></strong> (default): Standard linear
+correlation. Appropriate for normally distributed edge weights.</li>
+<li>
+<strong><code>spearman</code></strong>: Rank-based correlation. Use
+when edge weights are skewed, zero-inflated, or contain outliers.</li>
+</ul>
+<p><strong>P-value Adjustments:</strong></p>
+<ul>
+<li>
+<strong><code>none</code></strong> (default): No adjustment. Fine
+for single comparisons.</li>
+<li>
+<strong><code>holm</code></strong>: Controls family-wise error rate.
+Use for a small number of planned comparisons.</li>
+<li>
+<strong><code>BH</code></strong> (Benjamini-Hochberg): Controls
+false discovery rate. Best for many comparisons (e.g., comparing all
+time periods).</li>
+<li>
+<strong><code>BY</code></strong> (Benjamini-Yekutieli): More
+conservative FDR control. Use when comparisons are strongly
+dependent.</li>
+</ul>
+<p><strong>Binary Metrics</strong> (for binary networks):</p>
+<ul>
+<li>
+<strong><code>phi</code></strong>: Phi coefficient. Standard choice,
+but sensitive to marginal imbalance.</li>
+<li>
+<strong><code>simple_matching</code></strong>: Proportion of
+matching edges. Use when absence of edges is as meaningful as
+presence.</li>
+<li>
+<strong><code>mean_centered</code></strong>: Centers matrices before
+correlation. Reduces bias from density differences.</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="using-compare_networks-in-your-research-workflow">Using <code>compare_networks()</code> in Your Research Workflow<a class="anchor" aria-label="anchor" href="#using-compare_networks-in-your-research-workflow"></a>
+</h2>
+<div class="section level3">
+<h3 id="where-compare_networks-fits-in-network-analysis">Where <code>compare_networks()</code> Fits in Network Analysis<a class="anchor" aria-label="anchor" href="#where-compare_networks-fits-in-network-analysis"></a>
+</h3>
+<p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function serves as a
+comprehensive diagnostic tool that should be used throughout your
+network analysis workflow:</p>
+<table class="table">
+<colgroup>
+<col width="24%">
+<col width="23%">
+<col width="52%">
+</colgroup>
+<thead><tr class="header">
+<th>Analysis Stage</th>
+<th>Key Questions</th>
+<th>How <code><a href="../reference/compare_networks.html">compare_networks()</a></code> Helps</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>Data cleaning</strong></td>
+<td>Have I built the networks correctly?</td>
+<td>Quick edge &amp; node sanity checks</td>
+</tr>
+<tr class="even">
+<td><strong>Exploration</strong></td>
+<td>Where are the major differences?</td>
+<td>Multi-metric similarity diagnostics</td>
+</tr>
+<tr class="odd">
+<td><strong>Theory building</strong></td>
+<td>Which dimensions matter (time, layer, subgroup)?</td>
+<td>Temporal/multilayer/by-group comparisons highlight mechanisms</td>
+</tr>
+<tr class="even">
+<td><strong>Model specification</strong></td>
+<td>Which terms belong in my ERGM/SAOM?</td>
+<td>Structural summaries reveal relevant patterns</td>
+</tr>
+<tr class="odd">
+<td><strong>Model validation</strong></td>
+<td>Does my model capture observed differences?</td>
+<td>Compare observed vs. simulated networks</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="recommended-pre-modeling-workflow">Recommended Pre-Modeling Workflow<a class="anchor" aria-label="anchor" href="#recommended-pre-modeling-workflow"></a>
+</h3>
+<p>Before fitting ERGMs, SAOMs, or latent space models, follow this
+systematic approach:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Sanity Check</strong>:
+<code>compare_networks(nets, method="all", what="edges")</code>
+<ul>
+<li>Identify duplicate edges, missing dyads, density anomalies</li>
+<li>Clean data or adjust <code><a href="../reference/netify.html">netify()</a></code> parameters as needed</li>
+</ul>
+</li>
+<li>
+<strong>Cross-Domain Analysis</strong>: Compare different
+relationship types
+<ul>
+<li>Example: verbal vs. material cooperation</li>
+<li>Decides whether to model layers jointly (multiplex ERGM) or
+separately</li>
+</ul>
+</li>
+<li>
+<strong>Temporal Stability</strong>:
+<code>compare_networks(longit_nets, method="all")</code>
+<ul>
+<li>How quickly do ties appear/disappear?</li>
+<li>Informs SAOM rate functions or ERGM temporal windows</li>
+</ul>
+</li>
+<li>
+<strong>Actor Dynamics</strong>:
+<code>compare_networks(nets, what="nodes")</code>
+<ul>
+<li>Track actor turnover</li>
+<li>Choose between relational event models vs. panel frameworks</li>
+</ul>
+</li>
+<li>
+<strong>Structural Evolution</strong>:
+<code>compare_networks(nets, what="structure")</code>
+<ul>
+<li>Identify density, reciprocity, transitivity trends</li>
+<li>Suggests candidate ERGM terms or SAOM effects</li>
+</ul>
+</li>
+<li>
+<strong>Global Shifts</strong>:
+<code>compare_networks(nets, method="spectral")</code>
+<ul>
+<li>Detect regime-change style discontinuities</li>
+<li>May require sample breaks or change-point models</li>
+</ul>
+</li>
+<li>
+<strong>Statistical Validation</strong>:
+<code>compare_networks(nets, method="qap", permutation_type="...")</code>
+<ul>
+<li>Test if correlations are spurious under network constraints</li>
+<li>Guides which controls must enter your model</li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="section level3">
+<h3 id="interpreting-results-for-model-building">Interpreting Results for Model Building<a class="anchor" aria-label="anchor" href="#interpreting-results-for-model-building"></a>
+</h3>
+<p><strong>For ERGMs:</strong></p>
+<ul>
+<li>High transitivity → include GWESP terms</li>
+<li>Degree heterogeneity → add degree-based terms (e.g.,
+<code>gwidegree</code>)</li>
+<li>Reciprocity changes → include mutual edge terms</li>
+<li>Spectral distance jumps → consider time-varying parameters</li>
+</ul>
+<p><strong>For SAOMs:</strong></p>
+<ul>
+<li>Edge turnover rates → set appropriate rate functions</li>
+<li>Structural stability → choose evaluation vs. creation effects</li>
+<li>Actor composition changes → include composition change effects</li>
+</ul>
+<p><strong>For Latent Space Models:</strong></p>
+<ul>
+<li>Spectral distance magnitude → suggests latent dimensionality</li>
+<li>Community structure (from eigenvalues) → number of latent
+positions</li>
+<li>Temporal stability → fixed vs. dynamic latent positions</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="computational-considerations">Computational Considerations<a class="anchor" aria-label="anchor" href="#computational-considerations"></a>
+</h3>
+<p>For large networks (&gt;1000 nodes):</p>
+<ul>
+<li>Set <code>spectral_rank = round(sqrt(n))</code> for faster spectral
+comparisons</li>
+<li>Use <code>n_permutations = 1000</code> for initial exploration,
+increase for final analysis</li>
+<li>Consider <code>correlation_type = "spearman"</code> for heavy-tailed
+weight distributions</li>
+<li>Always use <code>p_adjust</code> when making many comparisons</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="example-complete-pre-modeling-diagnostic">Example: Complete Pre-Modeling Diagnostic<a class="anchor" aria-label="anchor" href="#example-complete-pre-modeling-diagnostic"></a>
+</h3>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Comprehensive diagnostic before ERGM fitting</span></span>
+<span><span class="va">diagnostic_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
+<span>    <span class="va">network_list</span>,</span>
+<span>    method <span class="op">=</span> <span class="st">"all"</span>,</span>
+<span>    what <span class="op">=</span> <span class="st">"edges"</span>,</span>
+<span>    permutation_type <span class="op">=</span> <span class="st">"degree_preserving"</span>,  <span class="co"># For sparse networks</span></span>
+<span>    correlation_type <span class="op">=</span> <span class="st">"spearman"</span>,           <span class="co"># For skewed weights</span></span>
+<span>    n_permutations <span class="op">=</span> <span class="fl">10000</span>,                  <span class="co"># For publication</span></span>
+<span>    p_adjust <span class="op">=</span> <span class="st">"BH"</span>,                         <span class="co"># Multiple comparisons</span></span>
+<span>    spectral_rank <span class="op">=</span> <span class="fl">75</span>,                      <span class="co"># Large network optimization</span></span>
+<span>    return_details <span class="op">=</span> <span class="cn">TRUE</span>,                   <span class="co"># For custom analysis</span></span>
+<span>    seed <span class="op">=</span> <span class="fl">12345</span>                             <span class="co"># Reproducibility</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Extract insights for model specification</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="va">diagnostic_results</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">transitivity</span> <span class="op">&gt;</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="co"># High clustering suggests including triadic closure terms</span></span>
+<span>    <span class="va">ergm_formula</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">net</span> <span class="op">~</span> <span class="va">edges</span> <span class="op">+</span> <span class="fu">gwesp</span><span class="op">(</span><span class="fl">0.5</span>, fixed<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="va">diagnostic_results</span><span class="op">$</span><span class="va">spectral</span> <span class="op">&gt;</span> <span class="fl">100</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="co"># Large spectral distance suggests structural regime change</span></span>
+<span>    <span class="co"># Consider separate models for different periods</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="metric-interpretation-guidelines">Metric Interpretation Guidelines<a class="anchor" aria-label="anchor" href="#metric-interpretation-guidelines"></a>
+</h3>
+<p><strong>Edge-level Metrics:</strong></p>
+<ul>
+<li>
+<strong>Correlation</strong> (-1 to 1): Linear association between
+edge weights
+<ul>
+<li>0.7+ = Strong alignment</li>
+<li>0.4-0.7 = Moderate relationship<br>
+</li>
+<li>&lt;0.4 = Weak or specialized overlap</li>
+</ul>
+</li>
+<li>
+<strong>Jaccard</strong> (0 to 1): Proportion of dyads that appear
+in at least one of the two networks that appear in both
+<ul>
+<li>Context-dependent: 0.25 is high for sparse international relations
+data</li>
+<li>0.5+ indicates substantial structural similarity</li>
+</ul>
+</li>
+<li>
+<strong>Hamming</strong> (0 to 1): Proportion of dyads that differ
+<ul>
+<li>The denominator is the count of dyads observed in both matrices
+after NA handling</li>
+<li>0.2 = 20% edge turnover (moderate change)</li>
+<li>0.5+ = Major restructuring</li>
+</ul>
+</li>
+<li>
+<strong>Spectral Distance</strong>: No fixed scale; interpret
+relatively
+<ul>
+<li>Doubling from baseline often indicates structural regime change</li>
+<li>Compare within same study/time period</li>
+</ul>
+</li>
+</ul>
+<p><strong>QAP p-values:</strong></p>
+<ul>
+<li>Interpret conditional on permutation engine used</li>
+<li>
+<code>degree_preserving</code> typically more conservative than
+<code>classic</code>
+</li>
+<li>Small p-values more credible with more permutations</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="computational-performance-guide">Computational Performance Guide<a class="anchor" aria-label="anchor" href="#computational-performance-guide"></a>
+</h3>
+<table class="table">
+<colgroup>
+<col width="14%">
+<col width="28%">
+<col width="25%">
+<col width="32%">
+</colgroup>
+<thead><tr class="header">
+<th>Method</th>
+<th>Time Complexity</th>
+<th>Memory Usage</th>
+<th>When to Optimize</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Correlation</td>
+<td>O(n²)</td>
+<td>Low</td>
+<td>Rarely needed</td>
+</tr>
+<tr class="even">
+<td>Jaccard/Hamming</td>
+<td>O(n²)</td>
+<td>Low</td>
+<td>Rarely needed</td>
+</tr>
+<tr class="odd">
+<td>Spectral</td>
+<td>O(n³)</td>
+<td>O(n²)</td>
+<td>Use <code>spectral_rank</code> for n&gt;1000</td>
+</tr>
+<tr class="even">
+<td>QAP Classic</td>
+<td>O(R×n²)</td>
+<td>Moderate</td>
+<td>Reduce permutations for exploration</td>
+</tr>
+<tr class="odd">
+<td>QAP Degree-Preserving</td>
+<td>O(R×m)</td>
+<td>High</td>
+<td>Most expensive; use selectively</td>
+</tr>
+</tbody>
+</table>
+<p>R = number of permutations, n = number of nodes, m = number of
+edges</p>
+</div>
+<div class="section level3">
+<h3 id="common-pitfalls-and-solutions">Common Pitfalls and Solutions<a class="anchor" aria-label="anchor" href="#common-pitfalls-and-solutions"></a>
+</h3>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Binary vs. Weighted Networks</strong>
+<ul>
+<li>If your “weighted” network is actually binary (0/1), set
+<code>binary_metric</code> appropriately</li>
+<li>Different density networks need
+<code>binary_metric = "simple_matching"</code>
+</li>
+</ul>
+</li>
+<li>
+<strong>Temporal Comparisons</strong>
+<ul>
+<li>Always check actor composition first with
+<code>what = "nodes"</code>
+</li>
+<li>High node turnover invalidates edge-level comparisons</li>
+</ul>
+</li>
+<li>
+<strong>Multiple Testing</strong>
+<ul>
+<li>With 10+ comparisons, always use <code>p_adjust</code>
+</li>
+<li>Report both raw and adjusted p-values in publications</li>
+</ul>
+</li>
+<li>
+<strong>Reproducibility</strong>
+<ul>
+<li>Always set <code>seed</code> for permutation tests</li>
+<li>The function captures and reports the seed used</li>
+</ul>
+</li>
+</ol>
+<p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function is your comprehensive
+pre-modeling diagnostic tool. Use it early and often to ensure your
+subsequent modeling choices are well-informed and defensible.</p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
