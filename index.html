@@ -134,30 +134,29 @@ matlConf 0.113    0 1.471 0.594 0.387
 <span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  <span class="at">node_vars =</span> <span class="st">'i_democ'</span></span>
 <span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>)</span>
 <span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="fu">plot</span>(</span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  icews_conflict, </span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>  <span class="co"># Log transform weights</span></span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>  <span class="at">mutate_weight =</span> log1p, </span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>  <span class="co"># Map node attributes to aesthetics</span></span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>  <span class="at">node_color_by =</span> <span class="st">'i_region'</span>, </span>
-<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>  <span class="at">node_size_by =</span> <span class="st">'i_log_gdp'</span>, </span>
-<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>  <span class="at">node_shape_by =</span> <span class="st">'i_democ'</span>,</span>
-<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>  <span class="co"># set global node alpha</span></span>
-<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>  <span class="at">node_alpha =</span> .<span class="dv">7</span>,</span>
-<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>  <span class="co"># set global edge alpha</span></span>
-<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>  <span class="at">edge_linewidth =</span> .<span class="dv">1</span>,</span>
-<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>  <span class="co"># Filter data</span></span>
-<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>  <span class="at">node_filter =</span> <span class="sc">~</span> <span class="sc">!</span><span class="fu">is.na</span>(i_democ),</span>
-<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>  <span class="at">time_filter =</span> <span class="fu">c</span>(<span class="st">'2002'</span>, <span class="st">'2004'</span>, <span class="st">'2008'</span>, <span class="st">'2014'</span>)</span>
-<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>  <span class="co"># clean up plot labels</span></span>
-<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a>  <span class="at">edge_alpha_label =</span> <span class="st">'Log(Matl.</span><span class="sc">\n</span><span class="st"> Conf.)'</span>,</span>
-<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>  <span class="at">node_color_label =</span> <span class="st">''</span>,</span>
-<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>  <span class="at">node_size_label =</span> <span class="st">'Log(GDP)'</span>,</span>
-<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a>  <span class="at">node_shape_label =</span> <span class="st">''</span></span>
-<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">'right'</span>) <span class="sc">+</span> </span>
-<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">'Set1'</span>)</span></code></pre></div>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co"># plot(</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  icews_conflict, </span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  <span class="co"># Log transform weights</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>  mutate_weight <span class="ot">=</span> log1p, </span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>  <span class="co"># Map node attributes to aesthetics</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>  node_color_by <span class="ot">=</span> <span class="st">'i_region'</span>, </span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>  node_size_by <span class="ot">=</span> <span class="st">'i_log_gdp'</span>, </span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>  node_shape_by <span class="ot">=</span> <span class="st">'i_democ'</span>,</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>  <span class="co"># set global node alpha</span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>  node_alpha <span class="ot">=</span> .<span class="dv">7</span>,</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>  <span class="co"># set global edge alpha</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>  edge_linewidth <span class="ot">=</span> .<span class="dv">1</span>,</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>  <span class="co"># Filter data</span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>  node_filter <span class="ot">=</span> <span class="er">~</span> <span class="sc">!</span><span class="fu">is.na</span>(i_democ),</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>  time_filter <span class="ot">=</span> <span class="fu">c</span>(<span class="st">'2002'</span>, <span class="st">'2004'</span>, <span class="st">'2008'</span>, <span class="st">'2014'</span>),</span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>  <span class="co"># clean up plot labels</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>  edge_alpha_label <span class="ot">=</span> <span class="st">'Log(Matl.</span><span class="sc">\n</span><span class="st"> Conf.)'</span>,</span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a>  node_color_label <span class="ot">=</span> <span class="st">''</span>,</span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>  node_size_label <span class="ot">=</span> <span class="st">'Log(GDP)'</span>,</span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>  node_shape_label <span class="ot">=</span> <span class="st">''</span></span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a>  <span class="er">)</span> <span class="sc">+</span></span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">'right'</span>) <span class="sc">+</span> </span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">'Set1'</span>)</span></code></pre></div>
 <p><img src="reference/figures/icews_advanced_plot.png"></p>
 </div>
 </div>
