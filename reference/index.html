@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,8 +21,9 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
   </ul></li>
@@ -113,6 +114,12 @@
         <dd>Analyze correlations between dyadic attributes and network ties</dd>
       </dl><dl><dt>
 
+          <code><a href="ego_layouts.html">create_hierarchical_ego_layout()</a></code> <code><a href="ego_layouts.html">create_radial_ego_layout()</a></code> <code><a href="ego_layouts.html">create_ego_centric_layout()</a></code>
+
+        </dt>
+        <dd>Create ego-centric layouts for ego networks</dd>
+      </dl><dl><dt>
+
           <code><a href="ego_netify.html">ego_netify()</a></code>
 
         </dt>
@@ -155,6 +162,12 @@
         <dd>Generate edge layout coordinates for netify visualization</dd>
       </dl><dl><dt>
 
+          <code><a href="get_ego_layout.html">get_ego_layout()</a></code>
+
+        </dt>
+        <dd>Calculate ego-centric layout positions for network visualization</dd>
+      </dl><dl><dt>
+
           <code><a href="get_node_layout.html">get_node_layout()</a></code>
 
         </dt>
@@ -179,6 +192,12 @@
         <dd>Add netify_label to ggplot</dd>
       </dl><dl><dt>
 
+          <code><a href="ggplot_add.netify_label_repel.html">ggplot_add(<i>&lt;netify_label_repel&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Add netify_label_repel to ggplot</dd>
+      </dl><dl><dt>
+
           <code><a href="ggplot_add.netify_labels.html">ggplot_add(<i>&lt;netify_labels&gt;</i>)</a></code>
 
         </dt>
@@ -201,6 +220,12 @@
 
         </dt>
         <dd>Add netify_text to ggplot</dd>
+      </dl><dl><dt>
+
+          <code><a href="ggplot_add.netify_text_repel.html">ggplot_add(<i>&lt;netify_text_repel&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Add netify_text_repel to ggplot</dd>
       </dl><dl><dt>
 
           <code><a href="homophily.html">homophily()</a></code>
@@ -257,6 +282,12 @@
         <dd>Create attribute mixing matrices for network data</dd>
       </dl><dl><dt>
 
+          <code><a href="mutate_weights.html">mutate_weights()</a></code>
+
+        </dt>
+        <dd>Mutate edge weights in a netify object</dd>
+      </dl><dl><dt>
+
           <code><a href="myanmar.html">myanmar</a></code>
 
         </dt>
@@ -287,6 +318,12 @@
         <dd>Extract label layer from netify plot components</dd>
       </dl><dl><dt>
 
+          <code><a href="netify_label_repel.html">netify_label_repel()</a></code>
+
+        </dt>
+        <dd>Extract label_repel layer from netify plot components</dd>
+      </dl><dl><dt>
+
           <code><a href="netify_measurements.html">netify_measurements()</a></code> <code><a href="netify_measurements.html">measurements()</a></code>
 
         </dt>
@@ -309,6 +346,12 @@
 
         </dt>
         <dd>Extract text layer from netify plot components</dd>
+      </dl><dl><dt>
+
+          <code><a href="netify_text_repel.html">netify_text_repel()</a></code>
+
+        </dt>
+        <dd>Extract text_repel layer from netify plot components</dd>
       </dl><dl><dt>
 
           <code><a href="netify_to_amen.html">netify_to_amen()</a></code> <code><a href="netify_to_amen.html">to_amen()</a></code>
@@ -405,6 +448,12 @@
 
         </dt>
         <dd>Print netify plot components</dd>
+      </dl><dl><dt>
+
+          <code><a href="remove_ego_edges.html">remove_ego_edges()</a></code>
+
+        </dt>
+        <dd>Remove ego-alter edges from ego network</dd>
       </dl><dl><dt>
 
           <code><a href="reset_scales.html">reset_scales()</a></code>
@@ -557,6 +606,12 @@
         <dd>Calculate graph-level statistics for netify objects</dd>
       </dl><dl><dt>
 
+          <code><a href="summary.netify_comparison.html">summary(<i>&lt;netify_comparison&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summary method for netify_comparison objects</dd>
+      </dl><dl><dt>
+
           <code><a href="summary_actor.html">summary_actor()</a></code>
 
         </dt>
@@ -579,12 +634,6 @@
 
         </dt>
         <dd>Convert igraph, network, or matrix objects to netify format</dd>
-      </dl><dl><dt>
-
-          <code><a href="transform_weights.html">transform_weights()</a></code>
-
-        </dt>
-        <dd>Transform edge weights in a netify object</dd>
       </dl><dl><dt>
 
           <code><a href="unnetify.html">unnetify()</a></code> <code><a href="unnetify.html">netify_to_df()</a></code>

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,8 +36,9 @@
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
   </ul>
@@ -65,7 +66,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2025-06-27</h4>
+            <h4 data-toc-skip class="date">2025-06-30</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/manual_plotting.Rmd" class="external-link"><code>vignettes/manual_plotting.Rmd</code></a></small>
       <div class="d-none name"><code>manual_plotting.Rmd</code></div>
@@ -84,8 +85,9 @@ to prepare the data.</p>
 legends when necessary in the same plot (e.g., if you want to have
 legends for a color aesthetic for both nodes and edges).</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="st">'ggnewscale'</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'ggnewscale'</span>, repos<span class="op">=</span><span class="st">'https://cloud.r-project.org'</span><span class="op">)</span> <span class="op">}</span></span>
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="st">"ggnewscale"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"ggnewscale"</span>, repos <span class="op">=</span> <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://eliocamp.github.io/ggnewscale/" class="external-link">ggnewscale</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="preparing-data">Preparing data<a class="anchor" aria-label="anchor" href="#preparing-data"></a>
@@ -97,41 +99,42 @@ legends for a color aesthetic for both nodes and edges).</p>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># choose attributes</span></span>
-<span><span class="va">nvars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">'i_polity2'</span>, <span class="st">'i_log_gdp'</span>, <span class="st">'i_log_pop'</span> <span class="op">)</span></span>
-<span><span class="va">dvars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">'matlCoop'</span>, <span class="st">'verbConf'</span>, <span class="st">'matlConf'</span> <span class="op">)</span></span>
+<span><span class="va">nvars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"i_polity2"</span>, <span class="st">"i_log_gdp"</span>, <span class="st">"i_log_pop"</span><span class="op">)</span></span>
+<span><span class="va">dvars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"matlCoop"</span>, <span class="st">"verbConf"</span>, <span class="st">"matlConf"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># create a netify object</span></span>
-<span><span class="va">netlet</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
-<span>    <span class="va">icews</span>, </span>
-<span>    actor1<span class="op">=</span><span class="st">'i'</span>, actor2<span class="op">=</span><span class="st">'j'</span>,</span>
-<span>    time <span class="op">=</span> <span class="st">'year'</span>,</span>
-<span>    symmetric<span class="op">=</span><span class="cn">FALSE</span>, weight<span class="op">=</span><span class="st">'verbCoop'</span>,</span>
-<span>    mode<span class="op">=</span><span class="st">'unipartite'</span>, sum_dyads<span class="op">=</span><span class="cn">FALSE</span>,</span>
-<span>    actor_time_uniform<span class="op">=</span><span class="cn">TRUE</span>, actor_pds<span class="op">=</span><span class="cn">NULL</span>,</span>
-<span>    diag_to_NA<span class="op">=</span><span class="cn">TRUE</span>, missing_to_zero<span class="op">=</span><span class="cn">TRUE</span>,</span>
-<span>    nodal_vars <span class="op">=</span> <span class="va">nvars</span>, </span>
+<span><span class="va">netlet</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
+<span>    <span class="va">icews</span>,</span>
+<span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
+<span>    time <span class="op">=</span> <span class="st">"year"</span>,</span>
+<span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>, weight <span class="op">=</span> <span class="st">"verbCoop"</span>,</span>
+<span>    mode <span class="op">=</span> <span class="st">"unipartite"</span>, sum_dyads <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    actor_time_uniform <span class="op">=</span> <span class="cn">TRUE</span>, actor_pds <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    diag_to_NA <span class="op">=</span> <span class="cn">TRUE</span>, missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    nodal_vars <span class="op">=</span> <span class="va">nvars</span>,</span>
 <span>    dyad_vars <span class="op">=</span> <span class="va">dvars</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># subset to a few actors</span></span>
-<span><span class="va">actors_to_keep</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">'Australia'</span>, <span class="st">'Brazil'</span>,</span>
-<span>  <span class="st">'Canada'</span>, <span class="st">'Chile'</span>, <span class="st">'China'</span>,</span>
-<span>  <span class="st">'Colombia'</span>, <span class="st">'Egypt'</span>, <span class="st">'Ethiopia'</span>,</span>
-<span>  <span class="st">'France'</span>, <span class="st">'Germany'</span>, <span class="st">'Ghana'</span>, </span>
-<span>  <span class="st">'Hungary'</span>, <span class="st">'India'</span>, <span class="st">'Indonesia'</span>, </span>
-<span>  <span class="st">'Iran, Islamic Republic Of'</span>, </span>
-<span>  <span class="st">'Israel'</span>, <span class="st">'Italy'</span>, <span class="st">'Japan'</span>, <span class="st">'Kenya'</span>, </span>
-<span>  <span class="st">"Korea, Democratic People's Republic Of"</span>,</span>
-<span>  <span class="st">'Korea, Republic Of'</span>, <span class="st">'Nigeria'</span>, <span class="st">'Pakistan'</span>, </span>
-<span>  <span class="st">'Qatar'</span>, <span class="st">'Russian Federation'</span>, <span class="st">'Saudi Arabia'</span>,</span>
-<span>  <span class="st">'South Africa'</span>, <span class="st">'Spain'</span>, <span class="st">'Sudan'</span>, </span>
-<span>  <span class="st">'Syrian Arab Republic'</span>, <span class="st">'Thailand'</span>, </span>
-<span>  <span class="st">'United Kingdom'</span>, <span class="st">'United States'</span>, </span>
-<span>  <span class="st">'Zimbabwe'</span> <span class="op">)</span></span>
-<span><span class="va">netlet</span> <span class="op">=</span> <span class="fu"><a href="../reference/subset_netify.html">subset_netify</a></span><span class="op">(</span></span>
-<span>  <span class="va">netlet</span>, </span>
-<span>  actors <span class="op">=</span> <span class="va">actors_to_keep</span></span>
+<span><span class="va">actors_to_keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="st">"Australia"</span>, <span class="st">"Brazil"</span>,</span>
+<span>    <span class="st">"Canada"</span>, <span class="st">"Chile"</span>, <span class="st">"China"</span>,</span>
+<span>    <span class="st">"Colombia"</span>, <span class="st">"Egypt"</span>, <span class="st">"Ethiopia"</span>,</span>
+<span>    <span class="st">"France"</span>, <span class="st">"Germany"</span>, <span class="st">"Ghana"</span>,</span>
+<span>    <span class="st">"Hungary"</span>, <span class="st">"India"</span>, <span class="st">"Indonesia"</span>,</span>
+<span>    <span class="st">"Iran, Islamic Republic Of"</span>,</span>
+<span>    <span class="st">"Israel"</span>, <span class="st">"Italy"</span>, <span class="st">"Japan"</span>, <span class="st">"Kenya"</span>,</span>
+<span>    <span class="st">"Korea, Democratic People's Republic Of"</span>,</span>
+<span>    <span class="st">"Korea, Republic Of"</span>, <span class="st">"Nigeria"</span>, <span class="st">"Pakistan"</span>,</span>
+<span>    <span class="st">"Qatar"</span>, <span class="st">"Russian Federation"</span>, <span class="st">"Saudi Arabia"</span>,</span>
+<span>    <span class="st">"South Africa"</span>, <span class="st">"Spain"</span>, <span class="st">"Sudan"</span>,</span>
+<span>    <span class="st">"Syrian Arab Republic"</span>, <span class="st">"Thailand"</span>,</span>
+<span>    <span class="st">"United Kingdom"</span>, <span class="st">"United States"</span>,</span>
+<span>    <span class="st">"Zimbabwe"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">netlet</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subset_netify.html">subset_netify</a></span><span class="op">(</span></span>
+<span>    <span class="va">netlet</span>,</span>
+<span>    actors <span class="op">=</span> <span class="va">actors_to_keep</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># print</span></span>
@@ -160,10 +163,10 @@ components but the most important one for users is the
 frames that can be passed to <code>ggplot2</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># create a data frame for plotting</span></span>
-<span><span class="va">plot_data</span> <span class="op">=</span> <span class="fu"><a href="../reference/net_plot_data.html">net_plot_data</a></span><span class="op">(</span><span class="va">netlet</span><span class="op">)</span></span>
+<span><span class="va">plot_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/net_plot_data.html">net_plot_data</a></span><span class="op">(</span><span class="va">netlet</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># get relevant dfs</span></span>
-<span><span class="va">net_dfs</span> <span class="op">=</span> <span class="va">plot_data</span><span class="op">$</span><span class="va">net_dfs</span></span>
+<span><span class="va">net_dfs</span> <span class="op">&lt;-</span> <span class="va">plot_data</span><span class="op">$</span><span class="va">net_dfs</span></span>
 <span></span>
 <span><span class="co"># check structure of what's here</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">net_dfs</span><span class="op">)</span></span></code></pre></div>
@@ -240,33 +243,33 @@ used to plot the network.</p>
 <code>geom_text</code>, and the `ggrepel package equivalents) functions
 to plot the edges and nodes, respectively.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span></span>
 <span>        data <span class="op">=</span> <span class="va">net_dfs</span><span class="op">$</span><span class="va">edge_data</span>,</span>
 <span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
-<span>            x<span class="op">=</span><span class="va">x1</span>, </span>
-<span>            y<span class="op">=</span><span class="va">y1</span>, </span>
-<span>            xend<span class="op">=</span><span class="va">x2</span>, </span>
-<span>            yend<span class="op">=</span><span class="va">y2</span></span>
+<span>            x <span class="op">=</span> <span class="va">x1</span>,</span>
+<span>            y <span class="op">=</span> <span class="va">y1</span>,</span>
+<span>            xend <span class="op">=</span> <span class="va">x2</span>,</span>
+<span>            yend <span class="op">=</span> <span class="va">y2</span></span>
 <span>        <span class="op">)</span>,</span>
-<span>        color<span class="op">=</span><span class="st">'lightgrey'</span>,</span>
-<span>        alpha<span class="op">=</span><span class="fl">.2</span></span>
+<span>        color <span class="op">=</span> <span class="st">"lightgrey"</span>,</span>
+<span>        alpha <span class="op">=</span> <span class="fl">.2</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span></span>
 <span>        data <span class="op">=</span> <span class="va">net_dfs</span><span class="op">$</span><span class="va">nodal_data</span>,</span>
 <span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
-<span>            x<span class="op">=</span><span class="va">x</span>, </span>
-<span>            y<span class="op">=</span><span class="va">y</span>,</span>
-<span>            size<span class="op">=</span><span class="va">i_log_pop</span>, </span>
-<span>            color<span class="op">=</span><span class="va">i_polity2</span></span>
+<span>            x <span class="op">=</span> <span class="va">x</span>,</span>
+<span>            y <span class="op">=</span> <span class="va">y</span>,</span>
+<span>            size <span class="op">=</span> <span class="va">i_log_pop</span>,</span>
+<span>            color <span class="op">=</span> <span class="va">i_polity2</span></span>
 <span>        <span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    color<span class="op">=</span><span class="st">'Polity'</span>, </span>
-<span>    size<span class="op">=</span><span class="st">'Log(Pop.)'</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient</a></span><span class="op">(</span>low<span class="op">=</span><span class="st">'#a6bddb'</span>, high<span class="op">=</span><span class="st">'#014636'</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">time</span>, scales<span class="op">=</span><span class="st">'free'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>        color <span class="op">=</span> <span class="st">"Polity"</span>,</span>
+<span>        size <span class="op">=</span> <span class="st">"Log(Pop.)"</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient</a></span><span class="op">(</span>low <span class="op">=</span> <span class="st">"#a6bddb"</span>, high <span class="op">=</span> <span class="st">"#014636"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">time</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="../reference/theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="manual_plotting_files/figure-html/unnamed-chunk-5-1.png" width="1350"></p>
 <div class="section level3">
@@ -277,12 +280,13 @@ to plot the edges and nodes, respectively.</p>
 Users can specify other layouts as, for example, say that you wanted to
 use the <code>mds</code> algorithm instead:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># create a df using mds instead </span></span>
-<span><span class="va">plot_data_mds</span> <span class="op">=</span> <span class="fu"><a href="../reference/net_plot_data.html">net_plot_data</a></span><span class="op">(</span><span class="va">netlet</span>, </span>
+<code class="sourceCode R"><span><span class="co"># create a df using mds instead</span></span>
+<span><span class="va">plot_data_mds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/net_plot_data.html">net_plot_data</a></span><span class="op">(</span></span>
+<span>    <span class="va">netlet</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>        layout<span class="op">=</span><span class="st">'mds'</span></span>
-<span>        <span class="op">)</span></span>
+<span>        layout <span class="op">=</span> <span class="st">"mds"</span></span>
 <span>    <span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># see new x-y coordinates</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">plot_data_mds</span><span class="op">$</span><span class="va">net_dfs</span>, <span class="va">head</span><span class="op">)</span></span></code></pre></div>
@@ -329,8 +333,9 @@ want to highlight edges of verbal cooperation that occur at the same
 time as when higher than average levels of material conflict occur in
 the network. First, let’s create the variable in the edge data.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="st">'dplyr'</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'dplyr'</span>, repos<span class="op">=</span><span class="st">'https://cloud.r-project.org'</span><span class="op">)</span> <span class="op">}</span></span>
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="st">"dplyr"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"dplyr"</span>, repos <span class="op">=</span> <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## Attaching package: 'dplyr'</span></span></code></pre>
@@ -342,10 +347,10 @@ the network. First, let’s create the variable in the edge data.</p>
 <span><span class="co">##     intersect, setdiff, setequal, union</span></span></code></pre>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># create high_matlConf variable</span></span>
-<span><span class="va">net_dfs</span><span class="op">$</span><span class="va">edge_data</span> <span class="op">=</span> <span class="va">net_dfs</span><span class="op">$</span><span class="va">edge_data</span> <span class="op">|&gt;</span></span>
+<span><span class="va">net_dfs</span><span class="op">$</span><span class="va">edge_data</span> <span class="op">&lt;-</span> <span class="va">net_dfs</span><span class="op">$</span><span class="va">edge_data</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>        high_matlConf <span class="op">=</span> <span class="va">matlConf</span> <span class="op">&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">matlConf</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span>        high_matlConf <span class="op">=</span> <span class="va">matlConf</span> <span class="op">&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">matlConf</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -374,44 +379,45 @@ aesthetic by default. We can get around this by using the
 package.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># color line segments by this new variable</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span></span>
 <span>        data <span class="op">=</span> <span class="va">net_dfs</span><span class="op">$</span><span class="va">edge_data</span>,</span>
 <span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
-<span>            x<span class="op">=</span><span class="va">x1</span>, </span>
-<span>            y<span class="op">=</span><span class="va">y1</span>, </span>
-<span>            xend<span class="op">=</span><span class="va">x2</span>, </span>
-<span>            yend<span class="op">=</span><span class="va">y2</span>,</span>
-<span>            color<span class="op">=</span><span class="va">high_matlConf</span></span>
+<span>            x <span class="op">=</span> <span class="va">x1</span>,</span>
+<span>            y <span class="op">=</span> <span class="va">y1</span>,</span>
+<span>            xend <span class="op">=</span> <span class="va">x2</span>,</span>
+<span>            yend <span class="op">=</span> <span class="va">y2</span>,</span>
+<span>            color <span class="op">=</span> <span class="va">high_matlConf</span></span>
 <span>        <span class="op">)</span>,</span>
-<span>        alpha<span class="op">=</span><span class="fl">.2</span></span>
+<span>        alpha <span class="op">=</span> <span class="fl">.2</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span></span>
-<span>      name<span class="op">=</span><span class="st">''</span>, </span>
-<span>      values<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'grey'</span>, <span class="st">'red'</span><span class="op">)</span>,</span>
-<span>      labels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Below Avg. Matl. Conf'</span>, <span class="st">'Above Avg.'</span><span class="op">)</span></span>
-<span>      <span class="op">)</span> <span class="op">+</span></span>
+<span>        name <span class="op">=</span> <span class="st">""</span>,</span>
+<span>        values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"grey"</span>, <span class="st">"red"</span><span class="op">)</span>,</span>
+<span>        labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Below Avg. Matl. Conf"</span>, <span class="st">"Above Avg."</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://eliocamp.github.io/ggnewscale/reference/new_scale.html" class="external-link">new_scale_color</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span></span>
 <span>        data <span class="op">=</span> <span class="va">net_dfs</span><span class="op">$</span><span class="va">nodal_data</span>,</span>
 <span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
-<span>            x<span class="op">=</span><span class="va">x</span>, </span>
-<span>            y<span class="op">=</span><span class="va">y</span>,</span>
-<span>            size<span class="op">=</span><span class="va">i_log_pop</span>, </span>
-<span>            color<span class="op">=</span><span class="va">i_polity2</span></span>
+<span>            x <span class="op">=</span> <span class="va">x</span>,</span>
+<span>            y <span class="op">=</span> <span class="va">y</span>,</span>
+<span>            size <span class="op">=</span> <span class="va">i_log_pop</span>,</span>
+<span>            color <span class="op">=</span> <span class="va">i_polity2</span></span>
 <span>        <span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient</a></span><span class="op">(</span></span>
-<span>      name<span class="op">=</span><span class="st">'Polity'</span>,</span>
-<span>      low<span class="op">=</span><span class="st">'#a6bddb'</span>, high<span class="op">=</span><span class="st">'#014636'</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    size<span class="op">=</span><span class="st">'Log(Pop.)'</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">time</span>, scales<span class="op">=</span><span class="st">'free'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>        name <span class="op">=</span> <span class="st">"Polity"</span>,</span>
+<span>        low <span class="op">=</span> <span class="st">"#a6bddb"</span>, high <span class="op">=</span> <span class="st">"#014636"</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>        size <span class="op">=</span> <span class="st">"Log(Pop.)"</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">time</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="../reference/theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
-<span>    legend.position<span class="op">=</span><span class="st">'right'</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>        legend.position <span class="op">=</span> <span class="st">"right"</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
 <p><img src="manual_plotting_files/figure-html/unnamed-chunk-8-1.png" width="1350"></p>
 </div>
 </div>

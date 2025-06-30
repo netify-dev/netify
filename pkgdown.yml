@@ -7,9 +7,10 @@ articles:
   event_data: event_data.html
   foundations: foundations.html
   manual_plotting: manual_plotting.html
+  multilayer_networks: multilayer_networks.html
   resources: resources.html
   tracking_changes: tracking_changes.html
-last_built: 2025-06-27T14:58Z
+last_built: 2025-06-30T10:41Z
 urls:
   reference: https://netify-dev.github.io/netify/reference
   article: https://netify-dev.github.io/netify/articles

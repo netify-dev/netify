@@ -11,7 +11,7 @@ mapping network attributes to visual properties."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,8 +25,9 @@ mapping network attributes to visual properties."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
   </ul></li>
@@ -88,7 +89,7 @@ variables (e.g., <code>point_size_var = "degree"</code>)</p></li>
 <li><p>For directed networks, arrows are added automatically</p></li>
 <li><p>For longitudinal networks, time periods are shown as facets</p></li>
 <li><p>Isolates are removed by default (set <code>remove_isolates = FALSE</code> to keep)</p></li>
-</ul><p><strong>Customization Tips:</strong></p><ul><li><p>Use <code>weight_transform</code> to handle skewed weight distributions</p></li>
+</ul><p><strong>Customization Tips:</strong></p><ul><li><p>Use <code>mutate_weight</code> to handle skewed weight distributions</p></li>
 <li><p>Combine fixed and variable aesthetics (e.g., fixed color with variable size)</p></li>
 <li><p>Add ggplot2 layers after the plot call for further customization</p></li>
 <li><p>Use <code>select_text</code> for selective labeling in dense networks</p></li>
@@ -102,7 +103,10 @@ variables (e.g., <code>point_size_var = "degree"</code>)</p></li>
 Options include: <code>"nicely"</code> (default), <code>"fr"</code> (Fruchterman-Reingold),
 <code>"kk"</code> (Kamada-Kawai), <code>"circle"</code>, <code>"star"</code>, <code>"grid"</code>,
 <code>"tree"</code>, <code>"bipartite"</code> (for bipartite networks), <code>"randomly"</code>,
-and others. See <code><a href="get_node_layout.html">get_node_layout</a></code> for full list.</p></dd>
+and others. For ego networks, additional options are available: <code>"radial"</code>
+(ego-centric with optional grouping) and <code>"concentric"</code> (ego at center with
+alters in rings). See <code><a href="get_node_layout.html">get_node_layout</a></code> and <code><a href="get_ego_layout.html">get_ego_layout</a></code>
+for full details.</p></dd>
 
 <dt><code>point_layout</code></dt>
 <dd><p>Optional data.frame or list of data.frames containing
@@ -136,8 +140,16 @@ creates composite layout from all time periods.</p></dd>
 <dt><code>add_text</code></dt>
 <dd><p>Logical. Add text labels to nodes? Default is <code>FALSE</code>.</p></dd>
 
+<dt><code>add_text_repel</code></dt>
+<dd><p>Logical. Add text labels with automatic repositioning to avoid overlaps?
+Default is <code>FALSE</code>. When <code>TRUE</code>, overrides <code>add_text</code>. Uses ggrepel for positioning.</p></dd>
+
 <dt><code>add_label</code></dt>
 <dd><p>Logical. Add boxed labels to nodes? Default is <code>FALSE</code>.</p></dd>
+
+<dt><code>add_label_repel</code></dt>
+<dd><p>Logical. Add boxed labels with automatic repositioning to avoid overlaps?
+Default is <code>FALSE</code>. When <code>TRUE</code>, overrides <code>add_label</code>. Uses ggrepel for positioning.</p></dd>
 
 <dt><code>remove_isolates</code></dt>
 <dd><p>Logical. Remove unconnected nodes? Default is <code>TRUE</code>.</p></dd>
@@ -147,6 +159,20 @@ creates composite layout from all time periods.</p></dd>
 
 <dt><code>use_theme_netify</code></dt>
 <dd><p>Logical. Apply netify theme? Default is <code>TRUE</code>.</p></dd>
+
+<dt><code>facet_type</code></dt>
+<dd><p>Character. For multilayer longitudinal networks, controls
+faceting style: <code>"grid"</code> (default) creates a 2D grid with time × layer,
+<code>"wrap"</code> creates wrapped facets with combined time-layer labels.</p></dd>
+
+<dt><code>facet_ncol</code></dt>
+<dd><p>Integer. Number of columns for facet_wrap layouts. Only
+used when <code>facet_type = "wrap"</code> or for single-dimension faceting.</p></dd>
+
+<dt><code>rescale_edge_weights</code></dt>
+<dd><p>Logical. For multilayer networks, should edge weights
+be rescaled to a common 0-1 range across all layers? This is useful when layers have
+very different weight scales. Default is <code>FALSE</code>.</p></dd>
 
 
 </dl></div>
@@ -167,7 +193,7 @@ edge attribute (including 'weight' for weighted networks). For example:
 The expression is evaluated in the context of the edge data, so any edge-level
 variable can be used.</p></dd>
 
-<dt><code>time</code></dt>
+<dt><code>time_filter</code></dt>
 <dd><p>For longitudinal networks, a vector of time periods to include in the plot.
 Can be numeric indices or character labels matching the time dimension. If NULL
 (default), all time periods are plotted. For cross-sectional networks, this
@@ -275,14 +301,16 @@ For weighted networks, defaults to the weight variable if not specified.</p></dd
 
 
 <p>Selective labeling:</p><dl><dt><code>select_text</code></dt>
-<dd><p>Character vector of node names to show as text.</p></dd>
+<dd><p>Character vector of node names to show as text. When used,
+text labels will automatically use <code>geom_text_repel</code> to avoid overlaps.</p></dd>
 
 <dt><code>select_text_display</code></dt>
 <dd><p>Alternative text to display (same length as
 <code>select_text</code>).</p></dd>
 
 <dt><code>select_label</code></dt>
-<dd><p>Character vector of node names to show with boxes.</p></dd>
+<dd><p>Character vector of node names to show with boxes. When used,
+labels will automatically use <code>geom_label_repel</code> to avoid overlaps.</p></dd>
 
 <dt><code>select_label_display</code></dt>
 <dd><p>Alternative labels (same length as
@@ -306,7 +334,33 @@ For weighted networks, defaults to the weight variable if not specified.</p></dd
 
 
 </dl><p>Label (boxed text) aesthetics have similar parameters with <code>label_</code> prefix.</p>
-    </div>
+<p>Text repel parameters (when <code>add_text_repel = TRUE</code>):</p><dl><dt><code>text_repel_force</code></dt>
+<dd><p>Force of repulsion between overlapping text. Default is 1.</p></dd>
+
+<dt><code>text_repel_max_overlaps</code></dt>
+<dd><p>Maximum number of overlaps to tolerate. Default is 10.</p></dd>
+
+<dt><code>text_repel_box_padding</code></dt>
+<dd><p>Padding around text. Default is 0.25.</p></dd>
+
+<dt><code>text_repel_point_padding</code></dt>
+<dd><p>Padding around points. Default is 0.</p></dd>
+
+<dt><code>text_repel_segment_color</code></dt>
+<dd><p>Color of connecting segments. Default is "grey50".</p></dd>
+
+
+</dl><p>Label repel parameters (when <code>add_label_repel = TRUE</code>):</p><dl><dt>Similar to text_repel but with <code>label_repel_</code> prefix</dt>
+<dd></dd>
+
+<dt><code>label_repel_label_padding</code></dt>
+<dd><p>Padding around label boxes. Default is 0.25.</p></dd>
+
+<dt><code>label_repel_label_r</code></dt>
+<dd><p>Radius of label box corners. Default is 0.15.</p></dd>
+
+
+</dl></div>
     <div class="section level2">
     <h2 id="scale-labels">Scale Labels<a class="anchor" aria-label="anchor" href="#scale-labels"></a></h2>
 
@@ -335,19 +389,23 @@ For weighted networks, defaults to the weight variable if not specified.</p></dd
 Non-highlighted nodes will be colored grey. Highlighted nodes can also be automatically
 enlarged if <code>highlight_size_increase</code> is greater than 1.</p></dd>
 
-<dt><code>highlight_colors</code></dt>
+<dt><code>highlight_color</code></dt>
 <dd><p>Named vector of colors for highlighted nodes. If NULL,
 uses default distinct colors (red, blue, green for up to 3 nodes, or a color palette
 for more). Names should match the values in the <code>highlight</code> parameter.
 Example: <code>c('USA' = 'blue', 'China' = 'red', 'Russia' = 'green')</code>.</p></dd>
 
-<dt><code>highlight_legend_title</code></dt>
+<dt><code>highlight_label</code></dt>
 <dd><p>Title for the highlight legend. Default is "Highlighted".</p></dd>
 
 <dt><code>highlight_size_increase</code></dt>
-<dd><p>Numeric factor to increase size of highlighted nodes.
-Default is 1.5 (50% larger). Set to 1 for no size change. The size increase is applied
-multiplicatively to any existing size mapping.</p></dd>
+<dd><p>Numeric factor(s) to increase size of highlighted nodes.
+Can be a single value (applied to all highlighted nodes) or a vector of length
+<code>length(highlight) + 1</code> where each value corresponds to a highlighted node
+and the last value applies to "Other" nodes. Default is 1 (no size increase).
+Example: <code>c(3, 1, 1, 0.5)</code> for 3 highlighted
+nodes where the first is 3x larger, the next two are normal size, and all
+others are half size.</p></dd>
 
 <dt><code>show_other_in_legend</code></dt>
 <dd><p>Logical. Include "Other" category in legend? Default is FALSE.
@@ -356,27 +414,51 @@ When FALSE, only highlighted nodes appear in the legend.</p></dd>
 
 </dl></div>
     <div class="section level2">
+    <h2 id="ego-layout-parameters">Ego Layout Parameters<a class="anchor" aria-label="anchor" href="#ego-layout-parameters"></a></h2>
+
+
+
+<p>For ego networks (created with <code><a href="ego_netify.html">ego_netify</a></code>), additional layout options
+control the ego-centric visualization:</p><dl><dt><code>ego_group_by</code></dt>
+<dd><p>Character string specifying a nodal attribute to use for
+grouping alters in ego layouts. For "radial" layout, creates sectors. For
+"concentric" layout, determines ring assignment.</p></dd>
+
+<dt><code>ego_order_by</code></dt>
+<dd><p>Character string specifying a nodal attribute to use for
+ordering alters within groups or rings. Common options include "degree_total".</p></dd>
+
+<dt><code>ego_weight_to_distance</code></dt>
+<dd><p>Logical. For weighted networks with "radial"
+layout, should edge weights determine distance from ego? Higher weights place
+alters closer to ego. Default is <code>FALSE</code>.</p></dd>
+
+<dt><code>ego_ring_gap</code></dt>
+<dd><p>Numeric (0-1). Gap between concentric rings as proportion
+of radius. Only for "concentric" layout. Default is 0.3.</p></dd>
+
+<dt><code>ego_size</code></dt>
+<dd><p>Numeric. Relative size of central area reserved for ego.
+Larger values create more space between ego and alters. Default is 0.1.</p></dd>
+
+
+</dl></div>
+    <div class="section level2">
     <h2 id="special-parameters">Special Parameters<a class="anchor" aria-label="anchor" href="#special-parameters"></a></h2>
 
 
-<dl><dt><code>weight_transform</code></dt>
+<dl><dt><code>mutate_weight</code></dt>
 <dd><p>Function to transform edge weights before plotting.
 Example: <code>log1p</code> for log(x+1) transformation. Applied before mapping to
 aesthetics.</p></dd>
-
-<dt><code>check_overlap</code></dt>
-<dd><p>Logical. Avoid text overlap? Default is <code>TRUE</code>.</p></dd>
 
 <dt><code>return_components</code></dt>
 <dd><p>Logical. Return plot components instead of
 assembled plot? Useful for manual customization. Default is <code>FALSE</code>.</p></dd>
 
-<dt><code>palette</code></dt>
-<dd><p>Character string for color palette, see <code><a href="list_palettes.html">list_palettes()</a></code>.</p></dd>
-
 <dt><code>style</code></dt>
-<dd><p>A style function (e.g., <code>style_budapest</code>) or its name as a
-string. Applies a complete visual style including colors, shapes, and layout preferences.</p></dd>
+<dd><p>A style function (e.g., <code>style_budapest</code>).
+Applies a complete visual style including colors, shapes, and layout preferences.</p></dd>
 
 
 </dl></div>
@@ -439,7 +521,7 @@ string. Applies a complete visual style including colors, shapes, and layout pre
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net_longit</span>,</span></span>
 <span class="r-in"><span>    <span class="co"># Edges</span></span></span>
 <span class="r-in"><span>    edge_color <span class="op">=</span> <span class="st">"grey70"</span>,</span></span>
-<span class="r-in"><span>    weight_transform <span class="op">=</span> <span class="va">log1p</span>, <span class="co"># Transform weights</span></span></span>
+<span class="r-in"><span>    mutate_weight <span class="op">=</span> <span class="va">log1p</span>, <span class="co"># Transform weights</span></span></span>
 <span class="r-in"><span>    <span class="co"># Nodes</span></span></span>
 <span class="r-in"><span>    node_size_by <span class="op">=</span> <span class="st">"degree_total"</span>,</span></span>
 <span class="r-in"><span>    node_color_by <span class="op">=</span> <span class="st">"i_polity2"</span>,</span></span>
@@ -460,7 +542,7 @@ string. Applies a complete visual style including colors, shapes, and layout pre
 <span class="r-in"><span>    text_color <span class="op">=</span> <span class="st">"darkred"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Removed 149 rows containing missing values or values outside the scale range</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> (`geom_text()`).</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> (`geom_text_repel()`).</span>
 <span class="r-plt img"><img src="plot.netify-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># choose alternative labels for selected text</span></span></span>
@@ -472,13 +554,13 @@ string. Applies a complete visual style including colors, shapes, and layout pre
 <span class="r-in"><span>    text_color <span class="op">=</span> <span class="st">"darkred"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Removed 149 rows containing missing values or values outside the scale range</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> (`geom_text()`).</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> (`geom_text_repel()`).</span>
 <span class="r-plt img"><img src="plot.netify-5.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Time subsetting example</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net_longit</span>,</span></span>
-<span class="r-in"><span>    time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2010"</span>, <span class="st">"2011"</span>, <span class="st">"2012"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    time_filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2010"</span>, <span class="st">"2011"</span>, <span class="st">"2012"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.netify-6.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
@@ -493,11 +575,11 @@ string. Applies a complete visual style including colors, shapes, and layout pre
 <span class="r-in"><span>    <span class="va">net_10</span>,</span></span>
 <span class="r-in"><span>    node_alpha <span class="op">=</span> <span class="fl">.8</span>,</span></span>
 <span class="r-in"><span>    arrow <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grid/arrow.html" class="external-link">arrow</a></span><span class="op">(</span>length <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="st">"inches"</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    node_size_by <span class="op">=</span> <span class="st">"log(degree_total)"</span>,</span></span>
+<span class="r-in"><span>    node_size_by <span class="op">=</span> <span class="st">"degree_total"</span>,</span></span>
 <span class="r-in"><span>    node_size_label <span class="op">=</span> <span class="st">"Log(Degree)"</span>,</span></span>
 <span class="r-in"><span>    edge_alpha_label <span class="op">=</span> <span class="st">"Log(Verbal Coop.)"</span>,</span></span>
 <span class="r-in"><span>    remove_isolates <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>    weight_transform <span class="op">=</span> <span class="va">log1p</span>,</span></span>
+<span class="r-in"><span>    mutate_weight <span class="op">=</span> <span class="va">log1p</span>,</span></span>
 <span class="r-in"><span>    return_components <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>

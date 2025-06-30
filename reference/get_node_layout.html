@@ -13,7 +13,7 @@ suitable for plotting."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,8 +27,9 @@ suitable for plotting."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
   </ul></li>
@@ -63,7 +64,8 @@ suitable for plotting.</p>
 <span>  static_actor_positions <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  which_static <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">6886</span>,</span>
-<span>  ig_netlet <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  ig_netlet <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -112,6 +114,12 @@ Default is 6886.</p></dd>
 <dd><p>An optional pre-converted igraph object. If provided, this
 function will use it directly instead of converting the netify object again.</p></dd>
 
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments passed to ego-specific layout functions when
+layout is "radial" or "concentric". See <code><a href="get_ego_layout.html">get_ego_layout</a></code> for
+available options (ego_group_by, ego_order_by, ego_weight_to_distance, etc.).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -129,7 +137,8 @@ networks with several key features:</p>
 <p><strong>Layout algorithms:</strong></p>
 <p>The function provides access to all major igraph layout algorithms. The default
 "nicely" option automatically selects an appropriate algorithm based on the
-network structure.</p>
+network structure. For ego networks, specialized layouts ("radial" and "concentric")
+are available that emphasize the ego-alter structure.</p>
 <p><strong>Longitudinal layouts:</strong></p>
 <p>For longitudinal networks, two approaches are available:</p><ul><li><p><strong>Dynamic layouts</strong>: Each time period gets its own optimized layout,
 which may better reveal structural changes but makes visual comparison harder</p></li>
