@@ -81,8 +81,7 @@ icews_conflict <- add_node_vars(
   node_vars = 'i_democ'
 )
 
-# 
-plot(
+# plot(
   icews_conflict, 
   # Log transform weights
   mutate_weight = log1p, 
@@ -96,7 +95,7 @@ plot(
   edge_linewidth = .1,
   # Filter data
   node_filter = ~ !is.na(i_democ),
-  time_filter = c('2002', '2004', '2008', '2014')
+  time_filter = c('2002', '2004', '2008', '2014'),
   # clean up plot labels
   edge_alpha_label = 'Log(Matl.\n Conf.)',
   node_color_label = '',
