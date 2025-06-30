@@ -170,21 +170,31 @@ This returns a data frame with network statistics for each time period:
 | Extract ego network | `ego_netify()` | `ego_netify(net, ego="USA")` |
 | Create multilayer | `layer_netify()` | `layer_netify(list(net1, net2))` |
 | Add node data | `add_node_vars()` | `add_node_vars(net, node_df, actor="id")` |
+| Add dyad data | `add_dyad_vars()` | `add_dyad_vars(net, dyad_df, actor1="from", actor2="to")` |
 | Subset network | `subset()` | `subset(net, time="2020")` |
-| Get summary | `summary()` | `summary(net)` |
-| Plot network | `plot()` | `plot(net) + style_nature()` |
+| Get graph level summary statistics | `summary()` | `summary(net)` |
+| Get actor level summary statistics | `summary_actor()` | `summary_actor(net)` |
+| Test homophily | `homophily()` | `homophily(net, attribute="democracy", method="correlation")` |
+| Create mixing matrix | `mixing_matrix()` | `mixing_matrix(net, attribute="regime_type", normalized=TRUE)` |
+| Test dyadic correlations | `dyad_correlation()` | `dyad_correlation(net, dyad_vars="geographic_distance")` |
+| Comprehensive attribute analysis | `attribute_report()` | `attribute_report(net, node_vars=c("region", "democracy"), dyad_vars="distance")` |
+| Compare networks | `compare_networks()` | `compare_networks(list(net1, net2), method="all")` |
+| Plot network | `plot()` | `plot(net)` |
 | Convert to igraph | `to_igraph()` | `g <- to_igraph(net)` |
+| Convert to statnet/network | `to_statnet()` | `g <- to_statnet(net)` |
 | Convert to amen | `to_amen()` | `amen_data <- to_amen(net)` |
 | Back to data frame | `unnetify()` | `df <- unnetify(net)` |
 
 
 ## When you might need something else
 
-netify handles most network analysis tasks, but sometimes you need specialized tools:
+netify handles a lot, but there's an awesome world of network packages out there! If you need to venture beyond our walls, we've built bridges to get you there:
 
-- **Advanced statistical models**: Use `to_amen()` to fit latent factor models or `to_network()` for ERGMs
-- **Graph algorithms we don't have**: Convert with `to_igraph()` 
-- **Your own analysis**: Use `unnetify()` to get back to a data frame
+- **Fancy statistical models**: Use `to_amen()` for latent factor models or `to_statnet()` for ERGMs
+- **Graph algorithms we don't have (yet!)**: Convert with `to_igraph()` to access igraph's vast toolkit
+- **Roll your own analysis**: Use `unnetify()` to get back to a data frame and do your own thing
+
+We play well with others! 🤝
 
 ## Getting help
 
