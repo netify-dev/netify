@@ -889,3 +889,389 @@ test_that("compare_networks handles all comparison methods with multilayer", {
     comp_all <- suppressWarnings(compare_networks(multilayer, method = "all"))
     expect_true(all(c("correlation", "jaccard", "hamming", "spectral") %in% names(comp_all$summary)))
 })
+
+# Tests for other_stats functionality
+
+test_that("compare_networks with other_stats for structural comparison", {
+    # Create test networks
+    n <- 15
+    mat1 <- matrix(rbinom(n * n, 1, 0.3), n, n)
+    mat2 <- matrix(rbinom(n * n, 1, 0.5), n, n)
+    
+    net1 <- new_netify(mat1, symmetric = FALSE)
+    net2 <- new_netify(mat2, symmetric = FALSE)
+    
+    # Define custom statistics function
+    custom_stats <- function(net) {
+        mat <- as.matrix(net)
+        c(
+            total_edges = sum(mat > 0),
+            max_degree = max(rowSums(mat) + colSums(mat)),
+            num_isolates = sum((rowSums(mat) + colSums(mat)) == 0)
+        )
+    }
+    
+    # Compare with custom stats
+    comp <- compare_networks(
+        list("Net1" = net1, "Net2" = net2),
+        what = "structure",
+        other_stats = list(custom = custom_stats)
+    )
+    
+    # Check that custom stats are included
+    expect_true("custom_stats" %in% names(comp))
+    expect_s3_class(comp$custom_stats, "data.frame")
+    expect_equal(nrow(comp$custom_stats), 2)
+    expect_true(all(c("network", "custom_total_edges", "custom_max_degree", "custom_num_isolates") %in% names(comp$custom_stats)))
+    
+    # Verify values make sense
+    expect_true(all(comp$custom_stats$custom_total_edges >= 0))
+    expect_true(all(comp$custom_stats$custom_max_degree >= 0))
+})
+
+test_that("compare_networks with other_stats for edge comparison", {
+    # Create test networks
+    n <- 10
+    mat1 <- matrix(rbinom(n * n, 1, 0.4), n, n)
+    mat2 <- mat1
+    # Modify some edges
+    mat2[1:3, 4:6] <- 1 - mat2[1:3, 4:6]
+    
+    net1 <- new_netify(mat1)
+    net2 <- new_netify(mat2)
+    
+    # Define custom edge statistics function (receives matrix)
+    edge_stats <- function(mat) {
+        c(
+            diagonal_sum = sum(diag(mat)),
+            upper_triangle_sum = sum(mat[upper.tri(mat)]),
+            matrix_rank = qr(mat)$rank
+        )
+    }
+    
+    # Compare with custom stats
+    comp <- compare_networks(
+        list(net1, net2),
+        what = "edges",
+        method = "correlation",
+        other_stats = list(edge_custom = edge_stats)
+    )
+    
+    # Check that custom stats are included
+    expect_true("custom_stats" %in% names(comp))
+    expect_s3_class(comp$custom_stats, "data.frame")
+    expect_equal(nrow(comp$custom_stats), 2)
+    expect_true(all(c("network", "edge_custom.edge_custom_diagonal_sum", "edge_custom.edge_custom_upper_triangle_sum", "edge_custom.edge_custom_matrix_rank") %in% names(comp$custom_stats)))
+})
+
+test_that("compare_networks with multiple other_stats functions", {
+    # Create test networks
+    n <- 12
+    mat1 <- matrix(rbinom(n * n, 1, 0.3), n, n)
+    mat2 <- matrix(rbinom(n * n, 1, 0.4), n, n)
+    
+    net1 <- new_netify(mat1)
+    net2 <- new_netify(mat2)
+    
+    # Define multiple custom functions
+    centrality_stats <- function(net) {
+        mat <- as.matrix(net)
+        degrees <- rowSums(mat) + colSums(mat)
+        c(
+            mean_degree = mean(degrees),
+            degree_variance = var(degrees)
+        )
+    }
+    
+    connectivity_stats <- function(net) {
+        # Simple connectivity measure
+        mat <- as.matrix(net)
+        n_nodes <- nrow(mat)
+        n_edges <- sum(mat > 0)
+        c(
+            edge_density = n_edges / (n_nodes * (n_nodes - 1)),
+            avg_clustering = NA  # Placeholder
+        )
+    }
+    
+    # Compare with multiple custom stats
+    comp <- compare_networks(
+        list("A" = net1, "B" = net2),
+        what = "structure",
+        other_stats = list(
+            centrality = centrality_stats,
+            connectivity = connectivity_stats
+        )
+    )
+    
+    # Check that all custom stats are included
+    expect_true("custom_stats" %in% names(comp))
+    custom_df <- comp$custom_stats
+    
+    # Should have stats from both functions
+    expect_true("centrality_mean_degree" %in% names(custom_df))
+    expect_true("centrality_degree_variance" %in% names(custom_df))
+    expect_true("connectivity_edge_density" %in% names(custom_df))
+    expect_true("connectivity_avg_clustering" %in% names(custom_df))
+})
+
+test_that("compare_networks other_stats error handling", {
+    # Create test networks
+    n <- 10
+    mat1 <- matrix(rbinom(n * n, 1, 0.3), n, n)
+    net1 <- new_netify(mat1)
+    net2 <- new_netify(mat1)
+    
+    # Test with invalid other_stats input
+    expect_error(
+        compare_networks(
+            list(net1, net2),
+            other_stats = "not a list"
+        ),
+        "other_stats must be a named list"
+    )
+    
+    # Create unnamed list with function (not using variable name)
+    expect_error(
+        compare_networks(
+            list(net1, net2),
+            other_stats = list(function(x) c(test = 1))  # truly unnamed list
+        ),
+        "other_stats must be a named list"
+    )
+    
+    expect_error(
+        compare_networks(
+            list(net1, net2),
+            other_stats = list(stat1 = "not a function")
+        ),
+        "All elements of other_stats must be functions"
+    )
+    
+    # Test with function that errors
+    error_function <- function(net) {
+        stop("Intentional error")
+    }
+    
+    # Should warn but not fail
+    expect_warning(
+        comp <- compare_networks(
+            list(net1, net2),
+            what = "structure",
+            other_stats = list(error_stat = error_function)
+        ),
+        "Error in custom stat function"
+    )
+    
+    # Result should still be valid
+    expect_s3_class(comp, "netify_comparison")
+})
+
+test_that("compare_networks other_stats with longitudinal networks", {
+    # Create longitudinal network
+    n <- 10
+    t <- 3
+    arr <- array(rbinom(n * n * t, 1, 0.3), dim = c(n, n, t))
+    dimnames(arr)[[3]] <- c("T1", "T2", "T3")
+    
+    net_longit <- new_netify(arr)
+    
+    # Custom stats for longitudinal
+    time_stats <- function(net) {
+        mat <- as.matrix(net)
+        c(
+            period_density = sum(mat > 0) / (nrow(mat) * (nrow(mat) - 1)),
+            period_edges = sum(mat > 0)
+        )
+    }
+    
+    # Compare across time with custom stats
+    comp <- compare_networks(
+        net_longit,
+        what = "structure",
+        other_stats = list(temporal = time_stats)
+    )
+    
+    expect_equal(comp$comparison_type, "temporal")
+    expect_true("custom_stats" %in% names(comp))
+    
+    # Should have stats for each time period
+    expect_equal(nrow(comp$custom_stats), t)
+    expect_true(all(c("temporal_period_density", "temporal_period_edges") %in% names(comp$custom_stats)))
+})
+
+test_that("compare_networks other_stats with node comparison", {
+    # Create networks with different node sets
+    n1 <- 12
+    n2 <- 15
+    
+    mat1 <- matrix(rbinom(n1 * n1, 1, 0.3), n1, n1)
+    mat2 <- matrix(rbinom(n2 * n2, 1, 0.3), n2, n2)
+    
+    rownames(mat1) <- colnames(mat1) <- paste0("node", 1:n1)
+    rownames(mat2) <- colnames(mat2) <- paste0("node", c(1:10, 20:24))
+    
+    net1 <- new_netify(mat1)
+    net2 <- new_netify(mat2)
+    
+    # Custom node-based stats
+    node_stats <- function(net) {
+        mat <- as.matrix(net)
+        actors <- unique(c(rownames(mat), colnames(mat)))
+        c(
+            num_actors = length(actors),
+            actor_name_length = mean(nchar(actors))
+        )
+    }
+    
+    comp <- compare_networks(
+        list(net1, net2),
+        what = "nodes",
+        other_stats = list(actors = node_stats)
+    )
+    
+    expect_true("custom_stats" %in% names(comp))
+    expect_equal(nrow(comp$custom_stats), 2)
+    expect_true(all(c("network", "actors.actors_num_actors", "actors.actors_actor_name_length") %in% names(comp$custom_stats)))
+})
+
+test_that("compare_networks other_stats with attribute comparison", {
+    # Create networks with attributes
+    n <- 15
+    mat1 <- matrix(rbinom(n * n, 1, 0.3), n, n)
+    mat2 <- mat1
+    
+    net1 <- new_netify(mat1)
+    net2 <- new_netify(mat2)
+    
+    # Add attributes
+    attr_df1 <- data.frame(
+        actor = 1:n,
+        group = sample(c("A", "B", "C"), n, replace = TRUE),
+        value = rnorm(n)
+    )
+    attr_df2 <- data.frame(
+        actor = 1:n,
+        group = sample(c("A", "B", "C"), n, replace = TRUE),
+        value = rnorm(n, mean = 0.5)
+    )
+    
+    net1 <- add_node_vars(net1, attr_df1, actor = "actor")
+    net2 <- add_node_vars(net2, attr_df2, actor = "actor")
+    
+    # Custom attribute stats
+    attr_stats <- function(net) {
+        attrs <- attr(net, "nodal_data")
+        if (!is.null(attrs) && "value" %in% names(attrs)) {
+            c(
+                mean_value = mean(attrs$value, na.rm = TRUE),
+                sd_value = sd(attrs$value, na.rm = TRUE)
+            )
+        } else {
+            c(mean_value = NA, sd_value = NA)
+        }
+    }
+    
+    comp <- compare_networks(
+        list(net1, net2),
+        what = "attributes",
+        other_stats = list(value_stats = attr_stats)
+    )
+    
+    expect_true("custom_stats" %in% names(comp))
+    expect_equal(nrow(comp$custom_stats), 2)
+})
+
+test_that("compare_networks other_stats preserves standard functionality", {
+    # Ensure adding other_stats doesn't break standard comparisons
+    n <- 10
+    mat1 <- matrix(rbinom(n * n, 1, 0.3), n, n)
+    mat2 <- matrix(rbinom(n * n, 1, 0.4), n, n)
+    
+    net1 <- new_netify(mat1)
+    net2 <- new_netify(mat2)
+    
+    simple_stat <- function(net) {
+        c(test_value = 1)
+    }
+    
+    # Compare without and with other_stats
+    comp_standard <- compare_networks(list(net1, net2), method = "all")
+    comp_custom <- compare_networks(
+        list(net1, net2), 
+        method = "all",
+        other_stats = list(test = simple_stat)
+    )
+    
+    # Standard results should be identical (except possibly QAP p-values due to randomness)
+    # Compare all columns except qap_pvalue
+    summary_cols <- setdiff(names(comp_standard$summary), "qap_pvalue")
+    expect_equal(comp_standard$summary[, summary_cols], comp_custom$summary[, summary_cols])
+    expect_equal(comp_standard$edge_changes, comp_custom$edge_changes)
+    
+    # Custom should have additional custom_stats
+    expect_false("custom_stats" %in% names(comp_standard))
+    expect_true("custom_stats" %in% names(comp_custom))
+})
+
+test_that("compare_networks other_stats with weighted networks", {
+    # Create weighted networks
+    n <- 10
+    mat1 <- matrix(runif(n * n, 0, 5), n, n)
+    mat2 <- matrix(runif(n * n, 0, 5), n, n)
+    
+    net1 <- new_netify(mat1, symmetric = FALSE)
+    net2 <- new_netify(mat2, symmetric = FALSE)
+    
+    # Custom stats for weighted networks
+    weight_stats <- function(net) {
+        mat <- as.matrix(net)
+        weights <- mat[mat > 0]
+        c(
+            mean_weight = mean(weights),
+            median_weight = median(weights),
+            weight_variance = var(weights)
+        )
+    }
+    
+    comp <- compare_networks(
+        list(net1, net2),
+        what = "edges",
+        other_stats = list(weights = weight_stats)
+    )
+    
+    expect_true("custom_stats" %in% names(comp))
+    custom_df <- comp$custom_stats
+    expect_true(all(c("network", "weights.weights_mean_weight", "weights.weights_median_weight", "weights.weights_weight_variance") %in% names(custom_df)))
+    
+    # Values should be positive for these random weighted networks
+    expect_true(all(custom_df$weights.weights_mean_weight > 0))
+})
+
+test_that("compare_networks other_stats with return_details", {
+    # Test that other_stats works with return_details = TRUE
+    n <- 10
+    mat1 <- matrix(rbinom(n * n, 1, 0.3), n, n)
+    mat2 <- matrix(rbinom(n * n, 1, 0.4), n, n)
+    
+    net1 <- new_netify(mat1)
+    net2 <- new_netify(mat2)
+    
+    custom_stat <- function(net) {
+        c(stat1 = 1, stat2 = 2)
+    }
+    
+    comp <- compare_networks(
+        list(net1, net2),
+        method = "all",
+        return_details = TRUE,
+        other_stats = list(custom = custom_stat)
+    )
+    
+    # Should have both details and custom_stats
+    expect_true("details" %in% names(comp))
+    expect_true("custom_stats" %in% names(comp))
+    
+    # Details should include standard matrices
+    expect_true(all(c("correlation_matrix", "jaccard_matrix", "hamming_matrix") %in% names(comp$details)))
+})

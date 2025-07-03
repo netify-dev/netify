@@ -23,7 +23,8 @@ compare_networks(
   alpha = 0.05,
   max_permutations = 20000,
   spectral_rank = 0,
-  attr_metric = c("ecdf_cor", "wasserstein")
+  attr_metric = c("ecdf_cor", "wasserstein"),
+  other_stats = NULL
 )
 }
 \arguments{
@@ -104,6 +105,19 @@ to improve performance while maintaining accuracy.}
 \item{"ecdf_cor"}{Correlation of empirical CDFs (default)}
 \item{"wasserstein"}{Wasserstein-1 (Earth Mover's) distance}
 }}
+
+\item{other_stats}{Named list of custom functions to calculate additional
+comparison statistics. Each function should accept a netify object (or matrix
+for edge comparisons) and return a named vector of scalar values. The specific
+input depends on the \code{what} parameter:
+\describe{
+\item{For \code{what = "edges"}}{Functions receive adjacency matrices}
+\item{For \code{what = "structure"}}{Functions receive netify objects}
+\item{For \code{what = "nodes"}}{Functions receive netify objects}
+\item{For \code{what = "attributes"}}{Functions receive netify objects}
+}
+Example: \code{list(connectivity = function(net) \{ g <- to_igraph(net); 
+  c(vertex_conn = igraph::vertex_connectivity(g)) \})}}
 }
 \value{
 A list of class "netify_comparison" containing:
@@ -234,6 +248,29 @@ detailed_comp <- compare_networks(
     return_details = TRUE
 )
 names(detailed_comp$details) # Shows available matrices
+
+# Compare with custom statistics
+\dontrun{
+library(igraph)
+
+# Define custom connectivity function
+connectivity_stats <- function(net) {
+    g <- to_igraph(net)
+    c(vertex_connectivity = vertex_connectivity(g),
+      edge_connectivity = edge_connectivity(g),
+      diameter = diameter(g, directed = FALSE))
+}
+
+# Apply to structural comparison
+struct_comp_custom <- compare_networks(
+    list("2002" = net_2002, "2003" = net_2003),
+    what = "structure",
+    other_stats = list(connectivity = connectivity_stats)
+)
+
+# Custom stats will appear in the summary
+print(struct_comp_custom$summary)
+}
 
 }
 \author{

@@ -63,6 +63,18 @@
 #'     \item{"ecdf_cor"}{Correlation of empirical CDFs (default)}
 #'     \item{"wasserstein"}{Wasserstein-1 (Earth Mover's) distance}
 #'   }
+#' @param other_stats Named list of custom functions to calculate additional
+#'   comparison statistics. Each function should accept a netify object (or matrix
+#'   for edge comparisons) and return a named vector of scalar values. The specific
+#'   input depends on the \code{what} parameter:
+#'   \describe{
+#'     \item{For \code{what = "edges"}}{Functions receive adjacency matrices}
+#'     \item{For \code{what = "structure"}}{Functions receive netify objects}
+#'     \item{For \code{what = "nodes"}}{Functions receive netify objects}
+#'     \item{For \code{what = "attributes"}}{Functions receive netify objects}
+#'   }
+#'   Example: \code{list(connectivity = function(net) \{ g <- to_igraph(net); 
+#'   c(vertex_conn = igraph::vertex_connectivity(g)) \})}
 #'
 #' @return A list of class "netify_comparison" containing:
 #'   \describe{
@@ -188,6 +200,29 @@
 #' )
 #' names(detailed_comp$details) # Shows available matrices
 #'
+#' # Compare with custom statistics
+#' \dontrun{
+#' library(igraph)
+#' 
+#' # Define custom connectivity function
+#' connectivity_stats <- function(net) {
+#'     g <- to_igraph(net)
+#'     c(vertex_connectivity = vertex_connectivity(g),
+#'       edge_connectivity = edge_connectivity(g),
+#'       diameter = diameter(g, directed = FALSE))
+#' }
+#' 
+#' # Apply to structural comparison
+#' struct_comp_custom <- compare_networks(
+#'     list("2002" = net_2002, "2003" = net_2003),
+#'     what = "structure",
+#'     other_stats = list(connectivity = connectivity_stats)
+#' )
+#' 
+#' # Custom stats will appear in the summary
+#' print(struct_comp_custom$summary)
+#' }
+#'
 #' @author Cassy Dorff, Shahryar Minhas
 #'
 #' @export compare_networks
@@ -212,7 +247,8 @@ compare_networks <- function(
     alpha = 0.05,
     max_permutations = 20000,
     spectral_rank = 0,
-    attr_metric = c("ecdf_cor", "wasserstein")) {
+    attr_metric = c("ecdf_cor", "wasserstein"),
+    other_stats = NULL) {
     # match arguments
     permutation_type <- match.arg(permutation_type)
     correlation_type <- match.arg(correlation_type)
@@ -285,6 +321,16 @@ compare_networks <- function(
     checkmate::assert_count(n_permutations, positive = TRUE)
     checkmate::assert_logical(include_diagonal, len = 1)
     checkmate::assert_logical(return_details, len = 1)
+    
+    # validate other_stats parameter
+    if (!is.null(other_stats)) {
+        if (!is.list(other_stats) || is.null(names(other_stats))) {
+            cli::cli_abort("other_stats must be a named list of functions")
+        }
+        if (!all(sapply(other_stats, is.function))) {
+            cli::cli_abort("All elements of other_stats must be functions")
+        }
+    }
 
     # init results
     results <- list(
@@ -301,14 +347,14 @@ compare_networks <- function(
             include_diagonal, edge_threshold, return_details,
             permutation_type, correlation_type, binary_metric,
             p_adjust, adaptive_stop, alpha, max_permutations, seed_used = seed,
-            spectral_rank = spectral_rank
+            spectral_rank = spectral_rank, other_stats = other_stats
         )
     } else if (what == "structure") {
-        comp_results <- compare_structure(nets_list, test)
+        comp_results <- compare_structure(nets_list, test, other_stats = other_stats)
     } else if (what == "nodes") {
-        comp_results <- compare_nodes(nets_list, return_details)
+        comp_results <- compare_nodes(nets_list, return_details, other_stats = other_stats)
     } else if (what == "attributes") {
-        comp_results <- compare_attributes(nets_list, test, n_permutations, return_details, attr_metric)
+        comp_results <- compare_attributes(nets_list, test, n_permutations, return_details, attr_metric, other_stats = other_stats)
     }
 
     # Merge comparison results with initial results

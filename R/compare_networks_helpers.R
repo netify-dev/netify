@@ -33,7 +33,8 @@ compare_edges <- function(
     alpha = 0.05,
     max_permutations = 20000,
     seed_used = NULL,
-    spectral_rank = 0) {
+    spectral_rank = 0,
+    other_stats = NULL) {
     
     # Handle adaptive stopping warning
     if (adaptive_stop) {
@@ -110,6 +111,42 @@ compare_edges <- function(
     # This is O(k * V^2) instead of O(k^2 * V^2)
     mats <- lapply(nets_list, extract_matrix)
     aligned_list <- batch_align_matrices_cpp(mats, all_actors, include_diagonal)
+    
+    # Calculate custom statistics if provided
+    custom_stats_list <- NULL
+    if (!is.null(other_stats)) {
+        custom_stats_list <- lapply(seq_along(mats), function(i) {
+            mat <- mats[[i]]
+            stats_result <- list()
+            
+            # Apply each custom function
+            for (stat_name in names(other_stats)) {
+                tryCatch({
+                    # Call the custom function with the matrix
+                    custom_result <- other_stats[[stat_name]](mat)
+                    
+                    # Ensure result is named vector
+                    if (is.null(names(custom_result))) {
+                        names(custom_result) <- paste0(stat_name, "_", seq_along(custom_result))
+                    } else {
+                        # Prefix names with stat name if not already
+                        if (!all(grepl(paste0("^", stat_name), names(custom_result)))) {
+                            names(custom_result) <- paste0(stat_name, "_", names(custom_result))
+                        }
+                    }
+                    
+                    stats_result[[stat_name]] <- custom_result
+                }, error = function(e) {
+                    warning(sprintf("Error in custom stat function '%s' for network %d: %s",
+                                    stat_name, i, e$message))
+                    stats_result[[stat_name]] <- NA
+                })
+            }
+            
+            unlist(stats_result)
+        })
+        names(custom_stats_list) <- net_names
+    }
 
     # compare all pairs of networks
     for (i in 1:(n_nets - 1)) {
@@ -258,6 +295,21 @@ compare_edges <- function(
         seed_used = seed_used,
         spectral_rank = spectral_rank
     )
+    
+    # Add custom statistics if calculated
+    if (!is.null(custom_stats_list)) {
+        # Convert to data frame for easier viewing
+        custom_stats_df <- do.call(rbind, lapply(custom_stats_list, function(x) {
+            if (is.null(x)) return(NULL)
+            as.data.frame(t(x), stringsAsFactors = FALSE)
+        }))
+        if (!is.null(custom_stats_df) && nrow(custom_stats_df) > 0) {
+            custom_stats_df$network <- names(custom_stats_list)
+            # Reorder columns to put network first
+            custom_stats_df <- custom_stats_df[, c("network", setdiff(names(custom_stats_df), "network"))]
+            results$custom_stats <- custom_stats_df
+        }
+    }
 
     # add significance tests if requested and QAP was actually performed
     if (test && method %in% c("qap", "all")) {
@@ -304,7 +356,7 @@ compare_edges <- function(
 #' @keywords internal
 #' @noRd
 
-compare_structure <- function(nets_list, test) {
+compare_structure <- function(nets_list, test, other_stats = NULL) {
     # get network names
     net_names <- names(nets_list)
     if (is.null(net_names)) {
@@ -348,20 +400,65 @@ compare_structure <- function(nets_list, test) {
         if (!is.null(net_summary$competition)) {
             props$centralization <- net_summary$competition
         }
+        
+        # Add custom statistics if provided
+        if (!is.null(other_stats)) {
+            for (stat_name in names(other_stats)) {
+                tryCatch({
+                    # Call the custom function with the netify object
+                    custom_result <- other_stats[[stat_name]](net)
+                    
+                    # Add each result to props
+                    for (j in seq_along(custom_result)) {
+                        col_name <- if (!is.null(names(custom_result)[j])) {
+                            paste0(stat_name, "_", names(custom_result)[j])
+                        } else {
+                            paste0(stat_name, "_", j)
+                        }
+                        props[[col_name]] <- custom_result[j]
+                    }
+                }, error = function(e) {
+                    warning(sprintf("Error in custom stat function '%s' for network %s: %s",
+                                    stat_name, net_names[i], e$message))
+                })
+            }
+        }
 
         props
     })
 
     # combine into single dataframe
     struct_df <- do.call(rbind, struct_props)
+    
+    # Separate custom stats if they exist
+    custom_stats_df <- NULL
+    if (!is.null(other_stats)) {
+        # Identify custom stat columns - need to check for their prefixed names
+        base_cols <- c("network", "n_nodes", "n_edges", "density", "reciprocity", 
+                       "transitivity", "mean_degree", "centralization")
+        all_cols <- names(struct_df)
+        
+        # Custom columns are those that contain underscore (from stat_name_metric pattern)
+        custom_cols <- all_cols[grepl("_", all_cols) & !all_cols %in% base_cols]
+        
+        if (length(custom_cols) > 0) {
+            # Extract custom stats
+            custom_stats_df <- struct_df[, c("network", custom_cols), drop = FALSE]
+            # Remove custom stats from main summary
+            struct_df <- struct_df[, base_cols[base_cols %in% names(struct_df)], drop = FALSE]
+        }
+    }
 
     # if only 2 networks, calculate changes between them
     if (length(nets_list) == 2) {
         props1 <- struct_props[[1]]
         props2 <- struct_props[[2]]
 
-        # calc changes for all numeric columns
-        numeric_cols <- setdiff(names(props1), c("network"))
+        # calc changes for all numeric columns (excluding custom stats)
+        base_cols_in_props <- intersect(names(props1), c("n_nodes", "n_edges", "density", 
+                                                         "reciprocity", "transitivity", 
+                                                         "mean_degree", "centralization"))
+        numeric_cols <- base_cols_in_props
         changes <- data.frame(
             metric = numeric_cols,
             value_net1 = unlist(props1[numeric_cols]),
@@ -397,6 +494,11 @@ compare_structure <- function(nets_list, test) {
     if (is.list(struct_df) && "changes" %in% names(struct_df)) {
         results$changes <- struct_df$changes
     }
+    
+    # Add custom stats if they exist
+    if (!is.null(custom_stats_df)) {
+        results$custom_stats <- custom_stats_df
+    }
 
     return(results)
 }
@@ -415,7 +517,7 @@ compare_structure <- function(nets_list, test) {
 #' @keywords internal
 #' @noRd
 
-compare_nodes <- function(nets_list, return_details = FALSE) {
+compare_nodes <- function(nets_list, return_details = FALSE, other_stats = NULL) {
     # get network names
     net_names <- names(nets_list)
     if (is.null(net_names)) {
@@ -466,6 +568,42 @@ compare_nodes <- function(nets_list, return_details = FALSE) {
     # fill diagonals
     diag(overlap_mat) <- sapply(node_sets, length)
     diag(jaccard_node_mat) <- 1
+    
+    # Calculate custom statistics if provided
+    custom_stats_list <- NULL
+    if (!is.null(other_stats)) {
+        custom_stats_list <- lapply(seq_along(nets_list), function(i) {
+            net <- nets_list[[i]]
+            stats_result <- list()
+            
+            # Apply each custom function
+            for (stat_name in names(other_stats)) {
+                tryCatch({
+                    # Call the custom function with the netify object
+                    custom_result <- other_stats[[stat_name]](net)
+                    
+                    # Ensure result is named vector
+                    if (is.null(names(custom_result))) {
+                        names(custom_result) <- paste0(stat_name, "_", seq_along(custom_result))
+                    } else {
+                        # Prefix names with stat name if not already
+                        if (!all(grepl(paste0("^", stat_name), names(custom_result)))) {
+                            names(custom_result) <- paste0(stat_name, "_", names(custom_result))
+                        }
+                    }
+                    
+                    stats_result[[stat_name]] <- custom_result
+                }, error = function(e) {
+                    warning(sprintf("Error in custom stat function '%s' for network %s: %s",
+                                    stat_name, net_names[i], e$message))
+                    stats_result[[stat_name]] <- NA
+                })
+            }
+            
+            unlist(stats_result)
+        })
+        names(custom_stats_list) <- net_names
+    }
 
     # create summary
     if (n_nets == 2) {
@@ -505,6 +643,21 @@ compare_nodes <- function(nets_list, return_details = FALSE) {
         summary = summary_df,
         node_changes = node_changes
     )
+    
+    # Add custom statistics if calculated
+    if (!is.null(custom_stats_list)) {
+        # Convert to data frame for easier viewing
+        custom_stats_df <- do.call(rbind, lapply(custom_stats_list, function(x) {
+            if (is.null(x)) return(NULL)
+            as.data.frame(t(x), stringsAsFactors = FALSE)
+        }))
+        if (!is.null(custom_stats_df) && nrow(custom_stats_df) > 0) {
+            custom_stats_df$network <- names(custom_stats_list)
+            # Reorder columns to put network first
+            custom_stats_df <- custom_stats_df[, c("network", setdiff(names(custom_stats_df), "network"))]
+            results$custom_stats <- custom_stats_df
+        }
+    }
 
     if (return_details) {
         results$details <- list(
@@ -536,7 +689,7 @@ compare_nodes <- function(nets_list, return_details = FALSE) {
 
 compare_attributes <- function(
     nets_list, test = TRUE, n_permutations = 1000,
-    return_details = FALSE, attr_metric = "ecdf_cor") {
+    return_details = FALSE, attr_metric = "ecdf_cor", other_stats = NULL) {
     # get network names
     net_names <- names(nets_list)
     if (is.null(net_names)) {
@@ -585,6 +738,42 @@ compare_attributes <- function(
     })
 
     summary_df <- do.call(rbind, summary_list[!sapply(summary_list, is.null)])
+    
+    # Calculate custom statistics if provided
+    custom_stats_list <- NULL
+    if (!is.null(other_stats)) {
+        custom_stats_list <- lapply(seq_along(nets_list), function(i) {
+            net <- nets_list[[i]]
+            stats_result <- list()
+            
+            # Apply each custom function
+            for (stat_name in names(other_stats)) {
+                tryCatch({
+                    # Call the custom function with the netify object
+                    custom_result <- other_stats[[stat_name]](net)
+                    
+                    # Ensure result is named vector
+                    if (is.null(names(custom_result))) {
+                        names(custom_result) <- paste0(stat_name, "_", seq_along(custom_result))
+                    } else {
+                        # Prefix names with stat name if not already
+                        if (!all(grepl(paste0("^", stat_name), names(custom_result)))) {
+                            names(custom_result) <- paste0(stat_name, "_", names(custom_result))
+                        }
+                    }
+                    
+                    stats_result[[stat_name]] <- custom_result
+                }, error = function(e) {
+                    warning(sprintf("Error in custom stat function '%s' for network %s: %s",
+                                    stat_name, net_names[i], e$message))
+                    stats_result[[stat_name]] <- NA
+                })
+            }
+            
+            unlist(stats_result)
+        })
+        names(custom_stats_list) <- net_names
+    }
 
     results <- list(
         # comparison_type = "attributes",
@@ -593,6 +782,21 @@ compare_attributes <- function(
         summary = summary_df,
         by_attribute = attr_comparisons
     )
+    
+    # Add custom statistics if calculated
+    if (!is.null(custom_stats_list)) {
+        # Convert to data frame for easier viewing
+        custom_stats_df <- do.call(rbind, lapply(custom_stats_list, function(x) {
+            if (is.null(x)) return(NULL)
+            as.data.frame(t(x), stringsAsFactors = FALSE)
+        }))
+        if (!is.null(custom_stats_df) && nrow(custom_stats_df) > 0) {
+            custom_stats_df$network <- names(custom_stats_list)
+            # Reorder columns to put network first
+            custom_stats_df <- custom_stats_df[, c("network", setdiff(names(custom_stats_df), "network"))]
+            results$custom_stats <- custom_stats_df
+        }
+    }
 
     if (return_details) {
         results$details <- lapply(attr_comparisons, function(x) x$details)
@@ -815,7 +1019,15 @@ extract_network_list <- function(net) {
                     attr(mat, "symmetric") <- attrs$symmetric
                     attr(mat, "mode") <- attrs$mode
                     attr(mat, "weight") <- attrs$weight
-                    # don't preserve layers attribute for non-multilayer
+                    attr(mat, "weight_binary") <- attrs$weight_binary
+                    attr(mat, "diag_to_NA") <- attrs$diag_to_NA %||% TRUE
+                    attr(mat, "missing_to_zero") <- attrs$missing_to_zero %||% TRUE
+                    attr(mat, "sum_dyads") <- attrs$sum_dyads %||% FALSE
+                    attr(mat, "detail_weight") <- attrs$detail_weight
+                    attr(mat, "actor_time_uniform") <- attrs$actor_time_uniform %||% TRUE
+                    attr(mat, "loops") <- attrs$loops %||% FALSE
+                    # For single time slices, layers should be NULL or a single TRUE value
+                    attr(mat, "layers") <- TRUE
                     class(mat) <- "netify"
                     mat
                 })
@@ -830,7 +1042,15 @@ extract_network_list <- function(net) {
                     attr(time_slice, "symmetric") <- attrs$symmetric
                     attr(time_slice, "mode") <- attrs$mode
                     attr(time_slice, "weight") <- attrs$weight
-                    # don't preserve layers attribute for non-multilayer
+                    attr(time_slice, "weight_binary") <- attrs$weight_binary
+                    attr(time_slice, "diag_to_NA") <- attrs$diag_to_NA %||% TRUE
+                    attr(time_slice, "missing_to_zero") <- attrs$missing_to_zero %||% TRUE
+                    attr(time_slice, "sum_dyads") <- attrs$sum_dyads %||% FALSE
+                    attr(time_slice, "detail_weight") <- attrs$detail_weight
+                    attr(time_slice, "actor_time_uniform") <- attrs$actor_time_uniform %||% TRUE
+                    attr(time_slice, "loops") <- attrs$loops %||% FALSE
+                    # For single time slices, layers should be NULL or a single TRUE value
+                    attr(time_slice, "layers") <- TRUE
                     class(time_slice) <- "netify"
 
                     net_list[[t]] <- time_slice
