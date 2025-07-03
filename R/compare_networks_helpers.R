@@ -367,114 +367,95 @@ compare_structure <- function(nets_list, test, other_stats = NULL) {
     struct_props <- lapply(seq_along(nets_list), function(i) {
         net <- nets_list[[i]]
 
-        # use netify's built-in summary function
-        net_summary <- summary(net)
-
-        # extract matrix to calculate additional metrics if needed
-        mat <- extract_matrix(net)
-        n_actors <- nrow(mat)
-        n_edges <- net_summary$num_edges %||% sum(mat > 0, na.rm = TRUE)
-
-        # calculate mean degree based on network type
-        is_directed <- !(attributes(net)$symmetric %||% FALSE)
-        if (is_directed) {
-            mean_deg <- n_edges / n_actors
-        } else {
-            # for undirected, edges are counted once but each contributes to 2 degrees
-            mean_deg <- (2 * n_edges) / n_actors
-        }
-
-        # pull out key structural properties
-        props <- data.frame(
-            network = net_names[i],
-            n_nodes = n_actors,
-            n_edges = n_edges,
-            density = net_summary$density %||% (n_edges / (n_actors * (n_actors - 1))),
-            reciprocity = net_summary$reciprocity %||% NA,
-            transitivity = net_summary$transitivity %||% NA,
-            mean_degree = mean_deg,
-            stringsAsFactors = FALSE
-        )
-
-        # add centralization if available
-        if (!is.null(net_summary$competition)) {
-            props$centralization <- net_summary$competition
-        }
+        # use netify's built-in summary function to get all stats
+        net_summary <- summary(net, other_stats = other_stats)
         
-        # Add custom statistics if provided
-        if (!is.null(other_stats)) {
-            for (stat_name in names(other_stats)) {
-                tryCatch({
-                    # Call the custom function with the netify object
-                    custom_result <- other_stats[[stat_name]](net)
-                    
-                    # Add each result to props
-                    for (j in seq_along(custom_result)) {
-                        col_name <- if (!is.null(names(custom_result)[j])) {
-                            paste0(stat_name, "_", names(custom_result)[j])
-                        } else {
-                            paste0(stat_name, "_", j)
-                        }
-                        props[[col_name]] <- custom_result[j]
-                    }
-                }, error = function(e) {
-                    warning(sprintf("Error in custom stat function '%s' for network %s: %s",
-                                    stat_name, net_names[i], e$message))
-                })
+        # For cross-sectional networks, summary returns a single row
+        # For longitudinal networks, it might return multiple rows
+        if (nrow(net_summary) == 1) {
+            # Simple case - cross-sectional network
+            props <- net_summary
+            props$network <- net_names[i]
+            # Remove 'net' column if it exists (from summary output)
+            if ("net" %in% names(props)) {
+                props$net <- NULL
+            }
+        } else {
+            # Longitudinal network - aggregate or warn
+            cli::cli_warn("Network {net_names[i]} appears to be longitudinal. Using first time period for structural comparison.")
+            props <- net_summary[1, , drop = FALSE]
+            props$network <- net_names[i]
+            if ("net" %in% names(props)) {
+                props$net <- NULL
             }
         }
-
+        
+        # Add mean_degree since summary.netify doesn't include it
+        # Extract matrix to calculate mean degree
+        mat <- extract_matrix(net)
+        n_actors <- props$num_actors %||% props$num_row_actors %||% nrow(mat)
+        n_edges <- props$num_edges
+        
+        # Calculate mean degree based on network type
+        is_directed <- !(attributes(net)$symmetric %||% FALSE)
+        is_bipartite <- attributes(net)$mode == "bipartite"
+        
+        if (!is_bipartite) {
+            if (is_directed) {
+                props$mean_degree <- n_edges / n_actors
+            } else {
+                # for undirected, edges are counted once but each contributes to 2 degrees
+                props$mean_degree <- (2 * n_edges) / n_actors
+            }
+        }
+        
+        # Ensure network name is first column
+        col_order <- c("network", setdiff(names(props), "network"))
+        props <- props[, col_order, drop = FALSE]
+        
         props
     })
 
     # combine into single dataframe
     struct_df <- do.call(rbind, struct_props)
     
-    # Separate custom stats if they exist
-    custom_stats_df <- NULL
-    if (!is.null(other_stats)) {
-        # Identify custom stat columns - need to check for their prefixed names
-        base_cols <- c("network", "n_nodes", "n_edges", "density", "reciprocity", 
-                       "transitivity", "mean_degree", "centralization")
-        all_cols <- names(struct_df)
-        
-        # Custom columns are those that contain underscore (from stat_name_metric pattern)
-        custom_cols <- all_cols[grepl("_", all_cols) & !all_cols %in% base_cols]
-        
-        if (length(custom_cols) > 0) {
-            # Extract custom stats
-            custom_stats_df <- struct_df[, c("network", custom_cols), drop = FALSE]
-            # Remove custom stats from main summary
-            struct_df <- struct_df[, base_cols[base_cols %in% names(struct_df)], drop = FALSE]
-        }
-    }
-
     # if only 2 networks, calculate changes between them
     if (length(nets_list) == 2) {
         props1 <- struct_props[[1]]
         props2 <- struct_props[[2]]
 
-        # calc changes for all numeric columns (excluding custom stats)
-        base_cols_in_props <- intersect(names(props1), c("n_nodes", "n_edges", "density", 
-                                                         "reciprocity", "transitivity", 
-                                                         "mean_degree", "centralization"))
-        numeric_cols <- base_cols_in_props
-        changes <- data.frame(
-            metric = numeric_cols,
-            value_net1 = unlist(props1[numeric_cols]),
-            value_net2 = unlist(props2[numeric_cols]),
-            stringsAsFactors = FALSE
-        )
-        changes$absolute_change <- changes$value_net2 - changes$value_net1
-        changes$percent_change <- ifelse(changes$value_net1 != 0 & !is.na(changes$value_net1),
-            100 * changes$absolute_change / changes$value_net1,
-            NA
-        )
-
-        struct_df <- list(
-            properties = struct_df,
-            changes = changes
-        )
+        # Get all numeric columns (excluding 'network' and 'layer' if present)
+        exclude_cols <- c("network", "layer")
+        all_cols <- setdiff(names(props1), exclude_cols)
+        
+        # Filter to numeric columns that exist in both dataframes
+        numeric_cols <- character()
+        for (col in all_cols) {
+            if (col %in% names(props2) && 
+                is.numeric(props1[[col]]) && 
+                is.numeric(props2[[col]])) {
+                numeric_cols <- c(numeric_cols, col)
+            }
+        }
+        
+        if (length(numeric_cols) > 0) {
+            changes <- data.frame(
+                metric = numeric_cols,
+                value_net1 = unlist(props1[numeric_cols]),
+                value_net2 = unlist(props2[numeric_cols]),
+                stringsAsFactors = FALSE
+            )
+            changes$absolute_change <- changes$value_net2 - changes$value_net1
+            changes$percent_change <- ifelse(changes$value_net1 != 0 & !is.na(changes$value_net1),
+                100 * changes$absolute_change / abs(changes$value_net1),
+                NA
+            )
+            
+            struct_df <- list(
+                properties = struct_df,
+                changes = changes
+            )
+        }
     }
 
     # build results
@@ -493,11 +474,6 @@ compare_structure <- function(nets_list, test, other_stats = NULL) {
     # if we have changes data (2 networks), add it separately
     if (is.list(struct_df) && "changes" %in% names(struct_df)) {
         results$changes <- struct_df$changes
-    }
-    
-    # Add custom stats if they exist
-    if (!is.null(custom_stats_df)) {
-        results$custom_stats <- custom_stats_df
     }
 
     return(results)

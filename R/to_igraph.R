@@ -374,9 +374,13 @@ netify_net_to_igraph <- function(netlet) {
 
     # convert to igraph_object
     if (!bipartite_logical) {
+        # For symmetric networks, use "max" to handle the new igraph behavior
+        # This takes the maximum of the upper and lower triangle values
+        mode_val <- if(attr(netlet, "symmetric")) "max" else "directed"
+        
         igraph_object <- igraph::graph_from_adjacency_matrix(
             raw_net,
-            mode = ifelse(attr(netlet, "symmetric"), "undirected", "directed"),
+            mode = mode_val,
             weighted = weight_logical,
             diag = !attr(netlet, "diag_to_NA")
         )

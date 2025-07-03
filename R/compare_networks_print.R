@@ -22,6 +22,45 @@
 #' @method print netify_comparison
 #' @export
 print.netify_comparison <- function(x, ..., n = 20) {
+    # Helper function to format numeric values intelligently
+    format_numeric <- function(x, digits = 3) {
+        if (!is.numeric(x)) return(x)
+        
+        # Handle special cases
+        x_formatted <- sapply(x, function(val) {
+            if (is.na(val)) return(NA)
+            if (is.infinite(val)) return(val)
+            
+            # For very small values, use scientific notation
+            if (abs(val) < 0.001 && val != 0) {
+                return(format(val, scientific = TRUE, digits = digits))
+            }
+            # For very large values, use scientific notation
+            else if (abs(val) >= 10000) {
+                return(format(val, scientific = TRUE, digits = digits))
+            }
+            # For percentages and other values, round appropriately
+            else if (abs(val) >= 10) {
+                return(round(val, 1))
+            }
+            else if (abs(val) >= 1) {
+                return(round(val, 2))
+            }
+            else {
+                return(round(val, digits))
+            }
+        })
+        
+        return(x_formatted)
+    }
+    
+    # Helper function to format data frames
+    format_df <- function(df) {
+        numeric_cols <- sapply(df, is.numeric)
+        df[numeric_cols] <- lapply(df[numeric_cols], format_numeric)
+        return(df)
+    }
+    
     cli::cli_h1("Network Comparison Results")
     
     # Basic info
@@ -65,22 +104,22 @@ print.netify_comparison <- function(x, ..., n = 20) {
             # For many networks, check if we should group by network name patterns
             if (nrow(x$summary) > n) {
                 cli::cli_alert_info("Showing first {n} of {nrow(x$summary)} comparisons. Use print(x, n = Inf) to see all.")
-                print(head(x$summary, n))
+                print(format_df(head(x$summary, n)))
             } else {
-                print(x$summary)
+                print(format_df(x$summary))
             }
         }
         
         if (!is.null(x$changes)) {
             cli::cli_h3("Changes Between Networks")
-            print(x$changes)
+            print(format_df(x$changes))
         }
         
     } else if (x$what == "edges") {
         cli::cli_h2("Edge Comparison Summary")
         
         if (!is.null(x$summary)) {
-            print(x$summary)
+            print(format_df(x$summary))
         }
         
         # Show edge changes if available
@@ -107,7 +146,7 @@ print.netify_comparison <- function(x, ..., n = 20) {
         cli::cli_h2("Node Composition")
         
         if (!is.null(x$summary)) {
-            print(x$summary)
+            print(format_df(x$summary))
         }
         
         if (!is.null(x$node_changes) && length(x$node_changes) > 0) {
@@ -132,7 +171,7 @@ print.netify_comparison <- function(x, ..., n = 20) {
         cli::cli_h2("Attribute Comparison")
         
         if (!is.null(x$summary)) {
-            print(x$summary)
+            print(format_df(x$summary))
         }
     }
     
@@ -149,12 +188,16 @@ print.netify_comparison <- function(x, ..., n = 20) {
         }
         
         if (is.data.frame(x$significance_tests)) {
-            print(x$significance_tests)
+            print(format_df(x$significance_tests))
         } else {
             # Handle list format
             for (test_name in names(x$significance_tests)) {
                 cli::cli_h3(test_name)
-                print(x$significance_tests[[test_name]])
+                if (is.data.frame(x$significance_tests[[test_name]])) {
+                    print(format_df(x$significance_tests[[test_name]]))
+                } else {
+                    print(x$significance_tests[[test_name]])
+                }
             }
         }
     }

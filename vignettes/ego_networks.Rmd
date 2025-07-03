@@ -346,7 +346,7 @@ comp_summary <- structural_comp$summary
 avg_props <- comp_summary %>%
     group_by(network) %>%
     summarise(
-        `Avg. Nodes` = round(mean(n_nodes), 0),
+        `Avg. Nodes` = round(mean(num_actors), 0),
         `Avg. Density` = round(mean(density), 3),
         `Avg. Transitivity` = round(mean(transitivity), 3),
         .groups = 'drop'
@@ -360,11 +360,21 @@ The US maintains a larger but less dense network—more of a hub-and-spoke patte
 Let's look at the temporal patterns:
 
 ```{r}
-# Prepare data for visualization
-comp_summary$year <- rep(2002:2014, 2)
+# Get temporal summaries for each ego network
+us_summary <- summary(us_ego)
+china_summary <- summary(china_ego)
+
+# Combine for visualization
+temporal_comparison <- bind_rows(
+    us_summary %>% mutate(network = "US"),
+    china_summary %>% mutate(network = "China")
+)
+
+# Extract year from net column (assuming format like "2002", "2003", etc.)
+temporal_comparison$year <- as.integer(temporal_comparison$net)
 
 # Density comparison
-ggplot(comp_summary, aes(x = year, y = density, color = network)) +
+ggplot(temporal_comparison, aes(x = year, y = density, color = network)) +
     geom_line(linewidth = 1.2) +
     geom_point(size = 2) +
     scale_color_manual(values = c("US" = "#377eb8", "China" = "#e41a1c")) +

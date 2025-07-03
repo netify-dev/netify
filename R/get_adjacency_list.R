@@ -166,6 +166,24 @@ get_adjacency_list <- function(
     # Pre-compute all actors from data
     a1_all <- unique_vector(dyad_data[, actor1])
     a2_all <- unique_vector(dyad_data[, actor2])
+    
+    # Incorporate nodelist if provided
+    if (!is.null(nodelist)) {
+        # Convert to character to ensure consistency
+        nodelist <- as.character(nodelist)
+        
+        # Add nodelist actors to the actor sets
+        if (mode == "unipartite") {
+            actors_from_data <- unique_vector(a1_all, a2_all)
+            all_actors <- unique_vector(actors_from_data, nodelist)
+            a1_all <- a2_all <- all_actors
+        } else {
+            # For bipartite, inform user about assignment
+            cli::cli_alert_info("For bipartite networks, nodelist should contain all actors. Assigning to both row and column actors.")
+            a1_all <- unique_vector(a1_all, nodelist)
+            a2_all <- unique_vector(a2_all, nodelist)
+        }
+    }
 
     # if no actor_pds provided then calculate based on actor_time_uniform
     if (is.null(actor_pds)) {
@@ -180,7 +198,29 @@ get_adjacency_list <- function(
                 stringsAsFactors = FALSE
             )
         } else {
+            # When not actor_time_uniform, we need to handle nodelist actors
             actor_pds <- get_actor_time_info(dyad_data, actor1, actor2, time)
+            
+            # Add nodelist actors that aren't in actor_pds yet
+            if (!is.null(nodelist)) {
+                existing_actors <- actor_pds$actor
+                missing_actors <- setdiff(nodelist, existing_actors)
+                
+                if (length(missing_actors) > 0) {
+                    # Add missing actors with full time range
+                    min_time <- min(dyad_data[, time], na.rm = TRUE)
+                    max_time <- max(dyad_data[, time], na.rm = TRUE)
+                    
+                    missing_actor_pds <- data.frame(
+                        actor = missing_actors,
+                        min_time = min_time,
+                        max_time = max_time,
+                        stringsAsFactors = FALSE
+                    )
+                    
+                    actor_pds <- rbind(actor_pds, missing_actor_pds)
+                }
+            }
         }
     } else {
         # make sure actor_pds is a data.frame

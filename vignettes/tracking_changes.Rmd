@@ -552,7 +552,7 @@ struct_data <- struct_comparison$summary
 # Calculate percent changes from baseline
 baseline_year <- struct_data$network[1]
 struct_long <- struct_data %>%
-    select(-n_nodes) %>% # Remove n_nodes since it doesn't change much
+    select(-num_actors) %>% # Remove num_actors since it doesn't change much
     pivot_longer(cols = -network, names_to = "metric", values_to = "value") %>%
     group_by(metric) %>%
     mutate(
@@ -588,7 +588,7 @@ Many ways to visualize structural changes ... could also just do a line plot:
 ```{r, fig.width=10, fig.height=6}
 # Reshape data for visualization
 struct_long <- struct_data %>%
-    select(-n_nodes) %>% # Remove n_nodes since it doesn't change
+    select(-num_actors) %>% # Remove num_actors since it doesn't change
     pivot_longer(cols = -network, names_to = "metric", values_to = "value") %>%
     group_by(metric) %>%
     mutate(
