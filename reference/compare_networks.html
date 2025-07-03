@@ -74,7 +74,8 @@ and node compositions across multiple networks or within subgroups.</p>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  max_permutations <span class="op">=</span> <span class="fl">20000</span>,</span>
 <span>  spectral_rank <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  attr_metric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ecdf_cor"</span>, <span class="st">"wasserstein"</span><span class="op">)</span></span>
+<span>  attr_metric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ecdf_cor"</span>, <span class="st">"wasserstein"</span><span class="op">)</span>,</span>
+<span>  other_stats <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -229,6 +230,27 @@ to improve performance while maintaining accuracy.</p></dd>
 
 
 </dl></dd>
+
+
+<dt id="arg-other-stats">other_stats<a class="anchor" aria-label="anchor" href="#arg-other-stats"></a></dt>
+<dd><p>Named list of custom functions to calculate additional
+comparison statistics. Each function should accept a netify object (or matrix
+for edge comparisons) and return a named vector of scalar values. The specific
+input depends on the <code>what</code> parameter:</p><dl><dt>For <code>what = "edges"</code></dt>
+<dd><p>Functions receive adjacency matrices</p></dd>
+
+<dt>For <code>what = "structure"</code></dt>
+<dd><p>Functions receive netify objects</p></dd>
+
+<dt>For <code>what = "nodes"</code></dt>
+<dd><p>Functions receive netify objects</p></dd>
+
+<dt>For <code>what = "attributes"</code></dt>
+<dd><p>Functions receive netify objects</p></dd>
+
+
+</dl><p>Example: <code>list(connectivity = function(net) { g &lt;- to_igraph(net);
+  c(vertex_conn = igraph::vertex_connectivity(g)) })</code></p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -387,6 +409,29 @@ which is important when degree heterogeneity could inflate Type I error rates.</
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">detailed_comp</span><span class="op">$</span><span class="va">details</span><span class="op">)</span> <span class="co"># Shows available matrices</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "correlation_matrix" "jaccard_matrix"     "hamming_matrix"    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4] "spectral_matrix"   </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Compare with custom statistics</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r.igraph.org/" class="external-link">igraph</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Define custom connectivity function</span></span></span>
+<span class="r-in"><span><span class="va">connectivity_stats</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">net</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify_to_igraph.html">to_igraph</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>vertex_connectivity <span class="op">=</span> <span class="fu"><a href="https://r.igraph.org/reference/vertex_connectivity.html" class="external-link">vertex_connectivity</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      edge_connectivity <span class="op">=</span> <span class="fu"><a href="https://r.igraph.org/reference/edge_connectivity.html" class="external-link">edge_connectivity</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      diameter <span class="op">=</span> <span class="fu"><a href="https://r.igraph.org/reference/diameter.html" class="external-link">diameter</a></span><span class="op">(</span><span class="va">g</span>, directed <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Apply to structural comparison</span></span></span>
+<span class="r-in"><span><span class="va">struct_comp_custom</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"2002"</span> <span class="op">=</span> <span class="va">net_2002</span>, <span class="st">"2003"</span> <span class="op">=</span> <span class="va">net_2003</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    what <span class="op">=</span> <span class="st">"structure"</span>,</span></span>
+<span class="r-in"><span>    other_stats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>connectivity <span class="op">=</span> <span class="va">connectivity_stats</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Custom stats will appear in the summary</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">struct_comp_custom</span><span class="op">$</span><span class="va">summary</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

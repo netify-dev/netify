@@ -93,8 +93,8 @@ as unipartite with a warning</p></li>
 <p>If the graph lacks vertex names, default names are assigned:</p><ul><li><p>Unipartite graphs: "a1", "a2", ..., "an"</p></li>
 <li><p>Bipartite graphs: "r1", "r2", ... for type 1; "c1", "c2", ... for type 2</p></li>
 </ul><p>Existing vertex names are always preserved and used in the output.</p>
-<p><strong>Matrix extraction:</strong></p><ul><li><p>Unipartite: Uses <code>as_adjacency_matrix()</code> to get n×n matrix</p></li>
-<li><p>Bipartite: Uses <code>as_biadjacency_matrix()</code> to get n₁×n₂ matrix where
+<p><strong>Matrix extraction:</strong></p><ul><li><p>Unipartite: Uses <code><a href="https://r.igraph.org/reference/as_adjacency_matrix.html" class="external-link">as_adjacency_matrix()</a></code> to get n×n matrix</p></li>
+<li><p>Bipartite: Uses <code><a href="https://r.igraph.org/reference/as_biadjacency_matrix.html" class="external-link">as_biadjacency_matrix()</a></code> to get n₁×n₂ matrix where
 rows correspond to type=FALSE vertices and columns to type=TRUE vertices</p></li>
 </ul><p><strong>Attribute handling:</strong></p>
 <p>All vertex and edge attributes are preserved in the output data frames. System
