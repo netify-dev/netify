@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -216,28 +216,43 @@ function of capacity.</p>
 <code class="sourceCode R"><span><span class="co"># Get structural comparison</span></span>
 <span><span class="va">struct_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">multilayer_net</span>, what <span class="op">=</span> <span class="st">"structure"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">struct_comp</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    network n_nodes n_edges   density reciprocity transitivity mean_degree</span></span>
-<span><span class="co">#&gt; 1   Verbal     152    9378 0.4059037          NA    0.6058952   123.39474</span></span>
-<span><span class="co">#&gt; 2 Material     152    2576 0.1114958          NA    0.3106440    33.89474</span></span>
-<span><span class="co">#&gt;   centralization</span></span>
-<span><span class="co">#&gt; 1     0.03999949</span></span>
-<span><span class="co">#&gt; 2     0.03794829</span></span>
-<span><span class="co">#&gt;                        metric   value_net1   value_net2 absolute_change</span></span>
-<span><span class="co">#&gt; n_nodes               n_nodes 1.520000e+02 1.520000e+02    0.000000e+00</span></span>
-<span><span class="co">#&gt; n_edges               n_edges 9.378000e+03 2.576000e+03   -6.802000e+03</span></span>
-<span><span class="co">#&gt; density               density 4.059037e-01 1.114958e-01   -2.944079e-01</span></span>
-<span><span class="co">#&gt; reciprocity       reciprocity           NA           NA              NA</span></span>
-<span><span class="co">#&gt; transitivity     transitivity 6.058952e-01 3.106440e-01   -2.952512e-01</span></span>
-<span><span class="co">#&gt; mean_degree       mean_degree 1.233947e+02 3.389474e+01   -8.950000e+01</span></span>
-<span><span class="co">#&gt; centralization centralization 3.999949e-02 3.794829e-02   -2.051197e-03</span></span>
-<span><span class="co">#&gt;                percent_change</span></span>
-<span><span class="co">#&gt; n_nodes              0.000000</span></span>
-<span><span class="co">#&gt; n_edges            -72.531457</span></span>
-<span><span class="co">#&gt; density            -72.531457</span></span>
-<span><span class="co">#&gt; reciprocity                NA</span></span>
-<span><span class="co">#&gt; transitivity       -48.729753</span></span>
-<span><span class="co">#&gt; mean_degree        -72.531457</span></span>
-<span><span class="co">#&gt; centralization      -5.128059</span></span></code></pre></div>
+<span><span class="co">#&gt;    network num_actors density num_edges prop_edges_missing mean_edge_weight</span></span>
+<span><span class="co">#&gt; 1   Verbal        152   0.406      9378                  0           19.800</span></span>
+<span><span class="co">#&gt; 2 Material        152   0.111      2576                  0            0.521</span></span>
+<span><span class="co">#&gt;   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition</span></span>
+<span><span class="co">#&gt; 1          145.3                  0               0            5760       0.040</span></span>
+<span><span class="co">#&gt; 2            5.5                  0               0             380       0.038</span></span>
+<span><span class="co">#&gt;   sd_of_actor_means transitivity mean_degree</span></span>
+<span><span class="co">#&gt; 1             44.80        0.606       123.4</span></span>
+<span><span class="co">#&gt; 2              1.14        0.311        33.9</span></span>
+<span><span class="co">#&gt;                                metric value_net1 value_net2 absolute_change</span></span>
+<span><span class="co">#&gt; num_actors                 num_actors    152.000    152.000           0.000</span></span>
+<span><span class="co">#&gt; density                       density      0.406      0.111          -0.294</span></span>
+<span><span class="co">#&gt; num_edges                   num_edges   9378.000   2576.000       -6802.000</span></span>
+<span><span class="co">#&gt; prop_edges_missing prop_edges_missing      0.000      0.000           0.000</span></span>
+<span><span class="co">#&gt; mean_edge_weight     mean_edge_weight     19.800      0.521         -19.300</span></span>
+<span><span class="co">#&gt; sd_edge_weight         sd_edge_weight    145.300      5.500        -139.800</span></span>
+<span><span class="co">#&gt; median_edge_weight median_edge_weight      0.000      0.000           0.000</span></span>
+<span><span class="co">#&gt; min_edge_weight       min_edge_weight      0.000      0.000           0.000</span></span>
+<span><span class="co">#&gt; max_edge_weight       max_edge_weight   5760.000    380.000       -5380.000</span></span>
+<span><span class="co">#&gt; competition               competition      0.040      0.038          -0.002</span></span>
+<span><span class="co">#&gt; sd_of_actor_means   sd_of_actor_means     44.800      1.140         -43.700</span></span>
+<span><span class="co">#&gt; transitivity             transitivity      0.606      0.311          -0.295</span></span>
+<span><span class="co">#&gt; mean_degree               mean_degree    123.400     33.900         -89.500</span></span>
+<span><span class="co">#&gt;                    percent_change</span></span>
+<span><span class="co">#&gt; num_actors                   0.00</span></span>
+<span><span class="co">#&gt; density                    -72.50</span></span>
+<span><span class="co">#&gt; num_edges                  -72.50</span></span>
+<span><span class="co">#&gt; prop_edges_missing             NA</span></span>
+<span><span class="co">#&gt; mean_edge_weight           -97.40</span></span>
+<span><span class="co">#&gt; sd_edge_weight             -96.20</span></span>
+<span><span class="co">#&gt; median_edge_weight             NA</span></span>
+<span><span class="co">#&gt; min_edge_weight                NA</span></span>
+<span><span class="co">#&gt; max_edge_weight            -93.40</span></span>
+<span><span class="co">#&gt; competition                 -5.13</span></span>
+<span><span class="co">#&gt; sd_of_actor_means          -97.50</span></span>
+<span><span class="co">#&gt; transitivity               -48.70</span></span>
+<span><span class="co">#&gt; mean_degree                -72.50</span></span></code></pre></div>
 <p><strong>What these numbers mean</strong>:</p>
 <ul>
 <li>
@@ -280,8 +295,8 @@ cooperation type?</p>
 <span><span class="co">#&gt; 1                 -6.964294                   -7.444698             0.4804043</span></span>
 <span><span class="co">#&gt; 2                 -7.016653                   -7.279288             0.2626347</span></span>
 <span><span class="co">#&gt;   p_value     ci_lower   ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">#&gt; 1   0.000  0.022752718 0.06031716              4453                6573</span></span>
-<span><span class="co">#&gt; 2   0.125 -0.004998469 0.03527289              1201                9825</span></span>
+<span><span class="co">#&gt; 1   0.000  0.022355634 0.06177886              4453                6573</span></span>
+<span><span class="co">#&gt; 2   0.137 -0.005370839 0.03396502              1201                9825</span></span>
 <span><span class="co">#&gt;   n_missing n_pairs</span></span>
 <span><span class="co">#&gt; 1         3   11476</span></span>
 <span><span class="co">#&gt; 2         3   11476</span></span></code></pre></div>
@@ -506,10 +521,10 @@ friend/foe categories.</p>
 <code class="sourceCode R"><span><span class="co"># Comprehensive layer comparison</span></span>
 <span><span class="va">layer_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">multilayer_net</span>, what <span class="op">=</span> <span class="st">"edges"</span>, method <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">layer_comparison</span><span class="op">)</span></span>
-<span><span class="co">#&gt;           comparison correlation   jaccard  hamming qap_correlation qap_pvalue</span></span>
-<span><span class="co">#&gt; 1 Verbal vs Material   0.4718002 0.2580509 0.305142       0.4718002          0</span></span>
+<span><span class="co">#&gt;           comparison correlation jaccard hamming qap_correlation qap_pvalue</span></span>
+<span><span class="co">#&gt; 1 Verbal vs Material       0.472   0.258   0.305           0.472          0</span></span>
 <span><span class="co">#&gt;   spectral</span></span>
-<span><span class="co">#&gt; 1 91163.55</span></span>
+<span><span class="co">#&gt; 1 9.12e+04</span></span>
 <span><span class="co">#&gt;             Verbal  Material</span></span>
 <span><span class="co">#&gt; Verbal   1.0000000 0.4718002</span></span>
 <span><span class="co">#&gt; Material 0.4718002 1.0000000</span></span>
