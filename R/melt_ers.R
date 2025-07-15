@@ -128,7 +128,7 @@ melt_array <- function(arr, remove_diagonal = TRUE, remove_zeros = TRUE,
             value.name = value.name
         )
         if (nrow(df) > 0) {
-            df$time <- if (!is.null(dn[[3]])) dn[[3]][k] else as.character(k)
+            df$L1 <- if (!is.null(dn[[3]])) dn[[3]][k] else as.character(k)
         }
         df
     })
@@ -138,9 +138,9 @@ melt_array <- function(arr, remove_diagonal = TRUE, remove_zeros = TRUE,
     rownames(result) <- NULL
 
     # Reorder columns
-    time_col <- which(names(result) == "time")
-    other_cols <- setdiff(seq_along(result), time_col)
-    result[c(other_cols[1:2], time_col, other_cols[3:length(other_cols)])]
+    L1_col <- which(names(result) == "L1")
+    other_cols <- setdiff(seq_along(result), L1_col)
+    result[c(other_cols[1:2], L1_col, other_cols[3:length(other_cols)])]
 }
 
 #' Legacy function names for backwards compatibility
