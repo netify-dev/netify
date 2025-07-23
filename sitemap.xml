@@ -1,15 +1,12 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://netify-dev.github.io/netify/404.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/LICENSE-text.html</loc></url>
-<url><loc>https://netify-dev.github.io/netify/articles/attribute_analysis.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/ego_networks.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/event_data.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/foundations.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/index.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/manual_plotting.html</loc></url>
-<url><loc>https://netify-dev.github.io/netify/articles/multilayer_networks.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/resources.html</loc></url>
-<url><loc>https://netify-dev.github.io/netify/articles/tracking_changes.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/authors.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/index.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/add_dyad_vars.html</loc></url>

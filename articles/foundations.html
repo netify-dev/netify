@@ -35,10 +35,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
   </ul>
@@ -66,7 +63,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2025-07-15</h4>
+            <h4 data-toc-skip class="date">2025-07-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/foundations.Rmd" class="external-link"><code>vignettes/foundations.Rmd</code></a></small>
       <div class="d-none name"><code>foundations.Rmd</code></div>
@@ -453,12 +450,12 @@ nodal data information.</p>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   actor time v2x_polyarchy1 v2x_polyarchy2 wbgdppc2011est2 wbgdppc2011est2_log</span></span>
-<span><span class="co">## 1   100 1995          0.595          0.883          10.740            2.373975</span></span>
-<span><span class="co">## 2   100 1996          0.574          0.881          10.768            2.376579</span></span>
-<span><span class="co">## 3   100 1997          0.581          0.868          10.798            2.379361</span></span>
-<span><span class="co">## 4   100 1998          0.558          0.867          10.833            2.382597</span></span>
-<span><span class="co">## 5   100 1999          0.553          0.864          10.860            2.385086</span></span>
-<span><span class="co">## 6   100 2000          0.562          0.863          10.888            2.387661</span></span>
+<span><span class="co">## 1   100 1995          0.563          0.868          10.740            2.373975</span></span>
+<span><span class="co">## 2   100 1996          0.554          0.867          10.768            2.376579</span></span>
+<span><span class="co">## 3   100 1997          0.554          0.866          10.798            2.379361</span></span>
+<span><span class="co">## 4   100 1998          0.544          0.867          10.833            2.382597</span></span>
+<span><span class="co">## 5   100 1999          0.539          0.870          10.860            2.385086</span></span>
+<span><span class="co">## 6   100 2000          0.548          0.868          10.888            2.387661</span></span>
 <span><span class="co">##   degree   prop_ties eigen_vector</span></span>
 <span><span class="co">## 1      1 0.005347594 0.000000e+00</span></span>
 <span><span class="co">## 2      0 0.000000000 0.000000e+00</span></span>
@@ -470,12 +467,12 @@ nodal data information.</p>
 <code class="sourceCode R"><span><span class="co"># i.e.,</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span><span class="op">$</span><span class="va">nodal_data</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   actor time v2x_polyarchy1 v2x_polyarchy2 wbgdppc2011est2 wbgdppc2011est2_log</span></span>
-<span><span class="co">## 1   100 1995          0.595          0.883          10.740            2.373975</span></span>
-<span><span class="co">## 2   100 1996          0.574          0.881          10.768            2.376579</span></span>
-<span><span class="co">## 3   100 1997          0.581          0.868          10.798            2.379361</span></span>
-<span><span class="co">## 4   100 1998          0.558          0.867          10.833            2.382597</span></span>
-<span><span class="co">## 5   100 1999          0.553          0.864          10.860            2.385086</span></span>
-<span><span class="co">## 6   100 2000          0.562          0.863          10.888            2.387661</span></span>
+<span><span class="co">## 1   100 1995          0.563          0.868          10.740            2.373975</span></span>
+<span><span class="co">## 2   100 1996          0.554          0.867          10.768            2.376579</span></span>
+<span><span class="co">## 3   100 1997          0.554          0.866          10.798            2.379361</span></span>
+<span><span class="co">## 4   100 1998          0.544          0.867          10.833            2.382597</span></span>
+<span><span class="co">## 5   100 1999          0.539          0.870          10.860            2.385086</span></span>
+<span><span class="co">## 6   100 2000          0.548          0.868          10.888            2.387661</span></span>
 <span><span class="co">##   degree   prop_ties eigen_vector</span></span>
 <span><span class="co">## 1      1 0.005347594 0.000000e+00</span></span>
 <span><span class="co">## 2      0 0.000000000 0.000000e+00</span></span>
@@ -645,11 +642,11 @@ networks.</p>
 <span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
 <span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
 <span><span class="co">##   .. ..$ : chr "capdist"</span></span>
-<span><span class="co">##  $ Xrow : num [1:81, 1:6] 7 4.35 6.35 6.8 8 9.2 7.8 10 10 10 ...</span></span>
+<span><span class="co">##  $ Xrow : num [1:81, 1:6] 7 4.35 6.4 6.25 8 9.2 7.8 10 10 10 ...</span></span>
 <span><span class="co">##   ..- attr(*, "dimnames")=List of 2</span></span>
 <span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
 <span><span class="co">##   .. ..$ : chr [1:6] "polity21" "polity22" "wbgdp2011est1" "wbgdp2011est2" ...</span></span>
-<span><span class="co">##  $ Xcol : num [1:81, 1:6] 7 4.35 6.35 6.8 8 9.2 7.8 10 10 10 ...</span></span>
+<span><span class="co">##  $ Xcol : num [1:81, 1:6] 7 4.35 6.4 6.25 8 9.2 7.8 10 10 10 ...</span></span>
 <span><span class="co">##   ..- attr(*, "dimnames")=List of 2</span></span>
 <span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
 <span><span class="co">##   .. ..$ : chr [1:6] "polity21" "polity22" "wbgdp2011est1" "wbgdp2011est2" ...</span></span></code></pre>
@@ -669,8 +666,9 @@ networks.</p>
 <span>    plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>    print <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## WARNING: replacing NAs in design matrix with zeros</span></span></code></pre>
 <p>We can apply the same process to ERGMs:</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install (if necessary) and load ergm</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="st">"ergm"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"ergm"</span>, repos <span class="op">=</span> <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span></span>
@@ -694,7 +692,7 @@ networks.</p>
 <pre><code><span><span class="co">## 'ergm' 4 is a major update that introduces some backwards-incompatible</span></span>
 <span><span class="co">## changes. Please type 'news(package="ergm")' for a list of major</span></span>
 <span><span class="co">## changes.</span></span></code></pre>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># called netify_to_statnet because it's a reference</span></span>
 <span><span class="co"># to the network library, which is what ergm uses</span></span>
 <span><span class="va">mid_cross_ergm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_statnet.html">netify_to_statnet</a></span><span class="op">(</span><span class="va">mid_cross_network</span><span class="op">)</span></span>
@@ -721,8 +719,29 @@ networks.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">##  Edge attribute names: </span></span>
 <span><span class="co">##     capdist_e cowmidonset</span></span></code></pre>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># plug and run</span></span>
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># set NA values to 0 for the three nodecov variables</span></span>
+<span><span class="co"># this is only for demonstration purposes in the vignette/example</span></span>
+<span><span class="co"># in any real analysis, carefully consider how to handle missing data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">set.vertex.attribute</a></span><span class="op">(</span></span>
+<span>    <span class="va">mid_cross_ergm</span>, <span class="st">"polity21"</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"polity21"</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>        <span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"polity21"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">set.vertex.attribute</a></span><span class="op">(</span></span>
+<span>    <span class="va">mid_cross_ergm</span>, <span class="st">"wbgdp2011est2"</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"wbgdp2011est2"</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>        <span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"wbgdp2011est2"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">set.vertex.attribute</a></span><span class="op">(</span></span>
+<span>    <span class="va">mid_cross_ergm</span>, <span class="st">"wbpopest2"</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"wbpopest2"</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>        <span class="fl">0</span>,  <span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"wbpopest2"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># plug and run</span></span>
 <span><span class="co"># Fit the ERGM model (well not a real ergm)</span></span>
 <span><span class="va">ergm_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm</a></span><span class="op">(</span></span>
 <span>    formula <span class="op">=</span> <span class="va">mid_cross_ergm</span> <span class="op">~</span></span>
