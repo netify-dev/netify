@@ -449,6 +449,27 @@ mid_cross_ergm <- netify_to_statnet(mid_cross_network)
 # notice edge attribtues get a _e suffix added
 mid_cross_ergm
 
+# set NA values to 0 for the three nodecov variables
+# this is only for demonstration purposes in the vignette/example
+# in any real analysis, carefully consider how to handle missing data
+set.vertex.attribute(
+    mid_cross_ergm, "polity21", 
+    ifelse(
+        is.na(get.vertex.attribute(mid_cross_ergm, "polity21")), 
+        0, get.vertex.attribute(mid_cross_ergm, "polity21")))
+
+set.vertex.attribute(
+    mid_cross_ergm, "wbgdp2011est2", 
+    ifelse(
+        is.na(get.vertex.attribute(mid_cross_ergm, "wbgdp2011est2")), 
+        0, get.vertex.attribute(mid_cross_ergm, "wbgdp2011est2")) )
+
+set.vertex.attribute(
+    mid_cross_ergm, "wbpopest2", 
+    ifelse(
+        is.na(get.vertex.attribute(mid_cross_ergm, "wbpopest2")), 
+        0,  get.vertex.attribute(mid_cross_ergm, "wbpopest2")) )
+
 # plug and run
 # Fit the ERGM model (well not a real ergm)
 ergm_model <- ergm(
