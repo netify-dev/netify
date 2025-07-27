@@ -1,0 +1,87 @@
+name: Build Netify Release Binaries
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux
+          - os: macos-13
+            label: macos-intel
+          - os: macos-15
+            label: macos-asan
+          - os: macos-latest
+            label: macos-arm64
+          - os: windows-latest
+            label: windows
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Install dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+
+      - name: Extract version from DESCRIPTION
+        id: version
+        run: |
+          VERSION=$(grep '^Version:' DESCRIPTION | cut -d' ' -f2)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build source package
+        run: R CMD build .
+        shell: bash
+
+      - name: Build binary package
+        run: |
+          PKG_FILE=$(ls -1tr *.tar.gz | tail -n 1)
+          R CMD INSTALL --build "$PKG_FILE"
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: netify-${{ matrix.label }}-v${{ steps.version.outputs.version }}
+          path: |
+            *.tgz
+            *.zip
+            *.tar.gz
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Extract version from DESCRIPTION
+        id: version
+        run: |
+          VERSION=$(grep '^Version:' DESCRIPTION | cut -d' ' -f2)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "netify v${{ steps.version.outputs.version }}"
+          tag_name: "v${{ steps.version.outputs.version }}"
+          generate_release_notes: true
+          files: |
+            artifacts/**/*.tgz
+            artifacts/**/*.zip
+            artifacts/**/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
