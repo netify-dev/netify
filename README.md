@@ -36,10 +36,14 @@ Most users can choose based on chip type:
 
 ```r
 # Example: Apple Silicon (M1/M2/M3)
-install.packages("~/Downloads/netify_0.1.3-macos-arm64.tgz", repos = NULL, type = "mac.binary")
+install.packages(
+  "~/Downloads/netify_0.1.3-macos-arm64.tgz", 
+  repos = NULL, type = "mac.binary", dependencies = TRUE)
 
 # Example: Intel Mac
-install.packages("~/Downloads/netify_0.1.3-macos-intel.tgz", repos = NULL, type = "mac.binary")
+install.packages(
+  "~/Downloads/netify_0.1.3-macos-intel.tgz", 
+  repos = NULL, type = "mac.binary", dependencies = TRUE)
 ```
 
 #### 🪟 Windows users:
@@ -47,7 +51,9 @@ install.packages("~/Downloads/netify_0.1.3-macos-intel.tgz", repos = NULL, type 
 Download the `.zip` file named `netify_0.1.3-windows.zip` (if available) and install:
 
 ```r
-install.packages("C:/path/to/netify_0.1.3-windows.zip", repos = NULL)
+install.packages(
+  "C:/path/to/netify_0.1.3-windows.zip", 
+  repos = NULL, dependencies = TRUE)
 ```
 
 Be sure to replace the file path with where you saved the download.
@@ -57,7 +63,9 @@ Be sure to replace the file path with where you saved the download.
 You can use the precompiled `.tgz` file, or install from source (see Option 2). Example:
 
 ```r
-install.packages("~/Downloads/netify_0.1.3-linux.tgz", repos = NULL, type = "source")
+install.packages(
+  "~/Downloads/netify_0.1.3-linux.tgz", 
+  repos = NULL, type = "source", dependencies = TRUE)
 ```
 
 ### 🔧 Option 2: Install from GitHub (requires build tools)
@@ -71,7 +79,7 @@ install.packages("~/Downloads/netify_0.1.3-linux.tgz", repos = NULL, type = "sou
 ```r
 # Install from GitHub
 # install.packages("devtools")
-devtools::install_github("netify-dev/netify")
+devtools::install_github("netify-dev/netify", dependencies = TRUE)
 ```
 
 ## Quick Start
