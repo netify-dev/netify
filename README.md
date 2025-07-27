@@ -10,6 +10,64 @@ We built netify while doing our own network research in social science. It handl
 
 ## Installation
 
+You have two options for installing `netify`.
+
+### 🛠 Option 1: Pre-built binaries (no compilation needed)
+
+If you're on **macOS** or **Windows** and want to avoid installing developer tools (like compilers, Xcode, or Rtools), you can use our pre-built binaries from the [Releases page](https://github.com/netify-dev/netify/releases):
+
+#### ✅ Steps:
+
+1. Go to: [https://github.com/netify-dev/netify/releases](https://github.com/netify-dev/netify/releases)
+2. Click on the latest release (e.g., **v0.1.3**)
+3. Download the file that matches your system:
+
+#### 🖥 macOS users:
+
+There are several macOS builds — choose the one that fits your system:
+
+| File              | For...                                                                      |
+| ----------------- | --------------------------------------------------------------------------- |
+| `macos-arm64.tgz` | Macs with Apple Silicon (M1, M2, M3 chips) running recent macOS             |
+| `macos-intel.tgz` | Macs with Intel chips                                                       |
+| `macos-asan.tgz`  | Developer/debug version (for advanced users only; includes sanitizer flags) |
+
+Most users can choose based on chip type:
+
+```r
+# Example: Apple Silicon (M1/M2/M3)
+install.packages("~/Downloads/netify_0.1.3-macos-arm64.tgz", repos = NULL, type = "mac.binary")
+
+# Example: Intel Mac
+install.packages("~/Downloads/netify_0.1.3-macos-intel.tgz", repos = NULL, type = "mac.binary")
+```
+
+#### 🪟 Windows users:
+
+Download the `.zip` file named `netify_0.1.3-windows.zip` (if available) and install:
+
+```r
+install.packages("C:/path/to/netify_0.1.3-windows.zip", repos = NULL)
+```
+
+Be sure to replace the file path with where you saved the download.
+
+#### 🐧 Linux users:
+
+You can use the precompiled `.tgz` file, or install from source (see Option 2). Example:
+
+```r
+install.packages("~/Downloads/netify_0.1.3-linux.tgz", repos = NULL, type = "source")
+```
+
+### 🔧 Option 2: Install from GitHub (requires build tools)
+
+> ⚠️ Requires R build tools:
+>
+> * macOS: Xcode Command Line Tools
+> * Windows: Rtools
+> * Linux: build-essential and related packages
+
 ```r
 # Install from GitHub
 # install.packages("devtools")
