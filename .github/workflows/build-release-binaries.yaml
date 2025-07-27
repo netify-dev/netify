@@ -44,8 +44,17 @@ jobs:
 
       - name: Build binary package
         run: |
-          PKG_FILE=$(ls -1tr *.tar.gz | tail -n 1)
-          R CMD INSTALL --build "$PKG_FILE"
+          pkg_file=$(ls -1tr *.tar.gz | tail -n 1)
+          R CMD INSTALL --build "$pkg_file"
+
+          platform=${{ matrix.label }}
+          for f in *.tgz *.zip *.tar.gz *.tar.bz2; do
+            if [ -f "$f" ]; then
+              ext="${f##*.}"
+              filename=$(basename "$f")
+              mv "$f" "${filename%.*}-${platform}.${ext}"
+            fi
+          done
         shell: bash
 
       - name: Upload artifacts
@@ -56,6 +65,7 @@ jobs:
             *.tgz
             *.zip
             *.tar.gz
+          retention-days: 90
 
   release:
     name: Create GitHub Release
@@ -63,6 +73,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
@@ -71,8 +84,9 @@ jobs:
       - name: Extract version from DESCRIPTION
         id: version
         run: |
-          VERSION=$(grep '^Version:' DESCRIPTION | cut -d' ' -f2)
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          version <- read.dcf("DESCRIPTION")[1, "Version"]
+          cat(sprintf("version=%s\n", version), file = Sys.getenv("GITHUB_OUTPUT"), append = TRUE)
+        shell: Rscript {0}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -83,6 +97,6 @@ jobs:
           files: |
             artifacts/**/*.tgz
             artifacts/**/*.zip
-            artifacts/**/*.tar.gz
+            artifacts/**/*-*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
