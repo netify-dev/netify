@@ -12,7 +12,21 @@ We built netify while doing our own network research in social science. It handl
 
 You have two options for installing `netify`.
 
-### 🛠 Option 1: Pre-built binaries (no compilation needed)
+### 🔧 Option 1: Install from GitHub (requires build tools)
+
+> ⚠️ Requires R build tools:
+>
+> * macOS: Xcode Command Line Tools
+> * Windows: Rtools
+> * Linux: build-essential and related packages
+
+```r
+# Install from GitHub
+# install.packages("devtools")
+devtools::install_github("netify-dev/netify", dependencies = TRUE)
+```
+
+### 🛠 Option 2: Pre-built binaries (no compilation needed)
 
 If you're on **macOS** or **Windows** and want to avoid installing developer tools (like compilers, Xcode, or Rtools), you can use our pre-built binaries from the [Releases page](https://github.com/netify-dev/netify/releases):
 
@@ -20,7 +34,24 @@ If you're on **macOS** or **Windows** and want to avoid installing developer too
 
 1. Go to: [https://github.com/netify-dev/netify/releases](https://github.com/netify-dev/netify/releases)
 2. Click on the latest release (e.g., **v0.1.3**)
-3. Download the file that matches your system:
+3. Download the file that matches your system
+
+#### 📦 First, install dependencies (if needed):
+
+```r
+# Install required packages if you don't already have them
+deps <- c("Rcpp", "stats", "rlang", "cli", "checkmate", "igraph", 
+          "ggplot2", "scales", "ggnewscale", "ggridges", 
+          "ggbeeswarm", "patchwork", "RColorBrewer", "ggrepel")
+
+# Check which packages are not installed
+missing_deps <- deps[!deps %in% installed.packages()[,"Package"]]
+
+# Install missing packages
+if(length(missing_deps) > 0) {
+  install.packages(missing_deps, repos='https://cloud.r-project.org/')
+}
+```
 
 #### 🖥 macOS users:
 
@@ -38,48 +69,34 @@ Most users can choose based on chip type:
 # Example: Apple Silicon (M1/M2/M3)
 install.packages(
   "~/Downloads/netify_0.1.3-macos-arm64.tgz", 
-  repos = NULL, type = "mac.binary", dependencies = TRUE)
+  repos = NULL, type = "mac.binary")
 
 # Example: Intel Mac
 install.packages(
   "~/Downloads/netify_0.1.3-macos-intel.tgz", 
-  repos = NULL, type = "mac.binary", dependencies = TRUE)
+  repos = NULL, type = "mac.binary")
 ```
 
 #### 🪟 Windows users:
 
-Download the `.zip` file named `netify_0.1.3-windows.zip` (if available) and install:
+Download the `.zip` file named `netify_0.1.3-windows.zip` and install:
 
 ```r
 install.packages(
   "C:/path/to/netify_0.1.3-windows.zip", 
-  repos = NULL, dependencies = TRUE)
+  repos = NULL)
 ```
 
 Be sure to replace the file path with where you saved the download.
 
 #### 🐧 Linux users:
 
-You can use the precompiled `.tgz` file, or install from source (see Option 2). Example:
+You can use the precompiled `.tgz` file, or install from source (see Option 1). Example:
 
 ```r
 install.packages(
   "~/Downloads/netify_0.1.3-linux.tgz", 
-  repos = NULL, type = "source", dependencies = TRUE)
-```
-
-### 🔧 Option 2: Install from GitHub (requires build tools)
-
-> ⚠️ Requires R build tools:
->
-> * macOS: Xcode Command Line Tools
-> * Windows: Rtools
-> * Linux: build-essential and related packages
-
-```r
-# Install from GitHub
-# install.packages("devtools")
-devtools::install_github("netify-dev/netify", dependencies = TRUE)
+  repos = NULL, type = "source")
 ```
 
 ## Quick Start
