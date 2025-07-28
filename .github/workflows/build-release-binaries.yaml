@@ -46,7 +46,7 @@ jobs:
         run: |
           pkg_file=$(ls -1tr *.tar.gz | tail -n 1)
           R CMD INSTALL --build "$pkg_file"
-
+          
           platform=${{ matrix.label }}
           for f in *.tgz *.zip *.tar.gz *.tar.bz2; do
             if [ -f "$f" ]; then
@@ -84,6 +84,11 @@ jobs:
         with:
           path: artifacts
 
+      - name: Move artifacts to root of artifacts directory
+        run: |
+          find artifacts -type f \( -name "*.zip" -o -name "*.tgz" -o -name "*.tar.gz" \) -exec mv {} artifacts/ \;
+        shell: bash
+
       - name: Extract version from DESCRIPTION
         id: version
         run: |
@@ -98,8 +103,8 @@ jobs:
           tag_name: "v${{ steps.version.outputs.version }}"
           generate_release_notes: true
           files: |
-            artifacts/**/*.tgz
-            artifacts/**/*.zip
-            artifacts/**/*-*.tar.gz
+            artifacts/*.tgz
+            artifacts/*.zip
+            artifacts/*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
