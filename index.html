@@ -70,7 +70,23 @@
 </h2>
 <p>You have two options for installing <code>netify</code>.</p>
 <div class="section level3">
-<h3 id="id_-option-1-pre-built-binaries-no-compilation-needed">🛠 Option 1: Pre-built binaries (no compilation needed)<a class="anchor" aria-label="anchor" href="#id_-option-1-pre-built-binaries-no-compilation-needed"></a>
+<h3 id="id_-option-1-install-from-github-requires-build-tools">🔧 Option 1: Install from GitHub (requires build tools)<a class="anchor" aria-label="anchor" href="#id_-option-1-install-from-github-requires-build-tools"></a>
+</h3>
+<blockquote>
+<p>⚠️ Requires R build tools:</p>
+<ul>
+<li>macOS: Xcode Command Line Tools</li>
+<li>Windows: Rtools</li>
+<li>Linux: build-essential and related packages</li>
+</ul>
+</blockquote>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Install from GitHub</span></span>
+<span><span class="co"># install.packages("devtools")</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"netify-dev/netify"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_-option-2-pre-built-binaries-no-compilation-needed">🛠 Option 2: Pre-built binaries (no compilation needed)<a class="anchor" aria-label="anchor" href="#id_-option-2-pre-built-binaries-no-compilation-needed"></a>
 </h3>
 <p>If you’re on <strong>macOS</strong> or <strong>Windows</strong> and want to avoid installing developer tools (like compilers, Xcode, or Rtools), you can use our pre-built binaries from the <a href="https://github.com/netify-dev/netify/releases" class="external-link">Releases page</a>:</p>
 <div class="section level4">
@@ -80,8 +96,25 @@
 <li>Go to: <a href="https://github.com/netify-dev/netify/releases" class="external-link">https://github.com/netify-dev/netify/releases</a>
 </li>
 <li>Click on the latest release (e.g., <strong>v0.1.3</strong>)</li>
-<li>Download the file that matches your system:</li>
+<li>Download the file that matches your system</li>
 </ol>
+</div>
+<div class="section level4">
+<h4 id="id_-first-install-dependencies-if-needed">📦 First, install dependencies (if needed):<a class="anchor" aria-label="anchor" href="#id_-first-install-dependencies-if-needed"></a>
+</h4>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Install required packages if you don't already have them</span></span>
+<span><span class="va">deps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Rcpp"</span>, <span class="st">"stats"</span>, <span class="st">"rlang"</span>, <span class="st">"cli"</span>, <span class="st">"checkmate"</span>, <span class="st">"igraph"</span>, </span>
+<span>          <span class="st">"ggplot2"</span>, <span class="st">"scales"</span>, <span class="st">"ggnewscale"</span>, <span class="st">"ggridges"</span>, </span>
+<span>          <span class="st">"ggbeeswarm"</span>, <span class="st">"patchwork"</span>, <span class="st">"RColorBrewer"</span>, <span class="st">"ggrepel"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Check which packages are not installed</span></span>
+<span><span class="va">missing_deps</span> <span class="op">&lt;-</span> <span class="va">deps</span><span class="op">[</span><span class="op">!</span><span class="va">deps</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span>,<span class="st">"Package"</span><span class="op">]</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Install missing packages</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">missing_deps</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="va">missing_deps</span>, repos<span class="op">=</span><span class="st">'https://cloud.r-project.org/'</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="id_-macos-users">🖥 macOS users:<a class="anchor" aria-label="anchor" href="#id_-macos-users"></a>
@@ -112,59 +145,43 @@
 </tbody>
 </table>
 <p>Most users can choose based on chip type:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example: Apple Silicon (M1/M2/M3)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
 <span>  <span class="st">"~/Downloads/netify_0.1.3-macos-arm64.tgz"</span>, </span>
-<span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"mac.binary"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"mac.binary"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Example: Intel Mac</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
 <span>  <span class="st">"~/Downloads/netify_0.1.3-macos-intel.tgz"</span>, </span>
-<span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"mac.binary"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"mac.binary"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="id_-windows-users">🪟 Windows users:<a class="anchor" aria-label="anchor" href="#id_-windows-users"></a>
 </h4>
-<p>Download the <code>.zip</code> file named <code>netify_0.1.3-windows.zip</code> (if available) and install:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<p>Download the <code>.zip</code> file named <code>netify_0.1.3-windows.zip</code> and install:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
 <span>  <span class="st">"C:/path/to/netify_0.1.3-windows.zip"</span>, </span>
-<span>  repos <span class="op">=</span> <span class="cn">NULL</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span>  repos <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
 <p>Be sure to replace the file path with where you saved the download.</p>
 </div>
 <div class="section level4">
 <h4 id="id_-linux-users">🐧 Linux users:<a class="anchor" aria-label="anchor" href="#id_-linux-users"></a>
 </h4>
-<p>You can use the precompiled <code>.tgz</code> file, or install from source (see Option 2). Example:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<p>You can use the precompiled <code>.tgz</code> file, or install from source (see Option 1). Example:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
 <span>  <span class="st">"~/Downloads/netify_0.1.3-linux.tgz"</span>, </span>
-<span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"source"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"source"</span><span class="op">)</span></span></code></pre></div>
 </div>
-</div>
-<div class="section level3">
-<h3 id="id_-option-2-install-from-github-requires-build-tools">🔧 Option 2: Install from GitHub (requires build tools)<a class="anchor" aria-label="anchor" href="#id_-option-2-install-from-github-requires-build-tools"></a>
-</h3>
-<blockquote>
-<p>⚠️ Requires R build tools:</p>
-<ul>
-<li>macOS: Xcode Command Line Tools</li>
-<li>Windows: Rtools</li>
-<li>Linux: build-essential and related packages</li>
-</ul>
-</blockquote>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Install from GitHub</span></span>
-<span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"netify-dev/netify"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
 <p>Transform your relational data into a network object with just one function:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/netify/">netify</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span>
 <span></span>
@@ -195,7 +212,7 @@ matlConf 0.113    0 1.471 0.594 0.387
 <div class="section level3">
 <h3 id="quick-visualization">Quick visualization<a class="anchor" aria-label="anchor" href="#quick-visualization"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot the network</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">icews_conflict</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/icews_plot.png"></p>
@@ -204,43 +221,43 @@ matlConf 0.113    0 1.471 0.594 0.387
 <h3 id="more-involved-visualization">More involved visualization<a class="anchor" aria-label="anchor" href="#more-involved-visualization"></a>
 </h3>
 <p>netify’s plotting system is highly customizable. Here’s how you can create a more sophisticated visualization:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Create democracy indicator</span></span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>icews<span class="sc">$</span>i_democ <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="fu">ifelse</span>(icews<span class="sc">$</span>i_polity2 <span class="sc">&gt;=</span> <span class="dv">6</span>, <span class="dv">1</span>, <span class="dv">0</span>), </span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), </span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Non-democracy"</span>, <span class="st">"Democracy"</span>)</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>)</span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co"># Add it to the network</span></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>icews_conflict <span class="ot">&lt;-</span> <span class="fu">add_node_vars</span>(</span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  icews_conflict, icews,</span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  <span class="at">actor =</span> <span class="st">'i'</span>, <span class="at">time =</span> <span class="st">'year'</span>,</span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  <span class="at">node_vars =</span> <span class="st">'i_democ'</span></span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>)</span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a></span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co"># plot(</span></span>
-<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>  icews_conflict, </span>
-<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>  <span class="co"># Log transform weights</span></span>
-<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>  mutate_weight <span class="ot">=</span> log1p, </span>
-<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>  <span class="co"># Map node attributes to aesthetics</span></span>
-<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>  node_color_by <span class="ot">=</span> <span class="st">'i_region'</span>, </span>
-<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>  node_size_by <span class="ot">=</span> <span class="st">'i_log_gdp'</span>, </span>
-<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>  node_shape_by <span class="ot">=</span> <span class="st">'i_democ'</span>,</span>
-<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a>  <span class="co"># set global node alpha</span></span>
-<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a>  node_alpha <span class="ot">=</span> .<span class="dv">7</span>,</span>
-<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a>  <span class="co"># set global edge alpha</span></span>
-<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a>  edge_linewidth <span class="ot">=</span> .<span class="dv">1</span>,</span>
-<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a>  <span class="co"># Filter data</span></span>
-<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a>  node_filter <span class="ot">=</span> <span class="er">~</span> <span class="sc">!</span><span class="fu">is.na</span>(i_democ),</span>
-<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a>  time_filter <span class="ot">=</span> <span class="fu">c</span>(<span class="st">'2002'</span>, <span class="st">'2004'</span>, <span class="st">'2008'</span>, <span class="st">'2014'</span>),</span>
-<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a>  <span class="co"># clean up plot labels</span></span>
-<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a>  edge_alpha_label <span class="ot">=</span> <span class="st">'Log(Matl.</span><span class="sc">\n</span><span class="st"> Conf.)'</span>,</span>
-<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a>  node_color_label <span class="ot">=</span> <span class="st">''</span>,</span>
-<span id="cb8-33"><a href="#cb8-33" tabindex="-1"></a>  node_size_label <span class="ot">=</span> <span class="st">'Log(GDP)'</span>,</span>
-<span id="cb8-34"><a href="#cb8-34" tabindex="-1"></a>  node_shape_label <span class="ot">=</span> <span class="st">''</span></span>
-<span id="cb8-35"><a href="#cb8-35" tabindex="-1"></a>  <span class="er">)</span> <span class="sc">+</span></span>
-<span id="cb8-36"><a href="#cb8-36" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">'right'</span>) <span class="sc">+</span> </span>
-<span id="cb8-37"><a href="#cb8-37" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">'Set1'</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Create democracy indicator</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>icews<span class="sc">$</span>i_democ <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="fu">ifelse</span>(icews<span class="sc">$</span>i_polity2 <span class="sc">&gt;=</span> <span class="dv">6</span>, <span class="dv">1</span>, <span class="dv">0</span>), </span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), </span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Non-democracy"</span>, <span class="st">"Democracy"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co"># Add it to the network</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>icews_conflict <span class="ot">&lt;-</span> <span class="fu">add_node_vars</span>(</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  icews_conflict, icews,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="at">actor =</span> <span class="st">'i'</span>, <span class="at">time =</span> <span class="st">'year'</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="at">node_vars =</span> <span class="st">'i_democ'</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>)</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co"># plot(</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>  icews_conflict, </span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>  <span class="co"># Log transform weights</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>  mutate_weight <span class="ot">=</span> log1p, </span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a>  <span class="co"># Map node attributes to aesthetics</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>  node_color_by <span class="ot">=</span> <span class="st">'i_region'</span>, </span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>  node_size_by <span class="ot">=</span> <span class="st">'i_log_gdp'</span>, </span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a>  node_shape_by <span class="ot">=</span> <span class="st">'i_democ'</span>,</span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a>  <span class="co"># set global node alpha</span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a>  node_alpha <span class="ot">=</span> .<span class="dv">7</span>,</span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a>  <span class="co"># set global edge alpha</span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a>  edge_linewidth <span class="ot">=</span> .<span class="dv">1</span>,</span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a>  <span class="co"># Filter data</span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a>  node_filter <span class="ot">=</span> <span class="er">~</span> <span class="sc">!</span><span class="fu">is.na</span>(i_democ),</span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a>  time_filter <span class="ot">=</span> <span class="fu">c</span>(<span class="st">'2002'</span>, <span class="st">'2004'</span>, <span class="st">'2008'</span>, <span class="st">'2014'</span>),</span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a>  <span class="co"># clean up plot labels</span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a>  edge_alpha_label <span class="ot">=</span> <span class="st">'Log(Matl.</span><span class="sc">\n</span><span class="st"> Conf.)'</span>,</span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a>  node_color_label <span class="ot">=</span> <span class="st">''</span>,</span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a>  node_size_label <span class="ot">=</span> <span class="st">'Log(GDP)'</span>,</span>
+<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a>  node_shape_label <span class="ot">=</span> <span class="st">''</span></span>
+<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a>  <span class="er">)</span> <span class="sc">+</span></span>
+<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">'right'</span>) <span class="sc">+</span> </span>
+<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">'Set1'</span>)</span></code></pre></div>
 <p><img src="reference/figures/icews_advanced_plot.png"></p>
 </div>
 </div>
@@ -250,7 +267,7 @@ matlConf 0.113    0 1.471 0.594 0.387
 <div class="section level3">
 <h3 id="get-network-statistics">Get network statistics<a class="anchor" aria-label="anchor" href="#get-network-statistics"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">icews_conflict</span><span class="op">)</span></span></code></pre></div>
 <p>This returns a data frame with network statistics for each time period:</p>
 <table class="table">
@@ -535,7 +552,7 @@ matlConf 0.113    0 1.471 0.594 0.387
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>If you use netify in your research, please cite:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"netify"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
