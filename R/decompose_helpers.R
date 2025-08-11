@@ -200,13 +200,13 @@ finalize_edge_data <- function(edge_data, netify_type) {
 #' Process nodal data from netify object
 #' @keywords internal
 #' @noRd
-process_nodal_data <- function(obj_attrs, netify_type) {
+process_nodal_data <- function(obj_attrs, netify_type, time_labels = NULL) {
     # check if nodal data exists in obj_attrs
     # if not, try to build it from actor_pds
     if (!is.null(obj_attrs$nodal_data)) {
         nodal_data <- obj_attrs$nodal_data
     } else if (!is.null(obj_attrs$actor_pds)) {
-        nodal_data <- actor_pds_to_frame(obj_attrs$actor_pds)
+        nodal_data <- actor_pds_to_frame(obj_attrs$actor_pds, time_labels)
     } else {
         # fallback to an empty data frame if no data is found
         nodal_data <- data.frame(

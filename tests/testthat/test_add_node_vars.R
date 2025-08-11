@@ -109,6 +109,8 @@ test_that(
         # extract nodal information and order that matches the actor info in result
         node_result <- node_data[which(node_data$actor %in% actors), ]
         node_result <- node_result[which(node_result$time %in% 1:3), ]
+        # convert time to character
+        node_result$time <- as.character(node_result$time)
 
         # convert into netify object and add attributes
         class(result) <- "netify"

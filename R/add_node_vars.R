@@ -173,7 +173,14 @@ add_node_vars <- function(
     # the time column because in the time NULL already
     # present nodal data case there is no time column
     if (is.null(attr(netlet, "nodal_data"))) {
-        frame <- actor_pds_to_frame(attributes(netlet)$actor_pds)
+        # For longitudinal data, pass the time labels from the netlet names
+        netlet_type <- attributes(netlet)$netify_type
+        if (netlet_type != "cross_sec") {
+            time_labels <- names(netlet)
+        } else {
+            time_labels <- NULL
+        }
+        frame <- actor_pds_to_frame(attributes(netlet)$actor_pds, time_labels)
         if (is.null(time)) {
             frame <- frame[, -2, drop = FALSE]
         }

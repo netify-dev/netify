@@ -124,7 +124,7 @@ get_actor_time_info <- function(
 #' @keywords internal
 #' @noRd
 
-actor_pds_to_frame <- function(netlet_actor_pds) {
+actor_pds_to_frame <- function(netlet_actor_pds, time_labels = NULL) {
     # iterate through actor rows
     frame <- lapply(1:nrow(netlet_actor_pds), function(ii) {
         # get time range
@@ -135,6 +135,31 @@ actor_pds_to_frame <- function(netlet_actor_pds) {
         iiFrame <- data.frame(iiFrame, stringsAsFactors = FALSE)
         names(iiFrame) <- c("actor", "time")
         iiFrame$actor <- char(iiFrame$actor)
+        
+        # Convert numeric time to labels if provided
+        if (!is.null(time_labels)) {
+            # For numeric time data, actor_pds might have actual year values (2000-2015)
+            # but we need to map them to the time_labels which are ordered
+            # Check if timeRange values are indices or actual time values
+            if (max(timeRange) > length(time_labels)) {
+                # timeRange contains actual time values, need to map to time_labels
+                # Find which time_labels match our time values
+                time_label_nums <- as.numeric(time_labels)
+                if (!any(is.na(time_label_nums))) {
+                    # time_labels are numeric strings like "2000", "2001"
+                    # Map timeRange values to corresponding time_labels
+                    iiFrame$time <- as.character(timeRange)
+                } else {
+                    # time_labels are not numeric, use them as is with indices
+                    # This shouldn't happen in practice
+                    iiFrame$time <- as.character(time_labels[match(timeRange, sort(unique(c(netlet_actor_pds$min_time, netlet_actor_pds$max_time))))])
+                }
+            } else {
+                # timeRange contains indices (1-based), use directly
+                iiFrame$time <- as.character(time_labels[iiFrame$time])
+            }
+        }
+        
         return(iiFrame)
     })
 
