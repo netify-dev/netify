@@ -4,10 +4,23 @@
 \alias{plot.netify}
 \title{Plotting method for netify objects}
 \usage{
-\method{plot}{netify}(x, ...)
+\method{plot}{netify}(x, auto_format = TRUE, ...)
 }
 \arguments{
 \item{x}{A 'netify' object containing network data to visualize.}
+
+\item{auto_format}{Logical. If TRUE (default), automatically adjusts plot
+parameters based on network characteristics such as size, density, and
+structure. This includes "intelligent" defaults for:
+\itemize{
+\item Node size (smaller for larger networks)
+\item Edge transparency (lower for denser networks)
+\item Text labels (enabled for small networks)
+\item Curved edges (for small dense networks)
+\item Isolate removal (for large networks)
+}
+Set to FALSE to disable all automatic formatting. Individual parameters
+can still be overridden even when auto_format is TRUE.}
 
 \item{...}{Additional arguments controlling plot appearance:}
 }
@@ -296,8 +309,11 @@ net_10 <- netify(
     weight = "verbCoop"
 )
 
-# Simple plot
+# Simple plot with auto-formatting (default)
 plot(net_10)
+
+# Plot without auto-formatting for full control
+plot(net_10, auto_format = FALSE)
 
 # add nodal stats to netlet
 net_10 <- add_node_vars(

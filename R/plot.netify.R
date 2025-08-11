@@ -5,6 +5,18 @@
 #' mapping network attributes to visual properties.
 #'
 #' @param x A 'netify' object containing network data to visualize.
+#' @param auto_format Logical. If TRUE (default), automatically adjusts plot
+#'   parameters based on network characteristics such as size, density, and
+#'   structure. This includes "intelligent" defaults for:
+#'   \itemize{
+#'     \item Node size (smaller for larger networks)
+#'     \item Edge transparency (lower for denser networks)
+#'     \item Text labels (enabled for small networks)
+#'     \item Curved edges (for small dense networks)
+#'     \item Isolate removal (for large networks)
+#'   }
+#'   Set to FALSE to disable all automatic formatting. Individual parameters
+#'   can still be overridden even when auto_format is TRUE.
 #' @param ... Additional arguments controlling plot appearance:
 #'
 #' @section Layout Parameters:
@@ -268,8 +280,11 @@
 #'     weight = "verbCoop"
 #' )
 #'
-#' # Simple plot
+#' # Simple plot with auto-formatting (default)
 #' plot(net_10)
+#' 
+#' # Plot without auto-formatting for full control
+#' plot(net_10, auto_format = FALSE)
 #'
 #' # add nodal stats to netlet
 #' net_10 <- add_node_vars(
@@ -378,7 +393,7 @@
 #' @export plot.netify
 #' @export
 
-plot.netify <- function(x, ...) {
+plot.netify <- function(x, auto_format = TRUE, ...) {
     # check if the input is a netify object
     netify_check(x)
 
@@ -440,6 +455,9 @@ plot.netify <- function(x, ...) {
     # Remove filter args before passing to net_plot_data
     plot_args$node_filter <- NULL
     plot_args$edge_filter <- NULL
+    
+    # Pass auto_format setting to net_plot_data
+    plot_args$auto_format <- auto_format
 
     # get plot data and parameters for ggplot
     net_plot_info <- net_plot_data(x, plot_args)

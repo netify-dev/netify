@@ -26,7 +26,7 @@ validate_plot_params <- function(plot_args, ...) {
         "layout", "point_layout", "static_actor_positions", "which_static", "seed",
         "min_radius", "max_radius",
         # Display control
-        "add_edges", "add_points", "add_text", "add_text_repel", "add_label", 
+        "auto_format", "add_edges", "add_points", "add_text", "add_text_repel", "add_label", 
         "add_label_repel", "remove_isolates", "curve_edges", "use_theme_netify",
         "facet_type", "facet_ncol", "rescale_edge_weights", "check_overlap",
         "return_components", "style", "palette", "xlim", "ylim",
