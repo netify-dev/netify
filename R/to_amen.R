@@ -288,7 +288,8 @@ netify_to_amen <- function(netlet, lame = FALSE) {
             Xcol_list <- NULL
             if (nodal_data_exists) {
                 nodal_df <- attr(netlet, "nodal_data")
-                time_periods <- unique(nodal_df$time)
+                # Use time periods from the network data, not from nodal_data
+                time_periods <- names(Y_list)
 
                 Xrow_list <- lapply(time_periods, function(t) {
                     subset_df <- nodal_df[nodal_df$time == t, ]
