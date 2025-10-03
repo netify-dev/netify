@@ -198,7 +198,7 @@ pivot_dyad_to_network <- function(
 #' Detect symmetry of a dyadic variable
 #'
 #' Internal function to detect whether a dyadic variable is symmetric
-#' by checking if matrix[i,j] equals matrix[j,i] for all elements.
+#' by checking if matrix\[i,j\] equals matrix\[j,i\] for all elements.
 #'
 #' @param netlet A netify object
 #' @param dyad_var Name of the dyadic variable to check

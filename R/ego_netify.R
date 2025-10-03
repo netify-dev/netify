@@ -209,6 +209,45 @@ ego_netify <- function(
     ego_nets <- get_ngbd_net_for_ego(
         raw_net, ego, threshold, include_ego, ngbd_direction
     )
+
+    # Check if ego has no neighbors in any time period and provide informative message
+    if (longitudinal) {
+        # For longitudinal networks, check each time period
+        isolated_periods <- sapply(ego_nets, function(net) {
+            n_actors <- ifelse(is.null(dim(net)), 1, nrow(net))
+            return(n_actors == 1 && include_ego)
+        })
+
+        if (any(isolated_periods)) {
+            time_labels <- names(raw_net)[isolated_periods]
+            if (length(time_labels) == length(raw_net)) {
+                cli::cli_alert_info(
+                    paste0("Ego '", ego, "' has no neighbors meeting the threshold in any time period.")
+                )
+            } else {
+                cli::cli_alert_info(
+                    paste0("Ego '", ego, "' has no neighbors meeting the threshold in ",
+                           length(time_labels), " time period(s): ",
+                           paste(time_labels, collapse = ", "))
+                )
+            }
+        }
+    } else {
+        # For cross-sectional networks
+        n_actors <- ifelse(is.null(dim(ego_nets[[1]])), 1, nrow(ego_nets[[1]]))
+        if (n_actors == 1 && include_ego) {
+            cli::cli_alert_info(
+                paste0("Ego '", ego, "' has no neighbors meeting the threshold (",
+                       round(threshold[1], 3), "). ",
+                       "The ego network contains only the ego node.")
+            )
+        } else if (n_actors == 0) {
+            cli::cli_alert_warning(
+                paste0("Ego '", ego, "' has no neighbors and ego was not included. ",
+                       "The resulting network is empty.")
+            )
+        }
+    }
     ######################
 
     ######################

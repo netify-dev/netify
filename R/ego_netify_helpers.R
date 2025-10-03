@@ -37,15 +37,16 @@ get_ngbd_net_for_ego <- function(
             ngbd_any <- c(ego, ngbd_any)
         }
 
-        # Construct ngbd net based on ngbd_direction
+        # construct ngbd net based on ngbd_direction
+        #use drop=FALSE to maintain matrix structure even for 1x1 matrices
         if (ngbd_direction == "out") {
-            ngbd_net <- net[ngbd_row, ngbd_row]
+            ngbd_net <- net[ngbd_row, ngbd_row, drop = FALSE]
         }
         if (ngbd_direction == "in") {
-            ngbd_net <- net[ngbd_col, ngbd_col]
+            ngbd_net <- net[ngbd_col, ngbd_col, drop = FALSE]
         }
         if (ngbd_direction == "any") {
-            ngbd_net <- net[ngbd_any, ngbd_any]
+            ngbd_net <- net[ngbd_any, ngbd_any, drop = FALSE]
         }
 
         return(ngbd_net)

@@ -176,9 +176,17 @@ print.netify <- function(x, ...) {
 
     # if longitudinal then avg across time
     summ_stats <- lapply(unique(summ_stats$layer), function(layer) {
-        slice <- summ_stats[summ_stats$layer == layer, to_keep]
-        names(slice) <- to_keep_clean
-        slice <- data.frame(t(colMeans(slice, na.rm = TRUE)))
+        slice <- summ_stats[summ_stats$layer == layer, to_keep, drop = FALSE]
+        # Handle case where slice might be a single row (no averaging needed)
+        if (nrow(slice) == 1) {
+            # Single row, just convert to proper format
+            slice <- data.frame(slice)
+            names(slice) <- to_keep_clean
+        } else {
+            # Multiple rows, compute means
+            slice <- data.frame(t(colMeans(slice, na.rm = TRUE)))
+            names(slice) <- to_keep_clean
+        }
         slice <- round(slice, 3)
         slice <- cbind(layer = layer, slice)
         return(slice)
