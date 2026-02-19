@@ -190,6 +190,15 @@ batch_align_matrices_cpp <- function(nets_list, all_actors_arg = NULL, include_d
     .Call(`_netify_batch_align_matrices_cpp`, nets_list, all_actors_arg, include_diagonal)
 }
 
+#' Calculate Wasserstein-1 distance between two distributions
+#'
+#' @param x First vector of values
+#' @param y Second vector of values
+#' @return Wasserstein-1 distance between empirical distributions
+#' @author Shahryar Minhas
+#'
+#' @keywords internal
+#' @noRd
 calculate_wasserstein_cpp <- function(x, y) {
     .Call(`_netify_calculate_wasserstein_cpp`, x, y)
 }

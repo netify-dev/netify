@@ -288,9 +288,9 @@ subset_netify <- function(
         layer_idx <- match(layers, obj_attrs$layers)
 
         # update all layer-specific attributes at once
-        if (length(obj_attrs$weight) > 1) {
-            weight_vec <- strsplit(obj_attrs$weight, ", ")[[1]]
-            new_attrs$weight <- paste(weight_vec[layer_idx], collapse = ", ")
+        if (length(obj_attrs[["weight"]]) > 1) {
+            weight_vec <- strsplit(obj_attrs[["weight"]], ", ")[[1]]
+            new_attrs[["weight"]] <- paste(weight_vec[layer_idx], collapse = ", ")
         }
 
         if (length(obj_attrs$detail_weight) > 1) {

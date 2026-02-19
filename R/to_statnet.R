@@ -251,7 +251,7 @@ netify_net_to_statnet <- function(netlet) {
     bipartite_logical <- ifelse(attr(netlet, "mode") == "bipartite", TRUE, FALSE)
 
     # if weight is NULL then create logical to set value for ignore.eval
-    if (is.null(attr(netlet, "weight"))) {
+    if (is.null(attr(netlet, "weight", exact = TRUE))) {
         ignore_eval <- TRUE
     } else {
         ignore_eval <- FALSE
@@ -264,14 +264,14 @@ netify_net_to_statnet <- function(netlet) {
         directed = !attr(netlet, "symmetric"),
         loops = !attr(netlet, "diag_to_NA"),
         bipartite = bipartite_logical,
-        names.eval = attr(netlet, "weight"),
+        names.eval = attr(netlet, "weight", exact = TRUE),
         ignore.eval = ignore_eval
     )
 
     # set as network attribute as well if weight provided
-    if (!is.null(attr(netlet, "weight"))) {
+    if (!is.null(attr(netlet, "weight", exact = TRUE))) {
         network::set.network.attribute(
-            statnet_object, attr(netlet, "weight"),
+            statnet_object, attr(netlet, "weight", exact = TRUE),
             get_raw(netlet)
         )
     }

@@ -61,13 +61,13 @@ netify_edge <- function(comp) {
 #'
 #' @param object A netify_edge object created by \code{\link{netify_edge}}
 #' @param plot A ggplot object to which the edge layer will be added
-#' @param object_name The name of the object being added (used internally by ggplot2)
+#' @param ... Additional arguments passed by ggplot2 (used internally)
 #'
 #' @return A ggplot object with the edge layer added
 #'
 #' @method ggplot_add netify_edge
 #' @export
-ggplot_add.netify_edge <- function(object, plot, object_name) {
+ggplot_add.netify_edge <- function(object, plot, ...) {
     plot$layers <- append(plot$layers, object)
     plot
 }
@@ -134,13 +134,13 @@ netify_node <- function(comp) {
 #'
 #' @param object A netify_node object created by \code{\link{netify_node}}
 #' @param plot A ggplot object to which the node layer will be added
-#' @param object_name The name of the object being added (used internally by ggplot2)
+#' @param ... Additional arguments passed by ggplot2 (used internally)
 #'
 #' @return A ggplot object with the node layer added
 #'
 #' @method ggplot_add netify_node
 #' @export
-ggplot_add.netify_node <- function(object, plot, object_name) {
+ggplot_add.netify_node <- function(object, plot, ...) {
     plot$layers <- append(plot$layers, object)
     plot
 }
@@ -205,13 +205,13 @@ netify_text <- function(comp) {
 #'
 #' @param object A netify_text object created by \code{\link{netify_text}}
 #' @param plot A ggplot object to which the text layer will be added
-#' @param object_name The name of the object being added (used internally by ggplot2)
+#' @param ... Additional arguments passed by ggplot2 (used internally)
 #'
 #' @return A ggplot object with the text layer added
 #'
 #' @method ggplot_add netify_text
 #' @export
-ggplot_add.netify_text <- function(object, plot, object_name) {
+ggplot_add.netify_text <- function(object, plot, ...) {
     plot$layers <- append(plot$layers, object)
     plot
 }
@@ -276,13 +276,13 @@ netify_label <- function(comp) {
 #'
 #' @param object A netify_label object created by \code{\link{netify_label}}
 #' @param plot A ggplot object to which the label layer will be added
-#' @param object_name The name of the object being added (used internally by ggplot2)
+#' @param ... Additional arguments passed by ggplot2 (used internally)
 #'
 #' @return A ggplot object with the label layer added
 #'
 #' @method ggplot_add netify_label
 #' @export
-ggplot_add.netify_label <- function(object, plot, object_name) {
+ggplot_add.netify_label <- function(object, plot, ...) {
     plot$layers <- append(plot$layers, object)
     plot
 }
@@ -347,13 +347,13 @@ netify_text_repel <- function(comp) {
 #'
 #' @param object A netify_text_repel object created by \code{\link{netify_text_repel}}
 #' @param plot A ggplot object to which the text_repel layer will be added
-#' @param object_name The name of the object being added (used internally by ggplot2)
+#' @param ... Additional arguments passed by ggplot2 (used internally)
 #'
 #' @return A ggplot object with the text_repel layer added
 #'
 #' @method ggplot_add netify_text_repel
 #' @export
-ggplot_add.netify_text_repel <- function(object, plot, object_name) {
+ggplot_add.netify_text_repel <- function(object, plot, ...) {
     plot$layers <- append(plot$layers, object)
     plot
 }
@@ -418,13 +418,13 @@ netify_label_repel <- function(comp) {
 #'
 #' @param object A netify_label_repel object created by \code{\link{netify_label_repel}}
 #' @param plot A ggplot object to which the label_repel layer will be added
-#' @param object_name The name of the object being added (used internally by ggplot2)
+#' @param ... Additional arguments passed by ggplot2 (used internally)
 #'
 #' @return A ggplot object with the label_repel layer added
 #'
 #' @method ggplot_add netify_label_repel
 #' @export
-ggplot_add.netify_label_repel <- function(object, plot, object_name) {
+ggplot_add.netify_label_repel <- function(object, plot, ...) {
     plot$layers <- append(plot$layers, object)
     plot
 }
@@ -470,13 +470,13 @@ reset_scales <- function() {
 #'
 #' @param object A netify_scale_reset object created by \code{\link{reset_scales}}
 #' @param plot A ggplot object to which scale resets will be added
-#' @param object_name The name of the object being added (used internally by ggplot2)
+#' @param ... Additional arguments passed by ggplot2 (used internally)
 #'
 #' @return A ggplot object with scale resets applied
 #'
 #' @method ggplot_add netify_scale_reset
 #' @export
-ggplot_add.netify_scale_reset <- function(object, plot, object_name) {
+ggplot_add.netify_scale_reset <- function(object, plot, ...) {
     plot <- plot + ggnewscale::new_scale_color()
     plot <- plot + ggnewscale::new_scale_fill()
     plot <- plot + ggnewscale::new_scale("alpha")
@@ -700,13 +700,13 @@ netify_scale_labels <- function(...) {
 #'
 #' @param object A netify_labels object created by \code{\link{netify_scale_labels}}
 #' @param plot A ggplot object to which the labels will be added
-#' @param object_name The name of the object being added (used internally by ggplot2)
+#' @param ... Additional arguments passed by ggplot2 (used internally)
 #'
 #' @return A ggplot object with updated scale labels
 #'
 #' @method ggplot_add netify_labels
 #' @export
-ggplot_add.netify_labels <- function(object, plot, object_name) {
+ggplot_add.netify_labels <- function(object, plot, ...) {
     # extract the netify plot data if available
     if (!is.null(plot$plot_env$last_netify_components)) {
         components <- plot$plot_env$last_netify_components

@@ -132,7 +132,7 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
     # get attrs
     obj_attrs <- attributes(netlet)
     netify_type <- obj_attrs$netify_type
-    weight_attr <- obj_attrs$weight
+    weight_attr <- obj_attrs[["weight"]]
     ego_netlet <- obj_attrs$ego_netlet
 
     # get msrs

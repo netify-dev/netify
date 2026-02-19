@@ -11,3 +11,9 @@ articles:
     - ego_networks
     - manual_plotting
     - resources
+  - title: "Advanced Topics"
+    navbar: ~
+    contents:
+    - multilayer_networks
+    - tracking_changes
+    - attribute_analysis

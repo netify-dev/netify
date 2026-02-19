@@ -63,7 +63,9 @@ test_that("netify_to_igraph: unweighted cross-sec, symmetric", {
     adjm[adjm < 0] <- 0
     diag(adjm) <- NA
     rownames(adjm) <- colnames(adjm) <- letters[1:nrow(adjm)]
-    g1 <- igraph::graph_from_adjacency_matrix(adjm, diag = FALSE)
+    adjm_clean <- adjm
+    adjm_clean[is.na(adjm_clean)] <- 0
+    g1 <- igraph::graph_from_adjacency_matrix(adjm_clean, diag = FALSE)
 
     # convert to dyadic so we can pass into netify
     df <- melt_matrix_sparse(adjm, remove_zeros = FALSE, remove_diagonal = TRUE)
@@ -90,7 +92,9 @@ test_that("netify_to_igraph: weighted cross-sec, symmetric", {
     adjm <- (adjm + t(adjm)) / 2
     diag(adjm) <- NA
     rownames(adjm) <- colnames(adjm) <- letters[1:nrow(adjm)]
-    g1 <- igraph::graph_from_adjacency_matrix(adjm, weighted = TRUE, diag = FALSE)
+    adjm_clean <- adjm
+    adjm_clean[is.na(adjm_clean)] <- 0
+    g1 <- igraph::graph_from_adjacency_matrix(adjm_clean, weighted = TRUE, diag = FALSE)
 
     # convert to dyadic so we can pass into netify
     df <- melt_matrix_sparse(adjm, remove_zeros = FALSE, remove_diagonal = TRUE)

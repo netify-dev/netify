@@ -495,7 +495,7 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
         # Apply the filter to edge data
         if (nrow(net_dfs$edge_data) > 0) {
             # Get weight column name if available
-            weight_col <- attr(x, "weight")
+            weight_col <- attr(x, "weight", exact = TRUE)
 
             # Apply the filter using the helper function
             filter_result <- apply_edge_filter(net_dfs$edge_data, edge_filter, weight_col)
@@ -536,7 +536,7 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
     # Handle weight transformation
     if (!is.null(plot_args$mutate_weight)) {
         # Apply transformation to edge data
-        weight_col <- attr(x, "weight")
+        weight_col <- attr(x, "weight", exact = TRUE)
         if (!is.null(weight_col) && weight_col %in% names(net_dfs$edge_data)) {
             transform_fn <- match.fun(plot_args$mutate_weight)
             net_dfs$edge_data[[weight_col]] <- transform_fn(net_dfs$edge_data[[weight_col]])

@@ -4,14 +4,14 @@
 \alias{ggplot_add.netify_label_repel}
 \title{Add netify_label_repel to ggplot}
 \usage{
-\method{ggplot_add}{netify_label_repel}(object, plot, object_name)
+\method{ggplot_add}{netify_label_repel}(object, plot, ...)
 }
 \arguments{
 \item{object}{A netify_label_repel object created by \code{\link{netify_label_repel}}}
 
 \item{plot}{A ggplot object to which the label_repel layer will be added}
 
-\item{object_name}{The name of the object being added (used internally by ggplot2)}
+\item{...}{Additional arguments passed by ggplot2 (used internally)}
 }
 \value{
 A ggplot object with the label_repel layer added

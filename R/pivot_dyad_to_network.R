@@ -133,8 +133,8 @@ pivot_dyad_to_network <- function(
 
     # determine the name for the network variable if needed
     if (make_network_dyad_var && is.null(network_var_name)) {
-        if (!is.null(netlet_attrs$weight)) {
-            network_var_name <- netlet_attrs$weight
+        if (!is.null(netlet_attrs[["weight"]])) {
+            network_var_name <- netlet_attrs[["weight"]]
         } else {
             network_var_name <- "old_network"
         }

@@ -175,11 +175,12 @@ mutate_weights <- function(
     keep_original = TRUE) {
     # check if the input is a valid netify object
     netify_check(netlet)
-    weight_var <- attr(netlet, "weight")
+    weight_var <- attr(netlet, "weight", exact = TRUE)
 
-    # ensure the netify object has a weight variable
+    # if binary network (no weight var), assign a default weight name
     if (is.null(weight_var)) {
-        cli::cli_abort("no weight variable found in netify object")
+        weight_var <- "edge_value"
+        attr(netlet, "weight") <- weight_var
     }
 
     # get the raw network data
@@ -328,7 +329,7 @@ mutate_weights <- function(
     } else {
         # no new name provided, but still update detail_weight if binary status changed
         if (attr(netlet, "weight_binary") != original_weight_binary) {
-            current_weight <- attr(netlet, "weight") %||% "weight"
+            current_weight <- attr(netlet, "weight", exact = TRUE) %||% "weight"
             if (attr(netlet, "weight_binary")) {
                 attr(netlet, "detail_weight") <- paste0(current_weight, " (binarized)")
                 cli::cli_alert_info("network has been binarized through transformation")

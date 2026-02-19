@@ -4,14 +4,14 @@
 \alias{ggplot_add.netify_scale_reset}
 \title{Add scale resets to ggplot}
 \usage{
-\method{ggplot_add}{netify_scale_reset}(object, plot, object_name)
+\method{ggplot_add}{netify_scale_reset}(object, plot, ...)
 }
 \arguments{
 \item{object}{A netify_scale_reset object created by \code{\link{reset_scales}}}
 
 \item{plot}{A ggplot object to which scale resets will be added}
 
-\item{object_name}{The name of the object being added (used internally by ggplot2)}
+\item{...}{Additional arguments passed by ggplot2 (used internally)}
 }
 \value{
 A ggplot object with scale resets applied

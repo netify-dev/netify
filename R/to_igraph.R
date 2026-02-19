@@ -363,7 +363,7 @@ netify_net_to_igraph <- function(netlet) {
     bipartite_logical <- ifelse(attr(netlet, "mode") == "bipartite", TRUE, FALSE)
 
     # weight logical
-    if (!is.null(attr(netlet, "weight"))) {
+    if (!is.null(attr(netlet, "weight", exact = TRUE))) {
         weight_logical <- TRUE
     } else {
         weight_logical <- NULL
@@ -371,6 +371,9 @@ netify_net_to_igraph <- function(netlet) {
 
     # strip netify attribs away
     raw_net <- get_raw(netlet)
+
+    # replace NAs with 0 for igraph compatibility
+    raw_net[is.na(raw_net)] <- 0
 
     # convert to igraph_object
     if (!bipartite_logical) {
@@ -396,7 +399,7 @@ netify_net_to_igraph <- function(netlet) {
     }
 
     # add dv as edge attribute as well
-    if (!is.null(attr(netlet, "weight"))) {
+    if (!is.null(attr(netlet, "weight", exact = TRUE))) {
         # match edge positions between raw data and igraph
         ePosIgraph <- adj_igraph_positions(raw_net, igraph_object)
 
@@ -404,7 +407,7 @@ netify_net_to_igraph <- function(netlet) {
         # and add edge attr
         igraph_object <- igraph::set_edge_attr(
             igraph_object,
-            name = attr(netlet, "weight"),
+            name = attr(netlet, "weight", exact = TRUE),
             value = raw_net[ePosIgraph]
         )
     }
