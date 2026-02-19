@@ -35,12 +35,12 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
+    <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
   </ul>
 </li>
       </ul>
@@ -66,7 +66,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2025-07-15</h4>
+            <h4 data-toc-skip class="date">2026-02-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/multilayer_networks.Rmd" class="external-link"><code>vignettes/multilayer_networks.Rmd</code></a></small>
       <div class="d-none name"><code>multilayer_networks.Rmd</code></div>
@@ -140,7 +140,7 @@ types shape each other?</li>
 <span></span>
 <span><span class="co"># Quick visualization</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">multi_net</span>, add_text <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-1-1.png" width="672"></p>
+<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-1-1.png" class="r-plt" alt="" width="672"></p>
 <p><strong>What we see</strong>: Even this simple example reveals the
 “cheap talk” problem in international relations. The verbal cooperation
 network (left) is dense with connections, while material cooperation
@@ -200,7 +200,7 @@ when cooperation dynamics were rapidly shifting.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
 <span>        legend.position <span class="op">=</span> <span class="st">"right"</span></span>
 <span>    <span class="op">)</span></span></code></pre></div>
-<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-3-1.png" width="960"></p>
+<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="960"></p>
 <p>This visualization reveals the fundamental asymmetry in international
 cooperation. The verbal layer shows the “diplomatic commons” – nearly
 all countries engage in diplomatic discourse. The material layer reveals
@@ -295,8 +295,8 @@ cooperation type?</p>
 <span><span class="co">#&gt; 1                 -6.964294                   -7.444698             0.4804043</span></span>
 <span><span class="co">#&gt; 2                 -7.016653                   -7.279288             0.2626347</span></span>
 <span><span class="co">#&gt;   p_value     ci_lower   ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">#&gt; 1   0.000  0.023140854 0.06077686              4453                6573</span></span>
-<span><span class="co">#&gt; 2   0.118 -0.005009788 0.03452013              1201                9825</span></span>
+<span><span class="co">#&gt; 1   0.000  0.023263949 0.06089174              4453                6573</span></span>
+<span><span class="co">#&gt; 2   0.124 -0.004918521 0.03355849              1201                9825</span></span>
 <span><span class="co">#&gt;   n_missing n_pairs</span></span>
 <span><span class="co">#&gt; 1         3   11476</span></span>
 <span><span class="co">#&gt; 2         3   11476</span></span></code></pre></div>
@@ -410,7 +410,7 @@ conduits.</p>
 <span>    across_actor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>    specific_actors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"United States"</span>, <span class="st">"China"</span>, <span class="st">"Russian Federation"</span>, <span class="st">"Japan"</span>, <span class="st">"Germany"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-9-1.png" width="672"></p>
+<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="672"></p>
 <p><strong>Power Analysis</strong>:</p>
 <ul>
 <li>The US dominates both layers, confirming hegemonic status</li>
@@ -446,7 +446,7 @@ stability:</p>
 <span><span class="co"># Categorize relationships</span></span>
 <span><span class="va">multiplexity_summary</span> <span class="op">&lt;-</span> <span class="va">edge_comparison</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>        relationship_type <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
+<span>        relationship_type <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
 <span>            <span class="va">value_verbal</span> <span class="op">&gt;</span> <span class="fl">0</span> <span class="op">&amp;</span> <span class="va">value_material</span> <span class="op">&gt;</span> <span class="fl">0</span> <span class="op">~</span> <span class="st">"Multiplex"</span>,</span>
 <span>            <span class="va">value_verbal</span> <span class="op">&gt;</span> <span class="fl">0</span> <span class="op">~</span> <span class="st">"Verbal Only"</span>,</span>
 <span>            <span class="va">value_material</span> <span class="op">&gt;</span> <span class="fl">0</span> <span class="op">~</span> <span class="st">"Material Only"</span></span>
@@ -468,7 +468,7 @@ stability:</p>
 <span>        y <span class="op">=</span> <span class="st">"Number of Country Pairs"</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-10-1.png" width="672"></p>
+<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="672"></p>
 <p><strong>Multiplexity Insights</strong>:</p>
 <ul>
 <li>Only 26% of relationships are multiplex (involving both verbal and
@@ -568,7 +568,7 @@ statistically significant, not due to chance</li>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">7</span>, y <span class="op">=</span> <span class="fl">1</span>, label <span class="op">=</span> <span class="st">"Talk without action"</span>, fontface <span class="op">=</span> <span class="st">"italic"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">1</span>, y <span class="op">=</span> <span class="fl">5</span>, label <span class="op">=</span> <span class="st">"Quiet support"</span>, fontface <span class="op">=</span> <span class="st">"italic"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">6</span>, y <span class="op">=</span> <span class="fl">5</span>, label <span class="op">=</span> <span class="st">"Full cooperation"</span>, fontface <span class="op">=</span> <span class="st">"italic"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-13-1.png" width="768"></p>
+<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 </div>
 <div class="section level2">
@@ -608,7 +608,7 @@ cooperation dynamics:</p>
 <span>    facet_type <span class="op">=</span> <span class="st">"wrap"</span>,</span>
 <span>    facet_ncol <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-14-1.png" width="1152"></p>
+<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="1152"></p>
 <p>The post-9/11 period shows network evolution. Both layers densify
 from 2001 to 2003, but material cooperation grows more selectively,
 suggesting crisis-driven coalition building.</p>
@@ -681,7 +681,7 @@ diverge. By moving beyond single-layer analysis, we can:</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

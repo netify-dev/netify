@@ -38,6 +38,9 @@
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/resources.html">Helpful Resources</a></li>
+    <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
   </ul>
 </li>
       </ul>
@@ -63,7 +66,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2025-10-03</h4>
+            <h4 data-toc-skip class="date">2026-02-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/manual_plotting.Rmd" class="external-link"><code>vignettes/manual_plotting.Rmd</code></a></small>
       <div class="d-none name"><code>manual_plotting.Rmd</code></div>
@@ -176,48 +179,48 @@ frames that can be passed to <code>ggplot2</code>.</p>
 <span><span class="co">##   ..$ matlCoop: num [1:12937] 0 1 0 15 0 0 3 2 0 0 ...</span></span>
 <span><span class="co">##   ..$ verbConf: num [1:12937] 0 3 0 43 6 2 11 1 0 3 ...</span></span>
 <span><span class="co">##   ..$ matlConf: num [1:12937] 0 3 1 3 0 4 0 6 0 3 ...</span></span>
-<span><span class="co">##   ..$ x1      : num [1:12937] -3.19 -3.19 -3.19 -3.19 -3.19 ...</span></span>
-<span><span class="co">##   ..$ y1      : num [1:12937] 2.54 2.54 2.54 2.54 2.54 ...</span></span>
-<span><span class="co">##   ..$ x2      : num [1:12937] -2.95 -2.9 -3.15 -3.09 -2.83 ...</span></span>
-<span><span class="co">##   ..$ y2      : num [1:12937] 2.32 2.62 2.22 2.53 2.39 ...</span></span>
+<span><span class="co">##   ..$ x1      : num [1:12937] -0.0576 -0.0576 -0.0576 -0.0576 -0.0576 ...</span></span>
+<span><span class="co">##   ..$ y1      : num [1:12937] 0.132 0.132 0.132 0.132 0.132 ...</span></span>
+<span><span class="co">##   ..$ x2      : num [1:12937] 0.25671 0.03958 0.22088 -0.00051 0.25814 ...</span></span>
+<span><span class="co">##   ..$ y2      : num [1:12937] 0.061 -0.1548 0.2778 0.0518 -0.0817 ...</span></span>
 <span><span class="co">##  $ nodal_data:'data.frame':  442 obs. of  10 variables:</span></span>
 <span><span class="co">##   ..$ name      : chr [1:442] "Australia" "Australia" "Australia" "Australia" ...</span></span>
 <span><span class="co">##   ..$ time      : chr [1:442] "2002" "2003" "2004" "2005" ...</span></span>
 <span><span class="co">##   ..$ i_polity2 : int [1:442] 10 10 10 10 10 10 10 10 10 10 ...</span></span>
 <span><span class="co">##   ..$ i_log_gdp : num [1:442] 27.6 27.6 27.6 27.7 27.7 ...</span></span>
 <span><span class="co">##   ..$ i_log_pop : num [1:442] 16.8 16.8 16.8 16.8 16.8 ...</span></span>
-<span><span class="co">##   ..$ x         : num [1:442] -3.187 -0.0567 -1.115 0.4053 4.7545 ...</span></span>
-<span><span class="co">##   ..$ y         : num [1:442] 2.535 0.445 -3.669 0.282 1.836 ...</span></span>
+<span><span class="co">##   ..$ x         : num [1:442] -0.0576 0.1062 -0.1676 0.0248 0.0547 ...</span></span>
+<span><span class="co">##   ..$ y         : num [1:442] 0.1316 -0.0741 0.0391 -0.1551 0.1232 ...</span></span>
 <span><span class="co">##   ..$ name_text : chr [1:442] "Australia" "Australia" "Australia" "Australia" ...</span></span>
 <span><span class="co">##   ..$ name_label: chr [1:442] "Australia" "Australia" "Australia" "Australia" ...</span></span>
 <span><span class="co">##   ..$ id        : chr [1:442] "Australia_2002" "Australia_2003" "Australia_2004" "Australia_2005" ...</span></span></code></pre>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check the first few rows of the edge data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">net_dfs</span><span class="op">$</span><span class="va">edge_data</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##        from       to time verbCoop matlCoop verbConf matlConf        x1</span></span>
-<span><span class="co">## 1 Australia   Brazil 2002        3        0        0        0 -3.186958</span></span>
-<span><span class="co">## 2 Australia   Canada 2002       24        1        3        3 -3.186958</span></span>
-<span><span class="co">## 3 Australia    Chile 2002        1        0        0        1 -3.186958</span></span>
-<span><span class="co">## 4 Australia    China 2002      518       15       43        3 -3.186958</span></span>
-<span><span class="co">## 5 Australia Colombia 2002        1        0        6        0 -3.186958</span></span>
-<span><span class="co">## 6 Australia    Egypt 2002       15        0        2        4 -3.186958</span></span>
-<span><span class="co">##         y1        x2       y2</span></span>
-<span><span class="co">## 1 2.535002 -2.951523 2.315115</span></span>
-<span><span class="co">## 2 2.535002 -2.895578 2.616097</span></span>
-<span><span class="co">## 3 2.535002 -3.150793 2.222567</span></span>
-<span><span class="co">## 4 2.535002 -3.088811 2.532826</span></span>
-<span><span class="co">## 5 2.535002 -2.832835 2.394330</span></span>
-<span><span class="co">## 6 2.535002 -2.962405 2.626167</span></span></code></pre>
+<pre><code><span><span class="co">##        from       to time verbCoop matlCoop verbConf matlConf          x1</span></span>
+<span><span class="co">## 1 Australia   Brazil 2002        3        0        0        0 -0.05761221</span></span>
+<span><span class="co">## 2 Australia   Canada 2002       24        1        3        3 -0.05761221</span></span>
+<span><span class="co">## 3 Australia    Chile 2002        1        0        0        1 -0.05761221</span></span>
+<span><span class="co">## 4 Australia    China 2002      518       15       43        3 -0.05761221</span></span>
+<span><span class="co">## 5 Australia Colombia 2002        1        0        6        0 -0.05761221</span></span>
+<span><span class="co">## 6 Australia    Egypt 2002       15        0        2        4 -0.05761221</span></span>
+<span><span class="co">##          y1            x2          y2</span></span>
+<span><span class="co">## 1 0.1316246  0.2567066471  0.06102817</span></span>
+<span><span class="co">## 2 0.1316246  0.0395816516 -0.15478831</span></span>
+<span><span class="co">## 3 0.1316246  0.2208771149  0.27780000</span></span>
+<span><span class="co">## 4 0.1316246 -0.0005098899  0.05176884</span></span>
+<span><span class="co">## 5 0.1316246  0.2581434830 -0.08165964</span></span>
+<span><span class="co">## 6 0.1316246 -0.0063939248 -0.10525516</span></span></code></pre>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># check the first few rows of the nodal data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">net_dfs</span><span class="op">$</span><span class="va">nodal_data</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##         name time i_polity2 i_log_gdp i_log_pop           x          y</span></span>
-<span><span class="co">## 79 Australia 2002        10  27.55492  16.78568 -3.18695808  2.5350018</span></span>
-<span><span class="co">## 80 Australia 2003        10  27.58556  16.79718 -0.05666548  0.4452790</span></span>
-<span><span class="co">## 81 Australia 2004        10  27.62686  16.80787 -1.11499738 -3.6691981</span></span>
-<span><span class="co">## 82 Australia 2005        10  27.65791  16.82005  0.40527329  0.2821195</span></span>
-<span><span class="co">## 83 Australia 2006        10  27.68495  16.83354  4.75445819  1.8357027</span></span>
-<span><span class="co">## 84 Australia 2007        10  27.72203  16.85179 -0.95933985 -0.8500965</span></span>
+<pre><code><span><span class="co">##         name time i_polity2 i_log_gdp i_log_pop           x           y</span></span>
+<span><span class="co">## 79 Australia 2002        10  27.55492  16.78568 -0.05761221  0.13162457</span></span>
+<span><span class="co">## 80 Australia 2003        10  27.58556  16.79718  0.10621976 -0.07408432</span></span>
+<span><span class="co">## 81 Australia 2004        10  27.62686  16.80787 -0.16761260  0.03905379</span></span>
+<span><span class="co">## 82 Australia 2005        10  27.65791  16.82005  0.02483645 -0.15514885</span></span>
+<span><span class="co">## 83 Australia 2006        10  27.68495  16.83354  0.05468896  0.12317962</span></span>
+<span><span class="co">## 84 Australia 2007        10  27.72203  16.85179  0.03834328 -0.11702110</span></span>
 <span><span class="co">##    name_text name_label             id</span></span>
 <span><span class="co">## 79 Australia  Australia Australia_2002</span></span>
 <span><span class="co">## 80 Australia  Australia Australia_2003</span></span>
@@ -268,7 +271,7 @@ to plot the edges and nodes, respectively.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient</a></span><span class="op">(</span>low <span class="op">=</span> <span class="st">"#a6bddb"</span>, high <span class="op">=</span> <span class="st">"#014636"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">time</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="../reference/theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="manual_plotting_files/figure-html/unnamed-chunk-5-1.png" width="1350"></p>
+<p><img src="manual_plotting_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="1350"></p>
 <div class="section level3">
 <h3 id="changing-the-layout">Changing the layout<a class="anchor" aria-label="anchor" href="#changing-the-layout"></a>
 </h3>
@@ -354,20 +357,20 @@ the network. First, let’s create the variable in the edge data.</p>
 <span></span>
 <span><span class="co"># check</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">net_dfs</span><span class="op">$</span><span class="va">edge_data</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##        from       to time verbCoop matlCoop verbConf matlConf        x1</span></span>
-<span><span class="co">## 1 Australia   Brazil 2002        3        0        0        0 -3.186958</span></span>
-<span><span class="co">## 2 Australia   Canada 2002       24        1        3        3 -3.186958</span></span>
-<span><span class="co">## 3 Australia    Chile 2002        1        0        0        1 -3.186958</span></span>
-<span><span class="co">## 4 Australia    China 2002      518       15       43        3 -3.186958</span></span>
-<span><span class="co">## 5 Australia Colombia 2002        1        0        6        0 -3.186958</span></span>
-<span><span class="co">## 6 Australia    Egypt 2002       15        0        2        4 -3.186958</span></span>
-<span><span class="co">##         y1        x2       y2 high_matlConf</span></span>
-<span><span class="co">## 1 2.535002 -2.951523 2.315115         FALSE</span></span>
-<span><span class="co">## 2 2.535002 -2.895578 2.616097         FALSE</span></span>
-<span><span class="co">## 3 2.535002 -3.150793 2.222567         FALSE</span></span>
-<span><span class="co">## 4 2.535002 -3.088811 2.532826         FALSE</span></span>
-<span><span class="co">## 5 2.535002 -2.832835 2.394330         FALSE</span></span>
-<span><span class="co">## 6 2.535002 -2.962405 2.626167         FALSE</span></span></code></pre>
+<pre><code><span><span class="co">##        from       to time verbCoop matlCoop verbConf matlConf          x1</span></span>
+<span><span class="co">## 1 Australia   Brazil 2002        3        0        0        0 -0.05761221</span></span>
+<span><span class="co">## 2 Australia   Canada 2002       24        1        3        3 -0.05761221</span></span>
+<span><span class="co">## 3 Australia    Chile 2002        1        0        0        1 -0.05761221</span></span>
+<span><span class="co">## 4 Australia    China 2002      518       15       43        3 -0.05761221</span></span>
+<span><span class="co">## 5 Australia Colombia 2002        1        0        6        0 -0.05761221</span></span>
+<span><span class="co">## 6 Australia    Egypt 2002       15        0        2        4 -0.05761221</span></span>
+<span><span class="co">##          y1            x2          y2 high_matlConf</span></span>
+<span><span class="co">## 1 0.1316246  0.2567066471  0.06102817         FALSE</span></span>
+<span><span class="co">## 2 0.1316246  0.0395816516 -0.15478831         FALSE</span></span>
+<span><span class="co">## 3 0.1316246  0.2208771149  0.27780000         FALSE</span></span>
+<span><span class="co">## 4 0.1316246 -0.0005098899  0.05176884         FALSE</span></span>
+<span><span class="co">## 5 0.1316246  0.2581434830 -0.08165964         FALSE</span></span>
+<span><span class="co">## 6 0.1316246 -0.0063939248 -0.10525516         FALSE</span></span></code></pre>
 <p>Now that we have the new variable in the data.frame, we can plot by
 it but note that we now need a color aesthetic for both points and
 segments, even though <code>ggplot2</code> only supports one legend by
@@ -415,7 +418,7 @@ package.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
 <span>        legend.position <span class="op">=</span> <span class="st">"right"</span></span>
 <span>    <span class="op">)</span></span></code></pre></div>
-<p><img src="manual_plotting_files/figure-html/unnamed-chunk-8-1.png" width="1350"></p>
+<p><img src="manual_plotting_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="1350"></p>
 </div>
 </div>
 <div class="section level2">
@@ -442,7 +445,7 @@ Springer-Verlag New York.</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

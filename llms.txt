@@ -1,0 +1,601 @@
+# netify ![hex](reference/figures/hex.png)
+
+## Overview
+
+netify is an R package for working with relational data. It converts
+edge lists, matrices, and data frames into network objects that you can
+analyze and visualize using a consistent set of functions.
+
+We built netify while doing our own network research in social science.
+It handles common tasks like temporal network analysis, ego network
+extraction, and multiplex relationships without requiring multiple
+packages or data format conversions.
+
+## Installation
+
+You have two options for installing `netify`.
+
+### 🔧 Option 1: Install from GitHub (requires build tools)
+
+> ⚠️ Requires R build tools:
+>
+> - macOS: Xcode Command Line Tools
+> - Windows: Rtools
+> - Linux: build-essential and related packages
+
+``` r
+# Install from GitHub
+# install.packages("devtools")
+devtools::install_github("netify-dev/netify", dependencies = TRUE)
+```
+
+### 🛠 Option 2: Pre-built binaries (no compilation needed)
+
+If you’re on **macOS** or **Windows** and want to avoid installing
+developer tools (like compilers, Xcode, or Rtools), you can use our
+pre-built binaries from the [Releases
+page](https://github.com/netify-dev/netify/releases):
+
+#### ✅ Steps:
+
+1.  Go to: <https://github.com/netify-dev/netify/releases>
+2.  Click on the latest release (e.g., **v0.1.3**)
+3.  Download the file that matches your system
+
+#### 📦 First, install dependencies (if needed):
+
+``` r
+# Install required packages if you don't already have them
+deps <- c("Rcpp", "stats", "rlang", "cli", "checkmate", "igraph", 
+          "ggplot2", "scales", "ggnewscale", "ggridges", 
+          "ggbeeswarm", "patchwork", "RColorBrewer", "ggrepel")
+
+# Check which packages are not installed
+missing_deps <- deps[!deps %in% installed.packages()[,"Package"]]
+
+# Install missing packages
+if(length(missing_deps) > 0) {
+  install.packages(missing_deps, repos='https://cloud.r-project.org/')
+}
+```
+
+#### 🖥 macOS users:
+
+There are several macOS builds — choose the one that fits your system:
+
+| File              | For…                                                                        |
+|-------------------|-----------------------------------------------------------------------------|
+| `macos-arm64.tgz` | Macs with Apple Silicon (M1, M2, M3 chips) running recent macOS             |
+| `macos-intel.tgz` | Macs with Intel chips                                                       |
+| `macos-asan.tgz`  | Developer/debug version (for advanced users only; includes sanitizer flags) |
+
+Most users can choose based on chip type:
+
+``` r
+# Example: Apple Silicon (M1/M2/M3)
+install.packages(
+  "~/Downloads/netify_0.1.3-macos-arm64.tgz", 
+  repos = NULL, type = "mac.binary")
+
+# Example: Intel Mac
+install.packages(
+  "~/Downloads/netify_0.1.3-macos-intel.tgz", 
+  repos = NULL, type = "mac.binary")
+```
+
+#### 🪟 Windows users:
+
+Download the `.zip` file named `netify_0.1.3-windows.zip` and install:
+
+``` r
+install.packages(
+  "C:/path/to/netify_0.1.3-windows.zip", 
+  repos = NULL)
+```
+
+Be sure to replace the file path with where you saved the download.
+
+#### 🐧 Linux users:
+
+You can use the precompiled `.tgz` file, or install from source (see
+Option 1). Example:
+
+``` r
+install.packages(
+  "~/Downloads/netify_0.1.3-linux.tgz", 
+  repos = NULL, type = "source")
+```
+
+## Quick Start
+
+Transform your relational data into a network object with just one
+function:
+
+``` r
+library(netify)
+data(icews)
+
+# Create a network from dyadic data
+icews_conflict <- netify(
+  icews,
+  actor1 = 'i', 
+  actor2 = 'j',
+  time = 'year',
+  symmetric = FALSE, 
+  weight = 'matlConf',
+  nodal_vars = c('i_polity2', 'i_log_gdp', 'i_region')
+)
+
+# Print the netify object
+print(icews_conflict)
+```
+
+    ✔ Hello, you have created network data, yay!
+    • Unipartite
+    • Asymmetric
+    • Weights from `matlConf`
+    • Longitudinal: 13 Periods
+    • # Unique Actors: 152
+    Network Summary Statistics (averaged across time):
+              dens miss  mean recip trans
+    matlConf 0.113    0 1.471 0.594 0.387
+    • Nodal Features: None
+    • Dyad Features: None
+
+### Quick visualization
+
+``` r
+# Plot the network
+plot(icews_conflict)
+```
+
+![](reference/figures/icews_plot.png)
+
+### More involved visualization
+
+netify’s plotting system is highly customizable. Here’s how you can
+create a more sophisticated visualization:
+
+``` r
+# Create democracy indicator
+icews$i_democ <- factor(
+  ifelse(icews$i_polity2 >= 6, 1, 0), 
+  levels = c(0, 1), 
+  labels = c("Non-democracy", "Democracy")
+)
+
+# Add it to the network
+icews_conflict <- add_node_vars(
+  icews_conflict, icews,
+  actor = 'i', time = 'year',
+  node_vars = 'i_democ'
+)
+
+# plot(
+  icews_conflict, 
+  # Log transform weights
+  mutate_weight = log1p, 
+  # Map node attributes to aesthetics
+  node_color_by = 'i_region', 
+  node_size_by = 'i_log_gdp', 
+  node_shape_by = 'i_democ',
+  # set global node alpha
+  node_alpha = .7,
+  # set global edge alpha
+  edge_linewidth = .1,
+  # Filter data
+  node_filter = ~ !is.na(i_democ),
+  time_filter = c('2002', '2004', '2008', '2014'),
+  # clean up plot labels
+  edge_alpha_label = 'Log(Matl.\n Conf.)',
+  node_color_label = '',
+  node_size_label = 'Log(GDP)',
+  node_shape_label = ''
+  ) +
+  theme(legend.position = 'right') + 
+  scale_color_brewer(palette = 'Set1')
+```
+
+![](reference/figures/icews_advanced_plot.png)
+
+## What can you do with a netify object?
+
+### Get network statistics
+
+``` r
+summary(icews_conflict)
+```
+
+This returns a data frame with network statistics for each time period:
+
+| Year | Actors | Density | Edges | Mean Weight | Reciprocity | Transitivity |
+|------|--------|---------|-------|-------------|-------------|--------------|
+| 2002 | 152    | 0.090   | 2069  | 1.12        | 0.200       | 0.354        |
+| 2003 | 152    | 0.095   | 2193  | 1.54        | 0.294       | 0.358        |
+| 2004 | 152    | 0.115   | 2666  | 1.64        | 0.647       | 0.391        |
+| …    | …      | …       | …     | …           | …           | …            |
+
+(Table shows first few rows - actual output includes all time periods)
+
+## Key functions
+
+### Building networks
+
+- [`netify()`](https://netify-dev.github.io/netify/reference/netify.md) -
+  Turn your data into a network object
+- [`ego_netify()`](https://netify-dev.github.io/netify/reference/ego_netify.md) -
+  Extract ego networks
+- [`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md) -
+  Stack multiple relationships into multilayer networks
+
+### Adding information
+
+- [`add_node_vars()`](https://netify-dev.github.io/netify/reference/add_node_vars.md) -
+  Attach attributes to actors (like GDP, democracy scores)
+- [`add_dyad_vars()`](https://netify-dev.github.io/netify/reference/add_dyad_vars.md) -
+  Attach attributes to relationships (like trade volume, conflict
+  events)
+
+### Wrangling networks
+
+- [`subset()`](https://rdrr.io/r/base/subset.html) - Pull out specific
+  time periods or actors
+- [`mutate_weights()`](https://netify-dev.github.io/netify/reference/mutate_weights.md) -
+  Log-transform, normalize, or otherwise modify edge weights
+
+### Analysis
+
+- [`measurements()`](https://netify-dev.github.io/netify/reference/netify_measurements.md) -
+  Measurements of your network size and composition
+- [`summary()`](https://rdrr.io/r/base/summary.html) - Get a quick
+  overview of your network
+- [`summary_actor()`](https://netify-dev.github.io/netify/reference/summary_actor.md) -
+  See how individual actors fit into the network
+- [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md) -
+  See how similar two networks are
+- [`homophily()`](https://netify-dev.github.io/netify/reference/homophily.md) -
+  Do similar actors tend to connect?
+- [`mixing_matrix()`](https://netify-dev.github.io/netify/reference/mixing_matrix.md) -
+  Who connects with whom?
+
+### Visualization
+
+- [`plot()`](https://rdrr.io/r/graphics/plot.default.html) - Create
+  network diagrams with sensible defaults
+- [`plot_actor_stats()`](https://netify-dev.github.io/netify/reference/plot_actor_stats.md) -
+  Visualize node-level statistics
+- [`plot_graph_stats()`](https://netify-dev.github.io/netify/reference/plot_graph_stats.md) -
+  Show how network properties change over time
+
+### Working with other packages
+
+- [`to_igraph()`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md)
+  /
+  [`to_network()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md) -
+  When you need something we don’t have
+- [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md) -
+  For fitting AME or SRM models
+- [`unnetify()`](https://netify-dev.github.io/netify/reference/unnetify.md) -
+  Get back to a regular data frame
+
+## Quick Reference
+
+### Essential Functions
+
+| Task                               | Function                                                                                  | Example                                                                           |
+|------------------------------------|-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+| Create network                     | [`netify()`](https://netify-dev.github.io/netify/reference/netify.md)                     | `netify(data, actor1="from", actor2="to")`                                        |
+| Extract ego network                | [`ego_netify()`](https://netify-dev.github.io/netify/reference/ego_netify.md)             | `ego_netify(net, ego="USA")`                                                      |
+| Create multilayer                  | [`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md)         | `layer_netify(list(net1, net2))`                                                  |
+| Add node data                      | [`add_node_vars()`](https://netify-dev.github.io/netify/reference/add_node_vars.md)       | `add_node_vars(net, node_df, actor="id")`                                         |
+| Add dyad data                      | [`add_dyad_vars()`](https://netify-dev.github.io/netify/reference/add_dyad_vars.md)       | `add_dyad_vars(net, dyad_df, actor1="from", actor2="to")`                         |
+| Subset network                     | [`subset()`](https://rdrr.io/r/base/subset.html)                                          | `subset(net, time="2020")`                                                        |
+| Get graph level summary statistics | [`summary()`](https://rdrr.io/r/base/summary.html)                                        | `summary(net)`                                                                    |
+| Get actor level summary statistics | [`summary_actor()`](https://netify-dev.github.io/netify/reference/summary_actor.md)       | `summary_actor(net)`                                                              |
+| Test homophily                     | [`homophily()`](https://netify-dev.github.io/netify/reference/homophily.md)               | `homophily(net, attribute="democracy", method="correlation")`                     |
+| Create mixing matrix               | [`mixing_matrix()`](https://netify-dev.github.io/netify/reference/mixing_matrix.md)       | `mixing_matrix(net, attribute="regime_type", normalized=TRUE)`                    |
+| Test dyadic correlations           | [`dyad_correlation()`](https://netify-dev.github.io/netify/reference/dyad_correlation.md) | `dyad_correlation(net, dyad_vars="geographic_distance")`                          |
+| Comprehensive attribute analysis   | [`attribute_report()`](https://netify-dev.github.io/netify/reference/attribute_report.md) | `attribute_report(net, node_vars=c("region", "democracy"), dyad_vars="distance")` |
+| Compare networks                   | [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md) | `compare_networks(list(net1, net2), method="all")`                                |
+| Plot network                       | [`plot()`](https://rdrr.io/r/graphics/plot.default.html)                                  | `plot(net)`                                                                       |
+| Convert to igraph                  | [`to_igraph()`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md)        | `g <- to_igraph(net)`                                                             |
+| Convert to statnet/network         | [`to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)      | `g <- to_statnet(net)`                                                            |
+| Convert to amen                    | [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)            | `amen_data <- to_amen(net)`                                                       |
+| Back to data frame                 | [`unnetify()`](https://netify-dev.github.io/netify/reference/unnetify.md)                 | `df <- unnetify(net)`                                                             |
+
+## When you might need something else
+
+netify handles a lot, but there’s an awesome world of network packages
+out there! If you need to venture beyond our walls, we’ve built bridges
+to get you there:
+
+- **Fancy statistical models**: Use
+  [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)
+  for latent factor models or
+  [`to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)
+  for ERGMs
+- **Graph algorithms we don’t have (yet!)**: Convert with
+  [`to_igraph()`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md)
+  to access igraph’s vast toolkit
+- **Roll your own analysis**: Use
+  [`unnetify()`](https://netify-dev.github.io/netify/reference/unnetify.md)
+  to get back to a data frame and do your own thing
+
+We play well with others! 🤝
+
+## Getting help
+
+- Browse vignettes for detailed guides: `browseVignettes("netify")`
+- Check function documentation:
+  [`?netify`](https://netify-dev.github.io/netify/reference/netify.md),
+  [`?plot.netify`](https://netify-dev.github.io/netify/reference/plot.netify.md),
+  etc.
+- Report bugs: [GitHub
+  Issues](https://github.com/netify-dev/netify/issues)
+- Ask questions: [GitHub
+  Discussions](https://github.com/netify-dev/netify/discussions)
+
+## Citation
+
+If you use netify in your research, please cite:
+
+``` r
+citation("netify")
+```
+
+## Contributors
+
+netify is developed by: - **Cassy Dorff** (Vanderbilt University) -
+**Shahryar Minhas** (Michigan State University)
+
+With contributions from: - Ha Eun Choi (Michigan State University) -
+Colin Henry (Vanderbilt University) - Tosin Salau (Michigan State
+University)
+
+This work is supported by National Science Foundation Awards \#2017162
+and \#2017180.
+
+## License
+
+MIT License - see [LICENSE](https://netify-dev.github.io/netify/LICENSE)
+file for details.
+
+------------------------------------------------------------------------
+
+Made with ❤️ for the network analysis community
+
+# Package index
+
+## All functions
+
+- [`add_dyad_vars()`](https://netify-dev.github.io/netify/reference/add_dyad_vars.md)
+  [`add_edge_attributes()`](https://netify-dev.github.io/netify/reference/add_dyad_vars.md)
+  : Add dyadic variables to a netify object
+- [`add_node_vars()`](https://netify-dev.github.io/netify/reference/add_node_vars.md)
+  [`add_vertex_attributes()`](https://netify-dev.github.io/netify/reference/add_node_vars.md)
+  : Add nodal variables to a netify object
+- [`aggregate_dyad()`](https://netify-dev.github.io/netify/reference/aggregate_dyad.md)
+  : Aggregate dyadic event data by actor pairs
+- [`assemble_netify_plot()`](https://netify-dev.github.io/netify/reference/assemble_netify_plot.md)
+  : Assemble netify plot from components
+- [`attribute_report()`](https://netify-dev.github.io/netify/reference/attribute_report.md)
+  : Comprehensive summary of network-attribute relationships
+- [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md)
+  : Compare networks across time, layers, or attributes
+- [`decompose_igraph()`](https://netify-dev.github.io/netify/reference/decompose_igraph.md)
+  : Decompose an igraph object into base R components
+- [`decompose_netify()`](https://netify-dev.github.io/netify/reference/decompose_netify.md)
+  : Decompose a netify object into edge and node data frames
+- [`decompose_statnet()`](https://netify-dev.github.io/netify/reference/decompose_statnet.md)
+  [`decompose_network()`](https://netify-dev.github.io/netify/reference/decompose_statnet.md)
+  : Decompose a network object into base R components
+- [`dyad_correlation()`](https://netify-dev.github.io/netify/reference/dyad_correlation.md)
+  : Analyze correlations between dyadic attributes and network ties
+- [`create_hierarchical_ego_layout()`](https://netify-dev.github.io/netify/reference/ego_layouts.md)
+  [`create_radial_ego_layout()`](https://netify-dev.github.io/netify/reference/ego_layouts.md)
+  [`create_ego_centric_layout()`](https://netify-dev.github.io/netify/reference/ego_layouts.md)
+  : Create ego-centric layouts for ego networks
+- [`ego_netify()`](https://netify-dev.github.io/netify/reference/ego_netify.md)
+  : Create ego network from a netify object
+- [`gen_symm_id()`](https://netify-dev.github.io/netify/reference/gen_symm_id.md)
+  : Generate symmetric identifiers for dyadic data
+- [`get_actor_time_info()`](https://netify-dev.github.io/netify/reference/get_actor_time_info.md)
+  : Extract actor time range information from dyadic data
+- [`get_adjacency()`](https://netify-dev.github.io/netify/reference/get_adjacency.md)
+  : Create a netify matrix from cross-sectional dyadic data
+- [`get_adjacency_array()`](https://netify-dev.github.io/netify/reference/get_adjacency_array.md)
+  : Create a netify array from longitudinal dyadic data
+- [`get_adjacency_list()`](https://netify-dev.github.io/netify/reference/get_adjacency_list.md)
+  : Create a netify list from longitudinal dyadic data
+- [`get_edge_layout()`](https://netify-dev.github.io/netify/reference/get_edge_layout.md)
+  : Generate edge layout coordinates for netify visualization
+- [`get_ego_layout()`](https://netify-dev.github.io/netify/reference/get_ego_layout.md)
+  : Calculate ego-centric layout positions for network visualization
+- [`get_node_layout()`](https://netify-dev.github.io/netify/reference/get_node_layout.md)
+  : Calculate node layout positions for netify visualization
+- [`get_raw()`](https://netify-dev.github.io/netify/reference/get_raw.md)
+  : Get raw network data without netify attributes
+- [`ggplot_add(`*`<netify_edge>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_edge.md)
+  : Add netify_edge to ggplot
+- [`ggplot_add(`*`<netify_label>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_label.md)
+  : Add netify_label to ggplot
+- [`ggplot_add(`*`<netify_label_repel>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_label_repel.md)
+  : Add netify_label_repel to ggplot
+- [`ggplot_add(`*`<netify_labels>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_labels.md)
+  : Add netify scale labels to ggplot
+- [`ggplot_add(`*`<netify_node>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_node.md)
+  : Add netify_node to ggplot
+- [`ggplot_add(`*`<netify_scale_reset>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_scale_reset.md)
+  : Add scale resets to ggplot
+- [`ggplot_add(`*`<netify_text>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_text.md)
+  : Add netify_text to ggplot
+- [`ggplot_add(`*`<netify_text_repel>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_text_repel.md)
+  : Add netify_text_repel to ggplot
+- [`homophily()`](https://netify-dev.github.io/netify/reference/homophily.md)
+  : Analyze homophily in network data
+- [`icews`](https://netify-dev.github.io/netify/reference/icews.md) :
+  Event data slice from ICEWS
+- [`is_netify()`](https://netify-dev.github.io/netify/reference/is_netify.md)
+  : Is this object a netify object?
+- [`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md)
+  : Create multilayer networks from multiple netify objects
+- [`list_network_styles()`](https://netify-dev.github.io/netify/reference/list_network_styles.md)
+  : List available network styles
+- [`list_palettes()`](https://netify-dev.github.io/netify/reference/list_palettes.md)
+  : List available color palettes
+- [`melt()`](https://netify-dev.github.io/netify/reference/melt.md) :
+  Melt methods for netify objects
+- [`mexico`](https://netify-dev.github.io/netify/reference/mexico.md) :
+  Event data slice from UCDP on Mexico
+- [`mixing_matrix()`](https://netify-dev.github.io/netify/reference/mixing_matrix.md)
+  : Create attribute mixing matrices for network data
+- [`mutate_weights()`](https://netify-dev.github.io/netify/reference/mutate_weights.md)
+  : Mutate edge weights in a netify object
+- [`myanmar`](https://netify-dev.github.io/netify/reference/myanmar.md)
+  : Event data slice from UCDP on Myanmar
+- [`net_plot_data()`](https://netify-dev.github.io/netify/reference/net_plot_data.md)
+  : Prepare netify data for network visualization
+- [`netify()`](https://netify-dev.github.io/netify/reference/netify.md)
+  : Create network object from various data types
+- [`netify_edge()`](https://netify-dev.github.io/netify/reference/netify_edge.md)
+  : Extract edges layer from netify plot components
+- [`netify_label()`](https://netify-dev.github.io/netify/reference/netify_label.md)
+  : Extract label layer from netify plot components
+- [`netify_label_repel()`](https://netify-dev.github.io/netify/reference/netify_label_repel.md)
+  : Extract label_repel layer from netify plot components
+- [`netify_measurements()`](https://netify-dev.github.io/netify/reference/netify_measurements.md)
+  [`measurements()`](https://netify-dev.github.io/netify/reference/netify_measurements.md)
+  : Extract measurements and dimensions from a netify object
+- [`netify_node()`](https://netify-dev.github.io/netify/reference/netify_node.md)
+  : Extract nodes layer from netify plot components
+- [`netify_scale_labels()`](https://netify-dev.github.io/netify/reference/netify_scale_labels.md)
+  : Set scale labels for netify plots
+- [`netify_text()`](https://netify-dev.github.io/netify/reference/netify_text.md)
+  : Extract text layer from netify plot components
+- [`netify_text_repel()`](https://netify-dev.github.io/netify/reference/netify_text_repel.md)
+  : Extract text_repel layer from netify plot components
+- [`netify_to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)
+  [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)
+  : Convert netify objects to amen format
+- [`netify_to_igraph()`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md)
+  [`to_igraph()`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md)
+  : Convert netify objects to igraph format
+- [`netify_to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)
+  [`netify_to_network()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)
+  [`to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)
+  [`to_network()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)
+  : Convert netify objects to statnet network format
+- [`new_netify()`](https://netify-dev.github.io/netify/reference/new_netify.md)
+  : Low-level constructor for netify objects
+- [`peek()`](https://netify-dev.github.io/netify/reference/peek.md) :
+  Preview subsets of network data from netify objects
+- [`pivot_dyad_to_network()`](https://netify-dev.github.io/netify/reference/pivot_dyad_to_network.md)
+  : Pivot a dyadic variable to become the network
+- [`plot(`*`<netify>`*`)`](https://netify-dev.github.io/netify/reference/plot.netify.md)
+  : Plotting method for netify objects
+- [`plot_actor_stats()`](https://netify-dev.github.io/netify/reference/plot_actor_stats.md)
+  : Visualize actor-level network statistics
+- [`plot_graph_stats()`](https://netify-dev.github.io/netify/reference/plot_graph_stats.md)
+  : Visualize network-level statistics
+- [`plot_homophily()`](https://netify-dev.github.io/netify/reference/plot_homophily.md)
+  : Visualize homophily analysis results
+- [`plot_mixing_matrix()`](https://netify-dev.github.io/netify/reference/plot_mixing_matrix.md)
+  : Visualize attribute mixing matrix results
+- [`plot_mixing_matrix_facet()`](https://netify-dev.github.io/netify/reference/plot_mixing_matrix_facet.md)
+  : Create a multi-panel mixing matrix visualization
+- [`plot_with_style()`](https://netify-dev.github.io/netify/reference/plot_with_style.md)
+  : Apply style to netify plot
+- [`print(`*`<netify>`*`)`](https://netify-dev.github.io/netify/reference/print.netify.md)
+  : Print method for netify objects
+- [`print(`*`<netify_comparison>`*`)`](https://netify-dev.github.io/netify/reference/print.netify_comparison.md)
+  : Print method for netify_comparison objects
+- [`print(`*`<netify_plot_components>`*`)`](https://netify-dev.github.io/netify/reference/print.netify_plot_components.md)
+  : Print netify plot components
+- [`remove_ego_edges()`](https://netify-dev.github.io/netify/reference/remove_ego_edges.md)
+  : Remove ego-alter edges from ego network
+- [`reset_scales()`](https://netify-dev.github.io/netify/reference/reset_scales.md)
+  : Reset aesthetic scales in ggplot
+- [`style_538()`](https://netify-dev.github.io/netify/reference/style_538.md)
+  : FiveThirtyEight-inspired network style
+- [`style_bipartite_network()`](https://netify-dev.github.io/netify/reference/style_bipartite_network.md)
+  : Preset style for bipartite networks
+- [`style_budapest()`](https://netify-dev.github.io/netify/reference/style_budapest.md)
+  : Wes Anderson-inspired network style (Grand Budapest Hotel)
+- [`style_cyberpunk()`](https://netify-dev.github.io/netify/reference/style_cyberpunk.md)
+  : Cyberpunk-inspired network style
+- [`style_dark2()`](https://netify-dev.github.io/netify/reference/style_dark2.md)
+  : ColorBrewer Dark2-based network style
+- [`style_economist()`](https://netify-dev.github.io/netify/reference/style_economist.md)
+  : Economist-style network style
+- [`style_nature()`](https://netify-dev.github.io/netify/reference/style_nature.md)
+  : Nature journal-inspired network style
+- [`style_pastel()`](https://netify-dev.github.io/netify/reference/style_pastel.md)
+  : Pastel rainbow network style
+- [`style_pokemon_pikachu()`](https://netify-dev.github.io/netify/reference/style_pokemon_pikachu.md)
+  : Pokemon-style network style (Pikachu)
+- [`style_random()`](https://netify-dev.github.io/netify/reference/style_random.md)
+  : Apply random network style
+- [`style_retro80s()`](https://netify-dev.github.io/netify/reference/style_retro80s.md)
+  : Retro 80s-inspired network style
+- [`style_secretariat()`](https://netify-dev.github.io/netify/reference/style_secretariat.md)
+  : Secretariat-style network style
+- [`style_solarized()`](https://netify-dev.github.io/netify/reference/style_solarized.md)
+  : Solarized-inspired network style
+- [`style_stata()`](https://netify-dev.github.io/netify/reference/style_stata.md)
+  : Stata-inspired network style
+- [`style_temporal_network()`](https://netify-dev.github.io/netify/reference/style_temporal_network.md)
+  : Preset style for temporal/longitudinal networks
+- [`style_tufte()`](https://netify-dev.github.io/netify/reference/style_tufte.md)
+  : Minimal Tufte-inspired network style
+- [`style_witcher_feline()`](https://netify-dev.github.io/netify/reference/style_witcher_feline.md)
+  : Witcher 3 Feline School network style
+- [`style_witcher_griffin()`](https://netify-dev.github.io/netify/reference/style_witcher_griffin.md)
+  : Witcher 3 Griffin School network style
+- [`style_witcher_manticore()`](https://netify-dev.github.io/netify/reference/style_witcher_manticore.md)
+  : Witcher 3 Manticore School network style (bonus)
+- [`style_witcher_ursine()`](https://netify-dev.github.io/netify/reference/style_witcher_ursine.md)
+  : Witcher 3 Ursine School network style
+- [`style_witcher_viper()`](https://netify-dev.github.io/netify/reference/style_witcher_viper.md)
+  : Witcher 3 Viper School network style (bonus)
+- [`style_witcher_wolven()`](https://netify-dev.github.io/netify/reference/style_witcher_wolven.md)
+  : Witcher 3 Wolven School network style
+- [`subset(`*`<netify>`*`)`](https://netify-dev.github.io/netify/reference/subset.netify.md)
+  : Subset netify objects
+- [`summary(`*`<netify>`*`)`](https://netify-dev.github.io/netify/reference/summary.netify.md)
+  : Calculate graph-level statistics for netify objects
+- [`summary(`*`<netify_comparison>`*`)`](https://netify-dev.github.io/netify/reference/summary.netify_comparison.md)
+  : Summary method for netify_comparison objects
+- [`summary_actor()`](https://netify-dev.github.io/netify/reference/summary_actor.md)
+  : Calculate actor-level network statistics
+- [`theme_netify()`](https://netify-dev.github.io/netify/reference/theme_netify.md)
+  : theme_netify function
+- [`theme_stat_netify()`](https://netify-dev.github.io/netify/reference/theme_stat_netify.md)
+  : theme_stat_netify function
+- [`to_netify()`](https://netify-dev.github.io/netify/reference/to_netify.md)
+  : Convert igraph, network, or matrix objects to netify format
+- [`unnetify()`](https://netify-dev.github.io/netify/reference/unnetify.md)
+  [`netify_to_df()`](https://netify-dev.github.io/netify/reference/unnetify.md)
+  : Convert netify objects back to dyadic data frames
+
+# Articles
+
+### Getting Started
+
+- [Foundations](https://netify-dev.github.io/netify/articles/foundations.md):
+- [Event
+  Data](https://netify-dev.github.io/netify/articles/event_data.md):
+- [Ego
+  Networks](https://netify-dev.github.io/netify/articles/ego_networks.md):
+- [Manual Plotting with
+  ggplot2](https://netify-dev.github.io/netify/articles/manual_plotting.md):
+- [Helpful
+  Resources](https://netify-dev.github.io/netify/articles/resources.md):
+
+### Advanced Topics
+
+- [Multilayer
+  Networks](https://netify-dev.github.io/netify/articles/multilayer_networks.md):
+- [Tracking Changes in Cooperation and Conflict: Comparing
+  Networks](https://netify-dev.github.io/netify/articles/tracking_changes.md):
+- [Measuring Who Connects with Whom: Homophily & Dyadic
+  Analysis](https://netify-dev.github.io/netify/articles/attribute_analysis.md):

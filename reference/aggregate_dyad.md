@@ -1,0 +1,238 @@
+# Aggregate dyadic event data by actor pairs
+
+`aggregate_dyad` is designed for use with dyadic event datasets such as
+those from ACLED or ICEWS. These datasets often contain multiple
+interactions between the same pair of actors—e.g., protest events,
+material cooperation, or verbal conflict—recorded at high frequency.
+This function aggregates such repeated observations into a single
+summary value per dyad, optionally within specified time periods. It is
+particularly useful for preparing network inputs by collapsing daily or
+monthly event-level data into actor-to-actor matrices.
+
+## Usage
+
+``` r
+aggregate_dyad(
+  dyad_data,
+  actor1,
+  actor2,
+  time = NULL,
+  weight,
+  symmetric,
+  ignore_missing = TRUE
+)
+```
+
+## Arguments
+
+- dyad_data:
+
+  A data.frame containing dyadic observations. Must include columns for
+  two actors and a weight variable. Will be coerced to data.frame if a
+  tibble or data.table is provided.
+
+- actor1:
+
+  Character string specifying the column name for the first actor in
+  each dyad.
+
+- actor2:
+
+  Character string specifying the column name for the second actor in
+  each dyad.
+
+- time:
+
+  Character string specifying the column name for time periods. If NULL
+  (default), aggregation is performed across all time periods.
+
+- weight:
+
+  Character string specifying the column name containing values to be
+  aggregated (summed) for each unique actor pair.
+
+- symmetric:
+
+  Logical. If TRUE, treats dyads as undirected (i.e., the dyad A-B is
+  treated as identical to B-A). If FALSE, treats dyads as directed
+  (i.e., A-B is distinct from B-A).
+
+- ignore_missing:
+
+  Logical. If TRUE (default), missing values in the weight variable are
+  ignored during aggregation. If FALSE, any dyad containing a missing
+  value will result in NA for that aggregated dyad.
+
+## Value
+
+A data.frame with unique actor pairs (and time periods if specified) and
+their aggregated weight values. The output contains columns:
+
+- **actor1**: First actor in each dyad (using original column name)
+
+- **actor2**: Second actor in each dyad (using original column name)
+
+- **time**: Time period if time parameter was specified (using original
+  column name)
+
+- **weight**: Aggregated (summed) values for each unique dyad (using
+  original column name)
+
+## Details
+
+The function handles both directed and undirected dyadic aggregation:
+
+**For symmetric (undirected) networks:**
+
+The function uses an efficient aggregation method that:
+
+1.  Creates symmetric identifiers for each dyad using `gen_symm_id`
+    (where A-B = B-A)
+
+2.  Aggregates values by these symmetric identifiers
+
+3.  Expands the results back to directed format for consistency with
+    other netify functions
+
+This ensures that interactions between actors A and B are combined
+regardless of direction, useful for undirected relationships like
+friendships or alliances.
+
+**For asymmetric (directed) networks:**
+
+Standard aggregation is performed treating each directed dyad
+separately. This maintains the distinction between A→B and B→A
+relationships, which is important for directed interactions like
+exports/imports or sender/receiver communications.
+
+**Missing value handling:**
+
+The `ignore_missing` parameter controls how NA values are treated:
+
+- When TRUE: Missing values are excluded from the sum (e.g., sum(10,
+  NA, 20) = 30)
+
+- When FALSE: Any missing value results in NA for that dyad (e.g.,
+  sum(10, NA, 20) = NA)
+
+## Note
+
+The function preserves the original column names from the input
+data.frame in the output, making it easy to chain operations or merge
+results.
+
+When symmetric = TRUE, the output still maintains a directed format
+(separate rows for A-B and B-A) with identical values for both
+directions. This ensures compatibility with other netify functions that
+expect directed dyadic data.
+
+## Author
+
+Shahryar Minhas
+
+## Examples
+
+``` r
+# Load example data
+data(icews)
+
+# Example 1: Aggregate multiple events between countries
+# The icews data contains multiple events per country pair
+icews_2010 <- icews[icews$year == 2010, ]
+
+# Aggregate directed cooperation events
+agg_coop <- aggregate_dyad(
+    dyad_data = icews_2010,
+    actor1 = "i",
+    actor2 = "j",
+    weight = "verbCoop",
+    symmetric = FALSE
+)
+
+# Check reduction in observations
+nrow(icews_2010) # Original observations
+#> [1] 22952
+nrow(agg_coop) # Unique directed dyads
+#> [1] 22952
+
+# Example 2: Create symmetric trade volumes
+trade_data <- data.frame(
+    exporter = c("USA", "USA", "China", "China", "USA", "China"),
+    importer = c("China", "China", "USA", "USA", "UK", "UK"),
+    year = c(2020, 2020, 2020, 2021, 2021, 2021),
+    trade_value = c(100, 50, 75, 80, 120, 90)
+)
+
+# Aggregate as total trade between countries (undirected)
+total_trade <- aggregate_dyad(
+    dyad_data = trade_data,
+    actor1 = "exporter",
+    actor2 = "importer",
+    time = "year",
+    weight = "trade_value",
+    symmetric = TRUE
+)
+
+# USA-China trade in 2020: 100+50+75 = 225 (appears in both directions)
+total_trade[total_trade$year == 2020, ]
+#>   exporter importer year trade_value
+#> 2    China      USA 2020         225
+#> 6      USA    China 2020         225
+
+# Example 3: Aggregate across all time periods
+all_time_trade <- aggregate_dyad(
+    dyad_data = trade_data,
+    actor1 = "exporter",
+    actor2 = "importer",
+    time = NULL, # Aggregate across all years
+    weight = "trade_value",
+    symmetric = FALSE
+)
+
+# USA total exports to China: 100+50 = 150
+all_time_trade
+#>   exporter importer trade_value
+#> 1      USA    China         150
+#> 2    China       UK          90
+#> 3      USA       UK         120
+#> 4    China      USA         155
+
+# Example 4: Handle missing values
+trade_data_na <- trade_data
+trade_data_na$trade_value[2] <- NA
+
+# Ignore missing values (default)
+agg_ignore_na <- aggregate_dyad(
+    dyad_data = trade_data_na,
+    actor1 = "exporter",
+    actor2 = "importer",
+    time = "year",
+    weight = "trade_value",
+    symmetric = FALSE,
+    ignore_missing = TRUE
+)
+
+# Include missing values
+agg_with_na <- aggregate_dyad(
+    dyad_data = trade_data_na,
+    actor1 = "exporter",
+    actor2 = "importer",
+    time = "year",
+    weight = "trade_value",
+    symmetric = FALSE,
+    ignore_missing = FALSE
+)
+
+# Compare results for USA->China in 2020
+agg_ignore_na[agg_ignore_na$exporter == "USA" &
+    agg_ignore_na$importer == "China" &
+    agg_ignore_na$year == 2020, ] # 100 (ignored NA)
+#>   exporter importer year trade_value
+#> 1      USA    China 2020         100
+
+agg_with_na[agg_with_na$exporter == "USA" &
+    agg_with_na$importer == "China" &
+    agg_with_na$year == 2020, ] # NA
+#>   exporter importer year trade_value
+#> 1      USA    China 2020          NA
+```
