@@ -169,6 +169,7 @@ Cassy Dorff, Shahryar Minhas
 # Load example data
 data(icews)
 
+# \donttest{
 # Basic usage
 net <- netify(
     icews,
@@ -235,6 +236,7 @@ summary(net)
 #> 11              0.9877987   0.9702754    0.6337725
 #> 12              0.9939394   0.9782226    0.6314429
 #> 13              0.9904402   0.9730745    0.6297063
+# }
 
 if (FALSE) { # \dontrun{
 # Add custom statistics - community detection

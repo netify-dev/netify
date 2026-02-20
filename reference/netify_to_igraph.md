@@ -113,11 +113,11 @@ ig <- netify_to_igraph(verbCoop_net)
 
 # Examine the result
 ig
-#> IGRAPH a09913d DNW- 152 9976 -- 
+#> IGRAPH 55e0487 DNW- 152 9976 -- 
 #> + attr: name (v/c), i_polity2 (v/n), i_log_gdp (v/n), i_log_pop (v/n),
 #> | weight (e/n), verbCoop (e/n), matlCoop (e/n), verbConf (e/n),
 #> | matlConf (e/n)
-#> + edges from a09913d (vertex names):
+#> + edges from 55e0487 (vertex names):
 #>  [1] Afghanistan->Argentina  Afghanistan->Armenia    Afghanistan->Australia 
 #>  [4] Afghanistan->Austria    Afghanistan->Azerbaijan Afghanistan->Bahrain   
 #>  [7] Afghanistan->Bangladesh Afghanistan->Belgium    Afghanistan->Brazil    
@@ -702,6 +702,7 @@ igraph::E(ig)$matlCoop # material cooperation
 #> [9955]   0   0   0   0   0   0   4   0   0   0   0   0   0   0   0   0   0   0
 #> [9973]   1   0   0   0
 
+# \donttest{
 # Example 2: Longitudinal network
 verbCoop_longit <- netify(
     icews,
@@ -726,11 +727,11 @@ names(ig_list) # time period labels
 # Access specific time period
 ig_2002 <- ig_list[["2002"]]
 ig_2002
-#> IGRAPH 2f7a7b9 DNW- 152 8692 -- 
+#> IGRAPH 5a17b00 DNW- 152 8692 -- 
 #> + attr: name (v/c), i_polity2 (v/n), i_log_gdp (v/n), i_log_pop (v/n),
 #> | weight (e/n), verbCoop (e/n), matlCoop (e/n), verbConf (e/n),
 #> | matlConf (e/n)
-#> + edges from 2f7a7b9 (vertex names):
+#> + edges from 5a17b00 (vertex names):
 #>  [1] Afghanistan->Albania    Afghanistan->Armenia    Afghanistan->Australia 
 #>  [4] Afghanistan->Austria    Afghanistan->Azerbaijan Afghanistan->Bahrain   
 #>  [7] Afghanistan->Bangladesh Afghanistan->Belgium    Afghanistan->Brazil    
@@ -738,6 +739,7 @@ ig_2002
 #> [13] Afghanistan->Chile      Afghanistan->China      Afghanistan->Cuba      
 #> [16] Afghanistan->Denmark    Afghanistan->Egypt      Afghanistan->Estonia   
 #> + ... omitted several edges
+# }
 
 # Example 3: Convert without attributes
 ig_structure_only <- netify_to_igraph(

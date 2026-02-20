@@ -176,6 +176,7 @@ network::is.directed(ntwk) # TRUE for this example
 network::has.loops(ntwk) # FALSE (no self-ties)
 #> [1] FALSE
 
+# \donttest{
 # Longitudinal example
 verbCoop_longit <- netify(
     icews,
@@ -219,6 +220,7 @@ ntwk_2002
 #>     i_log_gdp i_log_pop i_polity2 vertex.names 
 #> 
 #>  Edge attribute names not shown 
+# }
 
 if (FALSE) { # \dontrun{
 # Use with ergm for modeling (requires ergm package)

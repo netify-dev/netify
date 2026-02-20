@@ -33,7 +33,9 @@ throughout here.
 
 ``` r
 library(netify)
-library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 
 # Load the ICEWS event data
 data(icews)
@@ -216,8 +218,8 @@ print(multilayer_homophily)
 #> 1                 -6.964294                   -7.444698             0.4804043
 #> 2                 -7.016653                   -7.279288             0.2626347
 #>   p_value     ci_lower   ci_upper n_connected_pairs n_unconnected_pairs
-#> 1   0.000  0.023263949 0.06089174              4453                6573
-#> 2   0.124 -0.004918521 0.03355849              1201                9825
+#> 1   0.000  0.022129252 0.06083500              4453                6573
+#> 2   0.131 -0.004976477 0.03496605              1201                9825
 #>   n_missing n_pairs
 #> 1         3   11476
 #> 2         3   11476

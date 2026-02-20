@@ -48,6 +48,8 @@ melt(
 
 ## Value
 
+See method-specific documentation (e.g., `melt.netify`)
+
 Data frame with columns: row, col, value (and optionally time/layer)
 
 ## Details

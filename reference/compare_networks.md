@@ -365,6 +365,7 @@ struct_comp <- compare_networks(
     what = "structure"
 )
 
+# \donttest{
 # Create longitudinal network for automatic temporal comparison
 longit_net <- netify(
     icews,
@@ -378,8 +379,6 @@ longit_net <- netify(
 temporal_comp <- compare_networks(longit_net, method = "all")
 
 # Create multilayer network example
-if (FALSE) { # \dontrun{
-# Create separate networks for different interaction types
 verbal_coop <- netify(
     icews[icews$year == 2010, ],
     actor1 = "i", actor2 = "j",
@@ -400,8 +399,43 @@ multilayer <- layer_netify(
 # Automatic multilayer comparison
 layer_comp <- compare_networks(multilayer, method = "all")
 print(layer_comp)
-# Will show comparison between verbal and material cooperation layers
-} # }
+#> 
+#> ── Network Comparison Results ──────────────────────────────────────────────────
+#> Comparison type: multilayer
+#> Number of networks: 2
+#> Comparison focus: edges
+#> Method: all
+#> Algorithm: all
+#> Permutation type: classic
+#> Correlation type: pearson
+#> Random seed: 1733169229
+#> ────────────────────────────────────────────────────────────────────────────────
+#> 
+#> ── Edge Comparison Summary ──
+#> 
+#>           comparison correlation jaccard hamming qap_correlation qap_pvalue
+#> 1 verbal vs material       0.609   0.264   0.351           0.609          0
+#>   spectral
+#> 1  8.4e+04
+#> ── Edge Changes 
+#> verbal_vs_material:
+#> Added: 188 | Removed: 7930 | Maintained: 2912
+#> 
+#> ── Statistical Tests ──
+#> 
+#> Permutations: 5000
+#> 
+#> ── qap_correlations 
+#>             verbal  material
+#> verbal   1.0000000 0.6090541
+#> material 0.6090541 1.0000000
+#> 
+#> ── qap_pvalues 
+#>          verbal material
+#> verbal        0        0
+#> material      0        0
+#> attr(,"n_perm")
+#> [1] 5000
 
 # Get detailed matrices
 detailed_comp <- compare_networks(
@@ -411,6 +445,7 @@ detailed_comp <- compare_networks(
 names(detailed_comp$details) # Shows available matrices
 #> [1] "correlation_matrix" "jaccard_matrix"     "hamming_matrix"    
 #> [4] "spectral_matrix"   
+# }
 
 # Compare with custom statistics
 if (FALSE) { # \dontrun{

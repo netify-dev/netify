@@ -149,6 +149,7 @@ layers, consider whether all layers are necessary for your analysis.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">coop_multilayer</span>, <span class="st">"layers"</span><span class="op">)</span> <span class="co"># "Verbal" "Material"</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Verbal"   "Material"</span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Example 2: Longitudinal multilayer (array format)</span></span></span>
 <span class="r-in"><span><span class="va">verbal_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">icews</span>,</span></span>
@@ -174,6 +175,7 @@ layers, consider whether all layers are necessary for your analysis.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="get_raw.html">get_raw</a></span><span class="op">(</span><span class="va">longit_multilayer</span><span class="op">)</span><span class="op">)</span> <span class="co"># [actors × actors × 2 × years]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 152 152   2  13</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

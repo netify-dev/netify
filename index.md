@@ -1,4 +1,4 @@
-# netify ![hex](reference/figures/hex.png)
+# netify ![netify package hex logo](reference/figures/hex.png)
 
 ## Overview
 
@@ -149,7 +149,9 @@ print(icews_conflict)
 plot(icews_conflict)
 ```
 
-![](reference/figures/icews_plot.png)
+![Basic ICEWS conflict network plot](reference/figures/icews_plot.png)
+
+Basic ICEWS conflict network plot
 
 ### More involved visualization
 
@@ -196,7 +198,10 @@ icews_conflict <- add_node_vars(
   scale_color_brewer(palette = 'Set1')
 ```
 
-![](reference/figures/icews_advanced_plot.png)
+![Advanced ICEWS network plot with node colors, sizes, and
+shapes](reference/figures/icews_advanced_plot.png)
+
+Advanced ICEWS network plot with node colors, sizes, and shapes
 
 ## What can you do with a netify object?
 

@@ -97,7 +97,7 @@ We’ll focus on how to do some exploratory statistical analysis with
 library(netify)
 library(ggplot2)
 library(peacesciencer)
-library(tidyverse)
+library(dplyr)
 library(countrycode)
 ```
 
@@ -432,7 +432,7 @@ knitr::kable(regime_homophily, digits=3, align='c')
 
 | net |    layer    |  attribute  |   method    | threshold_value | homophily_correlation | mean_similarity_connected | mean_similarity_unconnected | similarity_difference | p_value | ci_lower | ci_upper | n_connected_pairs | n_unconnected_pairs | n_missing | n_pairs |
 |:---:|:-----------:|:-----------:|:-----------:|:---------------:|:---------------------:|:-------------------------:|:---------------------------:|:---------------------:|:-------:|:--------:|:--------:|:-----------------:|:-------------------:|:---------:|:-------:|
-|  1  | cooperation | regime_type | categorical |        0        |         0.122         |           0.394           |            0.259            |         0.135         |    0    |  0.107   |  0.137   |       4046        |        14869        |     0     |  18915  |
+|  1  | cooperation | regime_type | categorical |        0        |         0.122         |           0.394           |            0.259            |         0.135         |    0    |  0.107   |  0.138   |       4046        |        14869        |     0     |  18915  |
 
 ``` r
 # Build regime type summary message
@@ -529,7 +529,7 @@ knitr::kable(gdp_homophily, digits=3, align='c')
 
 | net |    layer    | attribute |   method    | threshold_value | homophily_correlation | mean_similarity_connected | mean_similarity_unconnected | similarity_difference | p_value | ci_lower | ci_upper | n_connected_pairs | n_unconnected_pairs | n_missing | n_pairs |
 |:---:|:-----------:|:---------:|:-----------:|:---------------:|:---------------------:|:-------------------------:|:---------------------------:|:---------------------:|:-------:|:--------:|:--------:|:-----------------:|:-------------------:|:---------:|:-------:|
-|  1  | cooperation |  log_gdp  | correlation |        0        |         0.111         |          -0.085           |           -0.106            |         0.02          |    0    |  0.098   |  0.125   |       3915        |        13851        |     6     |  18915  |
+|  1  | cooperation |  log_gdp  | correlation |        0        |         0.111         |          -0.085           |           -0.106            |         0.02          |    0    |  0.099   |  0.124   |       3915        |        13851        |     6     |  18915  |
 
 ``` r
 # Build economic development summary message
@@ -1237,11 +1237,11 @@ print(democracy_homophily_longit)
     ## 4                -0.2504444                  -0.3140721            0.06362762
     ## 5                -0.2520272                  -0.3131798            0.06115268
     ##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing
-    ## 1       0 0.1396287 0.1702568              3497               11381        22
-    ## 2       0 0.1398064 0.1689306              3497               11554        21
-    ## 3       0 0.1274913 0.1572406              3571               11480        21
-    ## 4       0 0.1130944 0.1446976              3645               11406        21
-    ## 5       0 0.1087197 0.1389190              3646               11405        21
+    ## 1       0 0.1388299 0.1693459              3497               11381        22
+    ## 2       0 0.1396067 0.1678709              3497               11554        21
+    ## 3       0 0.1260908 0.1563579              3571               11480        21
+    ## 4       0 0.1131807 0.1467251              3645               11406        21
+    ## 5       0 0.1089060 0.1402524              3646               11405        21
     ##   n_pairs
     ## 1   18915
     ## 2   18915

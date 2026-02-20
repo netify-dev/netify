@@ -547,6 +547,7 @@ plot(net_10,
 )
 
 
+# \donttest{
 # Longitudinal network example
 net_longit <- netify(
     icews,
@@ -605,7 +606,6 @@ plot(net_10,
 #> (`geom_text_repel()`).
 
 
-
 # Time subsetting example
 plot(net_longit,
     time_filter = c("2010", "2011", "2012")
@@ -639,4 +639,5 @@ g10$base +
     netify_node(g10) +
     theme_netify()
 
+# }
 ```

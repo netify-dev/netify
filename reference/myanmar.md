@@ -8,6 +8,10 @@ Event data from UCDP for Myanmar
 data(myanmar)
 ```
 
+## Format
+
+A data frame with dyadic event observations.
+
 ## Source
 
 [ucdp](https://ucdp.uu.se/)

@@ -104,7 +104,7 @@ preserved as a dyadic variable named "original_weight".</p>
     <p>The function handles all netify object types:</p><ul><li><p><strong>Cross-sectional</strong>: Transforms the single network matrix</p></li>
 <li><p><strong>Longitudinal arrays</strong>: Transforms each time slice</p></li>
 <li><p><strong>Longitudinal lists</strong>: Transforms each time period matrix</p></li>
-</ul><p>The function automatically updates network attributes:</p><ul><li><p>Updates <code>weight_binary</code> if transformation results in 0/1 values</p></li>
+</ul><p>The function automatically updates network attributes:</p><ul><li><p>Updates <code>is_binary</code> if transformation results in 0/1 values</p></li>
 <li><p>Updates <code>detail_weight</code> with transformation description</p></li>
 <li><p>Preserves all other network and nodal attributes</p></li>
 </ul><p>For longitudinal arrays, original weight preservation is not yet implemented

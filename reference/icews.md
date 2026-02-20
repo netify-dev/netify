@@ -9,6 +9,106 @@ additional nodal variables from the World Bank and Polity IV.
 data(icews)
 ```
 
+## Format
+
+A data frame with dyadic observations and the following variables:
+
+- i:
+
+  Source country
+
+- j:
+
+  Target country
+
+- year:
+
+  Year of observation
+
+- id:
+
+  Observation identifier
+
+- verbCoop:
+
+  Verbal cooperation score
+
+- matlCoop:
+
+  Material cooperation score
+
+- verbConf:
+
+  Verbal conflict score
+
+- matlConf:
+
+  Material conflict score
+
+- i_year:
+
+  Year for source country
+
+- j_year:
+
+  Year for target country
+
+- i_polity2:
+
+  Polity IV democracy score for source country
+
+- j_polity2:
+
+  Polity IV democracy score for target country
+
+- i_iso3c:
+
+  ISO 3166-1 alpha-3 code for source country
+
+- j_iso3c:
+
+  ISO 3166-1 alpha-3 code for target country
+
+- i_region:
+
+  Region for source country
+
+- j_region:
+
+  Region for target country
+
+- i_gdp:
+
+  GDP for source country
+
+- j_gdp:
+
+  GDP for target country
+
+- i_log_gdp:
+
+  Log GDP for source country
+
+- j_log_gdp:
+
+  Log GDP for target country
+
+- i_pop:
+
+  Population for source country
+
+- j_pop:
+
+  Population for target country
+
+- i_log_pop:
+
+  Log population for source country
+
+- j_log_pop:
+
+  Log population for target country
+
 ## Source
 
 [icews](https://dataverse.harvard.edu/dataverse/icews)

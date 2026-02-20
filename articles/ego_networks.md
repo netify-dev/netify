@@ -41,8 +41,8 @@ network data. You can study:
 
 ``` r
 library(netify)
-library(tidyverse)
-library(patchwork)
+library(dplyr)
+library(ggplot2)
 ```
 
 ## Getting Started: Extract an Ego Network

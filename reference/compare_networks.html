@@ -363,6 +363,7 @@ which is important when degree heterogeneity could inflate Type I error rates.</
 <span class="r-in"><span>    what <span class="op">=</span> <span class="st">"structure"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Create longitudinal network for automatic temporal comparison</span></span></span>
 <span class="r-in"><span><span class="va">longit_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">icews</span>,</span></span>
@@ -376,8 +377,6 @@ which is important when degree heterogeneity could inflate Type I error rates.</
 <span class="r-in"><span><span class="va">temporal_comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span><span class="va">longit_net</span>, method <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create multilayer network example</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Create separate networks for different interaction types</span></span></span>
 <span class="r-in"><span><span class="va">verbal_coop</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span>,</span></span>
 <span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
@@ -398,8 +397,43 @@ which is important when degree heterogeneity could inflate Type I error rates.</
 <span class="r-in"><span><span class="co"># Automatic multilayer comparison</span></span></span>
 <span class="r-in"><span><span class="va">layer_comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span><span class="va">multilayer</span>, method <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">layer_comp</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># Will show comparison between verbal and material cooperation layers</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Network Comparison Results</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Comparison type: <span style="font-weight: bold;">multilayer</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Number of networks: <span style="color: #0000BB;">2</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Comparison focus: <span style="color: #00BB00;">edges</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Method: <span style="color: #00BB00;">all</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Algorithm: <span style="color: #00BB00;">all</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Permutation type: <span style="color: #00BB00;">classic</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Correlation type: <span style="color: #00BB00;">pearson</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Random seed: <span style="color: #0000BB;">1733169229</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ────────────────────────────────────────────────────────────────────────────────</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Edge Comparison Summary</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           comparison correlation jaccard hamming qap_correlation qap_pvalue</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 verbal vs material       0.609   0.264   0.351           0.609          0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   spectral</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  8.4e+04</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Edge Changes </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">verbal_vs_material</span>:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Added: <span style="color: #0000BB;">188</span> | Removed: <span style="color: #0000BB;">7930</span> | Maintained: <span style="color: #0000BB;">2912</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Statistical Tests</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Permutations: <span style="color: #0000BB;">5000</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── qap_correlations </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             verbal  material</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> verbal   1.0000000 0.6090541</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> material 0.6090541 1.0000000</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── qap_pvalues </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          verbal material</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> verbal        0        0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> material      0        0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"n_perm")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5000</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Get detailed matrices</span></span></span>
 <span class="r-in"><span><span class="va">detailed_comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span></span></span>
@@ -409,6 +443,7 @@ which is important when degree heterogeneity could inflate Type I error rates.</
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">detailed_comp</span><span class="op">$</span><span class="va">details</span><span class="op">)</span> <span class="co"># Shows available matrices</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "correlation_matrix" "jaccard_matrix"     "hamming_matrix"    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4] "spectral_matrix"   </span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compare with custom statistics</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>

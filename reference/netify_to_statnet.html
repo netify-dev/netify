@@ -211,6 +211,7 @@ after creating the network objects.</p>
 <span class="r-in"><span><span class="fu">network</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/network/man/network.indicators.html" class="external-link">has.loops</a></span><span class="op">(</span><span class="va">ntwk</span><span class="op">)</span> <span class="co"># FALSE (no self-ties)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Longitudinal example</span></span></span>
 <span class="r-in"><span><span class="va">verbCoop_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">icews</span>,</span></span>
@@ -254,6 +255,7 @@ after creating the network objects.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     i_log_gdp i_log_pop i_polity2 vertex.names </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Edge attribute names not shown </span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># Use with ergm for modeling (requires ergm package)</span></span></span>

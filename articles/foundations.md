@@ -73,7 +73,8 @@ if (!"peacesciencer" %in% rownames(installed.packages())) {
 }
 # load necessary packages for this vignette
 library(peacesciencer)
-library(tidyverse)
+library(dplyr)
+library(ggplot2)
 
 # organize external data for peacesciencer
 peacesciencer::download_extdata()
