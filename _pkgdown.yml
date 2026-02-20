@@ -23,6 +23,7 @@ reference:
     desc: "Functions for constructing netify objects"
     contents:
     - netify
+    - new_netify
     - layer_netify
     - ego_netify
     - to_netify
@@ -48,9 +49,11 @@ reference:
     desc: "Network statistics and comparisons"
     contents:
     - summary.netify
+    - summary.netify_comparison
     - summary_actor
     - netify_measurements
     - compare_networks
+    - print.netify_comparison
     - homophily
     - mixing_matrix
     - dyad_correlation
@@ -71,6 +74,32 @@ reference:
     - list_network_styles
     - list_palettes
 
+  - title: "Plot Styles"
+    desc: "Pre-built visual style presets"
+    contents:
+    - style_random
+    - style_budapest
+    - style_economist
+    - style_538
+    - style_solarized
+    - style_stata
+    - style_nature
+    - style_cyberpunk
+    - style_tufte
+    - style_pastel
+    - style_retro80s
+    - style_dark2
+    - style_bipartite_network
+    - style_temporal_network
+    - style_witcher_feline
+    - style_witcher_griffin
+    - style_witcher_wolven
+    - style_witcher_ursine
+    - style_witcher_manticore
+    - style_witcher_viper
+    - style_pokemon_pikachu
+    - style_secretariat
+
   - title: "Plot Components"
     desc: "Low-level plot building blocks"
     contents:
@@ -78,6 +107,8 @@ reference:
     - get_node_layout
     - get_edge_layout
     - get_ego_layout
+    - ego_layouts
+    - remove_ego_edges
     - assemble_netify_plot
     - netify_edge
     - netify_node
@@ -88,6 +119,16 @@ reference:
     - netify_scale_labels
     - reset_scales
     - plot_with_style
+    - validate_plot_params
+    - print.netify_plot_components
+    - ggplot_add.netify_edge
+    - ggplot_add.netify_node
+    - ggplot_add.netify_text
+    - ggplot_add.netify_label
+    - ggplot_add.netify_text_repel
+    - ggplot_add.netify_label_repel
+    - ggplot_add.netify_scale_reset
+    - ggplot_add.netify_labels
 
   - title: "Conversion"
     desc: "Convert between netify and other formats"
@@ -96,7 +137,9 @@ reference:
     - netify_to_statnet
     - netify_to_amen
     - unnetify
-    - melt.netify
+    - melt
+    - decompose_igraph
+    - decompose_statnet
 
   - title: "Inspection"
     desc: "Examine and extract from netify objects"
