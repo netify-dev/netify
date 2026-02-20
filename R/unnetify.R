@@ -21,11 +21,8 @@
 #'     \item \strong{from_id}: Unique identifier combining actor and time (longitudinal only)
 #'     \item \strong{to_id}: Unique identifier combining actor and time (longitudinal only)
 #'     \item \strong{Dyadic attributes}: Any edge-level covariates from the original data
-#'     \item \strong{Nodal attributes}: Actor-level covariates merged onto dyads:
-#'       \itemize{
-#'         \item For directed networks: suffixed with "_from" and "_to"
-#'         \item For undirected networks: suffixed with "_dyad"
-#'       }
+#'     \item \strong{Nodal attributes}: Actor-level covariates merged onto dyads,
+#'       suffixed with "_from" and "_to" to match the corresponding actor
 #'   }
 #'
 #' @details
@@ -37,13 +34,10 @@
 #'   \item Merging network results back with other dyadic covariates
 #' }
 #'
-#' For directed networks, nodal attributes are attached twice - once for the
-#' sender (suffixed "_from") and once for the receiver (suffixed "_to"). This
-#' allows for modeling sender and receiver effects separately.
-#'
-#' For undirected networks, nodal attributes are attached once per dyad with
-#' the suffix "_dyad", since there is no meaningful distinction between sender
-#' and receiver.
+#' Nodal attributes are attached twice per dyad - once for the "from" actor
+#' (suffixed "_from") and once for the "to" actor (suffixed "_to"). This
+#' applies to both directed and undirected networks, ensuring that both
+#' actors' attributes are available for dyadic analysis.
 #'
 #' The function handles both cross-sectional and longitudinal netify objects,
 #' automatically detecting the structure and adjusting the output accordingly.
@@ -151,23 +145,13 @@ unnetify <- function(netlet, remove_zeros = FALSE) {
     # iterate through nodal_vars
     # and merge into edge_data
     for (nv in nodal_vars) {
-        # if not symmetric
-        if (!obj_attrs$symmetric) {
-            # add from rel
-            edge_data$tmp <- nodal_data[match(edge_data$from_id, nodal_data$id), nv]
-            names(edge_data)[ncol(edge_data)] <- paste(nv, "from", sep = "_")
+        # add from rel
+        edge_data$tmp <- nodal_data[match(edge_data$from_id, nodal_data$id), nv]
+        names(edge_data)[ncol(edge_data)] <- paste(nv, "from", sep = "_")
 
-            # add to rel
-            edge_data$tmp <- nodal_data[match(edge_data$to_id, nodal_data$id), nv]
-            names(edge_data)[ncol(edge_data)] <- paste(nv, "to", sep = "_")
-        }
-
-        # if symmetric
-        if (obj_attrs$symmetric) {
-            # add from rel
-            edge_data$tmp <- nodal_data[match(edge_data$from_id, nodal_data$id), nv]
-            names(edge_data)[ncol(edge_data)] <- paste(nv, "dyad", sep = "_")
-        }
+        # add to rel
+        edge_data$tmp <- nodal_data[match(edge_data$to_id, nodal_data$id), nv]
+        names(edge_data)[ncol(edge_data)] <- paste(nv, "to", sep = "_")
     }
     ######################
 

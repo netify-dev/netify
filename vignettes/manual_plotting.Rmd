@@ -15,12 +15,17 @@ knitr::opts_chunk$set(
     cache = FALSE,
     echo = TRUE
 )
+
+# this vignette requires dplyr for data manipulation
+has_pkgs <- requireNamespace("dplyr", quietly = TRUE)
+if (!has_pkgs) {
+    knitr::opts_chunk$set(eval = FALSE)
+}
 ```
 
+This vignette provides an overview of how to create customizable plots using `ggplot2` while still using `netify` to prepare the data.
 
-This vignette provides an overview of how to create customizable plots using `ggplot2` while still using `netify` to prepare the data. 
-
-Lets load the necessary libraries.
+Let's load the necessary libraries.
 
 ```{r}
 library(netify)
@@ -30,9 +35,6 @@ library(ggplot2)
 We'll also use the `ggnewscale` package to create multiple legends when necessary in the same plot (e.g., if you want to have legends for a color aesthetic for both nodes and edges).
 
 ```{r}
-if (!"ggnewscale" %in% rownames(installed.packages())) {
-    install.packages("ggnewscale", repos = "https://cloud.r-project.org")
-}
 library(ggnewscale)
 ```
 
@@ -112,7 +114,7 @@ The `x` and `y` in `nodal_data` and the `x1`, `y1`, `x2`, and `y2` in `edge_data
 
 ## Creating a plot
 
-Now that we have the data, we can create a plot using `ggplot2`. We'll use the `geom_segment` and `geom_point` (or, `geom_label`, `geom_text`, and the `ggrepel package equivalents) functions to plot the edges and nodes, respectively.
+Now that we have the data, we can create a plot using `ggplot2`. We'll use `geom_segment` and `geom_point` (or `geom_label`, `geom_text`, and the `ggrepel` equivalents) to plot the edges and nodes, respectively.
 
 ```{r, fig.width=9, fig.height=8}
 ggplot() +
@@ -168,9 +170,6 @@ lapply(plot_data_mds$net_dfs, head)
 So far, we have focused on using color to convey information about nodal attributes in the network (population size and polity score). Now, let's add more edge information to the plot. For example, we can include information about the `matlConf` dyadic attribute. Imagine we want to highlight edges of verbal cooperation that occur at the same time as when higher than average levels of material conflict occur in the network. First, let's create the variable in the edge data.
 
 ```{r}
-if (!"dplyr" %in% rownames(installed.packages())) {
-    install.packages("dplyr", repos = "https://cloud.r-project.org")
-}
 library(dplyr)
 
 # create high_matlConf variable

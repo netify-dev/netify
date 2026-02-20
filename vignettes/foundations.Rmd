@@ -15,20 +15,28 @@ knitr::opts_chunk$set(
     cache = FALSE,
     echo = TRUE
 )
+
+# this vignette requires several suggested packages
+has_pkgs <- requireNamespace("peacesciencer", quietly = TRUE) &&
+    requireNamespace("dplyr", quietly = TRUE) &&
+    requireNamespace("countrycode", quietly = TRUE)
+if (!has_pkgs) {
+    knitr::opts_chunk$set(eval = FALSE)
+}
 ```
 
-##  Package Overview 
+##  Package Overview
 
-You supply data and `netify` transforms it into easy to work with network data. The goal of `netify` is to provide R functions that simplify and facilitate common tasks related to network creation, summary, visualization, and modeling. Although our package was built with social scientists (especially peace science scholars) in mind, anyone can use it!
+You supply data and `netify` transforms it into easy-to-work-with network data. The goal of `netify` is to provide R functions that simplify and facilitate common tasks related to network creation, summary, visualization, and modeling. Although our package was built with social scientists (especially peace science scholars) in mind, anyone can use it!
 
-This vignette provides a high level overview of our package from start to finish. The best use of this vignette is to introduce the core components of the package to larger audiences. This overview covers our primary functions with data examples and minimal writing. 
+This vignette provides a high-level overview of our package from start to finish. It introduces the core components of the package with data examples and minimal writing.
 
-`netify` goals: 
+`netify` goals:
 
-  (1) Create: Netify your data! We Make it easy for users to create networks from raw data in $R$ as well as add additional features, such as nodal and dyadic variables, to the network object.
-  (2) Explore: Explore characteristics of the network you created, like summary statistics at both the network and actor levels. Visualize your network.
-  (3) Advance:  Advance your network analysis to the next stage by preparing it for use in other network packages and modeling approaches. 
-  
+  (1) **Create**: Netify your data! We make it easy for users to create networks from raw data in R as well as add additional features, such as nodal and dyadic variables, to the network object.
+  (2) **Explore**: Explore characteristics of the network you created, like summary statistics at both the network and actor levels. Visualize your network.
+  (3) **Advance**: Advance your network analysis to the next stage by preparing it for use in other network packages and modeling approaches.
+
 `netify` provides a suite of primary functions to help achieve these goals:
 
 | Create💡  | Explore 🔎 | Advance ️🚀|
@@ -40,7 +48,7 @@ This vignette provides a high level overview of our package from start to finish
 |              |   `plot_graph_stats()`|        |
 |              |   `plot()`|        |
 
-`netify` begins with the user's data input. Data types: our core function, `netify`  handles up to 7 different data inputs, including data frames and edgelists, see documentation for more detail.
+`netify` begins with the user's data input. Our core function, `netify()`, handles several different data inputs including data frames and edgelists (see documentation for more detail).
 
 - The package can also create different types of networks including:
 
@@ -62,15 +70,6 @@ Begin by loading packages and supplying the data. We will use the `peacesciencer
 ```{r, eval=TRUE, results='hide', warning=FALSE, message=FALSE}
 # load packages
 library(netify)
-
-# install extra packages for this vignette
-if (!"tidyverse" %in% rownames(installed.packages())) {
-    install.packages("tidyverse", repos = "https://cloud.r-project.org")
-}
-if (!"peacesciencer" %in% rownames(installed.packages())) {
-    install.packages("peacesciencer", repos = "https://cloud.r-project.org")
-}
-# load necessary packages for this vignette
 library(peacesciencer)
 library(dplyr)
 library(ggplot2)
@@ -230,18 +229,18 @@ plot_actor_stats(
 )
 ```
 
-Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object. (Isolates removed by default and seed set to 6886 for node layout).
+Instead of looking at summary statistics, we also might want to simply visualize the entire network. We can do this by plotting the netify object.
 
-Our goal was to make this super easy for plotting time-varying attributes or actors. 
+By default, `plot()` uses `auto_format = TRUE`, which automatically adjusts aesthetics based on your network's properties — node sizes scale down for larger networks, edge transparency increases for denser networks, and text labels appear for small networks (≤15 nodes). You can disable this with `auto_format = FALSE` for full manual control, or simply override any individual parameter.
 
 ```{r, fig.width=6, fig.height=6}
-# default plot
-plot.netify(mid_long_network,
+# default plot with auto_format
+plot(mid_long_network,
     static_actor_positions = TRUE,
     remove_isolates = FALSE
 )
 
-# a little cleaner
+# override specific defaults
 plot(
     mid_long_network,
     edge_color = "grey",
@@ -285,14 +284,14 @@ head(
 head(attributes(mid_long_network)$nodal_data)
 ```
 
-And now return to our network graph by highlighting specific nodal attributes:
+And now return to our network graph by highlighting specific nodal attributes. To map visual properties to data, we use the `node_*_by` naming convention (e.g., `node_size_by`, `node_color_by`). The legacy `point_*_var` names (e.g., `point_size_var`) also work identically if you prefer that style.
 
 ```{r, fig.width=6, fig.height=6}
 # vary node size by degree
 plot(
     mid_long_network,
     edge_color = "grey",
-    point_size_var = "degree"
+    node_size_by = "degree"
 )
 
 # vary node color by polyarchy
@@ -348,6 +347,17 @@ plot(
 ) + guides(size = "none")
 ```
 
+### Extracting data back to a data frame
+
+If you need to convert a netify object back into a dyadic data frame — for example, to run regressions or export to other software — use `unnetify()`:
+
+```{r}
+mid_long_df <- unnetify(mid_long_network)
+head(mid_long_df[, 1:5])
+```
+
+This returns one row per dyad with all nodal and dyadic attributes merged in. Use `remove_zeros = TRUE` to keep only non-zero edges for a more compact result.
+
 ## Step 3: Advance 🚀
 
 Once we have created and explored our network object, we might want to continue analyzing the data using different modeling approaches. `netify` makes this simple even though those models often aren't! And for the sake of convergence lets go with cross-sectional networks. 
@@ -402,17 +412,13 @@ mid_cross_network <- netify(
 
 Next, let's take a look at passing our netify object to the `amen` function:
 
-```{r}
-# install (if necessary) and load amen
-if (!"amen" %in% rownames(installed.packages())) {
-    install.packages("amen", repos = "https://cloud.r-project.org")
-}
+```{r, eval=requireNamespace("amen", quietly = TRUE)}
 library(amen)
 
 # prep for amen
 mid_cross_amen <- netify_to_amen(mid_cross_network)
 
-# we got all the elements we need for amen! woohoO!
+# we got all the elements we need for amen
 str(mid_cross_amen)
 
 # plug and run
@@ -434,20 +440,16 @@ mid_amen_mod <- ame(
 
 We can apply the same process to ERGMs:
 
-```{r}
-# install (if necessary) and load ergm
-if (!"ergm" %in% rownames(installed.packages())) {
-    install.packages("ergm", repos = "https://cloud.r-project.org")
-}
+```{r, eval=requireNamespace("ergm", quietly = TRUE)}
 library(ergm)
 
-# called netify_to_statnet because it's a reference
-# to the network library, which is what ergm uses
+# netify_to_statnet converts to a network object,
+# which is what ergm uses
 mid_cross_ergm <- netify_to_statnet(mid_cross_network)
 
 # attributes should all be loaded into the
 # appropriate slot
-# notice edge attribtues get a _e suffix added
+# notice edge attributes get a _e suffix added
 mid_cross_ergm
 
 # set NA values to 0 for the three nodecov variables
@@ -472,7 +474,6 @@ set.vertex.attribute(
         0,  get.vertex.attribute(mid_cross_ergm, "wbpopest2")) )
 
 # plug and run
-# Fit the ERGM model (well not a real ergm)
 ergm_model <- ergm(
     formula = mid_cross_ergm ~
         edges +

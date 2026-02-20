@@ -35,7 +35,7 @@ validate_plot_params <- function(plot_args, ...) {
         # Edge aesthetics - fixed
         "edge_alpha", "edge_arrow", "edge_color", "edge_linewidth", "edge_linetype",
         "edge_angle", "edge_curvature", "edge_ncp", "edge_lineend", "edge_linejoin",
-        "adjust_arrow_endpoints", "edge_arrow_gap", "edge_arrow_size_scale", "edge_arrow_fill",
+        "edge_arrow_fill",
         # Edge aesthetics - variable mappings (_by and legacy _var)
         "edge_alpha_by", "edge_alpha_var", "edge_color_by", "edge_color_var",
         "edge_linewidth_by", "edge_linewidth_var", "edge_linetype_by", "edge_linetype_var",

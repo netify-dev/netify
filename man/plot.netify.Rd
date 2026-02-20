@@ -165,13 +165,6 @@ Fixed aesthetics:
 \item{\code{edge_curvature}}{Curvature amount when \code{curve_edges = TRUE}.}
 \item{\code{edge_arrow}}{Arrow specification for directed networks. Example:
 \code{arrow(length = unit(0.2, "cm"))}.}
-\item{\code{adjust_arrow_endpoints}}{Logical. Should arrow endpoints be adjusted
-to stop at node boundaries? Default is \code{FALSE}. Only affects directed networks.}
-\item{\code{edge_arrow_gap}}{Numeric. Additional gap between arrow tip and node boundary
-as a proportion of node radius (0-1). Default is 0.2. Only used when
-\code{adjust_arrow_endpoints = TRUE}.}
-\item{\code{edge_arrow_size_scale}}{Numeric. Scale factor for converting node sizes to
-coordinate units. If \code{NULL} (default), automatically calculated based on plot range.}
 }
 
 Variable aesthetics:

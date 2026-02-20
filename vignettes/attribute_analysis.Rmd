@@ -814,7 +814,7 @@ cat(power_politics_summary)
 
 ## 8. Visualizing Network Patterns
 
-And as seen in other vignettes we can use the `plot.netify()` function to visualize the network with node attributes and edge weights:
+And as seen in other vignettes we can use the `plot()` function to visualize the network with node attributes and edge weights:
 
 ### Network Visualization by Attributes
 
@@ -914,7 +914,7 @@ plot_mixing_matrix(
        y = "Regime type")
 ```
 
-The heatmap clearly shows the alliance patterns between different regime types. The diagonal cells (emphasized with black borders) represent within-type alliances, while off-diagonal cells show cross-type alliances. Darker blue indicates higher proportions of alliances. The assortativity coefficient of 0.113 (not 0.126) and diagonal proportion of 0.41 (not 0.405) confirm the moderate tendency for regime type homophily in alliance formation.
+The heatmap clearly shows the alliance patterns between different regime types. The diagonal cells (emphasized with black borders) represent within-type alliances, while off-diagonal cells show cross-type alliances. Darker blue indicates higher proportions of alliances, confirming the moderate tendency for regime type homophily in alliance formation.
 
 ## 9. Working with Longitudinal Networks
 
@@ -1059,7 +1059,7 @@ regime_mixing_longit <- mixing_matrix(
 # Let's look at the summary statistics
 mixing_summary <- regime_mixing_longit$summary_stats |>
   select(net, assortativity, diagonal_proportion) |>
-  mutate(across(where(is.numeric), round, 3))
+  mutate(across(where(is.numeric), \(x) round(x, 3)))
 
 knitr::kable(mixing_summary,
              caption = "Regime Type Mixing Patterns Over Time",
