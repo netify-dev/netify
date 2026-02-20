@@ -38,7 +38,7 @@ test_that(
         # check attributes
         expect_equal(attr(net_log, "weight"), "log_verbCoop")
         expect_equal(attr(net_log, "detail_weight"), "log_verbCoop (transformed)")
-        expect_false(attr(net_log, "weight_binary"))
+        expect_false(attr(net_log, "is_binary"))
 
         # check transformation
         orig_mat <- get_raw(net_weighted)
@@ -63,7 +63,7 @@ test_that(
         )
 
         # check it's weighted
-        expect_false(attr(net_weighted, "weight_binary"))
+        expect_false(attr(net_weighted, "is_binary"))
 
         # binarize
         net_binary <- mutate_weights(
@@ -73,7 +73,7 @@ test_that(
         )
 
         # check attributes updated
-        expect_true(attr(net_binary, "weight_binary"))
+        expect_true(attr(net_binary, "is_binary"))
         expect_equal(attr(net_binary, "weight"), "conflict_present")
         expect_equal(attr(net_binary, "detail_weight"), "conflict_present (binarized)")
 
@@ -98,7 +98,7 @@ test_that(
         )
 
         # verify it's binary
-        expect_true(attr(net_binary, "weight_binary"))
+        expect_true(attr(net_binary, "is_binary"))
 
         # make weighted
         net_weighted <- mutate_weights(
@@ -108,7 +108,7 @@ test_that(
         )
 
         # check attributes
-        expect_false(attr(net_weighted, "weight_binary"))
+        expect_false(attr(net_weighted, "is_binary"))
         expect_equal(attr(net_weighted, "detail_weight"), "weighted_ties (weighted from binary)")
 
         # verify transformation
@@ -139,7 +139,7 @@ test_that(
 
         # check attributes
         expect_equal(attr(net_sqrt, "weight"), "sqrt_verbCoop")
-        expect_false(attr(net_sqrt, "weight_binary"))
+        expect_false(attr(net_sqrt, "is_binary"))
 
         # verify transformation for specific time slice
         orig_slice <- get_raw(net_array)[, , "2010"]
@@ -200,11 +200,11 @@ test_that(
         )
 
         # check overall attribute
-        expect_true(attr(net_binary, "weight_binary"))
+        expect_true(attr(net_binary, "is_binary"))
 
         # check each period is binary
         for (i in seq_along(net_binary)) {
-            expect_true(attr(net_binary[[i]], "weight_binary"))
+            expect_true(attr(net_binary[[i]], "is_binary"))
             mat <- get_raw(net_binary[[i]])
             expect_true(all(mat %in% c(0, 1, NA)))
         }
@@ -290,7 +290,7 @@ test_that(
         )
 
         # should still be binary
-        expect_true(attr(net_identity, "weight_binary"))
+        expect_true(attr(net_identity, "is_binary"))
         expect_equal(get_raw(net_binary), get_raw(net_identity))
     }
 )
@@ -356,7 +356,7 @@ test_that(
 
         # check attributes
         expect_equal(attr(net_std, "weight"), "verbCoop_standardized")
-        expect_false(attr(net_std, "weight_binary"))
+        expect_false(attr(net_std, "is_binary"))
 
         # verify standardization (mean ~0, sd ~1)
         trans_mat <- get_raw(net_std)
@@ -388,7 +388,7 @@ test_that(
 
         # check attributes
         expect_equal(attr(net_rank, "weight"), "verbCoop_ranked")
-        expect_false(attr(net_rank, "weight_binary"))
+        expect_false(attr(net_rank, "is_binary"))
 
         # verify ranks are reasonable (positive, finite)
         trans_mat <- get_raw(net_rank)
@@ -425,7 +425,7 @@ test_that(
 
         # check attributes
         expect_equal(attr(net_norm, "weight"), "verbCoop_normalized")
-        expect_false(attr(net_norm, "weight_binary"))
+        expect_false(attr(net_norm, "is_binary"))
 
         # verify normalization (range 0-1)
         trans_mat <- get_raw(net_norm)
@@ -462,7 +462,7 @@ test_that(
 
         # check attributes
         expect_equal(attr(net_winsor, "weight"), "verbCoop_winsorized")
-        expect_false(attr(net_winsor, "weight_binary"))
+        expect_false(attr(net_winsor, "is_binary"))
 
         # verify winsorization
         orig_mat <- get_raw(net)
@@ -497,7 +497,7 @@ test_that(
 
         # check attributes
         expect_equal(attr(net_shifted, "weight"), "verbCoop_shifted")
-        expect_false(attr(net_shifted, "weight_binary"))
+        expect_false(attr(net_shifted, "is_binary"))
 
         # verify constant addition
         orig_mat <- get_raw(net)
@@ -528,7 +528,7 @@ test_that(
 
         # check attributes
         expect_equal(attr(net_log1p, "weight"), "log1p_verbCoop")
-        expect_false(attr(net_log1p, "weight_binary"))
+        expect_false(attr(net_log1p, "is_binary"))
 
         # verify transformation
         orig_mat <- get_raw(net)
@@ -565,7 +565,7 @@ test_that(
 
         # check attributes
         expect_equal(attr(net_custom, "weight"), "verbCoop_log_std")
-        expect_false(attr(net_custom, "weight_binary"))
+        expect_false(attr(net_custom, "is_binary"))
 
         # verify transformation (standardized log should have mean ~0, sd ~1)
         trans_mat <- get_raw(net_custom)
@@ -597,7 +597,7 @@ test_that(
 
         # check attributes
         expect_equal(attr(net_power, "weight"), "verbCoop_power")
-        expect_false(attr(net_power, "weight_binary"))
+        expect_false(attr(net_power, "is_binary"))
 
         # verify transformation
         orig_mat <- get_raw(net)

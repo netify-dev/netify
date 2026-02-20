@@ -84,6 +84,7 @@
 #' igraph::V(ig)$i_polity2 # polity scores
 #' igraph::E(ig)$matlCoop # material cooperation
 #'
+#' \donttest{
 #' # Example 2: Longitudinal network
 #' verbCoop_longit <- netify(
 #'     icews,
@@ -105,6 +106,7 @@
 #' # Access specific time period
 #' ig_2002 <- ig_list[["2002"]]
 #' ig_2002
+#' }
 #'
 #' # Example 3: Convert without attributes
 #' ig_structure_only <- netify_to_igraph(
@@ -373,6 +375,18 @@ netify_net_to_igraph <- function(netlet) {
     raw_net <- get_raw(netlet)
 
     # replace NAs with 0 for igraph compatibility
+    # check for non-diagonal NAs and warn the user
+    diag_na <- if (!attr(netlet, "diag_to_NA")) FALSE else TRUE
+    if (diag_na) {
+        non_diag_na <- sum(is.na(raw_net)) - sum(is.na(diag(raw_net)))
+    } else {
+        non_diag_na <- sum(is.na(raw_net))
+    }
+    if (non_diag_na > 0) {
+        cli::cli_alert_warning(
+            "Replacing {non_diag_na} non-diagonal NA value{?s} with 0 for igraph compatibility."
+        )
+    }
     raw_net[is.na(raw_net)] <- 0
 
     # convert to igraph_object

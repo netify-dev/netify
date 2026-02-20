@@ -1,4 +1,4 @@
-# netify <img src="man/figures/hex.png" align="right" alt="hex" width="200px">
+# netify <img src="man/figures/hex.png" align="right" alt="netify package hex logo" width="200px">
 
 ## Overview 
 
@@ -143,7 +143,7 @@ matlConf 0.113    0 1.471 0.594 0.387
 plot(icews_conflict)
 ```
 
-![](man/figures/icews_plot.png)
+![Basic ICEWS conflict network plot](man/figures/icews_plot.png)
 
 ### More involved visualization
 
@@ -189,7 +189,7 @@ icews_conflict <- add_node_vars(
   scale_color_brewer(palette = 'Set1')
 ```
 
-![](man/figures/icews_advanced_plot.png)
+![Advanced ICEWS network plot with node colors, sizes, and shapes](man/figures/icews_advanced_plot.png)
 
 ## What can you do with a netify object?
 

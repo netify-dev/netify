@@ -17,3 +17,101 @@ articles:
     - multilayer_networks
     - tracking_changes
     - attribute_analysis
+
+reference:
+  - title: "Creating Networks"
+    desc: "Functions for constructing netify objects"
+    contents:
+    - netify
+    - layer_netify
+    - ego_netify
+    - to_netify
+    - pivot_dyad_to_network
+
+  - title: "Adding Attributes"
+    desc: "Add nodal and dyadic attributes"
+    contents:
+    - add_node_vars
+    - add_dyad_vars
+
+  - title: "Manipulating Networks"
+    desc: "Subset, transform, and reshape networks"
+    contents:
+    - subset_netify
+    - subset.netify
+    - mutate_weights
+    - aggregate_dyad
+    - decompose_netify
+    - gen_symm_id
+
+  - title: "Analysis"
+    desc: "Network statistics and comparisons"
+    contents:
+    - summary.netify
+    - summary_actor
+    - netify_measurements
+    - compare_networks
+    - homophily
+    - mixing_matrix
+    - dyad_correlation
+    - attribute_report
+    - get_actor_time_info
+
+  - title: "Visualization"
+    desc: "Plot networks and statistics"
+    contents:
+    - plot.netify
+    - plot_actor_stats
+    - plot_graph_stats
+    - plot_homophily
+    - plot_mixing_matrix
+    - plot_mixing_matrix_facet
+    - theme_netify
+    - theme_stat_netify
+    - list_network_styles
+    - list_palettes
+
+  - title: "Plot Components"
+    desc: "Low-level plot building blocks"
+    contents:
+    - net_plot_data
+    - get_node_layout
+    - get_edge_layout
+    - get_ego_layout
+    - assemble_netify_plot
+    - netify_edge
+    - netify_node
+    - netify_text
+    - netify_label
+    - netify_text_repel
+    - netify_label_repel
+    - netify_scale_labels
+    - reset_scales
+    - plot_with_style
+
+  - title: "Conversion"
+    desc: "Convert between netify and other formats"
+    contents:
+    - netify_to_igraph
+    - netify_to_statnet
+    - netify_to_amen
+    - unnetify
+    - melt.netify
+
+  - title: "Inspection"
+    desc: "Examine and extract from netify objects"
+    contents:
+    - print.netify
+    - peek
+    - get_raw
+    - get_adjacency
+    - get_adjacency_array
+    - get_adjacency_list
+    - is_netify
+
+  - title: "Data"
+    desc: "Example datasets"
+    contents:
+    - icews
+    - mexico
+    - myanmar

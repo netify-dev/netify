@@ -352,7 +352,7 @@ test_that("to_netify handles weighted networks correctly", {
     rownames(w_mat) <- colnames(w_mat) <- paste0("v", 1:4)
 
     net_wmat <- to_netify(w_mat)
-    expect_false(attr(net_wmat, "weight_binary"))
+    expect_false(attr(net_wmat, "is_binary"))
 
     # Binary matrix
     b_mat <- matrix(sample(0:1, 16, replace = TRUE), 4, 4)
@@ -360,7 +360,7 @@ test_that("to_netify handles weighted networks correctly", {
     rownames(b_mat) <- colnames(b_mat) <- paste0("v", 1:4)
 
     net_bmat <- to_netify(b_mat)
-    expect_true(attr(net_bmat, "weight_binary"))
+    expect_true(attr(net_bmat, "is_binary"))
 })
 
 # data checks

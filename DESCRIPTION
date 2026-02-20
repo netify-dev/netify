@@ -39,7 +39,6 @@ Suggests:
     testthat (>= 3.0.0),
     dplyr,
     peacesciencer,
-    tidyverse, 
     amen, 
     ergm,
     latentnet,

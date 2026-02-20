@@ -612,7 +612,7 @@ test_that("compare_networks properly extracts multilayer networks", {
     attr(multilayer_net, "layers") <- c("Layer1", "Layer2")
     attr(multilayer_net, "weight") <- c("weight1", "weight2")
     attr(multilayer_net, "detail_weight") <- "Multiple weights"
-    attr(multilayer_net, "weight_binary") <- c(FALSE, FALSE)
+    attr(multilayer_net, "is_binary") <- c(FALSE, FALSE)
     attr(multilayer_net, "diag_to_NA") <- TRUE
     attr(multilayer_net, "missing_to_zero") <- TRUE
     attr(multilayer_net, "sum_dyads") <- FALSE
@@ -631,7 +631,7 @@ test_that("compare_networks properly extracts multilayer networks", {
         expect_equal(attr(layer, "mode"), "unipartite")
         expect_true(!is.null(attr(layer, "weight")))
         expect_true(!is.null(attr(layer, "detail_weight")))
-        expect_true(!is.null(attr(layer, "weight_binary")))
+        expect_true(!is.null(attr(layer, "is_binary")))
         expect_true(!is.null(attr(layer, "diag_to_NA")))
         expect_true(!is.null(attr(layer, "missing_to_zero")))
         expect_true(!is.null(attr(layer, "sum_dyads")))

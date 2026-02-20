@@ -7,6 +7,8 @@
 #' @param data An object to be melted (e.g., a netify object)
 #' @param ... Additional arguments passed to methods
 #'
+#' @return See method-specific documentation (e.g., \code{\link{melt.netify}})
+#'
 #' @name melt
 #' @rdname melt
 #' @export

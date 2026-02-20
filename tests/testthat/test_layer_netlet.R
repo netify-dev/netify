@@ -281,9 +281,9 @@ test_that(
         weight_str <- attr(multi_net, "weight")
         expect_equal(weight_str, "verbCoop, matlCoop, verbConf, matlConf")
 
-        # Check weight_binary vector
-        expect_length(attr(multi_net, "weight_binary"), 4)
-        expect_type(attr(multi_net, "weight_binary"), "logical")
+        # Check is_binary vector
+        expect_length(attr(multi_net, "is_binary"), 4)
+        expect_type(attr(multi_net, "is_binary"), "logical")
     }
 )
 

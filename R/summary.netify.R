@@ -104,6 +104,7 @@
 #' # Load example data
 #' data(icews)
 #'
+#' \donttest{
 #' # Basic usage
 #' net <- netify(
 #'     icews,
@@ -114,6 +115,7 @@
 #'
 #' # get summary
 #' summary(net)
+#' }
 #'
 #' \dontrun{
 #' # Add custom statistics - community detection
@@ -154,7 +156,7 @@ summary.netify <- function(object, ...) {
     is_cross_sec <- netlet_type == "cross_sec"
     is_symmetric <- obj_attrs$symmetric
     is_unipartite <- obj_attrs$mode == "unipartite"
-    is_all_binary <- all(obj_attrs$weight_binary)
+    is_all_binary <- all(obj_attrs$is_binary)
 
     # Check for ego network
     ego_netlet <- !is.null(obj_attrs$ego_netlet) && obj_attrs$ego_netlet

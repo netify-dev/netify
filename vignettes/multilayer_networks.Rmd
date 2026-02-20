@@ -18,6 +18,13 @@ knitr::opts_chunk$set(
     fig.width = 7,
     fig.height = 5
 )
+
+# check for suggested packages needed by this vignette
+has_pkgs <- requireNamespace("dplyr", quietly = TRUE) &&
+    requireNamespace("tidyr", quietly = TRUE)
+if (!has_pkgs) {
+    knitr::opts_chunk$set(eval = FALSE)
+}
 ```
 
 This vignette demonstrates how to analyze multilayer networks in `netify`. Multilayer networks capture multiple types of relationships between the same actors -- a crucial feature for understanding complex political systems where actors interact through various channels simultaneously.
@@ -39,7 +46,9 @@ We'll use data from the Integrated Crisis Early Warning System (ICEWS) throughou
 
 ```{r}
 library(netify)
-library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 
 # Load the ICEWS event data
 data(icews)

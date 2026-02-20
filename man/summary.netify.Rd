@@ -110,6 +110,7 @@ in the \code{prop_edges_missing} statistic.
 # Load example data
 data(icews)
 
+\donttest{
 # Basic usage
 net <- netify(
     icews,
@@ -120,6 +121,7 @@ net <- netify(
 
 # get summary
 summary(net)
+}
 
 \dontrun{
 # Add custom statistics - community detection

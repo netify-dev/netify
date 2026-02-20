@@ -827,7 +827,6 @@ extract_network_list <- function(net) {
                     attr(layer_slice, "netify_type") <- "cross_sec"
                     attr(layer_slice, "symmetric") <- attrs$symmetric
                     attr(layer_slice, "mode") <- attrs$mode
-                    attr(layer_slice, "layer") <- layer_names[l]
                     attr(layer_slice, "layers") <- layer_names[l]
 
                     # Handle weight attributes - might be layer-specific
@@ -839,11 +838,11 @@ extract_network_list <- function(net) {
                         attr(layer_slice, "detail_weight") <- attrs$detail_weight
                     }
 
-                    # Handle weight_binary which might be a vector
-                    if (length(attrs[["weight_binary"]]) > 1) {
-                        attr(layer_slice, "weight_binary") <- attrs[["weight_binary"]][l]
+                    # Handle is_binary which might be a vector
+                    if (length(attrs[["is_binary"]]) > 1) {
+                        attr(layer_slice, "is_binary") <- attrs[["is_binary"]][l]
                     } else {
-                        attr(layer_slice, "weight_binary") <- attrs[["weight_binary"]]
+                        attr(layer_slice, "is_binary") <- attrs[["is_binary"]]
                     }
 
                     # Handle other attributes that might be vectors for multilayer
@@ -882,13 +881,12 @@ extract_network_list <- function(net) {
                     attr(time_list, "weight") <- attrs[["weight"]]
                     attr(time_list, "detail_weight") <- attrs$detail_weight
                 }
-                # Handle weight_binary which might be a vector
-                if (length(attrs[["weight_binary"]]) > 1) {
-                    attr(time_list, "weight_binary") <- attrs[["weight_binary"]][l]
+                # Handle is_binary which might be a vector
+                if (length(attrs[["is_binary"]]) > 1) {
+                    attr(time_list, "is_binary") <- attrs[["is_binary"]][l]
                 } else {
-                    attr(time_list, "weight_binary") <- attrs[["weight_binary"]]
+                    attr(time_list, "is_binary") <- attrs[["is_binary"]]
                 }
-                attr(time_list, "layer") <- layer_names[l]
                 attr(time_list, "layers") <- layer_names[l]
                 attr(time_list, "loops") <- attrs$loops %||% FALSE
                 attr(time_list, "actor_time_uniform") <- attrs$actor_time_uniform %||% TRUE
@@ -950,7 +948,7 @@ extract_network_list <- function(net) {
                 attr(layer_array, "symmetric") <- attrs$symmetric
                 attr(layer_array, "mode") <- attrs$mode
                 attr(layer_array, "weight") <- attrs[["weight"]]
-                attr(layer_array, "layer") <- layer_names[l]
+                attr(layer_array, "layers") <- layer_names[l]
                 class(layer_array) <- "netify"
 
                 layer_list[[l]] <- layer_array
@@ -995,7 +993,7 @@ extract_network_list <- function(net) {
                     attr(mat, "symmetric") <- attrs$symmetric
                     attr(mat, "mode") <- attrs$mode
                     attr(mat, "weight") <- attrs[["weight"]]
-                    attr(mat, "weight_binary") <- attrs[["weight_binary"]]
+                    attr(mat, "is_binary") <- attrs[["is_binary"]]
                     attr(mat, "diag_to_NA") <- attrs$diag_to_NA %||% TRUE
                     attr(mat, "missing_to_zero") <- attrs$missing_to_zero %||% TRUE
                     attr(mat, "sum_dyads") <- attrs$sum_dyads %||% FALSE
@@ -1018,7 +1016,7 @@ extract_network_list <- function(net) {
                     attr(time_slice, "symmetric") <- attrs$symmetric
                     attr(time_slice, "mode") <- attrs$mode
                     attr(time_slice, "weight") <- attrs[["weight"]]
-                    attr(time_slice, "weight_binary") <- attrs[["weight_binary"]]
+                    attr(time_slice, "is_binary") <- attrs[["is_binary"]]
                     attr(time_slice, "diag_to_NA") <- attrs$diag_to_NA %||% TRUE
                     attr(time_slice, "missing_to_zero") <- attrs$missing_to_zero %||% TRUE
                     attr(time_slice, "sum_dyads") <- attrs$sum_dyads %||% FALSE
@@ -1063,15 +1061,14 @@ extract_network_list <- function(net) {
                     attr(layer_slice, "weight") <- attrs[["weight"]]
                     attr(layer_slice, "detail_weight") <- attrs$detail_weight
                 }
-                # Handle weight_binary which might be a vector
-                if (length(attrs[["weight_binary"]]) > 1) {
-                    attr(layer_slice, "weight_binary") <- attrs[["weight_binary"]][l]
+                # Handle is_binary which might be a vector
+                if (length(attrs[["is_binary"]]) > 1) {
+                    attr(layer_slice, "is_binary") <- attrs[["is_binary"]][l]
                 } else {
-                    attr(layer_slice, "weight_binary") <- attrs[["weight_binary"]]
+                    attr(layer_slice, "is_binary") <- attrs[["is_binary"]]
                 }
-                attr(layer_slice, "layer") <- layer_names[l]
                 attr(layer_slice, "loops") <- attrs$loops %||% FALSE
-                attr(layer_slice, "layers") <- layer_names[l] # Single layer name
+                attr(layer_slice, "layers") <- layer_names[l]
                 attr(layer_slice, "actor_time_uniform") <- attrs$actor_time_uniform %||% TRUE
                 attr(layer_slice, "actor_pds") <- attrs$actor_pds
                 # Handle attributes that might be vectors for multilayer

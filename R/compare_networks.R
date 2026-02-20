@@ -155,6 +155,7 @@
 #'     what = "structure"
 #' )
 #'
+#' \donttest{
 #' # Create longitudinal network for automatic temporal comparison
 #' longit_net <- netify(
 #'     icews,
@@ -168,8 +169,6 @@
 #' temporal_comp <- compare_networks(longit_net, method = "all")
 #'
 #' # Create multilayer network example
-#' \dontrun{
-#' # Create separate networks for different interaction types
 #' verbal_coop <- netify(
 #'     icews[icews$year == 2010, ],
 #'     actor1 = "i", actor2 = "j",
@@ -190,8 +189,6 @@
 #' # Automatic multilayer comparison
 #' layer_comp <- compare_networks(multilayer, method = "all")
 #' print(layer_comp)
-#' # Will show comparison between verbal and material cooperation layers
-#' }
 #'
 #' # Get detailed matrices
 #' detailed_comp <- compare_networks(
@@ -199,6 +196,7 @@
 #'     return_details = TRUE
 #' )
 #' names(detailed_comp$details) # Shows available matrices
+#' }
 #'
 #' # Compare with custom statistics
 #' \dontrun{

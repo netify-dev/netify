@@ -269,7 +269,7 @@ calculate_ego_layout_single <- function(
     
     # Get edge weights if needed
     edge_weights <- NULL
-    if (weight_to_distance && !attr(netlet, "weight_binary")) {
+    if (weight_to_distance && !attr(netlet, "is_binary")) {
         # Extract weights from ego to each alter
         edge_weights <- numeric(n_alters)
         names(edge_weights) <- alters

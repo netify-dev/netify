@@ -229,8 +229,8 @@ test_that("multilayer functions handle binary networks correctly", {
     net2 <- new_netify(mat2)
 
     # Verify they are binary
-    expect_true(attr(net1, "weight_binary"))
-    expect_true(attr(net2, "weight_binary"))
+    expect_true(attr(net1, "is_binary"))
+    expect_true(attr(net2, "is_binary"))
 
     # Add attributes
     nodes <- data.frame(
@@ -247,9 +247,9 @@ test_that("multilayer functions handle binary networks correctly", {
         layer_labels = c("Binary1", "Binary2")
     )
 
-    # weight_binary should be a vector
-    expect_equal(length(attr(multi, "weight_binary")), 2)
-    expect_true(all(attr(multi, "weight_binary")))
+    # is_binary should be a vector
+    expect_equal(length(attr(multi, "is_binary")), 2)
+    expect_true(all(attr(multi, "is_binary")))
 
     # Test homophily works
     result <- homophily(multi, attribute = "attr", method = "categorical")
@@ -281,8 +281,8 @@ test_that("multilayer functions handle mixed binary/weighted networks", {
         layer_labels = c("Binary", "Weighted")
     )
 
-    # weight_binary should reflect the mixed nature
-    wb <- attr(multi, "weight_binary")
+    # is_binary should reflect the mixed nature
+    wb <- attr(multi, "is_binary")
     expect_equal(length(wb), 2)
     expect_true(wb[1]) # First is binary
     expect_false(wb[2]) # Second is weighted

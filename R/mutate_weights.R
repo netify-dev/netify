@@ -29,7 +29,7 @@
 #'
 #' The function automatically updates network attributes:
 #' \itemize{
-#'   \item Updates `weight_binary` if transformation results in 0/1 values
+#'   \item Updates `is_binary` if transformation results in 0/1 values
 #'   \item Updates `detail_weight` with transformation description
 #'   \item Preserves all other network and nodal attributes
 #' }
@@ -189,8 +189,8 @@ mutate_weights <- function(
     # determine the type of netify object (e.g., cross-sectional, longitudinal)
     netify_type <- attr(netlet, "netify_type")
 
-    # store the original weight_binary status
-    original_weight_binary <- attr(netlet, "weight_binary")
+    # store the original is_binary status
+    original_is_binary <- attr(netlet, "is_binary")
 
     if (netify_type == "cross_sec") {
         # if requested, save the original weights as a dyadic variable
@@ -218,13 +218,13 @@ mutate_weights <- function(
         }
 
         # check if the transformation resulted in binary values
-        new_weight_binary <- all(as.vector(raw_net) %in% c(0, 1, NA))
+        new_is_binary <- all(as.vector(raw_net) %in% c(0, 1, NA))
 
         # update the raw data in the netify object
         netlet[, ] <- raw_net
 
-        # update the weight_binary attribute
-        attr(netlet, "weight_binary") <- new_weight_binary
+        # update the is_binary attribute
+        attr(netlet, "is_binary") <- new_is_binary
     } else if (netify_type == "longit_array") {
         # handle 3d array (longitudinal data)
         if (keep_original) {
@@ -246,8 +246,8 @@ mutate_weights <- function(
         }
         netlet[, , ] <- raw_net
 
-        # update weight_binary attribute (true only if all time periods are binary)
-        attr(netlet, "weight_binary") <- all(bin_check)
+        # update is_binary attribute (true only if all time periods are binary)
+        attr(netlet, "is_binary") <- all(bin_check)
     } else if (netify_type == "longit_list") {
         # handle list of matrices (longitudinal data)
         bin_check <- logical(length(netlet))
@@ -294,12 +294,12 @@ mutate_weights <- function(
                 }
             }
 
-            # update weight_binary for this specific matrix
-            attr(netlet[[i]], "weight_binary") <- bin_check[i]
+            # update is_binary for this specific matrix
+            attr(netlet[[i]], "is_binary") <- bin_check[i]
         }
 
-        # update overall weight_binary attribute (true only if all periods are binary)
-        attr(netlet, "weight_binary") <- all(bin_check)
+        # update overall is_binary attribute (true only if all periods are binary)
+        attr(netlet, "is_binary") <- all(bin_check)
     }
 
     # update the weight name if a new name is provided
@@ -307,8 +307,8 @@ mutate_weights <- function(
         attr(netlet, "weight") <- new_name
 
         # update detail_weight based on whether network is now binary
-        if (attr(netlet, "weight_binary")) {
-            if (original_weight_binary) {
+        if (attr(netlet, "is_binary")) {
+            if (original_is_binary) {
                 # was binary, still binary
                 attr(netlet, "detail_weight") <- paste0(new_name, " (transformed binary)")
             } else {
@@ -317,7 +317,7 @@ mutate_weights <- function(
                 cli::cli_alert_info("network has been binarized through transformation")
             }
         } else {
-            if (original_weight_binary) {
+            if (original_is_binary) {
                 # was binary, now weighted
                 attr(netlet, "detail_weight") <- paste0(new_name, " (weighted from binary)")
                 cli::cli_alert_info("binary network has been converted to weighted through transformation")
@@ -328,9 +328,9 @@ mutate_weights <- function(
         }
     } else {
         # no new name provided, but still update detail_weight if binary status changed
-        if (attr(netlet, "weight_binary") != original_weight_binary) {
+        if (attr(netlet, "is_binary") != original_is_binary) {
             current_weight <- attr(netlet, "weight", exact = TRUE) %||% "weight"
-            if (attr(netlet, "weight_binary")) {
+            if (attr(netlet, "is_binary")) {
                 attr(netlet, "detail_weight") <- paste0(current_weight, " (binarized)")
                 cli::cli_alert_info("network has been binarized through transformation")
             } else {

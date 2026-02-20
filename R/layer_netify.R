@@ -90,6 +90,7 @@
 #' dim(get_raw(coop_multilayer)) # [actors × actors × 2]
 #' attr(coop_multilayer, "layers") # "Verbal" "Material"
 #'
+#' \donttest{
 #' # Example 2: Longitudinal multilayer (array format)
 #' verbal_longit <- netify(
 #'     icews,
@@ -114,6 +115,7 @@
 #' )
 #'
 #' dim(get_raw(longit_multilayer)) # [actors × actors × 2 × years]
+#' }
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #'
@@ -150,7 +152,7 @@ layer_netify <- function(netlet_list, layer_labels = NULL) {
 
     # generate weights value for multilayer case - optimized
     weight_collapse <- vapply(attribs_list, function(x) {
-        w <- x$weight
+        w <- x[["weight"]]
         if (is.null(w)) {
             "NULL"
         } else if (is.logical(w)) {
@@ -168,7 +170,7 @@ layer_netify <- function(netlet_list, layer_labels = NULL) {
     )
 
     # pull out logical for whether we have binary weights - already optimized
-    weight_binary_vec <- vapply(attribs_list, `[[`, logical(1), "weight_binary")
+    is_binary_vec <- vapply(attribs_list, `[[`, logical(1), "is_binary")
 
     # check to make sure that the networks can be layered
     msrmnts_list <- lapply(netlet_list, netify_measurements)
@@ -210,7 +212,7 @@ layer_netify <- function(netlet_list, layer_labels = NULL) {
         actor_pds = first_attribs$actor_pds,
         weight = weight_collapse,
         detail_weight = weight_label_collapse,
-        weight_binary = weight_binary_vec,
+        is_binary = is_binary_vec,
         symmetric = first_attribs$symmetric,
         mode = first_attribs$mode,
         layers = layer_labels,

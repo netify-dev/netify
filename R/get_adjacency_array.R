@@ -229,8 +229,8 @@ get_adjacency_array <- function(
         }
 
         # create logical value that is TRUE if weight is just 0/1
-        weight_binary <- length(value) == 0 || all(value %in% c(0, 1))
-        bin_check[t_idx] <- weight_binary
+        is_binary <- length(value) == 0 || all(value %in% c(0, 1))
+        bin_check[t_idx] <- is_binary
 
         # get adj mat filled in using optimized C++ function
         adj_mat <- get_matrix(
@@ -272,7 +272,7 @@ get_adjacency_array <- function(
         actor_pds = actor_pds,
         weight = weight,
         detail_weight = weight_label,
-        weight_binary = all(bin_check),
+        is_binary = all(bin_check),
         symmetric = user_symmetric,
         mode = mode,
         layers = layer_label,

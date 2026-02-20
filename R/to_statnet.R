@@ -96,6 +96,7 @@
 #' network::is.directed(ntwk) # TRUE for this example
 #' network::has.loops(ntwk) # FALSE (no self-ties)
 #'
+#' \donttest{
 #' # Longitudinal example
 #' verbCoop_longit <- netify(
 #'     icews,
@@ -117,6 +118,7 @@
 #' # Access specific time period
 #' ntwk_2002 <- ntwk_list[["2002"]]
 #' ntwk_2002
+#' }
 #'
 #' \dontrun{
 #' # Use with ergm for modeling (requires ergm package)

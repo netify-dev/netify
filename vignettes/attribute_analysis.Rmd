@@ -17,6 +17,14 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
+
+# check for suggested packages needed by this vignette
+has_pkgs <- requireNamespace("peacesciencer", quietly = TRUE) &&
+  requireNamespace("countrycode", quietly = TRUE) &&
+  requireNamespace("dplyr", quietly = TRUE)
+if (!has_pkgs) {
+  knitr::opts_chunk$set(eval = FALSE)
+}
 ```
 
 ## Vignette Summary
@@ -69,7 +77,7 @@ We'll focus on how to do some exploratory statistical analysis with **netify**:
 library(netify)
 library(ggplot2)
 library(peacesciencer)
-library(tidyverse)
+library(dplyr)
 library(countrycode)
 ```
 

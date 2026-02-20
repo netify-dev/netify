@@ -134,7 +134,7 @@ new_netify <- function(data, ...) {
         actor_pds = NULL,
         weight = NULL,
         detail_weight = NULL,
-        weight_binary = NULL,
+        is_binary = NULL,
         symmetric = NULL,
         mode = NULL,
         layers = NULL,
@@ -207,11 +207,11 @@ new_netify <- function(data, ...) {
             if (check_binary(mat)) {
                 final_params$weight <- NULL
                 final_params$detail_weight <- "Binary ties"
-                final_params$weight_binary <- TRUE
+                final_params$is_binary <- TRUE
             } else {
                 final_params$weight <- "edge_value"
                 final_params$detail_weight <- paste0("Edges weighted by ", final_params$weight)
-                final_params$weight_binary <- FALSE
+                final_params$is_binary <- FALSE
             }
         }
 
@@ -294,11 +294,11 @@ new_netify <- function(data, ...) {
             if (!any_nonbinary) {
                 final_params$weight <- NULL
                 final_params$detail_weight <- "Binary ties"
-                final_params$weight_binary <- TRUE
+                final_params$is_binary <- TRUE
             } else {
                 final_params$weight <- "edge_value"
                 final_params$detail_weight <- paste0("Edges weighted by ", final_params$weight)
-                final_params$weight_binary <- FALSE
+                final_params$is_binary <- FALSE
             }
         }
 
@@ -376,11 +376,11 @@ new_netify <- function(data, ...) {
             if (!any_nonbinary) {
                 final_params$weight <- NULL
                 final_params$detail_weight <- "Binary ties"
-                final_params$weight_binary <- TRUE
+                final_params$is_binary <- TRUE
             } else {
                 final_params$weight <- "edge_value"
                 final_params$detail_weight <- paste0("Edges weighted by ", final_params$weight)
-                final_params$weight_binary <- FALSE
+                final_params$is_binary <- FALSE
             }
         }
 

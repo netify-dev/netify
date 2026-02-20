@@ -4,6 +4,9 @@
 \name{mexico}
 \alias{mexico}
 \title{Event data slice from UCDP on Mexico}
+\format{
+A data frame with dyadic event observations.
+}
 \source{
 \href{https://ucdp.uu.se/}{ucdp}
 }

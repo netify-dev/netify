@@ -29,8 +29,8 @@ test_that(
         # random data => not symmetric => expect FALSE
         expect_false(attr(net_obj, "symmetric"))
 
-        # random data => not strictly binary => weight_binary=FALSE
-        expect_false(attr(net_obj, "weight_binary"))
+        # random data => not strictly binary => is_binary=FALSE
+        expect_false(attr(net_obj, "is_binary"))
 
         # check row/col names assigned if none existed
         # auto-labeled them "a1","a2",..., if none were present
@@ -57,7 +57,7 @@ test_that(
         m_bin[m_sym > mean(m_sym, na.rm = TRUE)] <- 1
         m_bin[m_sym <= mean(m_sym, na.rm = TRUE)] <- 0
         net_obj_bin <- new_netify(m_bin)
-        expect_true(attr(net_obj_bin, "weight_binary"))
+        expect_true(attr(net_obj_bin, "is_binary"))
 
         # test bipartite => e.g., 7 x 10 matrix
         m_bi <- matrix(sample(1:200, 70, replace = TRUE), nrow = 7, ncol = 10)
@@ -81,7 +81,7 @@ test_that("new_netify works with large array input", {
     expect_false(attr(net_obj, "diag_to_NA"))
     expect_true(attr(net_obj, "missing_to_zero"))
     expect_false(attr(net_obj, "symmetric"))
-    expect_false(attr(net_obj, "weight_binary"))
+    expect_false(attr(net_obj, "is_binary"))
 
     # check internal measurements
     msrs <- netify_measurements(net_obj)
@@ -126,7 +126,7 @@ test_that("new_netify works with large array input", {
     a_sym_binary[a_sym > mean(c(a_sym), na.rm = TRUE)] <- 1
     a_sym_binary[a_sym <= mean(c(a_sym), na.rm = TRUE)] <- 0
     net_obj_sym_binary <- new_netify(a_sym_binary)
-    expect_true(attr(net_obj_sym_binary, "weight_binary"))
+    expect_true(attr(net_obj_sym_binary, "is_binary"))
 
     # make a bipartite, uneven dims
     a_bipartite <- a[1:5, 6:9, ]
@@ -198,7 +198,7 @@ test_that(
             m
         })
         net_obj_bin <- new_netify(mat_list_binary)
-        expect_true(attr(net_obj_bin, "weight_binary"))
+        expect_true(attr(net_obj_bin, "is_binary"))
 
         # test missing => set random NA off diag
         mat_list_miss <- mat_list

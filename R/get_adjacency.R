@@ -192,7 +192,7 @@ get_adjacency <- function(
     value <- dyad_weight
 
     # create logical value that is TRUE if weight is just 0/1 - optimized check
-    weight_binary <- length(value) == 0 || all(value %in% c(0, 1))
+    is_binary <- length(value) == 0 || all(value %in% c(0, 1))
 
     # Pre-compute matrix indices to avoid repeated match() calls
     matRowIndices <- match(dyad_actor1, actors_rows)
@@ -234,7 +234,7 @@ get_adjacency <- function(
         actor_pds = actor_pds,
         weight = weight,
         detail_weight = weight_label,
-        weight_binary = weight_binary,
+        is_binary = is_binary,
         symmetric = user_symmetric,
         mode = mode,
         layers = layer_label,

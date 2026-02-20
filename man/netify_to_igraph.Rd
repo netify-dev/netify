@@ -98,6 +98,7 @@ igraph::edge_attr_names(ig) # edge attributes
 igraph::V(ig)$i_polity2 # polity scores
 igraph::E(ig)$matlCoop # material cooperation
 
+\donttest{
 # Example 2: Longitudinal network
 verbCoop_longit <- netify(
     icews,
@@ -119,6 +120,7 @@ names(ig_list) # time period labels
 # Access specific time period
 ig_2002 <- ig_list[["2002"]]
 ig_2002
+}
 
 # Example 3: Convert without attributes
 ig_structure_only <- netify_to_igraph(

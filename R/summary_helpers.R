@@ -190,7 +190,7 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
 actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = TRUE, other_stats = NULL) {
     # Cache frequently used values
     is_symmetric <- obj_attrs$symmetric
-    is_weighted <- !obj_attrs$weight_binary
+    is_weighted <- !obj_attrs$is_binary
     is_bipartite <- obj_attrs$mode == "bipartite"
 
     # Pre-calculate binary matrix for all cases

@@ -17,6 +17,14 @@ knitr::opts_chunk$set(
     warning = FALSE,
     message = FALSE
 )
+
+# check for suggested packages needed by this vignette
+has_pkgs <- requireNamespace("dplyr", quietly = TRUE) &&
+    requireNamespace("tidyr", quietly = TRUE) &&
+    requireNamespace("patchwork", quietly = TRUE)
+if (!has_pkgs) {
+    knitr::opts_chunk$set(eval = FALSE)
+}
 ```
 
 ## Vignette Summary
@@ -43,7 +51,8 @@ We'll use `compare_networks()` to answer these questions:
 ```{r}
 library(netify)
 library(ggplot2)
-library(tidyverse)
+library(dplyr)
+library(tidyr)
 library(patchwork)
 ```
 

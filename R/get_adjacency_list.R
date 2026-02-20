@@ -360,7 +360,7 @@ get_adjacency_list <- function(
         }
 
         # create logical value that is TRUE if weight is just 0/1
-        weight_binary <- length(value) == 0 || all(value %in% c(0, 1))
+        is_binary <- length(value) == 0 || all(value %in% c(0, 1))
 
         # get adj mat filled in using optimized C++ function
         adj_mat <- get_matrix(
@@ -388,7 +388,7 @@ get_adjacency_list <- function(
             actor_pds = NULL,
             weight = weight_attr,
             detail_weight = weight_label,
-            weight_binary = weight_binary,
+            is_binary = is_binary,
             symmetric = user_symmetric,
             mode = mode,
             layers = layer_label,
@@ -410,7 +410,7 @@ get_adjacency_list <- function(
     if (user_actor_pds) actor_time_uniform <- FALSE
 
     # get info on binary weights using vectorized operation
-    bin_check <- vapply(adj_out, function(x) attr(x, "weight_binary"), logical(1))
+    bin_check <- vapply(adj_out, function(x) attr(x, "is_binary"), logical(1))
 
     # add attributes to list efficiently
     class(adj_out) <- "netify"
@@ -420,7 +420,7 @@ get_adjacency_list <- function(
         actor_pds = actor_pds,
         weight = weight_final,
         detail_weight = weight_label,
-        weight_binary = all(bin_check),
+        is_binary = all(bin_check),
         symmetric = user_symmetric,
         mode = mode,
         layers = layer_label_final,

@@ -48,7 +48,7 @@ The function handles all netify object types:
 
 The function automatically updates network attributes:
 \itemize{
-\item Updates \code{weight_binary} if transformation results in 0/1 values
+\item Updates \code{is_binary} if transformation results in 0/1 values
 \item Updates \code{detail_weight} with transformation description
 \item Preserves all other network and nodal attributes
 }

@@ -148,13 +148,13 @@ homophily <- function(
     nodal_data <- obj_attrs$nodal_data
     netify_type <- obj_attrs$netify_type
 
-    # handle weight_binary which might be a vector for multilayer networks
-    weight_binary <- obj_attrs$weight_binary %||% FALSE
-    if (length(weight_binary) > 1) {
+    # handle is_binary which might be a vector for multilayer networks
+    is_binary <- obj_attrs$is_binary %||% FALSE
+    if (length(is_binary) > 1) {
         # for multilayer, take the first value or check if all are the same
-        is_binary_network <- weight_binary[1]
+        is_binary_network <- is_binary[1]
     } else {
-        is_binary_network <- weight_binary
+        is_binary_network <- is_binary
     }
 
     # check if attribute exists in nodal data
@@ -290,11 +290,11 @@ homophily <- function(
             similarity_matrix <- calculate_similarity_matrix(node_attrs, method)
 
             # determine threshold value for this time period/layer
-            # for multilayer networks, check weight_binary for this specific layer
-            if (length(weight_binary) > 1) {
-                layer_is_binary <- weight_binary[layer_index]
+            # for multilayer networks, check is_binary for this specific layer
+            if (length(is_binary) > 1) {
+                layer_is_binary <- is_binary[layer_index]
             } else {
-                layer_is_binary <- weight_binary
+                layer_is_binary <- is_binary
             }
 
             if (layer_is_binary) {

@@ -303,6 +303,7 @@
 #'     edge_alpha_label = "Verbal Cooperation"
 #' )
 #'
+#' \donttest{
 #' # Longitudinal network example
 #' net_longit <- netify(
 #'     icews,
@@ -354,7 +355,6 @@
 #'     text_color = "darkred"
 #' )
 #'
-#'
 #' # Time subsetting example
 #' plot(net_longit,
 #'     time_filter = c("2010", "2011", "2012")
@@ -385,6 +385,7 @@
 #'     ggplot2::scale_alpha_continuous(range = c(0.01, 0.2)) +
 #'     netify_node(g10) +
 #'     theme_netify()
+#' }
 #'
 #' @import ggplot2
 #' @importFrom ggnewscale new_scale_color new_scale_fill new_scale

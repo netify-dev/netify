@@ -96,7 +96,7 @@ ego_netify <- function(
     msrmnts <- netify_measurements(netlet)
 
     # determine if multilayer and/or longitudinal
-    weighted <- !obj_attrs$weight_binary
+    weighted <- !obj_attrs$is_binary
     multilayer <- ifelse(length(obj_attrs$layers) > 1, TRUE, FALSE)
     longitudinal <- ifelse(obj_attrs$netify_type != "cross_sec", TRUE, FALSE)
     bipartite <- ifelse(obj_attrs$mode == "bipartite", TRUE, FALSE)

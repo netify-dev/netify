@@ -3,6 +3,34 @@
 #' Event data from ICEWS for select countries from 2002 to 2014,
 #' and additional nodal variables from the World Bank and Polity IV.
 #'
+#' @format A data frame with dyadic observations and the following variables:
+#'   \describe{
+#'     \item{i}{Source country}
+#'     \item{j}{Target country}
+#'     \item{year}{Year of observation}
+#'     \item{id}{Observation identifier}
+#'     \item{verbCoop}{Verbal cooperation score}
+#'     \item{matlCoop}{Material cooperation score}
+#'     \item{verbConf}{Verbal conflict score}
+#'     \item{matlConf}{Material conflict score}
+#'     \item{i_year}{Year for source country}
+#'     \item{j_year}{Year for target country}
+#'     \item{i_polity2}{Polity IV democracy score for source country}
+#'     \item{j_polity2}{Polity IV democracy score for target country}
+#'     \item{i_iso3c}{ISO 3166-1 alpha-3 code for source country}
+#'     \item{j_iso3c}{ISO 3166-1 alpha-3 code for target country}
+#'     \item{i_region}{Region for source country}
+#'     \item{j_region}{Region for target country}
+#'     \item{i_gdp}{GDP for source country}
+#'     \item{j_gdp}{GDP for target country}
+#'     \item{i_log_gdp}{Log GDP for source country}
+#'     \item{j_log_gdp}{Log GDP for target country}
+#'     \item{i_pop}{Population for source country}
+#'     \item{j_pop}{Population for target country}
+#'     \item{i_log_pop}{Log population for source country}
+#'     \item{j_log_pop}{Log population for target country}
+#'   }
+#'
 #' @name icews
 #' @docType data
 #' @usage data(icews)

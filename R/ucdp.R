@@ -2,6 +2,8 @@
 #'
 #' Event data from UCDP for Mexico
 #'
+#' @format A data frame with dyadic event observations.
+#'
 #' @name mexico
 #' @docType data
 #' @usage data(mexico)
@@ -21,6 +23,8 @@ NULL
 #' Event data slice from UCDP on Myanmar
 #'
 #' Event data from UCDP for Myanmar
+#'
+#' @format A data frame with dyadic event observations.
 #'
 #' @name myanmar
 #' @docType data

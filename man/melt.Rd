@@ -30,6 +30,8 @@ melt(data, ...)
 \item{value.name}{Character. Name for value column (default: "value")}
 }
 \value{
+See method-specific documentation (e.g., \code{\link{melt.netify}})
+
 Data frame with columns: row, col, value (and optionally time/layer)
 }
 \description{

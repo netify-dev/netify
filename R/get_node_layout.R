@@ -348,7 +348,7 @@ create_union_graph <- function(g_list, obj_attrs) {
         idx <- match(actors_t, all_actors)
 
         # add to union (increment for binary, sum for weighted)
-        if (obj_attrs$weight_binary) {
+        if (obj_attrs$is_binary) {
             union_adj[idx, idx] <- union_adj[idx, idx] + (adj_t > 0)
         } else {
             union_adj[idx, idx] <- union_adj[idx, idx] + adj_t
@@ -356,7 +356,7 @@ create_union_graph <- function(g_list, obj_attrs) {
     }
 
     # normalize by number of time periods for weighted networks
-    if (!obj_attrs$weight_binary) {
+    if (!obj_attrs$is_binary) {
         union_adj <- union_adj / length(g_list)
     }
 

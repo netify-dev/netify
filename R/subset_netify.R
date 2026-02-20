@@ -299,7 +299,7 @@ subset_netify <- function(
         }
 
         # update logical vectors
-        for (attr_name in c("weight_binary", "diag_to_NA", "missing_to_zero")) {
+        for (attr_name in c("is_binary", "diag_to_NA", "missing_to_zero")) {
             if (!is.null(obj_attrs[[attr_name]]) && length(obj_attrs[[attr_name]]) > 1) {
                 new_attrs[[attr_name]] <- obj_attrs[[attr_name]][layer_idx]
             }
@@ -320,9 +320,9 @@ subset_netify <- function(
                 elem_attrs <- attributes(x)
                 # update layer-related attributes in each element
                 elem_attrs$layers <- new_attrs$layers
-                elem_attrs$weight <- new_attrs$weight
+                elem_attrs[["weight"]] <- new_attrs[["weight"]]
                 elem_attrs$detail_weight <- new_attrs$detail_weight
-                elem_attrs$weight_binary <- new_attrs$weight_binary
+                elem_attrs$is_binary <- new_attrs$is_binary
                 elem_attrs$diag_to_NA <- new_attrs$diag_to_NA
                 elem_attrs$missing_to_zero <- new_attrs$missing_to_zero
                 # reapply attributes

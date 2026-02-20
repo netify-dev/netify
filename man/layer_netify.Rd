@@ -98,6 +98,7 @@ coop_multilayer <- layer_netify(
 dim(get_raw(coop_multilayer)) # [actors × actors × 2]
 attr(coop_multilayer, "layers") # "Verbal" "Material"
 
+\donttest{
 # Example 2: Longitudinal multilayer (array format)
 verbal_longit <- netify(
     icews,
@@ -122,6 +123,7 @@ longit_multilayer <- layer_netify(
 )
 
 dim(get_raw(longit_multilayer)) # [actors × actors × 2 × years]
+}
 
 }
 \author{
