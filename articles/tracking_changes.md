@@ -584,7 +584,7 @@ edge_change_data <- data.frame(
 )
 
 # Reshape for plotting
-edge_change_long <- edge_change_data %>%
+edge_change_long <- edge_change_data |>
     pivot_longer(
         cols = c(Added, Removed, Maintained),
         names_to = "Change_Type",
@@ -738,14 +738,14 @@ struct_data <- struct_comparison$summary
 
 # Calculate percent changes from baseline
 baseline_year <- struct_data$network[1]
-struct_long <- struct_data %>%
-    select(-num_actors) %>% # Remove num_actors since it doesn't change much
-    pivot_longer(cols = -network, names_to = "metric", values_to = "value") %>%
-    group_by(metric) %>%
+struct_long <- struct_data |>
+    select(-num_actors) |> # Remove num_actors since it doesn't change much
+    pivot_longer(cols = -network, names_to = "metric", values_to = "value") |>
+    group_by(metric) |>
     mutate(
         first_value = value[1],
         percent_change = (value - first_value) / first_value * 100
-    ) %>%
+    ) |>
     ungroup()
 
 # Create heatmap of changes
@@ -779,17 +779,17 @@ plot:
 
 ``` r
 # Reshape data for visualization
-struct_long <- struct_data %>%
-    select(-num_actors) %>% # Remove num_actors since it doesn't change
-    pivot_longer(cols = -network, names_to = "metric", values_to = "value") %>%
-    group_by(metric) %>%
+struct_long <- struct_data |>
+    select(-num_actors) |> # Remove num_actors since it doesn't change
+    pivot_longer(cols = -network, names_to = "metric", values_to = "value") |>
+    group_by(metric) |>
     mutate(
         # Calculate percent change from first year
         first_value = value[1],
         percent_change = (value - first_value) / first_value * 100,
         # Also calculate year-to-year change
         yoy_change = (value - lag(value)) / lag(value) * 100
-    ) %>%
+    ) |>
     ungroup()
 
 # Visualize structural changes over time

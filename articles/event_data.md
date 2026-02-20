@@ -104,8 +104,8 @@ plot(mex_network,
 
 ![](event_data_files/figure-html/unnamed-chunk-3-2.png)
 
-The graphs above reveals the need to transform the data to increase
-interpretability. To do so, we can log the the values of the edges. The
+The graphs above reveal the need to transform the data to increase
+interpretability. To do so, we can log the values of the edges. The
 `netify` plot function has a built-in parameter for this where the user
 can pass the function they want to use to transform the weights of the
 data (see the general `mutate_weights` function in the package to
@@ -232,9 +232,9 @@ mex_network <- add_node_vars(
 plot(mex_network,
     mutate_weight = log1p,
     edge_alpha_label = "Log(Event Count)",
-    point_size_by = "degree",
-    point_size_label = "Degree",
-    point_alpha = .5,
+    node_size_by = "degree",
+    node_size_label = "Degree",
+    node_alpha = .5,
     check_overlap = TRUE
 )
 ```

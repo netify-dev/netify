@@ -90,9 +90,8 @@ the weight parameter used in netify)</p></li>
 <li><p><strong>from_id</strong>: Unique identifier combining actor and time (longitudinal only)</p></li>
 <li><p><strong>to_id</strong>: Unique identifier combining actor and time (longitudinal only)</p></li>
 <li><p><strong>Dyadic attributes</strong>: Any edge-level covariates from the original data</p></li>
-<li><p><strong>Nodal attributes</strong>: Actor-level covariates merged onto dyads:</p><ul><li><p>For directed networks: suffixed with "_from" and "_to"</p></li>
-<li><p>For undirected networks: suffixed with "_dyad"</p></li>
-</ul></li>
+<li><p><strong>Nodal attributes</strong>: Actor-level covariates merged onto dyads,
+suffixed with "_from" and "_to" to match the corresponding actor</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -100,12 +99,10 @@ the weight parameter used in netify)</p></li>
 <li><p>Creating dyadic datasets for regression analysis</p></li>
 <li><p>Inspecting network data in familiar data frame format</p></li>
 <li><p>Merging network results back with other dyadic covariates</p></li>
-</ul><p>For directed networks, nodal attributes are attached twice - once for the
-sender (suffixed "_from") and once for the receiver (suffixed "_to"). This
-allows for modeling sender and receiver effects separately.</p>
-<p>For undirected networks, nodal attributes are attached once per dyad with
-the suffix "_dyad", since there is no meaningful distinction between sender
-and receiver.</p>
+</ul><p>Nodal attributes are attached twice per dyad - once for the "from" actor
+(suffixed "_from") and once for the "to" actor (suffixed "_to"). This
+applies to both directed and undirected networks, ensuring that both
+actors' attributes are available for dyadic analysis.</p>
 <p>The function handles both cross-sectional and longitudinal netify objects,
 automatically detecting the structure and adjusting the output accordingly.</p>
     </div>

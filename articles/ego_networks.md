@@ -321,7 +321,7 @@ strong_size <- mean(summary(pakistan_strong)$num_actors)
 tibble(
   Network = c("All connections", "Strong only (>50)"),
   `Average Size` = round(c(all_size, strong_size), 1)
-) %>%
+) |>
   knitr::kable()
 ```
 
@@ -396,7 +396,7 @@ tibble(
   Removed = changes_2010_2011$removed,
   Maintained = changes_2010_2011$maintained,
   `Stability Ratio` = stability_ratio
-) %>%
+) |>
   knitr::kable()
 ```
 
@@ -425,8 +425,8 @@ structural_comp <- compare_networks(
 
 # Summarize average properties
 comp_summary <- structural_comp$summary
-avg_props <- comp_summary %>%
-    group_by(network) %>%
+avg_props <- comp_summary |>
+    group_by(network) |>
     summarise(
         `Avg. Nodes` = round(mean(num_actors), 0),
         `Avg. Density` = round(mean(density), 3),
@@ -455,8 +455,8 @@ china_summary <- summary(china_ego)
 
 # Combine for visualization
 temporal_comparison <- bind_rows(
-    us_summary %>% mutate(network = "US"),
-    china_summary %>% mutate(network = "China")
+    us_summary |> mutate(network = "US"),
+    china_summary |> mutate(network = "China")
 )
 
 # Extract year from net column (assuming format like "2002", "2003", etc.)
@@ -504,7 +504,7 @@ tibble(
     edge_changes$added,
     edge_changes$maintained
   )
-) %>%
+) |>
   knitr::kable()
 ```
 

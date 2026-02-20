@@ -284,22 +284,6 @@ Fixed aesthetics:
   Arrow specification for directed networks. Example:
   `arrow(length = unit(0.2, "cm"))`.
 
-- `adjust_arrow_endpoints`:
-
-  Logical. Should arrow endpoints be adjusted to stop at node
-  boundaries? Default is `FALSE`. Only affects directed networks.
-
-- `edge_arrow_gap`:
-
-  Numeric. Additional gap between arrow tip and node boundary as a
-  proportion of node radius (0-1). Default is 0.2. Only used when
-  `adjust_arrow_endpoints = TRUE`.
-
-- `edge_arrow_size_scale`:
-
-  Numeric. Scale factor for converting node sizes to coordinate units.
-  If `NULL` (default), automatically calculated based on plot range.
-
 Variable aesthetics:
 
 - `edge_color_by` or `edge_color_var`:

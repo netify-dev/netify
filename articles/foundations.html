@@ -77,28 +77,29 @@ Shahryar Minhas</h4>
 <div class="section level2">
 <h2 id="package-overview">Package Overview<a class="anchor" aria-label="anchor" href="#package-overview"></a>
 </h2>
-<p>You supply data and <code>netify</code> transforms it into easy to
-work with network data. The goal of <code>netify</code> is to provide R
-functions that simplify and facilitate common tasks related to network
-creation, summary, visualization, and modeling. Although our package was
-built with social scientists (especially peace science scholars) in
-mind, anyone can use it!</p>
-<p>This vignette provides a high level overview of our package from
-start to finish. The best use of this vignette is to introduce the core
-components of the package to larger audiences. This overview covers our
-primary functions with data examples and minimal writing.</p>
+<p>You supply data and <code>netify</code> transforms it into
+easy-to-work-with network data. The goal of <code>netify</code> is to
+provide R functions that simplify and facilitate common tasks related to
+network creation, summary, visualization, and modeling. Although our
+package was built with social scientists (especially peace science
+scholars) in mind, anyone can use it!</p>
+<p>This vignette provides a high-level overview of our package from
+start to finish. It introduces the core components of the package with
+data examples and minimal writing.</p>
 <p><code>netify</code> goals:</p>
 <ol style="list-style-type: decimal">
-<li>Create: Netify your data! We Make it easy for users to create
-networks from raw data in
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>R</mi><annotation encoding="application/x-tex">R</annotation></semantics></math>
-as well as add additional features, such as nodal and dyadic variables,
-to the network object.</li>
-<li>Explore: Explore characteristics of the network you created, like
-summary statistics at both the network and actor levels. Visualize your
-network.</li>
-<li>Advance: Advance your network analysis to the next stage by
-preparing it for use in other network packages and modeling
+<li>
+<strong>Create</strong>: Netify your data! We make it easy for users
+to create networks from raw data in R as well as add additional
+features, such as nodal and dyadic variables, to the network
+object.</li>
+<li>
+<strong>Explore</strong>: Explore characteristics of the network you
+created, like summary statistics at both the network and actor levels.
+Visualize your network.</li>
+<li>
+<strong>Advance</strong>: Advance your network analysis to the next
+stage by preparing it for use in other network packages and modeling
 approaches.</li>
 </ol>
 <p><code>netify</code> provides a suite of primary functions to help
@@ -142,10 +143,10 @@ achieve these goals:</p>
 </tr>
 </tbody>
 </table>
-<p><code>netify</code> begins with the user’s data input. Data types:
-our core function, <code>netify</code> handles up to 7 different data
-inputs, including data frames and edgelists, see documentation for more
-detail.</p>
+<p><code>netify</code> begins with the user’s data input. Our core
+function, <code><a href="../reference/netify.html">netify()</a></code>, handles several different data inputs
+including data frames and edgelists (see documentation for more
+detail).</p>
 <ul>
 <li>
 <p>The package can also create different types of networks
@@ -175,15 +176,6 @@ including:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># load packages</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/netify/">netify</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># install extra packages for this vignette</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="st">"tidyverse"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"tidyverse"</span>, repos <span class="op">=</span> <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="st">"peacesciencer"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"peacesciencer"</span>, repos <span class="op">=</span> <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="co"># load necessary packages for this vignette</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/svmiller/peacesciencer/" class="external-link">peacesciencer</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
@@ -395,13 +387,17 @@ legible plot.</p>
 <p><img src="foundations_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="900"></p>
 <p>Instead of looking at summary statistics, we also might want to
 simply visualize the entire network. We can do this by plotting the
-netify object. (Isolates removed by default and seed set to 6886 for
-node layout).</p>
-<p>Our goal was to make this super easy for plotting time-varying
-attributes or actors.</p>
+netify object.</p>
+<p>By default, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> uses <code>auto_format = TRUE</code>,
+which automatically adjusts aesthetics based on your network’s
+properties — node sizes scale down for larger networks, edge
+transparency increases for denser networks, and text labels appear for
+small networks (≤15 nodes). You can disable this with
+<code>auto_format = FALSE</code> for full manual control, or simply
+override any individual parameter.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># default plot</span></span>
-<span><span class="fu"><a href="../reference/plot.netify.html">plot.netify</a></span><span class="op">(</span><span class="va">mid_long_network</span>,</span>
+<code class="sourceCode R"><span><span class="co"># default plot with auto_format</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mid_long_network</span>,</span>
 <span>    static_actor_positions <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    remove_isolates <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -409,7 +405,7 @@ attributes or actors.</p>
 <span><span class="co">## (`geom_segment()`).</span></span></code></pre>
 <p><img src="foundations_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="900"></p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># a little cleaner</span></span>
+<code class="sourceCode R"><span><span class="co"># override specific defaults</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
 <span>    edge_color <span class="op">=</span> <span class="st">"grey"</span>,</span>
@@ -487,13 +483,17 @@ nodal data information.</p>
 <span><span class="co">## 5      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 6      1 0.005235602 4.953675e-03</span></span></code></pre>
 <p>And now return to our network graph by highlighting specific nodal
-attributes:</p>
+attributes. To map visual properties to data, we use the
+<code>node_*_by</code> naming convention (e.g.,
+<code>node_size_by</code>, <code>node_color_by</code>). The legacy
+<code>point_*_var</code> names (e.g., <code>point_size_var</code>) also
+work identically if you prefer that style.</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># vary node size by degree</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
 <span>    edge_color <span class="op">=</span> <span class="st">"grey"</span>,</span>
-<span>    point_size_var <span class="op">=</span> <span class="st">"degree"</span></span>
+<span>    node_size_by <span class="op">=</span> <span class="st">"degree"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Removed 773 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_segment()`).</span></span></code></pre>
@@ -570,6 +570,26 @@ attributes:</p>
 <pre><code><span><span class="co">## Warning: Removed 773 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_segment()`).</span></span></code></pre>
 <p><img src="foundations_files/figure-html/unnamed-chunk-17-2.png" class="r-plt" alt="" width="900"></p>
+<div class="section level3">
+<h3 id="extracting-data-back-to-a-data-frame">Extracting data back to a data frame<a class="anchor" aria-label="anchor" href="#extracting-data-back-to-a-data-frame"></a>
+</h3>
+<p>If you need to convert a netify object back into a dyadic data frame
+— for example, to run regressions or export to other software — use
+<code><a href="../reference/unnetify.html">unnetify()</a></code>:</p>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mid_long_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/unnetify.html">unnetify</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mid_long_df</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   from  to time cowmidonset   capdist</span></span>
+<span><span class="co">## 1  100 101 1995           1 1024.5480</span></span>
+<span><span class="co">## 2  100 110 1995           0 1779.6330</span></span>
+<span><span class="co">## 3  100 115 1995           0 2101.0041</span></span>
+<span><span class="co">## 4  100 130 1995           0  732.7128</span></span>
+<span><span class="co">## 5  100 135 1995           0 1889.2499</span></span>
+<span><span class="co">## 6  100 140 1995           0 2853.6456</span></span></code></pre>
+<p>This returns one row per dyad with all nodal and dyadic attributes
+merged in. Use <code>remove_zeros = TRUE</code> to keep only non-zero
+edges for a more compact result.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="step-3-advance">Step 3: Advance 🚀<a class="anchor" aria-label="anchor" href="#step-3-advance"></a>
@@ -580,7 +600,7 @@ to continue analyzing the data using different modeling approaches.
 aren’t! And for the sake of convergence lets go with cross-sectional
 networks.</p>
 <p>First, prep the data:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># prep data</span></span>
 <span><span class="va">cow_cross</span> <span class="op">&lt;-</span> <span class="va">cow_dyads</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ccode1</span>, <span class="va">ccode2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -626,17 +646,13 @@ networks.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Next, let’s take a look at passing our netify object to the
 <code>amen</code> function:</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install (if necessary) and load amen</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="st">"amen"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"amen"</span>, repos <span class="op">=</span> <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pdhoff/amen" class="external-link">amen</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pdhoff/amen" class="external-link">amen</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># prep for amen</span></span>
 <span><span class="va">mid_cross_amen</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_amen.html">netify_to_amen</a></span><span class="op">(</span><span class="va">mid_cross_network</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># we got all the elements we need for amen! woohoO!</span></span>
+<span><span class="co"># we got all the elements we need for amen</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">mid_cross_amen</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## List of 4</span></span>
 <span><span class="co">##  $ Y    : num [1:81, 1:81] NA 1 1 0 0 0 0 0 0 0 ...</span></span>
@@ -656,7 +672,7 @@ networks.</p>
 <span><span class="co">##   ..- attr(*, "dimnames")=List of 2</span></span>
 <span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
 <span><span class="co">##   .. ..$ : chr [1:6] "polity21" "polity22" "wbgdp2011est1" "wbgdp2011est2" ...</span></span></code></pre>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plug and run</span></span>
 <span><span class="va">mid_amen_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/amen/man/ame.html" class="external-link">ame</a></span><span class="op">(</span></span>
 <span>    Y <span class="op">=</span> <span class="va">mid_cross_amen</span><span class="op">$</span><span class="va">Y</span>,</span>
@@ -674,22 +690,14 @@ networks.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## WARNING: replacing NAs in design matrix with zeros</span></span></code></pre>
 <p>We can apply the same process to ERGMs:</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install (if necessary) and load ergm</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="st">"ergm"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"ergm"</span>, repos <span class="op">=</span> <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://statnet.org" class="external-link">ergm</a></span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://statnet.org" class="external-link">ergm</a></span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Loading required package: network</span></span></code></pre>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## 'network' 1.20.0 (2026-02-06), part of the Statnet Project</span></span>
 <span><span class="co">## * 'news(package="network")' for changes since last version</span></span>
 <span><span class="co">## * 'citation("network")' for citation information</span></span>
 <span><span class="co">## * 'https://statnet.org' for help, support, and other information</span></span></code></pre>
-<pre><code><span><span class="co">## Registered S3 methods overwritten by 'ergm':</span></span>
-<span><span class="co">##   method               from</span></span>
-<span><span class="co">##   simulate.formula     lme4</span></span>
-<span><span class="co">##   simulate.formula_lhs lme4</span></span></code></pre>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## 'ergm' 4.12.0 (2026-02-17), part of the Statnet Project</span></span>
 <span><span class="co">## * 'news(package="ergm")' for changes since last version</span></span>
@@ -698,14 +706,14 @@ networks.</p>
 <pre><code><span><span class="co">## 'ergm' 4 is a major update that introduces some backwards-incompatible</span></span>
 <span><span class="co">## changes. Please type 'news(package="ergm")' for a list of major</span></span>
 <span><span class="co">## changes.</span></span></code></pre>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># called netify_to_statnet because it's a reference</span></span>
-<span><span class="co"># to the network library, which is what ergm uses</span></span>
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># netify_to_statnet converts to a network object,</span></span>
+<span><span class="co"># which is what ergm uses</span></span>
 <span><span class="va">mid_cross_ergm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_statnet.html">netify_to_statnet</a></span><span class="op">(</span><span class="va">mid_cross_network</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># attributes should all be loaded into the</span></span>
 <span><span class="co"># appropriate slot</span></span>
-<span><span class="co"># notice edge attribtues get a _e suffix added</span></span>
+<span><span class="co"># notice edge attributes get a _e suffix added</span></span>
 <span><span class="va">mid_cross_ergm</span></span></code></pre></div>
 <pre><code><span><span class="co">##  Network attributes:</span></span>
 <span><span class="co">##   vertices = 81 </span></span>
@@ -725,7 +733,7 @@ networks.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">##  Edge attribute names: </span></span>
 <span><span class="co">##     capdist_e cowmidonset</span></span></code></pre>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># set NA values to 0 for the three nodecov variables</span></span>
 <span><span class="co"># this is only for demonstration purposes in the vignette/example</span></span>
 <span><span class="co"># in any real analysis, carefully consider how to handle missing data</span></span>
@@ -748,7 +756,6 @@ networks.</p>
 <span>        <span class="fl">0</span>,  <span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"wbpopest2"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># plug and run</span></span>
-<span><span class="co"># Fit the ERGM model (well not a real ergm)</span></span>
 <span><span class="va">ergm_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm</a></span><span class="op">(</span></span>
 <span>    formula <span class="op">=</span> <span class="va">mid_cross_ergm</span> <span class="op">~</span></span>
 <span>        <span class="va">edges</span> <span class="op">+</span></span>

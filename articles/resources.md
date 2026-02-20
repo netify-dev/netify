@@ -13,8 +13,8 @@ networks and conflict.
 
 #### Overview Books
 
-- Larson, J. M. (Forthcoming 2024). Designing empirical social networks
-  research. Cambridge University Press.
+- Larson, J. M. (2024). *Designing empirical social networks research*.
+  Cambridge University Press.
 
 - Marin, A., & Wellman, B. (2011). Social network analysis: An
   introduction. *The SAGE handbook of social network analysis*, 11-25.

@@ -416,7 +416,7 @@ attributes.</p>
 <td align="center">0.07</td>
 <td align="center">0</td>
 <td align="center">0.126</td>
-<td align="center">0.157</td>
+<td align="center">0.155</td>
 <td align="center">3571</td>
 <td align="center">11480</td>
 <td align="center">21</td>
@@ -624,7 +624,7 @@ prove equally or more influential in shaping alliance networks.</p>
 <td align="center">0.259</td>
 <td align="center">0.135</td>
 <td align="center">0</td>
-<td align="center">0.107</td>
+<td align="center">0.108</td>
 <td align="center">0.138</td>
 <td align="center">4046</td>
 <td align="center">14869</td>
@@ -766,7 +766,7 @@ this hypothesis:</p>
 <td align="center">-0.106</td>
 <td align="center">0.02</td>
 <td align="center">0</td>
-<td align="center">0.099</td>
+<td align="center">0.098</td>
 <td align="center">0.124</td>
 <td align="center">3915</td>
 <td align="center">13851</td>
@@ -1626,9 +1626,9 @@ powerful countries (heterophily)</li>
 <div class="section level2">
 <h2 id="visualizing-network-patterns">8. Visualizing Network Patterns<a class="anchor" aria-label="anchor" href="#visualizing-network-patterns"></a>
 </h2>
-<p>And as seen in other vignettes we can use the
-<code><a href="../reference/plot.netify.html">plot.netify()</a></code> function to visualize the network with node
-attributes and edge weights:</p>
+<p>And as seen in other vignettes we can use the <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>
+function to visualize the network with node attributes and edge
+weights:</p>
 <div class="section level3">
 <h3 id="network-visualization-by-attributes">Network Visualization by Attributes<a class="anchor" aria-label="anchor" href="#network-visualization-by-attributes"></a>
 </h3>
@@ -1732,9 +1732,8 @@ cleaner visualization of the mixing patterns:</p>
 regime types. The diagonal cells (emphasized with black borders)
 represent within-type alliances, while off-diagonal cells show
 cross-type alliances. Darker blue indicates higher proportions of
-alliances. The assortativity coefficient of 0.113 (not 0.126) and
-diagonal proportion of 0.41 (not 0.405) confirm the moderate tendency
-for regime type homophily in alliance formation.</p>
+alliances, confirming the moderate tendency for regime type homophily in
+alliance formation.</p>
 </div>
 </div>
 <div class="section level2">
@@ -1841,11 +1840,11 @@ periods.</p>
 <span><span class="co">## 4                -0.2504444                  -0.3140721            0.06362762</span></span>
 <span><span class="co">## 5                -0.2520272                  -0.3131798            0.06115268</span></span>
 <span><span class="co">##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing</span></span>
-<span><span class="co">## 1       0 0.1388299 0.1693459              3497               11381        22</span></span>
-<span><span class="co">## 2       0 0.1396067 0.1678709              3497               11554        21</span></span>
-<span><span class="co">## 3       0 0.1260908 0.1563579              3571               11480        21</span></span>
-<span><span class="co">## 4       0 0.1131807 0.1467251              3645               11406        21</span></span>
-<span><span class="co">## 5       0 0.1089060 0.1402524              3646               11405        21</span></span>
+<span><span class="co">## 1       0 0.1397918 0.1681661              3497               11381        22</span></span>
+<span><span class="co">## 2       0 0.1377000 0.1685221              3497               11554        21</span></span>
+<span><span class="co">## 3       0 0.1270526 0.1570710              3571               11480        21</span></span>
+<span><span class="co">## 4       0 0.1132304 0.1438056              3645               11406        21</span></span>
+<span><span class="co">## 5       0 0.1103529 0.1401963              3646               11405        21</span></span>
 <span><span class="co">##   n_pairs</span></span>
 <span><span class="co">## 1   18915</span></span>
 <span><span class="co">## 2   18915</span></span>
@@ -1943,7 +1942,7 @@ can extract that period first:</p>
 <span><span class="co"># Let's look at the summary statistics</span></span>
 <span><span class="va">mixing_summary</span> <span class="op">&lt;-</span> <span class="va">regime_mixing_longit</span><span class="op">$</span><span class="va">summary_stats</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">net</span>, <span class="va">assortativity</span>, <span class="va">diagonal_proportion</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, <span class="va">round</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">mixing_summary</span>,</span>
 <span>             caption <span class="op">=</span> <span class="st">"Regime Type Mixing Patterns Over Time"</span>,</span>

@@ -159,8 +159,8 @@ Mexico.</li>
 <pre><code><span><span class="co">## Warning: Removed 64 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_text_repel()`).</span></span></code></pre>
 <p><img src="event_data_files/figure-html/unnamed-chunk-3-2.png" class="r-plt" alt="" width="900"></p>
-<p>The graphs above reveals the need to transform the data to increase
-interpretability. To do so, we can log the the values of the edges. The
+<p>The graphs above reveal the need to transform the data to increase
+interpretability. To do so, we can log the values of the edges. The
 <code>netify</code> plot function has a built-in parameter for this
 where the user can pass the function they want to use to transform the
 weights of the data (see the general <code>mutate_weights</code>
@@ -255,9 +255,9 @@ create the nodal data frame.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
 <span>    mutate_weight <span class="op">=</span> <span class="va">log1p</span>,</span>
 <span>    edge_alpha_label <span class="op">=</span> <span class="st">"Log(Event Count)"</span>,</span>
-<span>    point_size_by <span class="op">=</span> <span class="st">"degree"</span>,</span>
-<span>    point_size_label <span class="op">=</span> <span class="st">"Degree"</span>,</span>
-<span>    point_alpha <span class="op">=</span> <span class="fl">.5</span>,</span>
+<span>    node_size_by <span class="op">=</span> <span class="st">"degree"</span>,</span>
+<span>    node_size_label <span class="op">=</span> <span class="st">"Degree"</span>,</span>
+<span>    node_alpha <span class="op">=</span> <span class="fl">.5</span>,</span>
 <span>    check_overlap <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Removed 69 rows containing missing values or values outside the scale range</span></span>

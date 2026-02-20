@@ -781,7 +781,7 @@ years.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Reshape for plotting</span></span>
-<span><span class="va">edge_change_long</span> <span class="op">&lt;-</span> <span class="va">edge_change_data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">edge_change_long</span> <span class="op">&lt;-</span> <span class="va">edge_change_data</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
 <span>        cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Added</span>, <span class="va">Removed</span>, <span class="va">Maintained</span><span class="op">)</span>,</span>
 <span>        names_to <span class="op">=</span> <span class="st">"Change_Type"</span>,</span>
@@ -1085,14 +1085,14 @@ interconnectedness in international cooperation.</p>
 <span></span>
 <span><span class="co"># Calculate percent changes from baseline</span></span>
 <span><span class="va">baseline_year</span> <span class="op">&lt;-</span> <span class="va">struct_data</span><span class="op">$</span><span class="va">network</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
-<span><span class="va">struct_long</span> <span class="op">&lt;-</span> <span class="va">struct_data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">num_actors</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="co"># Remove num_actors since it doesn't change much</span></span>
-<span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="op">-</span><span class="va">network</span>, names_to <span class="op">=</span> <span class="st">"metric"</span>, values_to <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">metric</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">struct_long</span> <span class="op">&lt;-</span> <span class="va">struct_data</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">num_actors</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Remove num_actors since it doesn't change much</span></span>
+<span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="op">-</span><span class="va">network</span>, names_to <span class="op">=</span> <span class="st">"metric"</span>, values_to <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">metric</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>        first_value <span class="op">=</span> <span class="va">value</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
 <span>        percent_change <span class="op">=</span> <span class="op">(</span><span class="va">value</span> <span class="op">-</span> <span class="va">first_value</span><span class="op">)</span> <span class="op">/</span> <span class="va">first_value</span> <span class="op">*</span> <span class="fl">100</span></span>
-<span>    <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create heatmap of changes</span></span>
@@ -1121,17 +1121,17 @@ slightly decreases and transitivity shows modest growth.</p>
 plot:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Reshape data for visualization</span></span>
-<span><span class="va">struct_long</span> <span class="op">&lt;-</span> <span class="va">struct_data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">num_actors</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="co"># Remove num_actors since it doesn't change</span></span>
-<span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="op">-</span><span class="va">network</span>, names_to <span class="op">=</span> <span class="st">"metric"</span>, values_to <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">metric</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">struct_long</span> <span class="op">&lt;-</span> <span class="va">struct_data</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">num_actors</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Remove num_actors since it doesn't change</span></span>
+<span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="op">-</span><span class="va">network</span>, names_to <span class="op">=</span> <span class="st">"metric"</span>, values_to <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">metric</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>        <span class="co"># Calculate percent change from first year</span></span>
 <span>        first_value <span class="op">=</span> <span class="va">value</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
 <span>        percent_change <span class="op">=</span> <span class="op">(</span><span class="va">value</span> <span class="op">-</span> <span class="va">first_value</span><span class="op">)</span> <span class="op">/</span> <span class="va">first_value</span> <span class="op">*</span> <span class="fl">100</span>,</span>
 <span>        <span class="co"># Also calculate year-to-year change</span></span>
 <span>        yoy_change <span class="op">=</span> <span class="op">(</span><span class="va">value</span> <span class="op">-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span></span>
-<span>    <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Visualize structural changes over time</span></span>

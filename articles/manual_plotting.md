@@ -3,7 +3,7 @@
 This vignette provides an overview of how to create customizable plots
 using `ggplot2` while still using `netify` to prepare the data.
 
-Lets load the necessary libraries.
+Let’s load the necessary libraries.
 
 ``` r
 library(netify)
@@ -15,9 +15,6 @@ necessary in the same plot (e.g., if you want to have legends for a
 color aesthetic for both nodes and edges).
 
 ``` r
-if (!"ggnewscale" %in% rownames(installed.packages())) {
-    install.packages("ggnewscale", repos = "https://cloud.r-project.org")
-}
 library(ggnewscale)
 ```
 
@@ -179,9 +176,8 @@ These are the coordinates that will be used to plot the network.
 ## Creating a plot
 
 Now that we have the data, we can create a plot using `ggplot2`. We’ll
-use the `geom_segment` and `geom_point` (or, `geom_label`, `geom_text`,
-and the \`ggrepel package equivalents) functions to plot the edges and
-nodes, respectively.
+use `geom_segment` and `geom_point` (or `geom_label`, `geom_text`, and
+the `ggrepel` equivalents) to plot the edges and nodes, respectively.
 
 ``` r
 ggplot() +
@@ -278,9 +274,6 @@ when higher than average levels of material conflict occur in the
 network. First, let’s create the variable in the edge data.
 
 ``` r
-if (!"dplyr" %in% rownames(installed.packages())) {
-    install.packages("dplyr", repos = "https://cloud.r-project.org")
-}
 library(dplyr)
 ```
 

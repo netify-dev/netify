@@ -377,7 +377,7 @@ Geopolitics seems to override ideological alignment.</p>
 <span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
 <span>  Network <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"All connections"</span>, <span class="st">"Strong only (&gt;50)"</span><span class="op">)</span>,</span>
 <span>  `Average Size` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">all_size</span>, <span class="va">strong_size</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -475,7 +475,7 @@ bilateral while cooperation tends to be multilateral.</p>
 <span>  Removed <span class="op">=</span> <span class="va">changes_2010_2011</span><span class="op">$</span><span class="va">removed</span>,</span>
 <span>  Maintained <span class="op">=</span> <span class="va">changes_2010_2011</span><span class="op">$</span><span class="va">maintained</span>,</span>
 <span>  `Stability Ratio` <span class="op">=</span> <span class="va">stability_ratio</span></span>
-<span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -514,8 +514,8 @@ differently?</p>
 <span></span>
 <span><span class="co"># Summarize average properties</span></span>
 <span><span class="va">comp_summary</span> <span class="op">&lt;-</span> <span class="va">structural_comp</span><span class="op">$</span><span class="va">summary</span></span>
-<span><span class="va">avg_props</span> <span class="op">&lt;-</span> <span class="va">comp_summary</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">network</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="va">avg_props</span> <span class="op">&lt;-</span> <span class="va">comp_summary</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">network</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span>
 <span>        `Avg. Nodes` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">num_actors</span><span class="op">)</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>        `Avg. Density` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">density</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
@@ -557,8 +557,8 @@ more interconnected, potentially reflecting regional concentration.</p>
 <span></span>
 <span><span class="co"># Combine for visualization</span></span>
 <span><span class="va">temporal_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
-<span>    <span class="va">us_summary</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>network <span class="op">=</span> <span class="st">"US"</span><span class="op">)</span>,</span>
-<span>    <span class="va">china_summary</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>network <span class="op">=</span> <span class="st">"China"</span><span class="op">)</span></span>
+<span>    <span class="va">us_summary</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>network <span class="op">=</span> <span class="st">"US"</span><span class="op">)</span>,</span>
+<span>    <span class="va">china_summary</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>network <span class="op">=</span> <span class="st">"China"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Extract year from net column (assuming format like "2002", "2003", etc.)</span></span>
@@ -602,7 +602,7 @@ more interconnected, potentially reflecting regional concentration.</p>
 <span>    <span class="va">edge_changes</span><span class="op">$</span><span class="va">added</span>,</span>
 <span>    <span class="va">edge_changes</span><span class="op">$</span><span class="va">maintained</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
