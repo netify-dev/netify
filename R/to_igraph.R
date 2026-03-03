@@ -125,224 +125,129 @@
 #' @aliases to_igraph
 
 netify_to_igraph <- function(
-    netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE) {
-    # check if netify object
-    netify_check(netlet)
+	netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE) {
+	# check if netify object
+	netify_check(netlet)
 
-    # if more than one layer tell user they must specify a single layer
-    if (length(attributes(netlet)$layers) > 1) {
-        cli::cli_alert_danger(
-            "Error: This object has multiple layers.
-      `netify_to_igraph` does not currently support multilayer `netify` inputs.
-      Please use the `subset_netify` function to create a `netify` object with a single layer."
-        )
-        stop()
-    }
+	# if more than one layer tell user they must specify a single layer
+	if (length(attributes(netlet)$layers) > 1) {
+		cli::cli_abort(
+			"This object has multiple layers.
+	  `netify_to_igraph` does not currently support multilayer `netify` inputs.
+	  Please use the `subset_netify` function to create a `netify` object with a single layer."
+		)
+	}
 
-    # assert dependencies for remapping data to igraph
-    assert_dependency("igraph")
+	# assert dependencies for remapping data to igraph
+	assert_dependency("igraph")
 
-    ## three cases: cross-sec/matrix, longit list, longit array
-    netlet_type <- attr(netlet, "netify_type")
+	## three cases: cross-sec/matrix, longit list, longit array
+	netlet_type <- attr(netlet, "netify_type")
 
-    # if type array convert to list since igraph
-    # doesnt support arrays anyhow
-    if (netlet_type == "longit_array") {
-        netlet <- array_to_list(netlet)
-    }
+	# if type array convert to list since igraph
+	# doesnt support arrays anyhow
+	if (netlet_type == "longit_array") {
+		netlet <- array_to_list(netlet)
+	}
 
-    # check other attributes
-    nodal_data_exist <- !is.null(
-        attr(netlet, "nodal_data")[[1]]
-    )
-    dyad_data_exist <- !is.null(
-        attr(netlet, "dyad_data")[[1]]
-    )
+	# check other attributes
+	nodal_data_exist <- !is.null(
+		attr(netlet, "nodal_data")[[1]]
+	)
+	dyad_data_exist <- !is.null(
+		attr(netlet, "dyad_data")[[1]]
+	)
 
-    # cross-sec case
-    if (netlet_type == "cross_sec") {
-        # convert to igraph object
-        igrph <- netify_net_to_igraph(netlet)
+	# cross-sec case
+	if (netlet_type == "cross_sec") {
+		# convert to igraph object
+		igrph <- netify_net_to_igraph(netlet)
 
-        # process nodal attributes if exist
-        if (nodal_data_exist) {
-            igrph <- add_nodal_to_igraph(
-                netlet, attr(netlet, "nodal_data"), igrph
-            )
-        }
+		# process nodal attributes if exist
+		if (nodal_data_exist) {
+			igrph <- add_nodal_to_igraph(
+				netlet, attr(netlet, "nodal_data"), igrph
+			)
+		}
 
-        # process dyadic attributes if exist
-        if (dyad_data_exist) {
-            igrph <- add_dyad_to_igraph(
-                netlet, attr(netlet, "dyad_data"), igrph
-            )
-        }
-    } # done with cross-sec case
+		# process dyadic attributes if exist
+		if (dyad_data_exist) {
+			igrph <- add_dyad_to_igraph(
+				netlet, attr(netlet, "dyad_data"), igrph
+			)
+		}
+	} # done with cross-sec case
 
-    ## longit case
-    if (netlet_type %in% c("longit_array", "longit_list")) {
-        # cache attributes once
-        time_vals <- names(netlet)
-        nodal_data_attr <- attr(netlet, "nodal_data")
-        dyad_data_attr <- attr(netlet, "dyad_data")
+	## longit case
+	if (netlet_type %in% c("longit_array", "longit_list")) {
+		# cache attributes once
+		time_vals <- names(netlet)
+		nodal_data_attr <- attr(netlet, "nodal_data")
+		dyad_data_attr <- attr(netlet, "dyad_data")
 
-        # if no attributes to add, simplify processing
-        if ((!nodal_data_exist || !add_nodal_attribs) &&
-            (!dyad_data_exist || !add_dyad_attribs)) {
-            # just convert to igraph without attributes
-            igrph <- lapply(netlet, netify_net_to_igraph)
-            names(igrph) <- time_vals
-        } else {
-            # pre-process nodal data by time if needed
-            nodal_data_by_time <- NULL
-            if (nodal_data_exist && add_nodal_attribs && !is.null(nodal_data_attr)) {
-                # create time-indexed lookup for faster access
-                time_col <- nodal_data_attr[, 2]
-                nodal_data_by_time <- split(nodal_data_attr, time_col)
-            }
+		# if no attributes to add, simplify processing
+		if ((!nodal_data_exist || !add_nodal_attribs) &&
+			(!dyad_data_exist || !add_dyad_attribs)) {
+			# just convert to igraph without attributes
+			igrph <- lapply(netlet, netify_net_to_igraph)
+			names(igrph) <- time_vals
+		} else {
+			# pre-process nodal data by time if needed
+			nodal_data_by_time <- NULL
+			if (nodal_data_exist && add_nodal_attribs && !is.null(nodal_data_attr)) {
+				# create time-indexed lookup for faster access
+				time_col <- nodal_data_attr[, 2]
+				nodal_data_by_time <- split(nodal_data_attr, time_col)
+			}
 
-            # process all time periods
-            igrph <- lapply(seq_along(netlet), function(ii) {
-                netlet_slice <- netlet[[ii]]
-                time_val <- time_vals[ii]
+			# process all time periods
+			igrph <- lapply(seq_along(netlet), function(ii) {
+				netlet_slice <- netlet[[ii]]
+				time_val <- time_vals[ii]
 
-                # convert to igraph
-                igrph_slice <- netify_net_to_igraph(netlet_slice)
+				# convert to igraph
+				igrph_slice <- netify_net_to_igraph(netlet_slice)
 
-                # add nodal attributes if needed
-                if (nodal_data_exist && add_nodal_attribs && !is.null(nodal_data_by_time[[time_val]])) {
-                    node_data_t <- nodal_data_by_time[[time_val]]
+				# add nodal attributes if needed
+				if (nodal_data_exist && add_nodal_attribs && !is.null(nodal_data_by_time[[time_val]])) {
+					node_data_t <- nodal_data_by_time[[time_val]]
 
-                    # match order efficiently
-                    igrph_nodes <- names(igraph::V(igrph_slice))
-                    node_data_t <- node_data_t[match(igrph_nodes, node_data_t[, 1]), ]
+					# match order efficiently
+					igrph_nodes <- names(igraph::V(igrph_slice))
+					node_data_t <- node_data_t[match(igrph_nodes, node_data_t[, 1]), ]
 
-                    # vectorized attribute setting
-                    node_var_start <- 3 # skip actor and time columns
-                    if (ncol(node_data_t) >= node_var_start) {
-                        for (col_idx in node_var_start:ncol(node_data_t)) {
-                            igrph_slice <- igraph::set_vertex_attr(
-                                igrph_slice,
-                                name = names(node_data_t)[col_idx],
-                                value = node_data_t[, col_idx]
-                            )
-                        }
-                    }
-                }
+					# vectorized attribute setting
+					node_var_start <- 3 # skip actor and time columns
+					if (ncol(node_data_t) >= node_var_start) {
+						for (col_idx in node_var_start:ncol(node_data_t)) {
+							igrph_slice <- igraph::set_vertex_attr(
+								igrph_slice,
+								name = names(node_data_t)[col_idx],
+								value = node_data_t[, col_idx]
+							)
+						}
+					}
+				}
 
-                # add dyadic attributes if needed
-                if (dyad_data_exist && add_dyad_attribs) {
-                    igrph_slice <- add_dyad_to_igraph(
-                        netlet_slice,
-                        dyad_data_attr,
-                        igrph_slice,
-                        time_val
-                    )
-                }
+				# add dyadic attributes if needed
+				if (dyad_data_exist && add_dyad_attribs) {
+					igrph_slice <- add_dyad_to_igraph(
+						netlet_slice,
+						dyad_data_attr,
+						igrph_slice,
+						time_val
+					)
+				}
 
-                return(igrph_slice)
-            })
+				return(igrph_slice)
+			})
 
-            names(igrph) <- time_vals
-        }
-    } # done with longit case
+			names(igrph) <- time_vals
+		}
+	} # done with longit case
 
-    #
-    return(igrph)
-}
-
-netify_to_igraph <- function(
-    netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE) {
-    # check if netify object
-    netify_check(netlet)
-
-    # if more than one layer tell user they must specify a single layer
-    if (length(attributes(netlet)$layers) > 1) {
-        cli::cli_alert_danger(
-            "Error: This object has multiple layers.
-      `netify_to_igraph` does not currently support multilayer `netify` inputs.
-      Please use the `subset_netify` function to create a `netify` object with a single layer."
-        )
-        stop()
-    }
-
-    # assert dependencies for remapping data to igraph
-    assert_dependency("igraph")
-
-    ## three cases: cross-sec/matrix, longit list, longit array
-    netlet_type <- attr(netlet, "netify_type")
-
-    # if type array convert to list since igraph
-    # doesnt support arrays anyhow
-    if (netlet_type == "longit_array") {
-        netlet <- array_to_list(netlet)
-    }
-
-    # check other attributes
-    nodal_data_exist <- !is.null(
-        attr(netlet, "nodal_data")[[1]]
-    )
-    dyad_data_exist <- !is.null(
-        attr(netlet, "dyad_data")[[1]]
-    )
-
-    # cross-sec case
-    if (netlet_type == "cross_sec") {
-        # convert to igraph object
-        igrph <- netify_net_to_igraph(netlet)
-
-        # process nodal attributes if exist
-        if (nodal_data_exist) {
-            igrph <- add_nodal_to_igraph(
-                netlet, attr(netlet, "nodal_data"), igrph
-            )
-        }
-
-        # process dyadic attributes if exist
-        if (dyad_data_exist) {
-            igrph <- add_dyad_to_igraph(
-                netlet, attr(netlet, "dyad_data"), igrph
-            )
-        }
-    } # done with cross-sec case
-
-    ## longit case
-    if (netlet_type %in% c("longit_array", "longit_list")) {
-        # iterate through netlet
-        igrph <- lapply(1:length(netlet), function(ii) {
-            # get netlet slice
-            netlet_slice <- netlet[[ii]]
-
-            # get time listing
-            time_val <- names(netlet)[ii]
-
-            # convert to network object
-            igrph_slice <- netify_net_to_igraph(netlet_slice)
-
-            # process nodal attributes if exist
-            if (nodal_data_exist & add_nodal_attribs) {
-                igrph_slice <- add_nodal_to_igraph(
-                    netlet_slice, attr(netlet, "nodal_data"),
-                    igrph_slice, time_val
-                )
-            }
-
-            # process dyadic attributes if exist
-            if (dyad_data_exist & add_dyad_attribs) {
-                igrph_slice <- add_dyad_to_igraph(
-                    netlet_slice, attr(netlet, "dyad_data"),
-                    igrph_slice, time_val
-                )
-            }
-
-            #
-            return(igrph_slice)
-        })
-        names(igrph) <- names(netlet)
-    } # done with longit case
-
-    #
-    return(igrph)
+	#
+	return(igrph)
 }
 
 #' @rdname netify_to_igraph
@@ -361,73 +266,73 @@ to_igraph <- netify_to_igraph
 #' @noRd
 
 netify_net_to_igraph <- function(netlet) {
-    # check if bipartite
-    bipartite_logical <- ifelse(attr(netlet, "mode") == "bipartite", TRUE, FALSE)
+	# check if bipartite
+	bipartite_logical <- ifelse(attr(netlet, "mode") == "bipartite", TRUE, FALSE)
 
-    # weight logical
-    if (!is.null(attr(netlet, "weight", exact = TRUE))) {
-        weight_logical <- TRUE
-    } else {
-        weight_logical <- NULL
-    }
+	# weight logical
+	if (!is.null(attr(netlet, "weight", exact = TRUE))) {
+		weight_logical <- TRUE
+	} else {
+		weight_logical <- NULL
+	}
 
-    # strip netify attribs away
-    raw_net <- get_raw(netlet)
+	# strip netify attribs away
+	raw_net <- get_raw(netlet)
 
-    # replace NAs with 0 for igraph compatibility
-    # check for non-diagonal NAs and warn the user
-    diag_na <- if (!attr(netlet, "diag_to_NA")) FALSE else TRUE
-    if (diag_na) {
-        non_diag_na <- sum(is.na(raw_net)) - sum(is.na(diag(raw_net)))
-    } else {
-        non_diag_na <- sum(is.na(raw_net))
-    }
-    if (non_diag_na > 0) {
-        cli::cli_alert_warning(
-            "Replacing {non_diag_na} non-diagonal NA value{?s} with 0 for igraph compatibility."
-        )
-    }
-    raw_net[is.na(raw_net)] <- 0
+	# replace NAs with 0 for igraph compatibility
+	# check for non-diagonal NAs and warn the user
+	diag_na <- if (!attr(netlet, "diag_to_NA")) FALSE else TRUE
+	if (diag_na) {
+		non_diag_na <- sum(is.na(raw_net)) - sum(is.na(diag(raw_net)))
+	} else {
+		non_diag_na <- sum(is.na(raw_net))
+	}
+	if (non_diag_na > 0) {
+		cli::cli_alert_warning(
+			"Replacing {non_diag_na} non-diagonal NA value{?s} with 0 for igraph compatibility."
+		)
+	}
+	raw_net[is.na(raw_net)] <- 0
 
-    # convert to igraph_object
-    if (!bipartite_logical) {
-        # For symmetric networks, use "max" to handle the new igraph behavior
-        # This takes the maximum of the upper and lower triangle values
-        mode_val <- if(attr(netlet, "symmetric")) "max" else "directed"
-        
-        igraph_object <- igraph::graph_from_adjacency_matrix(
-            raw_net,
-            mode = mode_val,
-            weighted = weight_logical,
-            diag = !attr(netlet, "diag_to_NA")
-        )
-    }
+	# convert to igraph_object
+	if (!bipartite_logical) {
+		# For symmetric networks, use "max" to handle the new igraph behavior
+		# This takes the maximum of the upper and lower triangle values
+		mode_val <- if(attr(netlet, "symmetric")) "max" else "directed"
+		
+		igraph_object <- igraph::graph_from_adjacency_matrix(
+			raw_net,
+			mode = mode_val,
+			weighted = weight_logical,
+			diag = !attr(netlet, "diag_to_NA")
+		)
+	}
 
-    # bipartite case
-    if (bipartite_logical) {
-        igraph_object <- igraph::graph_from_biadjacency_matrix(
-            raw_net,
-            directed = FALSE,
-            weighted = weight_logical
-        )
-    }
+	# bipartite case
+	if (bipartite_logical) {
+		igraph_object <- igraph::graph_from_biadjacency_matrix(
+			raw_net,
+			directed = FALSE,
+			weighted = weight_logical
+		)
+	}
 
-    # add dv as edge attribute as well
-    if (!is.null(attr(netlet, "weight", exact = TRUE))) {
-        # match edge positions between raw data and igraph
-        ePosIgraph <- adj_igraph_positions(raw_net, igraph_object)
+	# add dv as edge attribute as well
+	if (!is.null(attr(netlet, "weight", exact = TRUE))) {
+		# match edge positions between raw data and igraph
+		ePosIgraph <- adj_igraph_positions(raw_net, igraph_object)
 
-        # subset dyadic data matrix based on ids
-        # and add edge attr
-        igraph_object <- igraph::set_edge_attr(
-            igraph_object,
-            name = attr(netlet, "weight", exact = TRUE),
-            value = raw_net[ePosIgraph]
-        )
-    }
+		# subset dyadic data matrix based on ids
+		# and add edge attr
+		igraph_object <- igraph::set_edge_attr(
+			igraph_object,
+			name = attr(netlet, "weight", exact = TRUE),
+			value = raw_net[ePosIgraph]
+		)
+	}
 
-    #
-    return(igraph_object)
+	#
+	return(igraph_object)
 }
 
 #' add_nodal_to_igraph
@@ -445,39 +350,39 @@ netify_net_to_igraph <- function(netlet) {
 #' @noRd
 
 add_nodal_to_igraph <- function(
-    netlet, node_data, igraph_object, time = NULL) {
-    # slice by time if relevant
-    if (!is.null(time)) {
-        # # if ego network, then time variable includes ego name
-        # # modify to pull out year only since that' the only
-        # # thing that will match with the name of dyad_data_list
-        # ego_netlet = attr(netlet, 'ego_netlet')
-        # if(!is.null(ego_netlet)){
-        #   if(ego_netlet){
-        #     time = strsplit(time, '__')[[1]][2] } }
+	netlet, node_data, igraph_object, time = NULL) {
+	# slice by time if relevant
+	if (!is.null(time)) {
+		# # if ego network, then time variable includes ego name
+		# # modify to pull out year only since that' the only
+		# # thing that will match with the name of dyad_data_list
+		# ego_netlet = attr(netlet, 'ego_netlet')
+		# if(!is.null(ego_netlet)){
+		#   if(ego_netlet){
+		#     time = strsplit(time, '__')[[1]][2] } }
 
-        #
-        node_data <- node_data[node_data[, 2] == time, ]
-    }
+		#
+		node_data <- node_data[node_data[, 2] == time, ]
+	}
 
-    # make sure order of nodes is the same
-    igrph_nodes <- names(igraph::V(igraph_object))
-    node_data <- node_data[
-        match(igrph_nodes, node_data[, 1]),
-    ]
+	# make sure order of nodes is the same
+	igrph_nodes <- names(igraph::V(igraph_object))
+	node_data <- node_data[
+		match(igrph_nodes, node_data[, 1]),
+	]
 
-    # loop through and add to network object
-    node_var_start <- ifelse(is.null(time), 2, 3)
-    for (ii in node_var_start:ncol(node_data)) {
-        igraph_object <- igraph::set_vertex_attr(
-            igraph_object,
-            name = names(node_data)[ii],
-            value = node_data[, ii]
-        )
-    }
+	# loop through and add to network object
+	node_var_start <- ifelse(is.null(time), 2, 3)
+	for (ii in node_var_start:ncol(node_data)) {
+		igraph_object <- igraph::set_vertex_attr(
+			igraph_object,
+			name = names(node_data)[ii],
+			value = node_data[, ii]
+		)
+	}
 
-    #
-    return(igraph_object)
+	#
+	return(igraph_object)
 }
 
 #' add_dyad_to_igraph
@@ -495,51 +400,51 @@ add_nodal_to_igraph <- function(
 #' @noRd
 
 add_dyad_to_igraph <- function(netlet, dyad_data_list, igraph_object, time = NULL) {
-    # get dyadic data for specified time period
-    if (is.null(time)) {
-        var_matrices <- dyad_data_list[[1]]
-    } else {
-        var_matrices <- dyad_data_list[[time]]
-    }
+	# get dyadic data for specified time period
+	if (is.null(time)) {
+		var_matrices <- dyad_data_list[[1]]
+	} else {
+		var_matrices <- dyad_data_list[[time]]
+	}
 
-    # get var names from the list of matrices
-    vars <- names(var_matrices)
-    if (length(vars) == 0) {
-        return(igraph_object)
-    }
+	# get var names from the list of matrices
+	vars <- names(var_matrices)
+	if (length(vars) == 0) {
+		return(igraph_object)
+	}
 
-    # get attrs
-    netlet_mode <- attr(netlet, "mode")
-    netlet_diag_to_NA <- attr(netlet, "diag_to_NA")
-    bipartite_logical <- netlet_mode == "bipartite"
+	# get attrs
+	netlet_mode <- attr(netlet, "mode")
+	netlet_diag_to_NA <- attr(netlet, "diag_to_NA")
+	bipartite_logical <- netlet_mode == "bipartite"
 
-    # get edge positions
-    ePosIgraph <- adj_igraph_positions(var_matrices[[1]], igraph_object)
+	# get edge positions
+	ePosIgraph <- adj_igraph_positions(var_matrices[[1]], igraph_object)
 
-    # go through dyad vars
-    edge_attrs <- lapply(vars, function(var_name) {
-        dData <- var_matrices[[var_name]]
+	# go through dyad vars
+	edge_attrs <- lapply(vars, function(var_name) {
+		dData <- var_matrices[[var_name]]
 
-        # replace diagonal with 0s if needed
-        if (!bipartite_logical && netlet_diag_to_NA) {
-            diag(dData) <- 0
-        }
+		# replace diagonal with 0s if needed
+		if (!bipartite_logical && netlet_diag_to_NA) {
+			diag(dData) <- 0
+		}
 
-        # extract values using pre-computed positions
-        return(dData[ePosIgraph])
-    })
+		# extract values using pre-computed positions
+		return(dData[ePosIgraph])
+	})
 
-    # set all edge attributes at once
-    for (i in seq_along(vars)) {
-        igraph_object <- igraph::set_edge_attr(
-            igraph_object,
-            name = vars[i],
-            value = edge_attrs[[i]]
-        )
-    }
+	# set all edge attributes at once
+	for (i in seq_along(vars)) {
+		igraph_object <- igraph::set_edge_attr(
+			igraph_object,
+			name = vars[i],
+			value = edge_attrs[[i]]
+		)
+	}
 
-    #
-    return(igraph_object)
+	#
+	return(igraph_object)
 }
 
 #' adj_igraph_positions
@@ -557,28 +462,28 @@ add_dyad_to_igraph <- function(netlet, dyad_data_list, igraph_object, time = NUL
 #' @noRd
 
 adj_igraph_positions <- function(adj_mat, igraph_object) {
-    # get row and column information from adj_mat
-    ar <- rownames(adj_mat)
-    nr <- length(ar)
-    ac <- colnames(adj_mat)
-    nc <- length(ac)
-    arKey <- data.frame(
-        id = 1:nr, lab = ar, stringsAsFactors = FALSE
-    )
-    acKey <- data.frame(
-        id = 1:nc, lab = ac, stringsAsFactors = FALSE
-    )
+	# get row and column information from adj_mat
+	ar <- rownames(adj_mat)
+	nr <- length(ar)
+	ac <- colnames(adj_mat)
+	nc <- length(ac)
+	arKey <- data.frame(
+		id = 1:nr, lab = ar, stringsAsFactors = FALSE
+	)
+	acKey <- data.frame(
+		id = 1:nc, lab = ac, stringsAsFactors = FALSE
+	)
 
-    # can simplify the commented above via igraph::as_data_frame
-    eLabIgraph <- igraph::as_data_frame(igraph_object, what = "edges")
+	# can simplify the commented above via igraph::as_data_frame
+	eLabIgraph <- igraph::as_data_frame(igraph_object, what = "edges")
 
-    # get positions of each actor in eLabIgraph
-    # based on where they fall in aKey
-    ePosIgraph <- cbind(
-        row = arKey$id[match(eLabIgraph[, 1], arKey$lab)],
-        col = acKey$id[match(eLabIgraph[, 2], acKey$lab)]
-    )
+	# get positions of each actor in eLabIgraph
+	# based on where they fall in aKey
+	ePosIgraph <- cbind(
+		row = arKey$id[match(eLabIgraph[, 1], arKey$lab)],
+		col = acKey$id[match(eLabIgraph[, 2], acKey$lab)]
+	)
 
-    #
-    return(ePosIgraph)
+	#
+	return(ePosIgraph)
 }

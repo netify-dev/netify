@@ -132,97 +132,96 @@
 #' @aliases netify_to_network to_statnet to_network
 
 netify_to_statnet <- function(
-    netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE) {
-    # check if netify object
-    netify_check(netlet)
+	netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE) {
+	# check if netify object
+	netify_check(netlet)
 
-    # if more than one layer tell user they must specify a single layer
-    if (length(attributes(netlet)$layers) > 1) {
-        cli::cli_alert_danger(
-            "Error: This object has multiple layers.
-      `netify_to_statnet` does not currently support multilayer `netify` inputs.
-      Please use the `subset_netify` function to create a `netify` object with a single layer."
-        )
-        stop()
-    }
+	# if more than one layer tell user they must specify a single layer
+	if (length(attributes(netlet)$layers) > 1) {
+		cli::cli_abort(
+			"This object has multiple layers.
+	  `netify_to_statnet` does not currently support multilayer `netify` inputs.
+	  Please use the `subset_netify` function to create a `netify` object with a single layer."
+		)
+	}
 
-    # assert dependencies for remapping data to network
-    assert_dependency("network")
+	# assert dependencies for remapping data to network
+	assert_dependency("network")
 
-    ## three cases: cross-sec/matrix, longit list, longit array
-    netlet_type <- attr(netlet, "netify_type")
+	## three cases: cross-sec/matrix, longit list, longit array
+	netlet_type <- attr(netlet, "netify_type")
 
-    # if type array convert to list since network
-    # doesnt support arrays anyhow
-    if (netlet_type == "longit_array") {
-        netlet <- array_to_list(netlet)
-    }
+	# if type array convert to list since network
+	# doesnt support arrays anyhow
+	if (netlet_type == "longit_array") {
+		netlet <- array_to_list(netlet)
+	}
 
-    # check other attributes
-    nodal_data_exist <- !is.null(
-        attr(netlet, "nodal_data")[[1]]
-    )
-    dyad_data_exist <- !is.null(
-        attr(netlet, "dyad_data")[[1]]
-    )
+	# check other attributes
+	nodal_data_exist <- !is.null(
+		attr(netlet, "nodal_data")[[1]]
+	)
+	dyad_data_exist <- !is.null(
+		attr(netlet, "dyad_data")[[1]]
+	)
 
-    ## cross-sec case
-    if (netlet_type == "cross_sec") {
-        # convert to a statnet network object
-        ntwk <- netify_net_to_statnet(netlet)
+	## cross-sec case
+	if (netlet_type == "cross_sec") {
+		# convert to a statnet network object
+		ntwk <- netify_net_to_statnet(netlet)
 
-        # process nodal attributes if exist
-        if (nodal_data_exist & add_nodal_attribs) {
-            ntwk <- add_nodal_to_statnet(
-                netlet, attr(netlet, "nodal_data"), ntwk
-            )
-        }
+		# process nodal attributes if exist
+		if (nodal_data_exist & add_nodal_attribs) {
+			ntwk <- add_nodal_to_statnet(
+				netlet, attr(netlet, "nodal_data"), ntwk
+			)
+		}
 
-        # process dyadic attributes if exist
-        if (dyad_data_exist & add_dyad_attribs) {
-            ntwk <- add_dyad_to_statnet(
-                netlet, attr(netlet, "dyad_data"), ntwk
-            )
-        }
-    } # done with cross-sec case
+		# process dyadic attributes if exist
+		if (dyad_data_exist & add_dyad_attribs) {
+			ntwk <- add_dyad_to_statnet(
+				netlet, attr(netlet, "dyad_data"), ntwk
+			)
+		}
+	} # done with cross-sec case
 
-    ## longit case
-    if (netlet_type %in% c("longit_array", "longit_list")) {
-        # iterate through netlet
-        ntwk <- lapply(1:length(netlet), function(ii) {
-            # get netlet slice
-            netlet_slice <- netlet[[ii]]
+	## longit case
+	if (netlet_type %in% c("longit_array", "longit_list")) {
+		# iterate through netlet
+		ntwk <- lapply(1:length(netlet), function(ii) {
+			# get netlet slice
+			netlet_slice <- netlet[[ii]]
 
-            # get time listing
-            time_val <- names(netlet)[ii]
+			# get time listing
+			time_val <- names(netlet)[ii]
 
-            # convert to a statnet network object
-            ntwk_slice <- netify_net_to_statnet(netlet_slice)
+			# convert to a statnet network object
+			ntwk_slice <- netify_net_to_statnet(netlet_slice)
 
-            # process nodal attributes if exist
-            if (nodal_data_exist & add_nodal_attribs) {
-                ntwk_slice <- add_nodal_to_statnet(
-                    netlet_slice, attr(netlet, "nodal_data"),
-                    ntwk_slice, time_val
-                )
-            }
+			# process nodal attributes if exist
+			if (nodal_data_exist & add_nodal_attribs) {
+				ntwk_slice <- add_nodal_to_statnet(
+					netlet_slice, attr(netlet, "nodal_data"),
+					ntwk_slice, time_val
+				)
+			}
 
-            # process dyadic attributes if exist
-            if (dyad_data_exist & add_dyad_attribs) {
-                ntwk_slice <- add_dyad_to_statnet(
-                    netlet_slice, attr(netlet, "dyad_data"),
-                    ntwk_slice, time_val
-                )
-            }
+			# process dyadic attributes if exist
+			if (dyad_data_exist & add_dyad_attribs) {
+				ntwk_slice <- add_dyad_to_statnet(
+					netlet_slice, attr(netlet, "dyad_data"),
+					ntwk_slice, time_val
+				)
+			}
 
-            #
-            return(ntwk_slice)
-        })
-        names(ntwk) <- names(netlet)
-    } # done with longit case
+			#
+			return(ntwk_slice)
+		})
+		names(ntwk) <- names(netlet)
+	} # done with longit case
 
-    #
-    return(ntwk)
+	#
+	return(ntwk)
 }
 
 #' @rdname netify_to_statnet
@@ -249,37 +248,37 @@ to_network <- netify_to_statnet
 #' @noRd
 
 netify_net_to_statnet <- function(netlet) {
-    # check if bipartite
-    bipartite_logical <- ifelse(attr(netlet, "mode") == "bipartite", TRUE, FALSE)
+	# check if bipartite
+	bipartite_logical <- ifelse(attr(netlet, "mode") == "bipartite", TRUE, FALSE)
 
-    # if weight is NULL then create logical to set value for ignore.eval
-    if (is.null(attr(netlet, "weight", exact = TRUE))) {
-        ignore_eval <- TRUE
-    } else {
-        ignore_eval <- FALSE
-    }
+	# if weight is NULL then create logical to set value for ignore.eval
+	if (is.null(attr(netlet, "weight", exact = TRUE))) {
+		ignore_eval <- TRUE
+	} else {
+		ignore_eval <- FALSE
+	}
 
-    # convert to a statnet network object
-    statnet_object <- network::network(
-        get_raw(netlet),
-        matrix.type = "adjacency",
-        directed = !attr(netlet, "symmetric"),
-        loops = !attr(netlet, "diag_to_NA"),
-        bipartite = bipartite_logical,
-        names.eval = attr(netlet, "weight", exact = TRUE),
-        ignore.eval = ignore_eval
-    )
+	# convert to a statnet network object
+	statnet_object <- network::network(
+		get_raw(netlet),
+		matrix.type = "adjacency",
+		directed = !attr(netlet, "symmetric"),
+		loops = !attr(netlet, "diag_to_NA"),
+		bipartite = bipartite_logical,
+		names.eval = attr(netlet, "weight", exact = TRUE),
+		ignore.eval = ignore_eval
+	)
 
-    # set as network attribute as well if weight provided
-    if (!is.null(attr(netlet, "weight", exact = TRUE))) {
-        network::set.network.attribute(
-            statnet_object, attr(netlet, "weight", exact = TRUE),
-            get_raw(netlet)
-        )
-    }
+	# set as network attribute as well if weight provided
+	if (!is.null(attr(netlet, "weight", exact = TRUE))) {
+		network::set.network.attribute(
+			statnet_object, attr(netlet, "weight", exact = TRUE),
+			get_raw(netlet)
+		)
+	}
 
-    #
-    return(statnet_object)
+	#
+	return(statnet_object)
 }
 
 #' add_nodal_to_statnet
@@ -297,22 +296,22 @@ netify_net_to_statnet <- function(netlet) {
 #' @noRd
 
 add_nodal_to_statnet <- function(
-    netlet, node_data, statnet_object, time = NULL) {
-    # slice by time if relevant
-    if (!is.null(time)) {
-        node_data <- node_data[node_data[, 2] == time, ]
-    }
+	netlet, node_data, statnet_object, time = NULL) {
+	# slice by time if relevant
+	if (!is.null(time)) {
+		node_data <- node_data[node_data[, 2] == time, ]
+	}
 
-    # loop through and add to a statnet network object
-    node_var_start <- ifelse(is.null(time), 2, 3)
-    for (ii in node_var_start:ncol(node_data)) {
-        network::set.vertex.attribute(
-            statnet_object, names(node_data)[ii], node_data[, ii]
-        )
-    }
+	# loop through and add to a statnet network object
+	node_var_start <- ifelse(is.null(time), 2, 3)
+	for (ii in node_var_start:ncol(node_data)) {
+		network::set.vertex.attribute(
+			statnet_object, names(node_data)[ii], node_data[, ii]
+		)
+	}
 
-    #
-    return(statnet_object)
+	#
+	return(statnet_object)
 }
 
 #' add_dyad_to_statnet
@@ -330,50 +329,61 @@ add_nodal_to_statnet <- function(
 #' @noRd
 
 add_dyad_to_statnet <- function(
-    netlet, dyad_data_list, statnet_object, time = NULL) {
-    # get dyadic data for specified time period
-    if (is.null(time)) {
-        var_matrices <- dyad_data_list[[1]]
-    } else {
-        var_matrices <- dyad_data_list[[time]]
-    }
+	netlet, dyad_data_list, statnet_object, time = NULL) {
+	# get dyadic data for specified time period
+	if (is.null(time)) {
+		var_matrices <- dyad_data_list[[1]]
+	} else {
+		var_matrices <- dyad_data_list[[time]]
+	}
 
-    # get var names from the list of matrices
-    vars <- names(var_matrices)
+	# get var names from the list of matrices
+	vars <- names(var_matrices)
 
-    # cache netlet attributes for efficiency
-    netlet_mode <- attr(netlet, "mode")
-    netlet_diag_to_NA <- attr(netlet, "diag_to_NA")
-    bipartite_logical <- netlet_mode == "bipartite"
+	# cache netlet attributes for efficiency
+	netlet_mode <- attr(netlet, "mode")
+	netlet_diag_to_NA <- attr(netlet, "diag_to_NA")
+	bipartite_logical <- netlet_mode == "bipartite"
 
-    # iterate through dyadic vars and add into network object
-    for (ii in seq_along(vars)) {
-        var_name <- vars[ii]
+	# iterate through dyadic vars and add into network object
+	for (ii in seq_along(vars)) {
+		var_name <- vars[ii]
 
-        # get matrix for this variable
-        dData <- var_matrices[[var_name]]
+		# get matrix for this variable
+		dData <- var_matrices[[var_name]]
 
-        # replace diagonal with 0s except if
-        # netlet is bipartite or
-        # diag_to_NA is set to FALSE
-        if (!bipartite_logical && netlet_diag_to_NA) {
-            diag(dData) <- 0
-        }
+		# replace diagonal with 0s except if
+		# netlet is bipartite or
+		# diag_to_NA is set to FALSE
+		if (!bipartite_logical && netlet_diag_to_NA) {
+			diag(dData) <- 0
+		}
 
-        # set as edge attrib if not bipartite, weird sizing issue
-        # when trying to add edge attribute to bipartite network
-        # that is not clear to me
-        if (!bipartite_logical) {
-            network::set.edge.value(
-                statnet_object, paste0(var_name, "_e"), dData
-            )
-        }
+		# set as edge attrib if not bipartite
+		# note: we iterate over edges individually because
+		# network::set.edge.value with a full matrix can mismap values
+		if (!bipartite_logical) {
+			vnames <- network::get.vertex.attribute(statnet_object, "vertex.names")
+			el <- network::as.edgelist(statnet_object)
+			n_edges <- nrow(el)
+			edge_vals <- rep(0, n_edges)
+			for (e_idx in seq_len(n_edges)) {
+				from_name <- vnames[el[e_idx, 1]]
+				to_name <- vnames[el[e_idx, 2]]
+				if (from_name %in% rownames(dData) && to_name %in% colnames(dData)) {
+					edge_vals[e_idx] <- dData[from_name, to_name]
+				}
+			}
+			network::set.edge.attribute(
+				statnet_object, paste0(var_name, "_e"), edge_vals
+			)
+		}
 
-        # set as network attrib
-        network::set.network.attribute(
-            statnet_object, var_name, dData
-        )
-    }
+		# set as network attrib
+		network::set.network.attribute(
+			statnet_object, var_name, dData
+		)
+	}
 
-    return(statnet_object)
+	return(statnet_object)
 }

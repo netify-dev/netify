@@ -90,28 +90,43 @@ int count_duplicate_dyads_indexed(
     }
     
     // If we have too many actors, fall back to string method
-    if (nextIndex > 10000) {
+    if (nextIndex > 100000) {
         return count_duplicate_dyads(actor1, actor2, time);
     }
-    
+
     // Use integer-based key for better performance
-    // Key = actor1_idx * 100000 + actor2_idx * 100 + time_mod
+    // Key = idx1 * (maxActors * maxTime) + idx2 * maxTime + t
+    // where maxActors = nextIndex and maxTime is derived from data
     std::unordered_map<long long, int> dyadCounts;
     dyadCounts.reserve(n / 2);
-    
+
+    // Find time range for safe key encoding
+    int t_min = static_cast<int>(time[0]);
+    int t_max = t_min;
+    for (int i = 1; i < n; ++i) {
+        int t = static_cast<int>(time[i]);
+        if (t < t_min) t_min = t;
+        if (t > t_max) t_max = t;
+    }
+    long long t_range = static_cast<long long>(t_max - t_min) + 1;
+    long long n_actors = static_cast<long long>(nextIndex);
+
+    // If key space would overflow, fall back to string method
+    // long long max is ~9.2e18, so check n_actors * n_actors * t_range
+    if (n_actors * n_actors > 9000000000000000LL / t_range) {
+        return count_duplicate_dyads(actor1, actor2, time);
+    }
+
     int repeats = 0;
-    
+
     for (int i = 0; i < n; ++i) {
         int idx1 = actorIndex[std::string(actor1[i])];
         int idx2 = actorIndex[std::string(actor2[i])];
-        int t = static_cast<int>(time[i]);
-        
-        // Create unique integer key
-        // This works well for up to 10k actors and reasonable time values
-        long long key = static_cast<long long>(idx1) * 100000000LL + 
-                       static_cast<long long>(idx2) * 10000LL + 
-                       (t % 10000);
-        
+        long long t_offset = static_cast<long long>(static_cast<int>(time[i]) - t_min);
+
+        // Create unique integer key with no collisions
+        long long key = (static_cast<long long>(idx1) * n_actors + idx2) * t_range + t_offset;
+
         if (++dyadCounts[key] == 2) {
             repeats++;
         }

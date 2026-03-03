@@ -288,11 +288,11 @@ List calculate_homophily_stats_cpp(NumericMatrix similarity_matrix,
         
         if (valid_boots.size() > 0) {
             std::sort(valid_boots.begin(), valid_boots.end());
-            int lower_idx = floor(alpha / 2 * valid_boots.size());
-            int upper_idx = floor((1 - alpha / 2) * valid_boots.size());
-            // make sure indices are within bounds
-            lower_idx = std::max(0, std::min(lower_idx, (int)valid_boots.size() - 1));
-            upper_idx = std::max(0, std::min(upper_idx, (int)valid_boots.size() - 1));
+            int n_valid = valid_boots.size();
+            // use 0-based index: for the p-th quantile with n values,
+            // index = floor(p * (n - 1)) which matches R's type=1 quantile
+            int lower_idx = std::max(0, (int)floor(alpha / 2 * (n_valid - 1)));
+            int upper_idx = std::min(n_valid - 1, (int)ceil((1 - alpha / 2) * (n_valid - 1)));
             ci_lower = valid_boots[lower_idx];
             ci_upper = valid_boots[upper_idx];
         }

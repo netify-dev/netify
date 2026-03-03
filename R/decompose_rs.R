@@ -123,63 +123,63 @@
 #' @export decompose_netify
 
 decompose_netify <- function(netlet, remove_zeros = TRUE) {
-    # input validation
-    netify_check(netlet)
-    if (!is.logical(remove_zeros) || length(remove_zeros) != 1) {
-        stop("remove_zeros must be a single logical value")
-    }
+	# input validation
+	netify_check(netlet)
+	if (!is.logical(remove_zeros) || length(remove_zeros) != 1) {
+		stop("remove_zeros must be a single logical value")
+	}
 
-    # get attrs
-    obj_attrs <- attributes(netlet)
-    netify_type <- obj_attrs$netify_type
-    weight_attr <- obj_attrs[["weight"]]
-    ego_netlet <- obj_attrs$ego_netlet
+	# get attrs
+	obj_attrs <- attributes(netlet)
+	netify_type <- obj_attrs$netify_type
+	weight_attr <- obj_attrs[["weight"]]
+	ego_netlet <- obj_attrs$ego_netlet
 
-    # get msrs
-    msrmnts <- netify_measurements(netlet)
+	# get msrs
+	msrmnts <- netify_measurements(netlet)
 
-    # process edge data
-    edge_data <- process_edge_data(
-        netlet = netlet,
-        netify_type = netify_type,
-        weight_attr = weight_attr,
-        remove_zeros = remove_zeros,
-        ego_netlet = ego_netlet
-    )
+	# process edge data
+	edge_data <- process_edge_data(
+		netlet = netlet,
+		netify_type = netify_type,
+		weight_attr = weight_attr,
+		remove_zeros = remove_zeros,
+		ego_netlet = ego_netlet
+	)
 
-    # process dyadic attributes if they exist
-    if (!is.null(obj_attrs$dyad_data)) {
-        edge_data <- merge_dyadic_attributes(
-            edge_data = edge_data,
-            dyad_data_attr = obj_attrs$dyad_data,
-            netify_type = netify_type
-        )
-    }
+	# process dyadic attributes if they exist
+	if (!is.null(obj_attrs$dyad_data)) {
+		edge_data <- merge_dyadic_attributes(
+			edge_data = edge_data,
+			dyad_data_attr = obj_attrs$dyad_data,
+			netify_type = netify_type
+		)
+	}
 
-    # finalize edge data structure
-    edge_data <- finalize_edge_data(edge_data, netify_type)
+	# finalize edge data structure
+	edge_data <- finalize_edge_data(edge_data, netify_type)
 
-    # process nodal data
-    # For longitudinal data, pass the time labels from the netlet names
-    if (netify_type != "cross_sec") {
-        time_labels <- names(netlet)
-    } else {
-        time_labels <- NULL
-    }
-    nodal_data <- process_nodal_data(obj_attrs, netify_type, time_labels)
+	# process nodal data
+	# For longitudinal data, pass the time labels from the netlet names
+	if (netify_type != "cross_sec") {
+		time_labels <- names(netlet)
+	} else {
+		time_labels <- NULL
+	}
+	nodal_data <- process_nodal_data(obj_attrs, netify_type, time_labels)
 
-    # synchronize time variables
-    if (netify_type == "cross_sec" && nrow(nodal_data) > 0) {
-        edge_data$time <- as.character(nodal_data$time[1])
-    }
+	# synchronize time variables
+	if (netify_type == "cross_sec" && nrow(nodal_data) > 0) {
+		edge_data$time <- as.character(nodal_data$time[1])
+	}
 
-    # prepare output
-    out <- list(
-        edge_data = edge_data,
-        nodal_data = nodal_data
-    )
+	# prepare output
+	out <- list(
+		edge_data = edge_data,
+		nodal_data = nodal_data
+	)
 
-    return(out)
+	return(out)
 }
 
 #' Decompose an igraph object into base R components
@@ -262,108 +262,108 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
 #' @export decompose_igraph
 
 decompose_igraph <- function(grph, weight = NULL) {
-    stopifnot(inherits(grph, "igraph"))
+	stopifnot(inherits(grph, "igraph"))
 
-    # check if bipartite - but also verify the type attribute is actually logical
-    is_bipartite <- FALSE
-    if (igraph::is_bipartite(grph)) {
-        vertex_types <- igraph::V(grph)$type
+	# check if bipartite - but also verify the type attribute is actually logical
+	is_bipartite <- FALSE
+	if (igraph::is_bipartite(grph)) {
+		vertex_types <- igraph::V(grph)$type
 
-        # only treat as bipartite if type attribute exists and is logical
-        if (!is.null(vertex_types) && is.logical(vertex_types)) {
-            is_bipartite <- TRUE
-        } else {
-            # graph thinks it's bipartite but type attribute is invalid
-            # treat as unipartite and warn the user
-            cli::cli_warn(c(
-                "!" = "Graph has a {.field type} vertex attribute but it's not logical.",
-                "i" = "Treating graph as unipartite.",
-                ">" = "For bipartite graphs, use logical values: {.code V(g)$type <- c(TRUE, FALSE, ...)}"
-            ))
-        }
-    }
+		# only treat as bipartite if type attribute exists and is logical
+		if (!is.null(vertex_types) && is.logical(vertex_types)) {
+			is_bipartite <- TRUE
+		} else {
+			# graph thinks it's bipartite but type attribute is invalid
+			# treat as unipartite and warn the user
+			cli::cli_warn(c(
+				"!" = "Graph has a {.field type} vertex attribute but it's not logical.",
+				"i" = "Treating graph as unipartite.",
+				">" = "For bipartite graphs, use logical values: {.code V(g)$type <- c(TRUE, FALSE, ...)}"
+			))
+		}
+	}
 
-    # get existing vertex names if any
-    vertex_names <- igraph::V(grph)$name
+	# get existing vertex names if any
+	vertex_names <- igraph::V(grph)$name
 
-    if (is_bipartite) {
-        # now we know vertex_types is logical
-        n_type1 <- sum(!vertex_types)
-        n_type2 <- sum(vertex_types)
+	if (is_bipartite) {
+		# now we know vertex_types is logical
+		n_type1 <- sum(!vertex_types)
+		n_type2 <- sum(vertex_types)
 
-        # for bipartite graphs, get the bipartite adjacency matrix
-        # this returns a matrix of dimension n_type1 x n_type2
-        adj_mat <- igraph::as_biadjacency_matrix(
-            grph,
-            attr = weight,
-            sparse = FALSE
-        )
+		# for bipartite graphs, get the bipartite adjacency matrix
+		# this returns a matrix of dimension n_type1 x n_type2
+		adj_mat <- igraph::as_biadjacency_matrix(
+			grph,
+			attr = weight,
+			sparse = FALSE
+		)
 
-        # create vertex names if they don't exist
-        if (is.null(vertex_names)) {
-            vertex_names <- character(length(vertex_types))
-            vertex_names[!vertex_types] <- paste0("r", seq_len(n_type1))
-            vertex_names[vertex_types] <- paste0("c", seq_len(n_type2))
+		# create vertex names if they don't exist
+		if (is.null(vertex_names)) {
+			vertex_names <- character(length(vertex_types))
+			vertex_names[!vertex_types] <- paste0("r", seq_len(n_type1))
+			vertex_names[vertex_types] <- paste0("c", seq_len(n_type2))
 
-            # set row/column names for the bipartite adjacency matrix
-            rownames(adj_mat) <- paste0("r", seq_len(n_type1))
-            colnames(adj_mat) <- paste0("c", seq_len(n_type2))
-        } else {
-            # use existing names
-            rownames(adj_mat) <- vertex_names[!vertex_types]
-            colnames(adj_mat) <- vertex_names[vertex_types]
-        }
-    } else {
-        # for unipartite graphs, get the regular adjacency matrix
-        adj_mat <- igraph::as_adjacency_matrix(
-            grph,
-            attr = weight,
-            sparse = FALSE
-        )
+			# set row/column names for the bipartite adjacency matrix
+			rownames(adj_mat) <- paste0("r", seq_len(n_type1))
+			colnames(adj_mat) <- paste0("c", seq_len(n_type2))
+		} else {
+			# use existing names
+			rownames(adj_mat) <- vertex_names[!vertex_types]
+			colnames(adj_mat) <- vertex_names[vertex_types]
+		}
+	} else {
+		# for unipartite graphs, get the regular adjacency matrix
+		adj_mat <- igraph::as_adjacency_matrix(
+			grph,
+			attr = weight,
+			sparse = FALSE
+		)
 
-        # create vertex names if they don't exist
-        if (is.null(vertex_names)) {
-            n_vertices <- igraph::vcount(grph)
-            vertex_names <- paste0("a", seq_len(n_vertices))
-            rownames(adj_mat) <- vertex_names
-            colnames(adj_mat) <- vertex_names
-        } else {
-            # use existing names
-            rownames(adj_mat) <- vertex_names
-            colnames(adj_mat) <- vertex_names
-        }
-    }
+		# create vertex names if they don't exist
+		if (is.null(vertex_names)) {
+			n_vertices <- igraph::vcount(grph)
+			vertex_names <- paste0("a", seq_len(n_vertices))
+			rownames(adj_mat) <- vertex_names
+			colnames(adj_mat) <- vertex_names
+		} else {
+			# use existing names
+			rownames(adj_mat) <- vertex_names
+			colnames(adj_mat) <- vertex_names
+		}
+	}
 
-    # pull out vertex attributes as a data.frame, if any
-    v_labs <- igraph::vertex_attr_names(grph)
-    if (length(v_labs) > 0) {
-        ndata <- igraph::as_data_frame(grph, what = "vertices")
-        # always add vertex names as 'actor' column
-        ndata$actor <- vertex_names
-    } else {
-        ndata <- NULL
-    }
+	# pull out vertex attributes as a data.frame, if any
+	v_labs <- igraph::vertex_attr_names(grph)
+	if (length(v_labs) > 0) {
+		ndata <- igraph::as_data_frame(grph, what = "vertices")
+		# always add vertex names as 'actor' column
+		ndata$actor <- vertex_names
+	} else {
+		ndata <- NULL
+	}
 
-    # pull out edge attributes as a data.frame, if any
-    e_labs <- igraph::edge_attr_names(grph)
-    if (length(e_labs) > 0) {
-        ddata <- igraph::as_data_frame(grph, what = "edges")
-        # update from/to to use our naming scheme if they're numeric
-        if (is.numeric(ddata$from) && is.numeric(ddata$to)) {
-            ddata$from <- vertex_names[ddata$from]
-            ddata$to <- vertex_names[ddata$to]
-        }
-    } else {
-        ddata <- NULL
-    }
+	# pull out edge attributes as a data.frame, if any
+	e_labs <- igraph::edge_attr_names(grph)
+	if (length(e_labs) > 0) {
+		ddata <- igraph::as_data_frame(grph, what = "edges")
+		# update from/to to use our naming scheme if they're numeric
+		if (is.numeric(ddata$from) && is.numeric(ddata$to)) {
+			ddata$from <- vertex_names[ddata$from]
+			ddata$to <- vertex_names[ddata$to]
+		}
+	} else {
+		ddata <- NULL
+	}
 
-    # return the decomposed components
-    list(
-        adj_mat = adj_mat,
-        ndata = ndata,
-        ddata = ddata,
-        weight = weight
-    )
+	# return the decomposed components
+	list(
+		adj_mat = adj_mat,
+		ndata = ndata,
+		ddata = ddata,
+		weight = weight
+	)
 }
 
 #' Decompose a network object into base R components
@@ -452,112 +452,112 @@ decompose_igraph <- function(grph, weight = NULL) {
 #' @aliases decompose_network
 
 decompose_statnet <- function(ntwk, weight = NULL) {
-    stopifnot(inherits(ntwk, "network"))
+	stopifnot(inherits(ntwk, "network"))
 
-    # check if bipartite
-    is_bipartite <- network::is.bipartite(ntwk)
+	# check if bipartite
+	is_bipartite <- network::is.bipartite(ntwk)
 
-    # get or create vertex names
-    vertex_names <- network::get.vertex.attribute(ntwk, "vertex.names")
+	# get or create vertex names
+	vertex_names <- network::get.vertex.attribute(ntwk, "vertex.names")
 
-    # check if vertex names are just the default numeric sequence
-    # if so, treat as if they don't exist
-    if (!is.null(vertex_names) &&
-        is.numeric(vertex_names) &&
-        identical(vertex_names, seq_len(network::network.size(ntwk)))) {
-        vertex_names <- NULL
-    }
+	# check if vertex names are just the default numeric sequence
+	# if so, treat as if they don't exist
+	if (!is.null(vertex_names) &&
+		is.numeric(vertex_names) &&
+		identical(vertex_names, seq_len(network::network.size(ntwk)))) {
+		vertex_names <- NULL
+	}
 
-    if (is_bipartite) {
-        # get bipartite partition info
-        bip_partition <- network::get.network.attribute(ntwk, "bipartite")
-        n_type1 <- bip_partition
-        n_type2 <- network::network.size(ntwk) - bip_partition
+	if (is_bipartite) {
+		# get bipartite partition info
+		bip_partition <- network::get.network.attribute(ntwk, "bipartite")
+		n_type1 <- bip_partition
+		n_type2 <- network::network.size(ntwk) - bip_partition
 
-        # create vertex names if they don't exist
-        if (is.null(vertex_names)) {
-            vertex_names <- c(
-                paste0("r", seq_len(n_type1)),
-                paste0("c", seq_len(n_type2))
-            )
-        }
+		# create vertex names if they don't exist
+		if (is.null(vertex_names)) {
+			vertex_names <- c(
+				paste0("r", seq_len(n_type1)),
+				paste0("c", seq_len(n_type2))
+			)
+		}
 
-        # get the full adjacency matrix first
-        adj_mat <- network::as.matrix.network.adjacency(
-            ntwk,
-            attrname = weight
-        )
+		# get the full adjacency matrix first
+		adj_mat <- network::as.matrix.network.adjacency(
+			ntwk,
+			attrname = weight
+		)
 
-        # set row/column names
-        rownames(adj_mat) <- vertex_names[1:n_type1]
-        colnames(adj_mat) <- vertex_names[(n_type1 + 1):(n_type1 + n_type2)]
-    } else {
-        # for unipartite networks, get the regular adjacency matrix
-        adj_mat <- network::as.matrix.network.adjacency(
-            ntwk,
-            attrname = weight
-        )
+		# set row/column names
+		rownames(adj_mat) <- vertex_names[1:n_type1]
+		colnames(adj_mat) <- vertex_names[(n_type1 + 1):(n_type1 + n_type2)]
+	} else {
+		# for unipartite networks, get the regular adjacency matrix
+		adj_mat <- network::as.matrix.network.adjacency(
+			ntwk,
+			attrname = weight
+		)
 
-        # create vertex names if they don't exist
-        if (is.null(vertex_names)) {
-            n_vertices <- network::network.size(ntwk)
-            vertex_names <- paste0("a", seq_len(n_vertices))
-        }
+		# create vertex names if they don't exist
+		if (is.null(vertex_names)) {
+			n_vertices <- network::network.size(ntwk)
+			vertex_names <- paste0("a", seq_len(n_vertices))
+		}
 
-        # set row/column names
-        rownames(adj_mat) <- vertex_names
-        colnames(adj_mat) <- vertex_names
-    }
+		# set row/column names
+		rownames(adj_mat) <- vertex_names
+		colnames(adj_mat) <- vertex_names
+	}
 
-    # vertex attributes
-    v_labs <- network::list.vertex.attributes(ntwk)
-    # don't include system attributes as real vertex attributes
-    system_attrs <- c("vertex.names", "na")
-    v_labs <- setdiff(v_labs, system_attrs)
+	# vertex attributes
+	v_labs <- network::list.vertex.attributes(ntwk)
+	# don't include system attributes as real vertex attributes
+	system_attrs <- c("vertex.names", "na")
+	v_labs <- setdiff(v_labs, system_attrs)
 
-    if (length(v_labs) > 0) {
-        # use lapply for better performance than sapply
-        ndata_list <- lapply(v_labs, function(attr) {
-            network::get.vertex.attribute(ntwk, attr)
-        })
-        names(ndata_list) <- v_labs
-        ndata <- as.data.frame(ndata_list, stringsAsFactors = FALSE)
+	if (length(v_labs) > 0) {
+		# use lapply for better performance than sapply
+		ndata_list <- lapply(v_labs, function(attr) {
+			network::get.vertex.attribute(ntwk, attr)
+		})
+		names(ndata_list) <- v_labs
+		ndata <- as.data.frame(ndata_list, stringsAsFactors = FALSE)
 
-        # always add vertex names as 'actor' column
-        ndata$actor <- vertex_names
-    } else {
-        ndata <- NULL
-    }
+		# always add vertex names as 'actor' column
+		ndata$actor <- vertex_names
+	} else {
+		ndata <- NULL
+	}
 
-    # edge attributes
-    e_labs <- network::list.edge.attributes(ntwk)
-    if (length(e_labs) > 0) {
-        edgelist <- network::as.edgelist(ntwk)
+	# edge attributes
+	e_labs <- network::list.edge.attributes(ntwk)
+	if (length(e_labs) > 0) {
+		edgelist <- network::as.edgelist(ntwk)
 
-        # use lapply for better performance
-        attr_list <- lapply(e_labs, function(attr) {
-            network::get.edge.attribute(ntwk, attr)
-        })
-        names(attr_list) <- e_labs
-        attr_df <- as.data.frame(attr_list, stringsAsFactors = FALSE)
+		# use lapply for better performance
+		attr_list <- lapply(e_labs, function(attr) {
+			network::get.edge.attribute(ntwk, attr)
+		})
+		names(attr_list) <- e_labs
+		attr_df <- as.data.frame(attr_list, stringsAsFactors = FALSE)
 
-        ddata <- data.frame(
-            from = vertex_names[edgelist[, 1]],
-            to = vertex_names[edgelist[, 2]],
-            attr_df,
-            stringsAsFactors = FALSE
-        )
-    } else {
-        ddata <- NULL
-    }
+		ddata <- data.frame(
+			from = vertex_names[edgelist[, 1]],
+			to = vertex_names[edgelist[, 2]],
+			attr_df,
+			stringsAsFactors = FALSE
+		)
+	} else {
+		ddata <- NULL
+	}
 
-    # return the decomposed components
-    list(
-        adj_mat = adj_mat,
-        ndata = ndata,
-        ddata = ddata,
-        weight = weight
-    )
+	# return the decomposed components
+	list(
+		adj_mat = adj_mat,
+		ndata = ndata,
+		ddata = ddata,
+		weight = weight
+	)
 }
 
 #' @rdname decompose_statnet

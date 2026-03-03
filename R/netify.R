@@ -96,188 +96,188 @@
 #'
 
 netify <- function(
-    input,
-    actor1 = NULL, actor2 = NULL, time = NULL,
-    symmetric = TRUE, mode = "unipartite",
-    weight = NULL, sum_dyads = FALSE,
-    actor_time_uniform = TRUE,
-    actor_pds = NULL,
-    diag_to_NA = TRUE,
-    missing_to_zero = TRUE,
-    output_format = NULL,
-    nodal_vars = NULL,
-    dyad_vars = NULL,
-    dyad_vars_symmetric = rep(symmetric, length(dyad_vars)),
-    input_type = c("auto", "dyad_df", "netify_obj"),
-    nodelist = NULL,
-    ...) {
-    # Match input type argument
-    input_type <- match.arg(input_type)
+	input,
+	actor1 = NULL, actor2 = NULL, time = NULL,
+	symmetric = TRUE, mode = "unipartite",
+	weight = NULL, sum_dyads = FALSE,
+	actor_time_uniform = TRUE,
+	actor_pds = NULL,
+	diag_to_NA = TRUE,
+	missing_to_zero = TRUE,
+	output_format = NULL,
+	nodal_vars = NULL,
+	dyad_vars = NULL,
+	dyad_vars_symmetric = rep(symmetric, length(dyad_vars)),
+	input_type = c("auto", "dyad_df", "netify_obj"),
+	nodelist = NULL,
+	...) {
+	# Match input type argument
+	input_type <- match.arg(input_type)
 
-    # Determine processing path
-    use_network_path <- FALSE
+	# Determine processing path
+	use_network_path <- FALSE
 
-    if (input_type == "auto") {
-        # Auto-detect based on object type
-        if (inherits(input, c("matrix", "array", "igraph", "network"))) {
-            use_network_path <- TRUE
-        } else if (is.list(input) && length(input) > 0) {
-            # Check if it's a list of network objects
-            first_elem <- input[[1]]
-            if (inherits(first_elem, c("matrix", "igraph", "network"))) {
-                use_network_path <- TRUE
-            }
-        }
-    } else if (input_type == "netify_obj") {
-        use_network_path <- TRUE
-    }
-    # else input_type == "dyad_df", use_network_path remains FALSE
+	if (input_type == "auto") {
+		# Auto-detect based on object type
+		if (inherits(input, c("matrix", "array", "igraph", "network"))) {
+			use_network_path <- TRUE
+		} else if (is.list(input) && length(input) > 0) {
+			# Check if it's a list of network objects
+			first_elem <- input[[1]]
+			if (inherits(first_elem, c("matrix", "igraph", "network"))) {
+				use_network_path <- TRUE
+			}
+		}
+	} else if (input_type == "netify_obj") {
+		use_network_path <- TRUE
+	}
+	# else input_type == "dyad_df", use_network_path remains FALSE
 
-    # Route to appropriate processing path
-    if (use_network_path) {
-        # Use to_netify for network objects
-        return(to_netify(
-            net_obj = input,
-            weight = weight,
-            symmetric = symmetric,
-            mode = mode,
-            diag_to_NA = diag_to_NA,
-            missing_to_zero = missing_to_zero,
-            sum_dyads = sum_dyads,
-            actor_time_uniform = actor_time_uniform,
-            actor_pds = actor_pds,
-            ...
-        ))
-    }
+	# Route to appropriate processing path
+	if (use_network_path) {
+		# Use to_netify for network objects
+		return(to_netify(
+			net_obj = input,
+			weight = weight,
+			symmetric = symmetric,
+			mode = mode,
+			diag_to_NA = diag_to_NA,
+			missing_to_zero = missing_to_zero,
+			sum_dyads = sum_dyads,
+			actor_time_uniform = actor_time_uniform,
+			actor_pds = actor_pds,
+			...
+		))
+	}
 
-    # If we get here, treat as data.frame input
-    # Continue with the existing netify logic...
+	# If we get here, treat as data.frame input
+	# Continue with the existing netify logic...
 
-    # checks on user inputs
-    dyad_data <- df_check(input)
-    logical_check(sum_dyads, symmetric, diag_to_NA, missing_to_zero)
-    actor_check(actor1, actor2, dyad_data)
-    weight_check(weight, dyad_data)
-    if (!is.null(time)) {
-        time_check(time, dyad_data)
-    }
+	# checks on user inputs
+	dyad_data <- df_check(input)
+	logical_check(sum_dyads, symmetric, diag_to_NA, missing_to_zero)
+	actor_check(actor1, actor2, dyad_data)
+	weight_check(weight, dyad_data)
+	if (!is.null(time)) {
+		time_check(time, dyad_data)
+	}
 
-    # convert actor labels to character
-    # check data type for actor1 and actor2
-    if (!is.character(dyad_data[, actor1]) | !is.character(dyad_data[, actor2])) {
-        cli::cli_alert_warning(
-            "Converting `actor1` and/or `actor2` to character vector(s)."
-        )
-        dyad_data[, actor1] <- char(dyad_data[, actor1])
-        dyad_data[, actor2] <- char(dyad_data[, actor2])
-    }
+	# convert actor labels to character
+	# check data type for actor1 and actor2
+	if (!is.character(dyad_data[, actor1]) | !is.character(dyad_data[, actor2])) {
+		cli::cli_alert_warning(
+			"Converting `actor1` and/or `actor2` to character vector(s)."
+		)
+		dyad_data[, actor1] <- char(dyad_data[, actor1])
+		dyad_data[, actor2] <- char(dyad_data[, actor2])
+	}
 
-    # validate actors and mode-specific requirements
-    actor_mode_check(dyad_data, actor1, actor2, mode)
+	# validate actors and mode-specific requirements
+	actor_mode_check(dyad_data, actor1, actor2, mode)
 
-    # if sum_dyads is set to TRUE then users need to input nodal_vars and dyad_vars
-    # themselves after the network is generated using add_node_vars and add_dyad_vars
-    if (sum_dyads == TRUE) {
-        if (!is.null(nodal_vars) | !is.null(dyad_vars)) {
-            cli::cli_alert_warning(
-                "When sum_dyads is set to TRUE nodal and dyadic attributes cannot automatically be created using `netify`. Instead users need to add them afterwards using the `add_dyad_vars` and `add_node_vars` functions."
-            )
-            nodal_vars <- dyad_vars <- NULL
-        }
-    }
+	# if sum_dyads is set to TRUE then users need to input nodal_vars and dyad_vars
+	# themselves after the network is generated using add_node_vars and add_dyad_vars
+	if (sum_dyads == TRUE) {
+		if (!is.null(nodal_vars) | !is.null(dyad_vars)) {
+			cli::cli_alert_warning(
+				"When sum_dyads is set to TRUE nodal and dyadic attributes cannot automatically be created using `netify`. Instead users need to add them afterwards using the `add_dyad_vars` and `add_node_vars` functions."
+			)
+			nodal_vars <- dyad_vars <- NULL
+		}
+	}
 
-    # Determine output_format based on actual data if not specified
-    if (is.null(output_format)) {
-        if (is.null(time)) {
-            output_format <- "cross_sec"
-        } else {
-            # Check how many unique time periods exist
-            n_time_periods <- length(unique(dyad_data[[time]]))
+	# Determine output_format based on actual data if not specified
+	if (is.null(output_format)) {
+		if (is.null(time)) {
+			output_format <- "cross_sec"
+		} else {
+			# Check how many unique time periods exist
+			n_time_periods <- length(unique(dyad_data[[time]]))
 
-            if (n_time_periods == 1) {
-                output_format <- "cross_sec"
-                # Inform user
-                cli::cli_alert_info(
-                    "Time variable specified but only one time period found. Creating cross-sectional network."
-                )
-            } else {
-                # Default to list format for multiple time periods
-                output_format <- "longit_list"
-            }
-        }
-    }
+			if (n_time_periods == 1) {
+				output_format <- "cross_sec"
+				# Inform user
+				cli::cli_alert_info(
+					"Time variable specified but only one time period found. Creating cross-sectional network."
+				)
+			} else {
+				# Default to list format for multiple time periods
+				output_format <- "longit_list"
+			}
+		}
+	}
 
-    # choose relevant get_adjacency_* function
-    # based on output_format
-    if (output_format == "cross_sec") {
-        netlet <- get_adjacency(
-            dyad_data = dyad_data,
-            actor1 = actor1, actor2 = actor2,
-            symmetric = symmetric, mode = mode,
-            weight = weight,
-            sum_dyads = sum_dyads,
-            diag_to_NA = diag_to_NA,
-            missing_to_zero = missing_to_zero,
-            nodelist = nodelist
-        )
-    }
+	# choose relevant get_adjacency_* function
+	# based on output_format
+	if (output_format == "cross_sec") {
+		netlet <- get_adjacency(
+			dyad_data = dyad_data,
+			actor1 = actor1, actor2 = actor2,
+			symmetric = symmetric, mode = mode,
+			weight = weight,
+			sum_dyads = sum_dyads,
+			diag_to_NA = diag_to_NA,
+			missing_to_zero = missing_to_zero,
+			nodelist = nodelist
+		)
+	}
 
-    #
-    if (output_format == "longit_array") {
-        netlet <- get_adjacency_array(
-            dyad_data = dyad_data,
-            actor1 = actor1, actor2 = actor2, time = time,
-            symmetric = symmetric, mode = mode,
-            weight = weight, sum_dyads = sum_dyads,
-            diag_to_NA = diag_to_NA, missing_to_zero = missing_to_zero,
-            nodelist = nodelist
-        )
-    }
+	#
+	if (output_format == "longit_array") {
+		netlet <- get_adjacency_array(
+			dyad_data = dyad_data,
+			actor1 = actor1, actor2 = actor2, time = time,
+			symmetric = symmetric, mode = mode,
+			weight = weight, sum_dyads = sum_dyads,
+			diag_to_NA = diag_to_NA, missing_to_zero = missing_to_zero,
+			nodelist = nodelist
+		)
+	}
 
-    #
-    if (output_format == "longit_list") {
-        netlet <- get_adjacency_list(
-            dyad_data = dyad_data,
-            actor1 = actor1, actor2 = actor2, time = time,
-            symmetric = symmetric, mode = mode,
-            weight = weight, sum_dyads = sum_dyads,
-            actor_time_uniform = actor_time_uniform,
-            actor_pds = actor_pds,
-            diag_to_NA = diag_to_NA, missing_to_zero = missing_to_zero,
-            nodelist = nodelist
-        )
-    }
+	#
+	if (output_format == "longit_list") {
+		netlet <- get_adjacency_list(
+			dyad_data = dyad_data,
+			actor1 = actor1, actor2 = actor2, time = time,
+			symmetric = symmetric, mode = mode,
+			weight = weight, sum_dyads = sum_dyads,
+			actor_time_uniform = actor_time_uniform,
+			actor_pds = actor_pds,
+			diag_to_NA = diag_to_NA, missing_to_zero = missing_to_zero,
+			nodelist = nodelist
+		)
+	}
 
-    # add attributes if they were provided by user
-    # check if nodal vars specified and if so add them to the object
-    if (!is.null(nodal_vars)) {
-        # pull out nodal data
-        nodeData <- unique(dyad_data[, c(actor1, time, nodal_vars)])
+	# add attributes if they were provided by user
+	# check if nodal vars specified and if so add them to the object
+	if (!is.null(nodal_vars)) {
+		# pull out nodal data
+		nodeData <- unique(dyad_data[, c(actor1, time, nodal_vars)])
 
-        # add it in using add_node_vars function
-        netlet <- add_node_vars(
-            netlet = netlet, node_data = nodeData,
-            actor = actor1, time = time,
-            node_vars = nodal_vars
-        )
-    }
+		# add it in using add_node_vars function
+		netlet <- add_node_vars(
+			netlet = netlet, node_data = nodeData,
+			actor = actor1, time = time,
+			node_vars = nodal_vars
+		)
+	}
 
-    # check if dyad vars specified and if so add them to the object
-    if (!is.null(dyad_vars)) {
-        # spit out warning if dyad_vars_symmetric is left NULL
-        if (is.null(dyad_vars_symmetric)) {
-            dyad_vars_symmetric <- rep(symmetric, length(dyad_vars))
-        }
+	# check if dyad vars specified and if so add them to the object
+	if (!is.null(dyad_vars)) {
+		# spit out warning if dyad_vars_symmetric is left NULL
+		if (is.null(dyad_vars_symmetric)) {
+			dyad_vars_symmetric <- rep(symmetric, length(dyad_vars))
+		}
 
-        # add dyad vars using add_dyad_vars
-        netlet <- add_dyad_vars(
-            netlet = netlet, dyad_data = dyad_data,
-            actor1 = actor1, actor2 = actor2, time = time,
-            dyad_vars = dyad_vars,
-            dyad_vars_symmetric = dyad_vars_symmetric
-        )
-    }
+		# add dyad vars using add_dyad_vars
+		netlet <- add_dyad_vars(
+			netlet = netlet, dyad_data = dyad_data,
+			actor1 = actor1, actor2 = actor2, time = time,
+			dyad_vars = dyad_vars,
+			dyad_vars_symmetric = dyad_vars_symmetric
+		)
+	}
 
-    # return netlet object
-    return(netlet)
+	# return netlet object
+	return(netlet)
 }

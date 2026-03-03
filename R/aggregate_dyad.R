@@ -170,86 +170,86 @@
 #' @export aggregate_dyad
 
 aggregate_dyad <- function(
-    dyad_data,
-    actor1,
-    actor2,
-    time = NULL,
-    weight,
-    symmetric,
-    ignore_missing = TRUE) {
-    # if symmetric, use gen_symm_id for more efficient aggregation
-    if (symmetric) {
-        # create symmetric ids
-        dyad_data$symm_id <- gen_symm_id(
-            dyad_data,
-            actor1,
-            actor2,
-            time = time
-        )
+	dyad_data,
+	actor1,
+	actor2,
+	time = NULL,
+	weight,
+	symmetric,
+	ignore_missing = TRUE) {
+	# if symmetric, use gen_symm_id for more efficient aggregation
+	if (symmetric) {
+		# create symmetric ids
+		dyad_data$symm_id <- gen_symm_id(
+			dyad_data,
+			actor1,
+			actor2,
+			time = time
+		)
 
-        # aggregate by symmetric id
-        formula_str <- paste(weight, "~ symm_id")
+		# aggregate by symmetric id
+		formula_str <- paste(weight, "~ symm_id")
 
-        # Custom sum function that handles NAs correctly
-        sum_func <- if (ignore_missing) {
-            function(x) sum(x, na.rm = TRUE)
-        } else {
-            function(x) {
-                if (any(is.na(x))) NA_real_ else sum(x, na.rm = FALSE)
-            }
-        }
+		# Custom sum function that handles NAs correctly
+		sum_func <- if (ignore_missing) {
+			function(x) sum(x, na.rm = TRUE)
+		} else {
+			function(x) {
+				if (any(is.na(x))) NA_real_ else sum(x, na.rm = FALSE)
+			}
+		}
 
-        agg_result <- aggregate(
-            as.formula(formula_str),
-            data = dyad_data,
-            FUN = sum_func,
-            na.action = na.pass # Important: pass NAs through to the function
-        )
+		agg_result <- aggregate(
+			as.formula(formula_str),
+			data = dyad_data,
+			FUN = sum_func,
+			na.action = na.pass # Important: pass NAs through to the function
+		)
 
-        # expand back to directed format
-        dyad_data <- expand_symmetric_dyads(
-            agg_result,
-            actor1,
-            actor2,
-            time,
-            weight
-        )
-    } else {
-        # for non-symmetric, use standard aggregation
-        if (is.null(time)) {
-            formula_agg <- as.formula(paste(weight, "~", actor1, "+", actor2))
-        } else {
-            formula_agg <- as.formula(paste(weight, "~", actor1, "+", actor2, "+", time))
-        }
+		# expand back to directed format
+		dyad_data <- expand_symmetric_dyads(
+			agg_result,
+			actor1,
+			actor2,
+			time,
+			weight
+		)
+	} else {
+		# for non-symmetric, use standard aggregation
+		if (is.null(time)) {
+			formula_agg <- as.formula(paste(weight, "~", actor1, "+", actor2))
+		} else {
+			formula_agg <- as.formula(paste(weight, "~", actor1, "+", actor2, "+", time))
+		}
 
-        # Custom sum function that handles NAs correctly
-        sum_func <- if (ignore_missing) {
-            function(x) sum(x, na.rm = TRUE)
-        } else {
-            function(x) {
-                if (any(is.na(x))) NA_real_ else sum(x, na.rm = FALSE)
-            }
-        }
+		# Custom sum function that handles NAs correctly
+		sum_func <- if (ignore_missing) {
+			function(x) sum(x, na.rm = TRUE)
+		} else {
+			function(x) {
+				if (any(is.na(x))) NA_real_ else sum(x, na.rm = FALSE)
+			}
+		}
 
-        dyad_data <- aggregate(
-            formula_agg,
-            data = dyad_data,
-            FUN = sum_func,
-            na.action = na.pass # Important: pass NAs through to the function
-        )
+		dyad_data <- aggregate(
+			formula_agg,
+			data = dyad_data,
+			FUN = sum_func,
+			na.action = na.pass # Important: pass NAs through to the function
+		)
 
-        # ensure correct column order
-        if (is.null(time)) {
-            dyad_data <- dyad_data[, c(actor1, actor2, weight)]
-        } else {
-            dyad_data <- dyad_data[, c(actor1, actor2, time, weight)]
-        }
-    }
+		# ensure correct column order
+		if (is.null(time)) {
+			dyad_data <- dyad_data[, c(actor1, actor2, weight)]
+		} else {
+			dyad_data <- dyad_data[, c(actor1, actor2, time, weight)]
+		}
+	}
 
-    # reset row names
-    rownames(dyad_data) <- NULL
+	# reset row names
+	rownames(dyad_data) <- NULL
 
-    return(dyad_data)
+	return(dyad_data)
 }
 
 #' Generate symmetric identifiers for dyadic data
@@ -353,59 +353,59 @@ aggregate_dyad <- function(
 #' @export gen_symm_id
 
 gen_symm_id <- function(
-    dyad_data,
-    actor1,
-    actor2,
-    time = NULL) {
-    # input validation
-    if (!is.data.frame(dyad_data)) {
-        cli::cli_abort(c(
-            "x" = "{.arg dyad_data} must be a data.frame.",
-            "i" = "You provided an object of class {.cls {class(dyad_data)}}."
-        ))
-    }
+	dyad_data,
+	actor1,
+	actor2,
+	time = NULL) {
+	# input validation
+	if (!is.data.frame(dyad_data)) {
+		cli::cli_abort(c(
+			"x" = "{.arg dyad_data} must be a data.frame.",
+			"i" = "You provided an object of class {.cls {class(dyad_data)}}."
+		))
+	}
 
-    if (!actor1 %in% names(dyad_data)) {
-        cli::cli_abort(c(
-            "x" = "Column {.field {actor1}} not found in {.arg dyad_data}.",
-            "i" = "Available columns: {.field {names(dyad_data)}}"
-        ))
-    }
+	if (!actor1 %in% names(dyad_data)) {
+		cli::cli_abort(c(
+			"x" = "Column {.field {actor1}} not found in {.arg dyad_data}.",
+			"i" = "Available columns: {.field {names(dyad_data)}}"
+		))
+	}
 
-    if (!actor2 %in% names(dyad_data)) {
-        cli::cli_abort(c(
-            "x" = "Column {.field {actor2}} not found in {.arg dyad_data}.",
-            "i" = "Available columns: {.field {names(dyad_data)}}"
-        ))
-    }
+	if (!actor2 %in% names(dyad_data)) {
+		cli::cli_abort(c(
+			"x" = "Column {.field {actor2}} not found in {.arg dyad_data}.",
+			"i" = "Available columns: {.field {names(dyad_data)}}"
+		))
+	}
 
-    if (!is.null(time) && !time %in% names(dyad_data)) {
-        cli::cli_abort(c(
-            "x" = "Column {.field {time}} not found in {.arg dyad_data}.",
-            "i" = "Available columns: {.field {names(dyad_data)}}"
-        ))
-    }
+	if (!is.null(time) && !time %in% names(dyad_data)) {
+		cli::cli_abort(c(
+			"x" = "Column {.field {time}} not found in {.arg dyad_data}.",
+			"i" = "Available columns: {.field {names(dyad_data)}}"
+		))
+	}
 
-    # extract actor columns
-    a1 <- as.character(dyad_data[[actor1]])
-    a2 <- as.character(dyad_data[[actor2]])
+	# extract actor columns
+	a1 <- as.character(dyad_data[[actor1]])
+	a2 <- as.character(dyad_data[[actor2]])
 
-    # vectorized approach to create sorted actor pairs
-    # this is much faster than using apply() row-by-row
-    # use pmin/pmax for element-wise min/max comparison
-    actor_min <- pmin(a1, a2)
-    actor_max <- pmax(a1, a2)
+	# vectorized approach to create sorted actor pairs
+	# this is much faster than using apply() row-by-row
+	# use pmin/pmax for element-wise min/max comparison
+	actor_min <- pmin(a1, a2)
+	actor_max <- pmax(a1, a2)
 
-    # create base symmetric id
-    symm_id <- paste(actor_min, actor_max, sep = "_")
+	# create base symmetric id
+	symm_id <- paste(actor_min, actor_max, sep = "_")
 
-    # append time if specified
-    if (!is.null(time)) {
-        time_vals <- as.character(dyad_data[[time]])
-        symm_id <- paste(symm_id, time_vals, sep = "_")
-    }
+	# append time if specified
+	if (!is.null(time)) {
+		time_vals <- as.character(dyad_data[[time]])
+		symm_id <- paste(symm_id, time_vals, sep = "_")
+	}
 
-    return(symm_id)
+	return(symm_id)
 }
 
 
@@ -428,74 +428,74 @@ gen_symm_id <- function(
 #' @noRd
 
 expand_symmetric_dyads <- function(agg_result, actor1, actor2, time, weight) {
-    # split symmetric id back into components
-    id_parts <- strsplit(agg_result$symm_id, "_", fixed = TRUE)
-    n_dyads <- length(id_parts)
+	# split symmetric id back into components
+	id_parts <- strsplit(agg_result$symm_id, "_", fixed = TRUE)
+	n_dyads <- length(id_parts)
 
-    # extract all parts at once for efficiency
-    parts_matrix <- matrix(unlist(id_parts), ncol = if (is.null(time)) 2 else 3, byrow = TRUE)
-    a1_vals <- parts_matrix[, 1]
-    a2_vals <- parts_matrix[, 2]
-    wt_vals <- agg_result[[weight]]
+	# extract all parts at once for efficiency
+	parts_matrix <- matrix(unlist(id_parts), ncol = if (is.null(time)) 2 else 3, byrow = TRUE)
+	a1_vals <- parts_matrix[, 1]
+	a2_vals <- parts_matrix[, 2]
+	wt_vals <- agg_result[[weight]]
 
-    # identify self-loops
-    is_self_loop <- a1_vals == a2_vals
-    n_regular <- sum(!is_self_loop)
-    n_self <- sum(is_self_loop)
+	# identify self-loops
+	is_self_loop <- a1_vals == a2_vals
+	n_regular <- sum(!is_self_loop)
+	n_self <- sum(is_self_loop)
 
-    # calculate total rows needed
-    total_rows <- 2 * n_regular + n_self
+	# calculate total rows needed
+	total_rows <- 2 * n_regular + n_self
 
-    # build result vectors
-    if (is.null(time)) {
-        # cross-sectional case
-        result <- data.frame(
-            actor1 = c(
-                a1_vals[!is_self_loop], # regular dyads, direction 1
-                a2_vals[!is_self_loop], # regular dyads, direction 2
-                a1_vals[is_self_loop] # self-loops
-            ),
-            actor2 = c(
-                a2_vals[!is_self_loop], # regular dyads, direction 1
-                a1_vals[!is_self_loop], # regular dyads, direction 2
-                a2_vals[is_self_loop] # self-loops
-            ),
-            weight = c(
-                wt_vals[!is_self_loop], # regular dyads, direction 1
-                wt_vals[!is_self_loop], # regular dyads, direction 2
-                wt_vals[is_self_loop] # self-loops
-            ),
-            stringsAsFactors = FALSE
-        )
-        names(result) <- c(actor1, actor2, weight)
-    } else {
-        # longitudinal case
-        tm_vals <- parts_matrix[, 3]
-        result <- data.frame(
-            actor1 = c(
-                a1_vals[!is_self_loop],
-                a2_vals[!is_self_loop],
-                a1_vals[is_self_loop]
-            ),
-            actor2 = c(
-                a2_vals[!is_self_loop],
-                a1_vals[!is_self_loop],
-                a2_vals[is_self_loop]
-            ),
-            time = c(
-                tm_vals[!is_self_loop],
-                tm_vals[!is_self_loop],
-                tm_vals[is_self_loop]
-            ),
-            weight = c(
-                wt_vals[!is_self_loop],
-                wt_vals[!is_self_loop],
-                wt_vals[is_self_loop]
-            ),
-            stringsAsFactors = FALSE
-        )
-        names(result) <- c(actor1, actor2, time, weight)
-    }
+	# build result vectors
+	if (is.null(time)) {
+		# cross-sectional case
+		result <- data.frame(
+			actor1 = c(
+				a1_vals[!is_self_loop], # regular dyads, direction 1
+				a2_vals[!is_self_loop], # regular dyads, direction 2
+				a1_vals[is_self_loop] # self-loops
+			),
+			actor2 = c(
+				a2_vals[!is_self_loop], # regular dyads, direction 1
+				a1_vals[!is_self_loop], # regular dyads, direction 2
+				a2_vals[is_self_loop] # self-loops
+			),
+			weight = c(
+				wt_vals[!is_self_loop], # regular dyads, direction 1
+				wt_vals[!is_self_loop], # regular dyads, direction 2
+				wt_vals[is_self_loop] # self-loops
+			),
+			stringsAsFactors = FALSE
+		)
+		names(result) <- c(actor1, actor2, weight)
+	} else {
+		# longitudinal case
+		tm_vals <- parts_matrix[, 3]
+		result <- data.frame(
+			actor1 = c(
+				a1_vals[!is_self_loop],
+				a2_vals[!is_self_loop],
+				a1_vals[is_self_loop]
+			),
+			actor2 = c(
+				a2_vals[!is_self_loop],
+				a1_vals[!is_self_loop],
+				a2_vals[is_self_loop]
+			),
+			time = c(
+				tm_vals[!is_self_loop],
+				tm_vals[!is_self_loop],
+				tm_vals[is_self_loop]
+			),
+			weight = c(
+				wt_vals[!is_self_loop],
+				wt_vals[!is_self_loop],
+				wt_vals[is_self_loop]
+			),
+			stringsAsFactors = FALSE
+		)
+		names(result) <- c(actor1, actor2, time, weight)
+	}
 
-    return(result)
+	return(result)
 }

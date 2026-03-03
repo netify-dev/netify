@@ -17,18 +17,18 @@
 #' @keywords internal
 #' @noRd
 extract_matrix <- function(net, time_index = 1) {
-    attrs <- attributes(net)
-    netify_type <- attrs$netify_type
+	attrs <- attributes(net)
+	netify_type <- attrs$netify_type
 
-    if (netify_type == "cross_sec") {
-        return(as.matrix(net))
-    } else if (netify_type == "longit_array") {
-        return(net[, , time_index])
-    } else if (netify_type == "longit_list") {
-        return(net[[time_index]])
-    } else {
-        stop("Unknown netify type: ", netify_type)
-    }
+	if (netify_type == "cross_sec") {
+		return(as.matrix(net))
+	} else if (netify_type == "longit_array") {
+		return(net[, , time_index])
+	} else if (netify_type == "longit_list") {
+		return(net[[time_index]])
+	} else {
+		stop("Unknown netify type: ", netify_type)
+	}
 }
 
 #' Get all unique actors from networks
@@ -41,15 +41,15 @@ extract_matrix <- function(net, time_index = 1) {
 #' @keywords internal
 #' @noRd
 get_all_actors <- function(nets) {
-    if (!is.list(nets) || inherits(nets, "netify")) {
-        # single net
-        mat <- extract_matrix(nets)
-        return(sort(unique(c(rownames(mat), colnames(mat)))))
-    } else {
-        # list of nets - use rcpp for efficiency
-        mats <- lapply(nets, extract_matrix)
-        return(get_all_actors_cpp(mats))
-    }
+	if (!is.list(nets) || inherits(nets, "netify")) {
+		# single net
+		mat <- extract_matrix(nets)
+		return(sort(unique(c(rownames(mat), colnames(mat)))))
+	} else {
+		# list of nets - use rcpp for efficiency
+		mats <- lapply(nets, extract_matrix)
+		return(get_all_actors_cpp(mats))
+	}
 }
 
 #' Align matrices to common actors
@@ -64,31 +64,31 @@ get_all_actors <- function(nets) {
 #' @keywords internal
 #' @noRd
 align_matrices <- function(..., all_actors = NULL, include_diagonal = FALSE) {
-    dots <- list(...)
+	dots <- list(...)
 
-    # handle different input types
-    if (length(dots) == 1 && is.list(dots[[1]])) {
-        # list of mats passed
-        mats <- dots[[1]]
-    } else if (length(dots) == 2) {
-        # two mats passed directly
-        mats <- dots
-    } else {
-        stop("align_matrices requires either 2 matrices or a list of matrices")
-    }
+	# handle different input types
+	if (length(dots) == 1 && is.list(dots[[1]])) {
+		# list of mats passed
+		mats <- dots[[1]]
+	} else if (length(dots) == 2) {
+		# two mats passed directly
+		mats <- dots
+	} else {
+		stop("align_matrices requires either 2 matrices or a list of matrices")
+	}
 
-    # Extract matrices if they're netify objects
-    if (inherits(mats[[1]], "netify")) {
-        mats <- lapply(mats, extract_matrix)
-    }
+	# Extract matrices if they're netify objects
+	if (inherits(mats[[1]], "netify")) {
+		mats <- lapply(mats, extract_matrix)
+	}
 
-    if (length(mats) == 2) {
-        # use rcpp for two matrices
-        return(align_matrices_cpp(mats[[1]], mats[[2]], all_actors))
-    } else {
-        # use rcpp for multiple matrices
-        return(batch_align_matrices_cpp(mats, all_actors, include_diagonal))
-    }
+	if (length(mats) == 2) {
+		# use rcpp for two matrices
+		return(align_matrices_cpp(mats[[1]], mats[[2]], all_actors))
+	} else {
+		# use rcpp for multiple matrices
+		return(batch_align_matrices_cpp(mats, all_actors, include_diagonal))
+	}
 }
 
 #' Melt matrix to long format
@@ -106,23 +106,23 @@ align_matrices <- function(..., all_actors = NULL, include_diagonal = FALSE) {
 #' @keywords internal
 #' @noRd
 melt_matrix <- function(mat,
-                        remove_diagonal = TRUE,
-                        remove_zeros = TRUE,
-                        na.rm = TRUE,
-                        value.name = "value") {
-    # use rcpp implementation
-    result <- melt_matrix_cpp(mat, remove_diagonal, remove_zeros, na.rm)
+						remove_diagonal = TRUE,
+						remove_zeros = TRUE,
+						na.rm = TRUE,
+						value.name = "value") {
+	# use rcpp implementation
+	result <- melt_matrix_cpp(mat, remove_diagonal, remove_zeros, na.rm)
 
-    # rename columns to match expected format
-    names(result)[names(result) == "row"] <- "Var1"
-    names(result)[names(result) == "col"] <- "Var2"
+	# rename columns to match expected format
+	names(result)[names(result) == "row"] <- "Var1"
+	names(result)[names(result) == "col"] <- "Var2"
 
-    # rename value column if requested
-    if (value.name != "value") {
-        names(result)[names(result) == "value"] <- value.name
-    }
+	# rename value column if requested
+	if (value.name != "value") {
+		names(result)[names(result) == "value"] <- value.name
+	}
 
-    return(result)
+	return(result)
 }
 
 #' Calculate correlation with proper handling of edge cases
@@ -138,27 +138,27 @@ melt_matrix <- function(mat,
 #' @keywords internal
 #' @noRd
 safe_correlation <- function(x, y, na.rm = TRUE) {
-    if (na.rm) {
-        complete <- !is.na(x) & !is.na(y)
-        x <- x[complete]
-        y <- y[complete]
-    }
+	if (na.rm) {
+		complete <- !is.na(x) & !is.na(y)
+		x <- x[complete]
+		y <- y[complete]
+	}
 
-    if (length(x) < 3) {
-        return(NA_real_)
-    }
+	if (length(x) < 3) {
+		return(NA_real_)
+	}
 
-    # check for zero variance
-    if (var(x) == 0 || var(y) == 0) {
-        if (var(x) == 0 && var(y) == 0 && all(x == y)) {
-            # perfect correlation if both constant and equal
-            return(1) 
-        }
-        # no correlation if one is constant
-        return(0) 
-    }
+	# check for zero variance
+	if (var(x) == 0 || var(y) == 0) {
+		if (var(x) == 0 && var(y) == 0 && all(x == y)) {
+			# perfect correlation if both constant and equal
+			return(1) 
+		}
+		# no correlation if one is constant
+		return(0) 
+	}
 
-    return(correlation_cpp(x, y))
+	return(correlation_cpp(x, y))
 }
 
 #' Ensure matrices have same dimensions
@@ -172,28 +172,28 @@ safe_correlation <- function(x, y, na.rm = TRUE) {
 #' @keywords internal
 #' @noRd
 ensure_same_dimensions <- function(mat1, mat2) {
-    n1 <- nrow(mat1)
-    n2 <- nrow(mat2)
+	n1 <- nrow(mat1)
+	n2 <- nrow(mat2)
 
-    if (n1 == n2 && ncol(mat1) == ncol(mat2)) {
-        return(list(mat1 = mat1, mat2 = mat2))
-    }
+	if (n1 == n2 && ncol(mat1) == ncol(mat2)) {
+		return(list(mat1 = mat1, mat2 = mat2))
+	}
 
-    # determine target dimensions
-    n <- max(n1, n2, ncol(mat1), ncol(mat2))
+	# determine target dimensions
+	n <- max(n1, n2, ncol(mat1), ncol(mat2))
 
-    # pad matrices if needed
-    if (n1 < n || ncol(mat1) < n) {
-        new_mat1 <- matrix(0, n, n)
-        new_mat1[1:n1, 1:ncol(mat1)] <- mat1
-        mat1 <- new_mat1
-    }
+	# pad matrices if needed
+	if (n1 < n || ncol(mat1) < n) {
+		new_mat1 <- matrix(0, n, n)
+		new_mat1[1:n1, 1:ncol(mat1)] <- mat1
+		mat1 <- new_mat1
+	}
 
-    if (n2 < n || ncol(mat2) < n) {
-        new_mat2 <- matrix(0, n, n)
-        new_mat2[1:n2, 1:ncol(mat2)] <- mat2
-        mat2 <- new_mat2
-    }
+	if (n2 < n || ncol(mat2) < n) {
+		new_mat2 <- matrix(0, n, n)
+		new_mat2[1:n2, 1:ncol(mat2)] <- mat2
+		mat2 <- new_mat2
+	}
 
-    return(list(mat1 = mat1, mat2 = mat2))
+	return(list(mat1 = mat1, mat2 = mat2))
 }

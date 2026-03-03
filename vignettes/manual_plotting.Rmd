@@ -16,11 +16,10 @@ knitr::opts_chunk$set(
     echo = TRUE
 )
 
-# this vignette requires dplyr for data manipulation
-has_pkgs <- requireNamespace("dplyr", quietly = TRUE)
-if (!has_pkgs) {
-    knitr::opts_chunk$set(eval = FALSE)
-}
+# The advanced sections of this vignette use dplyr (Suggests).
+# ggnewscale is in Imports so it is always available.
+# Core workflow (data prep + basic ggplot) always runs.
+has_adv_pkgs <- requireNamespace("dplyr", quietly = TRUE)
 ```
 
 This vignette provides an overview of how to create customizable plots using `ggplot2` while still using `netify` to prepare the data.
@@ -32,9 +31,18 @@ library(netify)
 library(ggplot2)
 ```
 
-We'll also use the `ggnewscale` package to create multiple legends when necessary in the same plot (e.g., if you want to have legends for a color aesthetic for both nodes and edges).
+The advanced sections also use `dplyr` (for data manipulation) and `ggnewscale` (for multiple color legends). If `dplyr` is not installed, the core plotting workflow still runs; only the advanced edge-information section will be skipped.
 
-```{r}
+```{r, echo=FALSE}
+if (!has_adv_pkgs) {
+    message(
+        "Skipping advanced sections: install dplyr to run them.\n",
+        "install.packages('dplyr')"
+    )
+}
+```
+
+```{r, eval=has_adv_pkgs}
 library(ggnewscale)
 ```
 
@@ -169,7 +177,7 @@ lapply(plot_data_mds$net_dfs, head)
 
 So far, we have focused on using color to convey information about nodal attributes in the network (population size and polity score). Now, let's add more edge information to the plot. For example, we can include information about the `matlConf` dyadic attribute. Imagine we want to highlight edges of verbal cooperation that occur at the same time as when higher than average levels of material conflict occur in the network. First, let's create the variable in the edge data.
 
-```{r}
+```{r, eval=has_adv_pkgs}
 library(dplyr)
 
 # create high_matlConf variable
@@ -187,7 +195,7 @@ head(net_dfs$edge_data)
 
 Now that we have the new variable in the data.frame, we can plot by it but note that we now need a color aesthetic for both points and segments, even though `ggplot2` only supports one legend by aesthetic by default. We can get around this by using the `new_scale_color` function from the ``ggnewscale` package.
 
-```{r, fig.width=9, fig.height=8}
+```{r, fig.width=9, fig.height=8, eval=has_adv_pkgs}
 # color line segments by this new variable
 ggplot() +
     geom_segment(

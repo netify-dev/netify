@@ -226,150 +226,150 @@
 #' @export compare_networks
 
 compare_networks <- function(
-    nets,
-    method = "correlation",
-    by = NULL,
-    what = "edges",
-    test = TRUE,
-    n_permutations = 5000,
-    include_diagonal = FALSE,
-    return_details = FALSE,
-    edge_threshold = 0,
-    permutation_type = c("classic", "degree_preserving", 
-                         "freedman_lane", "dsp_mrqap"),
-    correlation_type = c("pearson", "spearman"),
-    binary_metric = c("phi", "simple_matching", "mean_centered"),
-    seed = NULL,
-    p_adjust = c("none", "holm", "BH", "BY"),
-    adaptive_stop = FALSE,
-    alpha = 0.05,
-    max_permutations = 20000,
-    spectral_rank = 0,
-    attr_metric = c("ecdf_cor", "wasserstein"),
-    other_stats = NULL) {
-    # match arguments
-    permutation_type <- match.arg(permutation_type)
-    correlation_type <- match.arg(correlation_type)
-    binary_metric <- match.arg(binary_metric)
-    p_adjust <- match.arg(p_adjust)
-    attr_metric <- match.arg(attr_metric)
-    
-    # RNG handling - generate seed if not provided for reproducibility
-    if (is.null(seed)) {
-        seed <- sample.int(.Machine$integer.max, 1)
-    }
-    
-    # Save and restore RNG state
-    old_rng <- if (exists(".Random.seed", .GlobalEnv)) .Random.seed else NULL
-    set.seed(seed)
-    on.exit({
-        if (!is.null(old_rng)) {
-            assign(".Random.seed", old_rng, envir = .GlobalEnv)
-        } else if (exists(".Random.seed", .GlobalEnv)) {
-            rm(.Random.seed, envir = .GlobalEnv)
-        }
-    })
-    
-    # input validation
-    if (!is.list(nets) && !is_netify(nets)) {
-        cli::cli_abort("Input must be a list of netify objects or a single netify object")
-    }
+	nets,
+	method = "correlation",
+	by = NULL,
+	what = "edges",
+	test = TRUE,
+	n_permutations = 5000,
+	include_diagonal = FALSE,
+	return_details = FALSE,
+	edge_threshold = 0,
+	permutation_type = c("classic", "degree_preserving", 
+						 "freedman_lane", "dsp_mrqap"),
+	correlation_type = c("pearson", "spearman"),
+	binary_metric = c("phi", "simple_matching", "mean_centered"),
+	seed = NULL,
+	p_adjust = c("none", "holm", "BH", "BY"),
+	adaptive_stop = FALSE,
+	alpha = 0.05,
+	max_permutations = 20000,
+	spectral_rank = 0,
+	attr_metric = c("ecdf_cor", "wasserstein"),
+	other_stats = NULL) {
+	# match arguments
+	permutation_type <- match.arg(permutation_type)
+	correlation_type <- match.arg(correlation_type)
+	binary_metric <- match.arg(binary_metric)
+	p_adjust <- match.arg(p_adjust)
+	attr_metric <- match.arg(attr_metric)
+	
+	# RNG handling - generate seed if not provided for reproducibility
+	if (is.null(seed)) {
+		seed <- sample.int(.Machine$integer.max, 1)
+	}
+	
+	# Save and restore RNG state
+	old_rng <- if (exists(".Random.seed", .GlobalEnv)) .Random.seed else NULL
+	set.seed(seed)
+	on.exit({
+		if (!is.null(old_rng)) {
+			assign(".Random.seed", old_rng, envir = .GlobalEnv)
+		} else if (exists(".Random.seed", .GlobalEnv)) {
+			rm(.Random.seed, envir = .GlobalEnv)
+		}
+	})
+	
+	# input validation
+	if (!is.list(nets) && !is_netify(nets)) {
+		cli::cli_abort("Input must be a list of netify objects or a single netify object")
+	}
 
-    # convert single netify to list if doing by-group comparison
-    if (is_netify(nets) && !is.null(by)) {
-        nets_list <- prepare_by_group_networks(nets, by)
-        comparison_type <- "by_group"
-    } else if (is_netify(nets)) {
-        # single netify without 'by' - extract time periods or layers
-        nets_list <- extract_network_list(nets)
+	# convert single netify to list if doing by-group comparison
+	if (is_netify(nets) && !is.null(by)) {
+		nets_list <- prepare_by_group_networks(nets, by)
+		comparison_type <- "by_group"
+	} else if (is_netify(nets)) {
+		# single netify without 'by' - extract time periods or layers
+		nets_list <- extract_network_list(nets)
 
-        # determine comparison type based on what was extracted
-        attrs <- attributes(nets)
-        # check if this is a true multilayer network (not just having layers="TRUE")
-        is_multilayer <- !is.null(attrs$layers) &&
-            is.character(attrs$layers) &&
-            length(attrs$layers) > 1
+		# determine comparison type based on what was extracted
+		attrs <- attributes(nets)
+		# check if this is a true multilayer network (not just having layers="TRUE")
+		is_multilayer <- !is.null(attrs$layers) &&
+			is.character(attrs$layers) &&
+			length(attrs$layers) > 1
 
-        if (is_multilayer) {
-            comparison_type <- "multilayer"
-        } else if (attrs$netify_type %in% c("longit_array", "longit_list")) {
-            comparison_type <- "temporal"
-        } else {
-            comparison_type <- "cross_network"
-        }
-    } else {
-        # list of netify objects
-        nets_list <- nets
-        comparison_type <- "cross_network"
-        # calidate all elements are netify
-        if (!all(sapply(nets_list, is_netify))) {
-            cli::cli_abort("All elements of nets must be netify objects")
-        }
-    }
+		if (is_multilayer) {
+			comparison_type <- "multilayer"
+		} else if (attrs$netify_type %in% c("longit_array", "longit_list")) {
+			comparison_type <- "temporal"
+		} else {
+			comparison_type <- "cross_network"
+		}
+	} else {
+		# list of netify objects
+		nets_list <- nets
+		comparison_type <- "cross_network"
+		# calidate all elements are netify
+		if (!all(sapply(nets_list, is_netify))) {
+			cli::cli_abort("All elements of nets must be netify objects")
+		}
+	}
 
-    # make sure we actually have things to compare
-    if (length(nets_list) < 2) {
-        cli::cli_abort("Need at least 2 networks to compare")
-    }
+	# make sure we actually have things to compare
+	if (length(nets_list) < 2) {
+		cli::cli_abort("Need at least 2 networks to compare")
+	}
 
-    # validate params
-    checkmate::assert_choice(method, c("correlation", "jaccard", "hamming", "qap", "spectral", "all"))
-    checkmate::assert_choice(what, c("edges", "structure", "nodes", "attributes"))
-    checkmate::assert_logical(test, len = 1)
-    checkmate::assert_count(n_permutations, positive = TRUE)
-    checkmate::assert_logical(include_diagonal, len = 1)
-    checkmate::assert_logical(return_details, len = 1)
-    
-    # validate other_stats parameter
-    if (!is.null(other_stats)) {
-        if (!is.list(other_stats) || is.null(names(other_stats))) {
-            cli::cli_abort("other_stats must be a named list of functions")
-        }
-        if (!all(sapply(other_stats, is.function))) {
-            cli::cli_abort("All elements of other_stats must be functions")
-        }
-    }
+	# validate params
+	checkmate::assert_choice(method, c("correlation", "jaccard", "hamming", "qap", "spectral", "all"))
+	checkmate::assert_choice(what, c("edges", "structure", "nodes", "attributes"))
+	checkmate::assert_logical(test, len = 1)
+	checkmate::assert_count(n_permutations, positive = TRUE)
+	checkmate::assert_logical(include_diagonal, len = 1)
+	checkmate::assert_logical(return_details, len = 1)
+	
+	# validate other_stats parameter
+	if (!is.null(other_stats)) {
+		if (!is.list(other_stats) || is.null(names(other_stats))) {
+			cli::cli_abort("other_stats must be a named list of functions")
+		}
+		if (!all(sapply(other_stats, is.function))) {
+			cli::cli_abort("All elements of other_stats must be functions")
+		}
+	}
 
-    # init results
-    results <- list(
-        comparison_type = comparison_type,
-        comparison_method = method,  # Store the algorithm (correlation, jaccard, etc.)
-        what = what,
-        n_networks = length(nets_list)
-    )
+	# init results
+	results <- list(
+		comparison_type = comparison_type,
+		comparison_method = method,  # Store the algorithm (correlation, jaccard, etc.)
+		what = what,
+		n_networks = length(nets_list)
+	)
 
-    #
-    if (what == "edges") {
-        comp_results <- compare_edges(
-            nets_list, method, test, n_permutations,
-            include_diagonal, edge_threshold, return_details,
-            permutation_type, correlation_type, binary_metric,
-            p_adjust, adaptive_stop, alpha, max_permutations, seed_used = seed,
-            spectral_rank = spectral_rank, other_stats = other_stats
-        )
-    } else if (what == "structure") {
-        comp_results <- compare_structure(nets_list, test, other_stats = other_stats)
-    } else if (what == "nodes") {
-        comp_results <- compare_nodes(nets_list, return_details, other_stats = other_stats)
-    } else if (what == "attributes") {
-        comp_results <- compare_attributes(nets_list, test, n_permutations, return_details, attr_metric, other_stats = other_stats)
-    }
+	#
+	if (what == "edges") {
+		comp_results <- compare_edges(
+			nets_list, method, test, n_permutations,
+			include_diagonal, edge_threshold, return_details,
+			permutation_type, correlation_type, binary_metric,
+			p_adjust, adaptive_stop, alpha, max_permutations, seed_used = seed,
+			spectral_rank = spectral_rank, other_stats = other_stats
+		)
+	} else if (what == "structure") {
+		comp_results <- compare_structure(nets_list, test, other_stats = other_stats)
+	} else if (what == "nodes") {
+		comp_results <- compare_nodes(nets_list, return_details, other_stats = other_stats)
+	} else if (what == "attributes") {
+		comp_results <- compare_attributes(nets_list, test, n_permutations, return_details, attr_metric, other_stats = other_stats)
+	}
 
-    # Merge comparison results with initial results
-    # The comp_results will have its own 'method' field that indicates the comparison type
-    results <- c(results, comp_results)
-    
-    #
-    results$comparison_type <- comparison_type
+	# Merge comparison results with initial results
+	# The comp_results will have its own 'method' field that indicates the comparison type
+	results <- c(results, comp_results)
+	
+	#
+	results$comparison_type <- comparison_type
 
-    #
-    if (!is.null(by) && comparison_type == "by_group") {
-        results$by_group <- analyze_by_group(results, nets_list, by)
-    }
+	#
+	if (!is.null(by) && comparison_type == "by_group") {
+		results$by_group <- analyze_by_group(results, nets_list, by)
+	}
 
-    #
-    class(results) <- c("netify_comparison", "list")
+	#
+	class(results) <- c("netify_comparison", "list")
 
-    #
-    return(results)
+	#
+	return(results)
 }

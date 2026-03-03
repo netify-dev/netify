@@ -348,16 +348,16 @@ double calculate_spectral_distance_cpp(
     // laplacian = degree matrix - adjacency matrix
     for (int i=0;i<n;++i) {
         double deg1=0, deg2=0;
-        
+
         // calculate degree and set off-diagonal elements
         for (int j=0;j<n;++j) {
-            // for mat1
-            if (!std::isnan(A(i,j))) { 
+            // for mat1 — use ISNA to properly detect R NA values
+            if (!ISNA(A(i,j)) && !ISNAN(A(i,j))) {
                 deg1 += std::abs(A(i,j));  // sum absolute values for degree
                 L1(i,j) = -A(i,j);          // negative adjacency for off-diagonal
             }
             // for mat2
-            if (!std::isnan(B(i,j))) { 
+            if (!ISNA(B(i,j)) && !ISNAN(B(i,j))) {
                 deg2 += std::abs(B(i,j));  // sum absolute values for degree
                 L2(i,j) = -B(i,j);          // negative adjacency for off-diagonal
             }
@@ -520,9 +520,13 @@ inline void one_edge_swap(
 
     std::uniform_int_distribution<> U(0, edges.size()-1);
     int tries=0;
-    
-    // try up to 10 times to find valid swap
-    while (tries<10) {
+
+    // scale max attempts with density — dense networks need more tries
+    // for sparse networks 100 is plenty, for dense networks we may need more
+    const int max_tries = 100;
+
+    // try up to max_tries times to find valid swap
+    while (tries<max_tries) {
         // randomly select two edges
         auto& e1 = edges[ U(rng) ];
         auto& e2 = edges[ U(rng) ];

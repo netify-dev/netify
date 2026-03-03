@@ -4,11 +4,18 @@
 \alias{layer_netify}
 \title{Create multilayer networks from multiple netify objects}
 \usage{
-layer_netify(netlet_list, layer_labels = NULL)
+layer_netify(netlet_list, ..., layer_labels = NULL)
 }
 \arguments{
-\item{netlet_list}{A list of netify objects to layer together. All objects must
-have compatible dimensions and attributes (see Details).}
+\item{netlet_list}{A list of netify objects to layer together, or the first
+netify object when passing multiple objects as separate arguments via
+\code{...}. All objects must have compatible dimensions and attributes
+(see Details).}
+
+\item{...}{Additional netify objects. When provided, \code{netlet_list}
+should be a single netify object and all arguments are collected into a
+list. This allows calling \code{layer_netify(net1, net2, net3)} as a
+shorthand for \code{layer_netify(list(net1, net2, net3))}.}
 
 \item{layer_labels}{Character vector specifying names for each layer. If NULL
 (default), uses names from netlet_list or generates generic labels ("layer1",

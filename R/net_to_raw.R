@@ -11,15 +11,15 @@
 #' @noRd
 
 raw_matrix <- function(netlet) {
-    stopifnot("Not a netify object!" = is_netify(netlet))
-    out <- netlet
-    if (length(attributes(out)$dim) > 2) {
-        class(out) <- c("array")
-    } else {
-        class(out) <- c("matrix", "array")
-    }
-    attributes(out)[3:length(attributes(out))] <- NULL
-    return(out)
+	stopifnot("Not a netify object!" = is_netify(netlet))
+	out <- netlet
+	if (length(attributes(out)$dim) > 2) {
+		class(out) <- c("array")
+	} else {
+		class(out) <- c("matrix", "array")
+	}
+	attributes(out)[3:length(attributes(out))] <- NULL
+	return(out)
 }
 
 #' raw_list
@@ -34,11 +34,11 @@ raw_matrix <- function(netlet) {
 #' @noRd
 
 raw_list <- function(netlet) {
-    stopifnot("Not a netify object!" = is_netify(netlet))
-    netlet <- lapply(netlet, raw_matrix)
-    class(netlet) <- c("list")
-    # attributes(netlet)[2:length(attributes(netlet))] <- NULL
-    return(netlet)
+	stopifnot("Not a netify object!" = is_netify(netlet))
+	netlet <- lapply(netlet, raw_matrix)
+	class(netlet) <- c("list")
+	# attributes(netlet)[2:length(attributes(netlet))] <- NULL
+	return(netlet)
 }
 
 #' Get raw network data without netify attributes
@@ -60,17 +60,17 @@ raw_list <- function(netlet) {
 #' @export get_raw
 
 get_raw <- function(netlet) {
-    # check
-    netify_check(netlet)
+	# check
+	netify_check(netlet)
 
-    # get type
-    obj_type <- attributes(netlet)$netify_type
+	# get type
+	obj_type <- attributes(netlet)$netify_type
 
-    # strip netify attributes and return
-    if (obj_type %in% c("cross_sec", "longit_array")) {
-        return(raw_matrix(netlet))
-    }
-    if (obj_type %in% c("longit_list")) {
-        return(raw_list(netlet))
-    }
+	# strip netify attributes and return
+	if (obj_type %in% c("cross_sec", "longit_array")) {
+		return(raw_matrix(netlet))
+	}
+	if (obj_type %in% c("longit_list")) {
+		return(raw_list(netlet))
+	}
 }

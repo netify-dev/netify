@@ -50,8 +50,19 @@
 #'   \describe{
 #'     \item{\code{covar_of_row_col_means}}{Covariance between actors' sending and
 #'       receiving patterns}
-#'     \item{\code{reciprocity}}{Correlation between adjacency matrix and its
-#'       transpose, measuring tendency for mutual ties}
+#'     \item{\code{reciprocity}}{Pearson correlation between the adjacency
+#'       matrix and its transpose. This measures the linear association
+#'       between outgoing and incoming tie weights for each dyad (i.e., how
+#'       similar \eqn{a_{ij}} is to \eqn{a_{ji}} across all dyads). Values
+#'       near 1 indicate strong reciprocity, while values near 0 indicate no
+#'       relationship. Note: this differs from the traditional edge-based
+#'       reciprocity (proportion of mutual dyads) used by igraph and other
+#'       packages.}
+#'     \item{\code{mutual}}{Proportion of mutual dyads: the fraction of
+#'       connected dyad pairs where both directions are present. Ranges from 0
+#'       (no mutual ties) to 1 (all ties are reciprocated). This is the
+#'       traditional edge-based reciprocity measure used by igraph and most
+#'       network analysis textbooks.}
 #'   }
 #'
 #' @details
@@ -140,162 +151,162 @@
 #' @export
 
 summary.netify <- function(object, ...) {
-    ######################
-    # prelim checks
-    # check if netify object
-    netify_check(object)
+	####
+	# prelim checks
+	# check if netify object
+	netify_check(object)
 
-    # get summary args
-    summary_args <- list(...)
+	# get summary args
+	summary_args <- list(...)
 
-    # cache attributes
-    obj_attrs <- attributes(object)
-    layers <- obj_attrs$layers
-    n_layers <- length(layers)
-    netlet_type <- obj_attrs$netify_type
-    is_cross_sec <- netlet_type == "cross_sec"
-    is_symmetric <- obj_attrs$symmetric
-    is_unipartite <- obj_attrs$mode == "unipartite"
-    is_all_binary <- all(obj_attrs$is_binary)
+	# cache attributes
+	obj_attrs <- attributes(object)
+	layers <- obj_attrs$layers
+	n_layers <- length(layers)
+	netlet_type <- obj_attrs$netify_type
+	is_cross_sec <- netlet_type == "cross_sec"
+	is_symmetric <- obj_attrs$symmetric
+	is_unipartite <- obj_attrs$mode == "unipartite"
+	is_all_binary <- all(obj_attrs$is_binary)
 
-    # Check for ego network
-    ego_netlet <- !is.null(obj_attrs$ego_netlet) && obj_attrs$ego_netlet
-    if (ego_netlet) {
-        ego_vec <- obj_attrs$ego_vec
-        ego_longit <- obj_attrs$ego_longit
-    }
-    ######################
+	# Check for ego network
+	ego_netlet <- !is.null(obj_attrs$ego_netlet) && obj_attrs$ego_netlet
+	if (ego_netlet) {
+		ego_vec <- obj_attrs$ego_vec
+		ego_longit <- obj_attrs$ego_longit
+	}
+	####
 
-    ######################
-    # Pre-allocate results list
-    net_stats_l_multi <- vector("list", n_layers)
+	####
+	# Pre-allocate results list
+	net_stats_l_multi <- vector("list", n_layers)
 
-    # iterate through each layer
-    for (i in seq_along(layers)) {
-        layer <- layers[i]
+	# iterate through each layer
+	for (i in seq_along(layers)) {
+		layer <- layers[i]
 
-        ######################
-        # Extract layer efficiently
-        if (n_layers == 1) {
-            netlet <- object
-        } else {
-            netlet <- subset_netify(object, layers = layer)
-            obj_attrs <- attributes(netlet)
-        }
+		####
+		# Extract layer efficiently
+		if (n_layers == 1) {
+			netlet <- object
+		} else {
+			netlet <- subset_netify(object, layers = layer)
+			obj_attrs <- attributes(netlet)
+		}
 
-        # Convert to list format for processing
-        netlet_list <- switch(netlet_type,
-            "cross_sec" = list(netlet),
-            "longit_array" = array_to_list(netlet),
-            "longit_list" = netlet
-        )
-        ######################
+		# Convert to list format for processing
+		netlet_list <- switch(netlet_type,
+			"cross_sec" = list(netlet),
+			"longit_array" = array_to_list(netlet),
+			"longit_list" = netlet
+		)
+		####
 
-        ######################
-        # calc stats across netlet(s) - vectorized where possible
-        net_stats_list <- lapply(netlet_list, function(mat) {
-            graph_stats_for_netlet(mat, obj_attrs, summary_args)
-        })
-        ######################
+		####
+		# calc stats across netlet(s) - vectorized where possible
+		net_stats_list <- lapply(netlet_list, function(mat) {
+			graph_stats_for_netlet(mat, obj_attrs, summary_args)
+		})
+		####
 
-        ######################
-        # Efficient data frame creation
-        net_stats <- do.call("rbind", net_stats_list)
-        net_names <- names(netlet_list) %||% rownames(net_stats)
+		####
+		# Efficient data frame creation
+		net_stats <- do.call("rbind", net_stats_list)
+		net_names <- names(netlet_list) %||% rownames(net_stats)
 
-        net_stats <- as.data.frame(net_stats, stringsAsFactors = FALSE)
-        net_stats$net <- net_names
-        net_stats$layer <- layer
+		net_stats <- as.data.frame(net_stats, stringsAsFactors = FALSE)
+		net_stats$net <- net_names
+		net_stats$layer <- layer
 
-        # Store in pre-allocated list
-        net_stats_l_multi[[i]] <- net_stats
-    }
-    ######################
+		# Store in pre-allocated list
+		net_stats_l_multi[[i]] <- net_stats
+	}
+	####
 
-    ######################
-    # Combine all results efficiently
-    net_stats <- do.call("rbind", net_stats_l_multi)
-    rownames(net_stats) <- NULL
+	####
+	# Combine all results efficiently
+	net_stats <- do.call("rbind", net_stats_l_multi)
+	rownames(net_stats) <- NULL
 
-    # Reorder columns - check if columns exist first
-    id_cols <- c("net", "layer")
-    # Only include id_cols that actually exist in net_stats
-    existing_id_cols <- id_cols[id_cols %in% names(net_stats)]
-    stat_cols <- setdiff(names(net_stats), id_cols)
+	# Reorder columns - check if columns exist first
+	id_cols <- c("net", "layer")
+	# Only include id_cols that actually exist in net_stats
+	existing_id_cols <- id_cols[id_cols %in% names(net_stats)]
+	stat_cols <- setdiff(names(net_stats), id_cols)
 
-    # Only reorder if we have the expected columns
-    if (length(existing_id_cols) > 0) {
-        net_stats <- net_stats[, c(existing_id_cols, stat_cols)]
-    }
+	# Only reorder if we have the expected columns
+	if (length(existing_id_cols) > 0) {
+		net_stats <- net_stats[, c(existing_id_cols, stat_cols)]
+	}
 
-    # Drop layer column if only one layer
-    if (n_layers == 1) {
-        net_stats$layer <- NULL
-    }
+	# Drop layer column if only one layer
+	if (n_layers == 1) {
+		net_stats$layer <- NULL
+	}
 
-    # Simplify column names based on network type
-    if (is_unipartite) {
-        # Rename num_row_actors to num_actors
-        names(net_stats)[names(net_stats) == "num_row_actors"] <- "num_actors"
-        # Remove num_col_actors
-        net_stats$num_col_actors <- NULL
-    }
+	# Simplify column names based on network type
+	if (is_unipartite) {
+		# Rename num_row_actors to num_actors
+		names(net_stats)[names(net_stats) == "num_row_actors"] <- "num_actors"
+		# Remove num_col_actors
+		net_stats$num_col_actors <- NULL
+	}
 
-    # Simplify for undirected networks
-    if (is_symmetric) {
-        # Rename competition and sd measures
-        names(net_stats)[names(net_stats) == "competition_row"] <- "competition"
-        names(net_stats)[names(net_stats) == "sd_of_row_means"] <- "sd_of_actor_means"
+	# Simplify for undirected networks
+	if (is_symmetric) {
+		# Rename competition and sd measures
+		names(net_stats)[names(net_stats) == "competition_row"] <- "competition"
+		names(net_stats)[names(net_stats) == "sd_of_row_means"] <- "sd_of_actor_means"
 
-        # Remove directed-only statistics
-        cols_to_remove <- c(
-            "competition_col", "sd_of_col_means",
-            "covar_of_row_col_means", "reciprocity"
-        )
-        net_stats[cols_to_remove] <- NULL
-    }
+		# Remove directed-only statistics
+		cols_to_remove <- c(
+			"competition_col", "sd_of_col_means",
+			"covar_of_row_col_means", "reciprocity", "mutual"
+		)
+		net_stats[cols_to_remove] <- NULL
+	}
 
-    # Remove weight statistics for binary networks
-    if (is_all_binary) {
-        weight_cols <- c(
-            "mean_edge_weight", "sd_edge_weight",
-            "min_edge_weight", "max_edge_weight",
-            "median_edge_weight"
-        )
-        net_stats[weight_cols] <- NULL
-    }
-    ######################
+	# Remove weight statistics for binary networks
+	if (is_all_binary) {
+		weight_cols <- c(
+			"mean_edge_weight", "sd_edge_weight",
+			"min_edge_weight", "max_edge_weight",
+			"median_edge_weight"
+		)
+		net_stats[weight_cols] <- NULL
+	}
+	####
 
-    ######################
-    # Handle ego networks efficiently
-    if (ego_netlet) {
-        if (!ego_longit) {
-            # Non-longitudinal ego network
-            if (is_cross_sec) {
-                net_stats$layer <- ego_vec
-            } else {
-                net_stats$layer <- net_stats$net
-            }
-            net_stats$net <- 1
-        } else {
-            # Longitudinal ego network
-            net_split <- strsplit(net_stats$net, "__", fixed = TRUE)
-            ego_units <- vapply(net_split, `[`, character(1), 1)
-            ego_pds <- vapply(net_split, `[`, character(1), 2)
+	####
+	# Handle ego networks efficiently
+	if (ego_netlet) {
+		if (!ego_longit) {
+			# Non-longitudinal ego network
+			if (is_cross_sec) {
+				net_stats$layer <- ego_vec
+			} else {
+				net_stats$layer <- net_stats$net
+			}
+			net_stats$net <- 1
+		} else {
+			# Longitudinal ego network
+			net_split <- strsplit(net_stats$net, "__", fixed = TRUE)
+			ego_units <- vapply(net_split, `[`, character(1), 1)
+			ego_pds <- vapply(net_split, `[`, character(1), 2)
 
-            net_stats$net <- ego_pds
-            net_stats$layer <- ego_units
-        }
+			net_stats$net <- ego_pds
+			net_stats$layer <- ego_units
+		}
 
-        # Ensure correct column order
-        net_stats <- net_stats[, c(
-            "net", "layer",
-            setdiff(names(net_stats), c("net", "layer"))
-        )]
-    }
-    ######################
+		# Ensure correct column order
+		net_stats <- net_stats[, c(
+			"net", "layer",
+			setdiff(names(net_stats), c("net", "layer"))
+		)]
+	}
+	####
 
-    ######################
-    return(net_stats)
-    ######################
+	####
+	return(net_stats)
+	####
 }

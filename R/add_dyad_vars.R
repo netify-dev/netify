@@ -166,224 +166,234 @@
 #' @aliases add_edge_attributes
 
 add_dyad_vars <- function(
-    netlet, dyad_data,
-    actor1 = NULL, actor2 = NULL, time = NULL,
-    dyad_vars = NULL, dyad_vars_symmetric = NULL,
-    replace_existing = FALSE) {
-    # user input checks
-    netify_check(netlet)
-    dyad_data <- df_check(dyad_data)
-    actor_check(actor1, actor2, dyad_data)
-    add_var_time_check(netlet, time)
+	netlet, dyad_data,
+	actor1 = NULL, actor2 = NULL, time = NULL,
+	dyad_vars = NULL, dyad_vars_symmetric = NULL,
+	replace_existing = FALSE) {
+	# user input checks
+	netify_check(netlet)
+	dyad_data <- df_check(dyad_data)
+	actor_check(actor1, actor2, dyad_data)
+	add_var_time_check(netlet, time)
 
-    # some attribute info
-    netlet_type <- attr(netlet, "netify_type")
-    netlet_mode <- attr(netlet, "mode")
-    actor_unif <- attr(netlet, "actor_time_uniform")
+	# some attribute info
+	netlet_type <- attr(netlet, "netify_type")
+	netlet_mode <- attr(netlet, "mode")
+	actor_unif <- attr(netlet, "actor_time_uniform")
 
-    # determine variables to merge if specific ones are not provided
-    if (is.null(dyad_vars)) {
-        dyad_vars <- setdiff(names(dyad_data), c(actor1, actor2, time))
-    }
+	# determine variables to merge if specific ones are not provided
+	if (is.null(dyad_vars)) {
+		dyad_vars <- setdiff(names(dyad_data), c(actor1, actor2, time))
+	}
 
-    # if user has not filled in dyadsVarsSymmetric logical then we need to choose for them
-    # yell at user about supplying a choice for dyadsVarsSymmetric
-    if (is.null(dyad_vars_symmetric) & netlet_mode != "bipartite") {
-        dyad_vars_symmetric <- rep(attr(netlet, "symmetric"), length(dyad_vars))
-        cli::cli_alert_warning(
-            "Warning: When adding dyadic variables it is best to specify whether the variable being added is symmetric or not"
-        )
-    }
-    if (netlet_mode == "bipartite") {
-        dyad_vars_symmetric <- rep(FALSE, length(dyad_vars))
-    }
+	# if user has not filled in dyadsVarsSymmetric logical then we need to choose for them
+	# yell at user about supplying a choice for dyadsVarsSymmetric
+	if (is.null(dyad_vars_symmetric) & netlet_mode != "bipartite") {
+		dyad_vars_symmetric <- rep(attr(netlet, "symmetric"), length(dyad_vars))
+		cli::cli_alert_warning(
+			"Warning: When adding dyadic variables it is best to specify whether the variable being added is symmetric or not"
+		)
+	}
+	if (netlet_mode == "bipartite") {
+		dyad_vars_symmetric <- rep(FALSE, length(dyad_vars))
+	}
 
-    # count up number of dyad_vars
-    ndVars <- length(dyad_vars)
+	# count up number of dyad_vars
+	ndVars <- length(dyad_vars)
 
-    # check to see if there is already a dyad_data attribute in the netify object
-    dyad_data_0 <- attributes(netlet)$dyad_data
-    dyad_data_attrib_exists <- !is.null(dyad_data_0)
+	# check to see if there is already a dyad_data attribute in the netify object
+	dyad_data_0 <- attributes(netlet)$dyad_data
+	dyad_data_attrib_exists <- !is.null(dyad_data_0)
 
-    # if dyad_data attribute already exists and replace_existing is TRUE
-    # then remove any vars that are already in the netlet dyad data attrib
-    if (dyad_data_attrib_exists & replace_existing) {
-        # Remove variables across all time periods
-        for (time_period in names(dyad_data_0)) {
-            for (var_name in dyad_vars) {
-                dyad_data_0[[time_period]][[var_name]] <- NULL
-            }
-        }
-    }
+	# if dyad_data attribute already exists and replace_existing is TRUE
+	# then remove any vars that are already in the netlet dyad data attrib
+	if (dyad_data_attrib_exists & replace_existing) {
+		# Remove variables across all time periods
+		for (time_period in names(dyad_data_0)) {
+			for (var_name in dyad_vars) {
+				dyad_data_0[[time_period]][[var_name]] <- NULL
+			}
+		}
+	}
 
-    # get netlet measurements
-    msrmnts <- netify_measurements(netlet)
+	# get netlet measurements
+	msrmnts <- netify_measurements(netlet)
 
-    # if cross_sec put in a 1 for time
-    if (is.null(msrmnts$time)) {
-        msrmnts$time <- 1
-    }
+	# if cross_sec put in a 1 for time
+	if (is.null(msrmnts$time)) {
+		msrmnts$time <- 1
+	}
 
-    # Pre-split dyad_data by time periods for efficiency
-    if (!is.null(time) & attributes(netlet)$netify_type != "cross_sec") {
-        time_indices <- split(seq_len(nrow(dyad_data)), dyad_data[, time])
-        dyad_actor1 <- dyad_data[, actor1]
-        dyad_actor2 <- dyad_data[, actor2]
-    }
+	# Pre-split dyad_data by time periods for efficiency
+	if (!is.null(time) & attributes(netlet)$netify_type != "cross_sec") {
+		time_indices <- split(seq_len(nrow(dyad_data)), dyad_data[, time])
+		dyad_actor1 <- dyad_data[, actor1]
+		dyad_actor2 <- dyad_data[, actor2]
+	}
 
-    # construct new storage structure: list of time periods -> list of variable matrices
-    dyad_structure <- lapply(msrmnts$time, function(timePd) {
-        # actors that should be in the matrices at this time point
-        if (netlet_type == "longit_list") {
-            actors_rows <- msrmnts$row_actors[[timePd]]
-            actors_cols <- msrmnts$col_actors[[timePd]]
-            n_actors_rows <- msrmnts$n_row_actors[[timePd]]
-            n_actors_cols <- msrmnts$n_col_actors[[timePd]]
-        }
-        if (netlet_type %in% c("longit_array", "cross_sec")) {
-            actors_rows <- msrmnts$row_actors
-            actors_cols <- msrmnts$col_actors
-            n_actors_rows <- msrmnts$n_row_actors
-            n_actors_cols <- msrmnts$n_col_actors
-        }
+	# construct new storage structure: list of time periods -> list of variable matrices
+	dyad_structure <- lapply(msrmnts$time, function(timePd) {
+		# actors that should be in the matrices at this time point
+		if (netlet_type == "longit_list") {
+			actors_rows <- msrmnts$row_actors[[timePd]]
+			actors_cols <- msrmnts$col_actors[[timePd]]
+			n_actors_rows <- msrmnts$n_row_actors[[timePd]]
+			n_actors_cols <- msrmnts$n_col_actors[[timePd]]
+		}
+		if (netlet_type %in% c("longit_array", "cross_sec")) {
+			actors_rows <- msrmnts$row_actors
+			actors_cols <- msrmnts$col_actors
+			n_actors_rows <- msrmnts$n_row_actors
+			n_actors_cols <- msrmnts$n_col_actors
+		}
 
-        # slice up dyad_data object for this time period
-        if (!is.null(time) & attributes(netlet)$netify_type != "cross_sec") {
-            slice_indices <- time_indices[[as.character(timePd)]]
-            if (is.null(slice_indices)) slice_indices <- integer(0)
+		# slice up dyad_data object for this time period
+		if (!is.null(time) & attributes(netlet)$netify_type != "cross_sec") {
+			slice_indices <- time_indices[[as.character(timePd)]]
+			if (is.null(slice_indices)) slice_indices <- integer(0)
 
-            if (length(slice_indices) > 0) {
-                slice_actor1 <- dyad_actor1[slice_indices]
-                slice_actor2 <- dyad_actor2[slice_indices]
-                slice_data <- dyad_data[slice_indices, dyad_vars, drop = FALSE]
-            } else {
-                slice_actor1 <- character(0)
-                slice_actor2 <- character(0)
-                slice_data <- dyad_data[integer(0), dyad_vars, drop = FALSE]
-            }
-        } else {
-            slice_actor1 <- dyad_data[, actor1]
-            slice_actor2 <- dyad_data[, actor2]
-            slice_data <- dyad_data[, dyad_vars, drop = FALSE]
-        }
+			if (length(slice_indices) > 0) {
+				slice_actor1 <- dyad_actor1[slice_indices]
+				slice_actor2 <- dyad_actor2[slice_indices]
+				slice_data <- dyad_data[slice_indices, dyad_vars, drop = FALSE]
+			} else {
+				slice_actor1 <- character(0)
+				slice_actor2 <- character(0)
+				slice_data <- dyad_data[integer(0), dyad_vars, drop = FALSE]
+			}
+		} else {
+			slice_actor1 <- dyad_data[, actor1]
+			slice_actor2 <- dyad_data[, actor2]
+			slice_data <- dyad_data[, dyad_vars, drop = FALSE]
+		}
 
-        # only keep rows that are in the netlet object
-        valid_rows <- slice_actor1 %in% actors_rows & slice_actor2 %in% actors_cols
-        slice_actor1 <- slice_actor1[valid_rows]
-        slice_actor2 <- slice_actor2[valid_rows]
-        slice_data <- slice_data[valid_rows, , drop = FALSE]
+		# only keep rows that are in the netlet object
+		valid_rows <- slice_actor1 %in% actors_rows & slice_actor2 %in% actors_cols
+		slice_actor1 <- slice_actor1[valid_rows]
+		slice_actor2 <- slice_actor2[valid_rows]
+		slice_data <- slice_data[valid_rows, , drop = FALSE]
 
-        # Pre-compute matrix indices for efficiency
-        if (length(slice_actor1) > 0) {
-            matRowIndices <- match(slice_actor1, actors_rows)
-            matColIndices <- match(slice_actor2, actors_cols)
-        } else {
-            matRowIndices <- integer(0)
-            matColIndices <- integer(0)
-        }
+		# Pre-compute matrix indices for efficiency
+		if (length(slice_actor1) > 0) {
+			matRowIndices <- match(slice_actor1, actors_rows)
+			matColIndices <- match(slice_actor2, actors_cols)
+		} else {
+			matRowIndices <- integer(0)
+			matColIndices <- integer(0)
+		}
 
-        # create list of matrices for each dyadic variable
-        var_matrices <- vector("list", ndVars)
-        names(var_matrices) <- dyad_vars
+		# create list of matrices for each dyadic variable
+		var_matrices <- vector("list", ndVars)
+		names(var_matrices) <- dyad_vars
 
-        # iterate through variables and create individual matrices
-        for (ii in 1:ndVars) {
-            var_name <- dyad_vars[ii]
+		# iterate through variables and create individual matrices
+		for (ii in 1:ndVars) {
+			var_name <- dyad_vars[ii]
 
-            # determine appropriate storage mode for efficiency
-            var_values <- if (length(slice_actor1) > 0) slice_data[, var_name] else numeric(0)
-            storage_mode <- determine_storage_mode(var_values)
+			# determine appropriate storage mode for efficiency
+			var_values <- if (length(slice_actor1) > 0) slice_data[, var_name] else numeric(0)
+			storage_mode <- determine_storage_mode(var_values)
 
-            # Use appropriate C++ function based on storage mode
-            if (storage_mode == "double") {
-                var_matrices[[var_name]] <- get_matrix(
-                    n_rows = n_actors_rows,
-                    n_cols = n_actors_cols,
-                    actors_rows = actors_rows,
-                    actors_cols = actors_cols,
-                    matRowIndices = matRowIndices,
-                    matColIndices = matColIndices,
-                    value = var_values,
-                    symmetric = dyad_vars_symmetric[ii],
-                    missing_to_zero = TRUE,
-                    diag_to_NA = FALSE
-                )
-            } else if (storage_mode == "integer") {
-                var_matrices[[var_name]] <- get_matrix_integer(
-                    n_rows = n_actors_rows,
-                    n_cols = n_actors_cols,
-                    actors_rows = actors_rows,
-                    actors_cols = actors_cols,
-                    matRowIndices = matRowIndices,
-                    matColIndices = matColIndices,
-                    value = as.integer(var_values),
-                    symmetric = dyad_vars_symmetric[ii],
-                    missing_to_zero = TRUE,
-                    diag_to_NA = FALSE
-                )
-            } else if (storage_mode == "logical") {
-                var_matrices[[var_name]] <- get_matrix_logical(
-                    n_rows = n_actors_rows,
-                    n_cols = n_actors_cols,
-                    actors_rows = actors_rows,
-                    actors_cols = actors_cols,
-                    matRowIndices = matRowIndices,
-                    matColIndices = matColIndices,
-                    value = as.logical(var_values),
-                    symmetric = dyad_vars_symmetric[ii],
-                    missing_to_zero = TRUE,
-                    diag_to_NA = FALSE
-                )
-            } else if (storage_mode == "character") {
-                var_matrices[[var_name]] <- get_matrix_character(
-                    n_rows = n_actors_rows,
-                    n_cols = n_actors_cols,
-                    actors_rows = actors_rows,
-                    actors_cols = actors_cols,
-                    matRowIndices = matRowIndices,
-                    matColIndices = matColIndices,
-                    value = as.character(var_values),
-                    symmetric = dyad_vars_symmetric[ii],
-                    missing_to_zero = TRUE,
-                    diag_to_NA = FALSE
-                )
-            } else {
-                # Fallback to original numeric function for unknown types
-                var_matrices[[var_name]] <- get_matrix(
-                    n_rows = n_actors_rows,
-                    n_cols = n_actors_cols,
-                    actors_rows = actors_rows,
-                    actors_cols = actors_cols,
-                    matRowIndices = matRowIndices,
-                    matColIndices = matColIndices,
-                    value = as.numeric(var_values),
-                    symmetric = dyad_vars_symmetric[ii],
-                    missing_to_zero = TRUE,
-                    diag_to_NA = FALSE
-                )
-            }
-        }
+			# Use appropriate C++ function based on storage mode
+			if (storage_mode == "double") {
+				var_matrices[[var_name]] <- get_matrix(
+					n_rows = n_actors_rows,
+					n_cols = n_actors_cols,
+					actors_rows = actors_rows,
+					actors_cols = actors_cols,
+					matRowIndices = matRowIndices,
+					matColIndices = matColIndices,
+					value = var_values,
+					symmetric = dyad_vars_symmetric[ii],
+					missing_to_zero = TRUE,
+					diag_to_NA = FALSE
+				)
+			} else if (storage_mode == "integer") {
+				var_matrices[[var_name]] <- get_matrix_integer(
+					n_rows = n_actors_rows,
+					n_cols = n_actors_cols,
+					actors_rows = actors_rows,
+					actors_cols = actors_cols,
+					matRowIndices = matRowIndices,
+					matColIndices = matColIndices,
+					value = as.integer(var_values),
+					symmetric = dyad_vars_symmetric[ii],
+					missing_to_zero = TRUE,
+					diag_to_NA = FALSE
+				)
+			} else if (storage_mode == "logical") {
+				var_matrices[[var_name]] <- get_matrix_logical(
+					n_rows = n_actors_rows,
+					n_cols = n_actors_cols,
+					actors_rows = actors_rows,
+					actors_cols = actors_cols,
+					matRowIndices = matRowIndices,
+					matColIndices = matColIndices,
+					value = as.logical(var_values),
+					symmetric = dyad_vars_symmetric[ii],
+					missing_to_zero = TRUE,
+					diag_to_NA = FALSE
+				)
+			} else if (storage_mode == "character") {
+				var_matrices[[var_name]] <- get_matrix_character(
+					n_rows = n_actors_rows,
+					n_cols = n_actors_cols,
+					actors_rows = actors_rows,
+					actors_cols = actors_cols,
+					matRowIndices = matRowIndices,
+					matColIndices = matColIndices,
+					value = as.character(var_values),
+					symmetric = dyad_vars_symmetric[ii],
+					missing_to_zero = TRUE,
+					diag_to_NA = FALSE
+				)
+			} else {
+				# Fallback to original numeric function for unknown types
+				var_matrices[[var_name]] <- get_matrix(
+					n_rows = n_actors_rows,
+					n_cols = n_actors_cols,
+					actors_rows = actors_rows,
+					actors_cols = actors_cols,
+					matRowIndices = matRowIndices,
+					matColIndices = matColIndices,
+					value = as.numeric(var_values),
+					symmetric = dyad_vars_symmetric[ii],
+					missing_to_zero = TRUE,
+					diag_to_NA = FALSE
+				)
+			}
+		}
 
-        # if dyad data attribute already existed, merge with existing data
-        if (dyad_data_attrib_exists) {
-            existing_vars <- dyad_data_0[[as.character(timePd)]]
-            if (!is.null(existing_vars)) {
-                # Merge existing variables with new ones
-                var_matrices <- c(existing_vars, var_matrices)
-            }
-        }
+		# if dyad data attribute already existed, merge with existing data
+		if (dyad_data_attrib_exists) {
+			existing_vars <- dyad_data_0[[as.character(timePd)]]
+			if (!is.null(existing_vars)) {
+				if (replace_existing) {
+					# drop replaced variables
+					existing_vars <- existing_vars[!names(existing_vars) %in% names(var_matrices)]
+				} else {
+					# skip variables that already exist
+					overlap <- intersect(names(existing_vars), names(var_matrices))
+					if (length(overlap) > 0) {
+						var_matrices <- var_matrices[!names(var_matrices) %in% overlap]
+					}
+				}
+				# Merge existing variables with new ones
+				var_matrices <- c(existing_vars, var_matrices)
+			}
+		}
 
-        return(var_matrices)
-    })
+		return(var_matrices)
+	})
 
-    # add time period labels to list
-    names(dyad_structure) <- as.character(msrmnts$time)
+	# add time period labels to list
+	names(dyad_structure) <- as.character(msrmnts$time)
 
-    # add the new dyadic data structure as an attribute
-    attr(netlet, "dyad_data") <- dyad_structure
+	# add the new dyadic data structure as an attribute
+	attr(netlet, "dyad_data") <- dyad_structure
 
-    # Return object
-    return(netlet)
+	# Return object
+	return(netlet)
 }
 
 #' @rdname add_dyad_vars
@@ -422,27 +432,27 @@ add_edge_attributes <- add_dyad_vars
 #' @noRd
 
 determine_storage_mode <- function(values) {
-    if (length(values) == 0) {
-        return("double")
-    }
+	if (length(values) == 0) {
+		return("double")
+	}
 
-    if (is.logical(values)) {
-        return("logical")
-    }
-    if (is.character(values)) {
-        return("character")
-    }
-    if (is.integer(values)) {
-        return("integer")
-    }
-    if (is.numeric(values)) {
-        # Check if values are actually integers
-        if (all(values == as.integer(values), na.rm = TRUE)) {
-            return("integer")
-        } else {
-            return("double")
-        }
-    }
+	if (is.logical(values)) {
+		return("logical")
+	}
+	if (is.character(values)) {
+		return("character")
+	}
+	if (is.integer(values)) {
+		return("integer")
+	}
+	if (is.numeric(values)) {
+		# Check if values are actually integers
+		if (all(values == as.integer(values), na.rm = TRUE)) {
+			return("integer")
+		} else {
+			return("double")
+		}
+	}
 
-    return("double") # default fallback
+	return("double") # default fallback
 }

@@ -127,193 +127,191 @@
 #' @aliases to_amen
 
 netify_to_amen <- function(netlet, lame = FALSE) {
-    # check if netify object
-    netify_check(netlet)
+	# check if netify object
+	netify_check(netlet)
 
-    # if more than one layer tell user they must specify a single layer
-    if (length(attributes(netlet)$layers) > 1) {
-        cli::cli_alert_danger(
-            "Error: This object has multiple layers.
-      `netify_to_amen` does not currently support multilayer `netify` inputs.
-      Please use the `subset_netify` function to create a `netify` object with a single layer."
-        )
-        stop()
-    }
+	# if more than one layer tell user they must specify a single layer
+	if (length(attributes(netlet)$layers) > 1) {
+		cli::cli_abort(
+			"This object has multiple layers.
+	  `netify_to_amen` does not currently support multilayer `netify` inputs.
+	  Please use the `subset_netify` function to create a `netify` object with a single layer."
+		)
+	}
 
-    # check attributes
-    nodal_data_exists <- !is.null(attr(netlet, "nodal_data"))
-    dyad_data_exists <- !is.null(attr(netlet, "dyad_data"))
+	# check attributes
+	nodal_data_exists <- !is.null(attr(netlet, "nodal_data"))
+	dyad_data_exists <- !is.null(attr(netlet, "dyad_data"))
 
-    # get dimensions
-    msrmnts <- netify_measurements(netlet)
+	# get dimensions
+	msrmnts <- netify_measurements(netlet)
 
-    # make sure nodal attributes are numeric
-    if (nodal_data_exists) {
-        nvar_class_check <- apply(
-            attr(netlet, "nodal_data")[, msrmnts$nvars],
-            2, is.numeric
-        )
-        if (!all(nvar_class_check)) {
-            cli::cli_alert_danger(
-                "Error: All nodal attributes must be numeric."
-            )
-            stop()
-        }
-    }
+	# make sure nodal attributes are numeric
+	if (nodal_data_exists) {
+		nvar_class_check <- apply(
+			attr(netlet, "nodal_data")[, msrmnts$nvars],
+			2, is.numeric
+		)
+		if (!all(nvar_class_check)) {
+			cli::cli_abort(
+				"All nodal attributes must be numeric."
+			)
+		}
+	}
 
-    ## three cases: cross-sec/matrix, longit list, longit array
-    netlet_type <- attributes(netlet)$netify_type
+	## three cases: cross-sec/matrix, longit list, longit array
+	netlet_type <- attributes(netlet)$netify_type
 
-    # cross-sec case
-    if (netlet_type == "cross_sec") {
-        # if present, convert nodal_data attribute into a
-        # data.matrix with rownames
-        if (nodal_data_exists) {
-            # organize nodal data separately for rows and cols
-            n_list <- lapply(c("row", "col"), function(dlab) {
-                # set up matrix to fill in for particular dim
-                mat_dim <- c(
-                    msrmnts[[paste0("n_", dlab, "_actors")]],
-                    msrmnts$n_nvars
-                )
-                mat_labs <- list(
-                    msrmnts[[paste0(dlab, "_actors")]],
-                    msrmnts$nvars
-                )
-                mat <- array(NA, mat_dim, dimnames = mat_labs)
+	# cross-sec case
+	if (netlet_type == "cross_sec") {
+		# if present, convert nodal_data attribute into a
+		# data.matrix with rownames
+		if (nodal_data_exists) {
+			# organize nodal data separately for rows and cols
+			n_list <- lapply(c("row", "col"), function(dlab) {
+				# set up matrix to fill in for particular dim
+				mat_dim <- c(
+					msrmnts[[paste0("n_", dlab, "_actors")]],
+					msrmnts$n_nvars
+				)
+				mat_labs <- list(
+					msrmnts[[paste0(dlab, "_actors")]],
+					msrmnts$nvars
+				)
+				mat <- array(NA, mat_dim, dimnames = mat_labs)
 
-                # fill in matrix
-                to_add <- attr(netlet, "nodal_data")
-                to_add_rows <- to_add$actor
-                to_add <- to_add[, msrmnts$nvars, drop = FALSE]
-                to_add <- data.matrix(to_add)
-                rownames(to_add) <- to_add_rows
-                mat[to_add_rows, ] <- to_add
-                return(mat)
-            })
-        } else {
-            n_list <- list(NULL, NULL)
-        }
-        names(n_list) <- c("row", "col")
+				# fill in matrix
+				to_add <- attr(netlet, "nodal_data")
+				to_add_rows <- to_add$actor
+				to_add <- to_add[, msrmnts$nvars, drop = FALSE]
+				to_add <- data.matrix(to_add)
+				rownames(to_add) <- to_add_rows
+				mat[to_add_rows, ] <- to_add
+				return(mat)
+			})
+		} else {
+			n_list <- list(NULL, NULL)
+		}
+		names(n_list) <- c("row", "col")
 
-        if (dyad_data_exists) {
-            # create dyad array
-            var_matrices <- attr(netlet, "dyad_data")[[1]]
-            first_matrix <- var_matrices[[1]]
-            dyad_arr <- array(
-                data = unlist(var_matrices, use.names = FALSE),
-                dim = c(
-                    nrow(first_matrix), ncol(first_matrix),
-                    length(var_matrices)
-                ),
-                dimnames = list(
-                    rownames(first_matrix), colnames(first_matrix),
-                    names(var_matrices)
-                )
-            )
-        } else {
-            dyad_arr <- NULL
-        }
+		if (dyad_data_exists) {
+			# create dyad array
+			var_matrices <- attr(netlet, "dyad_data")[[1]]
+			first_matrix <- var_matrices[[1]]
+			dyad_arr <- array(
+				data = unlist(var_matrices, use.names = FALSE),
+				dim = c(
+					nrow(first_matrix), ncol(first_matrix),
+					length(var_matrices)
+				),
+				dimnames = list(
+					rownames(first_matrix), colnames(first_matrix),
+					names(var_matrices)
+				)
+			)
+		} else {
+			dyad_arr <- NULL
+		}
 
-        # cross-sec output
-        out <- list(
-            Y = get_raw(netlet),
-            Xdyad = dyad_arr,
-            Xrow = n_list$"row",
-            Xcol = n_list$"col"
-        )
-    }
+		# cross-sec output
+		out <- list(
+			Y = get_raw(netlet),
+			Xdyad = dyad_arr,
+			Xrow = n_list$"row",
+			Xcol = n_list$"col"
+		)
+	}
 
-    # longitudinal cases
-    if (netlet_type %in% c("longit_array", "longit_list")) {
-        # If lame = FALSE, use array format (original behavior)
-        if (!lame) {
-            if (netlet_type == "longit_array") {
-                out <- list(
-                    Y = get_raw(netlet),
-                    Xdyad = longit_dyad_to_arr(netlet),
-                    Xrow = longit_nodal_to_arr(netlet)$"row",
-                    Xcol = longit_nodal_to_arr(netlet)$"col"
-                )
-            }
+	# longitudinal cases
+	if (netlet_type %in% c("longit_array", "longit_list")) {
+		# If lame = FALSE, use array format (original behavior)
+		if (!lame) {
+			if (netlet_type == "longit_array") {
+				out <- list(
+					Y = get_raw(netlet),
+					Xdyad = longit_dyad_to_arr(netlet),
+					Xrow = longit_nodal_to_arr(netlet)$"row",
+					Xcol = longit_nodal_to_arr(netlet)$"col"
+				)
+			}
 
-            if (netlet_type == "longit_list") {
-                out <- list(
-                    Y = longit_dv_to_arr(netlet),
-                    Xdyad = longit_dyad_to_arr(netlet),
-                    Xrow = longit_nodal_to_arr(netlet)$"row",
-                    Xcol = longit_nodal_to_arr(netlet)$"col"
-                )
-            }
-        }
+			if (netlet_type == "longit_list") {
+				out <- list(
+					Y = longit_dv_to_arr(netlet),
+					Xdyad = longit_dyad_to_arr(netlet),
+					Xrow = longit_nodal_to_arr(netlet)$"row",
+					Xcol = longit_nodal_to_arr(netlet)$"col"
+				)
+			}
+		}
 
-        # If lame = TRUE, convert to list format
-        if (lame) {
-            # Get raw data
-            raw_data <- get_raw(netlet)
+		# If lame = TRUE, convert to list format
+		if (lame) {
+			# Get raw data
+			raw_data <- get_raw(netlet)
 
-            # Convert to list if it's an array
-            if (netlet_type == "longit_array") {
-                Y_list <- lapply(seq_len(dim(raw_data)[3]), function(t) raw_data[, , t])
-                names(Y_list) <- dimnames(raw_data)[[3]]
-            } else {
-                Y_list <- raw_data
-            }
+			# Convert to list if it's an array
+			if (netlet_type == "longit_array") {
+				Y_list <- lapply(seq_len(dim(raw_data)[3]), function(t) raw_data[, , t])
+				names(Y_list) <- dimnames(raw_data)[[3]]
+			} else {
+				Y_list <- raw_data
+			}
 
-            # Convert dyadic data to list format
-            Xdyad_list <- NULL
-            if (dyad_data_exists) {
-                dyad_data <- attr(netlet, "dyad_data")
-                Xdyad_list <- lapply(names(dyad_data), function(t) {
-                    var_matrices <- dyad_data[[t]]
-                    if (length(var_matrices) > 0) {
-                        array(
-                            data = unlist(var_matrices, use.names = FALSE),
-                            dim = c(nrow(var_matrices[[1]]), ncol(var_matrices[[1]]), length(var_matrices)),
-                            dimnames = list(
-                                rownames(var_matrices[[1]]),
-                                colnames(var_matrices[[1]]),
-                                names(var_matrices)
-                            )
-                        )
-                    } else {
-                        NULL
-                    }
-                })
-                names(Xdyad_list) <- names(dyad_data)
-            }
+			# Convert dyadic data to list format
+			Xdyad_list <- NULL
+			if (dyad_data_exists) {
+				dyad_data <- attr(netlet, "dyad_data")
+				Xdyad_list <- lapply(names(dyad_data), function(t) {
+					var_matrices <- dyad_data[[t]]
+					if (length(var_matrices) > 0) {
+						array(
+							data = unlist(var_matrices, use.names = FALSE),
+							dim = c(nrow(var_matrices[[1]]), ncol(var_matrices[[1]]), length(var_matrices)),
+							dimnames = list(
+								rownames(var_matrices[[1]]),
+								colnames(var_matrices[[1]]),
+								names(var_matrices)
+							)
+						)
+					} else {
+						NULL
+					}
+				})
+				names(Xdyad_list) <- names(dyad_data)
+			}
 
-            # Convert nodal data to list format
-            Xrow_list <- NULL
-            Xcol_list <- NULL
-            if (nodal_data_exists) {
-                nodal_df <- attr(netlet, "nodal_data")
-                # Use time periods from the network data, not from nodal_data
-                time_periods <- names(Y_list)
+			# Convert nodal data to list format
+			Xrow_list <- NULL
+			Xcol_list <- NULL
+			if (nodal_data_exists) {
+				nodal_df <- attr(netlet, "nodal_data")
+				# Use time periods from the network data, not from nodal_data
+				time_periods <- names(Y_list)
 
-                Xrow_list <- lapply(time_periods, function(t) {
-                    subset_df <- nodal_df[nodal_df$time == t, ]
-                    mat <- as.matrix(subset_df[, msrmnts$nvars, drop = FALSE])
-                    rownames(mat) <- subset_df$actor
-                    mat
-                })
-                names(Xrow_list) <- time_periods
+				Xrow_list <- lapply(time_periods, function(t) {
+					subset_df <- nodal_df[nodal_df$time == t, ]
+					mat <- as.matrix(subset_df[, msrmnts$nvars, drop = FALSE])
+					rownames(mat) <- subset_df$actor
+					mat
+				})
+				names(Xrow_list) <- time_periods
 
-                # For symmetric networks, Xcol = Xrow
-                Xcol_list <- Xrow_list
-            }
+				# For symmetric networks, Xcol = Xrow
+				Xcol_list <- Xrow_list
+			}
 
-            out <- list(
-                Y = Y_list,
-                Xdyad = Xdyad_list,
-                Xrow = Xrow_list,
-                Xcol = Xcol_list
-            )
-        }
-    }
+			out <- list(
+				Y = Y_list,
+				Xdyad = Xdyad_list,
+				Xrow = Xrow_list,
+				Xcol = Xcol_list
+			)
+		}
+	}
 
-    #
-    return(out)
+	#
+	return(out)
 }
 
 #' @rdname netify_to_amen

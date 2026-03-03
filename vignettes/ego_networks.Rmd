@@ -18,6 +18,16 @@ knitr::opts_chunk$set(
     fig.width = 7,
     fig.height = 5
 )
+
+# This vignette requires dplyr.
+# Exit gracefully with an actionable message if it is missing.
+if (!requireNamespace("dplyr", quietly = TRUE)) {
+    message(
+        "This vignette requires: dplyr\n",
+        "Install with: install.packages('dplyr')"
+    )
+    knitr::knit_exit()
+}
 ```
 
 This vignette shows how `netify` handles ego networks—the network surrounding a specific actor and their immediate connections.

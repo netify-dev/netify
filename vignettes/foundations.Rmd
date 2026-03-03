@@ -16,12 +16,17 @@ knitr::opts_chunk$set(
     echo = TRUE
 )
 
-# this vignette requires several suggested packages
-has_pkgs <- requireNamespace("peacesciencer", quietly = TRUE) &&
-    requireNamespace("dplyr", quietly = TRUE) &&
-    requireNamespace("countrycode", quietly = TRUE)
-if (!has_pkgs) {
-    knitr::opts_chunk$set(eval = FALSE)
+# This vignette requires peacesciencer, dplyr, and countrycode.
+# Exit gracefully with an actionable message if any are missing.
+pkg_check <- c("peacesciencer", "dplyr", "countrycode")
+missing_pkgs <- pkg_check[!vapply(pkg_check, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs) > 0) {
+    message(
+        "This vignette requires: ", paste(missing_pkgs, collapse = ", "), "\n",
+        "Install with: install.packages(c(",
+        paste0("'", missing_pkgs, "'", collapse = ", "), "))"
+    )
+    knitr::knit_exit()
 }
 ```
 
@@ -410,7 +415,8 @@ mid_cross_network <- netify(
 )
 ```
 
-Next, let's take a look at passing our netify object to the `amen` function:
+Next, let's take a look at passing our netify object to the `amen` function.
+*Note: this chunk runs only when the `amen` package is installed (`install.packages("amen")`). If `amen` is not available, the chunk is skipped but the rest of the vignette is unaffected.*
 
 ```{r, eval=requireNamespace("amen", quietly = TRUE)}
 library(amen)
@@ -438,7 +444,8 @@ mid_amen_mod <- ame(
 )
 ```
 
-We can apply the same process to ERGMs:
+We can apply the same process to ERGMs.
+*Note: this chunk runs only when the `ergm` package is installed (`install.packages("ergm")`). If `ergm` is not available, the chunk is skipped but the rest of the vignette is unaffected.*
 
 ```{r, eval=requireNamespace("ergm", quietly = TRUE)}
 library(ergm)

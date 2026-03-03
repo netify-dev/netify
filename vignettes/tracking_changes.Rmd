@@ -18,12 +18,17 @@ knitr::opts_chunk$set(
     message = FALSE
 )
 
-# check for suggested packages needed by this vignette
-has_pkgs <- requireNamespace("dplyr", quietly = TRUE) &&
-    requireNamespace("tidyr", quietly = TRUE) &&
-    requireNamespace("patchwork", quietly = TRUE)
-if (!has_pkgs) {
-    knitr::opts_chunk$set(eval = FALSE)
+# This vignette requires dplyr, tidyr, and patchwork.
+# Exit gracefully with an actionable message if any are missing.
+pkg_check <- c("dplyr", "tidyr", "patchwork")
+missing_pkgs <- pkg_check[!vapply(pkg_check, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs) > 0) {
+    message(
+        "This vignette requires: ", paste(missing_pkgs, collapse = ", "), "\n",
+        "Install with: install.packages(c(",
+        paste0("'", missing_pkgs, "'", collapse = ", "), "))"
+    )
+    knitr::knit_exit()
 }
 ```
 
@@ -544,7 +549,7 @@ This table shows how network-wide properties evolve:
 - **n_nodes (152)**: Number of countries remains constant - same actors throughout
 - **n_edges**: Increases from 8,692 (2002) to 9,774 (2014) - more connections over time
 - **density**: Increases from 0.376 to 0.423 - the network becomes denser
-- **reciprocity**: Stays very high (0.97-0.98) - if country A cooperates with B, B almost always cooperates with A
+- **reciprocity**: Stays very high (0.97-0.98) — the correlation between each directed tie and its reverse is nearly perfect, meaning cooperation from A to B closely tracks cooperation from B to A in magnitude. (Note: this is a correlation-based measure, not the proportion of mutual edges.)
 - **transitivity**: Around 0.61-0.64 - moderate clustering (friend of a friend is often a friend)
 - **mean_degree**: Increases from 57.2 to 64.3 - average country has more partners over time
 
@@ -789,9 +794,11 @@ Spectral distance measures how different two networks are by comparing their eig
 
 ### Performance Optimization for Large Networks
 
-For large networks (>1000 nodes), computing all eigenvalues can be computationally expensive. The `spectral_rank` parameter allows you to use only the top-k eigenvalues:
+For large networks (>1000 nodes), computing all eigenvalues can be computationally expensive. The `spectral_rank` parameter allows you to use only the top-k eigenvalues.
 
-```{r, eval=FALSE}
+*Example: adapt the code below with your own large network objects to run it.*
+
+```r
 # For large networks, use spectral_rank to improve performance
 spectral_comp_fast <- compare_networks(
     list(large_net1, large_net2),
@@ -1145,7 +1152,9 @@ For large networks (>1000 nodes):
 
 ### Example: Complete Pre-Modeling Diagnostic
 
-```{r, eval=FALSE}
+*Example: adapt the template below to your own networks to run it.*
+
+```r
 # Comprehensive diagnostic before ERGM fitting
 diagnostic_results <- compare_networks(
     network_list,

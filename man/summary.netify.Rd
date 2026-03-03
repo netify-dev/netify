@@ -55,8 +55,19 @@ two neighbors of a node are connected)}
 \describe{
 \item{\code{covar_of_row_col_means}}{Covariance between actors' sending and
 receiving patterns}
-\item{\code{reciprocity}}{Correlation between adjacency matrix and its
-transpose, measuring tendency for mutual ties}
+\item{\code{reciprocity}}{Pearson correlation between the adjacency
+matrix and its transpose. This measures the linear association
+between outgoing and incoming tie weights for each dyad (i.e., how
+similar \eqn{a_{ij}} is to \eqn{a_{ji}} across all dyads). Values
+near 1 indicate strong reciprocity, while values near 0 indicate no
+relationship. Note: this differs from the traditional edge-based
+reciprocity (proportion of mutual dyads) used by igraph and other
+packages.}
+\item{\code{mutual}}{Proportion of mutual dyads: the fraction of
+connected dyad pairs where both directions are present. Ranges from 0
+(no mutual ties) to 1 (all ties are reciprocated). This is the
+traditional edge-based reciprocity measure used by igraph and most
+network analysis textbooks.}
 }
 }
 \description{

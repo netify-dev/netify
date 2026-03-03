@@ -31,13 +31,11 @@ NumericMatrix get_matrix(
     bool missing_to_zero = true,
     bool diag_to_NA = true
 ){
-    // initialize matrix
+    // initialize matrix — Rcpp NumericMatrix constructor zero-fills by default,
+    // so we only need explicit fill for NA case
     NumericMatrix m(n_rows, n_cols);
 
-    // start off with NAs or zeros based on missing_to_zero
-    if(missing_to_zero) {
-        std::fill(m.begin(), m.end(), 0.0);
-    } else {
+    if(!missing_to_zero) {
         std::fill(m.begin(), m.end(), NumericVector::get_na());
     }
 

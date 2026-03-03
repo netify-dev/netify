@@ -5,8 +5,14 @@
 #' a layer in the resulting multilayer network, enabling analysis of multiple
 #' relationship types or network views simultaneously.
 #'
-#' @param netlet_list A list of netify objects to layer together. All objects must
-#'   have compatible dimensions and attributes (see Details).
+#' @param netlet_list A list of netify objects to layer together, or the first
+#'   netify object when passing multiple objects as separate arguments via
+#'   \code{...}. All objects must have compatible dimensions and attributes
+#'   (see Details).
+#' @param ... Additional netify objects. When provided, \code{netlet_list}
+#'   should be a single netify object and all arguments are collected into a
+#'   list. This allows calling \code{layer_netify(net1, net2, net3)} as a
+#'   shorthand for \code{layer_netify(list(net1, net2, net3))}.
 #' @param layer_labels Character vector specifying names for each layer. If NULL
 #'   (default), uses names from netlet_list or generates generic labels ("layer1",
 #'   "layer2", etc.). Length must match the number of netify objects.
@@ -121,189 +127,201 @@
 #'
 #' @export layer_netify
 
-layer_netify <- function(netlet_list, layer_labels = NULL) {
-    # user input checks - use lapply instead of vapply since netify_check doesn't return a value
-    lapply(netlet_list, netify_check)
+layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
+	# support passing netify objects as separate arguments
+	dots <- list(...)
+	if (length(dots) > 0) {
+		if (is_netify(netlet_list)) {
+			netlet_list <- c(list(netlet_list), dots)
+		} else {
+			cli::cli_abort(
+				"When passing extra arguments via {.code ...}, the first argument must be a netify object."
+			)
+		}
+	}
 
-    # set layer labels
-    layer_labels <- set_layer_labels(netlet_list, layer_labels)
+	# user input checks - use lapply instead of vapply since netify_check doesn't return a value
+	lapply(netlet_list, netify_check)
 
-    # store attributes from netlet objects
-    attribs_list <- lapply(netlet_list, attributes)
+	# set layer labels
+	layer_labels <- set_layer_labels(netlet_list, layer_labels)
 
-    # define relevant attribute types that must be identical
-    rel_attrs <- c(
-        "netify_type", "actor_time_uniform",
-        "actor_pds", "symmetric", "mode"
-    )
+	# store attributes from netlet objects
+	attribs_list <- lapply(netlet_list, attributes)
 
-    # check if attributes compatible
-    check_layer_compatible(
-        a_list = attribs_list,
-        elems = rel_attrs,
-        msg = c(
-            "Error: The ",
-            " attribute is not identical across the netlets in `netlet_list`."
-        )
-    )
+	# define relevant attribute types that must be identical
+	rel_attrs <- c(
+		"netify_type", "actor_time_uniform",
+		"actor_pds", "symmetric", "mode"
+	)
 
-    # Extract first set of attributes for reuse
-    first_attribs <- attribs_list[[1]]
+	# check if attributes compatible
+	check_layer_compatible(
+		a_list = attribs_list,
+		elems = rel_attrs,
+		msg = c(
+			"Error: The ",
+			" attribute is not identical across the netlets in `netlet_list`."
+		)
+	)
 
-    # generate weights value for multilayer case - optimized
-    weight_collapse <- vapply(attribs_list, function(x) {
-        w <- x[["weight"]]
-        if (is.null(w)) {
-            "NULL"
-        } else if (is.logical(w)) {
-            if (w) "edge_value" else "NULL"
-        } else {
-            as.character(w)
-        }
-    }, character(1))
-    weight_collapse <- paste(weight_collapse, collapse = ", ")
+	# Extract first set of attributes for reuse
+	first_attribs <- attribs_list[[1]]
 
-    # do the same for longer weight label descriptors - optimized
-    weight_label_collapse <- paste(
-        vapply(attribs_list, `[[`, character(1), "detail_weight"),
-        collapse = " | "
-    )
+	# generate weights value for multilayer case - optimized
+	weight_collapse <- vapply(attribs_list, function(x) {
+		w <- x[["weight"]]
+		if (is.null(w)) {
+			"NULL"
+		} else if (is.logical(w)) {
+			if (w) "edge_value" else "NULL"
+		} else {
+			as.character(w)
+		}
+	}, character(1))
+	weight_collapse <- paste(weight_collapse, collapse = ", ")
 
-    # pull out logical for whether we have binary weights - already optimized
-    is_binary_vec <- vapply(attribs_list, `[[`, logical(1), "is_binary")
+	# do the same for longer weight label descriptors - optimized
+	weight_label_collapse <- paste(
+		vapply(attribs_list, `[[`, character(1), "detail_weight"),
+		collapse = " | "
+	)
 
-    # check to make sure that the networks can be layered
-    msrmnts_list <- lapply(netlet_list, netify_measurements)
+	# pull out logical for whether we have binary weights - already optimized
+	is_binary_vec <- vapply(attribs_list, `[[`, logical(1), "is_binary")
 
-    # define relevant measurements that must be identical
-    rel_msrs <- c(
-        "row_actors", "col_actors", "time",
-        "n_row_actors", "n_col_actors", "n_time"
-    )
+	# check to make sure that the networks can be layered
+	msrmnts_list <- lapply(netlet_list, netify_measurements)
 
-    # check if dimensions compatible
-    check_layer_compatible(
-        a_list = msrmnts_list,
-        elems = rel_msrs,
-        msg = c(
-            "Error: ",
-            " are not identical across the netlets in `netlet_list`."
-        )
-    )
+	# define relevant measurements that must be identical
+	rel_msrs <- c(
+		"row_actors", "col_actors", "time",
+		"n_row_actors", "n_col_actors", "n_time"
+	)
 
-    # Extract measurements once for reuse
-    first_msrmnts <- msrmnts_list[[1]]
-    netlet_type <- first_attribs$netify_type
-    n_layers <- length(netlet_list)
-    n_time <- first_msrmnts$n_time
-    n_row_actors <- first_msrmnts$n_row_actors
-    n_col_actors <- first_msrmnts$n_col_actors
-    time <- first_msrmnts$time
-    row_actors <- first_msrmnts$row_actors
-    col_actors <- first_msrmnts$col_actors
+	# check if dimensions compatible
+	check_layer_compatible(
+		a_list = msrmnts_list,
+		elems = rel_msrs,
+		msg = c(
+			"Error: ",
+			" are not identical across the netlets in `netlet_list`."
+		)
+	)
 
-    # pull out raw versions of data
-    netlet_raws <- lapply(netlet_list, get_raw)
+	# Extract measurements once for reuse
+	first_msrmnts <- msrmnts_list[[1]]
+	netlet_type <- first_attribs$netify_type
+	n_layers <- length(netlet_list)
+	n_time <- first_msrmnts$n_time
+	n_row_actors <- first_msrmnts$n_row_actors
+	n_col_actors <- first_msrmnts$n_col_actors
+	time <- first_msrmnts$time
+	row_actors <- first_msrmnts$row_actors
+	col_actors <- first_msrmnts$col_actors
 
-    # Create base attributes list to avoid repetition
-    base_attrs <- list(
-        netify_type = netlet_type,
-        actor_time_uniform = first_attribs$actor_time_uniform,
-        actor_pds = first_attribs$actor_pds,
-        weight = weight_collapse,
-        detail_weight = weight_label_collapse,
-        is_binary = is_binary_vec,
-        symmetric = first_attribs$symmetric,
-        mode = first_attribs$mode,
-        layers = layer_labels,
-        diag_to_NA = get_attribs(attribs_list, "diag_to_NA"),
-        missing_to_zero = get_attribs(attribs_list, "missing_to_zero"),
-        sum_dyads = get_attribs(attribs_list, "sum_dyads"),
-        nodal_data = NULL,
-        dyad_data = NULL
-    )
+	# pull out raw versions of data
+	netlet_raws <- lapply(netlet_list, get_raw)
 
-    # cross-sec case
-    if (netlet_type == "cross_sec") {
-        # define and fill array efficiently
-        netlet <- array(NA,
-            dim = c(n_row_actors, n_col_actors, n_layers),
-            dimnames = list(row_actors, col_actors, layer_labels)
-        )
+	# Create base attributes list to avoid repetition
+	base_attrs <- list(
+		netify_type = netlet_type,
+		actor_time_uniform = first_attribs$actor_time_uniform,
+		actor_pds = first_attribs$actor_pds,
+		weight = weight_collapse,
+		detail_weight = weight_label_collapse,
+		is_binary = is_binary_vec,
+		symmetric = first_attribs$symmetric,
+		mode = first_attribs$mode,
+		layers = layer_labels,
+		diag_to_NA = get_attribs(attribs_list, "diag_to_NA"),
+		missing_to_zero = get_attribs(attribs_list, "missing_to_zero"),
+		sum_dyads = get_attribs(attribs_list, "sum_dyads"),
+		nodal_data = NULL,
+		dyad_data = NULL
+	)
 
-        for (ii in seq_len(n_layers)) {
-            netlet[, , ii] <- netlet_raws[[ii]]
-        }
-    }
+	# cross-sec case
+	if (netlet_type == "cross_sec") {
+		# define and fill array efficiently
+		netlet <- array(NA,
+			dim = c(n_row_actors, n_col_actors, n_layers),
+			dimnames = list(row_actors, col_actors, layer_labels)
+		)
 
-    # array case
-    if (netlet_type == "longit_array") {
-        # define and fill array efficiently
-        netlet <- array(NA,
-            dim = c(n_row_actors, n_col_actors, n_layers, n_time),
-            dimnames = list(row_actors, col_actors, layer_labels, time)
-        )
+		for (ii in seq_len(n_layers)) {
+			netlet[, , ii] <- netlet_raws[[ii]]
+		}
+	}
 
-        for (ii in seq_len(n_layers)) {
-            netlet[, , ii, ] <- netlet_raws[[ii]]
-        }
-    }
+	# array case
+	if (netlet_type == "longit_array") {
+		# define and fill array efficiently
+		netlet <- array(NA,
+			dim = c(n_row_actors, n_col_actors, n_layers, n_time),
+			dimnames = list(row_actors, col_actors, layer_labels, time)
+		)
 
-    # longit list case - optimized
-    if (netlet_type == "longit_list") {
-        # Pre-allocate list
-        netlet <- vector("list", n_time)
-        names(netlet) <- time
+		for (ii in seq_len(n_layers)) {
+			netlet[, , ii, ] <- netlet_raws[[ii]]
+		}
+	}
 
-        # Create cross-sectional attributes once
-        cs_attrs <- base_attrs
-        cs_attrs$netify_type <- "cross_sec"
-        cs_attrs$actor_time_uniform <- NULL
-        cs_attrs$actor_pds <- NULL
+	# longit list case - optimized
+	if (netlet_type == "longit_list") {
+		# Pre-allocate list
+		netlet <- vector("list", n_time)
+		names(netlet) <- time
 
-        for (tt in seq_len(n_time)) {
-            # define array
-            arr <- array(NA,
-                dim = c(n_row_actors[[tt]], n_col_actors[[tt]], n_layers),
-                dimnames = list(row_actors[[tt]], col_actors[[tt]], layer_labels)
-            )
+		# Create cross-sectional attributes once
+		cs_attrs <- base_attrs
+		cs_attrs$netify_type <- "cross_sec"
+		cs_attrs$actor_time_uniform <- NULL
+		cs_attrs$actor_pds <- NULL
 
-            # fill in array
-            for (ii in seq_len(n_layers)) {
-                arr[, , ii] <- netlet_raws[[ii]][[tt]]
-            }
+		for (tt in seq_len(n_time)) {
+			# define array
+			arr <- array(NA,
+				dim = c(n_row_actors[[tt]], n_col_actors[[tt]], n_layers),
+				dimnames = list(row_actors[[tt]], col_actors[[tt]], layer_labels)
+			)
 
-            # add attributes efficiently
-            class(arr) <- "netify"
-            attributes(arr) <- c(attributes(arr), cs_attrs)
+			# fill in array
+			for (ii in seq_len(n_layers)) {
+				arr[, , ii] <- netlet_raws[[ii]][[tt]]
+			}
 
-            netlet[[tt]] <- arr
-        }
-    }
+			# add attributes efficiently
+			class(arr) <- "netify"
+			attributes(arr) <- c(attributes(arr), cs_attrs)
 
-    # add attributes to main object
-    class(netlet) <- "netify"
-    attributes(netlet) <- c(attributes(netlet), base_attrs)
+			netlet[[tt]] <- arr
+		}
+	}
 
-    # Handle nodal data - optimized checks
-    nodal_data_list <- lapply(attribs_list, `[[`, "nodal_data")
-    if (identical_recursive(nodal_data_list)) {
-        attr(netlet, "nodal_data") <- nodal_data_list[[1]]
-    } else {
-        attr(netlet, "nodal_data") <- reduce_combine_nodal_attr(
-            attribs_list, msrmnts_list, netlet_type
-        )
-    }
+	# add attributes to main object
+	class(netlet) <- "netify"
+	attributes(netlet) <- c(attributes(netlet), base_attrs)
 
-    # Handle dyad data - optimized checks
-    dyad_data_list <- lapply(attribs_list, `[[`, "dyad_data")
-    if (identical_recursive(dyad_data_list)) {
-        attr(netlet, "dyad_data") <- dyad_data_list[[1]]
-    } else {
-        attr(netlet, "dyad_data") <- reduce_combine_dyad_attr(
-            attribs_list, msrmnts_list, netlet_type
-        )
-    }
+	# Handle nodal data - optimized checks
+	nodal_data_list <- lapply(attribs_list, `[[`, "nodal_data")
+	if (identical_recursive(nodal_data_list)) {
+		attr(netlet, "nodal_data") <- nodal_data_list[[1]]
+	} else {
+		attr(netlet, "nodal_data") <- reduce_combine_nodal_attr(
+			attribs_list, msrmnts_list, netlet_type
+		)
+	}
 
-    return(netlet)
+	# Handle dyad data - optimized checks
+	dyad_data_list <- lapply(attribs_list, `[[`, "dyad_data")
+	if (identical_recursive(dyad_data_list)) {
+		attr(netlet, "dyad_data") <- dyad_data_list[[1]]
+	} else {
+		attr(netlet, "dyad_data") <- reduce_combine_dyad_attr(
+			attribs_list, msrmnts_list, netlet_type
+		)
+	}
+
+	return(netlet)
 }

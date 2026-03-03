@@ -53,13 +53,16 @@ DataFrame melt_matrix_cpp(
         }
     }
     
-    // Pre-allocate vectors (max possible size)
+    // Pre-allocate vectors with conservative initial estimate
+    // For sparse networks, nrow*ncol would waste huge memory (e.g., 10k nodes = 800MB)
+    // Use a reasonable initial guess and let vectors grow as needed
     int max_size = mat.nrow() * mat.ncol();
+    int init_reserve = std::min(max_size, std::max(1024, max_size / 10));
     std::vector<std::string> rows, cols;
     std::vector<double> values;
-    rows.reserve(max_size);
-    cols.reserve(max_size);
-    values.reserve(max_size);
+    rows.reserve(init_reserve);
+    cols.reserve(init_reserve);
+    values.reserve(init_reserve);
     
     // Melt the matrix
     for (int i = 0; i < mat.nrow(); i++) {

@@ -96,154 +96,154 @@
 #'
 
 get_adjacency <- function(
-    dyad_data,
-    actor1 = NULL, actor2 = NULL,
-    symmetric = TRUE, mode = "unipartite",
-    weight = NULL, sum_dyads = FALSE,
-    diag_to_NA = TRUE, missing_to_zero = TRUE,
-    nodelist = NULL) {
-    # if bipartite network then force diag_to_NA to be FALSE
-    # and force asymmetric, create copy to preserve user choice
-    user_symmetric <- symmetric
-    if (mode == "bipartite") {
-        diag_to_NA <- FALSE
-        symmetric <- FALSE
-    }
+	dyad_data,
+	actor1 = NULL, actor2 = NULL,
+	symmetric = TRUE, mode = "unipartite",
+	weight = NULL, sum_dyads = FALSE,
+	diag_to_NA = TRUE, missing_to_zero = TRUE,
+	nodelist = NULL) {
+	# if bipartite network then force diag_to_NA to be FALSE
+	# and force asymmetric, create copy to preserve user choice
+	user_symmetric <- symmetric
+	if (mode == "bipartite") {
+		diag_to_NA <- FALSE
+		symmetric <- FALSE
+	}
 
-    # # if mode bipartite is specified make sure that
-    # # actors in actor1 and actor2 columns are distinct
-    # if(mode=='bipartite'){
-    #   if(length(intersect(dyad_data[,actor1], dyad_data[,actor2])) > 0){
-    #     cli::cli_alert_warning(
-    #       "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes."
-    #     )
-    #   }
-    # }
+	# # if mode bipartite is specified make sure that
+	# # actors in actor1 and actor2 columns are distinct
+	# if(mode=='bipartite'){
+	#   if(length(intersect(dyad_data[,actor1], dyad_data[,actor2])) > 0){
+	#     cli::cli_alert_warning(
+	#       "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes."
+	#     )
+	#   }
+	# }
 
-    # create weight string for storage as attribute in netify object
-    weight_label <- weight_string_label(weight, sum_dyads)
+	# create weight string for storage as attribute in netify object
+	weight_label <- weight_string_label(weight, sum_dyads)
 
-    # add weight if not supplied
-    wOrig <- weight
-    if (is.null(weight)) {
-        dyad_data$weight_var <- 1
-        weight <- "weight_var"
-    }
+	# add weight if not supplied
+	wOrig <- weight
+	if (is.null(weight)) {
+		dyad_data$weight_var <- 1
+		weight <- "weight_var"
+	}
 
-    # subset to relevant vars once
-    dyad_data <- dyad_data[, c(actor1, actor2, weight)]
+	# subset to relevant vars once
+	dyad_data <- dyad_data[, c(actor1, actor2, weight)]
 
-    # get vector of actors - optimized extraction
-    actors_rows <- unique_vector(dyad_data[, actor1])
-    actors_cols <- unique_vector(dyad_data[, actor2])
-    actors <- unique_vector(actors_rows, actors_cols)
-    
-    # Incorporate nodelist if provided
-    if (!is.null(nodelist)) {
-        # Convert to character to ensure consistency
-        nodelist <- as.character(nodelist)
-        
-        # Add any missing actors from nodelist
-        if (mode == "unipartite") {
-            actors <- unique_vector(actors, nodelist)
-            actors_rows <- actors_cols <- actors
-        } else {
-            # For bipartite, assume nodelist contains all actors
-            # User should specify which are row/col actors
-            cli::cli_alert_info("For bipartite networks, nodelist should contain all actors. Assigning to both row and column actors.")
-            actors_rows <- unique_vector(actors_rows, nodelist)
-            actors_cols <- unique_vector(actors_cols, nodelist)
-            actors <- unique_vector(actors_rows, actors_cols)
-        }
-    } else if (mode == "unipartite") {
-        actors_rows <- actors_cols <- actors
-    }
+	# get vector of actors - optimized extraction
+	actors_rows <- unique_vector(dyad_data[, actor1])
+	actors_cols <- unique_vector(dyad_data[, actor2])
+	actors <- unique_vector(actors_rows, actors_cols)
+	
+	# Incorporate nodelist if provided
+	if (!is.null(nodelist)) {
+		# Convert to character to ensure consistency
+		nodelist <- as.character(nodelist)
+		
+		# Add any missing actors from nodelist
+		if (mode == "unipartite") {
+			actors <- unique_vector(actors, nodelist)
+			actors_rows <- actors_cols <- actors
+		} else {
+			# For bipartite, assume nodelist contains all actors
+			# User should specify which are row/col actors
+			cli::cli_alert_info("For bipartite networks, nodelist should contain all actors. Assigning to both row and column actors.")
+			actors_rows <- unique_vector(actors_rows, nodelist)
+			actors_cols <- unique_vector(actors_cols, nodelist)
+			actors <- unique_vector(actors_rows, actors_cols)
+		}
+	} else if (mode == "unipartite") {
+		actors_rows <- actors_cols <- actors
+	}
 
-    # actor year info
-    actor_pds <- data.frame(
-        actor = actors,
-        stringsAsFactors = FALSE
-    )
-    actor_pds$min_time <- 1
-    actor_pds$max_time <- 1
+	# actor year info
+	actor_pds <- data.frame(
+		actor = actors,
+		stringsAsFactors = FALSE
+	)
+	actor_pds$min_time <- 1
+	actor_pds$max_time <- 1
 
-    # check if there are repeating dyads
-    num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2)
-    if (num_repeat_dyads > 0) {
-        edge_value_check(wOrig, sum_dyads, TRUE)
-    }
+	# check if there are repeating dyads
+	num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2)
+	if (num_repeat_dyads > 0) {
+		edge_value_check(wOrig, sum_dyads, TRUE)
+	}
 
-    # aggregate data if sum dyads selected
-    if (sum_dyads) {
-        dyad_data <- aggregate_dyad(dyad_data, actor1, actor2, NULL, weight, symmetric, missing_to_zero)
-    }
+	# aggregate data if sum dyads selected
+	if (sum_dyads) {
+		dyad_data <- aggregate_dyad(dyad_data, actor1, actor2, NULL, weight, symmetric, missing_to_zero)
+	}
 
-    # remove zeros early if missing_to_zero is TRUE
-    if (missing_to_zero) {
-        dyad_data <- dyad_data[dyad_data[, weight] != 0, ]
-    }
+	# remove zeros early if missing_to_zero is TRUE
+	if (missing_to_zero) {
+		dyad_data <- dyad_data[dyad_data[, weight] != 0, ]
+	}
 
-    # Cache frequently accessed columns for efficiency
-    dyad_actor1 <- dyad_data[, actor1]
-    dyad_actor2 <- dyad_data[, actor2]
-    dyad_weight <- dyad_data[, weight]
+	# Cache frequently accessed columns for efficiency
+	dyad_actor1 <- dyad_data[, actor1]
+	dyad_actor2 <- dyad_data[, actor2]
+	dyad_weight <- dyad_data[, weight]
 
-    # assign cross-section value for adjmat depending on user inputs
-    value <- dyad_weight
+	# assign cross-section value for adjmat depending on user inputs
+	value <- dyad_weight
 
-    # create logical value that is TRUE if weight is just 0/1 - optimized check
-    is_binary <- length(value) == 0 || all(value %in% c(0, 1))
+	# create logical value that is TRUE if weight is just 0/1 - optimized check
+	is_binary <- length(value) == 0 || all(value %in% c(0, 1))
 
-    # Pre-compute matrix indices to avoid repeated match() calls
-    matRowIndices <- match(dyad_actor1, actors_rows)
-    matColIndices <- match(dyad_actor2, actors_cols)
+	# Pre-compute matrix indices to avoid repeated match() calls
+	matRowIndices <- match(dyad_actor1, actors_rows)
+	matColIndices <- match(dyad_actor2, actors_cols)
 
-    # convert to adjacency matrix using optimized C++ function
-    adj_out <- get_matrix(
-        n_rows = length(actors_rows),
-        n_cols = length(actors_cols),
-        actors_rows = actors_rows,
-        actors_cols = actors_cols,
-        matRowIndices = matRowIndices,
-        matColIndices = matColIndices,
-        value = value,
-        symmetric = symmetric,
-        missing_to_zero = missing_to_zero,
-        diag_to_NA = diag_to_NA && mode == "unipartite"
-    )
+	# convert to adjacency matrix using optimized C++ function
+	adj_out <- get_matrix(
+		n_rows = length(actors_rows),
+		n_cols = length(actors_cols),
+		actors_rows = actors_rows,
+		actors_cols = actors_cols,
+		matRowIndices = matRowIndices,
+		matColIndices = matColIndices,
+		value = value,
+		symmetric = symmetric,
+		missing_to_zero = missing_to_zero,
+		diag_to_NA = diag_to_NA && mode == "unipartite"
+	)
 
-    # if user left weight NULL and set sum_dyads
-    # to FALSE then record weight as NULL for
-    # attribute purposes
-    if (!sum_dyads && is.null(wOrig)) {
-        weight <- NULL
-    }
+	# if user left weight NULL and set sum_dyads
+	# to FALSE then record weight as NULL for
+	# attribute purposes
+	if (!sum_dyads && is.null(wOrig)) {
+		weight <- NULL
+	}
 
-    # layer label
-    if (is.null(weight)) {
-        layer_label <- "weight1"
-    } else {
-        layer_label <- weight
-    }
+	# layer label
+	if (is.null(weight)) {
+		layer_label <- "weight1"
+	} else {
+		layer_label <- weight
+	}
 
-    # add class info and attributes efficiently
-    class(adj_out) <- "netify"
-    attributes(adj_out) <- c(attributes(adj_out), list(
-        netify_type = "cross_sec",
-        actor_time_uniform = TRUE,
-        actor_pds = actor_pds,
-        weight = weight,
-        detail_weight = weight_label,
-        is_binary = is_binary,
-        symmetric = user_symmetric,
-        mode = mode,
-        layers = layer_label,
-        diag_to_NA = diag_to_NA,
-        missing_to_zero = missing_to_zero,
-        sum_dyads = sum_dyads,
-        nodal_data = NULL,
-        dyad_data = NULL
-    ))
+	# add class info and attributes efficiently
+	class(adj_out) <- "netify"
+	attributes(adj_out) <- c(attributes(adj_out), list(
+		netify_type = "cross_sec",
+		actor_time_uniform = TRUE,
+		actor_pds = actor_pds,
+		weight = weight,
+		detail_weight = weight_label,
+		is_binary = is_binary,
+		symmetric = user_symmetric,
+		mode = mode,
+		layers = layer_label,
+		diag_to_NA = diag_to_NA,
+		missing_to_zero = missing_to_zero,
+		sum_dyads = sum_dyads,
+		nodal_data = NULL,
+		dyad_data = NULL
+	))
 
-    return(adj_out)
+	return(adj_out)
 }

@@ -388,799 +388,812 @@
 #' @export
 
 plot.netify <- function(x, auto_format = TRUE, ...) {
-    # check if the input is a netify object
-    netify_check(x)
-
-    # extract attributes from the netify object
-    obj_attrs <- attributes(x)
-
-    # anything passed in goes to the plot arg dumpster
-    plot_args <- list(...)
-    
-    # Validate parameters and warn about common mistakes
-    validate_plot_params(plot_args, ...)
-
-    # NEW: Handle time_filter subsetting if provided
-    if (!is.null(plot_args$time_filter)) {
-        # Extract time_filter parameter before passing to net_plot_data
-        time_subset <- plot_args$time_filter
-
-        # Check if it's a longitudinal network
-        if (obj_attrs$netify_type != "cross_sec") {
-            # Subset the netify object for the specified time periods
-            x <- subset(x, time = time_subset)
-
-            # Update attributes after subsetting
-            obj_attrs <- attributes(x)
-
-            # Remove time_filter from plot_args since we've already handled it
-            plot_args$time_filter <- NULL
-        } else {
-            # Warn if time_filter is specified for cross-sectional network
-            cli::cli_alert_warning("'time_filter' parameter ignored for cross-sectional networks")
-            plot_args$time_filter <- NULL
-        }
-    }
-
-    # style over substance
-    if (!is.null(plot_args$style)) {
-        #
-        style_fun <- plot_args$style
-
-        # if a string get the fn
-        if (is.character(style_fun)) {
-            style_fun <- match.fun(style_fun)
-        }
-
-        # get style params
-        style_params <- style_fun()
-
-        # temove style from plot_args
-        plot_args$style <- NULL
-
-        # merge style params with plot_args
-        plot_args <- c(style_params, plot_args)
-    } # end styling
-
-    # Store filter arguments before removing them
-    node_filter <- plot_args$node_filter
-    edge_filter <- plot_args$edge_filter
-
-    # Remove filter args before passing to net_plot_data
-    plot_args$node_filter <- NULL
-    plot_args$edge_filter <- NULL
-    
-    # Pass auto_format setting to net_plot_data
-    plot_args$auto_format <- auto_format
-
-    # get plot data and parameters for ggplot
-    net_plot_info <- net_plot_data(x, plot_args)
-
-    # extract plot arguments and ggplot parameters
-    plot_args <- net_plot_info$plot_args
-    ggnet_params <- net_plot_info$ggnet_params
-    net_dfs <- net_plot_info$net_dfs
-
-    # NEW: Handle node filtering if provided
-    if (!is.null(node_filter)) {
-        # Apply the filter to nodal data
-        if (nrow(net_dfs$nodal_data) > 0) {
-            # Apply the filter using helper function
-            filter_result <- apply_node_filter(net_dfs$nodal_data, node_filter)
-
-            # Apply the filter
-            net_dfs$nodal_data <- net_dfs$nodal_data[filter_result, , drop = FALSE]
-
-            # Update edge data to remove edges connected to filtered nodes
-            if (nrow(net_dfs$edge_data) > 0) {
-                remaining_nodes <- net_dfs$nodal_data$name
-
-                # Keep only edges where both endpoints are in remaining nodes
-                edges_to_keep <- net_dfs$edge_data$from %in% remaining_nodes &
-                    net_dfs$edge_data$to %in% remaining_nodes
-
-                net_dfs$edge_data <- net_dfs$edge_data[edges_to_keep, , drop = FALSE]
-            }
-        }
-    }
-
-    # NEW: Handle edge filtering if provided
-    if (!is.null(edge_filter)) {
-        # Apply the filter to edge data
-        if (nrow(net_dfs$edge_data) > 0) {
-            # Get weight column name if available
-            weight_col <- attr(x, "weight", exact = TRUE)
-
-            # Apply the filter using the helper function
-            filter_result <- apply_edge_filter(net_dfs$edge_data, edge_filter, weight_col)
-
-            # Apply the filter
-            net_dfs$edge_data <- net_dfs$edge_data[filter_result, , drop = FALSE]
-
-            # Update node data to remove orphaned nodes if remove_isolates is TRUE
-            if (plot_args$remove_isolates && nrow(net_dfs$edge_data) > 0) {
-                # Get nodes that still have edges after filtering
-                remaining_nodes <- unique(c(net_dfs$edge_data$from, net_dfs$edge_data$to))
-
-                # Add time dimension if longitudinal
-                if (obj_attrs$netify_type != "cross_sec") {
-                    remaining_node_time <- unique(net_dfs$edge_data[, c("from", "to", "time")])
-                    remaining_combos <- unique(rbind(
-                        data.frame(name = remaining_node_time$from, time = remaining_node_time$time),
-                        data.frame(name = remaining_node_time$to, time = remaining_node_time$time)
-                    ))
-
-                    # Create ID for matching
-                    remaining_combos$id <- paste(remaining_combos$name, remaining_combos$time, sep = "_")
-                    net_dfs$nodal_data$id <- paste(net_dfs$nodal_data$name, net_dfs$nodal_data$time, sep = "_")
-
-                    # Keep only nodes that still have connections
-                    net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$id %in% remaining_combos$id, ]
-
-                    # Remove temporary id column
-                    net_dfs$nodal_data$id <- NULL
-                } else {
-                    # Cross-sectional case
-                    net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$name %in% remaining_nodes, ]
-                }
-            }
-        }
-    }
-
-    # Handle weight transformation
-    if (!is.null(plot_args$mutate_weight)) {
-        # Apply transformation to edge data
-        weight_col <- attr(x, "weight", exact = TRUE)
-        if (!is.null(weight_col) && weight_col %in% names(net_dfs$edge_data)) {
-            transform_fn <- match.fun(plot_args$mutate_weight)
-            net_dfs$edge_data[[weight_col]] <- transform_fn(net_dfs$edge_data[[weight_col]])
-        }
-    }
-
-    # process labels
-    scale_labels <- list(
-        # Edge labels
-        edge_alpha = plot_args$edge_alpha_label,
-        edge_color = plot_args$edge_color_label,
-        edge_linewidth = plot_args$edge_linewidth_label,
-        edge_linetype = plot_args$edge_linetype_label,
-
-        # Node labels
-        node_size = plot_args$node_size_label,
-        node_color = plot_args$node_color_label,
-        node_fill = plot_args$node_fill_label,
-        node_shape = plot_args$node_shape_label,
-        node_alpha = plot_args$node_alpha_label,
-        node_stroke = plot_args$node_stroke_label,
-
-        # Text labels
-        text_size = plot_args$text_size_label,
-        text_color = plot_args$text_color_label,
-        text_alpha = plot_args$text_alpha_label,
-
-        # Label (box) labels
-        label_size = plot_args$label_size_label,
-        label_color = plot_args$label_color_label,
-        label_fill = plot_args$label_fill_label,
-        label_alpha = plot_args$label_alpha_label
-    )
-
-    # initialize a list to store plot components
-    components <- list()
-
-    # create the base ggplot object
-    components$base <- ggplot()
-
-    # pour labels into components
-    components$scale_labels <- scale_labels
-
-    # Pre-process data for faceting if needed
-    # This must happen before creating geoms that reference net_dfs
-    is_longitudinal <- obj_attrs$netify_type != "cross_sec"
-    is_multilayer <- isTRUE(plot_args$is_multilayer)
-
-    if (is_multilayer && is_longitudinal) {
-        facet_type <- plot_args$facet_type %||% "grid"
-        if (facet_type == "wrap") {
-            # Create combined time_layer column before geoms are created
-            if ("layer" %in% names(net_dfs$nodal_data) && "time" %in% names(net_dfs$nodal_data)) {
-                net_dfs$nodal_data$time_layer <- paste(net_dfs$nodal_data$time,
-                    net_dfs$nodal_data$layer,
-                    sep = " - "
-                )
-                if (!is.null(net_dfs$edge_data) && nrow(net_dfs$edge_data) > 0) {
-                    net_dfs$edge_data$time_layer <- paste(net_dfs$edge_data$time,
-                        net_dfs$edge_data$layer,
-                        sep = " - "
-                    )
-                }
-            }
-        }
-    }
-
-    # add edges to the plot if specified
-    if (plot_args$add_edges) {
-        # static parameters for edges
-        edge_static_params <- ggnet_params$edge$static
-
-        # static parameters for curved edges
-        curve_static_params <- ggnet_params$curve$static
-
-        # dynamic aesthetic mappings for edges
-        edge_aes_list <- ggnet_params$edge$var
-
-        # add curved edges if specified
-        if (plot_args$curve_edges) {
-            components$edges <- list(
-                geom = GeomCurve,
-                data = net_dfs$edge_data,
-                mapping = do.call(aes, edge_aes_list),
-                params = curve_static_params,
-                stat = "identity",
-                position = "identity",
-                inherit.aes = TRUE,
-                show.legend = if (length(edge_aes_list) > 0) TRUE else NA
-            )
-        } else {
-            # add straight edges otherwise
-            components$edges <- list(
-                geom = GeomSegment,
-                data = net_dfs$edge_data,
-                mapping = do.call(aes, edge_aes_list),
-                params = edge_static_params,
-                stat = "identity",
-                position = "identity",
-                inherit.aes = TRUE,
-                show.legend = if (length(edge_aes_list) > 0) TRUE else NA
-            )
-        }
-
-        # store edge scale names for documentation
-        components$edge_scales <- list()
-        if (!is.null(plot_args$edge_color_var)) {
-            components$edge_scales$color <- plot_args$edge_color_var
-        }
-        if (!is.null(plot_args$edge_alpha_var)) {
-            components$edge_scales$alpha <- plot_args$edge_alpha_var
-        }
-        if (!is.null(plot_args$edge_linewidth_var)) {
-            components$edge_scales$linewidth <- plot_args$edge_linewidth_var
-        }
-        if (!is.null(plot_args$edge_linetype_var)) {
-            components$edge_scales$linetype <- plot_args$edge_linetype_var
-        }
-    }
-
-    # add nodes to the plot if specified
-    if (plot_args$add_points) {
-        # static parameters for points
-        point_static_params <- ggnet_params$point$static
-
-        # dynamic aesthetic mappings for points
-        point_aes_list <- ggnet_params$point$var
-
-        # create the geom_point component
-        components$points <- list(
-            geom = GeomPoint,
-            data = net_dfs$nodal_data,
-            mapping = do.call(aes, point_aes_list),
-            params = point_static_params,
-            stat = "identity",
-            position = "identity",
-            inherit.aes = TRUE,
-            show.legend = NA
-        )
-
-        # store point scale names
-        components$point_scales <- list()
-        if (!is.null(plot_args$point_color_var)) {
-            components$point_scales$color <- plot_args$point_color_var
-        }
-        if (!is.null(plot_args$point_fill_var)) {
-            components$point_scales$fill <- plot_args$point_fill_var
-        }
-        if (!is.null(plot_args$point_size_var)) {
-            components$point_scales$size <- plot_args$point_size_var
-        }
-        if (!is.null(plot_args$point_shape_var)) {
-            components$point_scales$shape <- plot_args$point_shape_var
-        }
-        if (!is.null(plot_args$point_alpha_var)) {
-            components$point_scales$alpha <- plot_args$point_alpha_var
-        }
-        if (!is.null(plot_args$point_stroke_var)) {
-            components$point_scales$stroke <- plot_args$point_stroke_var
-        }
-    }
-
-    # add text annotations to the plot if specified
-    if (plot_args$add_text) {
-        # static parameters for text
-        text_static_params <- ggnet_params$text$static
-
-        # dynamic aesthetic mappings for text
-        text_aes_list <- ggnet_params$text$var
-
-        # create the geom_text component
-        components$text <- list(
-            geom = GeomText,
-            data = net_dfs$nodal_data,
-            mapping = do.call(aes, text_aes_list),
-            params = text_static_params,
-            stat = "identity",
-            position = "identity",
-            inherit.aes = TRUE,
-            show.legend = NA
-        )
-
-        # store text scale names
-        components$text_scales <- list()
-        if (!is.null(plot_args$text_color_var)) {
-            components$text_scales$color <- plot_args$text_color_var
-        }
-        if (!is.null(plot_args$text_alpha_var)) {
-            components$text_scales$alpha <- plot_args$text_alpha_var
-        }
-        if (!is.null(plot_args$text_size_var)) {
-            components$text_scales$size <- plot_args$text_size_var
-        }
-    }
-
-    # add text_repel annotations to the plot if specified
-    if (plot_args$add_text_repel) {
-        # static parameters for text_repel
-        text_repel_static_params <- ggnet_params$text_repel$static
-
-        # dynamic aesthetic mappings for text_repel
-        text_repel_aes_list <- ggnet_params$text_repel$var
-
-        # create the geom_text_repel component
-        components$text_repel <- list(
-            geom = ggrepel::GeomTextRepel,
-            data = net_dfs$nodal_data,
-            mapping = do.call(aes, text_repel_aes_list),
-            params = text_repel_static_params,
-            stat = "identity",
-            position = "identity",
-            inherit.aes = TRUE,
-            show.legend = NA
-        )
-
-        # store text_repel scale names (same as text)
-        components$text_repel_scales <- list()
-        if (!is.null(plot_args$text_color_var)) {
-            components$text_repel_scales$color <- plot_args$text_color_var
-        }
-        if (!is.null(plot_args$text_alpha_var)) {
-            components$text_repel_scales$alpha <- plot_args$text_alpha_var
-        }
-        if (!is.null(plot_args$text_size_var)) {
-            components$text_repel_scales$size <- plot_args$text_size_var
-        }
-    }
-
-    # add labels to the plot if specified
-    if (plot_args$add_label) {
-        # static parameters for labels
-        label_static_params <- ggnet_params$label$static
-
-        # dynamic aesthetic mappings for labels
-        label_aes_list <- ggnet_params$label$var
-
-        # create the geom_label component
-        components$label <- list(
-            geom = GeomLabel,
-            data = net_dfs$nodal_data,
-            mapping = do.call(aes, label_aes_list),
-            params = label_static_params,
-            stat = "identity",
-            position = "identity",
-            inherit.aes = TRUE,
-            show.legend = NA
-        )
-
-        # store label scale names
-        components$label_scales <- list()
-        if (!is.null(plot_args$label_color_var)) {
-            components$label_scales$color <- plot_args$label_color_var
-        }
-        if (!is.null(plot_args$label_fill_var)) {
-            components$label_scales$fill <- plot_args$label_fill_var
-        }
-        if (!is.null(plot_args$label_alpha_var)) {
-            components$label_scales$alpha <- plot_args$label_alpha_var
-        }
-        if (!is.null(plot_args$label_size_var)) {
-            components$label_scales$size <- plot_args$label_size_var
-        }
-    }
-
-    # add label_repel annotations to the plot if specified
-    if (plot_args$add_label_repel) {
-        # static parameters for label_repel
-        label_repel_static_params <- ggnet_params$label_repel$static
-
-        # dynamic aesthetic mappings for label_repel
-        label_repel_aes_list <- ggnet_params$label_repel$var
-
-        # create the geom_label_repel component
-        components$label_repel <- list(
-            geom = ggrepel::GeomLabelRepel,
-            data = net_dfs$nodal_data,
-            mapping = do.call(aes, label_repel_aes_list),
-            params = label_repel_static_params,
-            stat = "identity",
-            position = "identity",
-            inherit.aes = TRUE,
-            show.legend = NA
-        )
-
-        # store label_repel scale names (same as label)
-        components$label_repel_scales <- list()
-        if (!is.null(plot_args$label_color_var)) {
-            components$label_repel_scales$color <- plot_args$label_color_var
-        }
-        if (!is.null(plot_args$label_fill_var)) {
-            components$label_repel_scales$fill <- plot_args$label_fill_var
-        }
-        if (!is.null(plot_args$label_alpha_var)) {
-            components$label_repel_scales$alpha <- plot_args$label_alpha_var
-        }
-        if (!is.null(plot_args$label_size_var)) {
-            components$label_repel_scales$size <- plot_args$label_size_var
-        }
-    }
-
-    # add facets for longitudinal and/or multilayer data
-    # (variables already defined earlier)
-
-    # Determine faceting based on data structure and user preferences
-    if (is_multilayer && is_longitudinal) {
-        # Both multilayer and longitudinal
-        facet_type <- plot_args$facet_type %||% "grid" # Default to grid for 2D faceting
-
-        if (facet_type == "grid") {
-            components$facets <- facet_grid(time ~ layer)
-        } else if (facet_type == "wrap") {
-            # time_layer column was already created earlier
-            components$facets <- facet_wrap(~time_layer,
-                scales = "free",
-                ncol = plot_args$facet_ncol %||% NULL
-            )
-        }
-    } else if (is_multilayer) {
-        # Only multilayer
-        components$facets <- facet_wrap(~layer,
-            scales = "free",
-            ncol = plot_args$facet_ncol %||% NULL
-        )
-    } else if (is_longitudinal) {
-        # Only longitudinal (original behavior)
-        components$facets <- facet_wrap(~time, scales = "free")
-    }
-
-    # apply the netify theme if specified
-    if (plot_args$use_theme_netify) {
-        components$theme <- theme_netify()
-    }
-
-    # store additional information for debugging or further customization
-    components$net_dfs <- net_dfs
-    components$plot_args <- plot_args
-    components$obj_attrs <- obj_attrs
-    components$ggnet_params <- ggnet_params
-
-    # return components if requested
-    if (isTRUE(plot_args$return_components)) {
-        class(components) <- c("netify_plot_components", "list")
-        return(components)
-    }
-
-    # assemble the plot from components
-    viz <- components$base
-
-    # add edges to the plot if they exist
-    if (!is.null(components$edges)) {
-        viz <- viz + layer(
-            geom = components$edges$geom,
-            data = components$edges$data,
-            mapping = components$edges$mapping,
-            stat = components$edges$stat,
-            position = components$edges$position,
-            params = components$edges$params,
-            inherit.aes = components$edges$inherit.aes,
-            show.legend = components$edges$show.legend
-        )
-
-        # apply edge scale labels if they are defined
-        if (!is.null(scale_labels$edge_alpha) && !is.null(components$edge_scales$alpha)) {
-            viz <- viz + labs(alpha = scale_labels$edge_alpha)
-            # Explicitly add alpha scale to ensure legend appears (critical for multilayer networks)
-            viz <- viz + scale_alpha_continuous()
-        }
-        if (!is.null(scale_labels$edge_color) && !is.null(components$edge_scales$color)) {
-            viz <- viz + labs(color = scale_labels$edge_color)
-        }
-        if (!is.null(scale_labels$edge_linewidth) && !is.null(components$edge_scales$linewidth)) {
-            viz <- viz + labs(linewidth = scale_labels$edge_linewidth)
-        }
-        if (!is.null(scale_labels$edge_linetype) && !is.null(components$edge_scales$linetype)) {
-            viz <- viz + labs(linetype = scale_labels$edge_linetype)
-        }
-    }
-
-    # reset scales if both edges and nodes have color or fill mappings
-    if (!is.null(components$edges) &&
-        (!is.null(components$points) || !is.null(components$text) || !is.null(components$label))) {
-        # Only reset color and fill scales if there's a conflict
-        if (!is.null(components$edge_scales$color) &&
-            (!is.null(components$point_scales$color) || !is.null(components$point_scales$fill))) {
-            viz <- viz +
-                ggnewscale::new_scale_color() +
-                ggnewscale::new_scale_fill()
-        }
-        # Only reset alpha scale if both edges and points use alpha
-        if (!is.null(components$edge_scales$alpha) &&
-            !is.null(components$point_scales$alpha)) {
-            viz <- viz +
-                ggnewscale::new_scale("alpha")
-        }
-    }
-
-    # add nodes to the plot if they exist
-    if (!is.null(components$points)) {
-        viz <- viz + layer(
-            geom = components$points$geom,
-            data = components$points$data,
-            mapping = components$points$mapping,
-            stat = components$points$stat,
-            position = components$points$position,
-            params = components$points$params,
-            inherit.aes = components$points$inherit.aes,
-            show.legend = components$points$show.legend
-        )
-
-        # apply node scale labels if they are defined
-        if (!is.null(scale_labels$node_size) && !is.null(components$point_scales$size)) {
-            viz <- viz + labs(size = scale_labels$node_size)
-        }
-        if (!is.null(scale_labels$node_color) && !is.null(components$point_scales$color)) {
-            viz <- viz + labs(color = scale_labels$node_color)
-        }
-        if (!is.null(scale_labels$node_fill) && !is.null(components$point_scales$fill)) {
-            viz <- viz + labs(fill = scale_labels$node_fill)
-        }
-        if (!is.null(scale_labels$node_shape) && !is.null(components$point_scales$shape)) {
-            viz <- viz + labs(shape = scale_labels$node_shape)
-        }
-        if (!is.null(scale_labels$node_alpha) && !is.null(components$point_scales$alpha)) {
-            viz <- viz + labs(alpha = scale_labels$node_alpha)
-        }
-        if (!is.null(scale_labels$node_stroke) && !is.null(components$point_scales$stroke)) {
-            viz <- viz + labs(stroke = scale_labels$node_stroke)
-        }
-        # hide size guide if requested (for highlighting)
-        if (isTRUE(plot_args$point_size_guide == "none") && !is.null(components$point_scales$size)) {
-            viz <- viz + guides(size = "none")
-        }
-    }
-
-    # add text annotations to the plot if they exist
-    if (!is.null(components$text)) {
-        # reset scales again if needed
-        if (!is.null(components$points)) {
-            viz <- viz +
-                ggnewscale::new_scale_color() +
-                ggnewscale::new_scale("alpha") +
-                ggnewscale::new_scale("size")
-        }
-
-        viz <- viz + layer(
-            geom = components$text$geom,
-            data = components$text$data,
-            mapping = components$text$mapping,
-            stat = components$text$stat,
-            position = components$text$position,
-            params = components$text$params,
-            inherit.aes = components$text$inherit.aes,
-            show.legend = components$text$show.legend
-        )
-
-        # apply text scale labels if they are defined
-        if (!is.null(scale_labels$text_size) && !is.null(components$text_scales$size)) {
-            viz <- viz + labs(size = scale_labels$text_size)
-        }
-        if (!is.null(scale_labels$text_color) && !is.null(components$text_scales$color)) {
-            viz <- viz + labs(color = scale_labels$text_color)
-        }
-        if (!is.null(scale_labels$text_alpha) && !is.null(components$text_scales$alpha)) {
-            viz <- viz + labs(alpha = scale_labels$text_alpha)
-        }
-    }
-
-    # add text_repel annotations to the plot if they exist
-    if (!is.null(components$text_repel)) {
-        # reset scales again if needed
-        if (!is.null(components$points)) {
-            viz <- viz +
-                ggnewscale::new_scale_color() +
-                ggnewscale::new_scale("alpha") +
-                ggnewscale::new_scale("size")
-        }
-
-        viz <- viz + layer(
-            geom = components$text_repel$geom,
-            data = components$text_repel$data,
-            mapping = components$text_repel$mapping,
-            stat = components$text_repel$stat,
-            position = components$text_repel$position,
-            params = components$text_repel$params,
-            inherit.aes = components$text_repel$inherit.aes,
-            show.legend = components$text_repel$show.legend
-        )
-
-        # apply text scale labels if they are defined (same as regular text)
-        if (!is.null(scale_labels$text_size) && !is.null(components$text_repel_scales$size)) {
-            viz <- viz + labs(size = scale_labels$text_size)
-        }
-        if (!is.null(scale_labels$text_color) && !is.null(components$text_repel_scales$color)) {
-            viz <- viz + labs(color = scale_labels$text_color)
-        }
-        if (!is.null(scale_labels$text_alpha) && !is.null(components$text_repel_scales$alpha)) {
-            viz <- viz + labs(alpha = scale_labels$text_alpha)
-        }
-    }
-
-    # add labels to the plot if they exist
-    if (!is.null(components$label)) {
-        # reset scales again if needed
-        if (!is.null(components$text) || !is.null(components$points)) {
-            viz <- viz +
-                ggnewscale::new_scale_color() +
-                ggnewscale::new_scale("alpha") +
-                ggnewscale::new_scale_fill() +
-                ggnewscale::new_scale("size")
-        }
-
-        viz <- viz + layer(
-            geom = components$label$geom,
-            data = components$label$data,
-            mapping = components$label$mapping,
-            stat = components$label$stat,
-            position = components$label$position,
-            params = components$label$params,
-            inherit.aes = components$label$inherit.aes,
-            show.legend = components$label$show.legend
-        )
-
-        # apply label scale labels if they are defined
-        if (!is.null(scale_labels$label_size) && !is.null(components$label_scales$size)) {
-            viz <- viz + labs(size = scale_labels$label_size)
-        }
-        if (!is.null(scale_labels$label_color) && !is.null(components$label_scales$color)) {
-            viz <- viz + labs(color = scale_labels$label_color)
-        }
-        if (!is.null(scale_labels$label_fill) && !is.null(components$label_scales$fill)) {
-            viz <- viz + labs(fill = scale_labels$label_fill)
-        }
-        if (!is.null(scale_labels$label_alpha) && !is.null(components$label_scales$alpha)) {
-            viz <- viz + labs(alpha = scale_labels$label_alpha)
-        }
-    }
-
-    # add label_repel annotations to the plot if they exist
-    if (!is.null(components$label_repel)) {
-        # reset scales again if needed
-        if (!is.null(components$text) || !is.null(components$text_repel) || !is.null(components$points)) {
-            viz <- viz +
-                ggnewscale::new_scale_color() +
-                ggnewscale::new_scale("alpha") +
-                ggnewscale::new_scale_fill() +
-                ggnewscale::new_scale("size")
-        }
-
-        viz <- viz + layer(
-            geom = components$label_repel$geom,
-            data = components$label_repel$data,
-            mapping = components$label_repel$mapping,
-            stat = components$label_repel$stat,
-            position = components$label_repel$position,
-            params = components$label_repel$params,
-            inherit.aes = components$label_repel$inherit.aes,
-            show.legend = components$label_repel$show.legend
-        )
-
-        # apply label scale labels if they are defined (same as regular label)
-        if (!is.null(scale_labels$label_size) && !is.null(components$label_repel_scales$size)) {
-            viz <- viz + labs(size = scale_labels$label_size)
-        }
-        if (!is.null(scale_labels$label_color) && !is.null(components$label_repel_scales$color)) {
-            viz <- viz + labs(color = scale_labels$label_color)
-        }
-        if (!is.null(scale_labels$label_fill) && !is.null(components$label_repel_scales$fill)) {
-            viz <- viz + labs(fill = scale_labels$label_fill)
-        }
-        if (!is.null(scale_labels$label_alpha) && !is.null(components$label_repel_scales$alpha)) {
-            viz <- viz + labs(alpha = scale_labels$label_alpha)
-        }
-    }
-
-    # apply color palettes if specified
-    if (!is.null(plot_args$node_color_palette) && !is.null(components$point_scales$color)) {
-        var_data <- net_dfs$nodal_data[[components$point_scales$color]]
-        if (is.numeric(var_data) && length(unique(var_data)) > 10) {
-            viz <- viz + scale_color_distiller(
-                palette = plot_args$node_color_palette,
-                direction = plot_args$node_color_direction %||% 1
-            )
-        } else {
-            viz <- viz + scale_color_brewer(
-                palette = plot_args$node_color_palette,
-                type = "qual"
-            )
-        }
-    }
-
-    # ditto for fill
-    if (!is.null(plot_args$node_fill_palette) && !is.null(components$point_scales$fill)) {
-        var_data <- net_dfs$nodal_data[[components$point_scales$fill]]
-        if (is.numeric(var_data) && length(unique(var_data)) > 10) {
-            viz <- viz + scale_fill_distiller(
-                palette = plot_args$node_fill_palette,
-                direction = plot_args$node_fill_direction %||% 1
-            )
-        } else {
-            viz <- viz + scale_fill_brewer(
-                palette = plot_args$node_fill_palette,
-                type = "qual"
-            )
-        }
-    }
-
-    # Apply highlight colors if highlighting is active
-    if (isTRUE(plot_args$is_highlighting)) {
-        if (!is.null(components$point_scales$fill) && components$point_scales$fill == "highlight_status") {
-            viz <- viz + scale_fill_manual(
-                values = plot_args$highlight_color,
-                name = plot_args$highlight_label %||% "Highlighted",
-                breaks = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"],
-                labels = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"]
-            )
-        } else if (!is.null(components$point_scales$color) && components$point_scales$color == "highlight_status") {
-            viz <- viz + scale_color_manual(
-                values = plot_args$highlight_color,
-                name = plot_args$highlight_label %||% "Highlighted",
-                breaks = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"],
-                labels = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"]
-            )
-        }
-    }
-
-    # add facets to the plot if they are defined (useful for longitudinal data)
-    if (!is.null(components$facets)) {
-        viz <- viz + components$facets
-    }
-
-    # add axis limits for facet_grid centering
-    if (!is.null(plot_args$xlim) && !is.null(plot_args$ylim)) {
-        viz <- viz +
-            coord_cartesian(xlim = plot_args$xlim, ylim = plot_args$ylim) +
-            theme(aspect.ratio = 1) # Ensure square panels
-    }
-
-    # add the theme to the plot if it is defined
-    if (!is.null(components$theme)) {
-        viz <- viz + components$theme
-    }
-
-    #
-    if (!isTRUE(plot_args$return_components)) {
-        # store components in the plot environment for netify_scale_labels
-        viz$plot_env$last_netify_components <- components
-    }
-
-    # return the final assembled plot
-    return(viz)
+	# check if the input is a netify object
+	netify_check(x)
+
+	# extract attributes from the netify object
+	obj_attrs <- attributes(x)
+
+	# size guard for very large networks
+	if (obj_attrs$netify_type == "cross_sec") {
+		n_actors <- nrow(x)
+	} else {
+		n_actors <- max(vapply(x, nrow, integer(1)))
+	}
+	if (n_actors > 1000) {
+		cli::cli_warn(c(
+			"Plotting a network with {n_actors} actors may be very slow or unresponsive.",
+			"i" = "Consider subsetting to fewer actors with {.fn subset_netify} before plotting."
+		))
+	}
+
+	# anything passed in goes to the plot arg dumpster
+	plot_args <- list(...)
+	
+	# Validate parameters and warn about common mistakes
+	validate_plot_params(plot_args, ...)
+
+	# NEW: Handle time_filter subsetting if provided
+	if (!is.null(plot_args$time_filter)) {
+		# Extract time_filter parameter before passing to net_plot_data
+		time_subset <- plot_args$time_filter
+
+		# Check if it's a longitudinal network
+		if (obj_attrs$netify_type != "cross_sec") {
+			# Subset the netify object for the specified time periods
+			x <- subset(x, time = time_subset)
+
+			# Update attributes after subsetting
+			obj_attrs <- attributes(x)
+
+			# Remove time_filter from plot_args since we've already handled it
+			plot_args$time_filter <- NULL
+		} else {
+			# Warn if time_filter is specified for cross-sectional network
+			cli::cli_alert_warning("'time_filter' parameter ignored for cross-sectional networks")
+			plot_args$time_filter <- NULL
+		}
+	}
+
+	# style over substance
+	if (!is.null(plot_args$style)) {
+		#
+		style_fun <- plot_args$style
+
+		# if a string get the fn
+		if (is.character(style_fun)) {
+			style_fun <- match.fun(style_fun)
+		}
+
+		# get style params
+		style_params <- style_fun()
+
+		# temove style from plot_args
+		plot_args$style <- NULL
+
+		# merge style params with plot_args
+		plot_args <- c(style_params, plot_args)
+	} # end styling
+
+	# Store filter arguments before removing them
+	node_filter <- plot_args$node_filter
+	edge_filter <- plot_args$edge_filter
+
+	# Remove filter args before passing to net_plot_data
+	plot_args$node_filter <- NULL
+	plot_args$edge_filter <- NULL
+	
+	# Pass auto_format setting to net_plot_data
+	plot_args$auto_format <- auto_format
+
+	# get plot data and parameters for ggplot
+	net_plot_info <- net_plot_data(x, plot_args)
+
+	# extract plot arguments and ggplot parameters
+	plot_args <- net_plot_info$plot_args
+	ggnet_params <- net_plot_info$ggnet_params
+	net_dfs <- net_plot_info$net_dfs
+
+	# NEW: Handle node filtering if provided
+	if (!is.null(node_filter)) {
+		# Apply the filter to nodal data
+		if (nrow(net_dfs$nodal_data) > 0) {
+			# Apply the filter using helper function
+			filter_result <- apply_node_filter(net_dfs$nodal_data, node_filter)
+
+			# Apply the filter
+			net_dfs$nodal_data <- net_dfs$nodal_data[filter_result, , drop = FALSE]
+
+			# Update edge data to remove edges connected to filtered nodes
+			if (nrow(net_dfs$edge_data) > 0) {
+				remaining_nodes <- net_dfs$nodal_data$name
+
+				# Keep only edges where both endpoints are in remaining nodes
+				edges_to_keep <- net_dfs$edge_data$from %in% remaining_nodes &
+					net_dfs$edge_data$to %in% remaining_nodes
+
+				net_dfs$edge_data <- net_dfs$edge_data[edges_to_keep, , drop = FALSE]
+			}
+		}
+	}
+
+	# NEW: Handle edge filtering if provided
+	if (!is.null(edge_filter)) {
+		# Apply the filter to edge data
+		if (nrow(net_dfs$edge_data) > 0) {
+			# Get weight column name if available
+			weight_col <- attr(x, "weight", exact = TRUE)
+
+			# Apply the filter using the helper function
+			filter_result <- apply_edge_filter(net_dfs$edge_data, edge_filter, weight_col)
+
+			# Apply the filter
+			net_dfs$edge_data <- net_dfs$edge_data[filter_result, , drop = FALSE]
+
+			# Update node data to remove orphaned nodes if remove_isolates is TRUE
+			if (plot_args$remove_isolates && nrow(net_dfs$edge_data) > 0) {
+				# Get nodes that still have edges after filtering
+				remaining_nodes <- unique(c(net_dfs$edge_data$from, net_dfs$edge_data$to))
+
+				# Add time dimension if longitudinal
+				if (obj_attrs$netify_type != "cross_sec") {
+					remaining_node_time <- unique(net_dfs$edge_data[, c("from", "to", "time")])
+					remaining_combos <- unique(rbind(
+						data.frame(name = remaining_node_time$from, time = remaining_node_time$time),
+						data.frame(name = remaining_node_time$to, time = remaining_node_time$time)
+					))
+
+					# Create ID for matching
+					remaining_combos$id <- paste(remaining_combos$name, remaining_combos$time, sep = "_")
+					net_dfs$nodal_data$id <- paste(net_dfs$nodal_data$name, net_dfs$nodal_data$time, sep = "_")
+
+					# Keep only nodes that still have connections
+					net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$id %in% remaining_combos$id, ]
+
+					# Remove temporary id column
+					net_dfs$nodal_data$id <- NULL
+				} else {
+					# Cross-sectional case
+					net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$name %in% remaining_nodes, ]
+				}
+			}
+		}
+	}
+
+	# Handle weight transformation
+	if (!is.null(plot_args$mutate_weight)) {
+		# Apply transformation to edge data
+		weight_col <- attr(x, "weight", exact = TRUE)
+		if (!is.null(weight_col) && weight_col %in% names(net_dfs$edge_data)) {
+			transform_fn <- match.fun(plot_args$mutate_weight)
+			net_dfs$edge_data[[weight_col]] <- transform_fn(net_dfs$edge_data[[weight_col]])
+		}
+	}
+
+	# process labels
+	scale_labels <- list(
+		# Edge labels
+		edge_alpha = plot_args$edge_alpha_label,
+		edge_color = plot_args$edge_color_label,
+		edge_linewidth = plot_args$edge_linewidth_label,
+		edge_linetype = plot_args$edge_linetype_label,
+
+		# Node labels
+		node_size = plot_args$node_size_label,
+		node_color = plot_args$node_color_label,
+		node_fill = plot_args$node_fill_label,
+		node_shape = plot_args$node_shape_label,
+		node_alpha = plot_args$node_alpha_label,
+		node_stroke = plot_args$node_stroke_label,
+
+		# Text labels
+		text_size = plot_args$text_size_label,
+		text_color = plot_args$text_color_label,
+		text_alpha = plot_args$text_alpha_label,
+
+		# Label (box) labels
+		label_size = plot_args$label_size_label,
+		label_color = plot_args$label_color_label,
+		label_fill = plot_args$label_fill_label,
+		label_alpha = plot_args$label_alpha_label
+	)
+
+	# initialize a list to store plot components
+	components <- list()
+
+	# create the base ggplot object
+	components$base <- ggplot()
+
+	# pour labels into components
+	components$scale_labels <- scale_labels
+
+	# Pre-process data for faceting if needed
+	# This must happen before creating geoms that reference net_dfs
+	is_longitudinal <- obj_attrs$netify_type != "cross_sec"
+	is_multilayer <- isTRUE(plot_args$is_multilayer)
+
+	if (is_multilayer && is_longitudinal) {
+		facet_type <- plot_args$facet_type %||% "grid"
+		if (facet_type == "wrap") {
+			# Create combined time_layer column before geoms are created
+			if ("layer" %in% names(net_dfs$nodal_data) && "time" %in% names(net_dfs$nodal_data)) {
+				net_dfs$nodal_data$time_layer <- paste(net_dfs$nodal_data$time,
+					net_dfs$nodal_data$layer,
+					sep = " - "
+				)
+				if (!is.null(net_dfs$edge_data) && nrow(net_dfs$edge_data) > 0) {
+					net_dfs$edge_data$time_layer <- paste(net_dfs$edge_data$time,
+						net_dfs$edge_data$layer,
+						sep = " - "
+					)
+				}
+			}
+		}
+	}
+
+	# add edges to the plot if specified
+	if (plot_args$add_edges) {
+		# static parameters for edges
+		edge_static_params <- ggnet_params$edge$static
+
+		# static parameters for curved edges
+		curve_static_params <- ggnet_params$curve$static
+
+		# dynamic aesthetic mappings for edges
+		edge_aes_list <- ggnet_params$edge$var
+
+		# add curved edges if specified
+		if (plot_args$curve_edges) {
+			components$edges <- list(
+				geom = GeomCurve,
+				data = net_dfs$edge_data,
+				mapping = do.call(aes, edge_aes_list),
+				params = curve_static_params,
+				stat = "identity",
+				position = "identity",
+				inherit.aes = TRUE,
+				show.legend = if (length(edge_aes_list) > 0) TRUE else NA
+			)
+		} else {
+			# add straight edges otherwise
+			components$edges <- list(
+				geom = GeomSegment,
+				data = net_dfs$edge_data,
+				mapping = do.call(aes, edge_aes_list),
+				params = edge_static_params,
+				stat = "identity",
+				position = "identity",
+				inherit.aes = TRUE,
+				show.legend = if (length(edge_aes_list) > 0) TRUE else NA
+			)
+		}
+
+		# store edge scale names for documentation
+		components$edge_scales <- list()
+		if (!is.null(plot_args$edge_color_var)) {
+			components$edge_scales$color <- plot_args$edge_color_var
+		}
+		if (!is.null(plot_args$edge_alpha_var)) {
+			components$edge_scales$alpha <- plot_args$edge_alpha_var
+		}
+		if (!is.null(plot_args$edge_linewidth_var)) {
+			components$edge_scales$linewidth <- plot_args$edge_linewidth_var
+		}
+		if (!is.null(plot_args$edge_linetype_var)) {
+			components$edge_scales$linetype <- plot_args$edge_linetype_var
+		}
+	}
+
+	# add nodes to the plot if specified
+	if (plot_args$add_points) {
+		# static parameters for points
+		point_static_params <- ggnet_params$point$static
+
+		# dynamic aesthetic mappings for points
+		point_aes_list <- ggnet_params$point$var
+
+		# create the geom_point component
+		components$points <- list(
+			geom = GeomPoint,
+			data = net_dfs$nodal_data,
+			mapping = do.call(aes, point_aes_list),
+			params = point_static_params,
+			stat = "identity",
+			position = "identity",
+			inherit.aes = TRUE,
+			show.legend = NA
+		)
+
+		# store point scale names
+		components$point_scales <- list()
+		if (!is.null(plot_args$point_color_var)) {
+			components$point_scales$color <- plot_args$point_color_var
+		}
+		if (!is.null(plot_args$point_fill_var)) {
+			components$point_scales$fill <- plot_args$point_fill_var
+		}
+		if (!is.null(plot_args$point_size_var)) {
+			components$point_scales$size <- plot_args$point_size_var
+		}
+		if (!is.null(plot_args$point_shape_var)) {
+			components$point_scales$shape <- plot_args$point_shape_var
+		}
+		if (!is.null(plot_args$point_alpha_var)) {
+			components$point_scales$alpha <- plot_args$point_alpha_var
+		}
+		if (!is.null(plot_args$point_stroke_var)) {
+			components$point_scales$stroke <- plot_args$point_stroke_var
+		}
+	}
+
+	# add text annotations to the plot if specified
+	if (plot_args$add_text) {
+		# static parameters for text
+		text_static_params <- ggnet_params$text$static
+
+		# dynamic aesthetic mappings for text
+		text_aes_list <- ggnet_params$text$var
+
+		# create the geom_text component
+		components$text <- list(
+			geom = GeomText,
+			data = net_dfs$nodal_data,
+			mapping = do.call(aes, text_aes_list),
+			params = text_static_params,
+			stat = "identity",
+			position = "identity",
+			inherit.aes = TRUE,
+			show.legend = NA
+		)
+
+		# store text scale names
+		components$text_scales <- list()
+		if (!is.null(plot_args$text_color_var)) {
+			components$text_scales$color <- plot_args$text_color_var
+		}
+		if (!is.null(plot_args$text_alpha_var)) {
+			components$text_scales$alpha <- plot_args$text_alpha_var
+		}
+		if (!is.null(plot_args$text_size_var)) {
+			components$text_scales$size <- plot_args$text_size_var
+		}
+	}
+
+	# add text_repel annotations to the plot if specified
+	if (plot_args$add_text_repel) {
+		# static parameters for text_repel
+		text_repel_static_params <- ggnet_params$text_repel$static
+
+		# dynamic aesthetic mappings for text_repel
+		text_repel_aes_list <- ggnet_params$text_repel$var
+
+		# create the geom_text_repel component
+		components$text_repel <- list(
+			geom = ggrepel::GeomTextRepel,
+			data = net_dfs$nodal_data,
+			mapping = do.call(aes, text_repel_aes_list),
+			params = text_repel_static_params,
+			stat = "identity",
+			position = "identity",
+			inherit.aes = TRUE,
+			show.legend = NA
+		)
+
+		# store text_repel scale names (same as text)
+		components$text_repel_scales <- list()
+		if (!is.null(plot_args$text_color_var)) {
+			components$text_repel_scales$color <- plot_args$text_color_var
+		}
+		if (!is.null(plot_args$text_alpha_var)) {
+			components$text_repel_scales$alpha <- plot_args$text_alpha_var
+		}
+		if (!is.null(plot_args$text_size_var)) {
+			components$text_repel_scales$size <- plot_args$text_size_var
+		}
+	}
+
+	# add labels to the plot if specified
+	if (plot_args$add_label) {
+		# static parameters for labels
+		label_static_params <- ggnet_params$label$static
+
+		# dynamic aesthetic mappings for labels
+		label_aes_list <- ggnet_params$label$var
+
+		# create the geom_label component
+		components$label <- list(
+			geom = GeomLabel,
+			data = net_dfs$nodal_data,
+			mapping = do.call(aes, label_aes_list),
+			params = label_static_params,
+			stat = "identity",
+			position = "identity",
+			inherit.aes = TRUE,
+			show.legend = NA
+		)
+
+		# store label scale names
+		components$label_scales <- list()
+		if (!is.null(plot_args$label_color_var)) {
+			components$label_scales$color <- plot_args$label_color_var
+		}
+		if (!is.null(plot_args$label_fill_var)) {
+			components$label_scales$fill <- plot_args$label_fill_var
+		}
+		if (!is.null(plot_args$label_alpha_var)) {
+			components$label_scales$alpha <- plot_args$label_alpha_var
+		}
+		if (!is.null(plot_args$label_size_var)) {
+			components$label_scales$size <- plot_args$label_size_var
+		}
+	}
+
+	# add label_repel annotations to the plot if specified
+	if (plot_args$add_label_repel) {
+		# static parameters for label_repel
+		label_repel_static_params <- ggnet_params$label_repel$static
+
+		# dynamic aesthetic mappings for label_repel
+		label_repel_aes_list <- ggnet_params$label_repel$var
+
+		# create the geom_label_repel component
+		components$label_repel <- list(
+			geom = ggrepel::GeomLabelRepel,
+			data = net_dfs$nodal_data,
+			mapping = do.call(aes, label_repel_aes_list),
+			params = label_repel_static_params,
+			stat = "identity",
+			position = "identity",
+			inherit.aes = TRUE,
+			show.legend = NA
+		)
+
+		# store label_repel scale names (same as label)
+		components$label_repel_scales <- list()
+		if (!is.null(plot_args$label_color_var)) {
+			components$label_repel_scales$color <- plot_args$label_color_var
+		}
+		if (!is.null(plot_args$label_fill_var)) {
+			components$label_repel_scales$fill <- plot_args$label_fill_var
+		}
+		if (!is.null(plot_args$label_alpha_var)) {
+			components$label_repel_scales$alpha <- plot_args$label_alpha_var
+		}
+		if (!is.null(plot_args$label_size_var)) {
+			components$label_repel_scales$size <- plot_args$label_size_var
+		}
+	}
+
+	# add facets for longitudinal and/or multilayer data
+	# (variables already defined earlier)
+
+	# Determine faceting based on data structure and user preferences
+	if (is_multilayer && is_longitudinal) {
+		# Both multilayer and longitudinal
+		facet_type <- plot_args$facet_type %||% "grid" # Default to grid for 2D faceting
+
+		if (facet_type == "grid") {
+			components$facets <- facet_grid(time ~ layer)
+		} else if (facet_type == "wrap") {
+			# time_layer column was already created earlier
+			components$facets <- facet_wrap(~time_layer,
+				scales = "free",
+				ncol = plot_args$facet_ncol %||% NULL
+			)
+		}
+	} else if (is_multilayer) {
+		# Only multilayer
+		components$facets <- facet_wrap(~layer,
+			scales = "free",
+			ncol = plot_args$facet_ncol %||% NULL
+		)
+	} else if (is_longitudinal) {
+		# Only longitudinal (original behavior)
+		components$facets <- facet_wrap(~time, scales = "free")
+	}
+
+	# apply the netify theme if specified
+	if (plot_args$use_theme_netify) {
+		components$theme <- theme_netify()
+	}
+
+	# store additional information for debugging or further customization
+	components$net_dfs <- net_dfs
+	components$plot_args <- plot_args
+	components$obj_attrs <- obj_attrs
+	components$ggnet_params <- ggnet_params
+
+	# return components if requested
+	if (isTRUE(plot_args$return_components)) {
+		class(components) <- c("netify_plot_components", "list")
+		return(components)
+	}
+
+	# assemble the plot from components
+	viz <- components$base
+
+	# add edges to the plot if they exist
+	if (!is.null(components$edges)) {
+		viz <- viz + layer(
+			geom = components$edges$geom,
+			data = components$edges$data,
+			mapping = components$edges$mapping,
+			stat = components$edges$stat,
+			position = components$edges$position,
+			params = components$edges$params,
+			inherit.aes = components$edges$inherit.aes,
+			show.legend = components$edges$show.legend
+		)
+
+		# apply edge scale labels if they are defined
+		if (!is.null(scale_labels$edge_alpha) && !is.null(components$edge_scales$alpha)) {
+			viz <- viz + labs(alpha = scale_labels$edge_alpha)
+			# Explicitly add alpha scale to ensure legend appears (critical for multilayer networks)
+			viz <- viz + scale_alpha_continuous()
+		}
+		if (!is.null(scale_labels$edge_color) && !is.null(components$edge_scales$color)) {
+			viz <- viz + labs(color = scale_labels$edge_color)
+		}
+		if (!is.null(scale_labels$edge_linewidth) && !is.null(components$edge_scales$linewidth)) {
+			viz <- viz + labs(linewidth = scale_labels$edge_linewidth)
+		}
+		if (!is.null(scale_labels$edge_linetype) && !is.null(components$edge_scales$linetype)) {
+			viz <- viz + labs(linetype = scale_labels$edge_linetype)
+		}
+	}
+
+	# reset scales if both edges and nodes have color or fill mappings
+	if (!is.null(components$edges) &&
+		(!is.null(components$points) || !is.null(components$text) || !is.null(components$label))) {
+		# Only reset color and fill scales if there's a conflict
+		if (!is.null(components$edge_scales$color) &&
+			(!is.null(components$point_scales$color) || !is.null(components$point_scales$fill))) {
+			viz <- viz +
+				ggnewscale::new_scale_color() +
+				ggnewscale::new_scale_fill()
+		}
+		# Only reset alpha scale if both edges and points use alpha
+		if (!is.null(components$edge_scales$alpha) &&
+			!is.null(components$point_scales$alpha)) {
+			viz <- viz +
+				ggnewscale::new_scale("alpha")
+		}
+	}
+
+	# add nodes to the plot if they exist
+	if (!is.null(components$points)) {
+		viz <- viz + layer(
+			geom = components$points$geom,
+			data = components$points$data,
+			mapping = components$points$mapping,
+			stat = components$points$stat,
+			position = components$points$position,
+			params = components$points$params,
+			inherit.aes = components$points$inherit.aes,
+			show.legend = components$points$show.legend
+		)
+
+		# apply node scale labels if they are defined
+		if (!is.null(scale_labels$node_size) && !is.null(components$point_scales$size)) {
+			viz <- viz + labs(size = scale_labels$node_size)
+		}
+		if (!is.null(scale_labels$node_color) && !is.null(components$point_scales$color)) {
+			viz <- viz + labs(color = scale_labels$node_color)
+		}
+		if (!is.null(scale_labels$node_fill) && !is.null(components$point_scales$fill)) {
+			viz <- viz + labs(fill = scale_labels$node_fill)
+		}
+		if (!is.null(scale_labels$node_shape) && !is.null(components$point_scales$shape)) {
+			viz <- viz + labs(shape = scale_labels$node_shape)
+		}
+		if (!is.null(scale_labels$node_alpha) && !is.null(components$point_scales$alpha)) {
+			viz <- viz + labs(alpha = scale_labels$node_alpha)
+		}
+		if (!is.null(scale_labels$node_stroke) && !is.null(components$point_scales$stroke)) {
+			viz <- viz + labs(stroke = scale_labels$node_stroke)
+		}
+		# hide size guide if requested (for highlighting)
+		if (isTRUE(plot_args$point_size_guide == "none") && !is.null(components$point_scales$size)) {
+			viz <- viz + guides(size = "none")
+		}
+	}
+
+	# add text annotations to the plot if they exist
+	if (!is.null(components$text)) {
+		# reset scales again if needed
+		if (!is.null(components$points)) {
+			viz <- viz +
+				ggnewscale::new_scale_color() +
+				ggnewscale::new_scale("alpha") +
+				ggnewscale::new_scale("size")
+		}
+
+		viz <- viz + layer(
+			geom = components$text$geom,
+			data = components$text$data,
+			mapping = components$text$mapping,
+			stat = components$text$stat,
+			position = components$text$position,
+			params = components$text$params,
+			inherit.aes = components$text$inherit.aes,
+			show.legend = components$text$show.legend
+		)
+
+		# apply text scale labels if they are defined
+		if (!is.null(scale_labels$text_size) && !is.null(components$text_scales$size)) {
+			viz <- viz + labs(size = scale_labels$text_size)
+		}
+		if (!is.null(scale_labels$text_color) && !is.null(components$text_scales$color)) {
+			viz <- viz + labs(color = scale_labels$text_color)
+		}
+		if (!is.null(scale_labels$text_alpha) && !is.null(components$text_scales$alpha)) {
+			viz <- viz + labs(alpha = scale_labels$text_alpha)
+		}
+	}
+
+	# add text_repel annotations to the plot if they exist
+	if (!is.null(components$text_repel)) {
+		# reset scales again if needed
+		if (!is.null(components$points)) {
+			viz <- viz +
+				ggnewscale::new_scale_color() +
+				ggnewscale::new_scale("alpha") +
+				ggnewscale::new_scale("size")
+		}
+
+		viz <- viz + layer(
+			geom = components$text_repel$geom,
+			data = components$text_repel$data,
+			mapping = components$text_repel$mapping,
+			stat = components$text_repel$stat,
+			position = components$text_repel$position,
+			params = components$text_repel$params,
+			inherit.aes = components$text_repel$inherit.aes,
+			show.legend = components$text_repel$show.legend
+		)
+
+		# apply text scale labels if they are defined (same as regular text)
+		if (!is.null(scale_labels$text_size) && !is.null(components$text_repel_scales$size)) {
+			viz <- viz + labs(size = scale_labels$text_size)
+		}
+		if (!is.null(scale_labels$text_color) && !is.null(components$text_repel_scales$color)) {
+			viz <- viz + labs(color = scale_labels$text_color)
+		}
+		if (!is.null(scale_labels$text_alpha) && !is.null(components$text_repel_scales$alpha)) {
+			viz <- viz + labs(alpha = scale_labels$text_alpha)
+		}
+	}
+
+	# add labels to the plot if they exist
+	if (!is.null(components$label)) {
+		# reset scales again if needed
+		if (!is.null(components$text) || !is.null(components$points)) {
+			viz <- viz +
+				ggnewscale::new_scale_color() +
+				ggnewscale::new_scale("alpha") +
+				ggnewscale::new_scale_fill() +
+				ggnewscale::new_scale("size")
+		}
+
+		viz <- viz + layer(
+			geom = components$label$geom,
+			data = components$label$data,
+			mapping = components$label$mapping,
+			stat = components$label$stat,
+			position = components$label$position,
+			params = components$label$params,
+			inherit.aes = components$label$inherit.aes,
+			show.legend = components$label$show.legend
+		)
+
+		# apply label scale labels if they are defined
+		if (!is.null(scale_labels$label_size) && !is.null(components$label_scales$size)) {
+			viz <- viz + labs(size = scale_labels$label_size)
+		}
+		if (!is.null(scale_labels$label_color) && !is.null(components$label_scales$color)) {
+			viz <- viz + labs(color = scale_labels$label_color)
+		}
+		if (!is.null(scale_labels$label_fill) && !is.null(components$label_scales$fill)) {
+			viz <- viz + labs(fill = scale_labels$label_fill)
+		}
+		if (!is.null(scale_labels$label_alpha) && !is.null(components$label_scales$alpha)) {
+			viz <- viz + labs(alpha = scale_labels$label_alpha)
+		}
+	}
+
+	# add label_repel annotations to the plot if they exist
+	if (!is.null(components$label_repel)) {
+		# reset scales again if needed
+		if (!is.null(components$text) || !is.null(components$text_repel) || !is.null(components$points)) {
+			viz <- viz +
+				ggnewscale::new_scale_color() +
+				ggnewscale::new_scale("alpha") +
+				ggnewscale::new_scale_fill() +
+				ggnewscale::new_scale("size")
+		}
+
+		viz <- viz + layer(
+			geom = components$label_repel$geom,
+			data = components$label_repel$data,
+			mapping = components$label_repel$mapping,
+			stat = components$label_repel$stat,
+			position = components$label_repel$position,
+			params = components$label_repel$params,
+			inherit.aes = components$label_repel$inherit.aes,
+			show.legend = components$label_repel$show.legend
+		)
+
+		# apply label scale labels if they are defined (same as regular label)
+		if (!is.null(scale_labels$label_size) && !is.null(components$label_repel_scales$size)) {
+			viz <- viz + labs(size = scale_labels$label_size)
+		}
+		if (!is.null(scale_labels$label_color) && !is.null(components$label_repel_scales$color)) {
+			viz <- viz + labs(color = scale_labels$label_color)
+		}
+		if (!is.null(scale_labels$label_fill) && !is.null(components$label_repel_scales$fill)) {
+			viz <- viz + labs(fill = scale_labels$label_fill)
+		}
+		if (!is.null(scale_labels$label_alpha) && !is.null(components$label_repel_scales$alpha)) {
+			viz <- viz + labs(alpha = scale_labels$label_alpha)
+		}
+	}
+
+	# apply color palettes if specified
+	if (!is.null(plot_args$node_color_palette) && !is.null(components$point_scales$color)) {
+		var_data <- net_dfs$nodal_data[[components$point_scales$color]]
+		if (is.numeric(var_data) && length(unique(var_data)) > 10) {
+			viz <- viz + scale_color_distiller(
+				palette = plot_args$node_color_palette,
+				direction = plot_args$node_color_direction %||% 1
+			)
+		} else {
+			viz <- viz + scale_color_brewer(
+				palette = plot_args$node_color_palette,
+				type = "qual"
+			)
+		}
+	}
+
+	# ditto for fill
+	if (!is.null(plot_args$node_fill_palette) && !is.null(components$point_scales$fill)) {
+		var_data <- net_dfs$nodal_data[[components$point_scales$fill]]
+		if (is.numeric(var_data) && length(unique(var_data)) > 10) {
+			viz <- viz + scale_fill_distiller(
+				palette = plot_args$node_fill_palette,
+				direction = plot_args$node_fill_direction %||% 1
+			)
+		} else {
+			viz <- viz + scale_fill_brewer(
+				palette = plot_args$node_fill_palette,
+				type = "qual"
+			)
+		}
+	}
+
+	# Apply highlight colors if highlighting is active
+	if (isTRUE(plot_args$is_highlighting)) {
+		if (!is.null(components$point_scales$fill) && components$point_scales$fill == "highlight_status") {
+			viz <- viz + scale_fill_manual(
+				values = plot_args$highlight_color,
+				name = plot_args$highlight_label %||% "Highlighted",
+				breaks = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"],
+				labels = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"]
+			)
+		} else if (!is.null(components$point_scales$color) && components$point_scales$color == "highlight_status") {
+			viz <- viz + scale_color_manual(
+				values = plot_args$highlight_color,
+				name = plot_args$highlight_label %||% "Highlighted",
+				breaks = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"],
+				labels = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"]
+			)
+		}
+	}
+
+	# add facets to the plot if they are defined (useful for longitudinal data)
+	if (!is.null(components$facets)) {
+		viz <- viz + components$facets
+	}
+
+	# add axis limits for facet_grid centering
+	if (!is.null(plot_args$xlim) && !is.null(plot_args$ylim)) {
+		viz <- viz +
+			coord_cartesian(xlim = plot_args$xlim, ylim = plot_args$ylim) +
+			theme(aspect.ratio = 1) # Ensure square panels
+	}
+
+	# add the theme to the plot if it is defined
+	if (!is.null(components$theme)) {
+		viz <- viz + components$theme
+	}
+
+	#
+	if (!isTRUE(plot_args$return_components)) {
+		# store components in the plot environment for netify_scale_labels
+		viz$plot_env$last_netify_components <- components
+	}
+
+	# return the final assembled plot
+	return(viz)
 }
 
 #' Apply edge filter expression to edge data
@@ -1197,58 +1210,58 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 #' @noRd
 
 apply_edge_filter <- function(edge_data, filter_input, weight_col = NULL) {
-    # Create a safe evaluation environment
-    eval_env <- edge_data
+	# Create a safe evaluation environment
+	eval_env <- edge_data
 
-    # Add 'weight' as an alias if weight column exists
-    if (!is.null(weight_col) && weight_col %in% names(edge_data)) {
-        eval_env$weight <- edge_data[[weight_col]]
-    }
+	# Add 'weight' as an alias if weight column exists
+	if (!is.null(weight_col) && weight_col %in% names(edge_data)) {
+		eval_env$weight <- edge_data[[weight_col]]
+	}
 
-    # Handle different input types
-    if (inherits(filter_input, "formula")) {
-        # Extract expression from formula
-        filter_expr <- filter_input[[2]]
-    } else if (is.function(filter_input)) {
-        # Apply function directly
-        return(filter_input(eval_env))
-    } else if (is.language(filter_input)) {
-        # Use quoted expression directly
-        filter_expr <- filter_input
-    } else {
-        cli::cli_abort("Edge filter must be a formula (~ expr), quoted expression (quote(expr)), or function")
-    }
+	# Handle different input types
+	if (inherits(filter_input, "formula")) {
+		# Extract expression from formula
+		filter_expr <- filter_input[[2]]
+	} else if (is.function(filter_input)) {
+		# Apply function directly
+		return(filter_input(eval_env))
+	} else if (is.language(filter_input)) {
+		# Use quoted expression directly
+		filter_expr <- filter_input
+	} else {
+		cli::cli_abort("Edge filter must be a formula (~ expr), quoted expression (quote(expr)), or function")
+	}
 
-    # Try to evaluate the expression
-    tryCatch(
-        {
-            # Evaluate the filter expression
-            result <- eval(filter_expr, envir = eval_env)
+	# Try to evaluate the expression
+	tryCatch(
+		{
+			# Evaluate the filter expression
+			result <- eval(filter_expr, envir = eval_env)
 
-            # Ensure result is logical
-            if (!is.logical(result)) {
-                cli::cli_alert_warning("Edge filter expression must return logical values. Attempting conversion.")
-                result <- as.logical(result)
-            }
+			# Ensure result is logical
+			if (!is.logical(result)) {
+				cli::cli_alert_warning("Edge filter expression must return logical values. Attempting conversion.")
+				result <- as.logical(result)
+			}
 
-            # Handle NA values
-            result[is.na(result)] <- FALSE
+			# Handle NA values
+			result[is.na(result)] <- FALSE
 
-            # Check length
-            if (length(result) != nrow(edge_data)) {
-                cli::cli_abort("Edge filter expression must return a value for each edge")
-            }
+			# Check length
+			if (length(result) != nrow(edge_data)) {
+				cli::cli_abort("Edge filter expression must return a value for each edge")
+			}
 
-            return(result)
-        },
-        error = function(e) {
-            cli::cli_abort(c(
-                "Error evaluating edge filter expression",
-                "x" = e$message,
-                "i" = "Available variables: {paste(names(eval_env), collapse = ', ')}"
-            ))
-        }
-    )
+			return(result)
+		},
+		error = function(e) {
+			cli::cli_abort(c(
+				"Error evaluating edge filter expression",
+				"x" = e$message,
+				"i" = "Available variables: {paste(names(eval_env), collapse = ', ')}"
+			))
+		}
+	)
 }
 
 #' Apply node filter expression to nodal data
@@ -1264,56 +1277,56 @@ apply_edge_filter <- function(edge_data, filter_input, weight_col = NULL) {
 #' @noRd
 
 apply_node_filter <- function(nodal_data, filter_input) {
-    # Create a safe evaluation environment
-    eval_env <- nodal_data
+	# Create a safe evaluation environment
+	eval_env <- nodal_data
 
-    # Add common aliases for convenience
-    if ("name" %in% names(nodal_data)) {
-        eval_env$actor <- nodal_data$name
-    }
+	# Add common aliases for convenience
+	if ("name" %in% names(nodal_data)) {
+		eval_env$actor <- nodal_data$name
+	}
 
-    # Handle different input types
-    if (inherits(filter_input, "formula")) {
-        # Extract expression from formula
-        filter_expr <- filter_input[[2]]
-    } else if (is.function(filter_input)) {
-        # Apply function directly
-        return(filter_input(eval_env))
-    } else if (is.language(filter_input)) {
-        # Use quoted expression directly
-        filter_expr <- filter_input
-    } else {
-        cli::cli_abort("Node filter must be a formula (~ expr), quoted expression (quote(expr)), or function")
-    }
+	# Handle different input types
+	if (inherits(filter_input, "formula")) {
+		# Extract expression from formula
+		filter_expr <- filter_input[[2]]
+	} else if (is.function(filter_input)) {
+		# Apply function directly
+		return(filter_input(eval_env))
+	} else if (is.language(filter_input)) {
+		# Use quoted expression directly
+		filter_expr <- filter_input
+	} else {
+		cli::cli_abort("Node filter must be a formula (~ expr), quoted expression (quote(expr)), or function")
+	}
 
-    # Try to evaluate the expression
-    tryCatch(
-        {
-            # Evaluate the filter expression
-            result <- eval(filter_expr, envir = eval_env)
+	# Try to evaluate the expression
+	tryCatch(
+		{
+			# Evaluate the filter expression
+			result <- eval(filter_expr, envir = eval_env)
 
-            # Ensure result is logical
-            if (!is.logical(result)) {
-                cli::cli_alert_warning("Node filter expression must return logical values. Attempting conversion.")
-                result <- as.logical(result)
-            }
+			# Ensure result is logical
+			if (!is.logical(result)) {
+				cli::cli_alert_warning("Node filter expression must return logical values. Attempting conversion.")
+				result <- as.logical(result)
+			}
 
-            # Handle NA values
-            result[is.na(result)] <- FALSE
+			# Handle NA values
+			result[is.na(result)] <- FALSE
 
-            # Check length
-            if (length(result) != nrow(nodal_data)) {
-                cli::cli_abort("Node filter expression must return a value for each node")
-            }
+			# Check length
+			if (length(result) != nrow(nodal_data)) {
+				cli::cli_abort("Node filter expression must return a value for each node")
+			}
 
-            return(result)
-        },
-        error = function(e) {
-            cli::cli_abort(c(
-                "Error evaluating node filter expression",
-                "x" = e$message,
-                "i" = "Available variables: {paste(names(eval_env), collapse = ', ')}"
-            ))
-        }
-    )
+			return(result)
+		},
+		error = function(e) {
+			cli::cli_abort(c(
+				"Error evaluating node filter expression",
+				"x" = e$message,
+				"i" = "Available variables: {paste(names(eval_env), collapse = ', ')}"
+			))
+		}
+	)
 }

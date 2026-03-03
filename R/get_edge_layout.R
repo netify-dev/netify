@@ -82,87 +82,87 @@
 #' @export get_edge_layout
 
 get_edge_layout <- function(
-    netlet,
-    nodes_layout,
-    ig_netlet = NULL) {
-    #
-    netify_check(netlet)
+	netlet,
+	nodes_layout,
+	ig_netlet = NULL) {
+	#
+	netify_check(netlet)
 
-    # convert to igraph without attributes
-    # cuz we got a need for speed
-    if (is.null(ig_netlet)) {
-        g <- netify_to_igraph(netlet,
-            add_nodal_attribs = FALSE,
-            add_dyad_attribs = FALSE
-        )
-    } else {
-        # use provided igraph object if avail
-        g <- ig_netlet
-    }
+	# convert to igraph without attributes
+	# cuz we got a need for speed
+	if (is.null(ig_netlet)) {
+		g <- netify_to_igraph(netlet,
+			add_nodal_attribs = FALSE,
+			add_dyad_attribs = FALSE
+		)
+	} else {
+		# use provided igraph object if avail
+		g <- ig_netlet
+	}
 
-    # make sure igraph object is in the right format
-    if (igraph::is_igraph(g)) {
-        g <- list(g)
-    }
+	# make sure igraph object is in the right format
+	if (igraph::is_igraph(g)) {
+		g <- list(g)
+	}
 
-    # make sure nodes_layout is in the right format
-    if (!is.list(nodes_layout)) {
-        nodes_layout <- list(nodes_layout)
-    }
+	# make sure nodes_layout is in the right format
+	if (!is.list(nodes_layout)) {
+		nodes_layout <- list(nodes_layout)
+	}
 
-    # vectorized approach for single time period
-    if (length(g) == 1) {
-        g_slice <- g[[1]]
-        nodes <- nodes_layout[[1]]
+	# vectorized approach for single time period
+	if (length(g) == 1) {
+		g_slice <- g[[1]]
+		nodes <- nodes_layout[[1]]
 
-        # get all edges at once
-        edges <- igraph::as_edgelist(g_slice, names = TRUE)
+		# get all edges at once
+		edges <- igraph::as_edgelist(g_slice, names = TRUE)
 
-        # create lookup vectors for O(1) access
-        node_x <- setNames(nodes$x, nodes$actor)
-        node_y <- setNames(nodes$y, nodes$actor)
+		# create lookup vectors for O(1) access
+		node_x <- setNames(nodes$x, nodes$actor)
+		node_y <- setNames(nodes$y, nodes$actor)
 
-        # vectorized coordinate assignment
-        edges_df <- data.frame(
-            from = edges[, 1],
-            to = edges[, 2],
-            x1 = node_x[edges[, 1]],
-            y1 = node_y[edges[, 1]],
-            x2 = node_x[edges[, 2]],
-            y2 = node_y[edges[, 2]],
-            stringsAsFactors = FALSE
-        )
+		# vectorized coordinate assignment
+		edges_df <- data.frame(
+			from = edges[, 1],
+			to = edges[, 2],
+			x1 = node_x[edges[, 1]],
+			y1 = node_y[edges[, 1]],
+			x2 = node_x[edges[, 2]],
+			y2 = node_y[edges[, 2]],
+			stringsAsFactors = FALSE
+		)
 
-        return(list(edges_df))
-    }
+		return(list(edges_df))
+	}
 
-    # for multiple time periods, process more efficiently
-    edges_list <- vector("list", length(g))
-    names(edges_list) <- names(g)
+	# for multiple time periods, process more efficiently
+	edges_list <- vector("list", length(g))
+	names(edges_list) <- names(g)
 
-    # pre-process all node lookups
-    node_lookups <- lapply(nodes_layout, function(nodes) {
-        list(
-            x = setNames(nodes$x, nodes$actor),
-            y = setNames(nodes$y, nodes$actor)
-        )
-    })
+	# pre-process all node lookups
+	node_lookups <- lapply(nodes_layout, function(nodes) {
+		list(
+			x = setNames(nodes$x, nodes$actor),
+			y = setNames(nodes$y, nodes$actor)
+		)
+	})
 
-    # process each time period
-    for (ii in seq_along(g)) {
-        edges <- igraph::as_edgelist(g[[ii]], names = TRUE)
-        lookup <- node_lookups[[ii]]
+	# process each time period
+	for (ii in seq_along(g)) {
+		edges <- igraph::as_edgelist(g[[ii]], names = TRUE)
+		lookup <- node_lookups[[ii]]
 
-        edges_list[[ii]] <- data.frame(
-            from = edges[, 1],
-            to = edges[, 2],
-            x1 = lookup$x[edges[, 1]],
-            y1 = lookup$y[edges[, 1]],
-            x2 = lookup$x[edges[, 2]],
-            y2 = lookup$y[edges[, 2]],
-            stringsAsFactors = FALSE
-        )
-    }
+		edges_list[[ii]] <- data.frame(
+			from = edges[, 1],
+			to = edges[, 2],
+			x1 = lookup$x[edges[, 1]],
+			y1 = lookup$y[edges[, 1]],
+			x2 = lookup$x[edges[, 2]],
+			y2 = lookup$y[edges[, 2]],
+			stringsAsFactors = FALSE
+		)
+	}
 
-    return(edges_list)
+	return(edges_list)
 }

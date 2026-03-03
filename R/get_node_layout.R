@@ -84,237 +84,237 @@
 #'
 
 get_node_layout <- function(
-    netlet,
-    layout = NULL,
-    static_actor_positions = FALSE,
-    which_static = NULL,
-    seed = 6886,
-    ig_netlet = NULL,
-    ...) {
-    # check if netify object
-    netify_check(netlet)
+	netlet,
+	layout = NULL,
+	static_actor_positions = FALSE,
+	which_static = NULL,
+	seed = 6886,
+	ig_netlet = NULL,
+	...) {
+	# check if netify object
+	netify_check(netlet)
 
-    # clean up null inputs
-    if (is.null(static_actor_positions)) {
-        static_actor_positions <- FALSE
-    }
-    if (is.null(seed)) {
-        seed <- 6886
-    }
+	# clean up null inputs
+	if (is.null(static_actor_positions)) {
+		static_actor_positions <- FALSE
+	}
+	if (is.null(seed)) {
+		seed <- 6886
+	}
 
-    # cache attributes once
-    obj_attrs <- attributes(netlet)
-    netify_type <- obj_attrs$netify_type
-    is_bipartite <- obj_attrs$mode == "bipartite"
-    is_ego <- obj_attrs$ego_netify %||% FALSE
-    
-    # Check if this is an ego network and layout is ego-specific
-    ego_layouts <- c("radial", "concentric", "hierarchical", "ego_centric")
-    if (is_ego && !is.null(layout) && tolower(layout) %in% ego_layouts) {
-        # For hierarchical and ego_centric layouts, use specialized functions
-        if (tolower(layout) == "hierarchical") {
-            # Extract min_radius and max_radius from ... parameters
-            dots <- list(...)
-            min_radius <- dots$min_radius %||% 1.5
-            max_radius <- dots$max_radius %||% 4.5
-            
-            return(create_hierarchical_ego_layout(
-                netlet = netlet,
-                min_radius = min_radius,
-                max_radius = max_radius,
-                seed = seed
-            ))
-        } else if (tolower(layout) == "ego_centric") {
-            # Extract buffer_radius and transition_zone from ... parameters
-            dots <- list(...)
-            buffer_radius <- dots$buffer_radius %||% 1.5
-            transition_zone <- dots$transition_zone %||% 0.5
-            
-            return(create_ego_centric_layout(
-                netlet = netlet,
-                buffer_radius = buffer_radius,
-                transition_zone = transition_zone,
-                seed = seed
-            ))
-        } else {
-            # For radial layout, use custom implementation
-            if (tolower(layout) == "radial") {
-                dots <- list(...)
-                n_rings <- dots$n_rings %||% 4
-                min_radius <- dots$min_radius %||% 1.5
-                max_radius <- dots$max_radius %||% 5
-                ego_name <- dots$ego_name %||% NULL
-                
-                return(create_radial_ego_layout(
-                    netlet = netlet,
-                    ego_name = ego_name,
-                    n_rings = n_rings,
-                    min_radius = min_radius,
-                    max_radius = max_radius,
-                    seed = seed
-                ))
-            } else {
-                # For concentric, use get_ego_layout
-                # Extract ego-specific parameters from ...
-                dots <- list(...)
-                ego_params <- dots[grep("^ego_", names(dots))]
-                
-                # Remove "ego_" prefix for the ego layout function
-                if (length(ego_params) > 0) {
-                    names(ego_params) <- gsub("^ego_", "", names(ego_params))
-                }
-                
-                return(do.call(get_ego_layout, c(
-                    list(
-                        netlet = netlet,
-                        layout = layout,
-                        seed = seed
-                    ),
-                    ego_params
-                )))
-            }
-        }
-    }
+	# cache attributes once
+	obj_attrs <- attributes(netlet)
+	netify_type <- obj_attrs$netify_type
+	is_bipartite <- obj_attrs$mode == "bipartite"
+	is_ego <- obj_attrs$ego_netify %||% FALSE
+	
+	# Check if this is an ego network and layout is ego-specific
+	ego_layouts <- c("radial", "concentric", "hierarchical", "ego_centric")
+	if (is_ego && !is.null(layout) && tolower(layout) %in% ego_layouts) {
+		# For hierarchical and ego_centric layouts, use specialized functions
+		if (tolower(layout) == "hierarchical") {
+			# Extract min_radius and max_radius from ... parameters
+			dots <- list(...)
+			min_radius <- dots$min_radius %||% 1.5
+			max_radius <- dots$max_radius %||% 4.5
+			
+			return(create_hierarchical_ego_layout(
+				netlet = netlet,
+				min_radius = min_radius,
+				max_radius = max_radius,
+				seed = seed
+			))
+		} else if (tolower(layout) == "ego_centric") {
+			# Extract buffer_radius and transition_zone from ... parameters
+			dots <- list(...)
+			buffer_radius <- dots$buffer_radius %||% 1.5
+			transition_zone <- dots$transition_zone %||% 0.5
+			
+			return(create_ego_centric_layout(
+				netlet = netlet,
+				buffer_radius = buffer_radius,
+				transition_zone = transition_zone,
+				seed = seed
+			))
+		} else {
+			# For radial layout, use custom implementation
+			if (tolower(layout) == "radial") {
+				dots <- list(...)
+				n_rings <- dots$n_rings %||% 4
+				min_radius <- dots$min_radius %||% 1.5
+				max_radius <- dots$max_radius %||% 5
+				ego_name <- dots$ego_name %||% NULL
+				
+				return(create_radial_ego_layout(
+					netlet = netlet,
+					ego_name = ego_name,
+					n_rings = n_rings,
+					min_radius = min_radius,
+					max_radius = max_radius,
+					seed = seed
+				))
+			} else {
+				# For concentric, use get_ego_layout
+				# Extract ego-specific parameters from ...
+				dots <- list(...)
+				ego_params <- dots[grep("^ego_", names(dots))]
+				
+				# Remove "ego_" prefix for the ego layout function
+				if (length(ego_params) > 0) {
+					names(ego_params) <- gsub("^ego_", "", names(ego_params))
+				}
+				
+				return(do.call(get_ego_layout, c(
+					list(
+						netlet = netlet,
+						layout = layout,
+						seed = seed
+					),
+					ego_params
+				)))
+			}
+		}
+	}
 
-    # convert to igraph without attributes
-    # cuz we got a need for speed
-    if (is.null(ig_netlet)) {
-        g <- netify_to_igraph(netlet,
-            add_nodal_attribs = FALSE,
-            add_dyad_attribs = FALSE
-        )
-    } else {
-        # use provided igraph object if avail
-        g <- ig_netlet
-    }
+	# convert to igraph without attributes
+	# cuz we got a need for speed
+	if (is.null(ig_netlet)) {
+		g <- netify_to_igraph(netlet,
+			add_nodal_attribs = FALSE,
+			add_dyad_attribs = FALSE
+		)
+	} else {
+		# use provided igraph object if avail
+		g <- ig_netlet
+	}
 
-    # determine layout function
-    if (is.null(layout)) {
-        layout_fun <- if (is_bipartite) "bipartite" else "nicely"
-    } else {
-        # make lowercase and match
-        layout_fun <- match.arg(
-            tolower(layout),
-            choices = c(
-                "nicely", "fruchterman.reingold",
-                "kamada.kawai", "random", "circle",
-                "star", "grid", "graphopt",
-                "sugiyama", "drl", "lgl", "bipartite",
-                "tree", "randomly", "dh", "fr",
-                "kk", "gem", "mds"
-            )
-        )
-    }
+	# determine layout function
+	if (is.null(layout)) {
+		layout_fun <- if (is_bipartite) "bipartite" else "nicely"
+	} else {
+		# make lowercase and match
+		layout_fun <- match.arg(
+			tolower(layout),
+			choices = c(
+				"nicely", "fruchterman.reingold",
+				"kamada.kawai", "random", "circle",
+				"star", "grid", "graphopt",
+				"sugiyama", "drl", "lgl", "bipartite",
+				"tree", "randomly", "dh", "fr",
+				"kk", "gem", "mds"
+			)
+		)
+	}
 
-    # get the actual layout function from igraph
-    layout_fun <- switch(layout_fun,
-        nicely = igraph::layout_nicely,
-        bipartite = igraph::layout_as_bipartite,
-        fruchterman.reingold = igraph::layout_with_fr,
-        fr = igraph::layout_with_fr,
-        kamada.kawai = igraph::layout_with_kk,
-        kk = igraph::layout_with_kk,
-        random = igraph::layout_randomly,
-        circle = igraph::layout_in_circle,
-        star = igraph::layout_as_star,
-        grid = igraph::layout_on_grid,
-        graphopt = igraph::layout_with_graphopt,
-        sugiyama = igraph::layout_with_sugiyama,
-        drl = igraph::layout_with_drl,
-        lgl = igraph::layout_with_lgl,
-        tree = igraph::layout_as_tree,
-        randomly = igraph::layout_randomly,
-        dh = igraph::layout_with_dh,
-        gem = igraph::layout_with_gem,
-        mds = igraph::layout_with_mds
-    )
+	# get the actual layout function from igraph
+	layout_fun <- switch(layout_fun,
+		nicely = igraph::layout_nicely,
+		bipartite = igraph::layout_as_bipartite,
+		fruchterman.reingold = igraph::layout_with_fr,
+		fr = igraph::layout_with_fr,
+		kamada.kawai = igraph::layout_with_kk,
+		kk = igraph::layout_with_kk,
+		random = igraph::layout_randomly,
+		circle = igraph::layout_in_circle,
+		star = igraph::layout_as_star,
+		grid = igraph::layout_on_grid,
+		graphopt = igraph::layout_with_graphopt,
+		sugiyama = igraph::layout_with_sugiyama,
+		drl = igraph::layout_with_drl,
+		lgl = igraph::layout_with_lgl,
+		tree = igraph::layout_as_tree,
+		randomly = igraph::layout_randomly,
+		dh = igraph::layout_with_dh,
+		gem = igraph::layout_with_gem,
+		mds = igraph::layout_with_mds
+	)
 
-    # handle cross-sectional case first (simpler)
-    if (netify_type == "cross_sec") {
-        set.seed(seed)
-        layout_matrix <- layout_fun(g)
-        rownames(layout_matrix) <- igraph::V(g)$name
+	# handle cross-sectional case first (simpler)
+	if (netify_type == "cross_sec") {
+		set.seed(seed)
+		layout_matrix <- layout_fun(g)
+		rownames(layout_matrix) <- igraph::V(g)$name
 
-        # format as data frame
-        nodes_df <- data.frame(
-            index = seq_len(nrow(layout_matrix)),
-            actor = rownames(layout_matrix),
-            x = layout_matrix[, 1],
-            y = layout_matrix[, 2],
-            stringsAsFactors = FALSE
-        )
+		# format as data frame
+		nodes_df <- data.frame(
+			index = seq_len(nrow(layout_matrix)),
+			actor = rownames(layout_matrix),
+			x = layout_matrix[, 1],
+			y = layout_matrix[, 2],
+			stringsAsFactors = FALSE
+		)
 
-        return(list(nodes_df))
-    }
+		return(list(nodes_df))
+	}
 
-    # longitudinal case
-    # ensure g is a list
-    if (igraph::is_igraph(g)) {
-        g <- list(g)
-    }
+	# longitudinal case
+	# ensure g is a list
+	if (igraph::is_igraph(g)) {
+		g <- list(g)
+	}
 
-    if (static_actor_positions) {
-        # determine which graph to use for static layout
-        if (is.null(which_static)) {
-            # create union graph with edge weights based on frequency
-            g_static <- create_union_graph(g, obj_attrs)
-        } else {
-            # use specific time period
-            g_static <- g[[which_static]]
-        }
+	if (static_actor_positions) {
+		# determine which graph to use for static layout
+		if (is.null(which_static)) {
+			# create union graph with edge weights based on frequency
+			g_static <- create_union_graph(g, obj_attrs)
+		} else {
+			# use specific time period
+			g_static <- g[[which_static]]
+		}
 
-        # compute layout once
-        set.seed(seed)
-        layout_matrix_static <- layout_fun(g_static)
-        rownames(layout_matrix_static) <- igraph::V(g_static)$name
+		# compute layout once
+		set.seed(seed)
+		layout_matrix_static <- layout_fun(g_static)
+		rownames(layout_matrix_static) <- igraph::V(g_static)$name
 
-        # create mapping for all actors across time
-        all_actors <- unique(unlist(lapply(g, function(x) igraph::V(x)$name)))
-        actor_positions <- data.frame(
-            actor = all_actors,
-            x = NA_real_,
-            y = NA_real_,
-            stringsAsFactors = FALSE
-        )
+		# create mapping for all actors across time
+		all_actors <- unique(unlist(lapply(g, function(x) igraph::V(x)$name)))
+		actor_positions <- data.frame(
+			actor = all_actors,
+			x = NA_real_,
+			y = NA_real_,
+			stringsAsFactors = FALSE
+		)
 
-        # fill in positions for actors in static layout
-        match_idx <- match(rownames(layout_matrix_static), actor_positions$actor)
-        actor_positions$x[match_idx] <- layout_matrix_static[, 1]
-        actor_positions$y[match_idx] <- layout_matrix_static[, 2]
+		# fill in positions for actors in static layout
+		match_idx <- match(rownames(layout_matrix_static), actor_positions$actor)
+		actor_positions$x[match_idx] <- layout_matrix_static[, 1]
+		actor_positions$y[match_idx] <- layout_matrix_static[, 2]
 
-        # create layout for each time period
-        nodes_list <- lapply(seq_along(g), function(i) {
-            actors_t <- igraph::V(g[[i]])$name
-            match_idx <- match(actors_t, actor_positions$actor)
+		# create layout for each time period
+		nodes_list <- lapply(seq_along(g), function(i) {
+			actors_t <- igraph::V(g[[i]])$name
+			match_idx <- match(actors_t, actor_positions$actor)
 
-            data.frame(
-                index = seq_along(actors_t),
-                actor = actors_t,
-                x = actor_positions$x[match_idx],
-                y = actor_positions$y[match_idx],
-                stringsAsFactors = FALSE
-            )
-        })
-    } else {
-        # dynamic layouts for each time period
-        nodes_list <- lapply(seq_along(g), function(i) {
-            set.seed(seed + i - 1) # ensure different but reproducible layouts
-            l_matrix <- layout_fun(g[[i]])
+			data.frame(
+				index = seq_along(actors_t),
+				actor = actors_t,
+				x = actor_positions$x[match_idx],
+				y = actor_positions$y[match_idx],
+				stringsAsFactors = FALSE
+			)
+		})
+	} else {
+		# dynamic layouts for each time period
+		nodes_list <- lapply(seq_along(g), function(i) {
+			set.seed(seed + i - 1) # ensure different but reproducible layouts
+			l_matrix <- layout_fun(g[[i]])
 
-            data.frame(
-                index = seq_len(nrow(l_matrix)),
-                actor = igraph::V(g[[i]])$name,
-                x = l_matrix[, 1],
-                y = l_matrix[, 2],
-                stringsAsFactors = FALSE
-            )
-        })
-    }
+			data.frame(
+				index = seq_len(nrow(l_matrix)),
+				actor = igraph::V(g[[i]])$name,
+				x = l_matrix[, 1],
+				y = l_matrix[, 2],
+				stringsAsFactors = FALSE
+			)
+		})
+	}
 
-    # add names
-    names(nodes_list) <- names(g)
+	# add names
+	names(nodes_list) <- names(g)
 
-    return(nodes_list)
+	return(nodes_list)
 }
 
 #' Create union graph for static layout
@@ -329,42 +329,42 @@ get_node_layout <- function(
 #' @noRd
 
 create_union_graph <- function(g_list, obj_attrs) {
-    # get all unique actors across time
-    all_actors <- unique(unlist(lapply(g_list, function(x) igraph::V(x)$name)))
-    n_actors <- length(all_actors)
+	# get all unique actors across time
+	all_actors <- unique(unlist(lapply(g_list, function(x) igraph::V(x)$name)))
+	n_actors <- length(all_actors)
 
-    # create empty adjacency matrix
-    union_adj <- matrix(0, n_actors, n_actors,
-        dimnames = list(all_actors, all_actors)
-    )
+	# create empty adjacency matrix
+	union_adj <- matrix(0, n_actors, n_actors,
+		dimnames = list(all_actors, all_actors)
+	)
 
-    # aggregate edges across time periods
-    for (g_t in g_list) {
-        # get adjacency matrix for this time period
-        adj_t <- igraph::as_adjacency_matrix(g_t, attr = "weight", sparse = FALSE)
+	# aggregate edges across time periods
+	for (g_t in g_list) {
+		# get adjacency matrix for this time period
+		adj_t <- igraph::as_adjacency_matrix(g_t, attr = "weight", sparse = FALSE)
 
-        # map to union matrix positions
-        actors_t <- rownames(adj_t)
-        idx <- match(actors_t, all_actors)
+		# map to union matrix positions
+		actors_t <- rownames(adj_t)
+		idx <- match(actors_t, all_actors)
 
-        # add to union (increment for binary, sum for weighted)
-        if (obj_attrs$is_binary) {
-            union_adj[idx, idx] <- union_adj[idx, idx] + (adj_t > 0)
-        } else {
-            union_adj[idx, idx] <- union_adj[idx, idx] + adj_t
-        }
-    }
+		# add to union (increment for binary, sum for weighted)
+		if (obj_attrs$is_binary) {
+			union_adj[idx, idx] <- union_adj[idx, idx] + (adj_t > 0)
+		} else {
+			union_adj[idx, idx] <- union_adj[idx, idx] + adj_t
+		}
+	}
 
-    # normalize by number of time periods for weighted networks
-    if (!obj_attrs$is_binary) {
-        union_adj <- union_adj / length(g_list)
-    }
+	# normalize by number of time periods for weighted networks
+	if (!obj_attrs$is_binary) {
+		union_adj <- union_adj / length(g_list)
+	}
 
-    # create igraph object from union
-    igraph::graph_from_adjacency_matrix(
-        union_adj,
-        mode = ifelse(obj_attrs$symmetric, "undirected", "directed"),
-        weighted = TRUE,
-        diag = FALSE
-    )
+	# create igraph object from union
+	igraph::graph_from_adjacency_matrix(
+		union_adj,
+		mode = ifelse(obj_attrs$symmetric, "undirected", "directed"),
+		weighted = TRUE,
+		diag = FALSE
+	)
 }

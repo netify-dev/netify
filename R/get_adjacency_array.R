@@ -93,195 +93,194 @@
 #' @export get_adjacency_array
 
 get_adjacency_array <- function(
-    dyad_data,
-    actor1 = NULL, actor2 = NULL, time = NULL,
-    symmetric = TRUE, mode = "unipartite",
-    weight = NULL, sum_dyads = FALSE,
-    diag_to_NA = TRUE, missing_to_zero = TRUE,
-    nodelist = NULL) {
-    # create weight string for storage as attribute in netify object
-    weight_label <- weight_string_label(weight, sum_dyads)
+	dyad_data,
+	actor1 = NULL, actor2 = NULL, time = NULL,
+	symmetric = TRUE, mode = "unipartite",
+	weight = NULL, sum_dyads = FALSE,
+	diag_to_NA = TRUE, missing_to_zero = TRUE,
+	nodelist = NULL) {
+	# create weight string for storage as attribute in netify object
+	weight_label <- weight_string_label(weight, sum_dyads)
 
-    # if bipartite network then force diag_to_NA to be FALSE
-    # and force asymmetric, create copy to preserve user choice
-    user_symmetric <- symmetric
-    if (mode == "bipartite") {
-        diag_to_NA <- FALSE
-        symmetric <- FALSE
-    }
+	# if bipartite network then force diag_to_NA to be FALSE
+	# and force asymmetric, create copy to preserve user choice
+	user_symmetric <- symmetric
+	if (mode == "bipartite") {
+		diag_to_NA <- FALSE
+		symmetric <- FALSE
+	}
 
-    # convert time to numeric and get labels
-    time_info <- convert_time_to_numeric(dyad_data[[time]], time)
-    dyad_data[[time]] <- time_info$numeric_time
+	# convert time to numeric and get labels
+	time_info <- convert_time_to_numeric(dyad_data[[time]], time)
+	dyad_data[[time]] <- time_info$numeric_time
 
-    # time check
-    if (!is.numeric(dyad_data[, time])) {
-        cli::cli_alert_danger("Failed to convert time variable to numeric format.")
-        stop()
-    }
+	# time check
+	if (!is.numeric(dyad_data[, time])) {
+		cli::cli_abort("Failed to convert time variable to numeric format.")
+	}
 
-    # add weight if not supplied
-    wOrig <- weight
-    if (is.null(weight)) {
-        dyad_data$weight_var <- 1
-        weight <- "weight_var"
-    }
+	# add weight if not supplied
+	wOrig <- weight
+	if (is.null(weight)) {
+		dyad_data$weight_var <- 1
+		weight <- "weight_var"
+	}
 
-    # subset to relevant vars once
-    dyad_data <- dyad_data[, c(actor1, actor2, time, weight)]
+	# subset to relevant vars once
+	dyad_data <- dyad_data[, c(actor1, actor2, time, weight)]
 
-    # get vector of time periods from conversion
-    time_pds <- time_info$time_labels
-    time_pds_num <- sort(unique(time_info$numeric_time))
+	# get vector of time periods from conversion
+	time_pds <- time_info$time_labels
+	time_pds_num <- sort(unique(time_info$numeric_time))
 
-    # get vector of actors - optimized extraction
-    actors_rows <- unique_vector(dyad_data[, actor1])
-    actors_cols <- unique_vector(dyad_data[, actor2])
-    actors <- unique_vector(actors_rows, actors_cols)
-    
-    # Incorporate nodelist if provided
-    if (!is.null(nodelist)) {
-        # Convert to character to ensure consistency
-        nodelist <- as.character(nodelist)
-        
-        # Add any missing actors from nodelist
-        if (mode == "unipartite") {
-            actors <- unique_vector(actors, nodelist)
-            actors_rows <- actors_cols <- actors
-        } else {
-            # For bipartite, assume nodelist contains all actors
-            # User should specify which are row/col actors
-            cli::cli_alert_info("For bipartite networks, nodelist should contain all actors. Assigning to both row and column actors.")
-            actors_rows <- unique_vector(actors_rows, nodelist)
-            actors_cols <- unique_vector(actors_cols, nodelist)
-            actors <- unique_vector(actors_rows, actors_cols)
-        }
-    } else if (mode == "unipartite") {
-        actors_rows <- actors_cols <- actors
-    }
+	# get vector of actors - optimized extraction
+	actors_rows <- unique_vector(dyad_data[, actor1])
+	actors_cols <- unique_vector(dyad_data[, actor2])
+	actors <- unique_vector(actors_rows, actors_cols)
+	
+	# Incorporate nodelist if provided
+	if (!is.null(nodelist)) {
+		# Convert to character to ensure consistency
+		nodelist <- as.character(nodelist)
+		
+		# Add any missing actors from nodelist
+		if (mode == "unipartite") {
+			actors <- unique_vector(actors, nodelist)
+			actors_rows <- actors_cols <- actors
+		} else {
+			# For bipartite, assume nodelist contains all actors
+			# User should specify which are row/col actors
+			cli::cli_alert_info("For bipartite networks, nodelist should contain all actors. Assigning to both row and column actors.")
+			actors_rows <- unique_vector(actors_rows, nodelist)
+			actors_cols <- unique_vector(actors_cols, nodelist)
+			actors <- unique_vector(actors_rows, actors_cols)
+		}
+	} else if (mode == "unipartite") {
+		actors_rows <- actors_cols <- actors
+	}
 
-    # add info on actor time sample
-    actor_pds <- data.frame(
-        actor = actors,
-        stringsAsFactors = FALSE
-    )
-    actor_pds$min_time <- time_pds[1]
-    actor_pds$max_time <- time_pds[length(time_pds)]
+	# add info on actor time sample
+	actor_pds <- data.frame(
+		actor = actors,
+		stringsAsFactors = FALSE
+	)
+	actor_pds$min_time <- time_pds[1]
+	actor_pds$max_time <- time_pds[length(time_pds)]
 
-    # check if there are repeating dyads
-    num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2, time)
-    if (num_repeat_dyads > 0) {
-        edge_value_check(wOrig, sum_dyads, TRUE)
-    }
+	# check if there are repeating dyads
+	num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2, time)
+	if (num_repeat_dyads > 0) {
+		edge_value_check(wOrig, sum_dyads, TRUE)
+	}
 
-    # aggregate data if sum dyads selected
-    if (sum_dyads) {
-        dyad_data <- aggregate_dyad(dyad_data, actor1, actor2, time, weight, symmetric, missing_to_zero)
-    }
+	# aggregate data if sum dyads selected
+	if (sum_dyads) {
+		dyad_data <- aggregate_dyad(dyad_data, actor1, actor2, time, weight, symmetric, missing_to_zero)
+	}
 
-    # remove zeros early if missing_to_zero is TRUE
-    if (missing_to_zero) {
-        dyad_data <- dyad_data[dyad_data[, weight] != 0, ]
-    }
+	# remove zeros early if missing_to_zero is TRUE
+	if (missing_to_zero) {
+		dyad_data <- dyad_data[dyad_data[, weight] != 0, ]
+	}
 
-    # Pre-split data by time periods for faster subsetting
-    time_indices <- split(seq_len(nrow(dyad_data)), dyad_data[, time])
+	# Pre-split data by time periods for faster subsetting
+	time_indices <- split(seq_len(nrow(dyad_data)), dyad_data[, time])
 
-    # Cache frequently accessed columns
-    dyad_actor1 <- dyad_data[, actor1]
-    dyad_actor2 <- dyad_data[, actor2]
-    dyad_weight <- dyad_data[, weight]
+	# Cache frequently accessed columns
+	dyad_actor1 <- dyad_data[, actor1]
+	dyad_actor2 <- dyad_data[, actor2]
+	dyad_weight <- dyad_data[, weight]
 
-    # organize array dimensions
-    n_rows <- length(actors_rows)
-    n_cols <- length(actors_cols)
-    t <- length(time_pds)
-    adj_out <- array(NA,
-        dim = c(n_rows, n_cols, t),
-        dimnames = list(actors_rows, actors_cols, time_pds)
-    )
+	# organize array dimensions
+	n_rows <- length(actors_rows)
+	n_cols <- length(actors_cols)
+	t <- length(time_pds)
+	adj_out <- array(NA,
+		dim = c(n_rows, n_cols, t),
+		dimnames = list(actors_rows, actors_cols, time_pds)
+	)
 
-    # binary weight check vector
-    bin_check <- logical(t)
+	# binary weight check vector
+	bin_check <- logical(t)
 
-    # iterate through third mode and fill in - optimized loop
-    for (t_idx in seq_along(time_pds)) {
-        time_pd <- time_pds[t_idx]
-        time_pd_num <- time_pds_num[t_idx]
+	# iterate through third mode and fill in - optimized loop
+	for (t_idx in seq_along(time_pds)) {
+		time_pd <- time_pds[t_idx]
+		time_pd_num <- time_pds_num[t_idx]
 
-        # Get indices for this time period using pre-split data
-        slice_indices <- time_indices[[as.character(time_pd_num)]]
-        if (is.null(slice_indices)) slice_indices <- integer(0)
+		# Get indices for this time period using pre-split data
+		slice_indices <- time_indices[[as.character(time_pd_num)]]
+		if (is.null(slice_indices)) slice_indices <- integer(0)
 
-        # get values and indices for this time slice
-        if (length(slice_indices) > 0) {
-            slice_actor1 <- dyad_actor1[slice_indices]
-            slice_actor2 <- dyad_actor2[slice_indices]
-            value <- dyad_weight[slice_indices]
+		# get values and indices for this time slice
+		if (length(slice_indices) > 0) {
+			slice_actor1 <- dyad_actor1[slice_indices]
+			slice_actor2 <- dyad_actor2[slice_indices]
+			value <- dyad_weight[slice_indices]
 
-            # Pre-compute matrix indices to avoid repeated match() calls
-            matRowIndices <- match(slice_actor1, actors_rows)
-            matColIndices <- match(slice_actor2, actors_cols)
-        } else {
-            value <- numeric(0)
-            matRowIndices <- integer(0)
-            matColIndices <- integer(0)
-        }
+			# Pre-compute matrix indices to avoid repeated match() calls
+			matRowIndices <- match(slice_actor1, actors_rows)
+			matColIndices <- match(slice_actor2, actors_cols)
+		} else {
+			value <- numeric(0)
+			matRowIndices <- integer(0)
+			matColIndices <- integer(0)
+		}
 
-        # create logical value that is TRUE if weight is just 0/1
-        is_binary <- length(value) == 0 || all(value %in% c(0, 1))
-        bin_check[t_idx] <- is_binary
+		# create logical value that is TRUE if weight is just 0/1
+		is_binary <- length(value) == 0 || all(value %in% c(0, 1))
+		bin_check[t_idx] <- is_binary
 
-        # get adj mat filled in using optimized C++ function
-        adj_mat <- get_matrix(
-            n_rows = length(actors_rows),
-            n_cols = length(actors_cols),
-            actors_rows = actors_rows,
-            actors_cols = actors_cols,
-            matRowIndices = matRowIndices,
-            matColIndices = matColIndices,
-            value = value,
-            symmetric = user_symmetric,
-            missing_to_zero = missing_to_zero,
-            diag_to_NA = diag_to_NA && mode == "unipartite"
-        )
+		# get adj mat filled in using optimized C++ function
+		adj_mat <- get_matrix(
+			n_rows = length(actors_rows),
+			n_cols = length(actors_cols),
+			actors_rows = actors_rows,
+			actors_cols = actors_cols,
+			matRowIndices = matRowIndices,
+			matColIndices = matColIndices,
+			value = value,
+			symmetric = user_symmetric,
+			missing_to_zero = missing_to_zero,
+			diag_to_NA = diag_to_NA && mode == "unipartite"
+		)
 
-        # insert into array
-        adj_out[, , as.character(time_pd)] <- adj_mat
-    }
+		# insert into array
+		adj_out[, , as.character(time_pd)] <- adj_mat
+	}
 
-    # if user left weight NULL and set sum_dyads
-    # to FALSE then record weight as NULL for
-    # attribute purposes
-    if (!sum_dyads && is.null(wOrig)) {
-        weight <- NULL
-    }
+	# if user left weight NULL and set sum_dyads
+	# to FALSE then record weight as NULL for
+	# attribute purposes
+	if (!sum_dyads && is.null(wOrig)) {
+		weight <- NULL
+	}
 
-    # layer label
-    if (is.null(weight)) {
-        layer_label <- "weight1"
-    } else {
-        layer_label <- weight
-    }
+	# layer label
+	if (is.null(weight)) {
+		layer_label <- "weight1"
+	} else {
+		layer_label <- weight
+	}
 
-    # add attributes to array efficiently
-    class(adj_out) <- "netify"
-    attributes(adj_out) <- c(attributes(adj_out), list(
-        netify_type = "longit_array",
-        actor_time_uniform = TRUE,
-        actor_pds = actor_pds,
-        weight = weight,
-        detail_weight = weight_label,
-        is_binary = all(bin_check),
-        symmetric = user_symmetric,
-        mode = mode,
-        layers = layer_label,
-        diag_to_NA = diag_to_NA,
-        missing_to_zero = missing_to_zero,
-        sum_dyads = sum_dyads,
-        nodal_data = NULL,
-        dyad_data = NULL
-    ))
+	# add attributes to array efficiently
+	class(adj_out) <- "netify"
+	attributes(adj_out) <- c(attributes(adj_out), list(
+		netify_type = "longit_array",
+		actor_time_uniform = TRUE,
+		actor_pds = actor_pds,
+		weight = weight,
+		detail_weight = weight_label,
+		is_binary = all(bin_check),
+		symmetric = user_symmetric,
+		mode = mode,
+		layers = layer_label,
+		diag_to_NA = diag_to_NA,
+		missing_to_zero = missing_to_zero,
+		sum_dyads = sum_dyads,
+		nodal_data = NULL,
+		dyad_data = NULL
+	))
 
-    return(adj_out)
+	return(adj_out)
 }

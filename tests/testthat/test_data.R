@@ -2,9 +2,9 @@
 
 
 test_that("valid data.frame loaded for icews", {
-    # load data
-    data(icews)
+	# load data
+	data(icews)
 
-    # check class
-    expect_equal(class(icews), "data.frame")
+	# check class
+	expect_equal(class(icews), "data.frame")
 })

@@ -1,6 +1,6 @@
 Package: netify
 Title: Network Tools
-Version: 0.1.3
+Version: 1.4
 Authors@R: c(
   person("Ha Eun", "Choi", email = "choiha3@msu.edu", role = c("ctb")),
   person("Cassy", "Dorff", email = "cassy.dorff@vanderbilt.edu", role = c("aut")),
@@ -20,30 +20,30 @@ Imports:
     checkmate,
     igraph,
     ggplot2 (>= 3.0.0),
-    scales,
     ggnewscale,
-    ggridges,
-    ggbeeswarm, 
-    patchwork,
-    RColorBrewer,
     ggrepel
 LinkingTo:
   Rcpp,
   RcppEigen
 Suggests:
-    knitr,    
+    knitr,
     rmarkdown,
-    abind,    
+    abind,
     tidyr,
     network,
     testthat (>= 3.0.0),
     dplyr,
     peacesciencer,
-    amen, 
+    amen,
     ergm,
     latentnet,
     RSiena,
-    countrycode
+    countrycode,
+    scales,
+    ggridges,
+    ggbeeswarm,
+    patchwork,
+    RColorBrewer
 VignetteBuilder: knitr
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
