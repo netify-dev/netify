@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-02-20</h4>
+            <h4 data-toc-skip class="date">2026-03-03</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/attribute_analysis.Rmd" class="external-link"><code>vignettes/attribute_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>attribute_analysis.Rmd</code></div>
@@ -253,8 +253,8 @@ countries, and alliance commitments from the ATOP dataset.</p>
 <span>    cooperation <span class="op">=</span> <span class="va">alliance_norm</span>,</span>
 <span>    <span class="co"># cooperation = alliance_norm * (1 - cowmidonset),</span></span>
 <span>    <span class="co"># Add region information</span></span>
-<span>    region1 <span class="op">=</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/reference/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">ccode1</span>, <span class="st">"cown"</span>, <span class="st">"region"</span><span class="op">)</span>,</span>
-<span>    region2 <span class="op">=</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/reference/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">ccode2</span>, <span class="st">"cown"</span>, <span class="st">"region"</span><span class="op">)</span>,</span>
+<span>    region1 <span class="op">=</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">ccode1</span>, <span class="st">"cown"</span>, <span class="st">"region"</span><span class="op">)</span>,</span>
+<span>    region2 <span class="op">=</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">ccode2</span>, <span class="st">"cown"</span>, <span class="st">"region"</span><span class="op">)</span>,</span>
 <span>    <span class="co"># Log transform some variables</span></span>
 <span>    log_gdp1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">wbgdp2011est1</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>    log_gdp2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">wbgdp2011est2</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span>,</span>
@@ -310,7 +310,7 @@ countries, and alliance commitments from the ATOP dataset.</p>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Add country names for better interpretation</span></span>
-<span><span class="va">nodal_data</span><span class="op">$</span><span class="va">country_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/reference/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">nodal_data</span><span class="op">$</span><span class="va">actor</span>, <span class="st">"cown"</span>, <span class="st">"country.name"</span><span class="op">)</span></span>
+<span><span class="va">nodal_data</span><span class="op">$</span><span class="va">country_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">nodal_data</span><span class="op">$</span><span class="va">actor</span>, <span class="st">"cown"</span>, <span class="st">"country.name"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Add nodal variables to network</span></span>
 <span><span class="va">alliance_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span><span class="va">alliance_net</span>, <span class="va">nodal_data</span>, actor <span class="op">=</span> <span class="st">"actor"</span><span class="op">)</span></span></code></pre></div>
@@ -415,8 +415,8 @@ attributes.</p>
 <td align="center">-0.316</td>
 <td align="center">0.07</td>
 <td align="center">0</td>
-<td align="center">0.126</td>
-<td align="center">0.155</td>
+<td align="center">0.127</td>
+<td align="center">0.157</td>
 <td align="center">3571</td>
 <td align="center">11480</td>
 <td align="center">21</td>
@@ -624,8 +624,8 @@ prove equally or more influential in shaping alliance networks.</p>
 <td align="center">0.259</td>
 <td align="center">0.135</td>
 <td align="center">0</td>
-<td align="center">0.108</td>
-<td align="center">0.138</td>
+<td align="center">0.107</td>
+<td align="center">0.137</td>
 <td align="center">4046</td>
 <td align="center">14869</td>
 <td align="center">0</td>
@@ -767,7 +767,7 @@ this hypothesis:</p>
 <td align="center">0.02</td>
 <td align="center">0</td>
 <td align="center">0.098</td>
-<td align="center">0.124</td>
+<td align="center">0.125</td>
 <td align="center">3915</td>
 <td align="center">13851</td>
 <td align="center">6</td>
@@ -1840,11 +1840,11 @@ periods.</p>
 <span><span class="co">## 4                -0.2504444                  -0.3140721            0.06362762</span></span>
 <span><span class="co">## 5                -0.2520272                  -0.3131798            0.06115268</span></span>
 <span><span class="co">##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing</span></span>
-<span><span class="co">## 1       0 0.1397918 0.1681661              3497               11381        22</span></span>
-<span><span class="co">## 2       0 0.1377000 0.1685221              3497               11554        21</span></span>
-<span><span class="co">## 3       0 0.1270526 0.1570710              3571               11480        21</span></span>
-<span><span class="co">## 4       0 0.1132304 0.1438056              3645               11406        21</span></span>
-<span><span class="co">## 5       0 0.1103529 0.1401963              3646               11405        21</span></span>
+<span><span class="co">## 1       0 0.1393848 0.1696013              3497               11381        22</span></span>
+<span><span class="co">## 2       0 0.1377920 0.1696754              3497               11554        21</span></span>
+<span><span class="co">## 3       0 0.1247654 0.1574131              3571               11480        21</span></span>
+<span><span class="co">## 4       0 0.1124384 0.1442018              3645               11406        21</span></span>
+<span><span class="co">## 5       0 0.1076046 0.1395406              3646               11405        21</span></span>
 <span><span class="co">##   n_pairs</span></span>
 <span><span class="co">## 1   18915</span></span>
 <span><span class="co">## 2   18915</span></span>

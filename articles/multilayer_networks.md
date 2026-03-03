@@ -143,8 +143,8 @@ function of capacity.
 struct_comp <- compare_networks(multilayer_net, what = "structure")
 print(struct_comp)
 #>    network num_actors density num_edges prop_edges_missing mean_edge_weight
-#> 1   Verbal        152   0.406      9378                  0           19.800
-#> 2 Material        152   0.111      2576                  0            0.521
+#> 1   Verbal        152   0.409      9378                  0           19.800
+#> 2 Material        152   0.112      2576                  0            0.521
 #>   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition
 #> 1          145.3                  0               0            5760       0.040
 #> 2            5.5                  0               0             380       0.038
@@ -153,7 +153,7 @@ print(struct_comp)
 #> 2              1.14        0.311        33.9
 #>                                metric value_net1 value_net2 absolute_change
 #> num_actors                 num_actors    152.000    152.000           0.000
-#> density                       density      0.406      0.111          -0.294
+#> density                       density      0.409      0.112          -0.296
 #> num_edges                   num_edges   9378.000   2576.000       -6802.000
 #> prop_edges_missing prop_edges_missing      0.000      0.000           0.000
 #> mean_edge_weight     mean_edge_weight     19.800      0.521         -19.300
@@ -218,8 +218,8 @@ print(multilayer_homophily)
 #> 1                 -6.964294                   -7.444698             0.4804043
 #> 2                 -7.016653                   -7.279288             0.2626347
 #>   p_value     ci_lower   ci_upper n_connected_pairs n_unconnected_pairs
-#> 1   0.000  0.022556816 0.06040362              4453                6573
-#> 2   0.118 -0.005798522 0.03469609              1201                9825
+#> 1   0.000  0.021032704 0.06054891              4453                6573
+#> 2   0.126 -0.004820535 0.03571828              1201                9825
 #>   n_missing n_pairs
 #> 1         3   11476
 #> 2         3   11476

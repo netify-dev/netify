@@ -229,12 +229,12 @@ head(summary_actor_mids)
     ## 5   130 1995      1 0.005347594    0.01470588         1           0
     ## 6   135 1995      1 0.005347594    0.01470588         1           0
     ##   eigen_vector
-    ## 1            0
-    ## 2            0
-    ## 3            0
-    ## 4            0
-    ## 5            0
-    ## 6            0
+    ## 1 0.000000e+00
+    ## 2 1.859766e-17
+    ## 3 0.000000e+00
+    ## 4 0.000000e+00
+    ## 5 2.385219e-18
+    ## 6 1.926012e-17
 
 We can look at the distribution of the statistic for all actors over
 time:
@@ -409,7 +409,7 @@ head(
     ## 1      1 0.005347594 0.000000e+00
     ## 2      0 0.000000000 0.000000e+00
     ## 3      1 0.005347594 0.000000e+00
-    ## 4      0 0.000000000 5.137642e-20
+    ## 4      0 0.000000000 2.939324e-19
     ## 5      0 0.000000000 0.000000e+00
     ## 6      1 0.005235602 4.953675e-03
 
@@ -429,7 +429,7 @@ head(attributes(mid_long_network)$nodal_data)
     ## 1      1 0.005347594 0.000000e+00
     ## 2      0 0.000000000 0.000000e+00
     ## 3      1 0.005347594 0.000000e+00
-    ## 4      0 0.000000000 5.137642e-20
+    ## 4      0 0.000000000 2.939324e-19
     ## 5      0 0.000000000 0.000000e+00
     ## 6      1 0.005235602 4.953675e-03
 
@@ -509,9 +509,6 @@ plot(
 
     ## Warning: Removed 839 rows containing missing values or values outside the scale range
     ## (`geom_text_repel()`).
-
-    ## Warning: ggrepel: 2 unlabeled data points (too many overlaps). Consider
-    ## increasing max.overlaps
 
 ![](foundations_files/figure-html/unnamed-chunk-17-1.png)
 
@@ -623,7 +620,9 @@ mid_cross_network <- netify(
 ```
 
 Next, let’s take a look at passing our netify object to the `amen`
-function:
+function. *Note: this chunk runs only when the `amen` package is
+installed (`install.packages("amen")`). If `amen` is not available, the
+chunk is skipped but the rest of the vignette is unaffected.*
 
 ``` r
 library(amen)
@@ -674,7 +673,10 @@ mid_amen_mod <- ame(
 
     ## WARNING: replacing NAs in design matrix with zeros
 
-We can apply the same process to ERGMs:
+We can apply the same process to ERGMs. *Note: this chunk runs only when
+the `ergm` package is installed (`install.packages("ergm")`). If `ergm`
+is not available, the chunk is skipped but the rest of the vignette is
+unaffected.*
 
 ``` r
 library(ergm)

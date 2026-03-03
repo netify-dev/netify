@@ -8,15 +8,23 @@ network views simultaneously.
 ## Usage
 
 ``` r
-layer_netify(netlet_list, layer_labels = NULL)
+layer_netify(netlet_list, ..., layer_labels = NULL)
 ```
 
 ## Arguments
 
 - netlet_list:
 
-  A list of netify objects to layer together. All objects must have
-  compatible dimensions and attributes (see Details).
+  A list of netify objects to layer together, or the first netify object
+  when passing multiple objects as separate arguments via `...`. All
+  objects must have compatible dimensions and attributes (see Details).
+
+- ...:
+
+  Additional netify objects. When provided, `netlet_list` should be a
+  single netify object and all arguments are collected into a list. This
+  allows calling `layer_netify(net1, net2, net3)` as a shorthand for
+  `layer_netify(list(net1, net2, net3))`.
 
 - layer_labels:
 

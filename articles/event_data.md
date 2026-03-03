@@ -56,7 +56,7 @@ summary(mex_network)
 ```
 
     ##   num_actors    density num_edges prop_edges_missing mean_edge_weight
-    ## 1         74 0.02520088       138                  0         7.018512
+    ## 1         74 0.02554609       138                  0         7.018512
     ##   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition
     ## 1        113.395                  0               0            3757   0.1371326
     ##   sd_of_actor_means transitivity

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-02-20</h4>
+            <h4 data-toc-skip class="date">2026-03-03</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/tracking_changes.Rmd" class="external-link"><code>vignettes/tracking_changes.Rmd</code></a></small>
       <div class="d-none name"><code>tracking_changes.Rmd</code></div>
@@ -922,25 +922,26 @@ properties rather than individual edges:</p>
 <span>    digits <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>    align <span class="op">=</span> <span class="st">"c"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<table style="width:100%;" class="table">
+<table class="table">
 <caption>Structural Properties Across Time Periods</caption>
 <colgroup>
 <col width="3%">
 <col width="4%">
 <col width="3%">
 <col width="3%">
-<col width="7%">
+<col width="6%">
 <col width="6%">
 <col width="5%">
-<col width="7%">
 <col width="6%">
-<col width="6%">
-<col width="6%">
-<col width="6%">
-<col width="6%">
-<col width="6%">
+<col width="5%">
+<col width="5%">
+<col width="5%">
+<col width="5%">
+<col width="5%">
+<col width="5%">
 <col width="8%">
 <col width="4%">
+<col width="2%">
 <col width="4%">
 <col width="4%">
 </colgroup>
@@ -961,6 +962,7 @@ properties rather than individual edges:</p>
 <th align="center">sd_of_col_means</th>
 <th align="center">covar_of_row_col_means</th>
 <th align="center">reciprocity</th>
+<th align="center">mutual</th>
 <th align="center">transitivity</th>
 <th align="center">mean_degree</th>
 </tr></thead>
@@ -968,7 +970,7 @@ properties rather than individual edges:</p>
 <tr class="odd">
 <td align="center">2002</td>
 <td align="center">152</td>
-<td align="center">0.376</td>
+<td align="center">0.379</td>
 <td align="center">8692</td>
 <td align="center">0</td>
 <td align="center">19.591</td>
@@ -982,13 +984,14 @@ properties rather than individual edges:</p>
 <td align="center">43.049</td>
 <td align="center">0.995</td>
 <td align="center">0.978</td>
+<td align="center">0.854</td>
 <td align="center">0.606</td>
 <td align="center">57.184</td>
 </tr>
 <tr class="even">
 <td align="center">2006</td>
 <td align="center">152</td>
-<td align="center">0.408</td>
+<td align="center">0.411</td>
 <td align="center">9429</td>
 <td align="center">0</td>
 <td align="center">21.091</td>
@@ -1002,13 +1005,14 @@ properties rather than individual edges:</p>
 <td align="center">45.485</td>
 <td align="center">0.991</td>
 <td align="center">0.977</td>
+<td align="center">0.851</td>
 <td align="center">0.628</td>
 <td align="center">62.033</td>
 </tr>
 <tr class="odd">
 <td align="center">2010</td>
 <td align="center">152</td>
-<td align="center">0.432</td>
+<td align="center">0.435</td>
 <td align="center">9976</td>
 <td align="center">0</td>
 <td align="center">18.134</td>
@@ -1022,13 +1026,14 @@ properties rather than individual edges:</p>
 <td align="center">37.770</td>
 <td align="center">0.993</td>
 <td align="center">0.982</td>
+<td align="center">0.840</td>
 <td align="center">0.639</td>
 <td align="center">65.632</td>
 </tr>
 <tr class="even">
 <td align="center">2014</td>
 <td align="center">152</td>
-<td align="center">0.423</td>
+<td align="center">0.426</td>
 <td align="center">9774</td>
 <td align="center">0</td>
 <td align="center">18.393</td>
@@ -1042,6 +1047,7 @@ properties rather than individual edges:</p>
 <td align="center">38.498</td>
 <td align="center">0.990</td>
 <td align="center">0.973</td>
+<td align="center">0.839</td>
 <td align="center">0.630</td>
 <td align="center">64.303</td>
 </tr>
@@ -1062,8 +1068,11 @@ properties rather than individual edges:</p>
 <strong>density</strong>: Increases from 0.376 to 0.423 - the
 network becomes denser</li>
 <li>
-<strong>reciprocity</strong>: Stays very high (0.97-0.98) - if
-country A cooperates with B, B almost always cooperates with A</li>
+<strong>reciprocity</strong>: Stays very high (0.97-0.98) — the
+correlation between each directed tie and its reverse is nearly perfect,
+meaning cooperation from A to B closely tracks cooperation from B to A
+in magnitude. (Note: this is a correlation-based measure, not the
+proportion of mutual edges.)</li>
 <li>
 <strong>transitivity</strong>: Around 0.61-0.64 - moderate
 clustering (friend of a friend is often a friend)</li>
@@ -1403,7 +1412,9 @@ network classification)</li>
 </h3>
 <p>For large networks (&gt;1000 nodes), computing all eigenvalues can be
 computationally expensive. The <code>spectral_rank</code> parameter
-allows you to use only the top-k eigenvalues:</p>
+allows you to use only the top-k eigenvalues.</p>
+<p><em>Example: adapt the code below with your own large network objects
+to run it.</em></p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># For large networks, use spectral_rank to improve performance</span></span>
 <span><span class="va">spectral_comp_fast</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
@@ -1499,7 +1510,7 @@ where n is the number of nodes.</p>
 <span>    subtitle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"2002 vs 2014 Cooperation Networks |"</span>, <span class="va">spectral_note</span><span class="op">)</span>,</span>
 <span>    theme <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="tracking_changes_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="" width="1093.75"></p>
+<p><img src="tracking_changes_files/figure-html/unnamed-chunk-19-1.png" class="r-plt" alt="" width="1093.75"></p>
 <p>Note that spectral distance is on a different scale than the other
 metrics (which are typically 0-1), so it’s best interpreted relative to
 other spectral distance values rather than in absolute terms.</p>
@@ -1996,6 +2007,8 @@ weight distributions</li>
 <div class="section level3">
 <h3 id="example-complete-pre-modeling-diagnostic">Example: Complete Pre-Modeling Diagnostic<a class="anchor" aria-label="anchor" href="#example-complete-pre-modeling-diagnostic"></a>
 </h3>
+<p><em>Example: adapt the template below to your own networks to run
+it.</em></p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Comprehensive diagnostic before ERGM fitting</span></span>
 <span><span class="va">diagnostic_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>

@@ -107,7 +107,7 @@ print(net_log)
 #> • # Unique Actors: 152
 #> Network Summary Statistics:
 #>           dens miss  mean recip trans
-#> verbCoop 0.432    0 0.975 0.966 0.639
+#> verbCoop 0.435    0 0.975 0.966 0.639
 #> • Nodal Features: None
 #> • Dyad Features: original_weight
 

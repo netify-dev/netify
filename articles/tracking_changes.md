@@ -699,12 +699,12 @@ knitr::kable(struct_comparison$summary,
 )
 ```
 
-| network | num_actors | density | num_edges | prop_edges_missing | mean_edge_weight | sd_edge_weight | median_edge_weight | min_edge_weight | max_edge_weight | competition_row | competition_col | sd_of_row_means | sd_of_col_means | covar_of_row_col_means | reciprocity | transitivity | mean_degree |
-|:-------:|:----------:|:-------:|:---------:|:------------------:|:----------------:|:--------------:|:------------------:|:---------------:|:---------------:|:---------------:|:---------------:|:---------------:|:---------------:|:----------------------:|:-----------:|:------------:|:-----------:|
-|  2002   |    152     |  0.376  |   8692    |         0          |      19.591      |    143.821     |         0          |        0        |      6003       |      0.041      |      0.038      |     44.915      |     43.049      |         0.995          |    0.978    |    0.606     |   57.184    |
-|  2006   |    152     |  0.408  |   9429    |         0          |      21.091      |    160.078     |         0          |        0        |      7579       |      0.042      |      0.037      |     48.763      |     45.485      |         0.991          |    0.977    |    0.628     |   62.033    |
-|  2010   |    152     |  0.432  |   9976    |         0          |      18.134      |    132.367     |         0          |        0        |      4937       |      0.041      |      0.035      |     41.441      |     37.770      |         0.993          |    0.982    |    0.639     |   65.632    |
-|  2014   |    152     |  0.423  |   9774    |         0          |      18.393      |    136.541     |         0          |        0        |      6327       |      0.041      |      0.035      |     41.954      |     38.498      |         0.990          |    0.973    |    0.630     |   64.303    |
+| network | num_actors | density | num_edges | prop_edges_missing | mean_edge_weight | sd_edge_weight | median_edge_weight | min_edge_weight | max_edge_weight | competition_row | competition_col | sd_of_row_means | sd_of_col_means | covar_of_row_col_means | reciprocity | mutual | transitivity | mean_degree |
+|:-------:|:----------:|:-------:|:---------:|:------------------:|:----------------:|:--------------:|:------------------:|:---------------:|:---------------:|:---------------:|:---------------:|:---------------:|:---------------:|:----------------------:|:-----------:|:------:|:------------:|:-----------:|
+|  2002   |    152     |  0.379  |   8692    |         0          |      19.591      |    143.821     |         0          |        0        |      6003       |      0.041      |      0.038      |     44.915      |     43.049      |         0.995          |    0.978    | 0.854  |    0.606     |   57.184    |
+|  2006   |    152     |  0.411  |   9429    |         0          |      21.091      |    160.078     |         0          |        0        |      7579       |      0.042      |      0.037      |     48.763      |     45.485      |         0.991          |    0.977    | 0.851  |    0.628     |   62.033    |
+|  2010   |    152     |  0.435  |   9976    |         0          |      18.134      |    132.367     |         0          |        0        |      4937       |      0.041      |      0.035      |     41.441      |     37.770      |         0.993          |    0.982    | 0.840  |    0.639     |   65.632    |
+|  2014   |    152     |  0.426  |   9774    |         0          |      18.393      |    136.541     |         0          |        0        |      6327       |      0.041      |      0.035      |     41.954      |     38.498      |         0.990          |    0.973    | 0.839  |    0.630     |   64.303    |
 
 Structural Properties Across Time Periods
 
@@ -718,8 +718,11 @@ This table shows how network-wide properties evolve:
   connections over time
 - **density**: Increases from 0.376 to 0.423 - the network becomes
   denser
-- **reciprocity**: Stays very high (0.97-0.98) - if country A cooperates
-  with B, B almost always cooperates with A
+- **reciprocity**: Stays very high (0.97-0.98) — the correlation between
+  each directed tie and its reverse is nearly perfect, meaning
+  cooperation from A to B closely tracks cooperation from B to A in
+  magnitude. (Note: this is a correlation-based measure, not the
+  proportion of mutual edges.)
 - **transitivity**: Around 0.61-0.64 - moderate clustering (friend of a
   friend is often a friend)
 - **mean_degree**: Increases from 57.2 to 64.3 - average country has
@@ -1024,7 +1027,10 @@ other metrics might miss:
 
 For large networks (\>1000 nodes), computing all eigenvalues can be
 computationally expensive. The `spectral_rank` parameter allows you to
-use only the top-k eigenvalues:
+use only the top-k eigenvalues.
+
+*Example: adapt the code below with your own large network objects to
+run it.*
 
 ``` r
 # For large networks, use spectral_rank to improve performance
@@ -1110,7 +1116,7 @@ p_similarity + plot_annotation(
 )
 ```
 
-![](tracking_changes_files/figure-html/unnamed-chunk-20-1.png)
+![](tracking_changes_files/figure-html/unnamed-chunk-19-1.png)
 
 Note that spectral distance is on a different scale than the other
 metrics (which are typically 0-1), so it’s best interpreted relative to
@@ -1467,6 +1473,8 @@ For large networks (\>1000 nodes):
 - Always use `p_adjust` when making many comparisons
 
 ### Example: Complete Pre-Modeling Diagnostic
+
+*Example: adapt the template below to your own networks to run it.*
 
 ``` r
 # Comprehensive diagnostic before ERGM fitting

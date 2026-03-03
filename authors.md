@@ -16,12 +16,12 @@ Source:
 [`DESCRIPTION`](https://github.com/netify-dev/netify/blob/main/DESCRIPTION)
 
 Dorff C, Minhas S (2026). *netify: Network Tools*. R package version
-0.1.3, <https://netify-dev.github.io/netify/>.
+1.4, <https://netify-dev.github.io/netify/>.
 
     @Manual{,
       title = {netify: Network Tools},
       author = {Cassy Dorff and Shahryar Minhas},
       year = {2026},
-      note = {R package version 0.1.3},
+      note = {R package version 1.4},
       url = {https://netify-dev.github.io/netify/},
     }

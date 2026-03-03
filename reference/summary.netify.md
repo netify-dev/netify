@@ -104,8 +104,20 @@ A data frame with one row per network/time period containing:
 
 - `reciprocity`:
 
-  Correlation between adjacency matrix and its transpose, measuring
-  tendency for mutual ties
+  Pearson correlation between the adjacency matrix and its transpose.
+  This measures the linear association between outgoing and incoming tie
+  weights for each dyad (i.e., how similar \\a\_{ij}\\ is to \\a\_{ji}\\
+  across all dyads). Values near 1 indicate strong reciprocity, while
+  values near 0 indicate no relationship. Note: this differs from the
+  traditional edge-based reciprocity (proportion of mutual dyads) used
+  by igraph and other packages.
+
+- `mutual`:
+
+  Proportion of mutual dyads: the fraction of connected dyad pairs where
+  both directions are present. Ranges from 0 (no mutual ties) to 1 (all
+  ties are reciprocated). This is the traditional edge-based reciprocity
+  measure used by igraph and most network analysis textbooks.
 
 ## Details
 
@@ -181,19 +193,19 @@ net <- netify(
 # get summary
 summary(net)
 #>     net num_actors   density num_edges prop_edges_missing mean_edge_weight
-#> 1  2002        152 0.3762119      8692                  0         19.59123
-#> 2  2003        152 0.3846520      8887                  0         19.36358
-#> 3  2004        152 0.4117902      9514                  0         19.84986
-#> 4  2005        152 0.4045187      9346                  0         19.79488
-#> 5  2006        152 0.4081111      9429                  0         21.09136
-#> 6  2007        152 0.4215287      9739                  0         21.89753
-#> 7  2008        152 0.4323061      9988                  0         21.03381
-#> 8  2009        152 0.4265062      9854                  0         20.33139
-#> 9  2010        152 0.4317867      9976                  0         18.13393
-#> 10 2011        152 0.4201870      9708                  0         15.79217
-#> 11 2012        152 0.4259436      9841                  0         15.99564
-#> 12 2013        152 0.4289733      9911                  0         17.21301
-#> 13 2014        152 0.4230436      9774                  0         18.39291
+#> 1  2002        152 0.3787034      8692                  0         19.59123
+#> 2  2003        152 0.3871994      8887                  0         19.36358
+#> 3  2004        152 0.4145173      9514                  0         19.84986
+#> 4  2005        152 0.4071976      9346                  0         19.79488
+#> 5  2006        152 0.4108139      9429                  0         21.09136
+#> 6  2007        152 0.4243203      9739                  0         21.89753
+#> 7  2008        152 0.4351690      9988                  0         21.03381
+#> 8  2009        152 0.4293308      9854                  0         20.33139
+#> 9  2010        152 0.4346462      9976                  0         18.13393
+#> 10 2011        152 0.4229697      9708                  0         15.79217
+#> 11 2012        152 0.4287644      9841                  0         15.99564
+#> 12 2013        152 0.4318142      9911                  0         17.21301
+#> 13 2014        152 0.4258452      9774                  0         18.39291
 #>    sd_edge_weight median_edge_weight min_edge_weight max_edge_weight
 #> 1        143.8213                  0               0            6003
 #> 2        144.5982                  0               0            5937
@@ -222,20 +234,20 @@ summary(net)
 #> 11      0.03587638      0.03146233        33.86660        31.21128
 #> 12      0.04058869      0.03642385        39.26572        36.78299
 #> 13      0.04058415      0.03521224        41.95447        38.49827
-#>    covar_of_row_col_means reciprocity transitivity
-#> 1               0.9946888   0.9778217    0.6058952
-#> 2               0.9872959   0.9632488    0.6072045
-#> 3               0.9923809   0.9769563    0.6215978
-#> 4               0.9932157   0.9804325    0.6215075
-#> 5               0.9909337   0.9771928    0.6277829
-#> 6               0.9940837   0.9783703    0.6330626
-#> 7               0.9916659   0.9694667    0.6401296
-#> 8               0.9946612   0.9800665    0.6318319
-#> 9               0.9934913   0.9823385    0.6386063
-#> 10              0.9903188   0.9763723    0.6220630
-#> 11              0.9877987   0.9702754    0.6337725
-#> 12              0.9939394   0.9782226    0.6314429
-#> 13              0.9904402   0.9730745    0.6297063
+#>    covar_of_row_col_means reciprocity    mutual transitivity
+#> 1               0.9946888   0.9778217 0.8537001    0.6058952
+#> 2               0.9872959   0.9632488 0.8479933    0.6072045
+#> 3               0.9923809   0.9769563 0.8452289    0.6215978
+#> 4               0.9932157   0.9804325 0.8386779    0.6215075
+#> 5               0.9909337   0.9771928 0.8510012    0.6277829
+#> 6               0.9940837   0.9783703 0.8511690    0.6330626
+#> 7               0.9916659   0.9694667 0.8468935    0.6401296
+#> 8               0.9946612   0.9800665 0.8467016    0.6318319
+#> 9               0.9934913   0.9823385 0.8402509    0.6386063
+#> 10              0.9903188   0.9763723 0.8327355    0.6220630
+#> 11              0.9877987   0.9702754 0.8336128    0.6337725
+#> 12              0.9939394   0.9782226 0.8248941    0.6314429
+#> 13              0.9904402   0.9730745 0.8389464    0.6297063
 # }
 
 if (FALSE) { # \dontrun{

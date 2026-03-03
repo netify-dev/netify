@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-02-20</h4>
+            <h4 data-toc-skip class="date">2026-03-03</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/manual_plotting.Rmd" class="external-link"><code>vignettes/manual_plotting.Rmd</code></a></small>
       <div class="d-none name"><code>manual_plotting.Rmd</code></div>
@@ -81,9 +81,10 @@ to prepare the data.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/netify/">netify</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
-<p>We’ll also use the <code>ggnewscale</code> package to create multiple
-legends when necessary in the same plot (e.g., if you want to have
-legends for a color aesthetic for both nodes and edges).</p>
+<p>The advanced sections also use <code>dplyr</code> (for data
+manipulation) and <code>ggnewscale</code> (for multiple color legends).
+If <code>dplyr</code> is not installed, the core plotting workflow still
+runs; only the advanced edge-information section will be skipped.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://eliocamp.github.io/ggnewscale/" class="external-link">ggnewscale</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
@@ -144,7 +145,7 @@ legends for a color aesthetic for both nodes and edges).</p>
 <span><span class="co">## • # Unique Actors: 34</span></span>
 <span><span class="co">## Network Summary Statistics (averaged across time):</span></span>
 <span><span class="co">##           dens miss    mean recip trans</span></span>
-<span><span class="co">## verbCoop 0.861    0 179.484 0.978 0.928</span></span>
+<span><span class="co">## verbCoop 0.887    0 179.484 0.978 0.928</span></span>
 <span><span class="co">## • Nodal Features: i_polity2, i_log_gdp, i_log_pop</span></span>
 <span><span class="co">## • Dyad Features: matlCoop, verbConf, matlConf</span></span></code></pre>
 <p>This is a longitudinal, weighted network with nodal and dyadic
@@ -268,7 +269,7 @@ plot the edges and nodes, respectively.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient</a></span><span class="op">(</span>low <span class="op">=</span> <span class="st">"#a6bddb"</span>, high <span class="op">=</span> <span class="st">"#014636"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">time</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="../reference/theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="manual_plotting_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="1350"></p>
+<p><img src="manual_plotting_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="1350"></p>
 <div class="section level3">
 <h3 id="changing-the-layout">Changing the layout<a class="anchor" aria-label="anchor" href="#changing-the-layout"></a>
 </h3>
@@ -412,7 +413,7 @@ package.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
 <span>        legend.position <span class="op">=</span> <span class="st">"right"</span></span>
 <span>    <span class="op">)</span></span></code></pre></div>
-<p><img src="manual_plotting_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="1350"></p>
+<p><img src="manual_plotting_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="1350"></p>
 </div>
 </div>
 <div class="section level2">

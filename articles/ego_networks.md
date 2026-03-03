@@ -91,12 +91,12 @@ print(pakistan_ego_net)
 ngbd_summ <- summary(pakistan_ego_net)
 head(ngbd_summ)
 #>    net num_actors   density num_edges prop_edges_missing mean_edge_weight
-#> 1 2002         33 0.7805326       850                  0         182.9545
-#> 2 2003         28 0.8979592       704                  0         285.6905
-#> 3 2004         49 0.7730112      1856                  0         101.3461
-#> 4 2005         44 0.8780992      1700                  0         138.4968
-#> 5 2006         40 0.8625000      1380                  0         150.0731
-#> 6 2007         39 0.8849441      1346                  0         182.9852
+#> 1 2002         33 0.8049242       850                  0         182.9545
+#> 2 2003         28 0.9312169       704                  0         285.6905
+#> 3 2004         49 0.7891156      1856                  0         101.3461
+#> 4 2005         44 0.8985201      1700                  0         138.4968
+#> 5 2006         40 0.8846154      1380                  0         150.0731
+#> 6 2007         39 0.9082321      1346                  0         182.9852
 #>   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition
 #> 1       541.2426               16.0               0            5760  0.08270328
 #> 2       718.2698               43.5               0            5937  0.08521930
@@ -368,8 +368,8 @@ knitr::kable(comparison)
 
 | Metric          | Cooperation | Conflict |
 |:----------------|------------:|---------:|
-| Average actors  |      34.700 |    26.80 |
-| Average density |       0.877 |     0.62 |
+| Average actors  |      34.700 |   26.800 |
+| Average density |       0.904 |    0.646 |
 
 Pakistan’s conflict network is smaller but still substantial. The lower
 density in conflict (0.62 vs 0.88) suggests conflicts are more bilateral
@@ -439,8 +439,8 @@ knitr::kable(avg_props)
 
 | network | Avg. Nodes | Avg. Density | Avg. Transitivity |
 |:--------|-----------:|-------------:|------------------:|
-| China   |        104 |        0.563 |             0.698 |
-| US      |        120 |        0.528 |             0.682 |
+| China   |        104 |        0.568 |             0.698 |
+| US      |        120 |        0.533 |             0.682 |
 
 The US maintains a larger but less dense network—more of a hub-and-spoke
 pattern. China’s denser network suggests its partners are more

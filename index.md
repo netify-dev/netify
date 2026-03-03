@@ -173,8 +173,8 @@ icews_conflict <- add_node_vars(
   node_vars = 'i_democ'
 )
 
-# plot(
-  icews_conflict, 
+plot(
+  icews_conflict,
   # Log transform weights
   mutate_weight = log1p, 
   # Map node attributes to aesthetics

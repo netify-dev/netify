@@ -11,7 +11,7 @@ cross-sectional and longitudinal networks, as well as multilayer structures."></
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -132,8 +132,21 @@ two neighbors of a node are connected)</p></dd>
 receiving patterns</p></dd>
 
 <dt><code>reciprocity</code></dt>
-<dd><p>Correlation between adjacency matrix and its
-transpose, measuring tendency for mutual ties</p></dd>
+<dd><p>Pearson correlation between the adjacency
+matrix and its transpose. This measures the linear association
+between outgoing and incoming tie weights for each dyad (i.e., how
+similar \(a_{ij}\) is to \(a_{ji}\) across all dyads). Values
+near 1 indicate strong reciprocity, while values near 0 indicate no
+relationship. Note: this differs from the traditional edge-based
+reciprocity (proportion of mutual dyads) used by igraph and other
+packages.</p></dd>
+
+<dt><code>mutual</code></dt>
+<dd><p>Proportion of mutual dyads: the fraction of
+connected dyad pairs where both directions are present. Ranges from 0
+(no mutual ties) to 1 (all ties are reciprocated). This is the
+traditional edge-based reciprocity measure used by igraph and most
+network analysis textbooks.</p></dd>
 
 
 </dl></div>
@@ -199,19 +212,19 @@ conflict in Nigeria." <em>Journal of Politics</em>, 85(1).</p>
 <span class="r-in"><span><span class="co"># get summary</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     net num_actors   density num_edges prop_edges_missing mean_edge_weight</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  2002        152 0.3762119      8692                  0         19.59123</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2003        152 0.3846520      8887                  0         19.36358</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  2004        152 0.4117902      9514                  0         19.84986</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  2005        152 0.4045187      9346                  0         19.79488</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  2006        152 0.4081111      9429                  0         21.09136</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  2007        152 0.4215287      9739                  0         21.89753</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7  2008        152 0.4323061      9988                  0         21.03381</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8  2009        152 0.4265062      9854                  0         20.33139</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9  2010        152 0.4317867      9976                  0         18.13393</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 2011        152 0.4201870      9708                  0         15.79217</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 2012        152 0.4259436      9841                  0         15.99564</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 2013        152 0.4289733      9911                  0         17.21301</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13 2014        152 0.4230436      9774                  0         18.39291</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  2002        152 0.3787034      8692                  0         19.59123</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2003        152 0.3871994      8887                  0         19.36358</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  2004        152 0.4145173      9514                  0         19.84986</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  2005        152 0.4071976      9346                  0         19.79488</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  2006        152 0.4108139      9429                  0         21.09136</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  2007        152 0.4243203      9739                  0         21.89753</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7  2008        152 0.4351690      9988                  0         21.03381</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8  2009        152 0.4293308      9854                  0         20.33139</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9  2010        152 0.4346462      9976                  0         18.13393</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 2011        152 0.4229697      9708                  0         15.79217</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 2012        152 0.4287644      9841                  0         15.99564</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12 2013        152 0.4318142      9911                  0         17.21301</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13 2014        152 0.4258452      9774                  0         18.39291</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    sd_edge_weight median_edge_weight min_edge_weight max_edge_weight</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1        143.8213                  0               0            6003</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2        144.5982                  0               0            5937</span>
@@ -240,20 +253,20 @@ conflict in Nigeria." <em>Journal of Politics</em>, 85(1).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11      0.03587638      0.03146233        33.86660        31.21128</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12      0.04058869      0.03642385        39.26572        36.78299</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13      0.04058415      0.03521224        41.95447        38.49827</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    covar_of_row_col_means reciprocity transitivity</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1               0.9946888   0.9778217    0.6058952</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2               0.9872959   0.9632488    0.6072045</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3               0.9923809   0.9769563    0.6215978</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4               0.9932157   0.9804325    0.6215075</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5               0.9909337   0.9771928    0.6277829</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6               0.9940837   0.9783703    0.6330626</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7               0.9916659   0.9694667    0.6401296</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8               0.9946612   0.9800665    0.6318319</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9               0.9934913   0.9823385    0.6386063</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10              0.9903188   0.9763723    0.6220630</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11              0.9877987   0.9702754    0.6337725</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12              0.9939394   0.9782226    0.6314429</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13              0.9904402   0.9730745    0.6297063</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    covar_of_row_col_means reciprocity    mutual transitivity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1               0.9946888   0.9778217 0.8537001    0.6058952</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2               0.9872959   0.9632488 0.8479933    0.6072045</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3               0.9923809   0.9769563 0.8452289    0.6215978</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4               0.9932157   0.9804325 0.8386779    0.6215075</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5               0.9909337   0.9771928 0.8510012    0.6277829</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6               0.9940837   0.9783703 0.8511690    0.6330626</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7               0.9916659   0.9694667 0.8468935    0.6401296</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8               0.9946612   0.9800665 0.8467016    0.6318319</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9               0.9934913   0.9823385 0.8402509    0.6386063</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10              0.9903188   0.9763723 0.8327355    0.6220630</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11              0.9877987   0.9702754 0.8336128    0.6337725</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12              0.9939394   0.9782226 0.8248941    0.6314429</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13              0.9904402   0.9730745 0.8389464    0.6297063</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>

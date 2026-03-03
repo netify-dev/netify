@@ -10,9 +10,10 @@ library(netify)
 library(ggplot2)
 ```
 
-We’ll also use the `ggnewscale` package to create multiple legends when
-necessary in the same plot (e.g., if you want to have legends for a
-color aesthetic for both nodes and edges).
+The advanced sections also use `dplyr` (for data manipulation) and
+`ggnewscale` (for multiple color legends). If `dplyr` is not installed,
+the core plotting workflow still runs; only the advanced
+edge-information section will be skipped.
 
 ``` r
 library(ggnewscale)
@@ -78,7 +79,7 @@ netlet
     ## • # Unique Actors: 34
     ## Network Summary Statistics (averaged across time):
     ##           dens miss    mean recip trans
-    ## verbCoop 0.861    0 179.484 0.978 0.928
+    ## verbCoop 0.887    0 179.484 0.978 0.928
     ## • Nodal Features: i_polity2, i_log_gdp, i_log_pop
     ## • Dyad Features: matlCoop, verbConf, matlConf
 
@@ -210,7 +211,7 @@ ggplot() +
     theme_netify()
 ```
 
-![](manual_plotting_files/figure-html/unnamed-chunk-5-1.png)
+![](manual_plotting_files/figure-html/unnamed-chunk-6-1.png)
 
 ### Changing the layout
 
@@ -366,7 +367,7 @@ ggplot() +
     )
 ```
 
-![](manual_plotting_files/figure-html/unnamed-chunk-8-1.png)
+![](manual_plotting_files/figure-html/unnamed-chunk-9-1.png)
 
 ## References
 

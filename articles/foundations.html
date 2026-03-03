@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-02-20</h4>
+            <h4 data-toc-skip class="date">2026-03-03</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/foundations.Rmd" class="external-link"><code>vignettes/foundations.Rmd</code></a></small>
       <div class="d-none name"><code>foundations.Rmd</code></div>
@@ -324,12 +324,12 @@ density plot) or for specific actors:</p>
 <span><span class="co">## 5   130 1995      1 0.005347594    0.01470588         1           0</span></span>
 <span><span class="co">## 6   135 1995      1 0.005347594    0.01470588         1           0</span></span>
 <span><span class="co">##   eigen_vector</span></span>
-<span><span class="co">## 1            0</span></span>
-<span><span class="co">## 2            0</span></span>
-<span><span class="co">## 3            0</span></span>
-<span><span class="co">## 4            0</span></span>
-<span><span class="co">## 5            0</span></span>
-<span><span class="co">## 6            0</span></span></code></pre>
+<span><span class="co">## 1 0.000000e+00</span></span>
+<span><span class="co">## 2 1.859766e-17</span></span>
+<span><span class="co">## 3 0.000000e+00</span></span>
+<span><span class="co">## 4 0.000000e+00</span></span>
+<span><span class="co">## 5 2.385219e-18</span></span>
+<span><span class="co">## 6 1.926012e-17</span></span></code></pre>
 <p>We can look at the distribution of the statistic for all actors over
 time:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -462,7 +462,7 @@ nodal data information.</p>
 <span><span class="co">## 1      1 0.005347594 0.000000e+00</span></span>
 <span><span class="co">## 2      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 3      1 0.005347594 0.000000e+00</span></span>
-<span><span class="co">## 4      0 0.000000000 5.137642e-20</span></span>
+<span><span class="co">## 4      0 0.000000000 2.939324e-19</span></span>
 <span><span class="co">## 5      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 6      1 0.005235602 4.953675e-03</span></span></code></pre>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
@@ -479,7 +479,7 @@ nodal data information.</p>
 <span><span class="co">## 1      1 0.005347594 0.000000e+00</span></span>
 <span><span class="co">## 2      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 3      1 0.005347594 0.000000e+00</span></span>
-<span><span class="co">## 4      0 0.000000000 5.137642e-20</span></span>
+<span><span class="co">## 4      0 0.000000000 2.939324e-19</span></span>
 <span><span class="co">## 5      0 0.000000000 0.000000e+00</span></span>
 <span><span class="co">## 6      1 0.005235602 4.953675e-03</span></span></code></pre>
 <p>And now return to our network graph by highlighting specific nodal
@@ -517,14 +517,14 @@ work identically if you prefer that style.</p>
 <p>We might also prefer to add labels, but only a select few:</p>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vincentarelbundock.github.io/countrycode/" class="external-link">countrycode</a></span><span class="op">)</span></span>
-<span><span class="va">cowns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/reference/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span></span>
+<span><span class="va">cowns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>        <span class="st">"United States"</span>, <span class="st">"China"</span>, <span class="st">"Russia"</span>,</span>
 <span>        <span class="st">"France"</span>, <span class="st">"Germany"</span>, <span class="st">"United Kingdom"</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    <span class="st">"country.name"</span>, <span class="st">"cown"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">cabbs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/reference/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">cowns</span>, <span class="st">"cown"</span>, <span class="st">"iso3c"</span><span class="op">)</span></span>
+<span><span class="va">cabbs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">cowns</span>, <span class="st">"cown"</span>, <span class="st">"iso3c"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
@@ -544,10 +544,8 @@ work identically if you prefer that style.</p>
 <span><span class="co">## (`geom_segment()`).</span></span></code></pre>
 <pre><code><span><span class="co">## Warning: Removed 839 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_text_repel()`).</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: ggrepel: 2 unlabeled data points (too many overlaps). Consider</span></span>
-<span><span class="co">## increasing max.overlaps</span></span></code></pre>
 <p><img src="foundations_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="900"></p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># or we can go with labels only</span></span>
 <span><span class="co"># and remove points</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
@@ -576,7 +574,7 @@ work identically if you prefer that style.</p>
 <p>If you need to convert a netify object back into a dyadic data frame
 — for example, to run regressions or export to other software — use
 <code><a href="../reference/unnetify.html">unnetify()</a></code>:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mid_long_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/unnetify.html">unnetify</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mid_long_df</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   from  to time cowmidonset   capdist</span></span>
@@ -600,7 +598,7 @@ to continue analyzing the data using different modeling approaches.
 aren’t! And for the sake of convergence lets go with cross-sectional
 networks.</p>
 <p>First, prep the data:</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># prep data</span></span>
 <span><span class="va">cow_cross</span> <span class="op">&lt;-</span> <span class="va">cow_dyads</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ccode1</span>, <span class="va">ccode2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -645,8 +643,12 @@ networks.</p>
 <span>    dyad_vars_symmetric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Next, let’s take a look at passing our netify object to the
-<code>amen</code> function:</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code>amen</code> function. <em>Note: this chunk runs only when the
+<code>amen</code> package is installed
+(<code>install.packages("amen")</code>). If <code>amen</code> is not
+available, the chunk is skipped but the rest of the vignette is
+unaffected.</em></p>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pdhoff/amen" class="external-link">amen</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># prep for amen</span></span>
@@ -672,7 +674,7 @@ networks.</p>
 <span><span class="co">##   ..- attr(*, "dimnames")=List of 2</span></span>
 <span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
 <span><span class="co">##   .. ..$ : chr [1:6] "polity21" "polity22" "wbgdp2011est1" "wbgdp2011est2" ...</span></span></code></pre>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plug and run</span></span>
 <span><span class="va">mid_amen_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/amen/man/ame.html" class="external-link">ame</a></span><span class="op">(</span></span>
 <span>    Y <span class="op">=</span> <span class="va">mid_cross_amen</span><span class="op">$</span><span class="va">Y</span>,</span>
@@ -689,8 +691,12 @@ networks.</p>
 <span>    print <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## WARNING: replacing NAs in design matrix with zeros</span></span></code></pre>
-<p>We can apply the same process to ERGMs:</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<p>We can apply the same process to ERGMs. <em>Note: this chunk runs
+only when the <code>ergm</code> package is installed
+(<code>install.packages("ergm")</code>). If <code>ergm</code> is not
+available, the chunk is skipped but the rest of the vignette is
+unaffected.</em></p>
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://statnet.org" class="external-link">ergm</a></span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Loading required package: network</span></span></code></pre>
 <pre><code><span><span class="co">## </span></span>
@@ -706,7 +712,7 @@ networks.</p>
 <pre><code><span><span class="co">## 'ergm' 4 is a major update that introduces some backwards-incompatible</span></span>
 <span><span class="co">## changes. Please type 'news(package="ergm")' for a list of major</span></span>
 <span><span class="co">## changes.</span></span></code></pre>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># netify_to_statnet converts to a network object,</span></span>
 <span><span class="co"># which is what ergm uses</span></span>
 <span><span class="va">mid_cross_ergm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_statnet.html">netify_to_statnet</a></span><span class="op">(</span><span class="va">mid_cross_network</span><span class="op">)</span></span>
@@ -733,7 +739,7 @@ networks.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">##  Edge attribute names: </span></span>
 <span><span class="co">##     capdist_e cowmidonset</span></span></code></pre>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># set NA values to 0 for the three nodecov variables</span></span>
 <span><span class="co"># this is only for demonstration purposes in the vignette/example</span></span>
 <span><span class="co"># in any real analysis, carefully consider how to handle missing data</span></span>
