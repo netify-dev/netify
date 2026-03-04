@@ -9,8 +9,6 @@
   Networks](https://netify-dev.github.io/netify/articles/ego_networks.md):
 - [Manual Plotting with
   ggplot2](https://netify-dev.github.io/netify/articles/manual_plotting.md):
-- [Helpful
-  Resources](https://netify-dev.github.io/netify/articles/resources.md):
 
 ### Advanced Topics
 
@@ -20,3 +18,8 @@
   Networks](https://netify-dev.github.io/netify/articles/tracking_changes.md):
 - [Measuring Who Connects with Whom: Homophily & Dyadic
   Analysis](https://netify-dev.github.io/netify/articles/attribute_analysis.md):
+
+### Resources
+
+- [Helpful
+  Resources](https://netify-dev.github.io/netify/articles/resources.md):

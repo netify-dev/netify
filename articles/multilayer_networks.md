@@ -217,9 +217,9 @@ print(multilayer_homophily)
 #>   mean_similarity_connected mean_similarity_unconnected similarity_difference
 #> 1                 -6.964294                   -7.444698             0.4804043
 #> 2                 -7.016653                   -7.279288             0.2626347
-#>   p_value     ci_lower   ci_upper n_connected_pairs n_unconnected_pairs
-#> 1   0.000  0.021032704 0.06054891              4453                6573
-#> 2   0.126 -0.004820535 0.03571828              1201                9825
+#>   p_value    ci_lower   ci_upper n_connected_pairs n_unconnected_pairs
+#> 1   0.000  0.02178148 0.06172200              4453                6573
+#> 2   0.136 -0.00457230 0.03495701              1201                9825
 #>   n_missing n_pairs
 #> 1         3   11476
 #> 2         3   11476
