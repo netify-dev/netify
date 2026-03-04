@@ -2,6 +2,21 @@ url: https://netify-dev.github.io/netify/
 template:
   bootstrap: 5
 
+navbar:
+  structure:
+    left:
+      - intro
+      - reference
+      - articles
+      - resources
+    right:
+      - search
+      - github
+  components:
+    resources:
+      text: Resources
+      href: articles/resources.html
+
 articles:
   - title: "Getting Started"
     navbar: ~
@@ -10,13 +25,15 @@ articles:
     - event_data
     - ego_networks
     - manual_plotting
-    - resources
   - title: "Advanced Topics"
     navbar: ~
     contents:
     - multilayer_networks
     - tracking_changes
     - attribute_analysis
+  - title: "Resources"
+    contents:
+    - resources
 
 reference:
   - title: "Creating Networks"
