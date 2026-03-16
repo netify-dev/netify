@@ -111,18 +111,33 @@ netify <- function(
 	input_type = c("auto", "dyad_df", "netify_obj"),
 	nodelist = NULL,
 	...) {
-	# Match input type argument
+	# match input type argument
 	input_type <- match.arg(input_type)
 
-	# Determine processing path
+	# warn about missing_to_zero default when user hasn't explicitly set it
+	if (missing(missing_to_zero) && missing_to_zero) {
+		cli::cli_inform(
+			c(
+				"i" = "{.arg missing_to_zero} is set to {.val TRUE} (the default).",
+				"!" = "Missing dyads will be filled with zeros. For latent space or other
+				statistical network models, structural zeros and missing data have different
+				meanings. Set {.code missing_to_zero = FALSE} to preserve NAs if this distinction
+				matters for your analysis."
+			),
+			.frequency = "once",
+			.frequency_id = "netify_missing_to_zero_warning"
+		)
+	}
+
+	# determine processing path
 	use_network_path <- FALSE
 
 	if (input_type == "auto") {
-		# Auto-detect based on object type
+		# auto-detect based on object type
 		if (inherits(input, c("matrix", "array", "igraph", "network"))) {
 			use_network_path <- TRUE
 		} else if (is.list(input) && length(input) > 0) {
-			# Check if it's a list of network objects
+			# check if it's a list of network objects
 			first_elem <- input[[1]]
 			if (inherits(first_elem, c("matrix", "igraph", "network"))) {
 				use_network_path <- TRUE
@@ -133,9 +148,9 @@ netify <- function(
 	}
 	# else input_type == "dyad_df", use_network_path remains FALSE
 
-	# Route to appropriate processing path
+	# route to appropriate processing path
 	if (use_network_path) {
-		# Use to_netify for network objects
+		# use to_netify for network objects
 		return(to_netify(
 			net_obj = input,
 			weight = weight,
@@ -150,8 +165,8 @@ netify <- function(
 		))
 	}
 
-	# If we get here, treat as data.frame input
-	# Continue with the existing netify logic...
+	# if we get here, treat as data.frame input
+	# continue with the existing netify logic...
 
 	# checks on user inputs
 	dyad_data <- df_check(input)
@@ -186,22 +201,22 @@ netify <- function(
 		}
 	}
 
-	# Determine output_format based on actual data if not specified
+	# determine output_format based on actual data if not specified
 	if (is.null(output_format)) {
 		if (is.null(time)) {
 			output_format <- "cross_sec"
 		} else {
-			# Check how many unique time periods exist
+			# check how many unique time periods exist
 			n_time_periods <- length(unique(dyad_data[[time]]))
 
 			if (n_time_periods == 1) {
 				output_format <- "cross_sec"
-				# Inform user
+				# inform user
 				cli::cli_alert_info(
 					"Time variable specified but only one time period found. Creating cross-sectional network."
 				)
 			} else {
-				# Default to list format for multiple time periods
+				# default to list format for multiple time periods
 				output_format <- "longit_list"
 			}
 		}
@@ -252,11 +267,11 @@ netify <- function(
 	# check if nodal vars specified and if so add them to the object
 	if (!is.null(nodal_vars)) {
 		# pull out nodal data
-		nodeData <- unique(dyad_data[, c(actor1, time, nodal_vars)])
+		node_data <- unique(dyad_data[, c(actor1, time, nodal_vars)])
 
 		# add it in using add_node_vars function
 		netlet <- add_node_vars(
-			netlet = netlet, node_data = nodeData,
+			netlet = netlet, node_data = node_data,
 			actor = actor1, time = time,
 			node_vars = nodal_vars
 		)

@@ -3,20 +3,19 @@ set.seed(6886)
 # library(netify)
 # library(testthat)
 
-####
 # test basic directed aggregation
 test_that(
 	"aggregate_dyad: basic directed aggregation works",
 	{
 		# create test data with repeated dyads
-		test_data <- data.frame(
+		test_data = data.frame(
 			from = c("A", "A", "A", "B", "B", "C"),
 			to = c("B", "B", "C", "A", "C", "A"),
 			value = c(10, 20, 30, 40, 50, 60)
 		)
 
 		# aggregate
-		result <- aggregate_dyad(
+		result = aggregate_dyad(
 			dyad_data = test_data,
 			actor1 = "from",
 			actor2 = "to",
@@ -37,20 +36,19 @@ test_that(
 	}
 )
 
-####
 # test symmetric aggregation
 test_that(
 	"aggregate_dyad: symmetric aggregation works",
 	{
 		# create test data
-		test_data <- data.frame(
+		test_data = data.frame(
 			actor1 = c("USA", "China", "USA", "Russia"),
 			actor2 = c("China", "USA", "Russia", "USA"),
 			trade = c(100, 80, 50, 30)
 		)
 
 		# aggregate symmetrically
-		result <- aggregate_dyad(
+		result = aggregate_dyad(
 			dyad_data = test_data,
 			actor1 = "actor1",
 			actor2 = "actor2",
@@ -62,21 +60,20 @@ test_that(
 		expect_equal(nrow(result), 4) # 2 unique undirected dyads × 2 directions
 
 		# usa-china should equal china-usa = 180 (100 + 80)
-		usa_china <- result$trade[result$actor1 == "USA" & result$actor2 == "China"]
-		china_usa <- result$trade[result$actor1 == "China" & result$actor2 == "USA"]
+		usa_china = result$trade[result$actor1 == "USA" & result$actor2 == "China"]
+		china_usa = result$trade[result$actor1 == "China" & result$actor2 == "USA"]
 		expect_equal(usa_china, 180)
 		expect_equal(china_usa, 180)
 		expect_equal(usa_china, china_usa)
 	}
 )
 
-####
 # test temporal aggregation
 test_that(
 	"aggregate_dyad: temporal aggregation works",
 	{
 		# create temporal data
-		test_data <- data.frame(
+		test_data = data.frame(
 			sender = c("A", "A", "A", "A", "B", "B"),
 			receiver = c("B", "B", "B", "B", "A", "A"),
 			year = c(2020, 2020, 2021, 2021, 2020, 2021),
@@ -84,7 +81,7 @@ test_that(
 		)
 
 		# aggregate with time
-		result <- aggregate_dyad(
+		result = aggregate_dyad(
 			dyad_data = test_data,
 			actor1 = "sender",
 			actor2 = "receiver",
@@ -97,7 +94,7 @@ test_that(
 		expect_equal(nrow(result), 4) # 2 dyads × 2 years
 
 		# a->b in 2020 should be 8 (5 + 3)
-		ab_2020 <- result$events[
+		ab_2020 = result$events[
 			result$sender == "A" &
 				result$receiver == "B" &
 				result$year == 2020
@@ -105,7 +102,7 @@ test_that(
 		expect_equal(ab_2020, 8)
 
 		# a->b in 2021 should be 12 (10 + 2)
-		ab_2021 <- result$events[
+		ab_2021 = result$events[
 			result$sender == "A" &
 				result$receiver == "B" &
 				result$year == 2021
@@ -114,20 +111,19 @@ test_that(
 	}
 )
 
-####
 # test missing value handling
 test_that(
 	"aggregate_dyad: missing value handling works",
 	{
 		# create data with nas
-		test_data <- data.frame(
+		test_data = data.frame(
 			i = c("A", "A", "A", "B"),
 			j = c("B", "B", "C", "C"),
 			weight = c(10, NA, 20, 30)
 		)
 
 		# test ignore_missing = true (default)
-		result_ignore <- aggregate_dyad(
+		result_ignore = aggregate_dyad(
 			dyad_data = test_data,
 			actor1 = "i",
 			actor2 = "j",
@@ -143,7 +139,7 @@ test_that(
 		)
 
 		# test ignore_missing = false
-		result_na <- aggregate_dyad(
+		result_na = aggregate_dyad(
 			dyad_data = test_data,
 			actor1 = "i",
 			actor2 = "j",
@@ -159,20 +155,19 @@ test_that(
 	}
 )
 
-####
 # test column preservation
 test_that(
 	"aggregate_dyad: preserves original column names",
 	{
 		# create data with custom column names
-		test_data <- data.frame(
+		test_data = data.frame(
 			exporter = c("Mexico", "Mexico", "Canada"),
 			importer = c("USA", "USA", "USA"),
 			trade_value = c(100, 200, 300)
 		)
 
 		# aggregate
-		result <- aggregate_dyad(
+		result = aggregate_dyad(
 			dyad_data = test_data,
 			actor1 = "exporter",
 			actor2 = "importer",
@@ -185,20 +180,19 @@ test_that(
 	}
 )
 
-####
 # test self-loops in symmetric aggregation
 test_that(
 	"aggregate_dyad: handles self-loops correctly in symmetric case",
 	{
 		# create data with self-loops
-		test_data <- data.frame(
+		test_data = data.frame(
 			from = c("A", "A", "B", "B"),
 			to = c("A", "B", "A", "B"),
 			count = c(10, 20, 30, 40)
 		)
 
 		# aggregate symmetrically
-		result <- aggregate_dyad(
+		result = aggregate_dyad(
 			dyad_data = test_data,
 			actor1 = "from",
 			actor2 = "to",
@@ -207,17 +201,16 @@ test_that(
 		)
 
 		# check self-loops appear only once
-		self_loops <- result[result$from == result$to, ]
+		self_loops = result[result$from == result$to, ]
 		expect_equal(nrow(self_loops), 2) # a-a and b-b
 		expect_equal(self_loops$count[self_loops$from == "A"], 10)
 		expect_equal(self_loops$count[self_loops$from == "B"], 40)
 
 		# check a-b = b-a = 50 (20 + 30)
-		ab_count <- result$count[result$from == "A" & result$to == "B"]
-		ba_count <- result$count[result$from == "B" & result$to == "A"]
+		ab_count = result$count[result$from == "A" & result$to == "B"]
+		ba_count = result$count[result$from == "B" & result$to == "A"]
 		expect_equal(ab_count, 50)
 		expect_equal(ba_count, 50)
 	}
 )
 
-####

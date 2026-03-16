@@ -120,7 +120,7 @@ get_adjacency_array <- function(
 	}
 
 	# add weight if not supplied
-	wOrig <- weight
+	w_orig <- weight
 	if (is.null(weight)) {
 		dyad_data$weight_var <- 1
 		weight <- "weight_var"
@@ -138,18 +138,18 @@ get_adjacency_array <- function(
 	actors_cols <- unique_vector(dyad_data[, actor2])
 	actors <- unique_vector(actors_rows, actors_cols)
 	
-	# Incorporate nodelist if provided
+	# incorporate nodelist if provided
 	if (!is.null(nodelist)) {
-		# Convert to character to ensure consistency
+		# convert to character to ensure consistency
 		nodelist <- as.character(nodelist)
 		
-		# Add any missing actors from nodelist
+		# add any missing actors from nodelist
 		if (mode == "unipartite") {
 			actors <- unique_vector(actors, nodelist)
 			actors_rows <- actors_cols <- actors
 		} else {
-			# For bipartite, assume nodelist contains all actors
-			# User should specify which are row/col actors
+			# for bipartite, assume nodelist contains all actors
+			# user should specify which are row/col actors
 			cli::cli_alert_info("For bipartite networks, nodelist should contain all actors. Assigning to both row and column actors.")
 			actors_rows <- unique_vector(actors_rows, nodelist)
 			actors_cols <- unique_vector(actors_cols, nodelist)
@@ -170,7 +170,7 @@ get_adjacency_array <- function(
 	# check if there are repeating dyads
 	num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2, time)
 	if (num_repeat_dyads > 0) {
-		edge_value_check(wOrig, sum_dyads, TRUE)
+		edge_value_check(w_orig, sum_dyads, TRUE)
 	}
 
 	# aggregate data if sum dyads selected
@@ -183,10 +183,10 @@ get_adjacency_array <- function(
 		dyad_data <- dyad_data[dyad_data[, weight] != 0, ]
 	}
 
-	# Pre-split data by time periods for faster subsetting
+	# pre-split data by time periods for faster subsetting
 	time_indices <- split(seq_len(nrow(dyad_data)), dyad_data[, time])
 
-	# Cache frequently accessed columns
+	# cache frequently accessed columns
 	dyad_actor1 <- dyad_data[, actor1]
 	dyad_actor2 <- dyad_data[, actor2]
 	dyad_weight <- dyad_data[, weight]
@@ -208,7 +208,7 @@ get_adjacency_array <- function(
 		time_pd <- time_pds[t_idx]
 		time_pd_num <- time_pds_num[t_idx]
 
-		# Get indices for this time period using pre-split data
+		# get indices for this time period using pre-split data
 		slice_indices <- time_indices[[as.character(time_pd_num)]]
 		if (is.null(slice_indices)) slice_indices <- integer(0)
 
@@ -218,13 +218,13 @@ get_adjacency_array <- function(
 			slice_actor2 <- dyad_actor2[slice_indices]
 			value <- dyad_weight[slice_indices]
 
-			# Pre-compute matrix indices to avoid repeated match() calls
-			matRowIndices <- match(slice_actor1, actors_rows)
-			matColIndices <- match(slice_actor2, actors_cols)
+			# pre-compute matrix indices to avoid repeated match() calls
+			mat_row_indices <- match(slice_actor1, actors_rows)
+			mat_col_indices <- match(slice_actor2, actors_cols)
 		} else {
 			value <- numeric(0)
-			matRowIndices <- integer(0)
-			matColIndices <- integer(0)
+			mat_row_indices <- integer(0)
+			mat_col_indices <- integer(0)
 		}
 
 		# create logical value that is TRUE if weight is just 0/1
@@ -237,8 +237,8 @@ get_adjacency_array <- function(
 			n_cols = length(actors_cols),
 			actors_rows = actors_rows,
 			actors_cols = actors_cols,
-			matRowIndices = matRowIndices,
-			matColIndices = matColIndices,
+			matRowIndices = mat_row_indices,
+			matColIndices = mat_col_indices,
 			value = value,
 			symmetric = user_symmetric,
 			missing_to_zero = missing_to_zero,
@@ -252,7 +252,7 @@ get_adjacency_array <- function(
 	# if user left weight NULL and set sum_dyads
 	# to FALSE then record weight as NULL for
 	# attribute purposes
-	if (!sum_dyads && is.null(wOrig)) {
+	if (!sum_dyads && is.null(w_orig)) {
 		weight <- NULL
 	}
 

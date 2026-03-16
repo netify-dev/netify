@@ -76,7 +76,7 @@ plot_homophily <- function(
 	# what we doing
 	type <- match.arg(type)
 
-	# For distribution plots, we need both netlet and attribute
+	# for distribution plots, we need both netlet and attribute
 	if (type == "distribution" && (is.null(netlet) || is.null(attribute))) {
 		cli::cli_abort(c(
 			"x" = "Distribution plots require both 'netlet' and 'attribute' parameters.",
@@ -84,7 +84,7 @@ plot_homophily <- function(
 		))
 	}
 
-	# Check if this is a multilayer network and suggest alternative
+	# check if this is a multilayer network and suggest alternative
 	if (type == "distribution" && !is.null(netlet)) {
 		obj_attrs <- attributes(netlet)
 		layers <- obj_attrs$layers
@@ -152,7 +152,7 @@ plot_homophily_distribution <- function(
 		))
 	}
 
-	# Debug: Check the structure of similarity_data
+	# debug: check the structure of similarity_data
 	cli::cli_alert_info("Similarity data dimensions: {nrow(similarity_data)} rows x {ncol(similarity_data)} cols")
 	cli::cli_alert_info("Connected levels: {paste(levels(similarity_data$connected), collapse=', ')}")
 	cli::cli_alert_info("Connected counts: Connected={sum(similarity_data$connected == 'Connected')}, Not Connected={sum(similarity_data$connected == 'Not Connected')}")
@@ -183,7 +183,7 @@ plot_homophily_distribution <- function(
 		# create a contingency table of similarity and connection status
 		cont_table <- table(similarity_data$similarity, similarity_data$connected)
 
-		# Check if table is valid
+		# check if table is valid
 		if (nrow(cont_table) == 0 || ncol(cont_table) == 0) {
 			cli::cli_abort(c(
 				"x" = "Unable to create contingency table from similarity data.",
@@ -244,7 +244,7 @@ plot_homophily_distribution <- function(
 	} else {
 		# for continuous variables, create a density plot
 
-		# Final check before plotting
+		# final check before plotting
 		n_connected <- sum(similarity_data$connected == "Connected")
 		n_not_connected <- sum(similarity_data$connected == "Not Connected")
 
@@ -345,7 +345,7 @@ plot_homophily_comparison <- function(homophily_results, colors, ...) {
 			if ("attribute" %in% names(comparison_data)) {
 				comparison_data$attribute_name <- comparison_data$attribute
 			} else {
-				# If no attribute column, use row names or index
+				# if no attribute column, use row names or index
 				comparison_data$attribute_name <- rownames(comparison_data)
 				if (is.null(comparison_data$attribute_name)) {
 					comparison_data$attribute_name <- paste0("Attribute_", seq_len(nrow(comparison_data)))
@@ -362,23 +362,23 @@ plot_homophily_comparison <- function(homophily_results, colors, ...) {
 	}
 
 	# add a col to indicate stat sig - always recalculate to ensure accuracy
-	# First check if there's already a 'significant' column and remove it to avoid conflicts
+	# first check if there's already a 'significant' column and remove it to avoid conflicts
 	if ("significant" %in% names(comparison_data)) {
 		comparison_data$significant <- NULL
 	}
 
-	# Check if p_value exists, if not check for p.value (different naming conventions)
+	# check if p_value exists, if not check for p.value (different naming conventions)
 	if ("p_value" %in% names(comparison_data)) {
 		comparison_data$significant <- comparison_data$p_value < 0.05
 	} else if ("p.value" %in% names(comparison_data)) {
 		comparison_data$significant <- comparison_data$p.value < 0.05
 	} else {
-		# If no p-value column found, default to FALSE
+		# if no p-value column found, default to FALSE
 		cli::cli_alert_warning("No p-value column found in homophily results. Setting all to non-significant.")
 		comparison_data$significant <- FALSE
 	}
 
-	# Create unique labels if we have layers
+	# create unique labels if we have layers
 	if ("layer" %in% names(comparison_data) && length(unique(comparison_data$layer)) > 1) {
 		comparison_data$plot_label <- paste0(comparison_data$attribute_name, " (", comparison_data$layer, ")")
 	} else {
@@ -563,7 +563,7 @@ extract_similarity_data <- function(netlet, attribute, method) {
 		# extract first time period if it's longitudinal
 		if (netify_type == "longit_array") {
 			netlet <- netlet[, , 1]
-			# Also extract nodal data for first time period
+			# also extract nodal data for first time period
 			if (!is.null(nodal_data) && is.list(nodal_data)) {
 				time_names <- names(nodal_data)
 				if (length(time_names) > 0) {
@@ -572,7 +572,7 @@ extract_similarity_data <- function(netlet, attribute, method) {
 			}
 		} else if (netify_type == "longit_list") {
 			netlet <- netlet[[1]]
-			# Also extract nodal data for first time period
+			# also extract nodal data for first time period
 			if (!is.null(nodal_data) && is.list(nodal_data)) {
 				time_names <- names(nodal_data)
 				if (length(time_names) > 0) {
@@ -582,12 +582,12 @@ extract_similarity_data <- function(netlet, attribute, method) {
 		}
 	}
 
-	# Handle multilayer networks - use first layer
+	# handle multilayer networks - use first layer
 	if (length(layers) > 1 && netify_type == "cross_sec") {
 		cli::cli_alert_info("Distribution plots for multilayer networks will use the first layer: {layers[1]}")
-		# Extract first layer as matrix
+		# extract first layer as matrix
 		net_matrix <- netlet[, , 1]
-		# Ensure row/column names are preserved
+		# ensure row/column names are preserved
 		if (is.null(rownames(net_matrix))) {
 			rownames(net_matrix) <- dimnames(netlet)[[1]]
 			colnames(net_matrix) <- dimnames(netlet)[[2]]
@@ -626,15 +626,14 @@ extract_similarity_data <- function(netlet, attribute, method) {
 	# calculate similarity matrix (uses some external function)
 	similarity_matrix <- calculate_similarity_matrix(node_attrs, method)
 
-	# IMPORTANT: Set row/column names to match the network matrix
-	# The calculate_similarity_matrix function returns a matrix without names
+	# set row/column names to match the network matrix
 	rownames(similarity_matrix) <- rownames(net_matrix)
 	colnames(similarity_matrix) <- colnames(net_matrix)
 
 	# turn the network into a binary matrix
 	binary_net <- (net_matrix > 0) & !is.na(net_matrix)
 
-	# Debug: check matrix dimensions before melting
+	# debug: check matrix dimensions before melting
 	cli::cli_alert_info("Similarity matrix: {nrow(similarity_matrix)}x{ncol(similarity_matrix)}")
 	cli::cli_alert_info("Binary network: {nrow(binary_net)}x{ncol(binary_net)}")
 
@@ -642,13 +641,13 @@ extract_similarity_data <- function(netlet, attribute, method) {
 	similarity_melted <- melt_matrix(similarity_matrix, remove_zeros = FALSE, remove_diagonal = TRUE)
 	binary_melted <- melt_matrix(binary_net, remove_zeros = FALSE, remove_diagonal = TRUE)
 
-	# Check if melting produced valid results
+	# check if melting produced valid results
 	if (nrow(similarity_melted) == 0 || nrow(binary_melted) == 0) {
 		cli::cli_alert_danger("Matrix melting produced empty results.")
 		return(NULL)
 	}
 
-	# Debug: Check column names
+	# debug: check column names
 	if (!"Var1" %in% names(similarity_melted) || !"Var2" %in% names(similarity_melted)) {
 		cli::cli_alert_danger("Similarity melted data missing Var1/Var2 columns. Columns: {paste(names(similarity_melted), collapse=', ')}")
 		return(NULL)
@@ -662,13 +661,13 @@ extract_similarity_data <- function(netlet, attribute, method) {
 	sim_keys <- paste(similarity_melted$Var1, similarity_melted$Var2, sep = "_")
 	bin_keys <- paste(binary_melted$Var1, binary_melted$Var2, sep = "_")
 
-	# Debug: check key lengths
+	# debug: check key lengths
 	cli::cli_alert_info("Similarity keys: {length(sim_keys)}, Binary keys: {length(bin_keys)}")
 
 	# find matching rows
 	match_idx <- match(sim_keys, bin_keys)
 
-	# Debug: check match results
+	# debug: check match results
 	n_matched <- sum(!is.na(match_idx))
 	n_unmatched <- sum(is.na(match_idx))
 	cli::cli_alert_info("Matched: {n_matched}, Unmatched: {n_unmatched}")
@@ -682,38 +681,38 @@ extract_similarity_data <- function(netlet, attribute, method) {
 		match_idx <- match_idx[valid_idx]
 	}
 
-	# Check if we have any valid matches
+	# check if we have any valid matches
 	if (length(match_idx) == 0 || nrow(similarity_melted) == 0) {
 		cli::cli_alert_danger("No valid similarity-network pairs found.")
 		return(NULL)
 	}
 
-	# Check that match_idx values are within bounds
+	# check that match_idx values are within bounds
 	if (any(match_idx > nrow(binary_melted))) {
 		cli::cli_alert_danger("Match indices exceed binary matrix bounds.")
 		return(NULL)
 	}
 
-	# Check that binary_melted has the expected structure
+	# check that binary_melted has the expected structure
 	if (!"value" %in% names(binary_melted)) {
 		cli::cli_alert_danger("Binary network data doesn't have expected 'value' column.")
 		return(NULL)
 	}
 
-	# Extract connection values safely
+	# extract connection values safely
 	connection_values <- binary_melted$value[match_idx]
 
-	# Check if we got valid connection values
+	# check if we got valid connection values
 	if (length(connection_values) == 0 || all(is.na(connection_values))) {
 		cli::cli_alert_danger("No valid connection values found after matching.")
 		return(NULL)
 	}
 
 	# build the final data frame
-	# First create the connected labels
+	# first create the connected labels
 	connected_labels <- ifelse(connection_values == 1, "Connected", "Not Connected")
 
-	# Check that we have both levels
+	# check that we have both levels
 	if (!("Connected" %in% connected_labels) || !("Not Connected" %in% connected_labels)) {
 		cli::cli_alert_warning("Data may only contain one type of connection status.")
 	}
@@ -731,16 +730,16 @@ extract_similarity_data <- function(netlet, attribute, method) {
 	complete_idx <- which(complete.cases(similarity_data))
 	similarity_data <- similarity_data[complete_idx, ]
 
-	# Final check: ensure we have some data to return
+	# final check: ensure we have some data to return
 	if (nrow(similarity_data) == 0) {
 		cli::cli_alert_danger("No valid similarity data remaining after filtering.")
 		return(NULL)
 	}
 
-	# Ensure factor levels are properly set
+	# ensure factor levels are properly set
 	similarity_data$connected <- droplevels(similarity_data$connected)
 
-	# One more check
+	# one more check
 	if (length(levels(similarity_data$connected)) == 0) {
 		cli::cli_alert_danger("Connected factor has no levels.")
 		return(NULL)

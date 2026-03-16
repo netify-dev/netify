@@ -8,19 +8,19 @@ set.seed(6886)
 data(icews)
 
 # subset to a particular country in event data
-nigeria <- icews[icews$verbConf > 0, ]
-nigeria <- nigeria[, c("i", "j", "year")]
-names(nigeria) <- c("actor1", "actor2", "year")
+nigeria = icews[icews$verbConf > 0, ]
+nigeria = nigeria[, c("i", "j", "year")]
+names(nigeria) = c("actor1", "actor2", "year")
 
 # subset to particular year in icews
-icews_10 <- icews[icews$year == "2010", ]
+icews_10 = icews[icews$year == "2010", ]
 
 test_that(
 	"mutate_weights: cross-sectional weighted to log-transformed",
 	{
 		# create weighted network
-		icews_10 <- icews[icews$year == "2010", ]
-		net_weighted <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net_weighted = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
@@ -28,7 +28,7 @@ test_that(
 		)
 
 		# transform to log
-		net_log <- mutate_weights(
+		net_log = mutate_weights(
 			net_weighted,
 			transform_fn = log,
 			add_constant = 1,
@@ -41,8 +41,8 @@ test_that(
 		expect_false(attr(net_log, "is_binary"))
 
 		# check transformation
-		orig_mat <- get_raw(net_weighted)
-		trans_mat <- get_raw(net_log)
+		orig_mat = get_raw(net_weighted)
+		trans_mat = get_raw(net_log)
 		expect_equal(trans_mat, log(orig_mat + 1))
 
 		# check original preserved
@@ -54,8 +54,8 @@ test_that(
 	"mutate_weights: cross-sectional weighted to binary",
 	{
 		# create weighted network
-		icews_10 <- icews[icews$year == "2010", ]
-		net_weighted <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net_weighted = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
@@ -66,7 +66,7 @@ test_that(
 		expect_false(attr(net_weighted, "is_binary"))
 
 		# binarize
-		net_binary <- mutate_weights(
+		net_binary = mutate_weights(
 			net_weighted,
 			transform_fn = function(x) ifelse(x > 0, 1, 0),
 			new_name = "conflict_present"
@@ -78,7 +78,7 @@ test_that(
 		expect_equal(attr(net_binary, "detail_weight"), "conflict_present (binarized)")
 
 		# verify binarization
-		trans_mat <- get_raw(net_binary)
+		trans_mat = get_raw(net_binary)
 		expect_true(all(trans_mat %in% c(0, 1, NA)))
 	}
 )
@@ -87,11 +87,11 @@ test_that(
 	"mutate_weights: cross-sectional binary to weighted",
 	{
 		# create binary network
-		nigeria <- icews[icews$verbConf > 0, ]
-		nigeria <- nigeria[, c("i", "j", "year")]
-		nigeria_10 <- nigeria[nigeria$year == "2010", ]
+		nigeria = icews[icews$verbConf > 0, ]
+		nigeria = nigeria[, c("i", "j", "year")]
+		nigeria_10 = nigeria[nigeria$year == "2010", ]
 
-		net_binary <- netify(
+		net_binary = netify(
 			nigeria_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = TRUE
@@ -101,7 +101,7 @@ test_that(
 		expect_true(attr(net_binary, "is_binary"))
 
 		# make weighted
-		net_weighted <- mutate_weights(
+		net_weighted = mutate_weights(
 			net_binary,
 			transform_fn = function(x) x * 10,
 			new_name = "weighted_ties"
@@ -112,8 +112,8 @@ test_that(
 		expect_equal(attr(net_weighted, "detail_weight"), "weighted_ties (weighted from binary)")
 
 		# verify transformation
-		orig_mat <- get_raw(net_binary)
-		trans_mat <- get_raw(net_weighted)
+		orig_mat = get_raw(net_binary)
+		trans_mat = get_raw(net_weighted)
 		expect_equal(trans_mat, orig_mat * 10)
 	}
 )
@@ -122,7 +122,7 @@ test_that(
 	"mutate_weights: longitudinal array with sqrt transformation",
 	{
 		# create longitudinal array
-		net_array <- netify(
+		net_array = netify(
 			icews,
 			actor1 = "i", actor2 = "j", time = "year",
 			symmetric = FALSE,
@@ -131,7 +131,7 @@ test_that(
 		)
 
 		# sqrt transform
-		net_sqrt <- mutate_weights(
+		net_sqrt = mutate_weights(
 			net_array,
 			transform_fn = sqrt,
 			new_name = "sqrt_verbCoop"
@@ -142,8 +142,8 @@ test_that(
 		expect_false(attr(net_sqrt, "is_binary"))
 
 		# verify transformation for specific time slice
-		orig_slice <- get_raw(net_array)[, , "2010"]
-		trans_slice <- get_raw(net_sqrt)[, , "2010"]
+		orig_slice = get_raw(net_array)[, , "2010"]
+		trans_slice = get_raw(net_sqrt)[, , "2010"]
 		expect_equal(trans_slice, sqrt(orig_slice))
 	}
 )
@@ -152,7 +152,7 @@ test_that(
 	"mutate_weights: longitudinal list with normalization",
 	{
 		# create longitudinal list
-		net_list <- netify(
+		net_list = netify(
 			icews,
 			actor1 = "i", actor2 = "j", time = "year",
 			symmetric = FALSE,
@@ -161,7 +161,7 @@ test_that(
 		)
 
 		# normalize by max value per time period
-		net_norm <- mutate_weights(
+		net_norm = mutate_weights(
 			net_list,
 			transform_fn = function(x) x / max(x, na.rm = TRUE),
 			new_name = "norm_matlCoop"
@@ -169,8 +169,8 @@ test_that(
 
 		# check each time period
 		for (t in names(net_norm)) {
-			mat <- get_raw(net_norm[[t]])
-			max_val <- max(mat, na.rm = TRUE)
+			mat = get_raw(net_norm[[t]])
+			max_val = max(mat, na.rm = TRUE)
 			expect_true(max_val <= 1.0001) # account for floating point
 		}
 
@@ -184,7 +184,7 @@ test_that(
 	"mutate_weights: longitudinal list binarization updates all periods",
 	{
 		# create weighted longitudinal network
-		net_list <- netify(
+		net_list = netify(
 			icews,
 			actor1 = "i", actor2 = "j", time = "year",
 			symmetric = FALSE,
@@ -193,7 +193,7 @@ test_that(
 		)
 
 		# binarize all periods
-		net_binary <- mutate_weights(
+		net_binary = mutate_weights(
 			net_list,
 			transform_fn = function(x) ifelse(x > 0, 1, 0),
 			new_name = "conflict_binary"
@@ -205,7 +205,7 @@ test_that(
 		# check each period is binary
 		for (i in seq_along(net_binary)) {
 			expect_true(attr(net_binary[[i]], "is_binary"))
-			mat <- get_raw(net_binary[[i]])
+			mat = get_raw(net_binary[[i]])
 			expect_true(all(mat %in% c(0, 1, NA)))
 		}
 	}
@@ -215,8 +215,8 @@ test_that(
 	"mutate_weights: keep_original = FALSE works correctly",
 	{
 		# create network
-		icews_10 <- icews[icews$year == "2010", ]
-		net <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
@@ -224,14 +224,14 @@ test_that(
 		)
 
 		# transform without keeping original
-		net_trans <- mutate_weights(
+		net_trans = mutate_weights(
 			net,
 			transform_fn = log1p,
 			keep_original = FALSE
 		)
 
 		# verify no original_weight in dyad_data
-		dyad_vars <- names(attr(net_trans, "dyad_data")[["1"]])
+		dyad_vars = names(attr(net_trans, "dyad_data")[["1"]])
 		expect_false("original_weight" %in% dyad_vars)
 	}
 )
@@ -240,8 +240,8 @@ test_that(
 	"mutate_weights: handles NA values correctly",
 	{
 		# create network with NAs
-		icews_10 <- icews[icews$year == "2010", ]
-		net <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
@@ -249,23 +249,23 @@ test_that(
 		)
 
 		# introduce some NAs
-		raw_mat <- get_raw(net)
-		raw_mat[1:5, 1:5] <- NA
-		net[, ] <- raw_mat
+		raw_mat = get_raw(net)
+		raw_mat[1:5, 1:5] = NA
+		net[, ] = raw_mat
 
 		# transform
-		net_log <- mutate_weights(
+		net_log = mutate_weights(
 			net,
 			transform_fn = log1p
 		)
 
 		# check NAs preserved
-		trans_mat <- get_raw(net_log)
+		trans_mat = get_raw(net_log)
 		expect_true(all(is.na(trans_mat[1:5, 1:5])))
 
 		# check non-NA values transformed
-		non_na_orig <- raw_mat[!is.na(raw_mat)]
-		non_na_trans <- trans_mat[!is.na(trans_mat)]
+		non_na_orig = raw_mat[!is.na(raw_mat)]
+		non_na_trans = trans_mat[!is.na(trans_mat)]
 		expect_equal(non_na_trans, log1p(non_na_orig))
 	}
 )
@@ -274,17 +274,17 @@ test_that(
 	"mutate_weights: identity transformation preserves binary status",
 	{
 		# create binary network
-		nigeria <- icews[icews$verbConf > 0, ]
-		nigeria_10 <- nigeria[nigeria$year == "2010", ]
+		nigeria = icews[icews$verbConf > 0, ]
+		nigeria_10 = nigeria[nigeria$year == "2010", ]
 
-		net_binary <- netify(
+		net_binary = netify(
 			nigeria_10[, c("i", "j")],
 			actor1 = "i", actor2 = "j",
 			symmetric = TRUE
 		)
 
 		# identity transform
-		net_identity <- mutate_weights(
+		net_identity = mutate_weights(
 			net_binary,
 			transform_fn = function(x) x
 		)
@@ -299,14 +299,14 @@ test_that(
 	"mutate_weights: complex transformation on bipartite network",
 	{
 		# create bipartite network
-		bip_data <- data.frame(
+		bip_data = data.frame(
 			actor1 = rep(paste0("A", 1:3), each = 4),
 			actor2 = rep(paste0("B", 1:4), 3),
 			weight = rpois(12, lambda = 5),
 			stringsAsFactors = FALSE
 		)
 
-		net_bip <- netify(
+		net_bip = netify(
 			bip_data,
 			actor1 = "actor1",
 			actor2 = "actor2",
@@ -315,7 +315,7 @@ test_that(
 		)
 
 		# power transformation
-		net_power <- mutate_weights(
+		net_power = mutate_weights(
 			net_bip,
 			transform_fn = function(x) x^2,
 			new_name = "weight_squared"
@@ -325,8 +325,8 @@ test_that(
 		expect_equal(attr(net_power, "mode"), "bipartite")
 
 		# verify transformation
-		orig_mat <- get_raw(net_bip)
-		trans_mat <- get_raw(net_power)
+		orig_mat = get_raw(net_bip)
+		trans_mat = get_raw(net_power)
 		expect_equal(trans_mat, orig_mat^2)
 	}
 )
@@ -335,8 +335,8 @@ test_that(
 	"mutate_weights: standardization (z-scores) transformation",
 	{
 		# create weighted network
-		icews_10 <- icews[icews$year == "2010", ]
-		net <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
@@ -344,11 +344,11 @@ test_that(
 		)
 
 		# standardize
-		net_std <- mutate_weights(
+		net_std = mutate_weights(
 			net,
 			transform_fn = function(x) {
-				mean_x <- mean(x, na.rm = TRUE)
-				sd_x <- sd(x, na.rm = TRUE)
+				mean_x = mean(x, na.rm = TRUE)
+				sd_x = sd(x, na.rm = TRUE)
 				return((x - mean_x) / sd_x)
 			},
 			new_name = "verbCoop_standardized"
@@ -359,9 +359,9 @@ test_that(
 		expect_false(attr(net_std, "is_binary"))
 
 		# verify standardization (mean ~0, sd ~1)
-		trans_mat <- get_raw(net_std)
-		trans_vec <- as.vector(trans_mat)
-		trans_vec <- trans_vec[!is.na(trans_vec)]
+		trans_mat = get_raw(net_std)
+		trans_vec = as.vector(trans_mat)
+		trans_vec = trans_vec[!is.na(trans_vec)]
 		expect_true(abs(mean(trans_vec)) < 1e-10) # mean ~0
 		expect_true(abs(sd(trans_vec) - 1) < 1e-10) # sd ~1
 	}
@@ -371,8 +371,8 @@ test_that(
 	"mutate_weights: rank transformation",
 	{
 		# create weighted network
-		icews_10 <- icews[icews$year == "2010", ]
-		net <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
@@ -380,7 +380,7 @@ test_that(
 		)
 
 		# rank transformation
-		net_rank <- mutate_weights(
+		net_rank = mutate_weights(
 			net,
 			transform_fn = function(x) rank(x, na.last = "keep"),
 			new_name = "verbCoop_ranked"
@@ -391,9 +391,9 @@ test_that(
 		expect_false(attr(net_rank, "is_binary"))
 
 		# verify ranks are reasonable (positive, finite)
-		trans_mat <- get_raw(net_rank)
-		trans_vec <- as.vector(trans_mat)
-		trans_vec <- trans_vec[!is.na(trans_vec)]
+		trans_mat = get_raw(net_rank)
+		trans_vec = as.vector(trans_mat)
+		trans_vec = trans_vec[!is.na(trans_vec)]
 		expect_true(all(is.finite(trans_vec))) # all finite
 		expect_true(min(trans_vec) >= 1) # ranks start at 1
 		expect_true(max(trans_vec) <= length(trans_vec)) # max rank <= n elements
@@ -404,8 +404,8 @@ test_that(
 	"mutate_weights: min-max normalization (0-1 scaling)",
 	{
 		# create weighted network
-		icews_10 <- icews[icews$year == "2010", ]
-		net <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
@@ -413,11 +413,11 @@ test_that(
 		)
 
 		# min-max normalization
-		net_norm <- mutate_weights(
+		net_norm = mutate_weights(
 			net,
 			transform_fn = function(x) {
-				min_x <- min(x, na.rm = TRUE)
-				max_x <- max(x, na.rm = TRUE)
+				min_x = min(x, na.rm = TRUE)
+				max_x = max(x, na.rm = TRUE)
 				return((x - min_x) / (max_x - min_x))
 			},
 			new_name = "verbCoop_normalized"
@@ -428,9 +428,9 @@ test_that(
 		expect_false(attr(net_norm, "is_binary"))
 
 		# verify normalization (range 0-1)
-		trans_mat <- get_raw(net_norm)
-		trans_vec <- as.vector(trans_mat)
-		trans_vec <- trans_vec[!is.na(trans_vec)]
+		trans_mat = get_raw(net_norm)
+		trans_vec = as.vector(trans_mat)
+		trans_vec = trans_vec[!is.na(trans_vec)]
 		expect_true(min(trans_vec) >= 0)
 		expect_true(max(trans_vec) <= 1)
 		expect_true(abs(min(trans_vec) - 0) < 1e-10) # min should be 0
@@ -442,8 +442,8 @@ test_that(
 	"mutate_weights: winsorization (cap extreme values)",
 	{
 		# create weighted network
-		icews_10 <- icews[icews$year == "2010", ]
-		net <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
@@ -451,10 +451,10 @@ test_that(
 		)
 
 		# winsorization at 95th percentile
-		net_winsor <- mutate_weights(
+		net_winsor = mutate_weights(
 			net,
 			transform_fn = function(x) {
-				q95 <- quantile(x, 0.95, na.rm = TRUE)
+				q95 = quantile(x, 0.95, na.rm = TRUE)
 				return(pmin(x, q95))
 			},
 			new_name = "verbCoop_winsorized"
@@ -465,13 +465,13 @@ test_that(
 		expect_false(attr(net_winsor, "is_binary"))
 
 		# verify winsorization
-		orig_mat <- get_raw(net)
-		trans_mat <- get_raw(net_winsor)
-		q95_orig <- quantile(as.vector(orig_mat), 0.95, na.rm = TRUE)
+		orig_mat = get_raw(net)
+		trans_mat = get_raw(net_winsor)
+		q95_orig = quantile(as.vector(orig_mat), 0.95, na.rm = TRUE)
 
 		# all values should be <= original 95th percentile
-		trans_vec <- as.vector(trans_mat)
-		trans_vec <- trans_vec[!is.na(trans_vec)]
+		trans_vec = as.vector(trans_mat)
+		trans_vec = trans_vec[!is.na(trans_vec)]
 		expect_true(all(trans_vec <= q95_orig + 1e-10)) # allow for floating point
 	}
 )
@@ -480,8 +480,8 @@ test_that(
 	"mutate_weights: add constant only (no transformation function)",
 	{
 		# create weighted network
-		icews_10 <- icews[icews$year == "2010", ]
-		net <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
@@ -489,7 +489,7 @@ test_that(
 		)
 
 		# add constant only
-		net_shifted <- mutate_weights(
+		net_shifted = mutate_weights(
 			net,
 			add_constant = 10,
 			new_name = "verbCoop_shifted"
@@ -500,8 +500,8 @@ test_that(
 		expect_false(attr(net_shifted, "is_binary"))
 
 		# verify constant addition
-		orig_mat <- get_raw(net)
-		trans_mat <- get_raw(net_shifted)
+		orig_mat = get_raw(net)
+		trans_mat = get_raw(net_shifted)
 		expect_equal(trans_mat, orig_mat + 10)
 	}
 )
@@ -510,8 +510,8 @@ test_that(
 	"mutate_weights: log1p transformation (handles zeros)",
 	{
 		# create weighted network
-		icews_10 <- icews[icews$year == "2010", ]
-		net <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
@@ -519,7 +519,7 @@ test_that(
 		)
 
 		# log1p transformation
-		net_log1p <- mutate_weights(
+		net_log1p = mutate_weights(
 			net,
 			transform_fn = log1p,
 			new_name = "log1p_verbCoop",
@@ -531,8 +531,8 @@ test_that(
 		expect_false(attr(net_log1p, "is_binary"))
 
 		# verify transformation
-		orig_mat <- get_raw(net)
-		trans_mat <- get_raw(net_log1p)
+		orig_mat = get_raw(net)
+		trans_mat = get_raw(net_log1p)
 		expect_equal(trans_mat, log1p(orig_mat))
 
 		# verify original not kept
@@ -544,8 +544,8 @@ test_that(
 	"mutate_weights: custom multi-step transformation",
 	{
 		# create weighted network
-		icews_10 <- icews[icews$year == "2010", ]
-		net <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
@@ -553,11 +553,11 @@ test_that(
 		)
 
 		# custom transformation: log then standardize
-		net_custom <- mutate_weights(
+		net_custom = mutate_weights(
 			net,
 			transform_fn = function(x) {
-				x_log <- log(x + 1)
-				x_std <- (x_log - mean(x_log, na.rm = TRUE)) / sd(x_log, na.rm = TRUE)
+				x_log = log(x + 1)
+				x_std = (x_log - mean(x_log, na.rm = TRUE)) / sd(x_log, na.rm = TRUE)
 				return(x_std)
 			},
 			new_name = "verbCoop_log_std"
@@ -568,9 +568,9 @@ test_that(
 		expect_false(attr(net_custom, "is_binary"))
 
 		# verify transformation (standardized log should have mean ~0, sd ~1)
-		trans_mat <- get_raw(net_custom)
-		trans_vec <- as.vector(trans_mat)
-		trans_vec <- trans_vec[!is.na(trans_vec)]
+		trans_mat = get_raw(net_custom)
+		trans_vec = as.vector(trans_mat)
+		trans_vec = trans_vec[!is.na(trans_vec)]
 		expect_true(abs(mean(trans_vec)) < 1e-10)
 		expect_true(abs(sd(trans_vec) - 1) < 1e-10)
 	}
@@ -580,8 +580,8 @@ test_that(
 	"mutate_weights: power transformation",
 	{
 		# create weighted network
-		icews_10 <- icews[icews$year == "2010", ]
-		net <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
@@ -589,7 +589,7 @@ test_that(
 		)
 
 		# power transformation (square root)
-		net_power <- mutate_weights(
+		net_power = mutate_weights(
 			net,
 			transform_fn = function(x) x^0.5,
 			new_name = "verbCoop_power"
@@ -600,8 +600,8 @@ test_that(
 		expect_false(attr(net_power, "is_binary"))
 
 		# verify transformation
-		orig_mat <- get_raw(net)
-		trans_mat <- get_raw(net_power)
+		orig_mat = get_raw(net)
+		trans_mat = get_raw(net_power)
 		expect_equal(trans_mat, orig_mat^0.5)
 	}
 )
@@ -610,18 +610,18 @@ test_that(
 	"mutate_weights: transformation without new_name preserves original name",
 	{
 		# create weighted network
-		icews_10 <- icews[icews$year == "2010", ]
-		net <- netify(
+		icews_10 = icews[icews$year == "2010", ]
+		net = netify(
 			icews_10,
 			actor1 = "i", actor2 = "j",
 			symmetric = FALSE,
 			weight = "verbCoop"
 		)
 
-		original_weight <- attr(net, "weight")
+		original_weight = attr(net, "weight")
 
 		# transform without new name
-		net_trans <- mutate_weights(
+		net_trans = mutate_weights(
 			net,
 			transform_fn = sqrt
 		)
@@ -635,17 +635,17 @@ test_that(
 	"mutate_weights: error handling for missing weight",
 	{
 		# create unweighted network (binary)
-		nigeria <- icews[icews$verbConf > 0, ]
-		nigeria_10 <- nigeria[nigeria$year == "2010", ]
+		nigeria = icews[icews$verbConf > 0, ]
+		nigeria_10 = nigeria[nigeria$year == "2010", ]
 
-		net_unweighted <- netify(
+		net_unweighted = netify(
 			nigeria_10[, c("i", "j")],
 			actor1 = "i", actor2 = "j"
 		)
 
 		# should work since binary networks have weights
 		expect_no_error({
-			net_trans <- mutate_weights(
+			net_trans = mutate_weights(
 				net_unweighted,
 				transform_fn = function(x) x * 2
 			)

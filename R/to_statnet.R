@@ -262,7 +262,7 @@ netify_net_to_statnet <- function(netlet) {
 	statnet_object <- network::network(
 		get_raw(netlet),
 		matrix.type = "adjacency",
-		directed = !attr(netlet, "symmetric"),
+		directed = !all(attr(netlet, "symmetric")),
 		loops = !attr(netlet, "diag_to_NA"),
 		bipartite = bipartite_logical,
 		names.eval = attr(netlet, "weight", exact = TRUE),
@@ -350,13 +350,13 @@ add_dyad_to_statnet <- function(
 		var_name <- vars[ii]
 
 		# get matrix for this variable
-		dData <- var_matrices[[var_name]]
+		d_data <- var_matrices[[var_name]]
 
 		# replace diagonal with 0s except if
 		# netlet is bipartite or
 		# diag_to_NA is set to FALSE
 		if (!bipartite_logical && netlet_diag_to_NA) {
-			diag(dData) <- 0
+			diag(d_data) <- 0
 		}
 
 		# set as edge attrib if not bipartite
@@ -370,8 +370,8 @@ add_dyad_to_statnet <- function(
 			for (e_idx in seq_len(n_edges)) {
 				from_name <- vnames[el[e_idx, 1]]
 				to_name <- vnames[el[e_idx, 2]]
-				if (from_name %in% rownames(dData) && to_name %in% colnames(dData)) {
-					edge_vals[e_idx] <- dData[from_name, to_name]
+				if (from_name %in% rownames(d_data) && to_name %in% colnames(d_data)) {
+					edge_vals[e_idx] <- d_data[from_name, to_name]
 				}
 			}
 			network::set.edge.attribute(
@@ -381,7 +381,7 @@ add_dyad_to_statnet <- function(
 
 		# set as network attrib
 		network::set.network.attribute(
-			statnet_object, var_name, dData
+			statnet_object, var_name, d_data
 		)
 	}
 

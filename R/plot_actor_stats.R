@@ -77,7 +77,7 @@ plot_actor_stats <- function(
 	if (time_present) {
 		if (length(unique(summary_df$time)) == 1 & longitudinal) {
 			cli::cli_alert_warning(
-				"Note: The `summary_df` provided only has one unique time point, so longitudional will be set to FALSE."
+				"Note: The `summary_df` provided only has one unique time point, so longitudinal will be set to FALSE."
 			)
 			longitudinal <- FALSE
 			summary_df <- summary_df[, -which(colnames(summary_df) == "time")]
@@ -274,29 +274,29 @@ plot_actor_stats <- function(
 		}
 
 		# set up color key for actors
-		colKey <- rep("grey", n_tot)
-		names(colKey) <- acts
-		colKey[match(specific_actors, names(colKey))] <- cols
+		col_key <- rep("grey", n_tot)
+		names(col_key) <- acts
+		col_key[match(specific_actors, names(col_key))] <- cols
 
 		# set up border key for actors
-		borKey <- rep("grey", n_tot)
-		names(borKey) <- acts
-		borKey[match(specific_actors, names(borKey))] <- "black"
+		bor_key <- rep("grey", n_tot)
+		names(bor_key) <- acts
+		bor_key[match(specific_actors, names(bor_key))] <- "black"
 
 		# add alpha scale
-		alphaKey <- rep(.5, n_tot)
-		names(alphaKey) <- acts
-		alphaKey[match(specific_actors, names(alphaKey))] <- 1
+		alpha_key <- rep(.5, n_tot)
+		names(alpha_key) <- acts
+		alpha_key[match(specific_actors, names(alpha_key))] <- 1
 
 		#
-		alphaKey2 <- rep(.4, n_tot)
-		names(alphaKey2) <- acts
-		alphaKey2[match(specific_actors, names(alphaKey2))] <- 1
+		alpha_key2 <- rep(.4, n_tot)
+		names(alpha_key2) <- acts
+		alpha_key2[match(specific_actors, names(alpha_key2))] <- 1
 
 		# add size scale
-		sizeKey <- rep(1, n_tot)
-		names(sizeKey) <- acts
-		sizeKey[match(specific_actors, names(sizeKey))] <- 2
+		size_key <- rep(1, n_tot)
+		names(size_key) <- acts
+		size_key[match(specific_actors, names(size_key))] <- 2
 		####
 
 		####
@@ -327,10 +327,10 @@ plot_actor_stats <- function(
 			if (!multilayer) {
 				viz <- viz +
 					ggbeeswarm::geom_quasirandom(shape = 21) +
-					scale_fill_manual(values = colKey, breaks = specific_actors) +
-					scale_color_manual(values = borKey) +
-					scale_alpha_manual(values = alphaKey) +
-					scale_size_manual(values = sizeKey) +
+					scale_fill_manual(values = col_key, breaks = specific_actors) +
+					scale_color_manual(values = bor_key) +
+					scale_alpha_manual(values = alpha_key) +
+					scale_size_manual(values = size_key) +
 					guides(color = "none", alpha = "none", size = "none") +
 					facet_wrap(~variable, scales = "free") +
 					theme_stat_netify() +
@@ -340,10 +340,10 @@ plot_actor_stats <- function(
 			if (multilayer) {
 				viz <- viz +
 					ggbeeswarm::geom_quasirandom(shape = 21) +
-					scale_fill_manual(values = colKey, breaks = specific_actors) +
-					scale_color_manual(values = borKey) +
-					scale_alpha_manual(values = alphaKey) +
-					scale_size_manual(values = sizeKey) +
+					scale_fill_manual(values = col_key, breaks = specific_actors) +
+					scale_color_manual(values = bor_key) +
+					scale_alpha_manual(values = alpha_key) +
+					scale_size_manual(values = size_key) +
 					guides(color = "none", alpha = "none", size = "none") +
 					facet_wrap(~variable, scales = "free_y") +
 					theme_stat_netify() +
@@ -363,8 +363,8 @@ plot_actor_stats <- function(
 			)) +
 				geom_line() +
 				geom_point() +
-				scale_color_manual(values = colKey, breaks = specific_actors) +
-				scale_alpha_manual(values = alphaKey2) +
+				scale_color_manual(values = col_key, breaks = specific_actors) +
+				scale_alpha_manual(values = alpha_key2) +
 				guides(alpha = "none", size = "none") +
 				labs(x = "", y = "") +
 				theme_stat_netify()

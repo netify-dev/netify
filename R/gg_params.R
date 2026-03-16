@@ -124,10 +124,10 @@ gg_params <- function(plot_args) {
 		stroke = plot_args$point_stroke
 	)
 
-	# Prepare a list to conditionally build the aes()
+	# prepare a list to conditionally build the aes()
 	point_aes_list <- list(x = rlang::sym("x"), y = rlang::sym("y"))
 
-	# Add conditional aesthetics based on non-NULL entries
+	# add conditional aesthetics based on non-NULL entries
 	if (!is.null(plot_args$point_alpha_var)) {
 		point_aes_list$alpha <- rlang::sym(plot_args$point_alpha_var)
 		if ("alpha" %in% names(point_static_params)) {
@@ -179,13 +179,13 @@ gg_params <- function(plot_args) {
 		angle = plot_args$text_angle
 	)
 
-	# Prepare a list to conditionally build the aes()
+	# prepare a list to conditionally build the aes()
 	text_aes_list <- list(
 		x = rlang::sym("x"), y = rlang::sym("y"),
 		label = rlang::sym("name_text")
 	)
 
-	# Add conditional aesthetics based on non-NULL entries
+	# add conditional aesthetics based on non-NULL entries
 	if (!is.null(plot_args$text_alpha_var)) {
 		text_aes_list$alpha <- rlang::sym(plot_args$text_alpha_var)
 		if ("alpha" %in% names(text_static_params)) {
@@ -222,13 +222,13 @@ gg_params <- function(plot_args) {
 		lineheight = plot_args$label_lineheight
 	)
 
-	# Prepare a list to conditionally build the aes()
+	# prepare a list to conditionally build the aes()
 	label_aes_list <- list(
 		x = rlang::sym("x"), y = rlang::sym("y"),
 		label = rlang::sym("name_label")
 	)
 
-	# Add conditional aesthetics based on non-NULL entries
+	# add conditional aesthetics based on non-NULL entries
 	if (!is.null(plot_args$label_alpha_var)) {
 		label_aes_list$alpha <- rlang::sym(plot_args$label_alpha_var)
 		if ("alpha" %in% names(label_static_params)) {
@@ -259,7 +259,7 @@ gg_params <- function(plot_args) {
 	
 	# text_repel static param list
 	text_repel_static_params <- list(
-		# Basic text aesthetics (inherits from regular text)
+		# basic text aesthetics (inherits from regular text)
 		alpha = plot_args$text_alpha,
 		color = plot_args$text_color,
 		size = plot_args$text_size,
@@ -269,7 +269,7 @@ gg_params <- function(plot_args) {
 		hjust = plot_args$text_hjust,
 		vjust = plot_args$text_vjust,
 		lineheight = plot_args$text_lineheight,
-		# Repel-specific parameters
+		# repel-specific parameters
 		force = plot_args$text_repel_force,
 		force_pull = plot_args$text_repel_force_pull,
 		max.overlaps = plot_args$text_repel_max_overlaps,
@@ -296,10 +296,10 @@ gg_params <- function(plot_args) {
 		segment.inflect = plot_args$text_repel_segment_inflect
 	)
 	
-	# Use same aes as regular text
+	# use same aes as regular text
 	text_repel_aes_list <- text_aes_list
 	
-	# Handle variable aesthetics - remove from static if present
+	# handle variable aesthetics - remove from static if present
 	if (!is.null(plot_args$text_alpha_var)) {
 		if ("alpha" %in% names(text_repel_static_params)) {
 			text_repel_static_params$alpha <- NULL
@@ -321,7 +321,7 @@ gg_params <- function(plot_args) {
 	
 	# label_repel static param list
 	label_repel_static_params <- list(
-		# Basic label aesthetics (inherits from regular label)
+		# basic label aesthetics (inherits from regular label)
 		alpha = plot_args$label_alpha,
 		color = plot_args$label_color,
 		fill = plot_args$label_fill,
@@ -332,7 +332,7 @@ gg_params <- function(plot_args) {
 		hjust = plot_args$label_hjust,
 		vjust = plot_args$label_vjust,
 		lineheight = plot_args$label_lineheight,
-		# Repel-specific parameters
+		# repel-specific parameters
 		force = plot_args$label_repel_force,
 		force_pull = plot_args$label_repel_force_pull,
 		max.overlaps = plot_args$label_repel_max_overlaps,
@@ -362,10 +362,10 @@ gg_params <- function(plot_args) {
 		label.size = plot_args$label_repel_label_size
 	)
 	
-	# Use same aes as regular label
+	# use same aes as regular label
 	label_repel_aes_list <- label_aes_list
 	
-	# Handle variable aesthetics - remove from static if present
+	# handle variable aesthetics - remove from static if present
 	if (!is.null(plot_args$label_alpha_var)) {
 		if ("alpha" %in% names(label_repel_static_params)) {
 			label_repel_static_params$alpha <- NULL
@@ -409,13 +409,13 @@ gg_params <- function(plot_args) {
 	curve_static_params$ncp <- plot_args$edge_ncp
 	curve_static_params$linejoin <- NULL
 
-	# Prepare a list to conditionally build the aes() for edges
+	# prepare a list to conditionally build the aes() for edges
 	edge_aes_list <- list(
 		x = rlang::sym("x1"), y = rlang::sym("y1"),
 		xend = rlang::sym("x2"), yend = rlang::sym("y2")
 	)
 
-	# Add conditional aesthetics based on non-NULL entries
+	# add conditional aesthetics based on non-NULL entries
 	if (!is.null(plot_args$edge_alpha_var)) {
 		edge_aes_list$alpha <- rlang::sym(plot_args$edge_alpha_var)
 		if ("alpha" %in% names(edge_static_params)) {

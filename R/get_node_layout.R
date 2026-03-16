@@ -108,12 +108,12 @@ get_node_layout <- function(
 	is_bipartite <- obj_attrs$mode == "bipartite"
 	is_ego <- obj_attrs$ego_netify %||% FALSE
 	
-	# Check if this is an ego network and layout is ego-specific
+	# check if this is an ego network and layout is ego-specific
 	ego_layouts <- c("radial", "concentric", "hierarchical", "ego_centric")
 	if (is_ego && !is.null(layout) && tolower(layout) %in% ego_layouts) {
-		# For hierarchical and ego_centric layouts, use specialized functions
+		# for hierarchical and ego_centric layouts, use specialized functions
 		if (tolower(layout) == "hierarchical") {
-			# Extract min_radius and max_radius from ... parameters
+			# extract min_radius and max_radius from ... parameters
 			dots <- list(...)
 			min_radius <- dots$min_radius %||% 1.5
 			max_radius <- dots$max_radius %||% 4.5
@@ -125,7 +125,7 @@ get_node_layout <- function(
 				seed = seed
 			))
 		} else if (tolower(layout) == "ego_centric") {
-			# Extract buffer_radius and transition_zone from ... parameters
+			# extract buffer_radius and transition_zone from ... parameters
 			dots <- list(...)
 			buffer_radius <- dots$buffer_radius %||% 1.5
 			transition_zone <- dots$transition_zone %||% 0.5
@@ -137,7 +137,7 @@ get_node_layout <- function(
 				seed = seed
 			))
 		} else {
-			# For radial layout, use custom implementation
+			# for radial layout, use custom implementation
 			if (tolower(layout) == "radial") {
 				dots <- list(...)
 				n_rings <- dots$n_rings %||% 4
@@ -154,12 +154,12 @@ get_node_layout <- function(
 					seed = seed
 				))
 			} else {
-				# For concentric, use get_ego_layout
-				# Extract ego-specific parameters from ...
+				# for concentric, use get_ego_layout
+				# extract ego-specific parameters from ...
 				dots <- list(...)
 				ego_params <- dots[grep("^ego_", names(dots))]
 				
-				# Remove "ego_" prefix for the ego layout function
+				# remove "ego_" prefix for the ego layout function
 				if (length(ego_params) > 0) {
 					names(ego_params) <- gsub("^ego_", "", names(ego_params))
 				}
@@ -363,7 +363,7 @@ create_union_graph <- function(g_list, obj_attrs) {
 	# create igraph object from union
 	igraph::graph_from_adjacency_matrix(
 		union_adj,
-		mode = ifelse(obj_attrs$symmetric, "undirected", "directed"),
+		mode = ifelse(all(obj_attrs$symmetric), "undirected", "directed"),
 		weighted = TRUE,
 		diag = FALSE
 	)

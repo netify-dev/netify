@@ -207,7 +207,7 @@ mutate_weights <- function(
 				actor1 = "actor1",
 				actor2 = "actor2",
 				dyad_vars = "original_weight",
-				dyad_vars_symmetric = attr(netlet, "symmetric")
+				dyad_vars_symmetric = all(attr(netlet, "symmetric"))
 			)
 		}
 
@@ -270,7 +270,7 @@ mutate_weights <- function(
 					actor2 = "actor2",
 					time = "time",
 					dyad_vars = "original_weight",
-					dyad_vars_symmetric = attr(netlet, "symmetric")
+					dyad_vars_symmetric = all(attr(netlet, "symmetric"))
 				)
 			}
 

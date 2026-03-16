@@ -126,10 +126,10 @@ get_ego_layout <- function(
 	ego_size = 0.1,
 	seed = 6886) {
 
-	# Check if netify object
+	# check if netify object
 	netify_check(netlet)
 	
-	# Check if this is an ego network
+	# check if this is an ego network
 	is_ego <- attr(netlet, "ego_netify") %||% FALSE
 	ego_id <- attr(netlet, "ego_id")
 	
@@ -140,22 +140,22 @@ get_ego_layout <- function(
 		)
 	}
 	
-	# Validate layout parameter
+	# validate layout parameter
 	layout <- match.arg(tolower(layout), 
 					   choices = c("radial", "concentric", "star"))
 	
-	# Get network info
+	# get network info
 	obj_attrs <- attributes(netlet)
 	netify_type <- obj_attrs$netify_type
 	
-	# Handle longitudinal case - process as list
+	# handle longitudinal case - process as list
 	if (netify_type == "longit_list") {
-		# Get network data for each time period
+		# get network data for each time period
 		layout_list <- lapply(seq_along(netlet), function(t) {
 			time_name <- names(netlet)[t]
 			netlet_t <- netlet[[t]]
 			
-			# Calculate layout for this time period
+			# calculate layout for this time period
 			layout_df <- calculate_ego_layout_single(
 				netlet = netlet_t,
 				layout = layout,
@@ -165,7 +165,7 @@ get_ego_layout <- function(
 				weight_to_distance = weight_to_distance,
 				ring_gap = ring_gap,
 				ego_size = ego_size,
-				seed = seed + t - 1  # Different seed per time period
+				seed = seed + t - 1  # different seed per time period
 			)
 			
 			return(layout_df)
@@ -175,7 +175,7 @@ get_ego_layout <- function(
 		return(layout_list)
 		
 	} else {
-		# Cross-sectional case
+		# cross-sectional case
 		layout_df <- calculate_ego_layout_single(
 			netlet = netlet,
 			layout = layout,
@@ -202,11 +202,11 @@ calculate_ego_layout_single <- function(
 	netlet, layout, ego_id, group_by, order_by,
 	weight_to_distance, ring_gap, ego_size, seed) {
 	
-	# Get actor names
+	# get actor names
 	actors <- rownames(netlet)
 	n_actors <- length(actors)
 	
-	# Identify ego - use provided ego_id or first actor
+	# identify ego - use provided ego_id or first actor
 	if (is.null(ego_id)) {
 		ego_id <- actors[1]
 		cli::cli_alert_info(
@@ -214,16 +214,16 @@ calculate_ego_layout_single <- function(
 		)
 	}
 	
-	# Verify ego is in the network
+	# verify ego is in the network
 	if (!ego_id %in% actors) {
 		stop("Ego '", ego_id, "' not found in network")
 	}
 	
-	# Get alters (everyone except ego)
+	# get alters (everyone except ego)
 	alters <- setdiff(actors, ego_id)
 	n_alters <- length(alters)
 	
-	# Initialize layout data frame
+	# initialize layout data frame
 	layout_df <- data.frame(
 		index = seq_len(n_actors),
 		actor = actors,
@@ -232,22 +232,22 @@ calculate_ego_layout_single <- function(
 		stringsAsFactors = FALSE
 	)
 	
-	# Place ego at center
+	# place ego at center
 	ego_idx <- which(actors == ego_id)
 	layout_df$x[ego_idx] <- 0
 	layout_df$y[ego_idx] <- 0
 	
-	# If no alters, return ego-only layout
+	# if no alters, return ego-only layout
 	if (n_alters == 0) {
 		return(layout_df)
 	}
 	
-	# Get nodal attributes if needed
+	# get nodal attributes if needed
 	nodal_attrs <- NULL
 	if (!is.null(group_by) || !is.null(order_by)) {
 		nodal_attrs <- attr(netlet, "nodal_data")
 		
-		# Check if requested attributes exist
+		# check if requested attributes exist
 		if (!is.null(group_by) && !is.null(nodal_attrs) && 
 			!group_by %in% names(nodal_attrs)) {
 			cli::cli_alert_warning(
@@ -267,26 +267,26 @@ calculate_ego_layout_single <- function(
 		}
 	}
 	
-	# Get edge weights if needed
+	# get edge weights if needed
 	edge_weights <- NULL
 	if (weight_to_distance && !attr(netlet, "is_binary")) {
-		# Extract weights from ego to each alter
+		# extract weights from ego to each alter
 		edge_weights <- numeric(n_alters)
 		names(edge_weights) <- alters
 		
 		for (i in seq_along(alters)) {
 			alter <- alters[i]
-			# Get weight in both directions and use max
+			# get weight in both directions and use max
 			w1 <- netlet[ego_id, alter]
 			w2 <- netlet[alter, ego_id]
 			edge_weights[i] <- max(w1, w2, na.rm = TRUE)
 		}
 		
-		# Handle NAs
+		# handle NAs
 		edge_weights[is.na(edge_weights)] <- 0
 	}
 	
-	# Calculate positions based on layout type
+	# calculate positions based on layout type
 	if (layout == "star") {
 		alter_positions <- calculate_star_positions(
 			alters, order_by, nodal_attrs, ego_size, seed
@@ -303,7 +303,7 @@ calculate_ego_layout_single <- function(
 		)
 	}
 	
-	# Assign alter positions to layout data frame
+	# assign alter positions to layout data frame
 	for (i in seq_along(alters)) {
 		alter <- alters[i]
 		alter_idx <- which(actors == alter)
@@ -320,20 +320,20 @@ calculate_ego_layout_single <- function(
 calculate_star_positions <- function(alters, order_by, nodal_attrs, ego_size, seed) {
 	n_alters <- length(alters)
 	
-	# Order alters
+	# order alters
 	ordered_alters <- order_alters(alters, order_by, nodal_attrs, seed)
 	
-	# Calculate angles - evenly distributed
+	# calculate angles - evenly distributed
 	angles <- seq(0, 2 * pi, length.out = n_alters + 1)[-1]
 	
-	# Fixed radius for all alters
+	# fixed radius for all alters
 	radius <- 1
 	
-	# Convert to x,y coordinates
+	# convert to x,y coordinates
 	x <- radius * cos(angles)
 	y <- radius * sin(angles)
 	
-	# Reorder to match original alter order
+	# reorder to match original alter order
 	positions <- data.frame(
 		alter = ordered_alters,
 		x = x,
@@ -341,7 +341,7 @@ calculate_star_positions <- function(alters, order_by, nodal_attrs, ego_size, se
 		stringsAsFactors = FALSE
 	)
 	
-	# Match back to input order
+	# match back to input order
 	match_idx <- match(alters, positions$alter)
 	
 	return(data.frame(
@@ -359,7 +359,7 @@ calculate_radial_positions <- function(
 	
 	n_alters <- length(alters)
 	
-	# Get groups if specified
+	# get groups if specified
 	if (!is.null(group_by) && !is.null(nodal_attrs)) {
 		alter_groups <- nodal_attrs[[group_by]][match(alters, nodal_attrs$actor)]
 		unique_groups <- unique(alter_groups[!is.na(alter_groups)])
@@ -370,11 +370,11 @@ calculate_radial_positions <- function(
 		n_groups <- 1
 	}
 	
-	# Initialize positions
+	# initialize positions
 	x <- numeric(n_alters)
 	y <- numeric(n_alters)
 	
-	# Process each group
+	# process each group
 	for (g in seq_len(n_groups)) {
 		group <- unique_groups[g]
 		group_mask <- alter_groups == group & !is.na(alter_groups)
@@ -383,15 +383,15 @@ calculate_radial_positions <- function(
 		
 		if (n_group == 0) next
 		
-		# Order alters within group
+		# order alters within group
 		ordered_group <- order_alters(group_alters, order_by, nodal_attrs, seed)
 		
-		# Calculate angular range for this group
+		# calculate angular range for this group
 		if (n_groups > 1) {
-			# Divide circle into sectors
+			# divide circle into sectors
 			sector_start <- (g - 1) * 2 * pi / n_groups
 			sector_end <- g * 2 * pi / n_groups
-			# Leave small gap between sectors
+			# leave small gap between sectors
 			gap <- 0.05
 			sector_start <- sector_start + gap/2
 			sector_end <- sector_end - gap/2
@@ -400,19 +400,19 @@ calculate_radial_positions <- function(
 			sector_end <- 2 * pi
 		}
 		
-		# Calculate angles within sector
+		# calculate angles within sector
 		if (n_group == 1) {
 			group_angles <- (sector_start + sector_end) / 2
 		} else {
 			group_angles <- seq(sector_start, sector_end, length.out = n_group)
 		}
 		
-		# Calculate radii
+		# calculate radii
 		if (weight_to_distance && !is.null(edge_weights)) {
-			# Get weights for this group
+			# get weights for this group
 			group_weights <- edge_weights[ordered_group]
 			
-			# Normalize weights to [0,1]
+			# normalize weights to [0,1]
 			if (max(group_weights) > min(group_weights)) {
 				norm_weights <- (group_weights - min(group_weights)) / 
 							   (max(group_weights) - min(group_weights))
@@ -420,17 +420,17 @@ calculate_radial_positions <- function(
 				norm_weights <- rep(0.5, n_group)
 			}
 			
-			# Map to radius (closer = higher weight)
-			# Use ego_size as minimum distance
+			# map to radius (closer = higher weight)
+			# use ego_size as minimum distance
 			min_radius <- ego_size + 0.2
 			max_radius <- 1
 			group_radii <- max_radius - norm_weights * (max_radius - min_radius)
 		} else {
-			# Fixed radius for all
+			# fixed radius for all
 			group_radii <- rep(1, n_group)
 		}
 		
-		# Calculate positions
+		# calculate positions
 		for (i in seq_len(n_group)) {
 			alter_idx <- which(alters == ordered_group[i])
 			x[alter_idx] <- group_radii[i] * cos(group_angles[i])
@@ -438,13 +438,13 @@ calculate_radial_positions <- function(
 		}
 	}
 	
-	# Handle any ungrouped alters (NAs in grouping variable)
+	# handle any ungrouped alters (NAs in grouping variable)
 	if (any(is.na(alter_groups))) {
 		na_mask <- is.na(alter_groups)
 		na_alters <- alters[na_mask]
 		n_na <- length(na_alters)
 		
-		# Place at outer edge in a separate arc
+		# place at outer edge in a separate arc
 		na_angles <- seq(3*pi/2, 2*pi, length.out = n_na + 1)[-1]
 		
 		for (i in seq_len(n_na)) {
@@ -466,44 +466,44 @@ calculate_concentric_positions <- function(
 	
 	n_alters <- length(alters)
 	
-	# Determine ring assignment
+	# determine ring assignment
 	if (!is.null(group_by) && !is.null(nodal_attrs)) {
 		group_var <- nodal_attrs[[group_by]][match(alters, nodal_attrs$actor)]
 		
-		# Check if numeric or factor/character
+		# check if numeric or factor/character
 		if (is.numeric(group_var)) {
-			# Discretize numeric variable into rings
-			# Use quantiles to create roughly equal-sized rings
-			n_rings <- min(4, ceiling(sqrt(n_alters)))  # Max 4 rings
+			# discretize numeric variable into rings
+			# use quantiles to create roughly equal-sized rings
+			n_rings <- min(4, ceiling(sqrt(n_alters)))  # max 4 rings
 			ring_breaks <- quantile(group_var, 
 								  probs = seq(0, 1, length.out = n_rings + 1),
 								  na.rm = TRUE)
 			ring_assignment <- cut(group_var, breaks = ring_breaks, 
 								 include.lowest = TRUE, labels = FALSE)
 		} else {
-			# Use factor levels or unique values as rings
+			# use factor levels or unique values as rings
 			unique_vals <- unique(group_var[!is.na(group_var)])
 			ring_assignment <- match(group_var, unique_vals)
 			n_rings <- length(unique_vals)
 		}
 	} else {
-		# No grouping - put all alters in one ring
+		# no grouping - put all alters in one ring
 		ring_assignment <- rep(1, n_alters)
 		n_rings <- 1
 	}
 	
-	# Handle NAs - put in outermost ring
+	# handle NAs - put in outermost ring
 	if (any(is.na(ring_assignment))) {
 		n_rings <- n_rings + 1
 		ring_assignment[is.na(ring_assignment)] <- n_rings
 	}
 	
-	# Calculate ring radii
+	# calculate ring radii
 	min_radius <- ego_size + 0.2
 	max_radius <- 1
 	
 	if (n_rings == 1) {
-		ring_radii <- 0.7  # Single ring at moderate distance
+		ring_radii <- 0.7  # single ring at moderate distance
 	} else {
 		available_space <- max_radius - min_radius
 		gap_total <- ring_gap * (n_rings - 1)
@@ -515,11 +515,11 @@ calculate_concentric_positions <- function(
 		}
 	}
 	
-	# Initialize positions
+	# initialize positions
 	x <- numeric(n_alters)
 	y <- numeric(n_alters)
 	
-	# Place alters in each ring
+	# place alters in each ring
 	for (r in 1:n_rings) {
 		ring_mask <- ring_assignment == r
 		ring_alters <- alters[ring_mask]
@@ -527,17 +527,17 @@ calculate_concentric_positions <- function(
 		
 		if (n_ring == 0) next
 		
-		# Order alters within ring
+		# order alters within ring
 		ordered_ring <- order_alters(ring_alters, order_by, nodal_attrs, seed)
 		
-		# Calculate angles - evenly distributed
+		# calculate angles - evenly distributed
 		ring_angles <- seq(0, 2 * pi, length.out = n_ring + 1)[-1]
 		
-		# Add small rotation to each ring for visual interest
+		# add small rotation to each ring for visual interest
 		rotation_offset <- (r - 1) * pi / (2 * n_rings)
 		ring_angles <- ring_angles + rotation_offset
 		
-		# Assign positions
+		# assign positions
 		for (i in seq_len(n_ring)) {
 			alter_idx <- which(alters == ordered_ring[i])
 			x[alter_idx] <- ring_radii[r] * cos(ring_angles[i])
@@ -555,28 +555,28 @@ order_alters <- function(alters, order_by, nodal_attrs, seed) {
 	n_alters <- length(alters)
 	
 	if (!is.null(order_by) && !is.null(nodal_attrs)) {
-		# Get ordering variable
+		# get ordering variable
 		order_var <- nodal_attrs[[order_by]][match(alters, nodal_attrs$actor)]
 		
-		# Handle NAs by putting them last
+		# handle NAs by putting them last
 		na_mask <- is.na(order_var)
 		if (any(na_mask)) {
-			# Set NAs to a value that will sort last
+			# set NAs to a value that will sort last
 			if (is.numeric(order_var)) {
 				order_var[na_mask] <- min(order_var, na.rm = TRUE) - 1
 			} else {
-				order_var[na_mask] <- "ZZZZZZ"  # Sort last alphabetically
+				order_var[na_mask] <- "ZZZZZZ"  # sort last alphabetically
 			}
 		}
 		
-		# Create order with tie-breaking
+		# create order with tie-breaking
 		set.seed(seed)
 		tie_breaker <- runif(n_alters)
 		order_idx <- order(order_var, tie_breaker)
 		
 		return(alters[order_idx])
 	} else {
-		# Default to alphabetical order
+		# default to alphabetical order
 		return(sort(alters))
 	}
 }

@@ -158,7 +158,7 @@ reduce_combine_nodal_attr <- function(
 		# if id columns match then iteratively go through
 		# nodal data and cbind together
 		if (n_id_check) {
-			# Pre-filter nvars for each slice to avoid repeated intersections
+			# pre-filter nvars for each slice to avoid repeated intersections
 			ndata_list <- lapply(nodal_data_list, function(slice) {
 				nvars_slice <- names(slice)[names(slice) %in% nvars]
 				slice[, nvars_slice, drop = FALSE]
@@ -213,10 +213,10 @@ reduce_combine_dyad_attr <- function(
 
 		# check to make sure that the id row/col and time periods are
 		# identical across dyad_data from netlets
-		# For new structure: list(time) -> list(vars) -> matrix
+		# for new structure: list(time) -> list(vars) -> matrix
 		t_check <- identical_recursive(lapply(dyad_data_list, names))
 
-		# Extract first time period's first variable matrix once
+		# extract first time period's first variable matrix once
 		first_elements <- lapply(dyad_data_list, function(x) {
 			first_time <- x[[1]]
 			if (length(first_time) > 0) {
@@ -247,7 +247,7 @@ reduce_combine_dyad_attr <- function(
 			# get time periods from first dyad_data element
 			t_pds <- names(dyad_data_list[[1]])
 
-			# Pre-allocate list
+			# pre-allocate list
 			ddata <- vector("list", length(t_pds))
 			names(ddata) <- t_pds
 
@@ -255,7 +255,7 @@ reduce_combine_dyad_attr <- function(
 			for (tt_idx in seq_along(t_pds)) {
 				tt <- t_pds[tt_idx]
 
-				# Pre-allocate combined_vars with known size
+				# pre-allocate combined_vars with known size
 				combined_vars <- list()
 
 				# iterate through each netlet's dyad data for this time period
@@ -263,7 +263,7 @@ reduce_combine_dyad_attr <- function(
 					time_period_data <- netlet_dyad_data[[tt]]
 
 					if (!is.null(time_period_data) && length(time_period_data) > 0) {
-						# Direct assignment is faster than repeated list operations
+						# direct assignment is faster than repeated list operations
 						for (var_name in names(time_period_data)) {
 							if (var_name %in% dvars) {
 								combined_vars[[var_name]] <- time_period_data[[var_name]]

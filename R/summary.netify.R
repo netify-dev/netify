@@ -165,11 +165,12 @@ summary.netify <- function(object, ...) {
 	n_layers <- length(layers)
 	netlet_type <- obj_attrs$netify_type
 	is_cross_sec <- netlet_type == "cross_sec"
-	is_symmetric <- obj_attrs$symmetric
+	# for mixed-directedness multilayer, use FALSE to keep all columns
+	is_symmetric <- if (length(obj_attrs$symmetric) > 1) FALSE else obj_attrs$symmetric
 	is_unipartite <- obj_attrs$mode == "unipartite"
 	is_all_binary <- all(obj_attrs$is_binary)
 
-	# Check for ego network
+	# check for ego network
 	ego_netlet <- !is.null(obj_attrs$ego_netlet) && obj_attrs$ego_netlet
 	if (ego_netlet) {
 		ego_vec <- obj_attrs$ego_vec
@@ -178,7 +179,7 @@ summary.netify <- function(object, ...) {
 	####
 
 	####
-	# Pre-allocate results list
+	# pre-allocate results list
 	net_stats_l_multi <- vector("list", n_layers)
 
 	# iterate through each layer
@@ -186,7 +187,7 @@ summary.netify <- function(object, ...) {
 		layer <- layers[i]
 
 		####
-		# Extract layer efficiently
+		# extract layer efficiently
 		if (n_layers == 1) {
 			netlet <- object
 		} else {
@@ -194,7 +195,7 @@ summary.netify <- function(object, ...) {
 			obj_attrs <- attributes(netlet)
 		}
 
-		# Convert to list format for processing
+		# convert to list format for processing
 		netlet_list <- switch(netlet_type,
 			"cross_sec" = list(netlet),
 			"longit_array" = array_to_list(netlet),
@@ -210,7 +211,7 @@ summary.netify <- function(object, ...) {
 		####
 
 		####
-		# Efficient data frame creation
+		# efficient data frame creation
 		net_stats <- do.call("rbind", net_stats_list)
 		net_names <- names(netlet_list) %||% rownames(net_stats)
 
@@ -218,47 +219,47 @@ summary.netify <- function(object, ...) {
 		net_stats$net <- net_names
 		net_stats$layer <- layer
 
-		# Store in pre-allocated list
+		# store in pre-allocated list
 		net_stats_l_multi[[i]] <- net_stats
 	}
 	####
 
 	####
-	# Combine all results efficiently
+	# combine all results efficiently
 	net_stats <- do.call("rbind", net_stats_l_multi)
 	rownames(net_stats) <- NULL
 
-	# Reorder columns - check if columns exist first
+	# reorder columns - check if columns exist first
 	id_cols <- c("net", "layer")
-	# Only include id_cols that actually exist in net_stats
+	# only include id_cols that actually exist in net_stats
 	existing_id_cols <- id_cols[id_cols %in% names(net_stats)]
 	stat_cols <- setdiff(names(net_stats), id_cols)
 
-	# Only reorder if we have the expected columns
+	# only reorder if we have the expected columns
 	if (length(existing_id_cols) > 0) {
 		net_stats <- net_stats[, c(existing_id_cols, stat_cols)]
 	}
 
-	# Drop layer column if only one layer
+	# drop layer column if only one layer
 	if (n_layers == 1) {
 		net_stats$layer <- NULL
 	}
 
-	# Simplify column names based on network type
+	# simplify column names based on network type
 	if (is_unipartite) {
-		# Rename num_row_actors to num_actors
+		# rename num_row_actors to num_actors
 		names(net_stats)[names(net_stats) == "num_row_actors"] <- "num_actors"
-		# Remove num_col_actors
+		# remove num_col_actors
 		net_stats$num_col_actors <- NULL
 	}
 
-	# Simplify for undirected networks
+	# simplify for undirected networks
 	if (is_symmetric) {
-		# Rename competition and sd measures
+		# rename competition and sd measures
 		names(net_stats)[names(net_stats) == "competition_row"] <- "competition"
 		names(net_stats)[names(net_stats) == "sd_of_row_means"] <- "sd_of_actor_means"
 
-		# Remove directed-only statistics
+		# remove directed-only statistics
 		cols_to_remove <- c(
 			"competition_col", "sd_of_col_means",
 			"covar_of_row_col_means", "reciprocity", "mutual"
@@ -266,7 +267,7 @@ summary.netify <- function(object, ...) {
 		net_stats[cols_to_remove] <- NULL
 	}
 
-	# Remove weight statistics for binary networks
+	# remove weight statistics for binary networks
 	if (is_all_binary) {
 		weight_cols <- c(
 			"mean_edge_weight", "sd_edge_weight",
@@ -278,10 +279,10 @@ summary.netify <- function(object, ...) {
 	####
 
 	####
-	# Handle ego networks efficiently
+	# handle ego networks efficiently
 	if (ego_netlet) {
 		if (!ego_longit) {
-			# Non-longitudinal ego network
+			# non-longitudinal ego network
 			if (is_cross_sec) {
 				net_stats$layer <- ego_vec
 			} else {
@@ -289,7 +290,7 @@ summary.netify <- function(object, ...) {
 			}
 			net_stats$net <- 1
 		} else {
-			# Longitudinal ego network
+			# longitudinal ego network
 			net_split <- strsplit(net_stats$net, "__", fixed = TRUE)
 			ego_units <- vapply(net_split, `[`, character(1), 1)
 			ego_pds <- vapply(net_split, `[`, character(1), 2)
@@ -298,7 +299,7 @@ summary.netify <- function(object, ...) {
 			net_stats$layer <- ego_units
 		}
 
-		# Ensure correct column order
+		# ensure correct column order
 		net_stats <- net_stats[, c(
 			"net", "layer",
 			setdiff(names(net_stats), c("net", "layer"))

@@ -118,9 +118,9 @@ dyad_correlation <- function(
 		netlet_list <- switch(netify_type,
 			"cross_sec" = list("1" = netlet),
 			"longit_array" = {
-				# Check if this is multilayer longitudinal (4D) or single layer (3D)
+				# check if this is multilayer longitudinal (4D) or single layer (3D)
 				if (length(dim(netlet)) == 4) {
-					# Multilayer longitudinal: extract time periods from 4th dimension
+					# multilayer longitudinal: extract time periods from 4th dimension
 					time_names <- dimnames(netlet)[[4]]
 					if (is.null(time_names)) {
 						time_names <- as.character(seq_len(dim(netlet)[4]))
@@ -130,7 +130,7 @@ dyad_correlation <- function(
 						net_list[[time_names[t]]] <- netlet[, , , t]
 					}
 				} else {
-					# Single layer longitudinal: extract from 3rd dimension
+					# single layer longitudinal: extract from 3rd dimension
 					time_names <- dimnames(netlet)[[3]]
 					if (is.null(time_names)) {
 						time_names <- as.character(seq_len(dim(netlet)[3]))
@@ -150,13 +150,13 @@ dyad_correlation <- function(
 			# get network matrix for this time period
 			net_matrix <- netlet_list[[time_id]]
 
-			# Extract specific layer for multilayer networks
+			# extract specific layer for multilayer networks
 			if (length(layers) > 1) {
 				if (netify_type == "cross_sec") {
-					# For cross-sectional multilayer: 3D array [actors, actors, layers]
+					# for cross-sectional multilayer: 3D array [actors, actors, layers]
 					net_matrix <- netlet[, , layer_index]
 				} else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
-					# For longitudinal multilayer: 4D array [actors, actors, layers, time]
+					# for longitudinal multilayer: 4D array [actors, actors, layers, time]
 					net_matrix <- net_matrix[, , layer_index]
 				}
 			}
@@ -175,7 +175,7 @@ dyad_correlation <- function(
 				if (edge_var == layer || edge_var == "network") {
 					edge_matrix <- net_matrix
 				} else if (edge_var %in% layers) {
-					# Extract a different layer as edge variable
+					# extract a different layer as edge variable
 					edge_layer_idx <- which(layers == edge_var)
 					if (netify_type == "cross_sec") {
 						edge_matrix <- netlet[, , edge_layer_idx]

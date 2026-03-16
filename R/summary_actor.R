@@ -201,7 +201,7 @@ summary_actor <- function(netlet, invert_weights_for_igraph = TRUE, other_stats 
 	# save original
 	netlet_base <- netlet
 
-	# Pre-allocate list for efficiency
+	# pre-allocate list for efficiency
 	net_stats_l_mutli <- vector("list", n_layers)
 
 	# iterate through each layer
@@ -232,7 +232,7 @@ summary_actor <- function(netlet, invert_weights_for_igraph = TRUE, other_stats 
 
 		####
 		# calc stats across netlet(s) - more efficient with lapply
-		netStats_actor_list <- lapply(object, function(mat) {
+		net_stats_actor_list <- lapply(object, function(mat) {
 			actor_stats_for_netlet(
 				mat, obj_attrs,
 				invert_weights_for_igraph = invert_weights_for_igraph,
@@ -242,44 +242,53 @@ summary_actor <- function(netlet, invert_weights_for_igraph = TRUE, other_stats 
 		####
 
 		####
-		# More efficient data frame creation
-		# Combine all matrices at once, then convert to data frame
-		netStats_actor <- do.call("rbind", netStats_actor_list)
+		# more efficient data frame creation
+		# combine all matrices at once, then convert to data frame
+		net_stats_actor <- do.call("rbind", net_stats_actor_list)
 
-		# Convert to data frame with actor names efficiently
-		actor_names <- rownames(netStats_actor)
-		netStats_actor <- as.data.frame(netStats_actor, stringsAsFactors = FALSE)
-		netStats_actor$actor <- actor_names
-		netStats_actor$layer <- layer
+		# convert to data frame with actor names efficiently
+		actor_names <- rownames(net_stats_actor)
+		net_stats_actor <- as.data.frame(net_stats_actor, stringsAsFactors = FALSE)
+		net_stats_actor$actor <- actor_names
+		net_stats_actor$layer <- layer
 
-		# Store in pre-allocated list
-		net_stats_l_mutli[[i]] <- netStats_actor
+		# store in pre-allocated list
+		net_stats_l_mutli[[i]] <- net_stats_actor
 	}
 	####
 
 	####
-	# bind into one data frame - more efficient than repeated rbind
-	netStats_actor <- do.call("rbind", net_stats_l_mutli)
-	rownames(netStats_actor) <- NULL
+	# bind into one data frame - use rbind.fill logic for mixed columns
+	# (e.g., when layers have different directedness producing different stats)
+	all_cols <- unique(unlist(lapply(net_stats_l_mutli, names)))
+	net_stats_l_mutli <- lapply(net_stats_l_mutli, function(df) {
+		missing_cols <- setdiff(all_cols, names(df))
+		if (length(missing_cols) > 0) {
+			df[missing_cols] <- NA
+		}
+		df[all_cols]
+	})
+	net_stats_actor <- do.call("rbind", net_stats_l_mutli)
+	rownames(net_stats_actor) <- NULL
 
 	# drop layer column if only one layer
 	if (n_layers == 1) {
-		netStats_actor$layer <- NULL
+		net_stats_actor$layer <- NULL
 	}
 
 	# if longitudinal, actor contains both year and name information
-	# More efficient string splitting
+	# more efficient string splitting
 	if (is_longit) {
-		actor_split <- strsplit(netStats_actor$actor, ".", fixed = TRUE)
-		netStats_actor$time <- vapply(actor_split, `[`, character(1), 1)
-		netStats_actor$actor <- vapply(actor_split, `[`, character(1), 2)
+		actor_split <- strsplit(net_stats_actor$actor, ".", fixed = TRUE)
+		net_stats_actor$time <- vapply(actor_split, `[`, character(1), 1)
+		net_stats_actor$actor <- vapply(actor_split, `[`, character(1), 2)
 	}
 
 	# cleanup - more efficient column reordering
 	id_vars <- c("actor", "layer", "time")
-	existing_id_vars <- intersect(id_vars, names(netStats_actor))
-	stat_vars <- setdiff(names(netStats_actor), id_vars)
-	netStats_actor <- netStats_actor[, c(existing_id_vars, stat_vars)]
+	existing_id_vars <- intersect(id_vars, names(net_stats_actor))
+	stat_vars <- setdiff(names(net_stats_actor), id_vars)
+	net_stats_actor <- net_stats_actor[, c(existing_id_vars, stat_vars)]
 	####
 
 	####
@@ -299,34 +308,34 @@ summary_actor <- function(netlet, invert_weights_for_igraph = TRUE, other_stats 
 			# if just one time point and one ego then layer is just ego_vec
 			# otherwise the net column will have multiple egos
 			if (obj_attrs$netify_type == "cross_sec") {
-				netStats_actor$layer <- ego_vec
+				net_stats_actor$layer <- ego_vec
 			} else {
-				netStats_actor$layer <- netStats_actor$time
+				net_stats_actor$layer <- net_stats_actor$time
 			}
 
 			# set id vars and drop time if present
-			netStats_actor$time <- NULL
+			net_stats_actor$time <- NULL
 			existing_id_vars <- c("actor", "layer")
 		}
 
 		# if longit info for ego
 		if (ego_longit) {
-			# More efficient string splitting
-			time_split <- strsplit(netStats_actor$time, "__", fixed = TRUE)
-			netStats_actor$layer <- vapply(time_split, `[`, character(1), 1)
-			netStats_actor$time <- vapply(time_split, `[`, character(1), 2)
+			# more efficient string splitting
+			time_split <- strsplit(net_stats_actor$time, "__", fixed = TRUE)
+			net_stats_actor$layer <- vapply(time_split, `[`, character(1), 1)
+			net_stats_actor$time <- vapply(time_split, `[`, character(1), 2)
 
 			# set id vars
 			existing_id_vars <- c("actor", "layer", "time")
 		}
 
 		# organize - reorder columns efficiently
-		stat_vars <- setdiff(names(netStats_actor), existing_id_vars)
-		netStats_actor <- netStats_actor[, c(existing_id_vars, stat_vars)]
+		stat_vars <- setdiff(names(net_stats_actor), existing_id_vars)
+		net_stats_actor <- net_stats_actor[, c(existing_id_vars, stat_vars)]
 	}
 	####
 
 	####
-	return(netStats_actor)
+	return(net_stats_actor)
 	####
 }

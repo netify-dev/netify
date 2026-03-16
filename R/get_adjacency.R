@@ -124,7 +124,7 @@ get_adjacency <- function(
 	weight_label <- weight_string_label(weight, sum_dyads)
 
 	# add weight if not supplied
-	wOrig <- weight
+	w_orig <- weight
 	if (is.null(weight)) {
 		dyad_data$weight_var <- 1
 		weight <- "weight_var"
@@ -138,18 +138,18 @@ get_adjacency <- function(
 	actors_cols <- unique_vector(dyad_data[, actor2])
 	actors <- unique_vector(actors_rows, actors_cols)
 	
-	# Incorporate nodelist if provided
+	# incorporate nodelist if provided
 	if (!is.null(nodelist)) {
-		# Convert to character to ensure consistency
+		# convert to character to ensure consistency
 		nodelist <- as.character(nodelist)
 		
-		# Add any missing actors from nodelist
+		# add any missing actors from nodelist
 		if (mode == "unipartite") {
 			actors <- unique_vector(actors, nodelist)
 			actors_rows <- actors_cols <- actors
 		} else {
-			# For bipartite, assume nodelist contains all actors
-			# User should specify which are row/col actors
+			# for bipartite, assume nodelist contains all actors
+			# user should specify which are row/col actors
 			cli::cli_alert_info("For bipartite networks, nodelist should contain all actors. Assigning to both row and column actors.")
 			actors_rows <- unique_vector(actors_rows, nodelist)
 			actors_cols <- unique_vector(actors_cols, nodelist)
@@ -170,7 +170,7 @@ get_adjacency <- function(
 	# check if there are repeating dyads
 	num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2)
 	if (num_repeat_dyads > 0) {
-		edge_value_check(wOrig, sum_dyads, TRUE)
+		edge_value_check(w_orig, sum_dyads, TRUE)
 	}
 
 	# aggregate data if sum dyads selected
@@ -183,7 +183,7 @@ get_adjacency <- function(
 		dyad_data <- dyad_data[dyad_data[, weight] != 0, ]
 	}
 
-	# Cache frequently accessed columns for efficiency
+	# cache frequently accessed columns for efficiency
 	dyad_actor1 <- dyad_data[, actor1]
 	dyad_actor2 <- dyad_data[, actor2]
 	dyad_weight <- dyad_data[, weight]
@@ -194,9 +194,9 @@ get_adjacency <- function(
 	# create logical value that is TRUE if weight is just 0/1 - optimized check
 	is_binary <- length(value) == 0 || all(value %in% c(0, 1))
 
-	# Pre-compute matrix indices to avoid repeated match() calls
-	matRowIndices <- match(dyad_actor1, actors_rows)
-	matColIndices <- match(dyad_actor2, actors_cols)
+	# pre-compute matrix indices to avoid repeated match() calls
+	mat_row_indices <- match(dyad_actor1, actors_rows)
+	mat_col_indices <- match(dyad_actor2, actors_cols)
 
 	# convert to adjacency matrix using optimized C++ function
 	adj_out <- get_matrix(
@@ -204,8 +204,8 @@ get_adjacency <- function(
 		n_cols = length(actors_cols),
 		actors_rows = actors_rows,
 		actors_cols = actors_cols,
-		matRowIndices = matRowIndices,
-		matColIndices = matColIndices,
+		matRowIndices = mat_row_indices,
+		matColIndices = mat_col_indices,
 		value = value,
 		symmetric = symmetric,
 		missing_to_zero = missing_to_zero,
@@ -215,7 +215,7 @@ get_adjacency <- function(
 	# if user left weight NULL and set sum_dyads
 	# to FALSE then record weight as NULL for
 	# attribute purposes
-	if (!sum_dyads && is.null(wOrig)) {
+	if (!sum_dyads && is.null(w_orig)) {
 		weight <- NULL
 	}
 

@@ -9,16 +9,16 @@
 #' @export
 
 plot_with_style <- function(netlet, style_fun, ...) {
-	# Get the style parameters
+	# get the style parameters
 	style_params <- style_fun()
 
-	# Get additional parameters
+	# get additional parameters
 	additional_params <- list(...)
 
-	# Combine them (additional params override style params)
+	# combine them (additional params override style params)
 	all_params <- c(style_params, additional_params)
 
-	# Call plot with combined parameters
+	# call plot with combined parameters
 	do.call(plot, c(list(x = netlet), all_params))
 }
 
@@ -32,23 +32,23 @@ plot_with_style <- function(netlet, style_fun, ...) {
 
 style_bipartite_network <- function() {
 	list(
-		# Edges
+		# edges
 		edge_color = "#7F8C8D",
 		edge_alpha = 0.4,
 
-		# Will need to be combined with manual shape/color by node type
+		# will need to be combined with manual shape/color by node type
 		point_size = 3,
 		point_stroke = 1,
 
-		# No curves for clarity
+		# no curves for clarity
 		curve_edges = FALSE,
 
-		# Often want labels for bipartite
+		# often want labels for bipartite
 		add_text = TRUE,
 		text_size = 2.5,
 		check_overlap = TRUE,
 
-		# Use bipartite layout
+		# use bipartite layout
 		layout = "bipartite"
 	)
 }
@@ -62,23 +62,23 @@ style_bipartite_network <- function() {
 
 style_temporal_network <- function() {
 	list(
-		# Subtle edges
+		# subtle edges
 		edge_color = "#95A5A6",
 		edge_alpha = 0.3,
 		edge_linewidth = 0.5,
 
-		# Nodes that pop
+		# nodes that pop
 		point_fill = "#3498DB",
 		point_color = "#2980B9",
 		point_size = 2,
 
-		# Static positions for comparison
+		# static positions for comparison
 		static_actor_positions = TRUE,
 
-		# No curves for clarity across time
+		# no curves for clarity across time
 		curve_edges = FALSE,
 
-		# Minimal style works well with facets
+		# minimal style works well with facets
 		use_style_netify = TRUE
 	)
 }
@@ -93,26 +93,26 @@ style_temporal_network <- function() {
 
 style_budapest <- function() {
 	list(
-		# Soft pink edges
+		# soft pink edges
 		edge_color = "#F4B5BD",
 		edge_alpha = 0.6,
 		edge_linewidth = 0.8,
 
-		# Nodes in purple and gold
+		# nodes in purple and gold
 		point_fill = "#9A8C98",
 		point_color = "#C9ADA7",
 		point_stroke = 1.5,
 		point_shape = 21,
 
-		# Curved edges for whimsical feel
+		# curved edges for whimsical feel
 		curve_edges = FALSE,
 		edge_curvature = 0.3,
 
-		# Labels in dark purple
+		# labels in dark purple
 		text_color = "#4A4E69",
 		text_size = 3,
 
-		# Light background
+		# light background
 		use_style_netify = FALSE
 	)
 }
@@ -127,27 +127,27 @@ style_budapest <- function() {
 
 style_economist <- function() {
 	list(
-		# Signature Economist red for edges
+		# signature Economist red for edges
 		edge_color = "#E3120B",
 		edge_alpha = 0.7,
 		edge_linewidth = 0.5,
 
-		# Light blue nodes
+		# light blue nodes
 		point_fill = "#6BABEB",
-		point_color = "#01621E", # Dark green border
+		point_color = "#01621E", # dark green border
 		point_stroke = 1,
 		point_size = 2.5,
 		point_shape = 21,
 
-		# No curves - clean geometric look
+		# no curves - clean geometric look
 		curve_edges = FALSE,
 
-		# Clean, minimal text
+		# clean, minimal text
 		text_family = "sans",
 		text_size = 3,
 		text_color = "#000000",
 
-		# White background
+		# white background
 		use_style_netify = TRUE
 	)
 }
@@ -162,27 +162,27 @@ style_economist <- function() {
 
 style_538 <- function() {
 	list(
-		# Orange edges
+		# orange edges
 		edge_color = "#FC7634",
 		edge_alpha = 0.6,
 		edge_linewidth = 1,
 
-		# Teal nodes
+		# teal nodes
 		point_fill = "#30A9D9",
 		point_color = "#2A2A2A",
 		point_stroke = 0.5,
 		point_size = 3,
 		point_shape = 21,
 
-		# Straight edges
+		# straight edges
 		curve_edges = FALSE,
 
-		# Bold text
+		# bold text
 		text_size = 3.5,
 		text_color = "#2A2A2A",
-		text_fontface = 2, # Bold
+		text_fontface = 2, # bold
 
-		# Gray background (apply manually)
+		# gray background (apply manually)
 		use_style_netify = FALSE
 	)
 }
@@ -197,27 +197,27 @@ style_538 <- function() {
 
 style_solarized <- function() {
 	list(
-		# Base yellow edges
+		# base yellow edges
 		edge_color = "#B58900",
 		edge_alpha = 0.5,
 		edge_linewidth = 0.8,
 
-		# Blue nodes with orange border
+		# blue nodes with orange border
 		point_fill = "#268BD2",
 		point_color = "#CB4B16",
 		point_stroke = 1,
 		point_size = 2.5,
 		point_shape = 21,
 
-		# Slight curves
+		# slight curves
 		curve_edges = FALSE,
 		edge_curvature = 0.15,
 
-		# Readable text
+		# readable text
 		text_color = "#586E75",
 		text_size = 3,
 
-		# Dark background (apply manually)
+		# dark background (apply manually)
 		use_style_netify = FALSE
 	)
 }
@@ -232,22 +232,22 @@ style_solarized <- function() {
 
 style_stata <- function() {
 	list(
-		# Navy blue edges
+		# navy blue edges
 		edge_color = "#1A476F",
 		edge_alpha = 0.8,
 		edge_linewidth = 0.6,
 
-		# Maroon nodes
+		# maroon nodes
 		point_fill = "#90353B",
 		point_color = "#1A476F",
 		point_stroke = 1,
 		point_size = 2,
 		point_shape = 21,
 
-		# No curves - traditional feel
+		# no curves - traditional feel
 		curve_edges = FALSE,
 
-		# Classic serif text
+		# classic serif text
 		text_family = "serif",
 		text_size = 3,
 		text_color = "#000000",
@@ -265,22 +265,22 @@ style_stata <- function() {
 
 style_nature <- function() {
 	list(
-		# Dark blue edges
+		# dark blue edges
 		edge_color = "#003F7F",
 		edge_alpha = 0.6,
 		edge_linewidth = 0.7,
 
-		# Orange-red nodes
+		# orange-red nodes
 		point_fill = "#ED6D35",
 		point_color = "#003F7F",
 		point_stroke = 0.8,
 		point_size = 2.2,
 		point_shape = 21,
 
-		# Clean straight lines
+		# clean straight lines
 		curve_edges = FALSE,
 
-		# Professional text
+		# professional text
 		text_size = 2.8,
 		text_color = "#000000",
 		use_style_netify = TRUE
@@ -296,26 +296,26 @@ style_nature <- function() {
 
 style_cyberpunk <- function() {
 	list(
-		# Neon pink edges
+		# neon pink edges
 		edge_color = "#FF006E",
 		edge_alpha = 0.8,
 		edge_linewidth = 1,
 
-		# Cyan nodes
+		# cyan nodes
 		point_fill = "#00F5FF",
 		point_color = "#FF006E",
 		point_stroke = 1.5,
 		point_size = 2.5,
 		point_shape = 21,
 
-		# Angular feel
+		# angular feel
 		curve_edges = FALSE,
 
-		# Glowing text effect (white text)
+		# glowing text effect (white text)
 		text_color = "#FFFFFF",
 		text_size = 3,
 
-		# Dark background needed
+		# dark background needed
 		use_style_netify = FALSE
 	)
 }
@@ -330,26 +330,26 @@ style_cyberpunk <- function() {
 
 style_tufte <- function() {
 	list(
-		# Very light gray edges
+		# very light gray edges
 		edge_color = "#CCCCCC",
 		edge_alpha = 0.5,
 		edge_linewidth = 0.3,
 
-		# Small black nodes
+		# small black nodes
 		point_fill = "#000000",
 		point_color = "#000000",
 		point_stroke = 0,
 		point_size = 1.5,
 		point_shape = 21,
 
-		# No curves - clean
+		# no curves - clean
 		curve_edges = FALSE,
 
-		# Minimal text
+		# minimal text
 		text_size = 2.5,
 		text_color = "#333333",
 
-		# Remove all chrome
+		# remove all chrome
 		use_style_netify = TRUE
 	)
 }
@@ -363,23 +363,23 @@ style_tufte <- function() {
 
 style_pastel <- function() {
 	list(
-		# Lavender edges
+		# lavender edges
 		edge_color = "#BB9CC0",
 		edge_alpha = 0.7,
 		edge_linewidth = 1.2,
 
-		# Mint green nodes
+		# mint green nodes
 		point_fill = "#9EDAC0",
-		point_color = "#FEB1D3", # Pink border
+		point_color = "#FEB1D3", # pink border
 		point_stroke = 1.5,
 		point_size = 3,
 		point_shape = 21,
 
-		# Soft curves
+		# soft curves
 		curve_edges = FALSE,
 		edge_curvature = 0.4,
 
-		# Soft gray text
+		# soft gray text
 		text_color = "#666666",
 		text_size = 3,
 		use_style_netify = TRUE
@@ -396,22 +396,22 @@ style_pastel <- function() {
 
 style_retro80s <- function() {
 	list(
-		# Hot pink edges
+		# hot pink edges
 		edge_color = "#FF1493",
 		edge_alpha = 0.9,
 		edge_linewidth = 1.5,
 
-		# Electric blue nodes
+		# electric blue nodes
 		point_fill = "#00CED1",
-		point_color = "#FFD700", # Gold border
+		point_color = "#FFD700", # gold border
 		point_stroke = 2,
 		point_size = 3.5,
-		point_shape = 24, # Triangle
+		point_shape = 24, # triangle
 
-		# No curves - geometric
+		# no curves - geometric
 		curve_edges = FALSE,
 
-		# Bold text
+		# bold text
 		text_size = 4,
 		text_color = "#FF1493",
 		text_fontface = 2,
@@ -429,23 +429,23 @@ style_retro80s <- function() {
 
 style_dark2 <- function() {
 	list(
-		# Dark orange edges
+		# dark orange edges
 		edge_color = "#D95F02",
 		edge_alpha = 0.6,
 		edge_linewidth = 0.8,
 
-		# Dark green nodes with purple border
+		# dark green nodes with purple border
 		point_fill = "#1B9E77",
 		point_color = "#7570B3",
 		point_stroke = 1.2,
 		point_size = 2.5,
 		point_shape = 21,
 
-		# Slight curves
+		# slight curves
 		curve_edges = FALSE,
 		edge_curvature = 0.2,
 
-		# Dark text
+		# dark text
 		text_color = "#666666",
 		text_size = 3,
 		use_style_netify = TRUE
@@ -463,22 +463,22 @@ style_dark2 <- function() {
 
 style_witcher_feline <- function() {
 	list(
-		# Sharp black edges like cat claws
-		edge_color = "#1C1C1C", # Almost black
+		# sharp black edges like cat claws
+		edge_color = "#1C1C1C", # almost black
 		edge_alpha = 0.9,
-		edge_linewidth = 0.4, # Thin and precise
+		edge_linewidth = 0.4, # thin and precise
 
-		# Crimson nodes with silver borders
-		point_fill = "#8B0000", # Dark red (blood)
-		point_color = "#C0C0C0", # Silver trim
+		# crimson nodes with silver borders
+		point_fill = "#8B0000", # dark red (blood)
+		point_color = "#C0C0C0", # silver trim
 		point_stroke = 0.8,
 		point_size = 2,
-		point_shape = 23, # Diamond - sharp and agile
+		point_shape = 23, # diamond - sharp and agile
 
-		# No curves - direct strikes
+		# no curves - direct strikes
 		curve_edges = FALSE,
 
-		# Precise text
+		# precise text
 		text_color = "#8B0000",
 		text_size = 2.5,
 		use_theme_netify = TRUE
@@ -495,23 +495,23 @@ style_witcher_feline <- function() {
 
 style_witcher_griffin <- function() {
 	list(
-		# Magical blue edges
-		edge_color = "#4169E1", # Royal blue (Aard sign)
+		# magical blue edges
+		edge_color = "#4169E1", # royal blue (Aard sign)
 		edge_alpha = 0.7,
 		edge_linewidth = 0.8,
 
-		# Green nodes with gold borders (magical balance)
-		point_fill = "#228B22", # Forest green
-		point_color = "#FFD700", # Gold trim
+		# green nodes with gold borders (magical balance)
+		point_fill = "#228B22", # forest green
+		point_color = "#FFD700", # gold trim
 		point_stroke = 1.2,
 		point_size = 2.5,
-		point_shape = 21, # Circle - balanced
+		point_shape = 21, # circle - balanced
 
-		# Slight curves for magical flow
+		# slight curves for magical flow
 		curve_edges = FALSE,
 		edge_curvature = 0.2,
 
-		# Scholarly text
+		# scholarly text
 		text_color = "#4169E1",
 		text_size = 3,
 		use_theme_netify = TRUE
@@ -528,26 +528,26 @@ style_witcher_griffin <- function() {
 
 style_witcher_wolven <- function() {
 	list(
-		# Steel gray edges
-		edge_color = "#708090", # Slate gray (steel sword)
+		# steel gray edges
+		edge_color = "#708090", # slate gray (steel sword)
 		edge_alpha = 0.8,
 		edge_linewidth = 1,
 
-		# White/silver nodes with dark borders
-		point_fill = "#F5F5F5", # White wolf
-		point_color = "#2F4F4F", # Dark slate gray
+		# white/silver nodes with dark borders
+		point_fill = "#F5F5F5", # white wolf
+		point_color = "#2F4F4F", # dark slate gray
 		point_stroke = 1.5,
 		point_size = 3,
-		point_shape = 21, # Circle
+		point_shape = 21, # circle
 
-		# Moderate curves
+		# moderate curves
 		curve_edges = FALSE,
 		edge_curvature = 0.3,
 
-		# Clear text
+		# clear text
 		text_color = "#2F4F4F",
 		text_size = 3,
-		text_fontface = 2, # Bold like a wolf
+		text_fontface = 2, # bold like a wolf
 
 		use_theme_netify = TRUE
 	)
@@ -563,25 +563,25 @@ style_witcher_wolven <- function() {
 
 style_witcher_ursine <- function() {
 	list(
-		# Heavy brown edges
-		edge_color = "#8B4513", # Saddle brown (bear fur)
+		# heavy brown edges
+		edge_color = "#8B4513", # saddle brown (bear fur)
 		edge_alpha = 0.9,
-		edge_linewidth = 2, # Thick and heavy
+		edge_linewidth = 2, # thick and heavy
 
-		# Dark nodes with bronze borders
-		point_fill = "#2F2F2F", # Almost black (bear)
-		point_color = "#CD7F32", # Bronze trim
+		# dark nodes with bronze borders
+		point_fill = "#2F2F2F", # almost black (bear)
+		point_color = "#CD7F32", # bronze trim
 		point_stroke = 2,
-		point_size = 4, # Large and imposing
-		point_shape = 22, # Square - sturdy
+		point_size = 4, # large and imposing
+		point_shape = 22, # square - sturdy
 
-		# No curves - straightforward
+		# no curves - straightforward
 		curve_edges = FALSE,
 
-		# Heavy text
+		# heavy text
 		text_color = "#8B4513",
 		text_size = 4,
-		text_fontface = 2, # Bold
+		text_fontface = 2, # bold
 
 		use_theme_netify = TRUE
 	)
@@ -597,23 +597,23 @@ style_witcher_ursine <- function() {
 
 style_witcher_manticore <- function() {
 	list(
-		# Poison green edges
-		edge_color = "#32CD32", # Lime green (toxicity)
+		# poison green edges
+		edge_color = "#32CD32", # lime green (toxicity)
 		edge_alpha = 0.6,
 		edge_linewidth = 0.7,
 
-		# Purple nodes with green borders (alchemical)
-		point_fill = "#8B008B", # Dark magenta
-		point_color = "#00FF00", # Bright green
+		# purple nodes with green borders (alchemical)
+		point_fill = "#8B008B", # dark magenta
+		point_color = "#00FF00", # bright green
 		point_stroke = 1,
 		point_size = 2.5,
-		point_shape = 24, # Triangle up - exotic
+		point_shape = 24, # triangle up - exotic
 
-		# Twisted curves
+		# twisted curves
 		curve_edges = FALSE,
-		edge_curvature = 0.5, # More curved - mysterious
+		edge_curvature = 0.5, # more curved - mysterious
 
-		# Mysterious text
+		# mysterious text
 		text_color = "#8B008B",
 		text_size = 2.8,
 		use_theme_netify = TRUE
@@ -630,23 +630,23 @@ style_witcher_manticore <- function() {
 
 style_witcher_viper <- function() {
 	list(
-		# Dark green edges (snake)
-		edge_color = "#006400", # Dark green
-		edge_alpha = 0.5, # Stealthy
+		# dark green edges (snake)
+		edge_color = "#006400", # dark green
+		edge_alpha = 0.5, # stealthy
 		edge_linewidth = 0.6,
 
-		# Black nodes with yellow borders (snake pattern)
-		point_fill = "#000000", # Black
-		point_color = "#FFFF00", # Yellow (viper eyes)
+		# black nodes with yellow borders (snake pattern)
+		point_fill = "#000000", # black
+		point_color = "#FFFF00", # yellow (viper eyes)
 		point_stroke = 0.8,
-		point_size = 1.8, # Small and deadly
-		point_shape = 23, # Diamond - fangs
+		point_size = 1.8, # small and deadly
+		point_shape = 23, # diamond - fangs
 
-		# Sinuous curves
+		# sinuous curves
 		curve_edges = FALSE,
 		edge_curvature = 0.4,
 
-		# Subtle text
+		# subtle text
 		text_color = "#006400",
 		text_size = 2.5,
 		use_theme_netify = TRUE
@@ -661,14 +661,14 @@ style_witcher_viper <- function() {
 #' @export
 style_pokemon_pikachu <- function() {
 	list(
-		edge_color = "#FFD700", # Electric yellow
+		edge_color = "#FFD700", # electric yellow
 		edge_alpha = 0.8,
 		edge_linewidth = 1,
-		point_fill = "#FFFACD", # Light yellow node fill
-		point_color = "#DAA520", # Goldenrod border
+		point_fill = "#FFFACD", # light yellow node fill
+		point_color = "#DAA520", # goldenrod border
 		point_stroke = 1.2,
 		point_size = 3,
-		point_shape = 21, # Circle
+		point_shape = 21, # circle
 
 		curve_edges = FALSE,
 		edge_curvature = 0.25,
@@ -686,20 +686,20 @@ style_pokemon_pikachu <- function() {
 #' @export
 style_secretariat <- function() {
 	list(
-		edge_color = "#1F75FE", # Racing blue
+		edge_color = "#1F75FE", # racing blue
 		edge_alpha = 0.7,
 		edge_linewidth = 1.2,
-		point_fill = "#FFFFFF", # White silks
-		point_color = "#1F75FE", # Blue trim
+		point_fill = "#FFFFFF", # white silks
+		point_color = "#1F75FE", # blue trim
 		point_stroke = 2,
 		point_size = 3.5,
-		point_shape = 22, # Square - powerful base
+		point_shape = 22, # square - powerful base
 
-		curve_edges = FALSE, # Direct and fast
+		curve_edges = FALSE, # direct and fast
 
 		text_color = "#1F1F1F",
 		text_size = 3.2,
-		text_fontface = 2, # Bold for strength
+		text_fontface = 2, # bold for strength
 
 		use_style_netify = TRUE
 	)
@@ -806,6 +806,6 @@ style_random <- function(seed = NULL) {
 	selected <- sample(styles, 1)
 	cli::cli_inform("Using {.fn {selected}}")
 
-	# Call the selected style function
+	# call the selected style function
 	do.call(selected, list())
 }

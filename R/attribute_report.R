@@ -127,13 +127,13 @@ attribute_report <- function(
 		for (var in node_vars) {
 			tryCatch(
 				{
-					# Determine appropriate similarity method based on variable type
+					# determine appropriate similarity method based on variable type
 					if (!is.null(nodal_data)) {
-						# Extract variable values depending on data structure
+						# extract variable values depending on data structure
 						if (netify_type == "cross_sec") {
 							var_values <- nodal_data[[var]]
 						} else if (is.list(nodal_data)) {
-							# For longitudinal, get values from first time period
+							# for longitudinal, get values from first time period
 							first_time <- names(nodal_data)[1]
 							var_values <- nodal_data[[first_time]][[var]]
 						} else {
@@ -281,9 +281,9 @@ calculate_centrality_correlations <- function(netlet, node_vars, centrality_meas
 	netlet_list <- switch(netify_type,
 		"cross_sec" = list("1" = netlet),
 		"longit_array" = {
-			# Check if this is multilayer longitudinal (4D) or single layer (3D)
+			# check if this is multilayer longitudinal (4D) or single layer (3D)
 			if (length(dim(netlet)) == 4) {
-				# Multilayer longitudinal: extract time periods from 4th dimension
+				# multilayer longitudinal: extract time periods from 4th dimension
 				time_names <- dimnames(netlet)[[4]]
 				if (is.null(time_names)) {
 					time_names <- as.character(seq_len(dim(netlet)[4]))
@@ -294,7 +294,7 @@ calculate_centrality_correlations <- function(netlet, node_vars, centrality_meas
 				}
 				net_list
 			} else {
-				# Single layer longitudinal: extract from 3rd dimension
+				# single layer longitudinal: extract from 3rd dimension
 				time_names <- dimnames(netlet)[[3]]
 				if (is.null(time_names)) {
 					time_names <- as.character(seq_len(dim(netlet)[3]))
@@ -316,13 +316,13 @@ calculate_centrality_correlations <- function(netlet, node_vars, centrality_meas
 		for (time_id in names(netlet_list)) {
 			# get network matrix
 			net_matrix <- netlet_list[[time_id]]
-			# Extract specific layer for multilayer networks
+			# extract specific layer for multilayer networks
 			if (length(layers) > 1) {
 				if (netify_type == "cross_sec") {
-					# For cross-sectional multilayer: 3D array [actors, actors, layers]
+					# for cross-sectional multilayer: 3D array [actors, actors, layers]
 					net_matrix <- netlet[, , layer_index]
 				} else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
-					# For longitudinal multilayer: 4D array [actors, actors, layers, time]
+					# for longitudinal multilayer: 4D array [actors, actors, layers, time]
 					net_matrix <- net_matrix[, , layer_index]
 				}
 			}
@@ -349,7 +349,7 @@ calculate_centrality_correlations <- function(netlet, node_vars, centrality_meas
 					node_values <- time_nodal_data[[node_var]]
 					actors <- time_nodal_data$actor
 
-					# Match to matrix
+					# match to matrix
 					attr_indices <- match(matrix_actors, actors)
 					node_values <- node_values[attr_indices]
 
@@ -415,7 +415,7 @@ calculate_centrality_measures <- function(net_matrix, centrality_measures) {
 		{
 			# remove self-loops and convert to binary for centrality calculation
 			binary_matrix <- (net_matrix > 0) & !is.na(net_matrix)
-			diag(binary_matrix) <- FALSE # Remove self-loops
+			diag(binary_matrix) <- FALSE # remove self-loops
 			igraph::graph_from_adjacency_matrix(binary_matrix, mode = "directed")
 		},
 		error = function(e) {

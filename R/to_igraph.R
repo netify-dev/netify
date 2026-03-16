@@ -296,9 +296,9 @@ netify_net_to_igraph <- function(netlet) {
 
 	# convert to igraph_object
 	if (!bipartite_logical) {
-		# For symmetric networks, use "max" to handle the new igraph behavior
-		# This takes the maximum of the upper and lower triangle values
-		mode_val <- if(attr(netlet, "symmetric")) "max" else "directed"
+		# for symmetric networks, use "max" to handle the new igraph behavior
+		# this takes the maximum of the upper and lower triangle values
+		mode_val <- if(all(attr(netlet, "symmetric"))) "max" else "directed"
 		
 		igraph_object <- igraph::graph_from_adjacency_matrix(
 			raw_net,
@@ -320,14 +320,14 @@ netify_net_to_igraph <- function(netlet) {
 	# add dv as edge attribute as well
 	if (!is.null(attr(netlet, "weight", exact = TRUE))) {
 		# match edge positions between raw data and igraph
-		ePosIgraph <- adj_igraph_positions(raw_net, igraph_object)
+		e_pos_igraph <- adj_igraph_positions(raw_net, igraph_object)
 
 		# subset dyadic data matrix based on ids
 		# and add edge attr
 		igraph_object <- igraph::set_edge_attr(
 			igraph_object,
 			name = attr(netlet, "weight", exact = TRUE),
-			value = raw_net[ePosIgraph]
+			value = raw_net[e_pos_igraph]
 		)
 	}
 
@@ -419,19 +419,19 @@ add_dyad_to_igraph <- function(netlet, dyad_data_list, igraph_object, time = NUL
 	bipartite_logical <- netlet_mode == "bipartite"
 
 	# get edge positions
-	ePosIgraph <- adj_igraph_positions(var_matrices[[1]], igraph_object)
+	e_pos_igraph <- adj_igraph_positions(var_matrices[[1]], igraph_object)
 
 	# go through dyad vars
 	edge_attrs <- lapply(vars, function(var_name) {
-		dData <- var_matrices[[var_name]]
+		d_data <- var_matrices[[var_name]]
 
 		# replace diagonal with 0s if needed
 		if (!bipartite_logical && netlet_diag_to_NA) {
-			diag(dData) <- 0
+			diag(d_data) <- 0
 		}
 
 		# extract values using pre-computed positions
-		return(dData[ePosIgraph])
+		return(d_data[e_pos_igraph])
 	})
 
 	# set all edge attributes at once
@@ -467,23 +467,23 @@ adj_igraph_positions <- function(adj_mat, igraph_object) {
 	nr <- length(ar)
 	ac <- colnames(adj_mat)
 	nc <- length(ac)
-	arKey <- data.frame(
+	ar_key <- data.frame(
 		id = 1:nr, lab = ar, stringsAsFactors = FALSE
 	)
-	acKey <- data.frame(
+	ac_key <- data.frame(
 		id = 1:nc, lab = ac, stringsAsFactors = FALSE
 	)
 
 	# can simplify the commented above via igraph::as_data_frame
-	eLabIgraph <- igraph::as_data_frame(igraph_object, what = "edges")
+	e_lab_igraph <- igraph::as_data_frame(igraph_object, what = "edges")
 
-	# get positions of each actor in eLabIgraph
+	# get positions of each actor in e_lab_igraph
 	# based on where they fall in aKey
-	ePosIgraph <- cbind(
-		row = arKey$id[match(eLabIgraph[, 1], arKey$lab)],
-		col = acKey$id[match(eLabIgraph[, 2], acKey$lab)]
+	e_pos_igraph <- cbind(
+		row = ar_key$id[match(e_lab_igraph[, 1], ar_key$lab)],
+		col = ac_key$id[match(e_lab_igraph[, 2], ac_key$lab)]
 	)
 
 	#
-	return(ePosIgraph)
+	return(e_pos_igraph)
 }

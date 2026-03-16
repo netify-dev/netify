@@ -1,26 +1,22 @@
-# Tests for nodelist parameter functionality
-# IMPORTANT: The nodelist parameter addresses a critical issue in network analysis:
-# - In IR, it's common to have exhaustive dyadic data (every possible dyad has a row)
-# - Outside IR, edgelists typically only contain rows for existing edges
-# - This means isolates (nodes with no connections) are missing from edgelists
-# - The nodelist parameter allows users to ensure all nodes are included, even isolates
+# tests for nodelist parameter functionality
+# nodelist ensures all nodes are included, even isolates missing from edgelists
 #
-# Current implementation status:
-# - get_adjacency(): FULLY IMPLEMENTED - correctly adds isolates
-# - get_adjacency_array(): Parameter accepted but not implemented
-# - get_adjacency_list(): Parameter accepted but not implemented
+# implementation status:
+# - get_adjacency(): fully implemented
+# - get_adjacency_array(): fully implemented
+# - get_adjacency_list(): fully implemented
 
 test_that("nodelist parameter is accepted by all functions without error", {
-	# Create simple dyadic data
-	dyad_df <- data.frame(
+	# create simple dyadic data
+	dyad_df = data.frame(
 		actor1 = c("A", "B", "C"),
 		actor2 = c("B", "C", "D"),
 		weight = c(1, 2, 3),
 		stringsAsFactors = FALSE
 	)
 	
-	# Create longitudinal data
-	dyad_df_long <- data.frame(
+	# create longitudinal data
+	dyad_df_long = data.frame(
 		actor1 = rep(c("A", "B", "C"), 2),
 		actor2 = rep(c("B", "C", "D"), 2),
 		time = rep(1:2, each = 3),
@@ -28,11 +24,11 @@ test_that("nodelist parameter is accepted by all functions without error", {
 		stringsAsFactors = FALSE
 	)
 	
-	nodelist <- c("A", "B", "C", "D", "E")
+	nodelist = c("A", "B", "C", "D", "E")
 	
-	# Test that nodelist parameter is accepted without error
+	# test that nodelist parameter is accepted without error
 	expect_no_error({
-		net <- netify(
+		net = netify(
 			dyad_df,
 			actor1 = "actor1",
 			actor2 = "actor2",
@@ -42,7 +38,7 @@ test_that("nodelist parameter is accepted by all functions without error", {
 	})
 	
 	expect_no_error({
-		adj <- get_adjacency(
+		adj = get_adjacency(
 			dyad_df,
 			actor1 = "actor1",
 			actor2 = "actor2",
@@ -52,7 +48,7 @@ test_that("nodelist parameter is accepted by all functions without error", {
 	})
 	
 	expect_no_error({
-		arr <- get_adjacency_array(
+		arr = get_adjacency_array(
 			dyad_df_long,
 			actor1 = "actor1",
 			actor2 = "actor2",
@@ -63,7 +59,7 @@ test_that("nodelist parameter is accepted by all functions without error", {
 	})
 	
 	expect_no_error({
-		lst <- get_adjacency_list(
+		lst = get_adjacency_list(
 			dyad_df_long,
 			actor1 = "actor1",
 			actor2 = "actor2",
@@ -75,16 +71,16 @@ test_that("nodelist parameter is accepted by all functions without error", {
 })
 
 test_that("get_adjacency() correctly adds isolates with nodelist", {
-	# Create sparse edgelist - common scenario where isolates are missing
-	edgelist <- data.frame(
+	# create sparse edgelist - common scenario where isolates are missing
+	edgelist = data.frame(
 		from = c("A", "B", "C"),
 		to = c("B", "C", "A"),
 		weight = c(1, 2, 3),
 		stringsAsFactors = FALSE
 	)
 	
-	# Without nodelist - only actors in edges
-	adj_no_isolates <- get_adjacency(
+	# without nodelist - only actors in edges
+	adj_no_isolates = get_adjacency(
 		edgelist,
 		actor1 = "from",
 		actor2 = "to",
@@ -92,9 +88,9 @@ test_that("get_adjacency() correctly adds isolates with nodelist", {
 		symmetric = FALSE
 	)
 	
-	# With nodelist including isolates D, E, F
-	full_nodelist <- c("A", "B", "C", "D", "E", "F")
-	adj_with_isolates <- get_adjacency(
+	# with nodelist including isolates D, E, F
+	full_nodelist = c("A", "B", "C", "D", "E", "F")
+	adj_with_isolates = get_adjacency(
 		edgelist,
 		actor1 = "from",
 		actor2 = "to",
@@ -103,44 +99,44 @@ test_that("get_adjacency() correctly adds isolates with nodelist", {
 		nodelist = full_nodelist
 	)
 	
-	# Test 1: Dimensions increase to include isolates
+	# test 1: Dimensions increase to include isolates
 	expect_equal(dim(adj_no_isolates), c(3, 3))
 	expect_equal(dim(adj_with_isolates), c(6, 6))
 	
-	# Test 2: All nodes from nodelist are included
+	# test 2: All nodes from nodelist are included
 	expect_equal(rownames(adj_with_isolates), full_nodelist)
 	expect_equal(colnames(adj_with_isolates), full_nodelist)
 	
-	# Test 3: Original edges are preserved
+	# test 3: Original edges are preserved
 	expect_equal(adj_with_isolates["A", "B"], 1)
 	expect_equal(adj_with_isolates["B", "C"], 2)
 	expect_equal(adj_with_isolates["C", "A"], 3)
 	
-	# Test 4: Isolates have no connections (all 0s by default)
-	# Check isolate D
+	# test 4: Isolates have no connections (all 0s by default)
+	# check isolate D
 	expect_true(all(adj_with_isolates["D", ] == 0 | is.na(adj_with_isolates["D", ])))
 	expect_true(all(adj_with_isolates[, "D"] == 0 | is.na(adj_with_isolates[, "D"])))
-	# Check isolate E
+	# check isolate E
 	expect_true(all(adj_with_isolates["E", ] == 0 | is.na(adj_with_isolates["E", ])))
 	expect_true(all(adj_with_isolates[, "E"] == 0 | is.na(adj_with_isolates[, "E"])))
-	# Check isolate F
+	# check isolate F
 	expect_true(all(adj_with_isolates["F", ] == 0 | is.na(adj_with_isolates["F", ])))
 	expect_true(all(adj_with_isolates[, "F"] == 0 | is.na(adj_with_isolates[, "F"])))
 })
 
 test_that("get_adjacency() handles isolates correctly with missing_to_zero parameter", {
-	# Simple edgelist
-	edgelist <- data.frame(
+	# simple edgelist
+	edgelist = data.frame(
 		i = c("X", "Y"),
 		j = c("Y", "Z"),
 		value = c(5, 10),
 		stringsAsFactors = FALSE
 	)
 	
-	nodes <- c("W", "X", "Y", "Z")  # W is an isolate
+	nodes = c("W", "X", "Y", "Z")  # w is an isolate
 	
-	# Test with missing_to_zero = TRUE (default)
-	adj_zeros <- get_adjacency(
+	# test with missing_to_zero = TRUE (default)
+	adj_zeros = get_adjacency(
 		edgelist,
 		actor1 = "i",
 		actor2 = "j",
@@ -149,8 +145,8 @@ test_that("get_adjacency() handles isolates correctly with missing_to_zero param
 		missing_to_zero = TRUE
 	)
 	
-	# Test with missing_to_zero = FALSE
-	adj_nas <- get_adjacency(
+	# test with missing_to_zero = FALSE
+	adj_nas = get_adjacency(
 		edgelist,
 		actor1 = "i",
 		actor2 = "j",
@@ -159,22 +155,22 @@ test_that("get_adjacency() handles isolates correctly with missing_to_zero param
 		missing_to_zero = FALSE
 	)
 	
-	# Both should have same dimensions
+	# both should have same dimensions
 	expect_equal(dim(adj_zeros), c(4, 4))
 	expect_equal(dim(adj_nas), c(4, 4))
 	
-	# Check isolate W has correct values
-	# With missing_to_zero = TRUE, should be 0s
+	# check isolate W has correct values
+	# with missing_to_zero = TRUE, should be 0s
 	expect_equal(adj_zeros["W", "X"], 0)
 	expect_equal(adj_zeros["W", "Y"], 0)
 	expect_equal(adj_zeros["W", "Z"], 0)
 	
-	# With missing_to_zero = FALSE, should be NAs
+	# with missing_to_zero = FALSE, should be NAs
 	expect_true(is.na(adj_nas["W", "X"]))
 	expect_true(is.na(adj_nas["W", "Y"]))
 	expect_true(is.na(adj_nas["W", "Z"]))
 	
-	# Actual edges should be preserved in both
+	# actual edges should be preserved in both
 	expect_equal(adj_zeros["X", "Y"], 5)
 	expect_equal(adj_nas["X", "Y"], 5)
 	expect_equal(adj_zeros["Y", "Z"], 10)
@@ -182,43 +178,43 @@ test_that("get_adjacency() handles isolates correctly with missing_to_zero param
 })
 
 test_that("get_adjacency() nodelist works for IR-style exhaustive dyadic data", {
-	# IR example: trade data where 0 means no trade (not missing)
-	# Only non-zero trade relationships in the data
-	trade_edgelist <- data.frame(
+	# trade data where 0 means no trade (not missing)
+	# only non-zero trade relationships in the data
+	trade_edgelist = data.frame(
 		exporter = c("USA", "USA", "China", "Germany"),
 		importer = c("Canada", "Mexico", "Russia", "France"),
 		trade_value = c(100, 200, 150, 80),
 		stringsAsFactors = FALSE
 	)
 	
-	# Full list of countries in the study
-	all_countries <- c("USA", "Canada", "Mexico", "China", "Russia", 
+	# full list of countries in the study
+	all_countries = c("USA", "Canada", "Mexico", "China", "Russia", 
 					  "Germany", "France", "Japan", "Brazil")
 	
-	# Create adjacency matrix with all countries
-	trade_matrix <- get_adjacency(
+	# create adjacency matrix with all countries
+	trade_matrix = get_adjacency(
 		trade_edgelist,
 		actor1 = "exporter",
 		actor2 = "importer",
 		weight = "trade_value",
 		symmetric = FALSE,
 		nodelist = all_countries,
-		missing_to_zero = TRUE  # Important for trade data
+		missing_to_zero = TRUE  # important for trade data
 	)
 	
-	# Verify all countries are included
+	# verify all countries are included
 	expect_equal(dim(trade_matrix), c(9, 9))
 	expect_true(all(all_countries %in% rownames(trade_matrix)))
 	expect_true(all(all_countries %in% colnames(trade_matrix)))
 	
-	# Check that Japan and Brazil (isolates) are included with 0 trade
-	# Use na.rm = TRUE to handle diagonal NAs
+	# check that Japan and Brazil (isolates) are included with 0 trade
+	# use na.rm = TRUE to handle diagonal NAs
 	expect_equal(sum(trade_matrix["Japan", ], na.rm = TRUE), 0)
 	expect_equal(sum(trade_matrix[, "Japan"], na.rm = TRUE), 0)
 	expect_equal(sum(trade_matrix["Brazil", ], na.rm = TRUE), 0)
 	expect_equal(sum(trade_matrix[, "Brazil"], na.rm = TRUE), 0)
 	
-	# Verify actual trade values
+	# verify actual trade values
 	expect_equal(trade_matrix["USA", "Canada"], 100)
 	expect_equal(trade_matrix["USA", "Mexico"], 200)
 	expect_equal(trade_matrix["China", "Russia"], 150)
@@ -226,19 +222,19 @@ test_that("get_adjacency() nodelist works for IR-style exhaustive dyadic data", 
 })
 
 test_that("netify() correctly passes nodelist to get_adjacency()", {
-	# Test that netify() properly uses nodelist for cross-sectional data
-	edgelist <- data.frame(
+	# test that netify() properly uses nodelist for cross-sectional data
+	edgelist = data.frame(
 		sender = c("Alice", "Bob", "Charlie"),
 		receiver = c("Bob", "Charlie", "Alice"),
 		strength = c(10, 20, 15),
 		stringsAsFactors = FALSE
 	)
 	
-	# Include some isolates
-	all_people <- c("Alice", "Bob", "Charlie", "David", "Eve")
+	# include some isolates
+	all_people = c("Alice", "Bob", "Charlie", "David", "Eve")
 	
-	# Create network using netify with nodelist
-	net <- netify(
+	# create network using netify with nodelist
+	net = netify(
 		edgelist,
 		actor1 = "sender",
 		actor2 = "receiver",
@@ -247,37 +243,37 @@ test_that("netify() correctly passes nodelist to get_adjacency()", {
 		nodelist = all_people
 	)
 	
-	# Verify isolates are included
+	# verify isolates are included
 	expect_equal(dim(net), c(5, 5))
 	expect_equal(rownames(net), all_people)
 	expect_equal(colnames(net), all_people)
 	
-	# Check that David and Eve are isolates with no connections
+	# check that David and Eve are isolates with no connections
 	expect_true(all(net["David", ] == 0 | is.na(net["David", ])))
 	expect_true(all(net[, "David"] == 0 | is.na(net[, "David"])))
 	expect_true(all(net["Eve", ] == 0 | is.na(net["Eve", ])))
 	expect_true(all(net[, "Eve"] == 0 | is.na(net[, "Eve"])))
 	
-	# Verify edges are correct
+	# verify edges are correct
 	expect_equal(net["Alice", "Bob"], 10)
 	expect_equal(net["Bob", "Charlie"], 20)
 	expect_equal(net["Charlie", "Alice"], 15)
 })
 
 test_that("nodelist parameter produces informative message for bipartite networks", {
-	# Create bipartite data
-	dyad_df <- data.frame(
+	# create bipartite data
+	dyad_df = data.frame(
 		company = c("Apple", "Google"),
 		investor = c("FundA", "FundB"),
 		amount = c(1000, 2000),
 		stringsAsFactors = FALSE
 	)
 	
-	all_actors <- c("Apple", "Google", "Microsoft", "FundA", "FundB", "FundC")
+	all_actors = c("Apple", "Google", "Microsoft", "FundA", "FundB", "FundC")
 	
-	# Expect an informative message about bipartite handling
+	# expect an informative message about bipartite handling
 	expect_message({
-		bipartite_net <- get_adjacency(
+		bipartite_net = get_adjacency(
 			dyad_df,
 			actor1 = "company",
 			actor2 = "investor",
@@ -289,25 +285,25 @@ test_that("nodelist parameter produces informative message for bipartite network
 })
 
 test_that("existing network creation functionality works without nodelist", {
-	# This test ensures that the existing functionality is not broken
+	# this test ensures that the existing functionality is not broken
 	
-	# Create simple dyadic data
-	dyad_df <- data.frame(
+	# create simple dyadic data
+	dyad_df = data.frame(
 		from = c("A", "B", "C"),
 		to = c("B", "C", "D"),
 		value = c(1, 2, 3),
 		stringsAsFactors = FALSE
 	)
 	
-	# Create network without nodelist - existing functionality
-	net <- netify(
+	# create network without nodelist - existing functionality
+	net = netify(
 		dyad_df,
 		actor1 = "from",
 		actor2 = "to",
 		weight = "value"
 	)
 	
-	# Check basic properties
+	# check basic properties
 	expect_s3_class(net, "netify")
 	expect_equal(dim(net), c(4, 4))
 	expect_true(all(c("A", "B", "C", "D") %in% rownames(net)))
@@ -317,69 +313,61 @@ test_that("existing network creation functionality works without nodelist", {
 })
 
 test_that("nodelist implementation status documentation", {
-	# This test documents the current implementation status
+	# this test documents the current implementation status
 	# and can be updated as functionality is added
 	
-	implementation_status <- list(
+	implementation_status = list(
 		netify = "FULLY IMPLEMENTED - passes nodelist to all underlying functions",
 		get_adjacency = "FULLY IMPLEMENTED - correctly adds isolates to adjacency matrix",
 		get_adjacency_array = "FULLY IMPLEMENTED - correctly adds isolates to 3D array",
 		get_adjacency_list = "FULLY IMPLEMENTED - correctly adds isolates to list of matrices"
 	)
 	
-	# This test always passes and serves as documentation
+	# this test always passes and serves as documentation
 	expect_true(TRUE)
-	
-	# Print status if running interactively
-	if (interactive()) {
-		message("\nNodelist implementation status:")
-		for (func in names(implementation_status)) {
-			message(sprintf("  %s: %s", func, implementation_status[[func]]))
-		}
-	}
 })
 
 test_that("nodelist handles large sparse networks efficiently", {
-	# Example inspired by the context: social media networks with ~8k nodes
+	# example inspired by the context: social media networks with ~8k nodes
 	# but only ~200k edges (very sparse)
 	
-	# Create a small example of this scenario
-	# Simulate follower relationships (directed edges)
-	followers_edgelist <- data.frame(
+	# create a small example of this scenario
+	# simulate follower relationships (directed edges)
+	followers_edgelist = data.frame(
 		follower = c("user1", "user2", "user3", "user5", "user7"),
 		followed = c("user2", "user4", "user1", "user6", "user8"),
 		timestamp = 1:5,
 		stringsAsFactors = FALSE
 	)
 	
-	# Full list of users (many are isolates or have very few connections)
-	all_users <- paste0("user", 1:20)
+	# full list of users (many are isolates or have very few connections)
+	all_users = paste0("user", 1:20)
 	
-	# Create adjacency matrix with all users
-	follower_network <- get_adjacency(
+	# create adjacency matrix with all users
+	follower_network = get_adjacency(
 		followers_edgelist,
 		actor1 = "follower",
 		actor2 = "followed",
 		weight = "timestamp",
-		symmetric = FALSE,  # Directed network
+		symmetric = FALSE,  # directed network
 		nodelist = all_users,
 		missing_to_zero = TRUE
 	)
 	
-	# Verify dimensions include all users
+	# verify dimensions include all users
 	expect_equal(dim(follower_network), c(20, 20))
 	
-	# Check sparsity - most entries should be 0
-	n_edges <- sum(follower_network > 0, na.rm = TRUE)
-	n_possible <- 20 * 20 - 20  # Exclude diagonal
-	sparsity <- 1 - (n_edges / n_possible)
-	expect_true(sparsity > 0.9)  # Very sparse network
+	# check sparsity - most entries should be 0
+	n_edges = sum(follower_network > 0, na.rm = TRUE)
+	n_possible = 20 * 20 - 20  # exclude diagonal
+	sparsity = 1 - (n_edges / n_possible)
+	expect_true(sparsity > 0.9)  # very sparse network
 	
-	# Verify specific edges exist
+	# verify specific edges exist
 	expect_equal(follower_network["user1", "user2"], 1)
 	expect_equal(follower_network["user2", "user4"], 2)
 	
-	# Verify isolates exist (e.g., user10, user15, user20)
+	# verify isolates exist (e.g., user10, user15, user20)
 	expect_equal(sum(follower_network["user10", ], na.rm = TRUE), 0)
 	expect_equal(sum(follower_network[, "user10"], na.rm = TRUE), 0)
 	expect_equal(sum(follower_network["user20", ], na.rm = TRUE), 0)
@@ -387,8 +375,8 @@ test_that("nodelist handles large sparse networks efficiently", {
 })
 
 test_that("get_adjacency_array() correctly adds isolates with nodelist", {
-	# Create longitudinal dyadic data
-	dyad_df <- data.frame(
+	# create longitudinal dyadic data
+	dyad_df = data.frame(
 		from = rep(c("A", "B", "C"), each = 2),
 		to = rep(c("B", "C", "D"), 2),
 		year = rep(2020:2021, 3),
@@ -396,8 +384,8 @@ test_that("get_adjacency_array() correctly adds isolates with nodelist", {
 		stringsAsFactors = FALSE
 	)
 	
-	# Without nodelist
-	arr_no_nodelist <- get_adjacency_array(
+	# without nodelist
+	arr_no_nodelist = get_adjacency_array(
 		dyad_df,
 		actor1 = "from",
 		actor2 = "to",
@@ -405,9 +393,9 @@ test_that("get_adjacency_array() correctly adds isolates with nodelist", {
 		weight = "value"
 	)
 	
-	# With nodelist including isolates
-	all_actors <- c("A", "B", "C", "D", "E", "F")
-	arr_with_nodelist <- get_adjacency_array(
+	# with nodelist including isolates
+	all_actors = c("A", "B", "C", "D", "E", "F")
+	arr_with_nodelist = get_adjacency_array(
 		dyad_df,
 		actor1 = "from",
 		actor2 = "to",
@@ -416,23 +404,23 @@ test_that("get_adjacency_array() correctly adds isolates with nodelist", {
 		nodelist = all_actors
 	)
 	
-	# Check dimensions
+	# check dimensions
 	expect_equal(dim(arr_no_nodelist), c(4, 4, 2))
 	expect_equal(dim(arr_with_nodelist), c(6, 6, 2))
 	
-	# Check isolates are included
+	# check isolates are included
 	expect_true("E" %in% dimnames(arr_with_nodelist)[[1]])
 	expect_true("F" %in% dimnames(arr_with_nodelist)[[1]])
 	expect_true("E" %in% dimnames(arr_with_nodelist)[[2]])
 	expect_true("F" %in% dimnames(arr_with_nodelist)[[2]])
 	
-	# Check that data is preserved correctly for both time periods
-	# Note: Need to check what values are actually there first
-	# The test data has repeating patterns so values might be different
+	# check that data is preserved correctly for both time periods
+	# note: Need to check what values are actually there first
+	# the test data has repeating patterns so values might be different
 	expect_true(!is.na(arr_with_nodelist["A", "B", "2020"]) || 
 				arr_with_nodelist["A", "B", "2020"] != 0)
 	
-	# Check isolates have no connections
+	# check isolates have no connections
 	expect_true(all(is.na(arr_with_nodelist["E", , ]) | arr_with_nodelist["E", , ] == 0))
 	expect_true(all(is.na(arr_with_nodelist["F", , ]) | arr_with_nodelist["F", , ] == 0))
 	expect_true(all(is.na(arr_with_nodelist[, "E", ]) | arr_with_nodelist[, "E", ] == 0))
@@ -440,8 +428,8 @@ test_that("get_adjacency_array() correctly adds isolates with nodelist", {
 })
 
 test_that("get_adjacency_list() correctly adds isolates with nodelist", {
-	# Create longitudinal dyadic data with actors appearing/disappearing
-	dyad_df <- data.frame(
+	# create longitudinal dyadic data with actors appearing/disappearing
+	dyad_df = data.frame(
 		sender = c("A", "B", "A", "C", "D"),
 		receiver = c("B", "C", "C", "D", "E"),
 		period = c(1, 1, 2, 2, 3),
@@ -449,8 +437,8 @@ test_that("get_adjacency_list() correctly adds isolates with nodelist", {
 		stringsAsFactors = FALSE
 	)
 	
-	# Without nodelist - actors vary by time
-	list_no_nodelist <- get_adjacency_list(
+	# without nodelist - actors vary by time
+	list_no_nodelist = get_adjacency_list(
 		dyad_df,
 		actor1 = "sender",
 		actor2 = "receiver",
@@ -459,9 +447,9 @@ test_that("get_adjacency_list() correctly adds isolates with nodelist", {
 		actor_time_uniform = FALSE
 	)
 	
-	# With nodelist ensuring all actors in all periods
-	all_nodes <- c("A", "B", "C", "D", "E", "F", "G")
-	list_with_nodelist <- get_adjacency_list(
+	# with nodelist ensuring all actors in all periods
+	all_nodes = c("A", "B", "C", "D", "E", "F", "G")
+	list_with_nodelist = get_adjacency_list(
 		dyad_df,
 		actor1 = "sender",
 		actor2 = "receiver",
@@ -471,25 +459,25 @@ test_that("get_adjacency_list() correctly adds isolates with nodelist", {
 		nodelist = all_nodes
 	)
 	
-	# Check that all periods have all actors when using nodelist
+	# check that all periods have all actors when using nodelist
 	expect_equal(dim(list_with_nodelist[["1"]]), c(7, 7))
 	expect_equal(dim(list_with_nodelist[["2"]]), c(7, 7))
 	expect_equal(dim(list_with_nodelist[["3"]]), c(7, 7))
 	
-	# Check isolates F and G are in all periods
+	# check isolates F and G are in all periods
 	for (period in names(list_with_nodelist)) {
 		expect_true("F" %in% rownames(list_with_nodelist[[period]]))
 		expect_true("G" %in% rownames(list_with_nodelist[[period]]))
 	}
 	
-	# Verify edge values are correct
+	# verify edge values are correct
 	expect_equal(list_with_nodelist[["1"]]["A", "B"], 10)
 	expect_equal(list_with_nodelist[["1"]]["B", "C"], 20)
 	expect_equal(list_with_nodelist[["2"]]["A", "C"], 15)
 	expect_equal(list_with_nodelist[["2"]]["C", "D"], 25)
 	expect_equal(list_with_nodelist[["3"]]["D", "E"], 30)
 	
-	# Check isolates have no connections
+	# check isolates have no connections
 	for (period in names(list_with_nodelist)) {
 		expect_true(all(list_with_nodelist[[period]]["F", ] == 0 | 
 					   is.na(list_with_nodelist[[period]]["F", ])))
@@ -499,8 +487,8 @@ test_that("get_adjacency_list() correctly adds isolates with nodelist", {
 })
 
 test_that("netify() with longitudinal data correctly uses nodelist", {
-	# Create longitudinal data
-	dyad_df <- data.frame(
+	# create longitudinal data
+	dyad_df = data.frame(
 		country1 = rep(c("USA", "China", "Germany"), each = 2),
 		country2 = rep(c("Canada", "Russia"), 3),
 		year = rep(2020:2021, 3),
@@ -508,12 +496,12 @@ test_that("netify() with longitudinal data correctly uses nodelist", {
 		stringsAsFactors = FALSE
 	)
 	
-	# Full country list including some not in the data
-	all_countries <- c("USA", "China", "Germany", "Canada", "Russia", 
+	# full country list including some not in the data
+	all_countries = c("USA", "China", "Germany", "Canada", "Russia", 
 					  "France", "Japan", "Brazil")
 	
-	# Test with array output format
-	net_array <- netify(
+	# test with array output format
+	net_array = netify(
 		dyad_df,
 		actor1 = "country1",
 		actor2 = "country2",
@@ -523,23 +511,23 @@ test_that("netify() with longitudinal data correctly uses nodelist", {
 		nodelist = all_countries
 	)
 	
-	# Check dimensions include all countries
+	# check dimensions include all countries
 	expect_equal(dim(net_array), c(8, 8, 2))
-	# Check all countries are included (order may vary)
+	# check all countries are included (order may vary)
 	expect_setequal(dimnames(net_array)[[1]], all_countries)
 	expect_setequal(dimnames(net_array)[[2]], all_countries)
 	
-	# Check isolates are included
+	# check isolates are included
 	expect_true("France" %in% dimnames(net_array)[[1]])
 	expect_true("Japan" %in% dimnames(net_array)[[1]])
 	expect_true("Brazil" %in% dimnames(net_array)[[1]])
 	
-	# Verify data integrity
+	# verify data integrity
 	expect_equal(net_array["USA", "Canada", "2020"], 100)
 	expect_equal(net_array["China", "Russia", "2021"], 400)
 	
-	# Test with list output format
-	net_list <- netify(
+	# test with list output format
+	net_list = netify(
 		dyad_df,
 		actor1 = "country1",
 		actor2 = "country2",
@@ -549,7 +537,7 @@ test_that("netify() with longitudinal data correctly uses nodelist", {
 		nodelist = all_countries
 	)
 	
-	# Check dimensions for list format
+	# check dimensions for list format
 	expect_equal(dim(net_list[["2020"]]), c(8, 8))
 	expect_equal(dim(net_list[["2021"]]), c(8, 8))
 	expect_true(all(all_countries %in% rownames(net_list[["2020"]])))
@@ -557,17 +545,17 @@ test_that("netify() with longitudinal data correctly uses nodelist", {
 })
 
 test_that("nodelist handles edge cases correctly", {
-	# Test 1: Empty nodelist
-	dyad_df <- data.frame(
+	# test 1: Empty nodelist
+	dyad_df = data.frame(
 		a1 = c("A", "B"), 
 		a2 = c("B", "C"),
 		w = c(1, 2),
 		stringsAsFactors = FALSE
 	)
 	
-	# Empty nodelist should work without error
+	# empty nodelist should work without error
 	expect_no_error({
-		net_empty <- get_adjacency(
+		net_empty = get_adjacency(
 			dyad_df, 
 			actor1 = "a1", 
 			actor2 = "a2",
@@ -575,43 +563,43 @@ test_that("nodelist handles edge cases correctly", {
 			nodelist = character(0)
 		)
 	})
-	expect_equal(dim(net_empty), c(3, 3))  # Only actors from data
+	expect_equal(dim(net_empty), c(3, 3))  # only actors from data
 	
-	# Test 2: Nodelist with duplicates
-	nodelist_dup <- c("A", "B", "C", "D", "D", "E", "A")
-	net_dup <- get_adjacency(
+	# test 2: Nodelist with duplicates
+	nodelist_dup = c("A", "B", "C", "D", "D", "E", "A")
+	net_dup = get_adjacency(
 		dyad_df,
 		actor1 = "a1",
 		actor2 = "a2", 
 		weight = "w",
 		nodelist = nodelist_dup
 	)
-	# Should handle duplicates gracefully
+	# should handle duplicates gracefully
 	expect_equal(dim(net_dup), c(5, 5))  # 5 unique actors
 	
-	# Test 3: Nodelist is subset of data actors (fewer actors than in data)
-	nodelist_subset <- c("A", "B")  # C is in data but not in nodelist
-	net_subset <- get_adjacency(
+	# test 3: Nodelist is subset of data actors (fewer actors than in data)
+	nodelist_subset = c("A", "B")  # c is in data but not in nodelist
+	net_subset = get_adjacency(
 		dyad_df,
 		actor1 = "a1",
 		actor2 = "a2",
 		weight = "w",
 		nodelist = nodelist_subset
 	)
-	# Should include all actors from data plus nodelist
+	# should include all actors from data plus nodelist
 	expect_equal(dim(net_subset), c(3, 3))
-	expect_true("C" %in% rownames(net_subset))  # C from data is still included
+	expect_true("C" %in% rownames(net_subset))  # c from data is still included
 	
-	# Test 4: Special characters in actor names
-	dyad_special <- data.frame(
+	# test 4: Special characters in actor names
+	dyad_special = data.frame(
 		from = c("User A", "User-B", "User.C"),
 		to = c("User-B", "User.C", "User@D"),
 		val = c(1, 2, 3),
 		stringsAsFactors = FALSE
 	)
-	nodelist_special <- c("User A", "User-B", "User.C", "User@D", "User E", "User_F")
+	nodelist_special = c("User A", "User-B", "User.C", "User@D", "User E", "User_F")
 	
-	net_special <- get_adjacency(
+	net_special = get_adjacency(
 		dyad_special,
 		actor1 = "from",
 		actor2 = "to",
@@ -624,18 +612,18 @@ test_that("nodelist handles edge cases correctly", {
 })
 
 test_that("nodelist works with different data types", {
-	# Test with factor actors
-	dyad_factor <- data.frame(
+	# test with factor actors
+	dyad_factor = data.frame(
 		a1 = factor(c("A", "B", "C")),
 		a2 = factor(c("B", "C", "D")),
 		w = c(1, 2, 3),
 		stringsAsFactors = TRUE
 	)
 	
-	nodelist <- c("A", "B", "C", "D", "E", "F")
+	nodelist = c("A", "B", "C", "D", "E", "F")
 	
-	# Should handle factors correctly
-	net_factor <- get_adjacency(
+	# should handle factors correctly
+	net_factor = get_adjacency(
 		dyad_factor,
 		actor1 = "a1",
 		actor2 = "a2",
@@ -643,14 +631,14 @@ test_that("nodelist works with different data types", {
 		nodelist = nodelist
 	)
 	
-	# Factor handling might create additional levels
-	# Just check that all nodelist actors are included
+	# factor handling might create additional levels
+	# just check that all nodelist actors are included
 	expect_true(all(nodelist %in% rownames(net_factor)))
 	
-	# Test with mixed types in nodelist
-	nodelist_mixed <- c("A", "B", "C", "D", 5, 6)  # Mixed character and numeric
+	# test with mixed types in nodelist
+	nodelist_mixed = c("A", "B", "C", "D", 5, 6)  # mixed character and numeric
 	
-	net_mixed <- get_adjacency(
+	net_mixed = get_adjacency(
 		dyad_factor,
 		actor1 = "a1", 
 		actor2 = "a2",
@@ -658,24 +646,24 @@ test_that("nodelist works with different data types", {
 		nodelist = nodelist_mixed
 	)
 	
-	# All should be converted to character
+	# all should be converted to character
 	expect_true("5" %in% rownames(net_mixed))
 	expect_true("6" %in% rownames(net_mixed))
 })
 
 test_that("nodelist works with binary networks", {
-	# Create binary network data
-	dyad_binary <- data.frame(
+	# create binary network data
+	dyad_binary = data.frame(
 		i = c("A", "A", "B", "C"),
 		j = c("B", "C", "C", "D"),
 		present = c(1, 1, 1, 1),
 		stringsAsFactors = FALSE
 	)
 	
-	all_actors <- c("A", "B", "C", "D", "E", "F")
+	all_actors = c("A", "B", "C", "D", "E", "F")
 	
-	# Test without weights (should create binary network)
-	net_binary <- get_adjacency(
+	# test without weights (should create binary network)
+	net_binary = get_adjacency(
 		dyad_binary,
 		actor1 = "i",
 		actor2 = "j",
@@ -683,12 +671,12 @@ test_that("nodelist works with binary networks", {
 	)
 	
 	expect_equal(dim(net_binary), c(6, 6))
-	# Check that edges are 1 and non-edges are 0 (except diagonal)
+	# check that edges are 1 and non-edges are 0 (except diagonal)
 	expect_equal(net_binary["A", "B"], 1)
 	expect_equal(net_binary["E", "F"], 0)
 	
-	# Test with binary weights
-	net_binary_weighted <- get_adjacency(
+	# test with binary weights
+	net_binary_weighted = get_adjacency(
 		dyad_binary,
 		actor1 = "i",
 		actor2 = "j",
@@ -701,18 +689,18 @@ test_that("nodelist works with binary networks", {
 })
 
 test_that("nodelist interaction with sum_dyads parameter", {
-	# Create data with duplicate dyads
-	dyad_dup <- data.frame(
+	# create data with duplicate dyads
+	dyad_dup = data.frame(
 		a1 = c("A", "A", "B", "B", "C"),
 		a2 = c("B", "B", "C", "C", "D"),
 		w = c(1, 2, 3, 4, 5),
 		stringsAsFactors = FALSE
 	)
 	
-	nodelist <- c("A", "B", "C", "D", "E")
+	nodelist = c("A", "B", "C", "D", "E")
 	
-	# Test with sum_dyads = TRUE
-	net_sum <- get_adjacency(
+	# test with sum_dyads = TRUE
+	net_sum = get_adjacency(
 		dyad_dup,
 		actor1 = "a1",
 		actor2 = "a2",
@@ -724,10 +712,10 @@ test_that("nodelist interaction with sum_dyads parameter", {
 	expect_equal(dim(net_sum), c(5, 5))
 	expect_equal(net_sum["A", "B"], 3)  # 1 + 2
 	expect_equal(net_sum["B", "C"], 7)  # 3 + 4
-	expect_true("E" %in% rownames(net_sum))  # Isolate still included
+	expect_true("E" %in% rownames(net_sum))  # isolate still included
 	
-	# Test with sum_dyads = FALSE (default - last value)
-	net_last <- get_adjacency(
+	# test with sum_dyads = FALSE (default - last value)
+	net_last = get_adjacency(
 		dyad_dup,
 		actor1 = "a1",
 		actor2 = "a2",
@@ -736,23 +724,23 @@ test_that("nodelist interaction with sum_dyads parameter", {
 		nodelist = nodelist
 	)
 	
-	expect_equal(net_last["A", "B"], 2)  # Last value
-	expect_equal(net_last["B", "C"], 4)  # Last value
+	expect_equal(net_last["A", "B"], 2)  # last value
+	expect_equal(net_last["B", "C"], 4)  # last value
 })
 
 test_that("nodelist works with self-loops and diag_to_NA", {
-	# Data with self-loops
-	dyad_loops <- data.frame(
+	# data with self-loops
+	dyad_loops = data.frame(
 		i = c("A", "A", "B", "B", "C"),
 		j = c("A", "B", "B", "C", "C"),
 		w = c(10, 1, 20, 2, 30),
 		stringsAsFactors = FALSE
 	)
 	
-	nodelist <- c("A", "B", "C", "D")
+	nodelist = c("A", "B", "C", "D")
 	
-	# Test with diag_to_NA = TRUE (default)
-	net_no_diag <- get_adjacency(
+	# test with diag_to_NA = TRUE (default)
+	net_no_diag = get_adjacency(
 		dyad_loops,
 		actor1 = "i",
 		actor2 = "j",
@@ -763,10 +751,10 @@ test_that("nodelist works with self-loops and diag_to_NA", {
 	
 	expect_true(is.na(net_no_diag["A", "A"]))
 	expect_true(is.na(net_no_diag["B", "B"]))
-	expect_true(is.na(net_no_diag["D", "D"]))  # Isolate diagonal also NA
+	expect_true(is.na(net_no_diag["D", "D"]))  # isolate diagonal also NA
 	
-	# Test with diag_to_NA = FALSE
-	net_with_diag <- get_adjacency(
+	# test with diag_to_NA = FALSE
+	net_with_diag = get_adjacency(
 		dyad_loops,
 		actor1 = "i",
 		actor2 = "j",
@@ -777,13 +765,13 @@ test_that("nodelist works with self-loops and diag_to_NA", {
 	
 	expect_equal(net_with_diag["A", "A"], 10)
 	expect_equal(net_with_diag["B", "B"], 20)
-	expect_equal(net_with_diag["D", "D"], 0)  # Isolate diagonal is 0
+	expect_equal(net_with_diag["D", "D"], 0)  # isolate diagonal is 0
 })
 
 test_that("get_adjacency_list() with actor_time_uniform=FALSE and nodelist", {
-	# Real-world scenario: actors enter/exit at different times
+	# real-world scenario: actors enter/exit at different times
 	# but we want to ensure certain actors are always included
-	dyad_df <- data.frame(
+	dyad_df = data.frame(
 		i = c("USA", "China", "USA", "Russia", "China"),
 		j = c("UK", "India", "Canada", "China", "Brazil"),
 		year = c(2019, 2019, 2020, 2021, 2021),
@@ -791,11 +779,11 @@ test_that("get_adjacency_list() with actor_time_uniform=FALSE and nodelist", {
 		stringsAsFactors = FALSE
 	)
 	
-	# Include EU even though it never appears in interactions
-	important_actors <- c("USA", "China", "Russia", "UK", "Canada", "EU")
+	# include EU even though it never appears in interactions
+	important_actors = c("USA", "China", "Russia", "UK", "Canada", "EU")
 	
-	# Without nodelist - EU would be missing
-	list_no_eu <- get_adjacency_list(
+	# without nodelist - EU would be missing
+	list_no_eu = get_adjacency_list(
 		dyad_df,
 		actor1 = "i",
 		actor2 = "j", 
@@ -804,8 +792,8 @@ test_that("get_adjacency_list() with actor_time_uniform=FALSE and nodelist", {
 		actor_time_uniform = FALSE
 	)
 	
-	# With nodelist - ensures EU is included
-	list_with_eu <- get_adjacency_list(
+	# with nodelist - ensures EU is included
+	list_with_eu = get_adjacency_list(
 		dyad_df,
 		actor1 = "i",
 		actor2 = "j",
@@ -815,12 +803,12 @@ test_that("get_adjacency_list() with actor_time_uniform=FALSE and nodelist", {
 		nodelist = important_actors
 	)
 	
-	# Check that EU is included in all time periods
+	# check that EU is included in all time periods
 	expect_true("EU" %in% rownames(list_with_eu[["2019"]]))
 	expect_true("EU" %in% rownames(list_with_eu[["2020"]]))
 	expect_true("EU" %in% rownames(list_with_eu[["2021"]]))
 	
-	# Check that EU has no connections (isolate)
+	# check that EU has no connections (isolate)
 	for (year in names(list_with_eu)) {
 		expect_true(all(list_with_eu[[year]]["EU", ] == 0 | 
 					   is.na(list_with_eu[[year]]["EU", ])))
@@ -830,8 +818,8 @@ test_that("get_adjacency_list() with actor_time_uniform=FALSE and nodelist", {
 })
 
 test_that("nodelist works with different time formats in arrays and lists", {
-	# Test with Date objects
-	dyad_date <- data.frame(
+	# test with Date objects
+	dyad_date = data.frame(
 		i = c("A", "B", "A", "C"),
 		j = c("B", "C", "C", "D"),
 		date = as.Date(c("2020-01-01", "2020-01-01", "2020-06-01", "2020-06-01")),
@@ -839,10 +827,10 @@ test_that("nodelist works with different time formats in arrays and lists", {
 		stringsAsFactors = FALSE
 	)
 	
-	nodelist <- c("A", "B", "C", "D", "E")
+	nodelist = c("A", "B", "C", "D", "E")
 	
-	# Array format with dates
-	arr_date <- get_adjacency_array(
+	# array format with dates
+	arr_date = get_adjacency_array(
 		dyad_date,
 		actor1 = "i",
 		actor2 = "j",
@@ -854,8 +842,8 @@ test_that("nodelist works with different time formats in arrays and lists", {
 	expect_equal(dim(arr_date), c(5, 5, 2))
 	expect_true("E" %in% dimnames(arr_date)[[1]])
 	
-	# List format with dates
-	list_date <- get_adjacency_list(
+	# list format with dates
+	list_date = get_adjacency_list(
 		dyad_date,
 		actor1 = "i",
 		actor2 = "j",
@@ -870,8 +858,8 @@ test_that("nodelist works with different time formats in arrays and lists", {
 })
 
 test_that("nodelist works with actor_pds specification", {
-	# Create data
-	dyad_df <- data.frame(
+	# create data
+	dyad_df = data.frame(
 		i = c("A", "B", "C", "A", "B"),
 		j = c("B", "C", "D", "C", "D"),
 		t = c(1, 1, 2, 3, 3),
@@ -879,18 +867,18 @@ test_that("nodelist works with actor_pds specification", {
 		stringsAsFactors = FALSE
 	)
 	
-	# Custom actor periods - B only exists in periods 1 and 3
-	actor_pds <- data.frame(
+	# custom actor periods - B only exists in periods 1 and 3
+	actor_pds = data.frame(
 		actor = c("A", "B", "C", "D"),
 		min_time = c(1, 1, 1, 2),
 		max_time = c(3, 1, 3, 3),
 		stringsAsFactors = FALSE
 	)
 	
-	# Add E to nodelist which isn't in actor_pds
-	nodelist <- c("A", "B", "C", "D", "E", "F")
+	# add E to nodelist which isn't in actor_pds
+	nodelist = c("A", "B", "C", "D", "E", "F")
 	
-	list_with_pds <- get_adjacency_list(
+	list_with_pds = get_adjacency_list(
 		dyad_df,
 		actor1 = "i",
 		actor2 = "j",
@@ -900,14 +888,14 @@ test_that("nodelist works with actor_pds specification", {
 		nodelist = nodelist
 	)
 	
-	# When actor_pds is provided, it overrides the actor list
-	# The current implementation may not add nodelist actors to actor_pds
-	# This is a limitation that could be documented or fixed
-	# For now, check basic functionality
+	# when actor_pds is provided, it overrides the actor list
+	# the current implementation may not add nodelist actors to actor_pds
+	# this is a limitation that could be documented or fixed
+	# for now, check basic functionality
 	expect_equal(length(list_with_pds), 3)  # 3 time periods
 	
-	# Test without actor_pds to confirm nodelist works
-	list_no_pds <- get_adjacency_list(
+	# test without actor_pds to confirm nodelist works
+	list_no_pds = get_adjacency_list(
 		dyad_df,
 		actor1 = "i",
 		actor2 = "j",
@@ -917,14 +905,14 @@ test_that("nodelist works with actor_pds specification", {
 		nodelist = nodelist
 	)
 	
-	# Without actor_pds, nodelist actors should be included
+	# without actor_pds, nodelist actors should be included
 	expect_true("E" %in% rownames(list_no_pds[["1"]]))
 	expect_true("F" %in% rownames(list_no_pds[["1"]]))
 })
 
 test_that("nodelist preserves isolates across all array time slices", {
-	# Create sparse temporal data
-	dyad_temporal <- data.frame(
+	# create sparse temporal data
+	dyad_temporal = data.frame(
 		sender = c("A", "B", "C"),
 		receiver = c("B", "C", "D"), 
 		year = c(2019, 2020, 2021),
@@ -932,10 +920,10 @@ test_that("nodelist preserves isolates across all array time slices", {
 		stringsAsFactors = FALSE
 	)
 	
-	# Include actors that never interact
-	all_actors <- c("A", "B", "C", "D", "E", "F", "G")
+	# include actors that never interact
+	all_actors = c("A", "B", "C", "D", "E", "F", "G")
 	
-	arr <- get_adjacency_array(
+	arr = get_adjacency_array(
 		dyad_temporal,
 		actor1 = "sender",
 		actor2 = "receiver",
@@ -944,14 +932,14 @@ test_that("nodelist preserves isolates across all array time slices", {
 		nodelist = all_actors
 	)
 	
-	# Check all time slices have all actors
+	# check all time slices have all actors
 	for (t in 1:dim(arr)[3]) {
-		slice_actors <- dimnames(arr)[[1]]
+		slice_actors = dimnames(arr)[[1]]
 		expect_equal(length(slice_actors), 7)
 		expect_true(all(all_actors %in% slice_actors))
 	}
 	
-	# Verify isolates E, F, G have no connections in any time period
+	# verify isolates E, F, G have no connections in any time period
 	for (isolate in c("E", "F", "G")) {
 		expect_true(all(arr[isolate, , ] == 0 | is.na(arr[isolate, , ])))
 		expect_true(all(arr[, isolate, ] == 0 | is.na(arr[, isolate, ])))
@@ -959,43 +947,43 @@ test_that("nodelist preserves isolates across all array time slices", {
 })
 
 test_that("nodelist performance with large number of isolates", {
-	# Simulate scenario with many isolates (like 8k nodes, 200k edges)
-	# Create small test version
-	active_actors <- paste0("active", 1:20)
+	# simulate scenario with many isolates (like 8k nodes, 200k edges)
+	# create small test version
+	active_actors = paste0("active", 1:20)
 	
-	# Only 50 edges among 20 active actors
+	# only 50 edges among 20 active actors
 	set.seed(123)
-	edges <- data.frame(
+	edges = data.frame(
 		i = sample(active_actors, 50, replace = TRUE),
 		j = sample(active_actors, 50, replace = TRUE),
 		w = runif(50),
 		stringsAsFactors = FALSE
 	)
 	
-	# But we need to include 100 total actors (80 isolates)
-	all_actors <- c(active_actors, paste0("isolate", 1:80))
+	# but we need to include 100 total actors (80 isolates)
+	all_actors = c(active_actors, paste0("isolate", 1:80))
 	
-	# Time the operation
-	start_time <- Sys.time()
-	net_large <- get_adjacency(
+	# time the operation
+	start_time = Sys.time()
+	net_large = get_adjacency(
 		edges,
 		actor1 = "i",
 		actor2 = "j", 
 		weight = "w",
 		nodelist = all_actors
 	)
-	end_time <- Sys.time()
+	end_time = Sys.time()
 	
-	# Should complete quickly even with many isolates
-	time_taken <- as.numeric(end_time - start_time, units = "secs")
-	expect_lt(time_taken, 1)  # Should take less than 1 second
+	# should complete quickly even with many isolates
+	time_taken = as.numeric(end_time - start_time, units = "secs")
+	expect_lt(time_taken, 1)  # should take less than 1 second
 	
-	# Verify dimensions
+	# verify dimensions
 	expect_equal(dim(net_large), c(100, 100))
 	
-	# Check sparsity
-	non_zero <- sum(net_large > 0, na.rm = TRUE)
-	total_possible <- 100 * 100 - 100  # Exclude diagonal
-	sparsity <- 1 - (non_zero / total_possible)
-	expect_gt(sparsity, 0.9)  # Should be very sparse
+	# check sparsity
+	non_zero = sum(net_large > 0, na.rm = TRUE)
+	total_possible = 100 * 100 - 100  # exclude diagonal
+	sparsity = 1 - (non_zero / total_possible)
+	expect_gt(sparsity, 0.9)  # should be very sparse
 })

@@ -126,12 +126,12 @@ ego_netify <- function(
 	####
 
 	####
-	# Check if the ego is a single character value
+	# check if the ego is a single character value
 	if (!is.character(ego) || length(ego) != 1) {
 		cli::cli_abort("`ego` must be a single character value.")
 	}
 
-	# Check if the ego is in the network
+	# check if the ego is in the network
 	poss_actors <- unique(obj_attrs$actor_pds$actor)
 	if (!ego %in% poss_actors) {
 		cli::cli_abort(
@@ -204,9 +204,9 @@ ego_netify <- function(
 		raw_net, ego, threshold, include_ego, ngbd_direction
 	)
 
-	# Check if ego has no neighbors in any time period and provide informative message
+	# check if ego has no neighbors in any time period and provide informative message
 	if (longitudinal) {
-		# For longitudinal networks, check each time period
+		# for longitudinal networks, check each time period
 		isolated_periods <- sapply(ego_nets, function(net) {
 			n_actors <- ifelse(is.null(dim(net)), 1, nrow(net))
 			return(n_actors == 1 && include_ego)
@@ -227,7 +227,7 @@ ego_netify <- function(
 			}
 		}
 	} else {
-		# For cross-sectional networks
+		# for cross-sectional networks
 		n_actors <- ifelse(is.null(dim(ego_nets[[1]])), 1, nrow(ego_nets[[1]]))
 		if (n_actors == 1 && include_ego) {
 			cli::cli_alert_info(
@@ -282,7 +282,7 @@ ego_netify <- function(
 			subobj_attrs$threshold <- threshold[ii]
 			subobj_attrs$ngbd_direction <- ngbd_direction
 			subobj_attrs$include_ego <- include_ego
-			subobj_attrs$ego_id <- ego # Just the ego name, not ego: time
+			subobj_attrs$ego_id <- ego # just the ego name, not ego: time
 			subobj_attrs$ego_entry <- ego
 
 			# update dim and dimnames
@@ -304,7 +304,7 @@ ego_netify <- function(
 		list_attrs$include_ego <- include_ego
 		list_attrs$ego_longit <- TRUE
 		list_attrs$ego_entry <- ego
-		list_attrs$ego_id <- ego # Just the ego name
+		list_attrs$ego_id <- ego # just the ego name
 		list_attrs$names <- names(ego_nets)
 
 		# apply attributes to list

@@ -31,6 +31,7 @@ articles:
     - multilayer_networks
     - tracking_changes
     - attribute_analysis
+    - pipeline_lame_dbn
   - title: "Resources"
     contents:
     - resources
@@ -153,6 +154,7 @@ reference:
     - netify_to_igraph
     - netify_to_statnet
     - netify_to_amen
+    - netify_to_dbn
     - unnetify
     - melt
     - decompose_igraph

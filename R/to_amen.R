@@ -12,11 +12,18 @@
 #' @param lame Logical. Controls the output format for longitudinal data:
 #'   \itemize{
 #'     \item \code{FALSE} (default): Formats output for compatibility with the
-#'       standard version of the amen package, which uses array structures
+#'       standard version of the amen package, which uses array structures.
+#'       Y is returned as a 3D array \code{[n_actors x n_actors x n_time]},
+#'       Xdyad as a 4D array \code{[n_actors x n_actors x n_covariates x n_time]},
+#'       and Xrow/Xcol as 3D arrays \code{[n_actors x n_attributes x n_time]}.
+#'       This requires constant actor composition across time.
 #'     \item \code{TRUE}: Formats output for compatibility with the netify-verse
 #'       version called lame, which supports
-#'       longitudinal network modeling with time-varying actor compositions and
-#'       other features
+#'       longitudinal network modeling with time-varying actor compositions.
+#'       Y is returned as a list of T matrices (one per time period),
+#'       Xdyad as a list of T 3D arrays, and Xrow/Xcol as lists of T matrices.
+#'       Actor sets can vary across time periods, making this suitable for
+#'       panels where countries enter/exit.
 #'   }
 #'   This parameter is ignored for cross-sectional data.
 #'
@@ -87,10 +94,15 @@
 #' @note
 #' The function performs several validation checks:
 #' \itemize{
-#'   \item Ensures single-layer networks (multilayer not supported)
+#'   \item Ensures single-layer networks (multilayer not supported).
+#'     For multilayer networks, first extract individual layers using
+#'     \code{\link{subset_netify}} (e.g., \code{subset(net, layers = "trade")}).
 #'   \item Verifies all nodal attributes are numeric
 #'   \item Maintains actor ordering from the original netify object
 #' }
+#'
+#' For multilayer longitudinal models that require a 4D array
+#' \code{[n, n, p, T]}, see \code{\link{netify_to_dbn}} instead.
 #'
 #' @examples
 #' # Load example data
@@ -149,7 +161,7 @@ netify_to_amen <- function(netlet, lame = FALSE) {
 	# make sure nodal attributes are numeric
 	if (nodal_data_exists) {
 		nvar_class_check <- apply(
-			attr(netlet, "nodal_data")[, msrmnts$nvars],
+			attr(netlet, "nodal_data")[, msrmnts$nvars, drop = FALSE],
 			2, is.numeric
 		)
 		if (!all(nvar_class_check)) {
@@ -224,7 +236,7 @@ netify_to_amen <- function(netlet, lame = FALSE) {
 
 	# longitudinal cases
 	if (netlet_type %in% c("longit_array", "longit_list")) {
-		# If lame = FALSE, use array format (original behavior)
+		# if lame = FALSE, use array format (original behavior)
 		if (!lame) {
 			if (netlet_type == "longit_array") {
 				out <- list(
@@ -245,12 +257,12 @@ netify_to_amen <- function(netlet, lame = FALSE) {
 			}
 		}
 
-		# If lame = TRUE, convert to list format
+		# if lame = TRUE, convert to list format
 		if (lame) {
-			# Get raw data
+			# get raw data
 			raw_data <- get_raw(netlet)
 
-			# Convert to list if it's an array
+			# convert to list if it's an array
 			if (netlet_type == "longit_array") {
 				Y_list <- lapply(seq_len(dim(raw_data)[3]), function(t) raw_data[, , t])
 				names(Y_list) <- dimnames(raw_data)[[3]]
@@ -258,7 +270,7 @@ netify_to_amen <- function(netlet, lame = FALSE) {
 				Y_list <- raw_data
 			}
 
-			# Convert dyadic data to list format
+			# convert dyadic data to list format
 			Xdyad_list <- NULL
 			if (dyad_data_exists) {
 				dyad_data <- attr(netlet, "dyad_data")
@@ -281,12 +293,12 @@ netify_to_amen <- function(netlet, lame = FALSE) {
 				names(Xdyad_list) <- names(dyad_data)
 			}
 
-			# Convert nodal data to list format
+			# convert nodal data to list format
 			Xrow_list <- NULL
 			Xcol_list <- NULL
 			if (nodal_data_exists) {
 				nodal_df <- attr(netlet, "nodal_data")
-				# Use time periods from the network data, not from nodal_data
+				# use time periods from the network data, not from nodal_data
 				time_periods <- names(Y_list)
 
 				Xrow_list <- lapply(time_periods, function(t) {
@@ -297,7 +309,7 @@ netify_to_amen <- function(netlet, lame = FALSE) {
 				})
 				names(Xrow_list) <- time_periods
 
-				# For symmetric networks, Xcol = Xrow
+				# for symmetric networks, Xcol = Xrow
 				Xcol_list <- Xrow_list
 			}
 

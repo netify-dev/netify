@@ -58,7 +58,7 @@ print.netify <- function(x, ...) {
 		}
 	}
 
-	# ALSO check the newer attribute name (ego_netify)
+	# also check the newer attribute name (ego_netify)
 	if (!is.null(obj_attrs$ego_netify)) {
 		if (obj_attrs$ego_netify) {
 			ego_netlet <- TRUE
@@ -83,9 +83,16 @@ print.netify <- function(x, ...) {
 	obj_layer <- ifelse(length(obj_attrs$layers) > 1,
 		"Multilayer", "Single Layer"
 	)
-	obj_symm <- ifelse(obj_attrs$symmetric,
-		"Symmetric", "Asymmetric"
-	)
+	if (length(obj_attrs$symmetric) > 1) {
+		# mixed directedness multilayer
+		symm_labels <- ifelse(obj_attrs$symmetric, "Symmetric", "Asymmetric")
+		obj_symm <- paste0("Mixed (", paste(
+			paste0(names(symm_labels), ": ", symm_labels),
+			collapse = ", "
+		), ")")
+	} else {
+		obj_symm <- ifelse(obj_attrs$symmetric, "Symmetric", "Asymmetric")
+	}
 
 	# get information about cross-sections
 	detail_weight_label <- obj_attrs$detail_weight
@@ -177,13 +184,13 @@ print.netify <- function(x, ...) {
 	# if longitudinal then avg across time
 	summ_stats <- lapply(unique(summ_stats$layer), function(layer) {
 		slice <- summ_stats[summ_stats$layer == layer, to_keep, drop = FALSE]
-		# Handle case where slice might be a single row (no averaging needed)
+		# handle case where slice might be a single row (no averaging needed)
 		if (nrow(slice) == 1) {
-			# Single row, just convert to proper format
+			# single row, just convert to proper format
 			slice <- data.frame(slice)
 			names(slice) <- to_keep_clean
 		} else {
-			# Multiple rows, compute means
+			# multiple rows, compute means
 			slice <- data.frame(t(colMeans(slice, na.rm = TRUE)))
 			names(slice) <- to_keep_clean
 		}

@@ -410,26 +410,26 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 	# anything passed in goes to the plot arg dumpster
 	plot_args <- list(...)
 	
-	# Validate parameters and warn about common mistakes
+	# validate parameters and warn about common mistakes
 	validate_plot_params(plot_args, ...)
 
-	# NEW: Handle time_filter subsetting if provided
+	# handle time_filter subsetting if provided
 	if (!is.null(plot_args$time_filter)) {
-		# Extract time_filter parameter before passing to net_plot_data
+		# extract time_filter parameter before passing to net_plot_data
 		time_subset <- plot_args$time_filter
 
-		# Check if it's a longitudinal network
+		# check if it's a longitudinal network
 		if (obj_attrs$netify_type != "cross_sec") {
-			# Subset the netify object for the specified time periods
+			# subset the netify object for the specified time periods
 			x <- subset(x, time = time_subset)
 
-			# Update attributes after subsetting
+			# update attributes after subsetting
 			obj_attrs <- attributes(x)
 
-			# Remove time_filter from plot_args since we've already handled it
+			# remove time_filter from plot_args since we've already handled it
 			plot_args$time_filter <- NULL
 		} else {
-			# Warn if time_filter is specified for cross-sectional network
+			# warn if time_filter is specified for cross-sectional network
 			cli::cli_alert_warning("'time_filter' parameter ignored for cross-sectional networks")
 			plot_args$time_filter <- NULL
 		}
@@ -448,22 +448,22 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 		# get style params
 		style_params <- style_fun()
 
-		# temove style from plot_args
+		# remove style from plot_args
 		plot_args$style <- NULL
 
 		# merge style params with plot_args
 		plot_args <- c(style_params, plot_args)
 	} # end styling
 
-	# Store filter arguments before removing them
+	# store filter arguments before removing them
 	node_filter <- plot_args$node_filter
 	edge_filter <- plot_args$edge_filter
 
-	# Remove filter args before passing to net_plot_data
+	# remove filter args before passing to net_plot_data
 	plot_args$node_filter <- NULL
 	plot_args$edge_filter <- NULL
 	
-	# Pass auto_format setting to net_plot_data
+	# pass auto_format setting to net_plot_data
 	plot_args$auto_format <- auto_format
 
 	# get plot data and parameters for ggplot
@@ -474,21 +474,21 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 	ggnet_params <- net_plot_info$ggnet_params
 	net_dfs <- net_plot_info$net_dfs
 
-	# NEW: Handle node filtering if provided
+	# handle node filtering if provided
 	if (!is.null(node_filter)) {
-		# Apply the filter to nodal data
+		# apply the filter to nodal data
 		if (nrow(net_dfs$nodal_data) > 0) {
-			# Apply the filter using helper function
+			# apply the filter using helper function
 			filter_result <- apply_node_filter(net_dfs$nodal_data, node_filter)
 
-			# Apply the filter
+			# apply the filter
 			net_dfs$nodal_data <- net_dfs$nodal_data[filter_result, , drop = FALSE]
 
-			# Update edge data to remove edges connected to filtered nodes
+			# update edge data to remove edges connected to filtered nodes
 			if (nrow(net_dfs$edge_data) > 0) {
 				remaining_nodes <- net_dfs$nodal_data$name
 
-				# Keep only edges where both endpoints are in remaining nodes
+				# keep only edges where both endpoints are in remaining nodes
 				edges_to_keep <- net_dfs$edge_data$from %in% remaining_nodes &
 					net_dfs$edge_data$to %in% remaining_nodes
 
@@ -497,25 +497,25 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 		}
 	}
 
-	# NEW: Handle edge filtering if provided
+	# handle edge filtering if provided
 	if (!is.null(edge_filter)) {
-		# Apply the filter to edge data
+		# apply the filter to edge data
 		if (nrow(net_dfs$edge_data) > 0) {
-			# Get weight column name if available
+			# get weight column name if available
 			weight_col <- attr(x, "weight", exact = TRUE)
 
-			# Apply the filter using the helper function
+			# apply the filter using the helper function
 			filter_result <- apply_edge_filter(net_dfs$edge_data, edge_filter, weight_col)
 
-			# Apply the filter
+			# apply the filter
 			net_dfs$edge_data <- net_dfs$edge_data[filter_result, , drop = FALSE]
 
-			# Update node data to remove orphaned nodes if remove_isolates is TRUE
+			# update node data to remove orphaned nodes if remove_isolates is TRUE
 			if (plot_args$remove_isolates && nrow(net_dfs$edge_data) > 0) {
-				# Get nodes that still have edges after filtering
+				# get nodes that still have edges after filtering
 				remaining_nodes <- unique(c(net_dfs$edge_data$from, net_dfs$edge_data$to))
 
-				# Add time dimension if longitudinal
+				# add time dimension if longitudinal
 				if (obj_attrs$netify_type != "cross_sec") {
 					remaining_node_time <- unique(net_dfs$edge_data[, c("from", "to", "time")])
 					remaining_combos <- unique(rbind(
@@ -523,26 +523,26 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 						data.frame(name = remaining_node_time$to, time = remaining_node_time$time)
 					))
 
-					# Create ID for matching
+					# create ID for matching
 					remaining_combos$id <- paste(remaining_combos$name, remaining_combos$time, sep = "_")
 					net_dfs$nodal_data$id <- paste(net_dfs$nodal_data$name, net_dfs$nodal_data$time, sep = "_")
 
-					# Keep only nodes that still have connections
+					# keep only nodes that still have connections
 					net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$id %in% remaining_combos$id, ]
 
-					# Remove temporary id column
+					# remove temporary id column
 					net_dfs$nodal_data$id <- NULL
 				} else {
-					# Cross-sectional case
+					# cross-sectional case
 					net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$name %in% remaining_nodes, ]
 				}
 			}
 		}
 	}
 
-	# Handle weight transformation
+	# handle weight transformation
 	if (!is.null(plot_args$mutate_weight)) {
-		# Apply transformation to edge data
+		# apply transformation to edge data
 		weight_col <- attr(x, "weight", exact = TRUE)
 		if (!is.null(weight_col) && weight_col %in% names(net_dfs$edge_data)) {
 			transform_fn <- match.fun(plot_args$mutate_weight)
@@ -552,13 +552,13 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 
 	# process labels
 	scale_labels <- list(
-		# Edge labels
+		# edge labels
 		edge_alpha = plot_args$edge_alpha_label,
 		edge_color = plot_args$edge_color_label,
 		edge_linewidth = plot_args$edge_linewidth_label,
 		edge_linetype = plot_args$edge_linetype_label,
 
-		# Node labels
+		# node labels
 		node_size = plot_args$node_size_label,
 		node_color = plot_args$node_color_label,
 		node_fill = plot_args$node_fill_label,
@@ -566,12 +566,12 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 		node_alpha = plot_args$node_alpha_label,
 		node_stroke = plot_args$node_stroke_label,
 
-		# Text labels
+		# text labels
 		text_size = plot_args$text_size_label,
 		text_color = plot_args$text_color_label,
 		text_alpha = plot_args$text_alpha_label,
 
-		# Label (box) labels
+		# label (box) labels
 		label_size = plot_args$label_size_label,
 		label_color = plot_args$label_color_label,
 		label_fill = plot_args$label_fill_label,
@@ -587,15 +587,15 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 	# pour labels into components
 	components$scale_labels <- scale_labels
 
-	# Pre-process data for faceting if needed
-	# This must happen before creating geoms that reference net_dfs
+	# pre-process data for faceting if needed
+	# this must happen before creating geoms that reference net_dfs
 	is_longitudinal <- obj_attrs$netify_type != "cross_sec"
 	is_multilayer <- isTRUE(plot_args$is_multilayer)
 
 	if (is_multilayer && is_longitudinal) {
 		facet_type <- plot_args$facet_type %||% "grid"
 		if (facet_type == "wrap") {
-			# Create combined time_layer column before geoms are created
+			# create combined time_layer column before geoms are created
 			if ("layer" %in% names(net_dfs$nodal_data) && "time" %in% names(net_dfs$nodal_data)) {
 				net_dfs$nodal_data$time_layer <- paste(net_dfs$nodal_data$time,
 					net_dfs$nodal_data$layer,
@@ -847,9 +847,9 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 	# add facets for longitudinal and/or multilayer data
 	# (variables already defined earlier)
 
-	# Determine faceting based on data structure and user preferences
+	# determine faceting based on data structure and user preferences
 	if (is_multilayer && is_longitudinal) {
-		# Both multilayer and longitudinal
+		# both multilayer and longitudinal
 		facet_type <- plot_args$facet_type %||% "grid" # Default to grid for 2D faceting
 
 		if (facet_type == "grid") {
@@ -862,13 +862,13 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 			)
 		}
 	} else if (is_multilayer) {
-		# Only multilayer
+		# only multilayer
 		components$facets <- facet_wrap(~layer,
 			scales = "free",
 			ncol = plot_args$facet_ncol %||% NULL
 		)
 	} else if (is_longitudinal) {
-		# Only longitudinal (original behavior)
+		# only longitudinal (original behavior)
 		components$facets <- facet_wrap(~time, scales = "free")
 	}
 
@@ -908,7 +908,7 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 		# apply edge scale labels if they are defined
 		if (!is.null(scale_labels$edge_alpha) && !is.null(components$edge_scales$alpha)) {
 			viz <- viz + labs(alpha = scale_labels$edge_alpha)
-			# Explicitly add alpha scale to ensure legend appears (critical for multilayer networks)
+			# explicitly add alpha scale to ensure legend appears (critical for multilayer networks)
 			viz <- viz + scale_alpha_continuous()
 		}
 		if (!is.null(scale_labels$edge_color) && !is.null(components$edge_scales$color)) {
@@ -925,14 +925,14 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 	# reset scales if both edges and nodes have color or fill mappings
 	if (!is.null(components$edges) &&
 		(!is.null(components$points) || !is.null(components$text) || !is.null(components$label))) {
-		# Only reset color and fill scales if there's a conflict
+		# only reset color and fill scales if there's a conflict
 		if (!is.null(components$edge_scales$color) &&
 			(!is.null(components$point_scales$color) || !is.null(components$point_scales$fill))) {
 			viz <- viz +
 				ggnewscale::new_scale_color() +
 				ggnewscale::new_scale_fill()
 		}
-		# Only reset alpha scale if both edges and points use alpha
+		# only reset alpha scale if both edges and points use alpha
 		if (!is.null(components$edge_scales$alpha) &&
 			!is.null(components$point_scales$alpha)) {
 			viz <- viz +
@@ -1150,7 +1150,7 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 		}
 	}
 
-	# Apply highlight colors if highlighting is active
+	# apply highlight colors if highlighting is active
 	if (isTRUE(plot_args$is_highlighting)) {
 		if (!is.null(components$point_scales$fill) && components$point_scales$fill == "highlight_status") {
 			viz <- viz + scale_fill_manual(
@@ -1210,44 +1210,44 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 #' @noRd
 
 apply_edge_filter <- function(edge_data, filter_input, weight_col = NULL) {
-	# Create a safe evaluation environment
+	# create a safe evaluation environment
 	eval_env <- edge_data
 
-	# Add 'weight' as an alias if weight column exists
+	# add 'weight' as an alias if weight column exists
 	if (!is.null(weight_col) && weight_col %in% names(edge_data)) {
 		eval_env$weight <- edge_data[[weight_col]]
 	}
 
-	# Handle different input types
+	# handle different input types
 	if (inherits(filter_input, "formula")) {
-		# Extract expression from formula
+		# extract expression from formula
 		filter_expr <- filter_input[[2]]
 	} else if (is.function(filter_input)) {
-		# Apply function directly
+		# apply function directly
 		return(filter_input(eval_env))
 	} else if (is.language(filter_input)) {
-		# Use quoted expression directly
+		# use quoted expression directly
 		filter_expr <- filter_input
 	} else {
 		cli::cli_abort("Edge filter must be a formula (~ expr), quoted expression (quote(expr)), or function")
 	}
 
-	# Try to evaluate the expression
+	# try to evaluate the expression
 	tryCatch(
 		{
-			# Evaluate the filter expression
+			# evaluate the filter expression
 			result <- eval(filter_expr, envir = eval_env)
 
-			# Ensure result is logical
+			# ensure result is logical
 			if (!is.logical(result)) {
 				cli::cli_alert_warning("Edge filter expression must return logical values. Attempting conversion.")
 				result <- as.logical(result)
 			}
 
-			# Handle NA values
+			# handle NA values
 			result[is.na(result)] <- FALSE
 
-			# Check length
+			# check length
 			if (length(result) != nrow(edge_data)) {
 				cli::cli_abort("Edge filter expression must return a value for each edge")
 			}
@@ -1277,44 +1277,44 @@ apply_edge_filter <- function(edge_data, filter_input, weight_col = NULL) {
 #' @noRd
 
 apply_node_filter <- function(nodal_data, filter_input) {
-	# Create a safe evaluation environment
+	# create a safe evaluation environment
 	eval_env <- nodal_data
 
-	# Add common aliases for convenience
+	# add common aliases for convenience
 	if ("name" %in% names(nodal_data)) {
 		eval_env$actor <- nodal_data$name
 	}
 
-	# Handle different input types
+	# handle different input types
 	if (inherits(filter_input, "formula")) {
-		# Extract expression from formula
+		# extract expression from formula
 		filter_expr <- filter_input[[2]]
 	} else if (is.function(filter_input)) {
-		# Apply function directly
+		# apply function directly
 		return(filter_input(eval_env))
 	} else if (is.language(filter_input)) {
-		# Use quoted expression directly
+		# use quoted expression directly
 		filter_expr <- filter_input
 	} else {
 		cli::cli_abort("Node filter must be a formula (~ expr), quoted expression (quote(expr)), or function")
 	}
 
-	# Try to evaluate the expression
+	# try to evaluate the expression
 	tryCatch(
 		{
-			# Evaluate the filter expression
+			# evaluate the filter expression
 			result <- eval(filter_expr, envir = eval_env)
 
-			# Ensure result is logical
+			# ensure result is logical
 			if (!is.logical(result)) {
 				cli::cli_alert_warning("Node filter expression must return logical values. Attempting conversion.")
 				result <- as.logical(result)
 			}
 
-			# Handle NA values
+			# handle NA values
 			result[is.na(result)] <- FALSE
 
-			# Check length
+			# check length
 			if (length(result) != nrow(nodal_data)) {
 				cli::cli_abort("Node filter expression must return a value for each node")
 			}

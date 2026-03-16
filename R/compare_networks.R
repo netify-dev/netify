@@ -254,12 +254,12 @@ compare_networks <- function(
 	p_adjust <- match.arg(p_adjust)
 	attr_metric <- match.arg(attr_metric)
 	
-	# RNG handling - generate seed if not provided for reproducibility
+	# generate seed if not provided for reproducibility
 	if (is.null(seed)) {
 		seed <- sample.int(.Machine$integer.max, 1)
 	}
 	
-	# Save and restore RNG state
+	# save and restore RNG state
 	old_rng <- if (exists(".Random.seed", .GlobalEnv)) .Random.seed else NULL
 	set.seed(seed)
 	on.exit({
@@ -301,7 +301,7 @@ compare_networks <- function(
 		# list of netify objects
 		nets_list <- nets
 		comparison_type <- "cross_network"
-		# calidate all elements are netify
+		# validate all elements are netify
 		if (!all(sapply(nets_list, is_netify))) {
 			cli::cli_abort("All elements of nets must be netify objects")
 		}
@@ -355,8 +355,8 @@ compare_networks <- function(
 		comp_results <- compare_attributes(nets_list, test, n_permutations, return_details, attr_metric, other_stats = other_stats)
 	}
 
-	# Merge comparison results with initial results
-	# The comp_results will have its own 'method' field that indicates the comparison type
+	# merge comparison results with initial results
+	# the comp_results will have its own 'method' field that indicates the comparison type
 	results <- c(results, comp_results)
 	
 	#

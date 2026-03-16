@@ -21,16 +21,16 @@ get_ngbd_net_for_ego <- function(
 	####
 	# iterate through nets to construct ngbds
 	ngbd_actors <- lapply(1:length(raw_net), function(ii) {
-		# Get iith net and thresh
+		# get iith net and thresh
 		net <- raw_net[[ii]]
 		thresh <- threshold[ii]
 
-		# For the ego, figure out what actors have connections
+		# for the ego, figure out what actors have connections
 		ngbd_row <- rownames(net)[which(net[ego, ] > thresh)]
 		ngbd_col <- colnames(net)[which(net[, ego] > thresh)]
 		ngbd_any <- unique(c(ngbd_row, ngbd_col))
 
-		# Add back ego if include_ego is TRUE
+		# add back ego if include_ego is TRUE
 		if (include_ego) {
 			ngbd_row <- c(ego, ngbd_row)
 			ngbd_col <- c(ego, ngbd_col)

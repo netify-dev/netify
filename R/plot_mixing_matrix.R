@@ -153,15 +153,15 @@ plot_mixing_matrix <- function(
 
 	# determine text colors for value labels
 	if (!is.null(text_color_threshold)) {
-		# If threshold is provided, use white text for values above the threshold
-		# First normalize values to 0-1 scale for comparison
+		# if threshold is provided, use white text for values above the threshold
+		# first normalize values to 0-1 scale for comparison
 		value_range <- range(df_long$value, na.rm = TRUE)
 		normalized_values <- (df_long$value - value_range[1]) / (value_range[2] - value_range[1])
 
-		# Apply threshold to determine text colors
+		# apply threshold to determine text colors
 		text_colors <- ifelse(normalized_values > text_color_threshold, "white", "black")
 	} else {
-		# Default: use the provided text_color for all cells
+		# default: use the provided text_color for all cells
 		text_colors <- text_color
 	}
 

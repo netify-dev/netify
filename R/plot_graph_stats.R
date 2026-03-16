@@ -94,7 +94,7 @@ plot_graph_stats <- function(
 
 	####
 	# determine if summary_df is summarizing multiple time points
-	# Check if 'net' column exists first
+	# check if 'net' column exists first
 	if ("net" %in% colnames(summary_df)) {
 		if (length(unique(summary_df$net)) == 1) {
 			longitudinal <- FALSE
@@ -103,7 +103,7 @@ plot_graph_stats <- function(
 			longitudinal <- TRUE
 		}
 	} else {
-		# If no 'net' column, it's not longitudinal
+		# if no 'net' column, it's not longitudinal
 		longitudinal <- FALSE
 	}
 	####
@@ -201,7 +201,7 @@ plot_graph_stats <- function(
 		)
 	}
 
-	# Ensure viz is defined - this should not happen but just in case
+	# ensure viz is defined - this should not happen but just in case
 	if (!exists("viz")) {
 		cli::cli_abort(
 			"Unable to determine plot configuration for the provided data."

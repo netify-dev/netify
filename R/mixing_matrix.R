@@ -70,7 +70,7 @@ mixing_matrix <- function(
 		cli::cli_abort("No nodal_data found in netify object.")
 	}
 
-	# Check attribute availability depending on data structure
+	# check attribute availability depending on data structure
 	if (netify_type == "cross_sec") {
 		if (!attribute %in% names(nodal_data)) {
 			cli::cli_abort("Attribute '{attribute}' not found in nodal_data. Available attributes: {paste(names(nodal_data), collapse = ', ')}")
@@ -79,9 +79,9 @@ mixing_matrix <- function(
 			cli::cli_abort("Row attribute '{row_attribute}' not found in nodal_data. Available attributes: {paste(names(nodal_data), collapse = ', ')}")
 		}
 	} else {
-		# For longitudinal data, nodal_data can be either a list or a data.frame
+		# for longitudinal data, nodal_data can be either a list or a data.frame
 		if (is.data.frame(nodal_data)) {
-			# Legacy format with time column
+			# legacy format with time column
 			if (!attribute %in% names(nodal_data)) {
 				cli::cli_abort("Attribute '{attribute}' not found in nodal_data. Available attributes: {paste(setdiff(names(nodal_data), c('actor', 'time')), collapse = ', ')}")
 			}
@@ -89,7 +89,7 @@ mixing_matrix <- function(
 				cli::cli_abort("Row attribute '{row_attribute}' not found in nodal_data. Available attributes: {paste(setdiff(names(nodal_data), c('actor', 'time')), collapse = ', ')}")
 			}
 		} else if (is.list(nodal_data)) {
-			# List format - check in the first time period
+			# list format - check in the first time period
 			first_time <- names(nodal_data)[1]
 			if (!is.null(first_time)) {
 				if (!attribute %in% names(nodal_data[[first_time]])) {
@@ -118,9 +118,9 @@ mixing_matrix <- function(
 		netlet_list <- switch(netify_type,
 			"cross_sec" = list("1" = netlet),
 			"longit_array" = {
-				# Check if this is multilayer longitudinal (4D) or single layer (3D)
+				# check if this is multilayer longitudinal (4D) or single layer (3D)
 				if (length(dim(netlet)) == 4) {
-					# Multilayer longitudinal: extract time periods from 4th dimension
+					# multilayer longitudinal: extract time periods from 4th dimension
 					time_names <- dimnames(netlet)[[4]]
 					if (is.null(time_names)) {
 						time_names <- as.character(seq_len(dim(netlet)[4]))
@@ -130,7 +130,7 @@ mixing_matrix <- function(
 						net_list[[time_names[t]]] <- netlet[, , , t]
 					}
 				} else {
-					# Single layer longitudinal: extract from 3rd dimension
+					# single layer longitudinal: extract from 3rd dimension
 					time_names <- dimnames(netlet)[[3]]
 					if (is.null(time_names)) {
 						time_names <- as.character(seq_len(dim(netlet)[3]))
@@ -149,13 +149,13 @@ mixing_matrix <- function(
 		for (time_id in names(netlet_list)) {
 			# get network matrix for this time period
 			net_matrix <- netlet_list[[time_id]]
-			# Extract specific layer for multilayer networks
+			# extract specific layer for multilayer networks
 			if (length(layers) > 1) {
 				if (netify_type == "cross_sec") {
-					# For cross-sectional multilayer: 3D array [actors, actors, layers]
+					# for cross-sectional multilayer: 3D array [actors, actors, layers]
 					net_matrix <- netlet[, , layer_index]
 				} else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
-					# For longitudinal multilayer: 4D array [actors, actors, layers, time]
+					# for longitudinal multilayer: 4D array [actors, actors, layers, time]
 					net_matrix <- net_matrix[, , layer_index]
 				}
 			}
@@ -166,14 +166,14 @@ mixing_matrix <- function(
 				row_attrs <- nodal_data[[row_attribute]]
 				actors <- nodal_data$actor
 			} else {
-				# For longitudinal data, nodal_data is a list by time period
+				# for longitudinal data, nodal_data is a list by time period
 				if (is.list(nodal_data) && time_id %in% names(nodal_data)) {
 					time_data <- nodal_data[[time_id]]
 					col_attrs <- time_data[[attribute]]
 					row_attrs <- time_data[[row_attribute]]
 					actors <- time_data$actor
 				} else if (is.data.frame(nodal_data)) {
-					# Legacy format with time column
+					# legacy format with time column
 					time_data <- nodal_data[nodal_data$time == time_id, ]
 					col_attrs <- time_data[[attribute]]
 					row_attrs <- time_data[[row_attribute]]
@@ -278,7 +278,7 @@ create_mixing_matrix <- function(net_matrix, row_attrs, col_attrs,
 	n <- length(row_attrs)
 	for (i in seq_len(n)) {
 		for (j in seq_len(n)) {
-			if (i != j || !is.na(net_matrix[i, j])) { # Allow self-loops if they exist
+			if (i != j || !is.na(net_matrix[i, j])) { # allow self-loops if they exist
 				tie_value <- net_matrix[i, j]
 
 				if (!is.na(tie_value) && (include_weights || tie_value > 0)) {
@@ -353,7 +353,7 @@ calculate_mixing_stats <- function(mixing_matrix, raw_matrix, row_attrs, col_att
 
 	# shannon entropy of mixing pattern
 	probs <- as.vector(mixing_matrix)
-	probs <- probs[probs > 0] # Remove zeros for log calculation
+	probs <- probs[probs > 0] # remove zeros for log calculation
 	entropy <- ifelse(length(probs) > 1, -sum(probs * log(probs)), 0)
 
 	return(list(
@@ -378,16 +378,16 @@ calculate_assortativity <- function(mixing_matrix) {
 		return(NA)
 	}
 
-	e <- mixing_matrix / total # Joint probabilities
-	a <- rowSums(e) # Marginal probabilities (rows)
-	b <- colSums(e) # Marginal probabilities (columns)
+	e <- mixing_matrix / total # joint probabilities
+	a <- rowSums(e) # marginal probabilities (rows)
+	b <- colSums(e) # marginal probabilities (columns)
 
 	# assortativity coefficient: (trace - sum(a*b)) / (1 - sum(a*b))
 	trace_e <- sum(diag(e))
 	sum_ab <- sum(a * b)
 
 	if (sum_ab >= 1) {
-		return(NA) # Undefined
+		return(NA) # undefined
 	}
 
 	assortativity <- (trace_e - sum_ab) / (1 - sum_ab)
@@ -406,9 +406,9 @@ calculate_modularity <- function(mixing_matrix) {
 	}
 
 	# modularity calculation
-	k_in <- diag(mixing_matrix) # Within-group edges
-	k_out <- rowSums(mixing_matrix) - k_in # Between-group edges from group
-	k_in_total <- colSums(mixing_matrix) - k_in # Between-group edges to group
+	k_in <- diag(mixing_matrix) # within-group edges
+	k_out <- rowSums(mixing_matrix) - k_in # between-group edges from group
+	k_in_total <- colSums(mixing_matrix) - k_in # between-group edges to group
 
 	expected_within <- (k_out + k_in) * (k_in_total + k_in) / total
 

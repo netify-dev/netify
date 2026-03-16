@@ -160,7 +160,7 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
 	edge_data <- finalize_edge_data(edge_data, netify_type)
 
 	# process nodal data
-	# For longitudinal data, pass the time labels from the netlet names
+	# for longitudinal data, pass the time labels from the netlet names
 	if (netify_type != "cross_sec") {
 		time_labels <- names(netlet)
 	} else {

@@ -189,19 +189,19 @@ peek <- function(netlet,
 	# user input checks
 	netify_check(netlet)
 
-	# Handle actors parameter - if specified, it sets both from and to
+	# handle actors parameter - if specified, it sets both from and to
 	if (!is.null(actors)) {
 		from <- actors
 		to <- actors
 	}
 
-	# Cache attributes for efficiency
+	# cache attributes for efficiency
 	netify_type <- attr(netlet, "netify_type")
 	n_layers <- length(attr(netlet, "layers"))
 	is_multilayer <- n_layers > 1
 	is_longit <- netify_type != "cross_sec"
 
-	# Handle layer selection
+	# handle layer selection
 	if (is_multilayer && is.null(layers)) {
 		cli::cli_alert_warning("Multiple layers detected. Showing all layers. Specify 'layers' parameter to select specific layers.")
 	} else if (!is_multilayer && !is.null(layers)) {
@@ -209,7 +209,7 @@ peek <- function(netlet,
 		layers <- NULL
 	}
 
-	# Validate layer selection if provided
+	# validate layer selection if provided
 	if (!is.null(layers)) {
 		available_layers <- attr(netlet, "layers")
 		invalid_layers <- setdiff(layers, available_layers)
@@ -220,10 +220,10 @@ peek <- function(netlet,
 		}
 	}
 
-	# Get raw data for processing
+	# get raw data for processing
 	raw_data <- get_raw(netlet)
 
-	# Process time selection for longitudinal data
+	# process time selection for longitudinal data
 	if (is_longit) {
 		time_labels <- if (netify_type == "longit_list") {
 			names(raw_data)
@@ -231,7 +231,7 @@ peek <- function(netlet,
 			dimnames(raw_data)[[if (is_multilayer) 4 else 3]]
 		}
 
-		# Convert time parameter to indices
+		# convert time parameter to indices
 		if (is.null(time)) {
 			time_idx <- seq_along(time_labels)
 		} else if (is.character(time)) {
@@ -241,7 +241,7 @@ peek <- function(netlet,
 			time_idx <- time
 		}
 
-		# Validate time indices
+		# validate time indices
 		max_time <- length(time_labels)
 		time_idx <- time_idx[time_idx >= 1 & time_idx <= max_time]
 
@@ -250,7 +250,7 @@ peek <- function(netlet,
 		}
 	}
 
-	# Process row/column selection based on netify type
+	# process row/column selection based on netify type
 	if (netify_type == "cross_sec") {
 		return(peek_cross_sectional(raw_data, from, to, layers, is_multilayer))
 	} else if (netify_type == "longit_array") {
@@ -276,16 +276,16 @@ peek <- function(netlet,
 #' @keywords internal
 #' @noRd
 peek_cross_sectional <- function(data, rows, cols, layers, is_multilayer) {
-	# Get dimensions
+	# get dimensions
 	dims <- dim(data)
 	actor_rows <- dimnames(data)[[1]]
 	actor_cols <- dimnames(data)[[2]]
 
-	# Process row selection
+	# process row selection
 	row_idx <- process_actor_selection(rows, actor_rows, dims[1])
 	col_idx <- process_actor_selection(cols, actor_cols, dims[2])
 
-	# Subset data
+	# subset data
 	if (!is_multilayer) {
 		return(data[row_idx, col_idx, drop = FALSE])
 	} else {
@@ -315,16 +315,16 @@ peek_cross_sectional <- function(data, rows, cols, layers, is_multilayer) {
 #' @keywords internal
 #' @noRd
 peek_longit_array <- function(data, rows, cols, time_idx, layers, is_multilayer) {
-	# Get dimensions
+	# get dimensions
 	dims <- dim(data)
 	actor_rows <- dimnames(data)[[1]]
 	actor_cols <- dimnames(data)[[2]]
 
-	# Process actor selection
+	# process actor selection
 	row_idx <- process_actor_selection(rows, actor_rows, dims[1])
 	col_idx <- process_actor_selection(cols, actor_cols, dims[2])
 
-	# Subset data
+	# subset data
 	if (!is_multilayer) {
 		out <- data[row_idx, col_idx, time_idx, drop = FALSE]
 	} else {
@@ -355,20 +355,20 @@ peek_longit_array <- function(data, rows, cols, time_idx, layers, is_multilayer)
 #' @keywords internal
 #' @noRd
 peek_longit_list <- function(data, rows, cols, time_idx, layers, is_multilayer) {
-	# Subset to requested time periods
+	# subset to requested time periods
 	data_subset <- data[time_idx]
 
-	# Process each time period
+	# process each time period
 	result <- lapply(data_subset, function(slice) {
 		dims <- dim(slice)
 		actor_rows <- dimnames(slice)[[1]]
 		actor_cols <- dimnames(slice)[[2]]
 
-		# Process actor selection for this time period
+		# process actor selection for this time period
 		row_idx <- process_actor_selection(rows, actor_rows, dims[1])
 		col_idx <- process_actor_selection(cols, actor_cols, dims[2])
 
-		# Subset
+		# subset
 		if (!is_multilayer) {
 			return(slice[row_idx, col_idx, drop = FALSE])
 		} else {
@@ -400,16 +400,16 @@ peek_longit_list <- function(data, rows, cols, time_idx, layers, is_multilayer) 
 #' @noRd
 process_actor_selection <- function(selection, actor_names, max_dim) {
 	if (is.null(selection)) {
-		# NULL means all actors
+		# null means all actors
 		return(seq_len(max_dim))
 	} else if (is.numeric(selection) && length(selection) == 1) {
-		# Single number means first n actors
+		# single number means first n actors
 		return(seq_len(min(selection, max_dim)))
 	} else if (is.numeric(selection)) {
-		# Numeric vector of indices
+		# numeric vector of indices
 		return(selection[selection >= 1 & selection <= max_dim])
 	} else if (is.character(selection) || is.factor(selection)) {
-		# Character vector of actor names
+		# character vector of actor names
 		if (is.factor(selection)) selection <- as.character(selection)
 		idx <- match(selection, actor_names)
 		return(idx[!is.na(idx)])

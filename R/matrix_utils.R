@@ -77,7 +77,7 @@ align_matrices <- function(..., all_actors = NULL, include_diagonal = FALSE) {
 		stop("align_matrices requires either 2 matrices or a list of matrices")
 	}
 
-	# Extract matrices if they're netify objects
+	# extract matrices if they're netify objects
 	if (inherits(mats[[1]], "netify")) {
 		mats <- lapply(mats, extract_matrix)
 	}

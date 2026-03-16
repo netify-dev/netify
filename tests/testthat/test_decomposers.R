@@ -6,9 +6,9 @@ set.seed(6886)
 # library(network)
 
 # helper function to create test data
-create_test_data <- function() {
+create_test_data = function() {
 	# cross-sectional data
-	cs_data <- data.frame(
+	cs_data = data.frame(
 		from = c("A", "A", "B", "B", "C"),
 		to = c("B", "C", "A", "C", "A"),
 		weight = c(1, 2, 3, 4, 5),
@@ -18,7 +18,7 @@ create_test_data <- function() {
 
 	# longitudinal data with nodal attributes as columns in the dyad data
 	# for netify to extract nodal vars, they need to be in the dyad data
-	longit_data <- data.frame(
+	longit_data = data.frame(
 		from = rep(c("A", "A", "B", "B", "C"), 2),
 		to = rep(c("B", "C", "A", "C", "A"), 2),
 		time = c(rep(2020, 5), rep(2021, 5)),
@@ -30,7 +30,7 @@ create_test_data <- function() {
 	)
 
 	# separate nodal attributes data for add_node_vars
-	longit_node_attrs <- data.frame(
+	longit_node_attrs = data.frame(
 		actor = rep(c("A", "B", "C"), 2),
 		time = c(rep(2020, 3), rep(2021, 3)),
 		node_attr = c(10, 20, 30, 11, 21, 31),
@@ -39,7 +39,7 @@ create_test_data <- function() {
 	)
 
 	# cross-sectional nodal attributes
-	cs_node_attrs <- data.frame(
+	cs_node_attrs = data.frame(
 		actor = c("A", "B", "C"),
 		node_attr = c(10, 20, 30),
 		democracy = c(7, 8, 6),
@@ -47,7 +47,7 @@ create_test_data <- function() {
 	)
 
 	# bipartite data (e.g., countries trading with products)
-	bip_data <- data.frame(
+	bip_data = data.frame(
 		from = c("USA", "USA", "China", "China", "Japan"),
 		to = c("Oil", "Tech", "Tech", "Steel", "Tech"),
 		weight = c(100, 200, 300, 150, 250),
@@ -65,10 +65,10 @@ create_test_data <- function() {
 
 # tests for decompose_netify
 test_that("decompose_netify works for cross-sectional networks", {
-	test_data <- create_test_data()
+	test_data = create_test_data()
 
 	# create netify object with dyad_vars (from the dyad_data columns)
-	net_cs <- netify(
+	net_cs = netify(
 		test_data$cs_data,
 		actor1 = "from",
 		actor2 = "to",
@@ -79,7 +79,7 @@ test_that("decompose_netify works for cross-sectional networks", {
 	)
 
 	# add additional nodal attributes using add_node_vars
-	net_cs <- add_node_vars(
+	net_cs = add_node_vars(
 		netlet = net_cs,
 		node_data = test_data$cs_node_attrs,
 		actor = "actor",
@@ -87,7 +87,7 @@ test_that("decompose_netify works for cross-sectional networks", {
 	)
 
 	# decompose
-	decomposed <- decompose_netify(net_cs)
+	decomposed = decompose_netify(net_cs)
 
 	# test edge data
 	expect_true("edge_data" %in% names(decomposed))
@@ -115,17 +115,17 @@ test_that("decompose_netify works for cross-sectional networks", {
 # tests for decompose_igraph
 test_that("decompose_igraph: unweighted cross-sec, asymmetric", {
 	# generate test data using same approach as netify_to_igraph tests
-	adjm <- matrix(
+	adjm = matrix(
 		as.numeric(sample(0:1, 100, replace = TRUE, prob = c(0.5, .5))),
 		ncol = 10
 	)
-	rownames(adjm) <- colnames(adjm) <- letters[1:nrow(adjm)]
+	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 
 	# create igraph object
-	g1 <- igraph::graph_from_adjacency_matrix(adjm)
+	g1 = igraph::graph_from_adjacency_matrix(adjm)
 
 	# decompose
-	decomposed <- decompose_igraph(g1, weight = NULL)
+	decomposed = decompose_igraph(g1, weight = NULL)
 
 	# check structure
 	expect_equal(dim(decomposed$adj_mat), c(10, 10))
@@ -138,12 +138,12 @@ test_that("decompose_igraph: unweighted cross-sec, asymmetric", {
 
 test_that("decompose_igraph: weighted cross-sec, asymmetric", {
 	# generate test data
-	adjm <- matrix(rnorm(10^2), ncol = 10)
-	rownames(adjm) <- colnames(adjm) <- letters[1:nrow(adjm)]
-	g1 <- igraph::graph_from_adjacency_matrix(adjm, weighted = TRUE)
+	adjm = matrix(rnorm(10^2), ncol = 10)
+	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
+	g1 = igraph::graph_from_adjacency_matrix(adjm, weighted = TRUE)
 
 	# decompose
-	decomposed <- decompose_igraph(g1, weight = "weight")
+	decomposed = decompose_igraph(g1, weight = "weight")
 
 	# check structure
 	expect_equal(dim(decomposed$adj_mat), c(10, 10))
@@ -158,22 +158,22 @@ test_that("decompose_igraph: weighted cross-sec, asymmetric", {
 
 test_that("decompose_igraph: weighted cross-sec with dyad and nodal attribs", {
 	# create fake data matching netify_to_igraph test style
-	fakeDyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
-	fakeDyads$weight <- rnorm(nrow(fakeDyads))
-	fakeDyads$var2 <- rnorm(nrow(fakeDyads))
-	fakeDyads$var3 <- rnorm(nrow(fakeDyads))
-	fakeDyads$var4 <- rnorm(nrow(fakeDyads))
-	fakeDyads$actor1 <- as.character(fakeDyads$actor1)
-	fakeDyads$actor2 <- as.character(fakeDyads$actor2)
-	fakeDyads <- fakeDyads[fakeDyads$actor1 != fakeDyads$actor2, ]
+	fake_dyads = expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
+	fake_dyads$weight = rnorm(nrow(fake_dyads))
+	fake_dyads$var2 = rnorm(nrow(fake_dyads))
+	fake_dyads$var3 = rnorm(nrow(fake_dyads))
+	fake_dyads$var4 = rnorm(nrow(fake_dyads))
+	fake_dyads$actor1 = as.character(fake_dyads$actor1)
+	fake_dyads$actor2 = as.character(fake_dyads$actor2)
+	fake_dyads = fake_dyads[fake_dyads$actor1 != fake_dyads$actor2, ]
 
-	fakeNodes <- data.frame(actor1 = letters[1:3], var1 = rnorm(3), var2 = rnorm(3))
+	fake_nodes = data.frame(actor1 = letters[1:3], var1 = rnorm(3), var2 = rnorm(3))
 
 	# create igraph object
-	g <- igraph::graph_from_data_frame(fakeDyads, directed = TRUE, vertices = fakeNodes)
+	g = igraph::graph_from_data_frame(fake_dyads, directed = TRUE, vertices = fake_nodes)
 
 	# decompose
-	decomposed <- decompose_igraph(g, weight = "weight")
+	decomposed = decompose_igraph(g, weight = "weight")
 
 	# check adjacency matrix
 	expect_equal(dim(decomposed$adj_mat), c(3, 3))
@@ -191,22 +191,22 @@ test_that("decompose_igraph: weighted cross-sec with dyad and nodal attribs", {
 
 test_that("decompose_igraph: bipartite networks", {
 	# generate bipartite test data
-	adjm <- matrix(
+	adjm = matrix(
 		as.numeric(sample(0:1, 50, replace = TRUE, prob = c(0.5, .5))),
 		nrow = 5, ncol = 10
 	)
-	rownames(adjm) <- letters[1:5]
-	colnames(adjm) <- letters[17:26]
+	rownames(adjm) = letters[1:5]
+	colnames(adjm) = letters[17:26]
 
 	# create bipartite igraph
-	g <- igraph::graph_from_biadjacency_matrix(adjm)
+	g = igraph::graph_from_biadjacency_matrix(adjm)
 
 	# add some attributes
-	igraph::V(g)$node_attr <- rnorm(15)
-	igraph::E(g)$edge_attr <- rnorm(igraph::ecount(g))
+	igraph::V(g)$node_attr = rnorm(15)
+	igraph::E(g)$edge_attr = rnorm(igraph::ecount(g))
 
 	# decompose
-	decomposed <- decompose_igraph(g)
+	decomposed = decompose_igraph(g)
 
 	# check adjacency matrix dimensions (should be rectangular for bipartite)
 	expect_equal(dim(decomposed$adj_mat), c(5, 10))
@@ -222,14 +222,14 @@ test_that("decompose_igraph: bipartite networks", {
 # tests for decompose_statnet
 test_that("decompose_statnet: unweighted cross-sec, asymmetric", {
 	# generate test data matching netify_to_statnet test style
-	adjm <- matrix(
+	adjm = matrix(
 		as.numeric(sample(0:1, 100, replace = TRUE, prob = c(0.5, .5))),
 		ncol = 10
 	)
-	rownames(adjm) <- colnames(adjm) <- letters[1:nrow(adjm)]
+	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 
 	# create network object
-	net <- network::network(
+	net = network::network(
 		adjm,
 		matrix.type = "adjacency",
 		directed = TRUE,
@@ -237,7 +237,7 @@ test_that("decompose_statnet: unweighted cross-sec, asymmetric", {
 	)
 
 	# decompose
-	decomposed <- decompose_statnet(net, weight = NULL)
+	decomposed = decompose_statnet(net, weight = NULL)
 
 	# check structure
 	expect_equal(dim(decomposed$adj_mat), c(10, 10))
@@ -249,11 +249,11 @@ test_that("decompose_statnet: unweighted cross-sec, asymmetric", {
 
 test_that("decompose_statnet: weighted cross-sec, asymmetric", {
 	# generate test data
-	adjm <- matrix(rnorm(10^2), ncol = 10)
-	rownames(adjm) <- colnames(adjm) <- letters[1:nrow(adjm)]
+	adjm = matrix(rnorm(10^2), ncol = 10)
+	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 
 	# create network object
-	net <- network::network(
+	net = network::network(
 		adjm,
 		matrix.type = "adjacency",
 		directed = TRUE,
@@ -263,7 +263,7 @@ test_that("decompose_statnet: weighted cross-sec, asymmetric", {
 	)
 
 	# decompose
-	decomposed <- decompose_statnet(net, weight = "value")
+	decomposed = decompose_statnet(net, weight = "value")
 
 	# check structure
 	expect_equal(dim(decomposed$adj_mat), c(10, 10))
@@ -278,24 +278,24 @@ test_that("decompose_statnet: weighted cross-sec, asymmetric", {
 
 test_that("decompose_statnet: weighted cross-sec with dyad and nodal attribs", {
 	# create test data
-	fakeDyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
-	fakeDyads$weight <- rnorm(nrow(fakeDyads))
-	fakeDyads$var2 <- rnorm(nrow(fakeDyads))
-	fakeDyads$var3 <- rnorm(nrow(fakeDyads))
-	fakeDyads$actor1 <- as.character(fakeDyads$actor1)
-	fakeDyads$actor2 <- as.character(fakeDyads$actor2)
-	fakeDyads <- fakeDyads[fakeDyads$actor1 != fakeDyads$actor2, ]
+	fake_dyads = expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
+	fake_dyads$weight = rnorm(nrow(fake_dyads))
+	fake_dyads$var2 = rnorm(nrow(fake_dyads))
+	fake_dyads$var3 = rnorm(nrow(fake_dyads))
+	fake_dyads$actor1 = as.character(fake_dyads$actor1)
+	fake_dyads$actor2 = as.character(fake_dyads$actor2)
+	fake_dyads = fake_dyads[fake_dyads$actor1 != fake_dyads$actor2, ]
 
 	# create network from adjacency matrix first
-	adjm <- matrix(0, nrow = 3, ncol = 3)
-	rownames(adjm) <- colnames(adjm) <- letters[1:3]
-	for (i in 1:nrow(fakeDyads)) {
-		row_idx <- which(rownames(adjm) == fakeDyads$actor1[i])
-		col_idx <- which(colnames(adjm) == fakeDyads$actor2[i])
-		adjm[row_idx, col_idx] <- fakeDyads$weight[i]
+	adjm = matrix(0, nrow = 3, ncol = 3)
+	rownames(adjm) = colnames(adjm) = letters[1:3]
+	for (i in 1:nrow(fake_dyads)) {
+		row_idx = which(rownames(adjm) == fake_dyads$actor1[i])
+		col_idx = which(colnames(adjm) == fake_dyads$actor2[i])
+		adjm[row_idx, col_idx] = fake_dyads$weight[i]
 	}
 
-	net <- network::network(
+	net = network::network(
 		adjm,
 		matrix.type = "adjacency",
 		directed = TRUE,
@@ -308,11 +308,11 @@ test_that("decompose_statnet: weighted cross-sec with dyad and nodal attribs", {
 	network::set.vertex.attribute(net, "var2", rnorm(3))
 
 	# add edge attributes
-	network::set.edge.attribute(net, "var2", fakeDyads$var2)
-	network::set.edge.attribute(net, "var3", fakeDyads$var3)
+	network::set.edge.attribute(net, "var2", fake_dyads$var2)
+	network::set.edge.attribute(net, "var3", fake_dyads$var3)
 
 	# decompose
-	decomposed <- decompose_statnet(net, weight = "weight")
+	decomposed = decompose_statnet(net, weight = "weight")
 
 	# check structure
 	expect_equal(dim(decomposed$adj_mat), c(3, 3))
@@ -331,15 +331,15 @@ test_that("decompose_statnet: weighted cross-sec with dyad and nodal attribs", {
 
 test_that("decompose_statnet: bipartite networks", {
 	# generate bipartite test data
-	adjm <- matrix(
+	adjm = matrix(
 		as.numeric(sample(0:1, 50, replace = TRUE, prob = c(0.6, .4))),
 		nrow = 5, ncol = 10
 	)
-	rownames(adjm) <- letters[1:5]
-	colnames(adjm) <- letters[17:26]
+	rownames(adjm) = letters[1:5]
+	colnames(adjm) = letters[17:26]
 
 	# create bipartite network
-	net <- network::network(
+	net = network::network(
 		adjm,
 		matrix.type = "adjacency",
 		directed = TRUE,
@@ -351,7 +351,7 @@ test_that("decompose_statnet: bipartite networks", {
 	network::set.vertex.attribute(net, "node_attr", rnorm(15))
 
 	# decompose
-	decomposed <- decompose_statnet(net)
+	decomposed = decompose_statnet(net)
 
 	# for statnet bipartite, we get the full square matrix
 	# the first 5 rows/cols are the first partition
@@ -367,13 +367,13 @@ test_that("decompose_statnet: bipartite networks", {
 
 test_that("decompose_statnet: symmetric networks", {
 	# generate symmetric test data
-	adjm <- matrix(rnorm(10^2), ncol = 10)
-	adjm <- (adjm + t(adjm)) / 2
-	diag(adjm) <- NA
-	rownames(adjm) <- colnames(adjm) <- letters[1:nrow(adjm)]
+	adjm = matrix(rnorm(10^2), ncol = 10)
+	adjm = (adjm + t(adjm)) / 2
+	diag(adjm) = NA
+	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 
 	# create undirected network
-	net <- network::network(
+	net = network::network(
 		adjm,
 		matrix.type = "adjacency",
 		directed = FALSE,
@@ -383,7 +383,7 @@ test_that("decompose_statnet: symmetric networks", {
 	)
 
 	# decompose
-	decomposed <- decompose_statnet(net, weight = "value")
+	decomposed = decompose_statnet(net, weight = "value")
 
 	# check structure
 	expect_equal(dim(decomposed$adj_mat), c(10, 10))
@@ -392,8 +392,8 @@ test_that("decompose_statnet: symmetric networks", {
 
 test_that("decompose_statnet works for cross-sectional networks", {
 	# create network object
-	edges <- matrix(c(1, 2, 1, 3, 2, 1, 2, 3, 3, 1), ncol = 2, byrow = TRUE)
-	net <- network::network(edges, directed = TRUE, vertices = 3)
+	edges = matrix(c(1, 2, 1, 3, 2, 1, 2, 3, 3, 1), ncol = 2, byrow = TRUE)
+	net = network::network(edges, directed = TRUE, vertices = 3)
 
 	# add attributes
 	network::set.vertex.attribute(net, "vertex.names", c("A", "B", "C"))
@@ -402,7 +402,7 @@ test_that("decompose_statnet works for cross-sectional networks", {
 	network::set.edge.attribute(net, "edge_attr", c("x", "y", "x", "y", "x"))
 
 	# decompose
-	decomposed <- decompose_statnet(net, weight = "weight")
+	decomposed = decompose_statnet(net, weight = "weight")
 
 	# check adjacency matrix
 	expect_equal(dim(decomposed$adj_mat), c(3, 3))
@@ -421,10 +421,10 @@ test_that("decompose_statnet works for cross-sectional networks", {
 
 test_that("decompose_statnet works for longitudinal networks (as network list)", {
 	# create two network objects for different time points
-	net_t1 <- network::network(matrix(c(1, 2, 1, 3, 2, 3), ncol = 2, byrow = TRUE),
+	net_t1 = network::network(matrix(c(1, 2, 1, 3, 2, 3), ncol = 2, byrow = TRUE),
 		directed = TRUE
 	)
-	net_t2 <- network::network(matrix(c(1, 2, 2, 3, 3, 1), ncol = 2, byrow = TRUE),
+	net_t2 = network::network(matrix(c(1, 2, 2, 3, 3, 1), ncol = 2, byrow = TRUE),
 		directed = TRUE
 	)
 
@@ -432,8 +432,8 @@ test_that("decompose_statnet works for longitudinal networks (as network list)",
 	network::set.edge.attribute(net_t2, "weight", c(2, 4, 5))
 
 	# decompose each
-	decomp_t1 <- decompose_statnet(net_t1, weight = "weight")
-	decomp_t2 <- decompose_statnet(net_t2, weight = "weight")
+	decomp_t1 = decompose_statnet(net_t1, weight = "weight")
+	decomp_t2 = decompose_statnet(net_t2, weight = "weight")
 
 	# check both have same dimensions
 	expect_equal(dim(decomp_t1$adj_mat), c(3, 3))
@@ -446,8 +446,8 @@ test_that("decompose_statnet works for longitudinal networks (as network list)",
 
 test_that("decompose_statnet works for bipartite networks", {
 	# create bipartite network
-	edges <- matrix(c(1, 4, 1, 5, 2, 5, 2, 6, 3, 5), ncol = 2, byrow = TRUE)
-	net <- network::network(edges, directed = FALSE, bipartite = 3)
+	edges = matrix(c(1, 4, 1, 5, 2, 5, 2, 6, 3, 5), ncol = 2, byrow = TRUE)
+	net = network::network(edges, directed = FALSE, bipartite = 3)
 
 	# add names
 	network::set.vertex.attribute(
@@ -457,7 +457,7 @@ test_that("decompose_statnet works for bipartite networks", {
 	network::set.edge.attribute(net, "weight", c(100, 200, 300, 150, 250))
 
 	# decompose
-	decomposed <- decompose_statnet(net, weight = "weight")
+	decomposed = decompose_statnet(net, weight = "weight")
 
 	# check adjacency matrix (full matrix for statnet bipartite)
 	expect_equal(dim(decomposed$adj_mat), c(3, 3))

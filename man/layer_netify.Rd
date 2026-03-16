@@ -50,10 +50,16 @@ All netify objects in netlet_list must have identical:
 \itemize{
 \item Network type (cross-sectional or longitudinal)
 \item Dimensions (same actors and time periods)
-\item Symmetry (all directed or all undirected)
 \item Mode (all unipartite or all bipartite)
 \item Actor composition (same actors in same order)
 }
+
+\strong{Mixed directedness:}
+
+Layers are allowed to have different symmetry settings (e.g., some symmetric
+and others directed). When layers have mixed directedness, the
+\code{symmetric} attribute is stored as a named logical vector with one
+element per layer.
 
 \strong{Attribute handling:}
 

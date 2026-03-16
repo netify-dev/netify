@@ -275,9 +275,9 @@ time_check <- function(time, dyad_data) {
 repeat_dyads_check <- function(dyad_data, actor1, actor2, time = NULL) {
 	# clean up params
 	if (!is.null(time)) {
-		timeVec <- dyad_data[[time]]
+		time_vec <- dyad_data[[time]]
 	} else {
-		timeVec <- rep(1, nrow(dyad_data)) # Default time vector if none provided
+		time_vec <- rep(1, nrow(dyad_data)) # Default time vector if none provided
 	}
 
 	#
@@ -285,7 +285,7 @@ repeat_dyads_check <- function(dyad_data, actor1, actor2, time = NULL) {
 	actor2Vec <- dyad_data[[actor2]]
 
 	#
-	out <- count_duplicate_dyads(actor1Vec, actor2Vec, timeVec)
+	out <- count_duplicate_dyads(actor1Vec, actor2Vec, time_vec)
 
 	#
 	return(out)
@@ -388,11 +388,11 @@ add_var_time_check <- function(netlet, time) {
 #' @noRd
 
 actor_mode_check <- function(dyad_data, actor1, actor2, mode) {
-	# Extract unique actors from each column
+	# extract unique actors from each column
 	actors_1 <- unique(dyad_data[, actor1])
 	actors_2 <- unique(dyad_data[, actor2])
 
-	# Check for empty actor sets
+	# check for empty actor sets
 	if (length(actors_1) == 0) {
 		cli::cli_abort(
 			c(
@@ -411,7 +411,7 @@ actor_mode_check <- function(dyad_data, actor1, actor2, mode) {
 		)
 	}
 
-	# Mode-specific validation
+	# mode-specific validation
 	if (mode == "bipartite") {
 		bipartite_actor_check(actors_1, actors_2)
 	} else if (mode == "unipartite") {
@@ -442,7 +442,7 @@ actor_mode_check <- function(dyad_data, actor1, actor2, mode) {
 #' @noRd
 
 bipartite_actor_check <- function(actors_1, actors_2) {
-	# Check for overlapping actors (warning, not error)
+	# check for overlapping actors (warning, not error)
 	overlap <- intersect(actors_1, actors_2)
 	if (length(overlap) > 0) {
 		cli::cli_alert_warning(
@@ -453,7 +453,7 @@ bipartite_actor_check <- function(actors_1, actors_2) {
 		)
 	}
 
-	# Check for sufficient actors in each mode (error)
+	# check for sufficient actors in each mode (error)
 	if (length(actors_1) < 1 || length(actors_2) < 1) {
 		cli::cli_abort(
 			c(
@@ -479,8 +479,8 @@ bipartite_actor_check <- function(actors_1, actors_2) {
 #' @noRd
 
 unipartite_actor_check <- function(actors_1, actors_2) {
-	# For unipartite networks, we might want to check other things
-	# For now, just ensure we have some actors
+	# for unipartite networks, we might want to check other things
+	# for now, just ensure we have some actors
 	all_actors <- unique(c(actors_1, actors_2))
 
 	if (length(all_actors) < 4) {

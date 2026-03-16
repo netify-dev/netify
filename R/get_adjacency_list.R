@@ -149,7 +149,7 @@ get_adjacency_list <- function(
 	}
 
 	# add weight if not supplied
-	wOrig <- weight
+	w_orig <- weight
 	if (is.null(weight)) {
 		dyad_data$weight_var <- 1
 		weight <- "weight_var"
@@ -162,22 +162,22 @@ get_adjacency_list <- function(
 	time_pds <- time_info$time_labels
 	time_pds_num <- sort(unique(time_info$numeric_time))
 
-	# Pre-compute all actors from data
+	# pre-compute all actors from data
 	a1_all <- unique_vector(dyad_data[, actor1])
 	a2_all <- unique_vector(dyad_data[, actor2])
 	
-	# Incorporate nodelist if provided
+	# incorporate nodelist if provided
 	if (!is.null(nodelist)) {
-		# Convert to character to ensure consistency
+		# convert to character to ensure consistency
 		nodelist <- as.character(nodelist)
 		
-		# Add nodelist actors to the actor sets
+		# add nodelist actors to the actor sets
 		if (mode == "unipartite") {
 			actors_from_data <- unique_vector(a1_all, a2_all)
 			all_actors <- unique_vector(actors_from_data, nodelist)
 			a1_all <- a2_all <- all_actors
 		} else {
-			# For bipartite, inform user about assignment
+			# for bipartite, inform user about assignment
 			cli::cli_alert_info("For bipartite networks, nodelist should contain all actors. Assigning to both row and column actors.")
 			a1_all <- unique_vector(a1_all, nodelist)
 			a2_all <- unique_vector(a2_all, nodelist)
@@ -197,16 +197,16 @@ get_adjacency_list <- function(
 				stringsAsFactors = FALSE
 			)
 		} else {
-			# When not actor_time_uniform, we need to handle nodelist actors
+			# when not actor_time_uniform, we need to handle nodelist actors
 			actor_pds <- get_actor_time_info(dyad_data, actor1, actor2, time)
 			
-			# Add nodelist actors that aren't in actor_pds yet
+			# add nodelist actors that aren't in actor_pds yet
 			if (!is.null(nodelist)) {
 				existing_actors <- actor_pds$actor
 				missing_actors <- setdiff(nodelist, existing_actors)
 				
 				if (length(missing_actors) > 0) {
-					# Add missing actors with full time range
+					# add missing actors with full time range
 					min_time <- min(dyad_data[, time], na.rm = TRUE)
 					max_time <- max(dyad_data[, time], na.rm = TRUE)
 					
@@ -245,13 +245,13 @@ get_adjacency_list <- function(
 			a1_all <- a2_all <- actors_in_data
 		}
 
-		# Vectorized filtering - more efficient than string operations
-		# Create logical vectors for filtering
+		# vectorized filtering - more efficient than string operations
+		# create logical vectors for filtering
 		actor1_valid <- dyad_data[, actor1] %in% actors_in_data
 		actor2_valid <- dyad_data[, actor2] %in% actors_in_data
 		time_valid <- dyad_data[, time] %in% time_pds_num
 
-		# Apply all filters at once
+		# apply all filters at once
 		valid_rows <- actor1_valid & actor2_valid & time_valid
 		dyad_data <- dyad_data[valid_rows, ]
 
@@ -262,8 +262,8 @@ get_adjacency_list <- function(
 			)
 		}
 
-		# More efficient actor-time filtering using vectorized operations
-		# Create lookup table for valid actor-time combinations
+		# more efficient actor-time filtering using vectorized operations
+		# create lookup table for valid actor-time combinations
 		actor_time_lookup <- do.call(rbind, lapply(1:nrow(actor_pds), function(i) {
 			data.frame(
 				actor = actor_pds$actor[i],
@@ -272,16 +272,16 @@ get_adjacency_list <- function(
 			)
 		}))
 
-		# Create keys for fast lookup
+		# create keys for fast lookup
 		lookup_key <- paste(actor_time_lookup$actor, actor_time_lookup$time, sep = "_")
 		data_key1 <- paste(dyad_data[, actor1], dyad_data[, time], sep = "_")
 		data_key2 <- paste(dyad_data[, actor2], dyad_data[, time], sep = "_")
 
-		# Filter using vectorized %in% operations
+		# filter using vectorized %in% operations
 		valid_pairs <- data_key1 %in% lookup_key & data_key2 %in% lookup_key
 		dyad_data <- dyad_data[valid_pairs, ]
 
-		# Update actor lists based on filtered data
+		# update actor lists based on filtered data
 		a1_all <- unique_vector(dyad_data[, actor1])
 		a2_all <- unique_vector(dyad_data[, actor2])
 	}
@@ -289,7 +289,7 @@ get_adjacency_list <- function(
 	# check if there are repeating dyads
 	num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2, time)
 	if (num_repeat_dyads > 0) {
-		edge_value_check(wOrig, sum_dyads, TRUE)
+		edge_value_check(w_orig, sum_dyads, TRUE)
 	}
 
 	# aggregate data if sum dyads selected
@@ -302,18 +302,18 @@ get_adjacency_list <- function(
 		dyad_data <- dyad_data[dyad_data[, weight] != 0, ]
 	}
 
-	# Pre-compute actor presence matrix for all time periods
-	# This avoids recalculating for each time period
+	# pre-compute actor presence matrix for all time periods
+	# this avoids recalculating for each time period
 	actor_presence_matrix <- matrix(FALSE, nrow = nrow(actor_pds), ncol = length(time_pds_num))
 	for (i in 1:nrow(actor_pds)) {
 		actor_presence_matrix[i, ] <- (time_pds_num >= actor_pds$min_time[i]) &
 			(time_pds_num <= actor_pds$max_time[i])
 	}
 
-	# Pre-split data by time periods for faster subsetting
+	# pre-split data by time periods for faster subsetting
 	time_indices <- split(seq_len(nrow(dyad_data)), dyad_data[, time])
 
-	# Cache frequently accessed columns
+	# cache frequently accessed columns
 	dyad_actor1 <- dyad_data[, actor1]
 	dyad_actor2 <- dyad_data[, actor2]
 	dyad_weight <- dyad_data[, weight]
@@ -326,7 +326,7 @@ get_adjacency_list <- function(
 		time_pd <- time_pds[t_idx]
 		time_pd_num <- time_pds_num[t_idx]
 
-		# Get indices for this time period
+		# get indices for this time period
 		slice_indices <- time_indices[[as.character(time_pd_num)]]
 		if (is.null(slice_indices)) slice_indices <- integer(0)
 
@@ -347,13 +347,13 @@ get_adjacency_list <- function(
 			slice_actor2 <- dyad_actor2[slice_indices]
 			value <- dyad_weight[slice_indices]
 
-			# Pre-compute matrix indices to avoid repeated match() calls
-			matRowIndices <- match(slice_actor1, actors_rows)
-			matColIndices <- match(slice_actor2, actors_cols)
+			# pre-compute matrix indices to avoid repeated match() calls
+			mat_row_indices <- match(slice_actor1, actors_rows)
+			mat_col_indices <- match(slice_actor2, actors_cols)
 		} else {
 			value <- numeric(0)
-			matRowIndices <- integer(0)
-			matColIndices <- integer(0)
+			mat_row_indices <- integer(0)
+			mat_col_indices <- integer(0)
 		}
 
 		# create logical value that is TRUE if weight is just 0/1
@@ -365,8 +365,8 @@ get_adjacency_list <- function(
 			n_cols = length(actors_cols),
 			actors_rows = actors_rows,
 			actors_cols = actors_cols,
-			matRowIndices = matRowIndices,
-			matColIndices = matColIndices,
+			matRowIndices = mat_row_indices,
+			matColIndices = mat_col_indices,
 			value = value,
 			symmetric = symmetric,
 			missing_to_zero = missing_to_zero,
@@ -374,7 +374,7 @@ get_adjacency_list <- function(
 		)
 
 		# if user left weight NULL and set sum_dyads to FALSE
-		weight_attr <- if (!sum_dyads && is.null(wOrig)) NULL else weight
+		weight_attr <- if (!sum_dyads && is.null(w_orig)) NULL else weight
 		layer_label <- if (is.null(weight_attr)) "weight1" else weight_attr
 
 		# add class info and attributes efficiently
@@ -399,8 +399,8 @@ get_adjacency_list <- function(
 		adj_out[[t_idx]] <- adj_mat
 	}
 
-	# Final weight attribute handling
-	weight_final <- if (!sum_dyads && is.null(wOrig)) NULL else weight
+	# final weight attribute handling
+	weight_final <- if (!sum_dyads && is.null(w_orig)) NULL else weight
 	layer_label_final <- if (is.null(weight_final)) "weight1" else weight_final
 
 	# if user supplied actor_pds then set actor_time_uniform to FALSE

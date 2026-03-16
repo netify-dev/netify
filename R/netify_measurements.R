@@ -98,7 +98,7 @@ netify_measurements <- function(netlet) {
 
 		# check dyad data
 		if (dyad_data_exist) {
-			# Extract variable names from new structure: list(time) -> list(vars) -> matrix
+			# extract variable names from new structure: list(time) -> list(vars) -> matrix
 			dyad_data_raw <- attributes(netlet)$dyad_data
 			first_time_period <- dyad_data_raw[[1]]
 			msrmnts$dvars <- names(first_time_period)
@@ -137,7 +137,7 @@ netify_measurements <- function(netlet) {
 
 		# check dyad data
 		if (dyad_data_exist) {
-			# Extract variable names from new structure: list(time) -> list(vars) -> matrix
+			# extract variable names from new structure: list(time) -> list(vars) -> matrix
 			dyad_data_raw <- attributes(netlet)$dyad_data
 			first_time_period <- dyad_data_raw[[1]]
 			msrmnts$dvars <- names(first_time_period)
@@ -172,7 +172,7 @@ netify_measurements <- function(netlet) {
 
 		# check dyad data
 		if (dyad_data_exist) {
-			# Extract variable names from new structure: list(time) -> list(vars) -> matrix
+			# extract variable names from new structure: list(time) -> list(vars) -> matrix
 			dyad_data_raw <- attributes(netlet)$dyad_data
 			first_time_period <- dyad_data_raw[[1]]
 			msrmnts$dvars <- names(first_time_period)

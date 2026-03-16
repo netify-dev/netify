@@ -39,10 +39,16 @@
 #' \itemize{
 #'   \item Network type (cross-sectional or longitudinal)
 #'   \item Dimensions (same actors and time periods)
-#'   \item Symmetry (all directed or all undirected)
 #'   \item Mode (all unipartite or all bipartite)
 #'   \item Actor composition (same actors in same order)
 #' }
+#'
+#' \strong{Mixed directedness:}
+#'
+#' Layers are allowed to have different symmetry settings (e.g., some symmetric
+#' and others directed). When layers have mixed directedness, the
+#' \code{symmetric} attribute is stored as a named logical vector with one
+#' element per layer.
 #'
 #' \strong{Attribute handling:}
 #'
@@ -152,7 +158,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 	# define relevant attribute types that must be identical
 	rel_attrs <- c(
 		"netify_type", "actor_time_uniform",
-		"actor_pds", "symmetric", "mode"
+		"actor_pds", "mode"
 	)
 
 	# check if attributes compatible
@@ -165,7 +171,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 		)
 	)
 
-	# Extract first set of attributes for reuse
+	# extract first set of attributes for reuse
 	first_attribs <- attribs_list[[1]]
 
 	# generate weights value for multilayer case - optimized
@@ -209,7 +215,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 		)
 	)
 
-	# Extract measurements once for reuse
+	# extract measurements once for reuse
 	first_msrmnts <- msrmnts_list[[1]]
 	netlet_type <- first_attribs$netify_type
 	n_layers <- length(netlet_list)
@@ -223,7 +229,17 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 	# pull out raw versions of data
 	netlet_raws <- lapply(netlet_list, get_raw)
 
-	# Create base attributes list to avoid repetition
+	# handle symmetric attribute: store as named vector per layer
+	# when layers have mixed directedness, otherwise keep as scalar
+	symmetric_vec <- vapply(attribs_list, `[[`, logical(1), "symmetric")
+	names(symmetric_vec) <- layer_labels
+	if (length(unique(symmetric_vec)) == 1) {
+		symmetric_out <- unname(symmetric_vec[1])
+	} else {
+		symmetric_out <- symmetric_vec
+	}
+
+	# create base attributes list to avoid repetition
 	base_attrs <- list(
 		netify_type = netlet_type,
 		actor_time_uniform = first_attribs$actor_time_uniform,
@@ -231,7 +247,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 		weight = weight_collapse,
 		detail_weight = weight_label_collapse,
 		is_binary = is_binary_vec,
-		symmetric = first_attribs$symmetric,
+		symmetric = symmetric_out,
 		mode = first_attribs$mode,
 		layers = layer_labels,
 		diag_to_NA = get_attribs(attribs_list, "diag_to_NA"),
@@ -269,11 +285,11 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 
 	# longit list case - optimized
 	if (netlet_type == "longit_list") {
-		# Pre-allocate list
+		# pre-allocate list
 		netlet <- vector("list", n_time)
 		names(netlet) <- time
 
-		# Create cross-sectional attributes once
+		# create cross-sectional attributes once
 		cs_attrs <- base_attrs
 		cs_attrs$netify_type <- "cross_sec"
 		cs_attrs$actor_time_uniform <- NULL
@@ -303,7 +319,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 	class(netlet) <- "netify"
 	attributes(netlet) <- c(attributes(netlet), base_attrs)
 
-	# Handle nodal data - optimized checks
+	# handle nodal data - optimized checks
 	nodal_data_list <- lapply(attribs_list, `[[`, "nodal_data")
 	if (identical_recursive(nodal_data_list)) {
 		attr(netlet, "nodal_data") <- nodal_data_list[[1]]
@@ -313,7 +329,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 		)
 	}
 
-	# Handle dyad data - optimized checks
+	# handle dyad data - optimized checks
 	dyad_data_list <- lapply(attribs_list, `[[`, "dyad_data")
 	if (identical_recursive(dyad_data_list)) {
 		attr(netlet, "dyad_data") <- dyad_data_list[[1]]

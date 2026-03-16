@@ -246,21 +246,21 @@ array_to_list <- function(arr, preserveAttr = TRUE) {
 		# add back in netify attribs to top level list
 		class(l) <- "netify"
 		attr(l, "netify_type") <- "longit_list"
-		arrAttr <- attributes(arr)
-		for (ii in 5:length(arrAttr)) {
-			attr(l, names(arrAttr)[ii]) <- arrAttr[[ii]]
+		arr_attr <- attributes(arr)
+		for (ii in 5:length(arr_attr)) {
+			attr(l, names(arr_attr)[ii]) <- arr_attr[[ii]]
 		}
 
 		# adjust array attributes for cross_sec
-		arrAttr_cross <- arrAttr[1:15]
-		arrAttr_cross["dim"]$dim <- arrAttr_cross["dim"]$dim[1:2]
-		arrAttr_cross["dimnames"]$dimnames <- arrAttr_cross["dimnames"]$dimnames[1:2]
-		arrAttr_cross["netify_type"] <- "cross_sec"
-		arrAttr_cross["actor_pds"] <- NULL
+		arr_attr_cross <- arr_attr[1:15]
+		arr_attr_cross["dim"]$dim <- arr_attr_cross["dim"]$dim[1:2]
+		arr_attr_cross["dimnames"]$dimnames <- arr_attr_cross["dimnames"]$dimnames[1:2]
+		arr_attr_cross["netify_type"] <- "cross_sec"
+		arr_attr_cross["actor_pds"] <- NULL
 
 		# add attributes to every element in list
 		for (ii in seq_along(l)) {
-			attributes(l[[ii]]) <- arrAttr_cross
+			attributes(l[[ii]]) <- arr_attr_cross
 		}
 	}
 

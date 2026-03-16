@@ -17,11 +17,18 @@ layers using \code{\link{subset_netify}}.}
 \item{lame}{Logical. Controls the output format for longitudinal data:
 \itemize{
 \item \code{FALSE} (default): Formats output for compatibility with the
-standard version of the amen package, which uses array structures
+standard version of the amen package, which uses array structures.
+Y is returned as a 3D array \code{[n_actors x n_actors x n_time]},
+Xdyad as a 4D array \code{[n_actors x n_actors x n_covariates x n_time]},
+and Xrow/Xcol as 3D arrays \code{[n_actors x n_attributes x n_time]}.
+This requires constant actor composition across time.
 \item \code{TRUE}: Formats output for compatibility with the netify-verse
 version called lame, which supports
-longitudinal network modeling with time-varying actor compositions and
-other features
+longitudinal network modeling with time-varying actor compositions.
+Y is returned as a list of T matrices (one per time period),
+Xdyad as a list of T 3D arrays, and Xrow/Xcol as lists of T matrices.
+Actor sets can vary across time periods, making this suitable for
+panels where countries enter/exit.
 }
 This parameter is ignored for cross-sectional data.}
 }
@@ -100,10 +107,15 @@ network regression approaches implemented in amen.
 \note{
 The function performs several validation checks:
 \itemize{
-\item Ensures single-layer networks (multilayer not supported)
+\item Ensures single-layer networks (multilayer not supported).
+For multilayer networks, first extract individual layers using
+\code{\link{subset_netify}} (e.g., \code{subset(net, layers = "trade")}).
 \item Verifies all nodal attributes are numeric
 \item Maintains actor ordering from the original netify object
 }
+
+For multilayer longitudinal models that require a 4D array
+\code{[n, n, p, T]}, see \code{\link{netify_to_dbn}} instead.
 }
 \examples{
 # Load example data

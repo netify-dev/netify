@@ -6,14 +6,14 @@ set.seed(6886)
 
 test_that("netify_to_statnet: unweighted cross-sec, asymmetric", {
 	# generate some data
-	adjm <- matrix(
+	adjm = matrix(
 		as.numeric(sample(0:1, 100, replace = TRUE, prob = c(0.5, .5))),
 		ncol = 10
 	)
-	rownames(adjm) <- colnames(adjm) <- letters[1:nrow(adjm)]
+	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 
 	# convert to a statnet network object
-	g1 <- network::network(
+	g1 = network::network(
 		adjm,
 		matrix.type = "adjacency",
 		directed = TRUE,
@@ -21,10 +21,10 @@ test_that("netify_to_statnet: unweighted cross-sec, asymmetric", {
 	)
 
 	# convert to dyadic so we can pass into netify
-	df <- melt_matrix_sparse(adjm, remove_zeros = TRUE, remove_diagonal = FALSE)
+	df = melt_matrix_sparse(adjm, remove_zeros = TRUE, remove_diagonal = FALSE)
 
 	# convert to netify object
-	a_matrix <- netify(
+	a_matrix = netify(
 		df,
 		actor1 = "Var1", actor2 = "Var2", symmetric = FALSE,
 		weight = NULL,
@@ -32,7 +32,7 @@ test_that("netify_to_statnet: unweighted cross-sec, asymmetric", {
 	)
 
 	# convert to a statnet network object
-	ng <- netify_to_statnet(a_matrix)
+	ng = netify_to_statnet(a_matrix)
 
 	# compare
 	expect_identical(ng[, ], g1[, ])
@@ -40,11 +40,11 @@ test_that("netify_to_statnet: unweighted cross-sec, asymmetric", {
 
 test_that("netify_to_statnet: weighted cross-sec, asymmetric", {
 	# use network example to generate some data
-	adjm <- matrix(rnorm(10^2), ncol = 10)
-	rownames(adjm) <- colnames(adjm) <- letters[1:nrow(adjm)]
+	adjm = matrix(rnorm(10^2), ncol = 10)
+	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 
 	# convert to a statnet network object
-	g1 <- network::network(
+	g1 = network::network(
 		adjm,
 		matrix.type = "adjacency",
 		directed = TRUE,
@@ -54,10 +54,10 @@ test_that("netify_to_statnet: weighted cross-sec, asymmetric", {
 	)
 
 	# convert to dyadic so we can pass into netify
-	df <- melt_matrix_base(adjm)
+	df = melt_matrix_base(adjm)
 
 	# convert to netify object
-	a_matrix <- netify(
+	a_matrix = netify(
 		df,
 		actor1 = "Var1", actor2 = "Var2", symmetric = FALSE,
 		weight = "value",
@@ -65,7 +65,7 @@ test_that("netify_to_statnet: weighted cross-sec, asymmetric", {
 	)
 
 	# convert to a statnet network object
-	ng <- netify_to_statnet(a_matrix)
+	ng = netify_to_statnet(a_matrix)
 
 	# compare top level objects
 	expect_identical(ng[, ], g1[, ])
@@ -78,15 +78,15 @@ test_that("netify_to_statnet: weighted cross-sec, asymmetric", {
 
 test_that("netify_to_statnet: unweighted cross-sec, symmetric", {
 	# use network example to generate some data
-	adjm <- matrix(rnorm(10^2), ncol = 10)
-	adjm <- (adjm + t(adjm)) / 2
-	adjm[adjm > 0] <- 1
-	adjm[adjm < 0] <- 0
-	diag(adjm) <- NA
-	rownames(adjm) <- colnames(adjm) <- letters[1:nrow(adjm)]
+	adjm = matrix(rnorm(10^2), ncol = 10)
+	adjm = (adjm + t(adjm)) / 2
+	adjm[adjm > 0] = 1
+	adjm[adjm < 0] = 0
+	diag(adjm) = NA
+	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 
 	# convert to a statnet network object
-	g1 <- network::network(
+	g1 = network::network(
 		adjm,
 		matrix.type = "adjacency",
 		directed = FALSE,
@@ -95,12 +95,12 @@ test_that("netify_to_statnet: unweighted cross-sec, symmetric", {
 	)
 
 	# convert to dyadic so we can pass into netify
-	df <- melt_matrix_base(adjm)
-	df <- df[df$Var1 != df$Var2, ]
-	df <- df[df$value == 1, ]
+	df = melt_matrix_base(adjm)
+	df = df[df$Var1 != df$Var2, ]
+	df = df[df$value == 1, ]
 
 	# convert to netify object
-	a_matrix <- netify(
+	a_matrix = netify(
 		df,
 		actor1 = "Var1", actor2 = "Var2", symmetric = TRUE,
 		weight = NULL,
@@ -108,7 +108,7 @@ test_that("netify_to_statnet: unweighted cross-sec, symmetric", {
 	)
 
 	# convert to a statnet network object
-	ng <- netify_to_statnet(a_matrix)
+	ng = netify_to_statnet(a_matrix)
 
 	# compare
 	expect_identical(ng[, ], g1[, ])
@@ -116,13 +116,13 @@ test_that("netify_to_statnet: unweighted cross-sec, symmetric", {
 
 test_that("netify_to_statnet: weighted cross-sec, symmetric", {
 	# use network example to generate some data
-	adjm <- matrix(rnorm(10^2), ncol = 10)
-	adjm <- (adjm + t(adjm)) / 2
-	diag(adjm) <- NA
-	rownames(adjm) <- colnames(adjm) <- letters[1:nrow(adjm)]
+	adjm = matrix(rnorm(10^2), ncol = 10)
+	adjm = (adjm + t(adjm)) / 2
+	diag(adjm) = NA
+	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 
 	# convert to a statnet network object
-	g1 <- network::network(
+	g1 = network::network(
 		adjm,
 		matrix.type = "adjacency",
 		directed = FALSE,
@@ -132,11 +132,11 @@ test_that("netify_to_statnet: weighted cross-sec, symmetric", {
 	)
 
 	# convert to dyadic so we can pass into netify
-	df <- melt_matrix_base(adjm)
-	df <- df[df$Var1 != df$Var2, ]
+	df = melt_matrix_base(adjm)
+	df = df[df$Var1 != df$Var2, ]
 
 	# convert to netify object
-	a_matrix <- netify(
+	a_matrix = netify(
 		df,
 		actor1 = "Var1", actor2 = "Var2", symmetric = TRUE,
 		weight = "value",
@@ -144,7 +144,7 @@ test_that("netify_to_statnet: weighted cross-sec, symmetric", {
 	)
 
 	# convert to a statnet network object
-	ng <- netify_to_statnet(a_matrix)
+	ng = netify_to_statnet(a_matrix)
 
 	# compare top level objects
 	expect_identical(ng[, ], g1[, ])
@@ -157,16 +157,16 @@ test_that("netify_to_statnet: weighted cross-sec, symmetric", {
 
 test_that("netify_to_statnet, bipartite: unweighted cross-sec, asymmetric", {
 	# use network example to generate some data
-	adjm <- matrix(
+	adjm = matrix(
 		as.numeric(sample(0:1, 100, replace = TRUE, prob = c(0.6, .6))),
 		ncol = 10
 	)
-	adjm <- adjm[1:5, ]
-	rownames(adjm) <- letters[1:5]
-	colnames(adjm) <- letters[(length(letters) - 9):length(letters)]
+	adjm = adjm[1:5, ]
+	rownames(adjm) = letters[1:5]
+	colnames(adjm) = letters[(length(letters) - 9):length(letters)]
 
 	# convert to a statnet network object
-	g1 <- network::network(
+	g1 = network::network(
 		adjm,
 		matrix.type = "adjacency",
 		directed = TRUE,
@@ -176,10 +176,10 @@ test_that("netify_to_statnet, bipartite: unweighted cross-sec, asymmetric", {
 	)
 
 	# convert to dyadic so we can pass into netify
-	df <- melt_matrix_sparse(adjm, remove_zeros = TRUE, remove_diagonal = FALSE)
+	df = melt_matrix_sparse(adjm, remove_zeros = TRUE, remove_diagonal = FALSE)
 
 	# convert to netify object
-	a_matrix <- netify(
+	a_matrix = netify(
 		df,
 		actor1 = "Var1", actor2 = "Var2", symmetric = FALSE,
 		weight = NULL,
@@ -187,7 +187,7 @@ test_that("netify_to_statnet, bipartite: unweighted cross-sec, asymmetric", {
 	)
 
 	# convert to a statnet network object
-	ng <- netify_to_statnet(a_matrix)
+	ng = netify_to_statnet(a_matrix)
 
 	# compare
 	expect_identical(ng[, ], g1[, ])
@@ -195,13 +195,13 @@ test_that("netify_to_statnet, bipartite: unweighted cross-sec, asymmetric", {
 
 test_that("netify_to_statnet, bipartite: weighted cross-sec, asymmetric", {
 	# use network example to generate some data
-	adjm <- matrix(rnorm(10^2), ncol = 10)
-	adjm <- adjm[1:5, ]
-	rownames(adjm) <- letters[1:5]
-	colnames(adjm) <- letters[(length(letters) - 9):length(letters)]
+	adjm = matrix(rnorm(10^2), ncol = 10)
+	adjm = adjm[1:5, ]
+	rownames(adjm) = letters[1:5]
+	colnames(adjm) = letters[(length(letters) - 9):length(letters)]
 
 	# convert to a statnet network object
-	g1 <- network::network(
+	g1 = network::network(
 		adjm,
 		matrix.type = "adjacency",
 		directed = TRUE,
@@ -212,10 +212,10 @@ test_that("netify_to_statnet, bipartite: weighted cross-sec, asymmetric", {
 	)
 
 	# convert to dyadic so we can pass into netify
-	df <- melt_matrix_base(adjm)
+	df = melt_matrix_base(adjm)
 
 	# convert to netify object
-	a_matrix <- netify(
+	a_matrix = netify(
 		df,
 		actor1 = "Var1", actor2 = "Var2", symmetric = FALSE,
 		weight = "value",
@@ -223,7 +223,7 @@ test_that("netify_to_statnet, bipartite: weighted cross-sec, asymmetric", {
 	)
 
 	# convert to a statnet network object
-	ng <- netify_to_statnet(a_matrix)
+	ng = netify_to_statnet(a_matrix)
 
 	# compare
 	expect_identical(ng[, ], g1[, ])
@@ -237,77 +237,72 @@ test_that("netify_to_statnet, bipartite: weighted cross-sec, asymmetric", {
 test_that(
 	"netify_to_statnet: weighted cross-sec, dyad and nodal attribs",
 	{
-		####
 		# generate a fake un weighted cross-sec cnet
 
 		# create fake dyad data for cross-sectional case
-		fakeDyads <- expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
-		fakeDyads$weight <- rnorm(nrow(fakeDyads))
-		fakeDyads$var2 <- rnorm(nrow(fakeDyads))
-		fakeDyads$var3 <- rnorm(nrow(fakeDyads))
-		fakeDyads$var4 <- rnorm(nrow(fakeDyads))
-		fakeDyads$year <- 2312
-		fakeDyads$actor1 <- as.character(fakeDyads$actor1)
-		fakeDyads$actor2 <- as.character(fakeDyads$actor2)
-		fakeDyads <- fakeDyads[fakeDyads$actor1 != fakeDyads$actor2, ]
+		fake_dyads = expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
+		fake_dyads$weight = rnorm(nrow(fake_dyads))
+		fake_dyads$var2 = rnorm(nrow(fake_dyads))
+		fake_dyads$var3 = rnorm(nrow(fake_dyads))
+		fake_dyads$var4 = rnorm(nrow(fake_dyads))
+		fake_dyads$year = 2312
+		fake_dyads$actor1 = as.character(fake_dyads$actor1)
+		fake_dyads$actor2 = as.character(fake_dyads$actor2)
+		fake_dyads = fake_dyads[fake_dyads$actor1 != fake_dyads$actor2, ]
 
-		# add in random binary variable to fakeDyads
-		fakeDyads$dv <- rbinom(nrow(fakeDyads), 1, 0.5)
+		# add in random binary variable to fake_dyads
+		fake_dyads$dv = rbinom(nrow(fake_dyads), 1, 0.5)
 
 		# create fake node data for cross-sectional case
-		fakeNodes <- data.frame(actor1 = letters[1:3], var1 = rnorm(3), var2 = rnorm(3))
+		fake_nodes = data.frame(actor1 = letters[1:3], var1 = rnorm(3), var2 = rnorm(3))
 
 		# convert to conflictNet object
-		a_matrix <- netify(
-			fakeDyads,
+		a_matrix = netify(
+			fake_dyads,
 			actor1 = "actor1", actor2 = "actor2", symmetric = FALSE,
 			weight = "weight",
 			diag_to_NA = TRUE
 		)
 
 		# add dyad variables in fake data as a dyadic attribute
-		a_matrix <- add_dyad_vars(
-			a_matrix, fakeDyads,
+		a_matrix = add_dyad_vars(
+			a_matrix, fake_dyads,
 			"actor1", "actor2", NULL,
 			c("var2", "var3", "var4"),
 			c(FALSE, FALSE, FALSE, FALSE)
 		)
 		# add node variables in fake data
-		a_matrix <- add_node_vars(
-			a_matrix, fakeNodes,
+		a_matrix = add_node_vars(
+			a_matrix, fake_nodes,
 			"actor1", NULL, NULL, FALSE
 		)
-		####
 
-		####
 		# gen network versions
-		prepped_n <- netify_to_statnet(a_matrix)
-		####
+		prepped_n = netify_to_statnet(a_matrix)
 
-		####
 		# check original variable
 		expect_identical(
 			get_raw(a_matrix),
 			network::get.network.attribute(prepped_n, "weight")
 		)
 
-		# check dyadic variables - UPDATED for new structure
-		dVarL <- lapply(2:4, function(i) {
-			# NEW: Access individual matrices from list-of-lists structure
-			dvar <- attributes(a_matrix)$dyad_data[["1"]][[paste0("var", i)]]
-			diag(dvar) <- 0
+		# check dyadic variables
+		d_var_l = lapply(2:4, function(i) {
+			# access individual matrices from list-of-lists structure
+			dvar = attributes(a_matrix)$dyad_data[["1"]][[paste0("var", i)]]
+			diag(dvar) = 0
 			return(dvar)
 		})
 		expect_identical(
-			dVarL[[1]],
+			d_var_l[[1]],
 			network::get.network.attribute(prepped_n, "var2")
 		)
 		expect_identical(
-			dVarL[[2]],
+			d_var_l[[2]],
 			network::get.network.attribute(prepped_n, "var3")
 		)
 		expect_identical(
-			dVarL[[3]],
+			d_var_l[[3]],
 			network::get.network.attribute(prepped_n, "var4")
 		)
 
@@ -320,89 +315,83 @@ test_that(
 			attributes(a_matrix)$nodal_data$var2,
 			network::get.vertex.attribute(prepped_n, "var2")
 		)
-		####
 	}
 )
 
 test_that(
 	"netify_to_statnet, bipartite: weighted cross-sec, dyad and nodal attribs",
 	{
-		####
 		# generate a fake un weighted cross-sec cnet
 
 		# create fake dyad data for cross-sectional case
-		ar <- letters[1:3]
-		nr <- length(ar)
-		ac <- letters[22:26]
-		nc <- length(ac)
-		fakeDyads <- expand.grid(actor1 = ar, actor2 = ac)
-		fakeDyads$weight <- rnorm(nrow(fakeDyads))
-		fakeDyads$var2 <- rnorm(nrow(fakeDyads))
-		fakeDyads$var3 <- rnorm(nrow(fakeDyads))
-		fakeDyads$var4 <- rnorm(nrow(fakeDyads))
-		fakeDyads$year <- 2312
-		fakeDyads$actor1 <- as.character(fakeDyads$actor1)
-		fakeDyads$actor2 <- as.character(fakeDyads$actor2)
-		fakeDyads <- fakeDyads[fakeDyads$actor1 != fakeDyads$actor2, ]
+		ar = letters[1:3]
+		nr = length(ar)
+		ac = letters[22:26]
+		nc = length(ac)
+		fake_dyads = expand.grid(actor1 = ar, actor2 = ac)
+		fake_dyads$weight = rnorm(nrow(fake_dyads))
+		fake_dyads$var2 = rnorm(nrow(fake_dyads))
+		fake_dyads$var3 = rnorm(nrow(fake_dyads))
+		fake_dyads$var4 = rnorm(nrow(fake_dyads))
+		fake_dyads$year = 2312
+		fake_dyads$actor1 = as.character(fake_dyads$actor1)
+		fake_dyads$actor2 = as.character(fake_dyads$actor2)
+		fake_dyads = fake_dyads[fake_dyads$actor1 != fake_dyads$actor2, ]
 
-		# add in random binary variable to fakeDyads
-		fakeDyads$dv <- rbinom(nrow(fakeDyads), 1, 0.5)
+		# add in random binary variable to fake_dyads
+		fake_dyads$dv = rbinom(nrow(fake_dyads), 1, 0.5)
 
 		# create fake node data for cross-sectional case
-		actors <- c(ar, ac)
-		nactors <- nr + nc
-		fakeNodes <- data.frame(actor1 = actors, var1 = rnorm(nactors), var2 = rnorm(nactors))
+		actors = c(ar, ac)
+		nactors = nr + nc
+		fake_nodes = data.frame(actor1 = actors, var1 = rnorm(nactors), var2 = rnorm(nactors))
 
 		# convert to conflictNet object
-		a_matrix <- netify(
-			fakeDyads,
+		a_matrix = netify(
+			fake_dyads,
 			actor1 = "actor1", actor2 = "actor2",
 			weight = "weight",
 			mode = "bipartite"
 		)
 
 		# add dyad variables in fake data as a dyadic attribute
-		a_matrix <- add_dyad_vars(
-			a_matrix, fakeDyads,
+		a_matrix = add_dyad_vars(
+			a_matrix, fake_dyads,
 			"actor1", "actor2", NULL,
 			c("var2", "var3", "var4"),
 			c(FALSE, FALSE, FALSE, FALSE)
 		)
 		# add node variables in fake data
-		a_matrix <- add_node_vars(
-			a_matrix, fakeNodes,
+		a_matrix = add_node_vars(
+			a_matrix, fake_nodes,
 			"actor1", NULL, NULL, FALSE
 		)
-		####
 
-		####
 		# gen network versions
-		prepped_n <- netify_to_statnet(a_matrix)
-		####
+		prepped_n = netify_to_statnet(a_matrix)
 
-		####
 		# check original variable
 		expect_identical(
 			get_raw(a_matrix),
 			network::get.network.attribute(prepped_n, "weight")
 		)
 
-		# check dyadic variables - UPDATED for new list-of-lists structure
-		dVarL <- lapply(2:4, function(i) {
-			# NEW: Access individual matrices from list-of-lists structure
-			dvar <- attributes(a_matrix)$dyad_data[["1"]][[paste0("var", i)]]
+		# check dyadic variables
+		d_var_l = lapply(2:4, function(i) {
+			# access individual matrices from list-of-lists structure
+			dvar = attributes(a_matrix)$dyad_data[["1"]][[paste0("var", i)]]
 			return(dvar)
 		})
 		expect_identical(
-			dVarL[[1]],
+			d_var_l[[1]],
 			network::get.network.attribute(prepped_n, "var2")
 		)
 		expect_identical(
-			dVarL[[2]],
+			d_var_l[[2]],
 			network::get.network.attribute(prepped_n, "var3")
 		)
 		expect_identical(
-			dVarL[[3]],
+			d_var_l[[3]],
 			network::get.network.attribute(prepped_n, "var4")
 		)
 
@@ -415,6 +404,5 @@ test_that(
 			attributes(a_matrix)$nodal_data$var2,
 			network::get.vertex.attribute(prepped_n, "var2")
 		)
-		####
 	}
 )

@@ -190,7 +190,7 @@ aggregate_dyad <- function(
 		# aggregate by symmetric id
 		formula_str <- paste(weight, "~ symm_id")
 
-		# Custom sum function that handles NAs correctly
+		# custom sum function that handles NAs correctly
 		sum_func <- if (ignore_missing) {
 			function(x) sum(x, na.rm = TRUE)
 		} else {
@@ -222,7 +222,7 @@ aggregate_dyad <- function(
 			formula_agg <- as.formula(paste(weight, "~", actor1, "+", actor2, "+", time))
 		}
 
-		# Custom sum function that handles NAs correctly
+		# custom sum function that handles NAs correctly
 		sum_func <- if (ignore_missing) {
 			function(x) sum(x, na.rm = TRUE)
 		} else {

@@ -22,24 +22,24 @@
 #' @method print netify_comparison
 #' @export
 print.netify_comparison <- function(x, ..., n = 20) {
-	# Helper function to format numeric values intelligently
+	# helper function to format numeric values intelligently
 	format_numeric <- function(x, digits = 3) {
 		if (!is.numeric(x)) return(x)
 		
-		# Handle special cases
+		# handle special cases
 		x_formatted <- sapply(x, function(val) {
 			if (is.na(val)) return(NA)
 			if (is.infinite(val)) return(val)
 			
-			# For very small values, use scientific notation
+			# for very small values, use scientific notation
 			if (abs(val) < 0.001 && val != 0) {
 				return(format(val, scientific = TRUE, digits = digits))
 			}
-			# For very large values, use scientific notation
+			# for very large values, use scientific notation
 			else if (abs(val) >= 10000) {
 				return(format(val, scientific = TRUE, digits = digits))
 			}
-			# For percentages and other values, round appropriately
+			# for percentages and other values, round appropriately
 			else if (abs(val) >= 10) {
 				return(round(val, 1))
 			}
@@ -54,7 +54,7 @@ print.netify_comparison <- function(x, ..., n = 20) {
 		return(x_formatted)
 	}
 	
-	# Helper function to format data frames
+	# helper function to format data frames
 	format_df <- function(df) {
 		numeric_cols <- sapply(df, is.numeric)
 		df[numeric_cols] <- lapply(df[numeric_cols], format_numeric)
@@ -63,22 +63,22 @@ print.netify_comparison <- function(x, ..., n = 20) {
 	
 	cli::cli_h1("Network Comparison Results")
 	
-	# Basic info
+	# basic info
 	cli::cli_text("Comparison type: {.strong {x$comparison_type}}")
 	cli::cli_text("Number of networks: {.val {x$n_networks}}")
 	cli::cli_text("Comparison focus: {.field {x$what}}")
 	
-	# Show the method field (which contains the comparison type like "structural_comparison")
+	# show the method field (which contains the comparison type like "structural_comparison")
 	if (!is.null(x$method)) {
 		cli::cli_text("Method: {.field {x$method}}")
 	}
 	
-	# Show the comparison algorithm for edge comparisons
+	# show the comparison algorithm for edge comparisons
 	if (!is.null(x$comparison_method) && x$what == "edges") {
 		cli::cli_text("Algorithm: {.field {x$comparison_method}}")
 	}
 	
-	# Show additional settings for edge comparisons
+	# show additional settings for edge comparisons
 	if (x$what == "edges") {
 		if (!is.null(x$permutation_type)) {
 			cli::cli_text("Permutation type: {.field {x$permutation_type}}")
@@ -96,12 +96,12 @@ print.netify_comparison <- function(x, ..., n = 20) {
 	
 	cli::cli_rule()
 	
-	# Print summary based on what was compared
+	# print summary based on what was compared
 	if (x$what == "structure") {
 		cli::cli_h2("Structural Properties")
 		
 		if (!is.null(x$summary)) {
-			# For many networks, check if we should group by network name patterns
+			# for many networks, check if we should group by network name patterns
 			if (nrow(x$summary) > n) {
 				cli::cli_alert_info("Showing first {n} of {nrow(x$summary)} comparisons. Use print(x, n = Inf) to see all.")
 				print(format_df(head(x$summary, n)))
@@ -122,11 +122,11 @@ print.netify_comparison <- function(x, ..., n = 20) {
 			print(format_df(x$summary))
 		}
 		
-		# Show edge changes if available
+		# show edge changes if available
 		if (!is.null(x$edge_changes) && length(x$edge_changes) > 0) {
 			cli::cli_h3("Edge Changes")
 			
-			# Limit output for many comparisons
+			# limit output for many comparisons
 			n_changes <- length(x$edge_changes)
 			if (n_changes > 5) {
 				cli::cli_alert_info("Showing first 5 of {n_changes} pairwise comparisons.")
@@ -175,11 +175,11 @@ print.netify_comparison <- function(x, ..., n = 20) {
 		}
 	}
 	
-	# Print significance tests if available
+	# print significance tests if available
 	if (!is.null(x$significance_tests)) {
 		cli::cli_h2("Statistical Tests")
 		
-		# Show number of permutations if available
+		# show number of permutations if available
 		if (!is.null(x$significance_tests$qap_pvalues)) {
 			n_perm <- attr(x$significance_tests$qap_pvalues, "n_perm")
 			if (!is.null(n_perm)) {
@@ -190,7 +190,7 @@ print.netify_comparison <- function(x, ..., n = 20) {
 		if (is.data.frame(x$significance_tests)) {
 			print(format_df(x$significance_tests))
 		} else {
-			# Handle list format
+			# handle list format
 			for (test_name in names(x$significance_tests)) {
 				cli::cli_h3(test_name)
 				if (is.data.frame(x$significance_tests[[test_name]])) {
@@ -202,7 +202,7 @@ print.netify_comparison <- function(x, ..., n = 20) {
 		}
 	}
 	
-	# Add helpful hints based on comparison type
+	# add helpful hints based on comparison type
 	if (x$comparison_type == "temporal" && x$n_networks > 10) {
 		cli::cli_alert_info("Tip: For clearer comparisons, consider subsetting to specific time periods using subset().")
 	}
@@ -226,11 +226,11 @@ print.netify_comparison <- function(x, ..., n = 20) {
 #' @method summary netify_comparison
 #' @export
 summary.netify_comparison <- function(object, ...) {
-	# Return the main summary component
+	# return the main summary component
 	if (!is.null(object$summary)) {
 		return(object$summary)
 	} else {
-		# Create a basic summary if none exists
+		# create a basic summary if none exists
 		summary_list <- list(
 			comparison_type = object$comparison_type,
 			n_networks = object$n_networks,
@@ -238,7 +238,7 @@ summary.netify_comparison <- function(object, ...) {
 			method = object$method
 		)
 		
-		# Add any available metrics
+		# add any available metrics
 		if (!is.null(object$edge_changes)) {
 			summary_list$n_edge_comparisons <- length(object$edge_changes)
 		}

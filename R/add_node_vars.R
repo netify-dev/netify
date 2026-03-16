@@ -152,7 +152,7 @@ add_node_vars <- function(
 	netlet, node_data, actor = NULL,
 	time = NULL, node_vars = NULL,
 	replace_existing = FALSE) {
-	# Sanity check + error message
+	# sanity check + error message
 	netify_check(netlet)
 	node_data <- df_check(node_data)
 	actor_check(actor, actor, node_data)
@@ -173,7 +173,7 @@ add_node_vars <- function(
 	# the time column because in the time NULL already
 	# present nodal data case there is no time column
 	if (is.null(attr(netlet, "nodal_data"))) {
-		# For longitudinal data, pass the time labels from the netlet names
+		# for longitudinal data, pass the time labels from the netlet names
 		netlet_type <- attributes(netlet)$netify_type
 		if (netlet_type != "cross_sec") {
 			time_labels <- names(netlet)
@@ -239,7 +239,7 @@ add_node_vars <- function(
 	rownames(frame) <- NULL
 	attr(netlet, "nodal_data") <- frame
 
-	# Return object
+	# return object
 	return(netlet)
 }
 

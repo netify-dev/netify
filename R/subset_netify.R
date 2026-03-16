@@ -299,9 +299,14 @@ subset_netify <- function(
 		}
 
 		# update logical vectors
-		for (attr_name in c("is_binary", "diag_to_NA", "missing_to_zero")) {
+		for (attr_name in c("is_binary", "diag_to_NA", "missing_to_zero", "symmetric")) {
 			if (!is.null(obj_attrs[[attr_name]]) && length(obj_attrs[[attr_name]]) > 1) {
-				new_attrs[[attr_name]] <- obj_attrs[[attr_name]][layer_idx]
+				subset_val <- obj_attrs[[attr_name]][layer_idx]
+				# collapse to scalar if only one layer or all values identical
+				if (length(subset_val) == 1 || length(unique(subset_val)) == 1) {
+					subset_val <- unname(subset_val[1])
+				}
+				new_attrs[[attr_name]] <- subset_val
 			}
 		}
 	}
