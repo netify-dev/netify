@@ -31,6 +31,7 @@ relationship types or network views simultaneously."></head><body>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
     <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
@@ -102,10 +103,14 @@ shorthand for <code>layer_netify(list(net1, net2, net3))</code>.</p></dd>
     <p><strong>Compatibility requirements:</strong></p>
 <p>All netify objects in netlet_list must have identical:</p><ul><li><p>Network type (cross-sectional or longitudinal)</p></li>
 <li><p>Dimensions (same actors and time periods)</p></li>
-<li><p>Symmetry (all directed or all undirected)</p></li>
 <li><p>Mode (all unipartite or all bipartite)</p></li>
 <li><p>Actor composition (same actors in same order)</p></li>
-</ul><p><strong>Attribute handling:</strong></p>
+</ul><p><strong>Mixed directedness:</strong></p>
+<p>Layers are allowed to have different symmetry settings (e.g., some symmetric
+and others directed). When layers have mixed directedness, the
+<code>symmetric</code> attribute is stored as a named logical vector with one
+element per layer.</p>
+<p><strong>Attribute handling:</strong></p>
 <p>Nodal and dyadic attributes are combined when possible:</p><ul><li><p>If attributes are identical across layers, the first layer's attributes are used</p></li>
 <li><p>If attributes differ but have compatible structure, they are merged</p></li>
 <li><p>If attributes are incompatible, a warning is issued and attributes must be

@@ -8,6 +8,7 @@
 <url><loc>https://netify-dev.github.io/netify/articles/index.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/manual_plotting.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/multilayer_networks.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/articles/pipeline_lame_dbn.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/resources.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/articles/tracking_changes.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/authors.html</loc></url>
@@ -64,6 +65,7 @@
 <url><loc>https://netify-dev.github.io/netify/reference/netify_text.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/netify_text_repel.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/netify_to_amen.html</loc></url>
+<url><loc>https://netify-dev.github.io/netify/reference/netify_to_dbn.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/netify_to_igraph.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/netify_to_statnet.html</loc></url>
 <url><loc>https://netify-dev.github.io/netify/reference/new_netify.html</loc></url>

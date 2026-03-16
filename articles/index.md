@@ -18,6 +18,8 @@
   Networks](https://netify-dev.github.io/netify/articles/tracking_changes.md):
 - [Measuring Who Connects with Whom: Homophily & Dyadic
   Analysis](https://netify-dev.github.io/netify/articles/attribute_analysis.md):
+- [Pipeline: netify to lame and
+  dbn](https://netify-dev.github.io/netify/articles/pipeline_lame_dbn.md):
 
 ### Resources
 

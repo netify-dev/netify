@@ -221,6 +221,9 @@ Convert between netify and other formats
 - [`netify_to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)
   [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)
   : Convert netify objects to amen format
+- [`netify_to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md)
+  [`to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md)
+  : Convert netify objects to dbn format
 - [`unnetify()`](https://netify-dev.github.io/netify/reference/unnetify.md)
   [`netify_to_df()`](https://netify-dev.github.io/netify/reference/unnetify.md)
   : Convert netify objects back to dyadic data frames

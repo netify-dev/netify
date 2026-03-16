@@ -161,6 +161,12 @@ verbCoop_net <- netify(
     symmetric = FALSE,
     weight = "verbCoop"
 )
+#> ℹ `missing_to_zero` is set to "TRUE" (the default).
+#> ! Missing dyads will be filled with zeros. For latent space or other
+#>   statistical network models, structural zeros and missing data have different
+#>   meanings. Set `missing_to_zero = FALSE` to preserve NAs if this distinction
+#>   matters for your analysis.
+#> This message is displayed once per session.
 
 # Check class
 class(verbCoop_net) # "netify"

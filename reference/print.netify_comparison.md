@@ -47,7 +47,7 @@ print(comp)
 #> Algorithm: correlation
 #> Permutation type: classic
 #> Correlation type: pearson
-#> Random seed: 742067701
+#> Random seed: 1567385691
 #> ────────────────────────────────────────────────────────────────────────────────
 #> 
 #> ── Edge Comparison Summary ──

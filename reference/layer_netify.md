@@ -63,11 +63,16 @@ All netify objects in netlet_list must have identical:
 
 - Dimensions (same actors and time periods)
 
-- Symmetry (all directed or all undirected)
-
 - Mode (all unipartite or all bipartite)
 
 - Actor composition (same actors in same order)
+
+**Mixed directedness:**
+
+Layers are allowed to have different symmetry settings (e.g., some
+symmetric and others directed). When layers have mixed directedness, the
+`symmetric` attribute is stored as a named logical vector with one
+element per layer.
 
 **Attribute handling:**
 

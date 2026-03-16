@@ -306,7 +306,7 @@ plot_actor_stats(
 )
 ```
 
-    ## ! Note: The `summary_df` provided only has one unique time point, so longitudional will be set to FALSE.
+    ## ! Note: The `summary_df` provided only has one unique time point, so longitudinal will be set to FALSE.
 
     ## Warning: Removed 123 rows containing missing values or values outside the scale range
     ## (`position_quasirandom()`).

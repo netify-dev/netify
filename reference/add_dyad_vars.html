@@ -35,6 +35,7 @@ preprocessing."></head><body>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
     <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
@@ -197,6 +198,12 @@ variables, as each variable requires a full adjacency matrix for storage.</p>
 <span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> `missing_to_zero` is set to <span style="color: #0000BB;">"TRUE"</span> (the default).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Missing dyads will be filled with zeros. For latent space or other</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   statistical network models, structural zeros and missing data have different</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   meanings. Set `missing_to_zero = FALSE` to preserve NAs if this distinction</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   matters for your analysis.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #555555;">This message is displayed once per session.</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Check class</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">verbCoop_net</span><span class="op">)</span> <span class="co"># "netify"</span></span></span>

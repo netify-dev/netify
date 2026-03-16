@@ -33,6 +33,7 @@ network regression approaches implemented in amen."></head><body>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
     <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
@@ -80,11 +81,18 @@ layers using <code><a href="subset_netify.html">subset_netify</a></code>.</p></d
 
 <dt id="arg-lame">lame<a class="anchor" aria-label="anchor" href="#arg-lame"></a></dt>
 <dd><p>Logical. Controls the output format for longitudinal data:</p><ul><li><p><code>FALSE</code> (default): Formats output for compatibility with the
-standard version of the amen package, which uses array structures</p></li>
+standard version of the amen package, which uses array structures.
+Y is returned as a 3D array <code>[n_actors x n_actors x n_time]</code>,
+Xdyad as a 4D array <code>[n_actors x n_actors x n_covariates x n_time]</code>,
+and Xrow/Xcol as 3D arrays <code>[n_actors x n_attributes x n_time]</code>.
+This requires constant actor composition across time.</p></li>
 <li><p><code>TRUE</code>: Formats output for compatibility with the netify-verse
 version called lame, which supports
-longitudinal network modeling with time-varying actor compositions and
-other features</p></li>
+longitudinal network modeling with time-varying actor compositions.
+Y is returned as a list of T matrices (one per time period),
+Xdyad as a list of T 3D arrays, and Xrow/Xcol as lists of T matrices.
+Actor sets can vary across time periods, making this suitable for
+panels where countries enter/exit.</p></li>
 </ul><p>This parameter is ignored for cross-sectional data.</p></dd>
 
 </dl></div>
@@ -143,10 +151,14 @@ of nodal column covariates, or NULL if none exist</p></dd>
 </ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>The function performs several validation checks:</p><ul><li><p>Ensures single-layer networks (multilayer not supported)</p></li>
+    <p>The function performs several validation checks:</p><ul><li><p>Ensures single-layer networks (multilayer not supported).
+For multilayer networks, first extract individual layers using
+<code><a href="subset_netify.html">subset_netify</a></code> (e.g., <code>subset(net, layers = "trade")</code>).</p></li>
 <li><p>Verifies all nodal attributes are numeric</p></li>
 <li><p>Maintains actor ordering from the original netify object</p></li>
-</ul></div>
+</ul><p>For multilayer longitudinal models that require a 4D array
+<code>[n, n, p, T]</code>, see <code><a href="netify_to_dbn.html">netify_to_dbn</a></code> instead.</p>
+    </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
     <p>Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas</p>
