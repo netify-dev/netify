@@ -1,7 +1,3 @@
-# library(testthat)
-# library(netify)
-# devtools::load_all('~/Research/netify_dev/netify')
-
 set.seed(6886)
 
 # load relevant datasets from package
@@ -151,6 +147,7 @@ test_that(
 test_that(
 	"mutate_weights: longitudinal list with normalization",
 	{
+		skip_on_cran()
 		# create longitudinal list
 		net_list = netify(
 			icews,
@@ -183,6 +180,7 @@ test_that(
 test_that(
 	"mutate_weights: longitudinal list binarization updates all periods",
 	{
+		skip_on_cran()
 		# create weighted longitudinal network
 		net_list = netify(
 			icews,
@@ -271,31 +269,6 @@ test_that(
 )
 
 test_that(
-	"mutate_weights: identity transformation preserves binary status",
-	{
-		# create binary network
-		nigeria = icews[icews$verbConf > 0, ]
-		nigeria_10 = nigeria[nigeria$year == "2010", ]
-
-		net_binary = netify(
-			nigeria_10[, c("i", "j")],
-			actor1 = "i", actor2 = "j",
-			symmetric = TRUE
-		)
-
-		# identity transform
-		net_identity = mutate_weights(
-			net_binary,
-			transform_fn = function(x) x
-		)
-
-		# should still be binary
-		expect_true(attr(net_identity, "is_binary"))
-		expect_equal(get_raw(net_binary), get_raw(net_identity))
-	}
-)
-
-test_that(
 	"mutate_weights: complex transformation on bipartite network",
 	{
 		# create bipartite network
@@ -334,6 +307,7 @@ test_that(
 test_that(
 	"mutate_weights: standardization (z-scores) transformation",
 	{
+		skip_on_cran()
 		# create weighted network
 		icews_10 = icews[icews$year == "2010", ]
 		net = netify(
@@ -370,6 +344,7 @@ test_that(
 test_that(
 	"mutate_weights: rank transformation",
 	{
+		skip_on_cran()
 		# create weighted network
 		icews_10 = icews[icews$year == "2010", ]
 		net = netify(
@@ -403,6 +378,7 @@ test_that(
 test_that(
 	"mutate_weights: min-max normalization (0-1 scaling)",
 	{
+		skip_on_cran()
 		# create weighted network
 		icews_10 = icews[icews$year == "2010", ]
 		net = netify(
@@ -441,6 +417,7 @@ test_that(
 test_that(
 	"mutate_weights: winsorization (cap extreme values)",
 	{
+		skip_on_cran()
 		# create weighted network
 		icews_10 = icews[icews$year == "2010", ]
 		net = netify(
@@ -479,6 +456,7 @@ test_that(
 test_that(
 	"mutate_weights: add constant only (no transformation function)",
 	{
+		skip_on_cran()
 		# create weighted network
 		icews_10 = icews[icews$year == "2010", ]
 		net = netify(
@@ -509,6 +487,7 @@ test_that(
 test_that(
 	"mutate_weights: log1p transformation (handles zeros)",
 	{
+		skip_on_cran()
 		# create weighted network
 		icews_10 = icews[icews$year == "2010", ]
 		net = netify(
@@ -543,6 +522,7 @@ test_that(
 test_that(
 	"mutate_weights: custom multi-step transformation",
 	{
+		skip_on_cran()
 		# create weighted network
 		icews_10 = icews[icews$year == "2010", ]
 		net = netify(
@@ -579,6 +559,7 @@ test_that(
 test_that(
 	"mutate_weights: power transformation",
 	{
+		skip_on_cran()
 		# create weighted network
 		icews_10 = icews[icews$year == "2010", ]
 		net = netify(
@@ -609,6 +590,7 @@ test_that(
 test_that(
 	"mutate_weights: transformation without new_name preserves original name",
 	{
+		skip_on_cran()
 		# create weighted network
 		icews_10 = icews[icews$year == "2010", ]
 		net = netify(

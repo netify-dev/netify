@@ -178,7 +178,7 @@ matlCoop_2002 <- year_2002_data[["matlCoop"]]
 class(matlCoop_2002) # "matrix" "array"
 
 # Example: Add variables from a different source
-\dontrun{
+\donttest{
 # Create a new data.frame with trade information
 trade_data <- data.frame(
     i = icews_10$i,

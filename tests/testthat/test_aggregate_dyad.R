@@ -1,7 +1,5 @@
 set.seed(6886)
 
-# library(netify)
-# library(testthat)
 
 # test basic directed aggregation
 test_that(

@@ -251,6 +251,10 @@ summary.netify <- function(object, ...) {
 		names(net_stats)[names(net_stats) == "num_row_actors"] <- "num_actors"
 		# remove num_col_actors
 		net_stats$num_col_actors <- NULL
+	} else {
+		# bipartite networks cannot have reciprocity or transitivity
+		bipartite_remove <- c("reciprocity", "mutual", "transitivity")
+		net_stats[bipartite_remove] <- NULL
 	}
 
 	# simplify for undirected networks

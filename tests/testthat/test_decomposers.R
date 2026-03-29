@@ -1,9 +1,5 @@
 set.seed(6886)
 
-# library(testthat)
-# library(netify)
-# library(igraph)
-# library(network)
 
 # helper function to create test data
 create_test_data = function() {

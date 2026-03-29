@@ -125,6 +125,7 @@ class(node_data_stored) # "data.frame"
 head(node_data_stored)
 names(node_data_stored) # "actor" plus variable names
 
+\donttest{
 # Longitudinal example
 verbCoop_longit_net <- netify(
     icews, # data.frame input
@@ -135,8 +136,6 @@ verbCoop_longit_net <- netify(
 
 # Prepare longitudinal nodal data - one row per actor-time combination
 nodeData_longit <- unique(icews[, c("i", "year", nvars)])
-class(nodeData_longit) # "data.frame"
-nrow(nodeData_longit) # Number of actor-time combinations
 
 # Add nodal variables with time dimension
 verbCoop_longit_net <- add_node_vars(
@@ -146,18 +145,10 @@ verbCoop_longit_net <- add_node_vars(
     time = "year", # column identifying time
     node_vars = nvars # variables to add
 )
+}
 
-# Access longitudinal nodal data
-node_data_longit <- attr(verbCoop_longit_net, "nodal_data")
-class(node_data_longit) # "data.frame"
-head(node_data_longit) # Now includes time column
-
-# Filter to specific time period
-node_data_2010 <- node_data_longit[node_data_longit$time == "2010", ]
-nrow(node_data_2010) # Number of actors in 2010
-
-# Example: Add variables from external source
-\dontrun{
+\donttest{
+# Add variables from external source
 # Suppose you have additional actor data
 external_data <- data.frame(
     i = unique(icews_10$i),

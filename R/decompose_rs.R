@@ -81,28 +81,7 @@
 #' head(decomposed_cs$edge_data)
 #' head(decomposed_cs$nodal_data)
 #'
-#' # Example 2: Longitudinal network with attributes
-#' nvars <- c("i_polity2", "i_log_gdp", "i_log_pop")
-#' dvars <- c("matlCoop", "verbConf", "matlConf")
-#'
-#' net_longit <- netify(
-#'     icews,
-#'     actor1 = "i", actor2 = "j",
-#'     time = "year",
-#'     symmetric = FALSE,
-#'     weight = "verbCoop",
-#'     nodal_vars = nvars,
-#'     dyad_vars = dvars
-#' )
-#'
-#' # Decompose with all attributes
-#' decomposed_longit <- decompose_netify(net_longit)
-#'
-#' # Check that variables are preserved
-#' names(decomposed_longit$edge_data) # Includes dyadic variables
-#' names(decomposed_longit$nodal_data) # Includes nodal variables
-#'
-#' # Example 3: Keep zero-weight edges
+#' # Example 2: Keep zero-weight edges
 #' decomposed_with_zeros <- decompose_netify(net_cs, remove_zeros = FALSE)
 #'
 #' # Compare edge counts

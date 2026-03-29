@@ -1,8 +1,4 @@
 set.seed(6886)
-# library(netify)
-# library(testthat)
-# library(igraph)
-# library(reshape2)
 
 test_that("netify_to_igraph: unweighted cross-sec, asymmetric", {
 	# use igraph example to generate some data

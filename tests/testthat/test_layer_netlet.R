@@ -1,8 +1,5 @@
 set.seed(6886)
 
-# library(netify)
-# library(testthat)
-
 # load relevant datasets from package
 data(icews)
 
@@ -97,6 +94,7 @@ icews_matlCoop_attrs = netify(
 test_that(
 	"layer_netify: cross-sectional basic functionality",
 	{
+	skip_on_cran()
 		# create multilayer network
 		multi_net = layer_netify(
 			netlet_list = list(icews_verbCoop_10, icews_matlCoop_10),
@@ -121,6 +119,7 @@ test_that(
 test_that(
 	"layer_netify: cross-sectional with 4 layers",
 	{
+	skip_on_cran()
 		# create multilayer network with 4 layers
 		multi_net = layer_netify(
 			netlet_list = list(
@@ -149,6 +148,7 @@ test_that(
 test_that(
 	"layer_netify: longitudinal list basic functionality",
 	{
+	skip_on_cran()
 		# create multilayer network
 		multi_net_l = layer_netify(
 			netlet_list = list(icews_verbCoop_l, icews_matlCoop_l),
@@ -176,6 +176,7 @@ test_that(
 test_that(
 	"layer_netify: longitudinal list with 4 layers",
 	{
+	skip_on_cran()
 		# create multilayer network
 		multi_net_l = layer_netify(
 			netlet_list = list(
@@ -200,6 +201,7 @@ test_that(
 test_that(
 	"layer_netify: longitudinal array basic functionality",
 	{
+	skip_on_cran()
 		# create multilayer network
 		multi_net_a = layer_netify(
 			netlet_list = list(icews_verbCoop_a, icews_matlCoop_a),
@@ -224,6 +226,7 @@ test_that(
 test_that(
 	"layer_netify: automatic layer labeling",
 	{
+	skip_on_cran()
 		# test with unnamed list (should generate layer1, layer2, etc.)
 		unnamed_list = list(icews_verbCoop_10, icews_matlCoop_10)
 		multi_net = layer_netify(unnamed_list)
@@ -243,6 +246,7 @@ test_that(
 test_that(
 	"layer_netify: identical attributes preserved",
 	{
+	skip_on_cran()
 		# create multilayer with identical attributes
 		multi_net = layer_netify(
 			list(icews_verbCoop_attrs, icews_matlCoop_attrs),
@@ -261,6 +265,7 @@ test_that(
 test_that(
 	"layer_netify: weight attributes correctly combined",
 	{
+	skip_on_cran()
 		multi_net = layer_netify(
 			list(
 				icews_verbCoop_10, icews_matlCoop_10,
@@ -282,6 +287,7 @@ test_that(
 test_that(
 	"layer_netify: subset multilayer networks",
 	{
+	skip_on_cran()
 		# create multilayer
 		multi_net = layer_netify(
 			list(
@@ -317,6 +323,7 @@ test_that(
 test_that(
 	"layer_netify: data integrity maintained",
 	{
+	skip_on_cran()
 		# create multilayer
 		multi_net = layer_netify(
 			list(icews_verbCoop_10, icews_matlCoop_10),
@@ -341,6 +348,7 @@ test_that(
 test_that(
 	"layer_netify: handles named lists correctly",
 	{
+	skip_on_cran()
 		# test with named list (should work)
 		named_list = list(
 			verbal = icews_verbCoop_10,

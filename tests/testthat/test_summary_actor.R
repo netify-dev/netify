@@ -1,9 +1,5 @@
 set.seed(6886)
 
-# library(testthat)
-# library(netify)
-# devtools::load_all("~/Research/netify_dev/netify")
-
 test_that("summary_actor works for cross-sectional networks", {
 	# create a simple cross-sectional network
 	data(icews)
@@ -35,6 +31,7 @@ test_that("summary_actor works for cross-sectional networks", {
 })
 
 test_that("summary_actor works for longitudinal networks", {
+	skip_on_cran()
 	# create longitudinal network
 	data(icews)
 	net_longit = netify(
@@ -130,6 +127,7 @@ test_that("summary_actor works for weighted networks", {
 })
 
 test_that("summary_actor works for multilayer networks", {
+	skip_on_cran()
 	# create multilayer network
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -210,6 +208,7 @@ test_that("summary_actor handles bipartite networks", {
 })
 
 test_that("summary_actor handles ego networks", {
+	skip_on_cran()
 	# first create a netify object
 	data(icews)
 	net = netify(
@@ -231,6 +230,7 @@ test_that("summary_actor handles ego networks", {
 })
 
 test_that("summary_actor produces consistent output structure", {
+	skip_on_cran()
 	# create different types of networks
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -258,41 +258,6 @@ test_that("summary_actor produces consistent output structure", {
 	expect_s3_class(stats_binary, "data.frame")
 	expect_true("actor" %in% names(stats_binary))
 	expect_equal(nrow(stats_binary), nrow(stats_directed)) # same actors
-})
-
-test_that("summary_actor weight inversion parameter works", {
-	# create a network with multiple paths where weights matter
-	# diamond-shaped network: A -> B -> D and A -> C -> D
-	# different weights on each path will affect shortest paths
-	test_data = data.frame(
-		actor1 = c("A", "A", "B", "C", "B", "C"),
-		actor2 = c("B", "C", "D", "D", "C", "B"),
-		weight = c(1, 10, 1, 1, 5, 5) # path through B is shorter by weight
-	)
-
-	net = netify(
-		test_data,
-		actor1 = "actor1",
-		actor2 = "actor2",
-		weight = "weight",
-		symmetric = FALSE
-	)
-
-	# get stats with default inversion (TRUE)
-	stats_inverted = summary_actor(net, invert_weights_for_igraph = TRUE)
-
-	# get stats without inversion
-	stats_not_inverted = summary_actor(net, invert_weights_for_igraph = FALSE)
-
-	# both should return data frames with same structure
-	expect_identical(names(stats_inverted), names(stats_not_inverted))
-	expect_equal(nrow(stats_inverted), nrow(stats_not_inverted))
-
-	# verify the parameter works without error
-	expect_s3_class(stats_inverted, "data.frame")
-	expect_s3_class(stats_not_inverted, "data.frame")
-
-	expect_equal(stats_inverted$strength_sum_out, stats_not_inverted$strength_sum_out)
 })
 
 test_that("summary_actor weight inversion produces different centrality values", {

@@ -1,7 +1,5 @@
 set.seed(6886)
 
-# library(testthat)
-# library(netify)
 
 test_that("ego_netify works for single ego in cross-sectional network", {
 	# create simple test data

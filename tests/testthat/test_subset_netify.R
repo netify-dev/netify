@@ -1,7 +1,4 @@
-#
 set.seed(6886)
-# library(netify)
-# library(testthat)
 
 # load relevant datasets from package
 data(icews)
@@ -146,6 +143,7 @@ icews_all_10 = layer_netify(
 test_that(
 	"subset_netify: longitudinal list, unipartite, actor subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_matlConf_l
 
@@ -174,6 +172,7 @@ test_that(
 test_that(
 	"subset_netify: longitudinal array, unipartite, actor subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_matlConf_a
 
@@ -202,6 +201,7 @@ test_that(
 test_that(
 	"subset_netify: cross_sectional, unipartite, actor subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_matlConf_10
 
@@ -231,6 +231,7 @@ test_that(
 test_that(
 	"subset_netify: longitudinal list, bipartite, from subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = netify(
 			icews_bipartite,
@@ -265,6 +266,7 @@ test_that(
 test_that(
 	"subset_netify: longitudinal list, bipartite, to subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = netify(
 			icews_bipartite,
@@ -299,6 +301,7 @@ test_that(
 test_that(
 	"subset_netify: longitudinal list, bipartite, from+to subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = netify(
 			icews_bipartite,
@@ -338,6 +341,7 @@ test_that(
 test_that(
 	"subset_netify: longitudinal array, bipartite, from subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = netify(
 			icews_bipartite,
@@ -372,6 +376,7 @@ test_that(
 test_that(
 	"subset_netify: longitudinal array, bipartite, to subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = netify(
 			icews_bipartite,
@@ -406,6 +411,7 @@ test_that(
 test_that(
 	"subset_netify: longitudinal array, bipartite, from+to subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = netify(
 			icews_bipartite,
@@ -445,6 +451,7 @@ test_that(
 test_that(
 	"subset_netify: cross-sectional, bipartite, from subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = netify(
 			icews_bipartite_10,
@@ -478,6 +485,7 @@ test_that(
 test_that(
 	"subset_netify: cross-sectional, bipartite, to subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = netify(
 			icews_bipartite_10,
@@ -511,6 +519,7 @@ test_that(
 test_that(
 	"subset_netify: cross-sectional, bipartite, from+to subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = netify(
 			icews_bipartite_10,
@@ -550,6 +559,7 @@ test_that(
 test_that(
 	"subset_netify: longitudinal list, temporal subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_matlConf_l
 
@@ -590,6 +600,7 @@ test_that(
 test_that(
 	"subset_netify: longitudinal array, temporal subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_matlConf_a
 
@@ -630,6 +641,7 @@ test_that(
 test_that(
 	"subset_netify: longitudinal list, temporal subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_matlConf_l
 
@@ -664,6 +676,7 @@ test_that(
 test_that(
 	"subset_netify: longitudinal array, temporal subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_matlConf_a
 
@@ -700,6 +713,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer longitudinal list, actor subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_l
 
@@ -729,6 +743,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer longitudinal array, actor subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_a
 
@@ -758,6 +773,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer cross-sectional, actor subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_10
 
@@ -787,6 +803,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer longitudinal list, actor and time subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_l
 
@@ -821,6 +838,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer longitudinal array, actor and time subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_a
 
@@ -855,6 +873,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer longitudinal list, actor subset and go from longit to cross-sec",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_l
 
@@ -885,6 +904,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer longitudinal array, actor subset and go from longit to cross-sec",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_a
 
@@ -915,6 +935,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer longitudinal list, layer subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_l
 
@@ -945,6 +966,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer longitudinal array, layer subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_a
 
@@ -975,6 +997,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer cross-sectional, layer subset check",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_10
 
@@ -1005,6 +1028,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer longitudinal list, multilayer to single layer",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_l
 
@@ -1035,6 +1059,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer longitudinal array, multilayer to single layer",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_a
 
@@ -1065,6 +1090,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer cross-sectional, multilayer to single layer",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_10
 
@@ -1095,6 +1121,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer longitudinal list to single layer cross-sec",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_l
 
@@ -1126,6 +1153,7 @@ test_that(
 test_that(
 	"subset_netify: multilayer longitudinal array to single layer cross-sec",
 	{
+	skip_on_cran()
 		# create netify object and then subset
 		netlet = icews_all_a
 
@@ -1156,6 +1184,7 @@ test_that(
 test_that(
 	"subset_netify: longitudinal list remains longitudinal list after subset",
 	{
+	skip_on_cran()
 		# create netify object
 		netlet = icews_matlConf_l
 
@@ -1215,6 +1244,7 @@ test_that(
 test_that(
 	"subset_netify: nodal and dyadic attributes are preserved and filtered correctly",
 	{
+	skip_on_cran()
 		# create netify object with attributes
 		netlet = netify(
 			icews,
@@ -1255,6 +1285,7 @@ test_that(
 test_that(
 	"subset_netify: single actor subset works correctly",
 	{
+	skip_on_cran()
 		netlet = icews_matlConf_10
 
 		# subset to single actor

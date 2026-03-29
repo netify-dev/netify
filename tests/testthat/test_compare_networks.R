@@ -1,11 +1,9 @@
 set.seed(6886)
 
-library(testthat)
-library(netify)
-
 test_that("compare_networks works with basic edge comparison", {
+	skip_on_cran()
 	# create test networks
-	set.seed(123)
+	set.seed(6886)
 	n = 20
 
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -26,6 +24,7 @@ test_that("compare_networks works with basic edge comparison", {
 })
 
 test_that("compare_networks handles different comparison types", {
+	skip_on_cran()
 	# create test networks
 	mat1 = matrix(rbinom(100, 1, 0.3), 10, 10)
 	mat2 = matrix(rbinom(100, 1, 0.3), 10, 10)
@@ -47,6 +46,7 @@ test_that("compare_networks handles different comparison types", {
 })
 
 test_that("compare_networks works with longitudinal data", {
+	skip_on_cran()
 	# create longitudinal network
 	n = 10
 	arr = array(rbinom(n * n * 3, 1, 0.3), dim = c(n, n, 3))
@@ -58,6 +58,7 @@ test_that("compare_networks works with longitudinal data", {
 })
 
 test_that("compare_networks correctly identifies comparison types", {
+	skip_on_cran()
 	# create test networks
 	n = 10
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -82,6 +83,7 @@ test_that("compare_networks correctly identifies comparison types", {
 
 # test all 'what' options work correctly
 test_that("compare_networks handles all 'what' options", {
+	skip_on_cran()
 	# create test networks
 	mat1 = matrix(rbinom(100, 1, 0.3), 10, 10)
 	mat2 = matrix(rbinom(100, 1, 0.3), 10, 10)
@@ -108,6 +110,7 @@ test_that("compare_networks handles all 'what' options", {
 # additional comprehensive tests for compare_networks
 
 test_that("compare_networks handles different similarity methods", {
+	skip_on_cran()
 	# create test networks
 	n = 15
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -139,6 +142,7 @@ test_that("compare_networks handles different similarity methods", {
 })
 
 test_that("compare_networks handles weighted networks correctly", {
+	skip_on_cran()
 	# create weighted networks
 	n = 10
 	mat1 = matrix(runif(n * n), n, n)
@@ -158,6 +162,7 @@ test_that("compare_networks handles weighted networks correctly", {
 })
 
 test_that("compare_networks with return_details provides full matrices", {
+	skip_on_cran()
 	# create test networks
 	n = 10
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -184,6 +189,7 @@ test_that("compare_networks with return_details provides full matrices", {
 })
 
 test_that("compare_networks handles networks with different node sets", {
+	skip_on_cran()
 	# create networks with different actors
 	n1 = 10
 	n2 = 12
@@ -209,6 +215,7 @@ test_that("compare_networks handles networks with different node sets", {
 })
 
 test_that("compare_networks handles longitudinal networks with missing time periods", {
+	skip_on_cran()
 	# create longitudinal network with gaps
 	n = 10
 	times = c(2000, 2001, 2003, 2005) # missing 2002, 2004
@@ -230,6 +237,7 @@ test_that("compare_networks handles longitudinal networks with missing time peri
 })
 
 test_that("compare_networks structural comparison includes all metrics", {
+	skip_on_cran()
 	# create networks with different structural properties
 	n = 20
 
@@ -262,6 +270,7 @@ test_that("compare_networks structural comparison includes all metrics", {
 })
 
 test_that("compare_networks handles attribute comparison", {
+	skip_on_cran()
 	# create networks with node attributes
 	n = 15
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -294,6 +303,7 @@ test_that("compare_networks handles attribute comparison", {
 })
 
 test_that("compare_networks QAP test with custom permutations", {
+	skip_on_cran()
 	# create correlated networks
 	n = 10
 	base_mat = matrix(rbinom(n * n, 1, 0.5), n, n)
@@ -328,6 +338,7 @@ test_that("compare_networks QAP test with custom permutations", {
 })
 
 test_that("compare_networks handles bipartite networks", {
+	skip_on_cran()
 	# create bipartite networks
 	n1 = 8
 	n2 = 12
@@ -345,6 +356,7 @@ test_that("compare_networks handles bipartite networks", {
 })
 
 test_that("compare_networks handles empty and complete networks", {
+	skip_on_cran()
 	n = 10
 
 	# empty network
@@ -375,6 +387,7 @@ test_that("compare_networks handles empty and complete networks", {
 })
 
 test_that("compare_networks handles self-loops correctly", {
+	skip_on_cran()
 	n = 10
 
 	# network with self-loops
@@ -396,6 +409,7 @@ test_that("compare_networks handles self-loops correctly", {
 })
 
 test_that("compare_networks print method works", {
+	skip_on_cran()
 	# create simple networks
 	mat1 = matrix(rbinom(25, 1, 0.3), 5, 5)
 	mat2 = matrix(rbinom(25, 1, 0.3), 5, 5)
@@ -415,6 +429,7 @@ test_that("compare_networks print method works", {
 })
 
 test_that("compare_networks handles list input vs single network", {
+	skip_on_cran()
 	# create longitudinal network
 	n = 10
 	times = 3
@@ -439,6 +454,7 @@ test_that("compare_networks handles list input vs single network", {
 })
 
 test_that("compare_networks handles named lists correctly", {
+	skip_on_cran()
 	# create networks with names
 	mat1 = matrix(rbinom(100, 1, 0.3), 10, 10)
 	mat2 = matrix(rbinom(100, 1, 0.3), 10, 10)
@@ -461,6 +477,7 @@ test_that("compare_networks handles named lists correctly", {
 # additional edge case tests
 
 test_that("compare_networks handles single network gracefully", {
+	skip_on_cran()
 	mat = matrix(rbinom(100, 1, 0.3), 10, 10)
 	net = new_netify(mat)
 
@@ -469,6 +486,7 @@ test_that("compare_networks handles single network gracefully", {
 })
 
 test_that("compare_networks handles networks with all missing values", {
+	skip_on_cran()
 	n = 10
 
 	# network with all NA values
@@ -485,6 +503,7 @@ test_that("compare_networks handles networks with all missing values", {
 })
 
 test_that("compare_networks handles very sparse networks", {
+	skip_on_cran()
 	n = 50
 
 	# very sparse network (only 2 edges)
@@ -503,6 +522,7 @@ test_that("compare_networks handles very sparse networks", {
 })
 
 test_that("compare_networks structural comparison with extreme networks", {
+	skip_on_cran()
 	n = 20
 
 	# star network
@@ -529,6 +549,7 @@ test_that("compare_networks structural comparison with extreme networks", {
 })
 
 test_that("compare_networks handles networks with identical structure", {
+	skip_on_cran()
 	n = 15
 	mat = matrix(rbinom(n * n, 1, 0.3), n, n)
 	mat = mat | t(mat) # make symmetric
@@ -547,6 +568,7 @@ test_that("compare_networks handles networks with identical structure", {
 })
 
 test_that("spectral distance works correctly", {
+	skip_on_cran()
 	# create networks with known spectral properties
 	n = 10
 
@@ -589,6 +611,7 @@ test_that("spectral distance works correctly", {
 })
 
 test_that("compare_networks properly extracts multilayer networks", {
+	skip_on_cran()
 	# test that extract_network_list preserves all required attributes
 	n = 10
 
@@ -639,6 +662,7 @@ test_that("compare_networks properly extracts multilayer networks", {
 })
 
 test_that("spectral distance handles edge cases", {
+	skip_on_cran()
 	# networks with different sizes
 	n1 = 8
 	n2 = 12
@@ -664,6 +688,7 @@ test_that("spectral distance handles edge cases", {
 })
 
 test_that("compare_networks handles multilayer networks", {
+	skip_on_cran()
 	# create test data
 	n = 10
 
@@ -701,6 +726,7 @@ test_that("compare_networks handles multilayer networks", {
 })
 
 test_that("compare_networks handles longitudinal multilayer networks", {
+	skip_on_cran()
 	# create 4D array for longitudinal multilayer
 	n = 8
 	n_layers = 2
@@ -739,6 +765,7 @@ test_that("compare_networks handles longitudinal multilayer networks", {
 })
 
 test_that("compare_networks handles temporal multilayer networks (longit_list)", {
+	skip_on_cran()
 	# create temporal multilayer using layer_netify
 	data(icews)
 	years = c(2002, 2003)
@@ -796,6 +823,7 @@ test_that("compare_networks handles temporal multilayer networks (longit_list)",
 })
 
 test_that("compare_networks handles multilayer networks with missing attributes", {
+	skip_on_cran()
 	# create a multilayer network with minimal attributes
 	n = 10
 	layer1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -820,6 +848,7 @@ test_that("compare_networks handles multilayer networks with missing attributes"
 })
 
 test_that("compare_networks handles different weight specifications in multilayer", {
+	skip_on_cran()
 	# test with different weight types per layer
 	n = 10
 
@@ -848,6 +877,7 @@ test_that("compare_networks handles different weight specifications in multilaye
 })
 
 test_that("compare_networks error handling for invalid multilayer inputs", {
+	skip_on_cran()
 	# test with mismatched dimensions in layers
 	n1 = 10
 	n2 = 15
@@ -862,6 +892,7 @@ test_that("compare_networks error handling for invalid multilayer inputs", {
 })
 
 test_that("compare_networks handles all comparison methods with multilayer", {
+	skip_on_cran()
 	# create simple multilayer network
 	n = 20
 	layer1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -895,6 +926,7 @@ test_that("compare_networks handles all comparison methods with multilayer", {
 # tests for other_stats functionality
 
 test_that("compare_networks with other_stats for structural comparison", {
+	skip_on_cran()
 	# create test networks
 	n = 15
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -932,6 +964,7 @@ test_that("compare_networks with other_stats for structural comparison", {
 })
 
 test_that("compare_networks with other_stats for edge comparison", {
+	skip_on_cran()
 	# create test networks
 	n = 10
 	mat1 = matrix(rbinom(n * n, 1, 0.4), n, n)
@@ -967,6 +1000,7 @@ test_that("compare_networks with other_stats for edge comparison", {
 })
 
 test_that("compare_networks with multiple other_stats functions", {
+	skip_on_cran()
 	# create test networks
 	n = 12
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -1015,6 +1049,7 @@ test_that("compare_networks with multiple other_stats functions", {
 })
 
 test_that("compare_networks other_stats error handling", {
+	skip_on_cran()
 	# create test networks
 	n = 10
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -1063,6 +1098,7 @@ test_that("compare_networks other_stats error handling", {
 })
 
 test_that("compare_networks other_stats with longitudinal networks", {
+	skip_on_cran()
 	# create longitudinal network
 	n = 10
 	t = 3
@@ -1097,6 +1133,7 @@ test_that("compare_networks other_stats with longitudinal networks", {
 })
 
 test_that("compare_networks other_stats with node comparison", {
+	skip_on_cran()
 	# create networks with different node sets
 	n1 = 12
 	n2 = 15
@@ -1132,6 +1169,7 @@ test_that("compare_networks other_stats with node comparison", {
 })
 
 test_that("compare_networks other_stats with attribute comparison", {
+	skip_on_cran()
 	# create networks with attributes
 	n = 15
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -1179,6 +1217,7 @@ test_that("compare_networks other_stats with attribute comparison", {
 })
 
 test_that("compare_networks other_stats preserves standard functionality", {
+	skip_on_cran()
 	# ensure adding other_stats doesn't break standard comparisons
 	n = 10
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -1211,6 +1250,7 @@ test_that("compare_networks other_stats preserves standard functionality", {
 })
 
 test_that("compare_networks other_stats with weighted networks", {
+	skip_on_cran()
 	# create weighted networks
 	n = 10
 	mat1 = matrix(runif(n * n, 0, 5), n, n)
@@ -1245,6 +1285,7 @@ test_that("compare_networks other_stats with weighted networks", {
 })
 
 test_that("compare_networks other_stats with return_details", {
+	skip_on_cran()
 	# test that other_stats works with return_details = TRUE
 	n = 10
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -1275,6 +1316,7 @@ test_that("compare_networks other_stats with return_details", {
 # tests for enhanced structural comparison that includes all summary.netify stats
 
 test_that("compare_networks structural comparison includes all summary.netify statistics", {
+	skip_on_cran()
 	# create networks with different properties
 	n = 20
 	
@@ -1315,6 +1357,7 @@ test_that("compare_networks structural comparison includes all summary.netify st
 })
 
 test_that("compare_networks structural comparison with weighted networks includes weight stats", {
+	skip_on_cran()
 	# create weighted networks
 	n = 15
 	mat1 = matrix(runif(n * n, 0, 10), n, n)
@@ -1339,6 +1382,7 @@ test_that("compare_networks structural comparison with weighted networks include
 })
 
 test_that("compare_networks structural comparison adapts to network type", {
+	skip_on_cran()
 	# test undirected network - should not have reciprocity
 	n = 15
 	mat_sym = matrix(rbinom(n * n, 1, 0.4), n, n)
@@ -1362,6 +1406,7 @@ test_that("compare_networks structural comparison adapts to network type", {
 })
 
 test_that("compare_networks structural comparison with binary networks", {
+	skip_on_cran()
 	# create binary networks
 	n = 20
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -1384,6 +1429,7 @@ test_that("compare_networks structural comparison with binary networks", {
 })
 
 test_that("compare_networks structural percent changes calculated correctly", {
+	skip_on_cran()
 	# create networks with known differences
 	n = 10
 	
@@ -1426,6 +1472,7 @@ test_that("compare_networks structural percent changes calculated correctly", {
 })
 
 test_that("compare_networks structural comparison with custom other_stats", {
+	skip_on_cran()
 	# create test networks
 	n = 15
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -1462,6 +1509,7 @@ test_that("compare_networks structural comparison with custom other_stats", {
 })
 
 test_that("compare_networks structural comparison handles missing values", {
+	skip_on_cran()
 	# create networks with some missing values
 	n = 12
 	mat1 = matrix(rbinom(n * n, 1, 0.4), n, n)
@@ -1486,6 +1534,7 @@ test_that("compare_networks structural comparison handles missing values", {
 })
 
 test_that("compare_networks structural comparison with bipartite networks", {
+	skip_on_cran()
 	# create bipartite networks
 	n1 = 8
 	n2 = 12
@@ -1504,12 +1553,14 @@ test_that("compare_networks structural comparison with bipartite networks", {
 	
 	# should not have unipartite-only stats
 	expect_false("num_actors" %in% names(comp$summary))
-	# TODO: Fix summary.netify to not include reciprocity for bipartite networks
-	# for now, skip this test as it's an issue with summary.netify, not compare_networks
-	# expect_false("reciprocity" %in% names(comp$summary))
+	# bipartite networks should not include reciprocity or transitivity
+	expect_false("reciprocity" %in% names(comp$summary))
+	expect_false("mutual" %in% names(comp$summary))
+	expect_false("transitivity" %in% names(comp$summary))
 })
 
 test_that("compare_networks preserves all summary statistics in multilayer", {
+	skip_on_cran()
 	# create multilayer network
 	n = 15
 	layer1 = matrix(rbinom(n * n, 1, 0.3), n, n)

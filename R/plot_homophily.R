@@ -32,13 +32,14 @@
 #' # Load example data
 #' data(icews)
 #'
-#' # Create a simple network
+#' # Create a network with nodal attributes
 #' ntwk <- netify(
 #'     icews,
 #'     actor1 = "i", actor2 = "j",
 #'     time = "year",
 #'     symmetric = FALSE,
-#'     weight = "matlCoop"
+#'     weight = "matlCoop",
+#'     nodal_vars = "i_polity2"
 #' )
 #'
 #' # Run homophily analysis

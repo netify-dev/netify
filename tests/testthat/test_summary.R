@@ -1,9 +1,5 @@
 set.seed(6886)
 
-# library(testthat)
-# library(netify)
-# devtools::load_all("~/Research/netify_dev/netify")
-
 test_that("summary.netify works for cross-sectional networks", {
 	# create a simple cross-sectional network
 	data(icews)
@@ -30,6 +26,7 @@ test_that("summary.netify works for cross-sectional networks", {
 })
 
 test_that("summary.netify works for longitudinal networks", {
+	skip_on_cran()
 	# create longitudinal network
 	data(icews)
 	net_longit = netify(
@@ -91,6 +88,7 @@ test_that("summary.netify works for binary networks", {
 })
 
 test_that("summary.netify works for multilayer networks", {
+	skip_on_cran()
 	# create multilayer network
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -170,9 +168,15 @@ test_that("summary.netify handles bipartite networks", {
 	expect_true("num_row_actors" %in% names(summ))
 	expect_true("num_col_actors" %in% names(summ))
 	expect_false("num_actors" %in% names(summ))
+
+	# bipartite networks should not include reciprocity or transitivity
+	expect_false("reciprocity" %in% names(summ))
+	expect_false("mutual" %in% names(summ))
+	expect_false("transitivity" %in% names(summ))
 })
 
 test_that("summary.netify handles missing data correctly", {
+	skip_on_cran()
 	# create network with missing values
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -194,6 +198,7 @@ test_that("summary.netify handles missing data correctly", {
 })
 
 test_that("summary.netify handles ego networks", {
+	skip_on_cran()
 	# first create a netify object
 	data(icews)
 	net = netify(
@@ -216,6 +221,7 @@ test_that("summary.netify handles ego networks", {
 })
 
 test_that("summary.netify produces consistent output structure", {
+	skip_on_cran()
 	# create different types of networks
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]

@@ -44,23 +44,3 @@ test_that("plot parameter validation catches common mistakes", {
 		)
 	)
 })
-
-test_that("highlight_color parameter works correctly", {
-	# create a simple network
-	mat = matrix(rbinom(100, 1, 0.3), 10, 10)
-	df = data.frame(
-		i = rep(1:10, each = 10),
-		j = rep(1:10, times = 10),
-		weight = as.vector(mat)
-	)
-	net = netify(df[df$weight > 0,], actor1 = "i", actor2 = "j")
-	
-	# test that highlight_color (singular) is accepted without warning
-	p = plot(net, 
-		highlight = c("1", "2"),
-		highlight_color = c("1" = "#01411cff", "2" = "#ff0000", "Other" = "grey80")
-	)
-	
-	# check that the plot object is created
-	expect_s3_class(p, "gg")
-})

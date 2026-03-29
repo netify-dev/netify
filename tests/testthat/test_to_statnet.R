@@ -1,7 +1,3 @@
-# library(testthat)
-# library(netify)
-# devtools::load_all('~/Research/netify_dev/netify')
-
 set.seed(6886)
 
 test_that("netify_to_statnet: unweighted cross-sec, asymmetric", {

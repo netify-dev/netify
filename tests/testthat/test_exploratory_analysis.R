@@ -4,6 +4,7 @@ library(testthat)
 library(netify)
 
 test_that("homophily works for cross-sectional networks", {
+	skip_on_cran()
 	# create a simple cross-sectional network with attributes
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -41,6 +42,7 @@ test_that("homophily works for cross-sectional networks", {
 })
 
 test_that("mixing_matrix works for cross-sectional networks", {
+	skip_on_cran()
 	# create a simple cross-sectional network with attributes
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -76,6 +78,7 @@ test_that("mixing_matrix works for cross-sectional networks", {
 })
 
 test_that("dyad_correlation works with dyadic attributes", {
+	skip_on_cran()
 	# create a simple cross-sectional network
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -100,6 +103,7 @@ test_that("dyad_correlation works with dyadic attributes", {
 })
 
 test_that("attribute_report works with comprehensive analysis", {
+	skip_on_cran()
 	# create a simple cross-sectional network with both nodal and dyadic attributes
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -148,6 +152,7 @@ test_that("attribute_report works with comprehensive analysis", {
 })
 
 test_that("functions handle missing data gracefully", {
+	skip_on_cran()
 	# create network without attributes
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -180,6 +185,7 @@ test_that("functions handle missing data gracefully", {
 })
 
 test_that("functions work with different similarity methods", {
+	skip_on_cran()
 	# create a simple cross-sectional network with attributes
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -205,6 +211,7 @@ test_that("functions work with different similarity methods", {
 })
 
 test_that("functions work with different correlation methods", {
+	skip_on_cran()
 	# create a simple cross-sectional network with dyadic attributes
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -233,6 +240,7 @@ test_that("functions work with different correlation methods", {
 # additional comprehensive tests for edge cases and robustness
 
 test_that("homophily handles edge cases correctly", {
+	skip_on_cran()
 	# create test network
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -286,6 +294,7 @@ test_that("homophily handles edge cases correctly", {
 })
 
 test_that("homophily handles missing values appropriately", {
+	skip_on_cran()
 	# create network with missing values in attributes
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -308,6 +317,7 @@ test_that("homophily handles missing values appropriately", {
 })
 
 test_that("mixing_matrix works with cross-dimensional analysis", {
+	skip_on_cran()
 	# create test network with multiple categorical attributes
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -343,6 +353,7 @@ test_that("mixing_matrix works with cross-dimensional analysis", {
 })
 
 test_that("mixing_matrix normalization options work correctly", {
+	skip_on_cran()
 	# create test network
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -377,6 +388,7 @@ test_that("mixing_matrix normalization options work correctly", {
 })
 
 test_that("dyad_correlation handles multiple variables and methods", {
+	skip_on_cran()
 	# create test network with multiple dyadic variables
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -405,6 +417,7 @@ test_that("dyad_correlation handles multiple variables and methods", {
 })
 
 test_that("dyad_correlation works with symmetric and directed networks", {
+	skip_on_cran()
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
@@ -437,6 +450,7 @@ test_that("dyad_correlation works with symmetric and directed networks", {
 })
 
 test_that("attribute_report handles missing components gracefully", {
+	skip_on_cran()
 	# create network with limited attributes
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
@@ -482,6 +496,7 @@ test_that("attribute_report handles missing components gracefully", {
 })
 
 test_that("attribute_report centrality measures work correctly", {
+	skip_on_cran()
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
@@ -511,6 +526,7 @@ test_that("attribute_report centrality measures work correctly", {
 
 # test longitudinal network scenarios
 test_that("homophily works with longitudinal networks", {
+	skip_on_cran()
 	data(icews)
 
 	# create longitudinal network
@@ -536,6 +552,7 @@ test_that("homophily works with longitudinal networks", {
 })
 
 test_that("mixing_matrix works with longitudinal networks", {
+	skip_on_cran()
 	data(icews)
 
 	years = 2002:2004
@@ -565,6 +582,7 @@ test_that("mixing_matrix works with longitudinal networks", {
 
 # test weighted vs unweighted networks
 test_that("functions handle weighted and unweighted networks differently", {
+	skip_on_cran()
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
@@ -596,6 +614,7 @@ test_that("functions handle weighted and unweighted networks differently", {
 
 # test error handling
 test_that("functions provide informative errors", {
+	skip_on_cran()
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
@@ -628,6 +647,7 @@ test_that("functions provide informative errors", {
 
 # test performance with larger networks
 test_that("functions handle moderately large networks efficiently", {
+	skip_on_cran()
 	# create a larger synthetic network
 	n_actors = 100
 	n_edges = 2000
@@ -666,6 +686,7 @@ test_that("functions handle moderately large networks efficiently", {
 })
 
 test_that("homophily handles networks with single connected component", {
+	skip_on_cran()
 	# create disconnected network with two components
 	n = 20
 	mat = matrix(0, n, n)
@@ -694,6 +715,7 @@ test_that("homophily handles networks with single connected component", {
 })
 
 test_that("mixing_matrix handles highly skewed categorical distributions", {
+	skip_on_cran()
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
@@ -724,6 +746,7 @@ test_that("mixing_matrix handles highly skewed categorical distributions", {
 })
 
 test_that("dyad_correlation handles perfect collinearity", {
+	skip_on_cran()
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
@@ -747,6 +770,7 @@ test_that("dyad_correlation handles perfect collinearity", {
 })
 
 test_that("attribute_report handles networks with only one actor", {
+	skip_on_cran()
 	# single actor network (edge case)
 	mat = matrix(1, 1, 1)
 	net = new_netify(mat)
@@ -759,6 +783,7 @@ test_that("attribute_report handles networks with only one actor", {
 })
 
 test_that("functions handle networks with very long attribute names", {
+	skip_on_cran()
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
@@ -780,6 +805,7 @@ test_that("functions handle networks with very long attribute names", {
 })
 
 test_that("homophily threshold parameter works correctly", {
+	skip_on_cran()
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 

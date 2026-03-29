@@ -124,6 +124,7 @@
 #' with netify, the function appropriately handles the ego-alter structure.
 #'
 #' @examples
+#' \donttest{
 #' # Load example data
 #' data(icews)
 #'
@@ -140,7 +141,6 @@
 #' head(actor_stats)
 #'
 #' # Add custom statistics
-#' # Maximum incoming and outgoing tie weights
 #' max_out <- function(mat) apply(mat, 1, max, na.rm = TRUE)
 #' max_in <- function(mat) apply(mat, 2, max, na.rm = TRUE)
 #'
@@ -152,20 +152,7 @@
 #'     )
 #' )
 #' head(actor_stats_custom)
-#'
-#' # For networks where weights represent distances
-#' # (larger values = weaker relationships)
-#' distance_net <- netify(
-#'     icews,
-#'     actor1 = "i", actor2 = "j",
-#'     weight = "matlConf" # conflict measure
-#' )
-#'
-#' # Don't invert weights for centrality calculations
-#' actor_stats_dist <- summary_actor(
-#'     distance_net,
-#'     invert_weights_for_igraph = FALSE
-#' )
+#' }
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #'

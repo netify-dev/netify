@@ -135,7 +135,7 @@
 #' )
 #'
 #' # Example 11: Longitudinal network transformation
-#' \dontrun{
+#' \donttest{
 #' # Create longitudinal network
 #' net_longit <- netify(
 #'     icews,

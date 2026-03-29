@@ -112,7 +112,7 @@ table(dyad_df_longit$time)
 head(dyad_df_longit[, c("from", "to", "time", "verbCoop")])
 
 # Use the output for further analysis
-\dontrun{
+\donttest{
 # For example, regression analysis
 lm(verbCoop ~ i_polity2_from + i_polity2_to + verbConf, data = dyad_df)
 }

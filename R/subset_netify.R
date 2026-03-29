@@ -69,6 +69,7 @@
 #'
 #' @examples
 #'
+#' \donttest{
 #' # load example directed event data from ICEWS
 #' data(icews)
 #'
@@ -111,6 +112,7 @@
 #'     ),
 #'     time = c("2010", "2011")
 #' )
+#' }
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #'

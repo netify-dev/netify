@@ -1,7 +1,3 @@
-# library(netify)
-# library(testthat)
-# devtools::load_all('~/Research/netify_dev/netify')
-
 set.seed(6886)
 
 # load relevant datasets from package
@@ -18,6 +14,7 @@ icews_10 = icews[icews$year == "2010", ]
 test_that(
 	"netify: cross-sectional, undirected, unweighted network",
 	{
+	skip_on_cran()
 		nigeria_unweighted = get_adjacency(
 			nigeria,
 			actor1 = "actor1", actor2 = "actor2",
@@ -37,6 +34,7 @@ test_that(
 test_that(
 	"netify: cross-sectional, undirected, weighted network that sums across dyads",
 	{
+	skip_on_cran()
 		nigeria_weighted = get_adjacency(
 			nigeria,
 			actor1 = "actor1", actor2 = "actor2",
@@ -56,6 +54,7 @@ test_that(
 test_that(
 	"netify: cross-sectional, directed, weighted network that uses a weight var",
 	{
+	skip_on_cran()
 		icews_verbCoop = get_adjacency(
 			icews_10,
 			actor1 = "i", actor2 = "j",
@@ -75,6 +74,7 @@ test_that(
 test_that(
 	"netify: cross-sectional, directed, weighted network that uses a weight var 2",
 	{
+	skip_on_cran()
 		icews_matlConf = get_adjacency(
 			icews_10,
 			actor1 = "i", actor2 = "j",
@@ -94,6 +94,7 @@ test_that(
 test_that(
 	"netify: longitudinal array, directed, weighted network that uses a weight var",
 	{
+	skip_on_cran()
 		icews_matlConf = get_adjacency_array(
 			icews,
 			actor1 = "i", actor2 = "j", time = "year",
@@ -114,6 +115,7 @@ test_that(
 test_that(
 	"netify: longitudinal list, undirected, and unweighted network, same actor comp",
 	{
+	skip_on_cran()
 		nigeria_unweighted = get_adjacency_list(
 			nigeria,
 			actor1 = "actor1", actor2 = "actor2", time = "year",
@@ -133,6 +135,7 @@ test_that(
 test_that(
 	"netify: longitudinal list, undirected, and weighted network that sums across dyads, same actor comp",
 	{
+	skip_on_cran()
 		nigeria_weighted = get_adjacency_list(
 			nigeria,
 			actor1 = "actor1", actor2 = "actor2", time = "year",
@@ -152,6 +155,7 @@ test_that(
 test_that(
 	"netify: longitudinal list, undirected, and unweighted network, diff actor comp",
 	{
+	skip_on_cran()
 		nigeria_unweighted = get_adjacency_list(
 			nigeria,
 			actor1 = "actor1", actor2 = "actor2", time = "year",
@@ -171,6 +175,7 @@ test_that(
 test_that(
 	"netify: longitudinal list, undirected, and weighted network that sums across dyads, diff actor comp",
 	{
+	skip_on_cran()
 		nigeria_weighted = get_adjacency_list(
 			nigeria,
 			actor1 = "actor1", actor2 = "actor2", time = "year",
@@ -190,6 +195,7 @@ test_that(
 test_that(
 	"netify: longitudinal list, undirected, and weighted network that sums across dyads, user specified actor comp",
 	{
+	skip_on_cran()
 		actor_comp = data.frame(
 			actor = c(
 				"United States",
@@ -222,6 +228,7 @@ test_that(
 test_that(
 	"netify handles data.frame input by default (auto)",
 	{
+	skip_on_cran()
 		df = data.frame(
 			i = c("A", "B", "A"),
 			j = c("B", "C", "C"),
@@ -240,6 +247,7 @@ test_that(
 test_that(
 	"netify handles data.frame input when input_type = 'dyad_df'",
 	{
+	skip_on_cran()
 		df = data.frame(
 			source = c("X", "Y"),
 			target = c("Y", "Z"),
@@ -260,6 +268,7 @@ test_that(
 test_that(
 	"netify handles matrix input (auto-detect => goes to to_netify)",
 	{
+	skip_on_cran()
 		mat = matrix(sample(0:1, 16, replace = TRUE), 4, 4)
 		rownames(mat) = colnames(mat) = paste0("actor", 1:4)
 
@@ -273,6 +282,7 @@ test_that(
 test_that(
 	"netify handles igraph input (auto-detect => goes to to_netify)",
 	{
+	skip_on_cran()
 		g = igraph::make_ring(5)
 		igraph::E(g)$myweight = seq_len(igraph::ecount(g))
 
@@ -286,6 +296,7 @@ test_that(
 test_that(
 	"netify handles list of igraph objects (auto => longit_list)",
 	{
+	skip_on_cran()
 		g1 = igraph::make_ring(4)
 		igraph::E(g1)$myweight = c(1, 2, 3, 4)
 		g2 = igraph::make_star(4)
@@ -302,6 +313,7 @@ test_that(
 test_that(
 	"netify handles input when input_type='netify_obj' (forces to_netify)",
 	{
+	skip_on_cran()
 		df = data.frame(a = 1:3, b = 4:6)
 
 		expect_error(netify(df, input_type = "netify_obj"))
@@ -311,6 +323,7 @@ test_that(
 test_that(
 	"netify allows passing additional arguments (...) to to_netify",
 	{
+	skip_on_cran()
 		mat = matrix(0, 3, 3)
 		mat[1, 2] = 1
 		mat[2, 3] = 1
@@ -325,6 +338,7 @@ test_that(
 test_that(
 	"netify handles a list of igraph objects (auto => longit_list)",
 	{
+	skip_on_cran()
 		g1 = igraph::make_ring(4)
 		igraph::E(g1)$myweight = c(1, 2, 3, 4)
 		g2 = igraph::make_star(5)
@@ -342,6 +356,7 @@ test_that(
 test_that(
 	"netify handles a list of network objects (auto => longit_list)",
 	{
+	skip_on_cran()
 		nw1 = network::network(matrix(rbinom(9, 1, 0.3), 3, 3), directed = FALSE)
 		network::set.edge.attribute(nw1, "wts", runif(network::network.edgecount(nw1)))
 
@@ -362,6 +377,7 @@ test_that(
 test_that(
 	"netify handles a list of adjacency matrices (auto => longit_list)",
 	{
+	skip_on_cran()
 		mat1 = matrix(rbinom(9, 1, 0.5), 3, 3)
 		rownames(mat1) = colnames(mat1) = paste0("A", 1:3)
 
@@ -384,6 +400,7 @@ test_that(
 test_that(
 	"netify handles a single-element list (auto => longit_list with one slice)",
 	{
+	skip_on_cran()
 		single_list = list("T1" = matrix(rbinom(9, 1, 0.3), 3, 3))
 
 		net_obj = netify(single_list)
@@ -397,6 +414,7 @@ test_that(
 test_that(
 	"netify handles lists of different object types gracefully (error)",
 	{
+	skip_on_cran()
 		g = igraph::make_ring(4)
 		mat = matrix(rbinom(9, 1, 0.3), 3, 3)
 
@@ -406,53 +424,10 @@ test_that(
 )
 
 
-# test_that(
-#     "netify handles character date/time variables", {
-#         # create data with character dates
-#         df_char_dates <- data.frame(
-#             actor1 = c("USA", "USA", "China", "China", "Russia", "Russia"),
-#             actor2 = c("China", "Russia", "USA", "Russia", "USA", "China"),
-#             date = c("2020-01-01", "2020-01-01", "2020-06-15",
-#                     "2020-06-15", "2021-03-20", "2021-03-20"),
-#             trade_value = c(100, 50, 120, 30, 45, 80),
-#             stringsAsFactors = FALSE
-#         )
-
-#         # this should produce an error since time must be numeric
-#         expect_error(
-#             netify(
-#                 df_char_dates,
-#                 actor1 = "actor1",
-#                 actor2 = "actor2",
-#                 time = "date",
-#                 weight = "trade_value"
-#             ))
-
-#         # convert character dates to numeric (e.g., year)
-#         df_char_dates$year <- as.numeric(format(as.Date(df_char_dates$date), "%Y"))
-
-#         # now it should work with numeric year
-#         net_obj <- netify(
-#             df_char_dates,
-#             actor1 = "actor1",
-#             actor2 = "actor2",
-#             time = "year",
-#             weight = "trade_value"
-#         )
-
-#         expect_s3_class(net_obj, "netify")
-#         expect_equal(attr(net_obj, "netify_type"), "longit_list")
-#         expect_equal(names(net_obj), c("2020", "2021"))
-
-#         # verify the network structure
-#         expect_equal(dim(net_obj[["2020"]]), c(3, 3))  # USA, China, Russia
-#         expect_equal(dim(net_obj[["2021"]]), c(3, 3))
-# })
-
-
 test_that(
 	"netify handles character date time variables",
 	{
+	skip_on_cran()
 		# create data with character dates
 		df_char_dates = data.frame(
 			actor1 = c("USA", "USA", "China", "China", "Russia", "Russia"),
@@ -487,6 +462,7 @@ test_that(
 test_that(
 	"netify handles Date class time variables",
 	{
+	skip_on_cran()
 		# create data with actual Date objects
 		df_dates = data.frame(
 			i = rep(c("A", "B", "C"), each = 6),
@@ -523,6 +499,7 @@ test_that(
 test_that(
 	"netify handles POSIXct datetime variables",
 	{
+	skip_on_cran()
 		# create data with POSIXct timestamps
 		df_posix = data.frame(
 			sender = c("server1", "server2", "server1", "server3"),
@@ -554,6 +531,7 @@ test_that(
 test_that(
 	"netify handles character time with custom formats",
 	{
+	skip_on_cran()
 		# create data with quarterly time periods
 		df_quarters = data.frame(
 			company1 = rep(c("Apple", "Google", "Microsoft"), 4),
@@ -581,6 +559,7 @@ test_that(
 test_that(
 	"netify handles mixed format time that sorts correctly",
 	{
+	skip_on_cran()
 		# create data with month names
 		df_months = data.frame(
 			from = c("A", "B", "A", "C", "B", "C"),
@@ -609,6 +588,7 @@ test_that(
 test_that(
 	"netify with character time and specific output format",
 	{
+	skip_on_cran()
 		# test with longit_array output
 		df_char_time = data.frame(
 			i = rep(c("X", "Y", "Z"), 3),
@@ -637,6 +617,7 @@ test_that(
 test_that(
 	"netify preserves time ordering with character dates",
 	{
+	skip_on_cran()
 		# create data with dates that need proper ordering
 		df_unordered = data.frame(
 			a1 = c("A", "B", "A", "B", "C", "C"),
