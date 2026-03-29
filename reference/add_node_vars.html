@@ -215,6 +215,7 @@ quadratically.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">node_data_stored</span><span class="op">)</span> <span class="co"># "actor" plus variable names</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "actor"     "i_polity2" "i_gdp"     "i_log_gdp" "i_pop"     "i_log_pop"</span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Longitudinal example</span></span></span>
 <span class="r-in"><span><span class="va">verbCoop_longit_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">icews</span>, <span class="co"># data.frame input</span></span></span>
@@ -225,10 +226,6 @@ quadratically.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Prepare longitudinal nodal data - one row per actor-time combination</span></span></span>
 <span class="r-in"><span><span class="va">nodeData_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"i"</span>, <span class="st">"year"</span>, <span class="va">nvars</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">nodeData_longit</span><span class="op">)</span> <span class="co"># "data.frame"</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "data.frame"</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">nodeData_longit</span><span class="op">)</span> <span class="co"># Number of actor-time combinations</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1976</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Add nodal variables with time dimension</span></span></span>
 <span class="r-in"><span><span class="va">verbCoop_longit_net</span> <span class="op">&lt;-</span> <span class="fu">add_node_vars</span><span class="op">(</span></span></span>
@@ -238,27 +235,10 @@ quadratically.</p>
 <span class="r-in"><span>    time <span class="op">=</span> <span class="st">"year"</span>, <span class="co"># column identifying time</span></span></span>
 <span class="r-in"><span>    node_vars <span class="op">=</span> <span class="va">nvars</span> <span class="co"># variables to add</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Access longitudinal nodal data</span></span></span>
-<span class="r-in"><span><span class="va">node_data_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">verbCoop_longit_net</span>, <span class="st">"nodal_data"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">node_data_longit</span><span class="op">)</span> <span class="co"># "data.frame"</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "data.frame"</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">node_data_longit</span><span class="op">)</span> <span class="co"># Now includes time column</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         actor time i_polity2       i_gdp i_log_gdp    i_pop i_log_pop</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Afghanistan 2002        NA  7555185296  22.74550 21000256  16.86005</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 Afghanistan 2003        NA  8222480251  22.83014 22645130  16.93546</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 Afghanistan 2004        NA  8338755823  22.84418 23553551  16.97479</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 Afghanistan 2005        NA  9275174321  22.95061 24411191  17.01055</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 Afghanistan 2006        NA  9772082812  23.00280 25442944  17.05195</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 Afghanistan 2007        NA 11123202208  23.13230 25903301  17.06988</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Filter to specific time period</span></span></span>
-<span class="r-in"><span><span class="va">node_data_2010</span> <span class="op">&lt;-</span> <span class="va">node_data_longit</span><span class="op">[</span><span class="va">node_data_longit</span><span class="op">$</span><span class="va">time</span> <span class="op">==</span> <span class="st">"2010"</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">node_data_2010</span><span class="op">)</span> <span class="co"># Number of actors in 2010</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 152</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example: Add variables from external source</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Add variables from external source</span></span></span>
 <span class="r-in"><span><span class="co"># Suppose you have additional actor data</span></span></span>
 <span class="r-in"><span><span class="va">external_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews_10</span><span class="op">$</span><span class="va">i</span><span class="op">)</span>,</span></span>
@@ -272,7 +252,7 @@ quadratically.</p>
 <span class="r-in"><span>    actor <span class="op">=</span> <span class="st">"i"</span>,</span></span>
 <span class="r-in"><span>    node_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"democracy_score"</span>, <span class="st">"trade_openness"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

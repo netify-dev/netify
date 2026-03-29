@@ -188,7 +188,7 @@ net_log_compact <- mutate_weights(
 )
 
 # Example 11: Longitudinal network transformation
-if (FALSE) { # \dontrun{
+# \donttest{
 # Create longitudinal network
 net_longit <- netify(
     icews,
@@ -204,7 +204,7 @@ net_longit_log <- mutate_weights(
     transform_fn = log1p,
     new_name = "log_verbCoop"
 )
-} # }
+# }
 
 # Example 12: Custom transformation with multiple operations
 net_custom <- mutate_weights(

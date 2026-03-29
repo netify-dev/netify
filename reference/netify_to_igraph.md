@@ -113,11 +113,11 @@ ig <- netify_to_igraph(verbCoop_net)
 
 # Examine the result
 ig
-#> IGRAPH 116232d DNW- 152 9976 -- 
+#> IGRAPH 814d279 DNW- 152 9976 -- 
 #> + attr: name (v/c), i_polity2 (v/n), i_log_gdp (v/n), i_log_pop (v/n),
 #> | weight (e/n), verbCoop (e/n), matlCoop (e/n), verbConf (e/n),
 #> | matlConf (e/n)
-#> + edges from 116232d (vertex names):
+#> + edges from 814d279 (vertex names):
 #>  [1] Afghanistan->Argentina  Afghanistan->Armenia    Afghanistan->Australia 
 #>  [4] Afghanistan->Austria    Afghanistan->Azerbaijan Afghanistan->Bahrain   
 #>  [7] Afghanistan->Bangladesh Afghanistan->Belgium    Afghanistan->Brazil    
@@ -727,11 +727,11 @@ names(ig_list) # time period labels
 # Access specific time period
 ig_2002 <- ig_list[["2002"]]
 ig_2002
-#> IGRAPH 3b5d616 DNW- 152 8692 -- 
+#> IGRAPH ddf95fa DNW- 152 8692 -- 
 #> + attr: name (v/c), i_polity2 (v/n), i_log_gdp (v/n), i_log_pop (v/n),
 #> | weight (e/n), verbCoop (e/n), matlCoop (e/n), verbConf (e/n),
 #> | matlConf (e/n)
-#> + edges from 3b5d616 (vertex names):
+#> + edges from ddf95fa (vertex names):
 #>  [1] Afghanistan->Albania    Afghanistan->Armenia    Afghanistan->Australia 
 #>  [4] Afghanistan->Austria    Afghanistan->Azerbaijan Afghanistan->Bahrain   
 #>  [7] Afghanistan->Bangladesh Afghanistan->Belgium    Afghanistan->Brazil    

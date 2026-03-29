@@ -171,6 +171,7 @@ head(node_data_stored)
 names(node_data_stored) # "actor" plus variable names
 #> [1] "actor"     "i_polity2" "i_gdp"     "i_log_gdp" "i_pop"     "i_log_pop"
 
+# \donttest{
 # Longitudinal example
 verbCoop_longit_net <- netify(
     icews, # data.frame input
@@ -181,10 +182,6 @@ verbCoop_longit_net <- netify(
 
 # Prepare longitudinal nodal data - one row per actor-time combination
 nodeData_longit <- unique(icews[, c("i", "year", nvars)])
-class(nodeData_longit) # "data.frame"
-#> [1] "data.frame"
-nrow(nodeData_longit) # Number of actor-time combinations
-#> [1] 1976
 
 # Add nodal variables with time dimension
 verbCoop_longit_net <- add_node_vars(
@@ -194,27 +191,10 @@ verbCoop_longit_net <- add_node_vars(
     time = "year", # column identifying time
     node_vars = nvars # variables to add
 )
+# }
 
-# Access longitudinal nodal data
-node_data_longit <- attr(verbCoop_longit_net, "nodal_data")
-class(node_data_longit) # "data.frame"
-#> [1] "data.frame"
-head(node_data_longit) # Now includes time column
-#>         actor time i_polity2       i_gdp i_log_gdp    i_pop i_log_pop
-#> 1 Afghanistan 2002        NA  7555185296  22.74550 21000256  16.86005
-#> 2 Afghanistan 2003        NA  8222480251  22.83014 22645130  16.93546
-#> 3 Afghanistan 2004        NA  8338755823  22.84418 23553551  16.97479
-#> 4 Afghanistan 2005        NA  9275174321  22.95061 24411191  17.01055
-#> 5 Afghanistan 2006        NA  9772082812  23.00280 25442944  17.05195
-#> 6 Afghanistan 2007        NA 11123202208  23.13230 25903301  17.06988
-
-# Filter to specific time period
-node_data_2010 <- node_data_longit[node_data_longit$time == "2010", ]
-nrow(node_data_2010) # Number of actors in 2010
-#> [1] 152
-
-# Example: Add variables from external source
-if (FALSE) { # \dontrun{
+# \donttest{
+# Add variables from external source
 # Suppose you have additional actor data
 external_data <- data.frame(
     i = unique(icews_10$i),
@@ -228,5 +208,5 @@ verbCoop_net <- add_node_vars(
     actor = "i",
     node_vars = c("democracy_score", "trade_openness")
 )
-} # }
+# }
 ```

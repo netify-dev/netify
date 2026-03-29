@@ -172,8 +172,17 @@ head(dyad_df_longit[, c("from", "to", "time", "verbCoop")])
 #> 6 Afghanistan    Bahrain 2002       10
 
 # Use the output for further analysis
-if (FALSE) { # \dontrun{
+# \donttest{
 # For example, regression analysis
 lm(verbCoop ~ i_polity2_from + i_polity2_to + verbConf, data = dyad_df)
-} # }
+#> 
+#> Call:
+#> lm(formula = verbCoop ~ i_polity2_from + i_polity2_to + verbConf, 
+#>     data = dyad_df)
+#> 
+#> Coefficients:
+#>    (Intercept)  i_polity2_from    i_polity2_to        verbConf  
+#>        13.6092         -0.1287         -0.2820          4.2253  
+#> 
+# }
 ```

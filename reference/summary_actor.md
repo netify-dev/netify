@@ -228,6 +228,7 @@ Cassy Dorff, Shahryar Minhas
 ## Examples
 
 ``` r
+# \donttest{
 # Load example data
 data(icews)
 
@@ -293,7 +294,6 @@ head(actor_stats)
 #> 6                   0.0
 
 # Add custom statistics
-# Maximum incoming and outgoing tie weights
 max_out <- function(mat) apply(mat, 1, max, na.rm = TRUE)
 max_in <- function(mat) apply(mat, 2, max, na.rm = TRUE)
 
@@ -354,19 +354,5 @@ head(actor_stats_custom)
 #> 4                   0.0     147    176
 #> 5                   0.0     424    469
 #> 6                   0.0     547    609
-
-# For networks where weights represent distances
-# (larger values = weaker relationships)
-distance_net <- netify(
-    icews,
-    actor1 = "i", actor2 = "j",
-    weight = "matlConf" # conflict measure
-)
-#> ✖ Warning: there are repeating dyads within time periods in the dataset. When `sum_dyads = FALSE` and `weight` variable is supplied but there are repeating dyads in the dataset, we cannot uniquely identify edges. Try sum_dyads=TRUE or remove repeating dyads.
-
-# Don't invert weights for centrality calculations
-actor_stats_dist <- summary_actor(
-    distance_net,
-    invert_weights_for_igraph = FALSE
-)
+# }
 ```

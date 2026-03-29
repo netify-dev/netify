@@ -234,7 +234,7 @@ class(matlCoop_2002) # "matrix" "array"
 #> [1] "matrix" "array" 
 
 # Example: Add variables from a different source
-if (FALSE) { # \dontrun{
+# \donttest{
 # Create a new data.frame with trade information
 trade_data <- data.frame(
     i = icews_10$i,
@@ -243,6 +243,7 @@ trade_data <- data.frame(
     trade_balance = rnorm(nrow(icews_10))
 )
 class(trade_data) # "data.frame"
+#> [1] "data.frame"
 
 verbCoop_net <- add_dyad_vars(
     netlet = verbCoop_net,
@@ -251,5 +252,5 @@ verbCoop_net <- add_dyad_vars(
     dyad_vars = c("trade_volume", "trade_balance"),
     dyad_vars_symmetric = c(FALSE, FALSE)
 )
-} # }
+# }
 ```

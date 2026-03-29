@@ -133,6 +133,7 @@ Cassy Dorff, Shahryar Minhas
 ## Examples
 
 ``` r
+# \donttest{
 # load example directed event data from ICEWS
 data(icews)
 
@@ -175,4 +176,5 @@ icews_subset_3 <- subset_netify(
     ),
     time = c("2010", "2011")
 )
+# }
 ```

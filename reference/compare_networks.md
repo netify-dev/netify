@@ -348,7 +348,7 @@ print(comp)
 #> Algorithm: correlation
 #> Permutation type: classic
 #> Correlation type: pearson
-#> Random seed: 346871191
+#> Random seed: 551581484
 #> ────────────────────────────────────────────────────────────────────────────────
 #> 
 #> ── Edge Comparison Summary ──
@@ -408,7 +408,7 @@ print(layer_comp)
 #> Algorithm: all
 #> Permutation type: classic
 #> Correlation type: pearson
-#> Random seed: 2137934383
+#> Random seed: 1040204134
 #> ────────────────────────────────────────────────────────────────────────────────
 #> 
 #> ── Edge Comparison Summary ──

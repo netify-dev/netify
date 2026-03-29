@@ -208,10 +208,19 @@ or n × (n-1) / 2 for undirected networks).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 Afghanistan    Bahrain 2002       10</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Use the output for further analysis</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># For example, regression analysis</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">verbCoop</span> <span class="op">~</span> <span class="va">i_polity2_from</span> <span class="op">+</span> <span class="va">i_polity2_to</span> <span class="op">+</span> <span class="va">verbConf</span>, data <span class="op">=</span> <span class="va">dyad_df</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> lm(formula = verbCoop ~ i_polity2_from + i_polity2_to + verbConf, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     data = dyad_df)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    (Intercept)  i_polity2_from    i_polity2_to        verbConf  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        13.6092         -0.1287         -0.2820          4.2253  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
