@@ -193,6 +193,14 @@ subset_netify <- function(
 	is_multilayer_orig <- nlayers > 1
 	is_longit <- netify_type != "cross_sec"
 
+	# friendly error if user passes time on a cross-sectional network
+	if (!is_longit && !is.null(time)) {
+		cli::cli_abort(c(
+			"!" = "{.arg time} was supplied but this is a cross-sectional network (no time dimension).",
+			"i" = "Drop the {.arg time} argument, or build a longitudinal netify with {.code time = <your_time_column>}."
+		))
+	}
+
 	# check if output should be multilayer
 	nlayers_subset <- if (!is.null(layers)) length(layers) else nlayers
 	is_multilayer_out <- nlayers_subset > 1
@@ -218,8 +226,7 @@ subset_netify <- function(
 		layers = layers
 	)
 
-	# for longit_list, peek returns raw matrices
-	# we need to rebuild the proper netify structure
+	# rebuild the netify structure on top of peek's raw matrices
 	if (netify_type == "longit_list" && is.list(sub_net)) {
 		# get a reference element to copy attributes from
 		ref_elem <- netlet[[1]]
@@ -313,10 +320,21 @@ subset_netify <- function(
 		}
 	}
 
+	# bipartite uses both row and column actors as the universe
+	is_bipartite <- identical(new_attrs$mode, "bipartite") ||
+		identical(obj_attrs$mode, "bipartite")
+
 	# get actors in subsetted netlet efficiently
 	if (is.list(sub_net) && is_longit_out) {
 		# for lists, get unique actors across all time periods at once
-		all_actors <- unique(unlist(lapply(sub_net, rownames), use.names = FALSE))
+		if (is_bipartite) {
+			all_actors <- unique(c(
+				unlist(lapply(sub_net, rownames), use.names = FALSE),
+				unlist(lapply(sub_net, colnames), use.names = FALSE)
+			))
+		} else {
+			all_actors <- unique(unlist(lapply(sub_net, rownames), use.names = FALSE))
+		}
 
 		# update list-specific attributes
 		new_attrs$names <- names(sub_net)
@@ -338,7 +356,11 @@ subset_netify <- function(
 			})
 		}
 	} else {
-		all_actors <- rownames(sub_net)
+		if (is_bipartite) {
+			all_actors <- unique(c(rownames(sub_net), colnames(sub_net)))
+		} else {
+			all_actors <- rownames(sub_net)
+		}
 
 		# update dimensions if not already done
 		if (!extracted_single_time) {
@@ -376,8 +398,7 @@ subset_netify <- function(
 	if (!is.null(new_attrs$nodal_data)) {
 		nodal_data <- new_attrs$nodal_data
 
-		# create filter once — always filter by time for longitudinal networks,
-		# including when extracted_single_time is TRUE (single period subset)
+		# filter by time for longitudinal networks
 		if (is_longit) {
 			keep_rows <- nodal_data$actor %in% all_actors & nodal_data$time %in% time
 		} else {

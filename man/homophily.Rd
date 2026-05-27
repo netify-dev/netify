@@ -9,6 +9,7 @@ homophily(
   attribute,
   method = "correlation",
   threshold = 0,
+  signed_handling = c("abs", "drop_negative", "preserve_sign"),
   significance_test = TRUE,
   n_permutations = 1000,
   alpha = 0.05,
@@ -38,6 +39,17 @@ it should take the network matrix and return a logical matrix. Default is 0
 (any positive weight is a tie). Common values: 0 (default), mean(weights),
 median(weights), or quantile-based thresholds. For pre-binarized networks,
 consider using \code{mutate_weights()} first.}
+
+\item{signed_handling}{Character. Strategy for signed (negative-weight) edges:
+\describe{
+\item{\code{"abs"}}{(default) Take absolute values before thresholding so
+any tie magnitude — positive or negative — can become a connection.}
+\item{\code{"drop_negative"}}{Set negative weights to zero before
+thresholding (positive ties only).}
+\item{\code{"preserve_sign"}}{Treat any non-zero entry (positive or
+negative) as a connection; \code{threshold} is ignored for sign decisions.}
+}
+Ignored when the network has no negative weights.}
 
 \item{significance_test}{Logical. Whether to perform permutation test. Default TRUE.}
 
@@ -73,6 +85,16 @@ the correlation between attribute similarity and tie presence, with support for
 multiple similarity metrics and significance testing.
 }
 \details{
+\strong{Auto-promotion to \code{categorical}:}
+
+If you leave \code{method} at its default and pass a \code{character},
+\code{factor}, or \code{logical} attribute, \code{homophily()} will
+switch to \code{method = "categorical"} automatically and inform you
+once per attribute. This avoids the C++-level error that would
+otherwise come from feeding non-numeric data to the correlation-based
+similarity routine. Pass \code{method = "categorical"} (or any other
+explicit choice) to silence the message.
+
 \strong{Similarity Metrics:}
 
 For continuous attributes:
@@ -109,6 +131,18 @@ For more complex binarization needs (e.g., different thresholds by time period),
 consider using \code{mutate_weights()} to pre-process your network.
 }
 \examples{
+# quick homophily check on the bundled classroom friendship data
+data(classroom_edges)
+data(classroom_nodes)
+net <- netify(
+    classroom_edges,
+    actor1 = "from", actor2 = "to",
+    symmetric = TRUE,
+    nodal_data = classroom_nodes
+)
+# do students cluster by gender?
+homophily(net, attribute = "gender", method = "categorical")
+
 \dontrun{
 # Basic homophily analysis with default threshold (> 0)
 homophily_default <- homophily(net, attribute = "group")
@@ -143,4 +177,7 @@ homophily_combined <- homophily(
 )
 }
 
+}
+\author{
+Cassy Dorff, Shahryar Minhas
 }

@@ -281,13 +281,7 @@ test_that(
 	}
 )
 
-# cross-sectional, symmetric non-weighted network sum dyads
-# note that this is a strange case because the user is noting
-# the data is symmetric but the data.frame itself has
-# repeating dyads like a-b and b-a, which we end up
-# counting up as separate interactions. in the case
-# of event data this might be reasonable but not
-# for every other case
+# cross-sectional, symmetric non-weighted network with repeating dyads summed
 test_that(
 	"get_adjacency: cross-sectional, symmetric, non-weighted network, sum dyads",
 	{

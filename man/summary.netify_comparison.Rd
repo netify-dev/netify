@@ -17,3 +17,6 @@ A summary data frame or list depending on comparison type
 \description{
 Provides a concise summary of network comparison results.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

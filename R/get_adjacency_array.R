@@ -102,8 +102,7 @@ get_adjacency_array <- function(
 	# create weight string for storage as attribute in netify object
 	weight_label <- weight_string_label(weight, sum_dyads)
 
-	# if bipartite network then force diag_to_NA to be FALSE
-	# and force asymmetric, create copy to preserve user choice
+	# bipartite forces diag_to_NA=FALSE and asymmetric; preserve user choice
 	user_symmetric <- symmetric
 	if (mode == "bipartite") {
 		diag_to_NA <- FALSE
@@ -133,7 +132,7 @@ get_adjacency_array <- function(
 	time_pds <- time_info$time_labels
 	time_pds_num <- sort(unique(time_info$numeric_time))
 
-	# get vector of actors - optimized extraction
+	# get vector of actors
 	actors_rows <- unique_vector(dyad_data[, actor1])
 	actors_cols <- unique_vector(dyad_data[, actor2])
 	actors <- unique_vector(actors_rows, actors_cols)
@@ -167,10 +166,11 @@ get_adjacency_array <- function(
 	actor_pds$min_time <- time_pds[1]
 	actor_pds$max_time <- time_pds[length(time_pds)]
 
-	# check if there are repeating dyads
+	# auto-promote sum_dyads if repeats are present and weight is supplied
 	num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2, time)
 	if (num_repeat_dyads > 0) {
-		edge_value_check(w_orig, sum_dyads, TRUE)
+		evc <- edge_value_check(w_orig, sum_dyads, TRUE)
+		sum_dyads <- evc$sum_dyads
 	}
 
 	# aggregate data if sum dyads selected
@@ -178,9 +178,15 @@ get_adjacency_array <- function(
 		dyad_data <- aggregate_dyad(dyad_data, actor1, actor2, time, weight, symmetric, missing_to_zero)
 	}
 
-	# remove zeros early if missing_to_zero is TRUE
+	# drop zero-weight rows but keep NaN/NA so they propagate as missing
 	if (missing_to_zero) {
-		dyad_data <- dyad_data[dyad_data[, weight] != 0, ]
+		w_vec <- dyad_data[, weight]
+		nan_rows <- is.nan(w_vec)
+		if (any(nan_rows)) {
+			w_vec[nan_rows] <- NA_real_
+			dyad_data[, weight] <- w_vec
+		}
+		dyad_data <- dyad_data[which(is.na(w_vec) | w_vec != 0), , drop = FALSE]
 	}
 
 	# pre-split data by time periods for faster subsetting
@@ -203,12 +209,12 @@ get_adjacency_array <- function(
 	# binary weight check vector
 	bin_check <- logical(t)
 
-	# iterate through third mode and fill in - optimized loop
+	# fill in array by time slice
 	for (t_idx in seq_along(time_pds)) {
 		time_pd <- time_pds[t_idx]
 		time_pd_num <- time_pds_num[t_idx]
 
-		# get indices for this time period using pre-split data
+		# get indices for this time period
 		slice_indices <- time_indices[[as.character(time_pd_num)]]
 		if (is.null(slice_indices)) slice_indices <- integer(0)
 
@@ -218,7 +224,7 @@ get_adjacency_array <- function(
 			slice_actor2 <- dyad_actor2[slice_indices]
 			value <- dyad_weight[slice_indices]
 
-			# pre-compute matrix indices to avoid repeated match() calls
+			# pre-compute matrix indices
 			mat_row_indices <- match(slice_actor1, actors_rows)
 			mat_col_indices <- match(slice_actor2, actors_cols)
 		} else {
@@ -231,7 +237,7 @@ get_adjacency_array <- function(
 		is_binary <- length(value) == 0 || all(value %in% c(0, 1))
 		bin_check[t_idx] <- is_binary
 
-		# get adj mat filled in using optimized C++ function
+		# build adjacency matrix
 		adj_mat <- get_matrix(
 			n_rows = length(actors_rows),
 			n_cols = length(actors_cols),
@@ -249,9 +255,7 @@ get_adjacency_array <- function(
 		adj_out[, , as.character(time_pd)] <- adj_mat
 	}
 
-	# if user left weight NULL and set sum_dyads
-	# to FALSE then record weight as NULL for
-	# attribute purposes
+	# record weight as NULL when no weight supplied and sum_dyads is FALSE
 	if (!sum_dyads && is.null(w_orig)) {
 		weight <- NULL
 	}
@@ -263,7 +267,7 @@ get_adjacency_array <- function(
 		layer_label <- weight
 	}
 
-	# add attributes to array efficiently
+	# add attributes to array
 	class(adj_out) <- "netify"
 	attributes(adj_out) <- c(attributes(adj_out), list(
 		netify_type = "longit_array",

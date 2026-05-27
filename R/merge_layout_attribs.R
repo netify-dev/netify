@@ -45,12 +45,24 @@ merge_layout_attribs <- function(netlet, nodes_list, edges_list) {
 		net_dfs$nodal_data$x <- node_x_lookup[net_dfs$nodal_data$name]
 		net_dfs$nodal_data$y <- node_y_lookup[net_dfs$nodal_data$name]
 
-		# create lookup tables for edge coordinates using composite keys
-		edge_key_layout <- paste(edges$from, edges$to, sep = "__|__")
-		edge_x1_lookup <- setNames(edges$x1, edge_key_layout)
-		edge_y1_lookup <- setNames(edges$y1, edge_key_layout)
-		edge_x2_lookup <- setNames(edges$x2, edge_key_layout)
-		edge_y2_lookup <- setNames(edges$y2, edge_key_layout)
+		# build edge coordinate lookups; index both directions for undirected nets
+		is_symmetric <- isTRUE(all(obj_attrs$symmetric))
+		if (is_symmetric) {
+			edge_key_layout <- c(
+				paste(edges$from, edges$to, sep = "__|__"),
+				paste(edges$to, edges$from, sep = "__|__")
+			)
+			edge_x1_lookup <- setNames(c(edges$x1, edges$x2), edge_key_layout)
+			edge_y1_lookup <- setNames(c(edges$y1, edges$y2), edge_key_layout)
+			edge_x2_lookup <- setNames(c(edges$x2, edges$x1), edge_key_layout)
+			edge_y2_lookup <- setNames(c(edges$y2, edges$y1), edge_key_layout)
+		} else {
+			edge_key_layout <- paste(edges$from, edges$to, sep = "__|__")
+			edge_x1_lookup <- setNames(edges$x1, edge_key_layout)
+			edge_y1_lookup <- setNames(edges$y1, edge_key_layout)
+			edge_x2_lookup <- setNames(edges$x2, edge_key_layout)
+			edge_y2_lookup <- setNames(edges$y2, edge_key_layout)
+		}
 
 		# generate composite keys for edges in the data frame
 		edge_key_df <- paste(net_dfs$edge_data$from, net_dfs$edge_data$to, sep = "__|__")
@@ -111,16 +123,28 @@ merge_layout_attribs <- function(netlet, nodes_list, edges_list) {
 
 		# assign edge coordinates if both edges and edge data exist
 		if (nrow(edges_combined) > 0 && nrow(net_dfs$edge_data) > 0) {
-			# create lookup tables for edge coordinates with composite keys
-			edge_key_layout <- paste(
-				edges_combined$from, edges_combined$to,
-				edges_combined$time,
-				sep = "__|__"
-			)
-			edge_x1_lookup <- setNames(edges_combined$x1, edge_key_layout)
-			edge_y1_lookup <- setNames(edges_combined$y1, edge_key_layout)
-			edge_x2_lookup <- setNames(edges_combined$x2, edge_key_layout)
-			edge_y2_lookup <- setNames(edges_combined$y2, edge_key_layout)
+			# build edge coordinate lookups; index both directions for undirected nets
+			is_symmetric <- isTRUE(all(obj_attrs$symmetric))
+			if (is_symmetric) {
+				edge_key_layout <- c(
+					paste(edges_combined$from, edges_combined$to, edges_combined$time, sep = "__|__"),
+					paste(edges_combined$to, edges_combined$from, edges_combined$time, sep = "__|__")
+				)
+				edge_x1_lookup <- setNames(c(edges_combined$x1, edges_combined$x2), edge_key_layout)
+				edge_y1_lookup <- setNames(c(edges_combined$y1, edges_combined$y2), edge_key_layout)
+				edge_x2_lookup <- setNames(c(edges_combined$x2, edges_combined$x1), edge_key_layout)
+				edge_y2_lookup <- setNames(c(edges_combined$y2, edges_combined$y1), edge_key_layout)
+			} else {
+				edge_key_layout <- paste(
+					edges_combined$from, edges_combined$to,
+					edges_combined$time,
+					sep = "__|__"
+				)
+				edge_x1_lookup <- setNames(edges_combined$x1, edge_key_layout)
+				edge_y1_lookup <- setNames(edges_combined$y1, edge_key_layout)
+				edge_x2_lookup <- setNames(edges_combined$x2, edge_key_layout)
+				edge_y2_lookup <- setNames(edges_combined$y2, edge_key_layout)
+			}
 
 			# generate composite keys for edges in the data frame
 			edge_key_df <- paste(

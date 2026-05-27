@@ -15,6 +15,63 @@ check_dependency <- function(library_name) {
 }
 assert_dependency <- checkmate::makeAssertionFunction(check_dependency)
 
+#' Convert a sparseMatrix input to a dense base matrix with a size guard
+#'
+#' netify stores adjacencies densely. Accepting a large, very sparse
+#' sparseMatrix and silently densifying can balloon RAM (e.g. N = 15K
+#' -> ~1.7 GB for the dense allocation, regardless of how sparse the
+#' source was). Bail out unless the caller opts in via
+#' `force_dense = TRUE`.
+#'
+#' @param x A Matrix-package sparse matrix (e.g. dgCMatrix).
+#' @param force_dense Logical; if TRUE skip the size/density guard.
+#'
+#' @return A base R matrix.
+#'
+#' @keywords internal
+#' @noRd
+densify_sparse_input <- function(x, force_dense = FALSE) {
+	# Matrix package must be present to interrogate sparse matrices
+	if (!requireNamespace("Matrix", quietly = TRUE)) {
+		cli::cli_abort(
+			"Sparse matrix input requires the {.pkg Matrix} package."
+		)
+	}
+
+	# basic shape
+	dims <- dim(x)
+	n_row <- dims[1]; n_col <- dims[2]
+	n_cells <- as.numeric(n_row) * as.numeric(n_col)
+
+	# density = nonzero / total cells. pattern matrices (ngCMatrix) have
+	# no @x slot, so guard the slot access and fall back to Matrix::nnzero
+	nnz <- if (methods::.hasSlot(x, "x")) length(x@x) else Matrix::nnzero(x)
+	density <- nnz / max(n_cells, 1)
+
+	# guard against accidental gigabyte allocations: large N with very
+	# sparse fill is almost certainly a mistake on the user's end
+	too_big <- max(n_row, n_col) > 5000L
+	too_sparse <- density < 0.01
+	if (!isTRUE(force_dense) && too_big && too_sparse) {
+		gb <- round((n_cells * 8) / (1024^3), 2)
+		cli::cli_abort(
+			c(
+				"x" = "Refusing to densify a {n_row}x{n_col} sparseMatrix at density {round(density * 100, 3)}%.",
+				"i" = "Dense storage would allocate ~{gb} GB (8 bytes per cell).",
+				"!" = "Pass {.code force_dense = TRUE} to override, or build from an edgelist {.code data.frame} to skip the matrix intermediate. See {.code ?netify_workflows}."
+			)
+		)
+	}
+
+	# densify via Matrix dispatch (handles dgCMatrix, dgTMatrix, lgCMatrix, ...)
+	out <- as.matrix(x)
+	# preserve dimnames in case Matrix dropped them
+	if (is.null(dimnames(out)) && !is.null(dimnames(x))) {
+		dimnames(out) <- dimnames(x)
+	}
+	out
+}
+
 #' NULL-coalescing operator
 #'
 #'
@@ -300,4 +357,28 @@ list_to_array <- function(list_of_mats) {
 
 	#
 	return(arr)
+}
+
+
+#' Snapshot the global RNG and return a restorer
+#'
+#' Captures `.Random.seed` from the global environment (if set) so a
+#' caller-supplied `set.seed(...)` inside a function doesn't bleed into
+#' the user's random stream. Returns a zero-arg function that puts the
+#' RNG back exactly the way it was — even if no seed existed at entry.
+#'
+#' @return A function that, when called, restores the global RNG state.
+#' @keywords internal
+#' @noRd
+save_rng_state <- function() {
+	had_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+	old_seed <- if (had_seed) get(".Random.seed", envir = .GlobalEnv, inherits = FALSE) else NULL
+	function() {
+		if (had_seed) {
+			assign(".Random.seed", old_seed, envir = .GlobalEnv)
+		} else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+			rm(".Random.seed", envir = .GlobalEnv)
+		}
+		invisible(NULL)
+	}
 }

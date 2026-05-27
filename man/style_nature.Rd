@@ -13,3 +13,6 @@ List of plot arguments
 A network style inspired by Nature journal's clean scientific
 visualization style
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

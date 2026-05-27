@@ -13,3 +13,6 @@ List of plot arguments
 A network style inspired by the Wolf School armor from The Witcher 3.
 The most balanced school - Geralt's home school at Kaer Morhen.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

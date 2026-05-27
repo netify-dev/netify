@@ -26,7 +26,6 @@ is_netify <- function(x) {
 #' @noRd
 
 netify_check <- function(netlet) {
-	# check if `dyad_data` is df
 	if (!is_netify(netlet)) {
 		cli::cli_abort("check data type. Inputted object is not a `netify` object.")
 	}
@@ -126,7 +125,6 @@ netify_check <- function(netlet) {
 #' @export new_netify
 
 new_netify <- function(data, ...) {
-	# merge user arguments with defaults
 	default_params <- list(
 		netify_type = NULL,
 		actor_time_uniform = NULL,
@@ -145,17 +143,15 @@ new_netify <- function(data, ...) {
 		graph_data = NULL
 	)
 
-	# merge user params with defaults
 	user_params <- list(...)
 	final_params <- utils::modifyList(default_params, user_params)
 
-	# figure out class so we can specify netify_type
 	data_class <- class(data)[1]
 	if (!data_class %in% c("matrix", "array", "list")) {
 		cli::cli_abort("`data` must be a matrix, array, or list.")
 	}
 
-	# check for multilayer networks
+	# reject multilayer inputs here
 	if ((data_class == "array" && length(dim(data)) > 3) ||
 		(data_class == "list" && any(
 			sapply(data, function(x) !is.matrix(x) || length(dim(x)) > 2)
@@ -165,26 +161,23 @@ new_netify <- function(data, ...) {
 		)
 	}
 
-	# determine netify_type based on data class
 	netify_type <- switch(data_class,
 		"matrix" = "cross_sec",
 		"array"  = "longit_array",
 		"list"   = "longit_list"
 	)
 
-	# based on what hasnt been specified by user,
-	# determine what we netify attributes we need to figure out
+	# attributes the user did not set must be detected
 	detect_symmetric <- is.null(final_params$symmetric)
 	detect_mode <- is.null(final_params$mode)
 	detect_diag_to_NA <- is.null(final_params$diag_to_NA)
 	detect_missing_to_zero <- is.null(final_params$missing_to_zero)
 	detect_weight <- is.null(final_params$weight)
+	detect_is_binary <- is.null(final_params$is_binary)
 	detect_actor_time_uniform <- is.null(final_params$actor_time_uniform)
 	detect_actor_pds <- is.null(final_params$actor_pds)
 
-	# handle cross_sec
 	if (netify_type == "cross_sec") {
-		#
 		mat <- data
 		if (detect_symmetric) {
 			final_params$symmetric <- check_symmetric(mat)
@@ -210,18 +203,17 @@ new_netify <- function(data, ...) {
 				final_params$detail_weight <- paste0("Edges weighted by ", final_params$weight)
 				final_params$is_binary <- FALSE
 			}
+		} else if (detect_is_binary) {
+			final_params$is_binary <- check_binary(mat)
 		}
 
-		# assign row/col names based on mode
 		mat <- assign_dimnames(mat, final_params$mode)
 		data <- mat
 
-		#
 		if (detect_actor_time_uniform) {
 			final_params$actor_time_uniform <- TRUE
 		}
 
-		# create actor "pds" frame
 		if (detect_actor_pds) {
 			final_params$actor_pds <- data.frame(
 				actor = unique(c(rownames(mat), colnames(mat))),
@@ -230,30 +222,22 @@ new_netify <- function(data, ...) {
 			)
 		}
 
-		# handle longit_array
 	} else if (netify_type == "longit_array") {
-		#
 		dims <- dim(data)
 
-		# get mode assignment
 		if (detect_mode) {
 			final_params$mode <- guess_mode(data[, , 1, drop = TRUE])
 		}
 
-		# clean up row/col names if necessary
 		data <- assign_dimnames(data, final_params$mode)
 
-		# name time dimension
 		if (is.null(dimnames(data)[[3]])) {
 			cdim <- dimnames(data)
 			cdim[[3]] <- seq_len(dims[3])
 			dimnames(data) <- cdim
 		}
 
-		# figure out if net is symmetric/weighted
-		# add break here too?
-		# should probably do all period
-		# iteration in one go ...
+		# scan slices to detect symmetry and binary status
 		any_not_sym <- FALSE
 		any_nonbinary <- FALSE
 		for (ii in seq_len(dims[3])) {
@@ -297,14 +281,20 @@ new_netify <- function(data, ...) {
 				final_params$detail_weight <- paste0("Edges weighted by ", final_params$weight)
 				final_params$is_binary <- FALSE
 			}
+		} else if (detect_is_binary) {
+			any_nonbin <- FALSE
+			for (ii in seq_len(dims[3])) {
+				if (!check_binary(data[, , ii, drop = TRUE])) {
+					any_nonbin <- TRUE; break
+				}
+			}
+			final_params$is_binary <- !any_nonbin
 		}
 
-		#
 		if (detect_actor_time_uniform) {
 			final_params$actor_time_uniform <- TRUE
 		}
 
-		# create actor pds frame
 		if (detect_actor_pds) {
 			pds <- dimnames(data)[[3]]
 			final_params$actor_pds <- data.frame(
@@ -314,17 +304,12 @@ new_netify <- function(data, ...) {
 			)
 		}
 
-		# handle longit_list
 	} else if (netify_type == "longit_list") {
-		# if list has no names => t1,t2...
 		if (is.null(names(data))) {
 			names(data) <- seq_along(data)
 		}
 
-		# fix row/colnames in each slice if missing
-		# can't finalize mode until we see the first slice or do detection
-		# so let's do minimal approach:
-		# if we can't detect mode yet, do it from first slice
+		# infer mode from first slice if needed
 		guess_md <- final_params$mode
 		if (
 			detect_mode && length(data) > 0 && is.matrix(data[[1]])
@@ -332,7 +317,6 @@ new_netify <- function(data, ...) {
 			guess_md <- guess_mode(data[[1]])
 		}
 
-		# figure out if net is symmetric/weighted
 		any_not_sym <- FALSE
 		any_nonbinary <- FALSE
 		for (ii in seq_along(data)) {
@@ -352,7 +336,6 @@ new_netify <- function(data, ...) {
 			}
 		}
 
-		#
 		if (detect_mode && !is.null(guess_md)) {
 			final_params$mode <- guess_md
 		}
@@ -379,14 +362,21 @@ new_netify <- function(data, ...) {
 				final_params$detail_weight <- paste0("Edges weighted by ", final_params$weight)
 				final_params$is_binary <- FALSE
 			}
+		} else if (detect_is_binary) {
+			any_nonbin <- FALSE
+			for (ii in seq_along(data)) {
+				m <- data[[ii]]
+				if (!is.matrix(m)) next
+				if (!check_binary(m)) { any_nonbin <- TRUE; break }
+			}
+			final_params$is_binary <- !any_nonbin
 		}
 
-		# if we never had a mode, default unipartite
 		if (is.null(final_params$mode)) {
 			final_params$mode <- "unipartite"
 		}
 
-		# figure out if actors change
+		# detect whether actor set is stable across time
 		if (detect_actor_time_uniform) {
 			same_actors <- TRUE
 			if (length(data) > 0 && is.matrix(data[[1]])) {
@@ -396,17 +386,14 @@ new_netify <- function(data, ...) {
 					if (!identical(row0, rownames(data[[i]])) ||
 						!identical(col0, colnames(data[[i]]))) {
 						same_actors <- FALSE
-						break # stop as soon as we find a mismatch
+						break
 					}
 				}
 			}
 			final_params$actor_time_uniform <- same_actors
 		}
 
-		# if no actor_pds provided then calculate based on actor_time_uniform
 		if (detect_actor_pds) {
-			# if uniform and no actor_pds provided, then assume
-			# actors exist for duration of data
 			if (final_params$actor_time_uniform) {
 				pds <- names(data)
 				actors <- unique_vector(
@@ -418,18 +405,50 @@ new_netify <- function(data, ...) {
 				)
 			}
 
-			# if not uniform and no actor_pds provided, then calculate
-			# entry and exit based on min and max in data
 			if (!final_params$actor_time_uniform) {
 				actor_pds <- get_actor_time_info(
 					melt_list_sparse(data), "Var1", "Var2", "L1"
 				)
 			}
 		}
-	} # finished list processing
+	}
 
-	# guess a layer label if user hasn't supplied one
-	# not currently supporting multilayer network
+	# enforce resolved diag_to_NA / missing_to_zero on the data so flags
+	# and contents stay in sync. explicit FALSE leaves data untouched.
+	apply_diag_NA <- isTRUE(final_params$diag_to_NA)
+	apply_miss_0  <- isTRUE(final_params$missing_to_zero)
+	apply_flags_to_slice <- function(mat) {
+		if (!is.matrix(mat)) return(mat)
+		# diag_to_NA only meaningful on square (unipartite) matrices
+		if (apply_diag_NA && nrow(mat) == ncol(mat)) {
+			if (any(!is.na(diag(mat)))) diag(mat) <- NA
+		}
+		if (apply_miss_0 && anyNA(mat)) {
+			# preserve diagonal NAs when filling off-diagonal NAs
+			if (apply_diag_NA && nrow(mat) == ncol(mat)) {
+				d <- diag(mat)
+				mat[is.na(mat)] <- 0
+				diag(mat) <- d
+			} else {
+				mat[is.na(mat)] <- 0
+			}
+		}
+		mat
+	}
+	if (netify_type == "cross_sec") {
+		data <- apply_flags_to_slice(data)
+	} else if (netify_type == "longit_array") {
+		dims_x <- dim(data)
+		for (ii in seq_len(dims_x[3])) {
+			data[, , ii] <- apply_flags_to_slice(data[, , ii, drop = TRUE])
+		}
+	} else if (netify_type == "longit_list") {
+		for (ii in seq_along(data)) {
+			data[[ii]] <- apply_flags_to_slice(data[[ii]])
+		}
+	}
+
+	# default layer label
 	if (is.null(final_params$layers)) {
 		if (is.null(final_params$weight)) {
 			final_params$layers <- "weight1"
@@ -438,7 +457,6 @@ new_netify <- function(data, ...) {
 		}
 	}
 
-	# if detail_weight wasn't set, do it now
 	if (is.null(final_params$detail_weight)) {
 		if (!is.null(final_params$weight)) {
 			final_params$detail_weight <- paste0("Edges weighted by ", final_params$weight)
@@ -447,7 +465,7 @@ new_netify <- function(data, ...) {
 		}
 	}
 
-	# clean up cross-secs in list
+	# tag each slice in a list as its own cross_sec netify
 	if (netify_type == "longit_list") {
 		for (ii in seq_along(data)) {
 			mat_slice <- data[[ii]]
@@ -467,30 +485,17 @@ new_netify <- function(data, ...) {
 		}
 	}
 
-	# throw error about nodal data if it
-	# does not match data object and
-	# expected structure
-
-
-	# throw errir about dyad data if it
-	# does not match data object and
-	# expected structure
-
-
-	# build the final object
 	out <- structure(
 		data,
 		class = "netify",
 		netify_type = netify_type
 	)
 
-	# attach all final_params
 	for (nm in names(final_params)) {
 		if (nm == "netify_type") next
 		attr(out, nm) <- final_params[[nm]]
 	}
 
-	#
 	return(out)
 }
 ####
@@ -512,29 +517,24 @@ new_netify <- function(data, ...) {
 #' @keywords internal
 #' @noRd
 assign_dimnames <- function(mat, mode) {
-	# get dims
 	nr <- nrow(mat)
 	nc <- ncol(mat)
 
-	# check what to do with rownames
+	# paste0("a", seq_len(0)) recycles to "a"; guard the zero-dim case
+	make_names <- function(n, prefix) {
+		if (n == 0L) character(0) else paste0(prefix, seq_len(n))
+	}
+
 	if (is.null(rownames(mat))) {
-		if (mode == "unipartite") {
-			rownames(mat) <- paste0("a", seq_len(nr))
-		} else {
-			rownames(mat) <- paste0("r", seq_len(nr))
-		}
+		prefix <- if (mode == "unipartite") "a" else "r"
+		rownames(mat) <- make_names(nr, prefix)
 	}
 
-	# check what to do with colnames
 	if (is.null(colnames(mat))) {
-		if (mode == "unipartite") {
-			colnames(mat) <- paste0("a", seq_len(nc))
-		} else {
-			colnames(mat) <- paste0("c", seq_len(nc))
-		}
+		prefix <- if (mode == "unipartite") "a" else "c"
+		colnames(mat) <- make_names(nc, prefix)
 	}
 
-	# return the matrix with updated names
 	return(mat)
 }
 ####
@@ -554,10 +554,7 @@ assign_dimnames <- function(mat, mode) {
 #' @keywords internal
 #' @noRd
 check_symmetric <- function(mat) {
-	# set diagonal to zero
 	diag(mat) <- 0
-
-	# symm if mat is ident to its transpose
 	return(identical(mat, t(mat)))
 }
 ####
@@ -577,10 +574,7 @@ check_symmetric <- function(mat) {
 #' @keywords internal
 #' @noRd
 check_binary <- function(mat) {
-	# pull out non-na vals only
 	non_na_vals <- mat[!is.na(mat)]
-
-	# return FALSE as soon as a non-0/1 val is found
 	return(!any(non_na_vals != 0 & non_na_vals != 1))
 }
 ####
@@ -600,7 +594,6 @@ check_binary <- function(mat) {
 #' @keywords internal
 #' @noRd
 guess_diag_to_NA <- function(mat) {
-	# assume TRUE if all diagonal entries are NA
 	return(all(is.na(diag(mat))))
 }
 ####
@@ -623,12 +616,10 @@ guess_diag_to_NA <- function(mat) {
 #' @keywords internal
 #' @noRd
 guess_missing_to_zero <- function(mat, diag_NA = TRUE) {
-	# set diags to zero if diag_NA is TRUE
 	if (diag_NA) {
 		diag(mat) <- 0
 	}
 
-	# if any entries are NA, return FALSE
 	return(!any(is.na(mat)))
 }
 ####
@@ -648,20 +639,16 @@ guess_missing_to_zero <- function(mat, diag_NA = TRUE) {
 #' @keywords internal
 #' @noRd
 guess_mode <- function(mat) {
-	# get dims
 	nr <- nrow(mat)
 	nc <- ncol(mat)
 
-	# if matrix is not square, assume bipartite
 	if (nr != nc) {
 		return("bipartite")
 	}
 
-	# if row/col names are present, check for overlap
 	rown <- rownames(mat)
 	coln <- colnames(mat)
 
-	# if both row and col names are present, check for overlap
 	if (!is.null(rown) && !is.null(coln)) {
 		if (length(intersect(rown, coln)) == length(rown)) {
 			return("unipartite")
@@ -670,7 +657,6 @@ guess_mode <- function(mat) {
 		}
 	}
 
-	# if no row/col names, assume unipartite
 	return("unipartite")
 }
 ####

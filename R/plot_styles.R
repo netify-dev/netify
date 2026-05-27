@@ -6,19 +6,18 @@
 #' @param style_fun A style function (e.g., style_budapest)
 #' @param ... Additional plot parameters
 #' @return A ggplot object
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 plot_with_style <- function(netlet, style_fun, ...) {
-	# get the style parameters
 	style_params <- style_fun()
-
-	# get additional parameters
 	additional_params <- list(...)
 
-	# combine them (additional params override style params)
+	# additional params override style params
 	all_params <- c(style_params, additional_params)
 
-	# call plot with combined parameters
 	do.call(plot, c(list(x = netlet), all_params))
 }
 
@@ -28,6 +27,9 @@ plot_with_style <- function(netlet, style_fun, ...) {
 #' with two distinct node sets
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_bipartite_network <- function() {
@@ -36,7 +38,7 @@ style_bipartite_network <- function() {
 		edge_color = "#7F8C8D",
 		edge_alpha = 0.4,
 
-		# will need to be combined with manual shape/color by node type
+		# combine with manual shape/color by node type at the call site
 		point_size = 3,
 		point_stroke = 1,
 
@@ -58,6 +60,9 @@ style_bipartite_network <- function() {
 #' A complete visual style optimized for displaying networks over time
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_temporal_network <- function() {
@@ -89,6 +94,9 @@ style_temporal_network <- function() {
 #' Wes Anderson's Grand Budapest Hotel
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_budapest <- function() {
@@ -123,6 +131,9 @@ style_budapest <- function() {
 #' visual style with red accents and clean lines
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_economist <- function() {
@@ -158,6 +169,9 @@ style_economist <- function() {
 #' style with gray background and bright accents
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_538 <- function() {
@@ -193,6 +207,9 @@ style_538 <- function() {
 #' optimized for reduced eye strain
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_solarized <- function() {
@@ -228,6 +245,9 @@ style_solarized <- function() {
 #' with navy blue and maroon
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_stata <- function() {
@@ -261,6 +281,9 @@ style_stata <- function() {
 #' visualization style
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_nature <- function() {
@@ -292,6 +315,9 @@ style_nature <- function() {
 #' A futuristic network style with neon colors on dark background
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_cyberpunk <- function() {
@@ -326,6 +352,9 @@ style_cyberpunk <- function() {
 #' data visualization principles
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_tufte <- function() {
@@ -359,6 +388,9 @@ style_tufte <- function() {
 #' A soft, cheerful network style using pastel colors
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_pastel <- function() {
@@ -392,6 +424,9 @@ style_pastel <- function() {
 #' with bold colors and geometric shapes
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_retro80s <- function() {
@@ -425,6 +460,9 @@ style_retro80s <- function() {
 #' for high contrast and accessibility
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_dark2 <- function() {
@@ -459,6 +497,9 @@ style_dark2 <- function() {
 #' contrasts and sleek design.
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_witcher_feline <- function() {
@@ -491,6 +532,9 @@ style_witcher_feline <- function() {
 #' Balanced between signs and swordplay - moderate, magical aesthetics.
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_witcher_griffin <- function() {
@@ -524,6 +568,9 @@ style_witcher_griffin <- function() {
 #' The most balanced school - Geralt's home school at Kaer Morhen.
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_witcher_wolven <- function() {
@@ -559,6 +606,9 @@ style_witcher_wolven <- function() {
 #' Heavy, tank-like armor - translates to bold, substantial visuals.
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_witcher_ursine <- function() {
@@ -593,6 +643,9 @@ style_witcher_ursine <- function() {
 #' Exotic, alchemical focus - poisonous and mysterious.
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_witcher_manticore <- function() {
@@ -626,6 +679,9 @@ style_witcher_manticore <- function() {
 #' Lethal, assassination-focused - stealth and poison.
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_witcher_viper <- function() {
@@ -658,6 +714,9 @@ style_witcher_viper <- function() {
 #' A playful style inspired by Pikachu: energetic yellows, bold outlines, and lightning vibes
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 style_pokemon_pikachu <- function() {
 	list(
@@ -683,6 +742,9 @@ style_pokemon_pikachu <- function() {
 #' A powerful, sleek style inspired by Secretariat - clean lines, racing blues, and commanding contrast.
 #'
 #' @return List of plot arguments
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 style_secretariat <- function() {
 	list(
@@ -712,6 +774,9 @@ style_secretariat <- function() {
 #' Shows all available preset network styles with descriptions
 #'
 #' @return A data frame with style names and descriptions
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 list_network_styles <- function() {
@@ -791,6 +856,9 @@ list_network_styles <- function() {
 #'
 #' @param seed Optional seed for reproducibility
 #' @return A style list that can be passed to plot()
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 style_random <- function(seed = NULL) {
@@ -806,6 +874,5 @@ style_random <- function(seed = NULL) {
 	selected <- sample(styles, 1)
 	cli::cli_inform("Using {.fn {selected}}")
 
-	# call the selected style function
 	do.call(selected, list())
 }

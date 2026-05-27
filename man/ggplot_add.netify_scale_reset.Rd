@@ -20,3 +20,6 @@ A ggplot object with scale resets applied
 S3 method to add scale reset objects to ggplot objects. This method resets
 color, fill, alpha, and size scales using the ggnewscale package.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

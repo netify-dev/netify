@@ -402,3 +402,64 @@ test_that(
 		)
 	}
 )
+
+
+test_that("netify_to_statnet: multilayer returns named list keyed by layer", {
+	# two single-layer cross-sec netlets
+	dyads <- expand.grid(
+		actor1 = letters[1:5], actor2 = letters[1:5],
+		stringsAsFactors = FALSE
+	)
+	dyads <- dyads[dyads$actor1 != dyads$actor2, ]
+	dyads$w1 <- rnorm(nrow(dyads))
+	dyads$w2 <- rnorm(nrow(dyads))
+
+	n1 <- netify(dyads, actor1 = "actor1", actor2 = "actor2",
+		symmetric = FALSE, weight = "w1")
+	n2 <- netify(dyads, actor1 = "actor1", actor2 = "actor2",
+		symmetric = FALSE, weight = "w2")
+	multi <- layer_netify(list(L1 = n1, L2 = n2))
+
+	out <- netify_to_statnet(multi)
+	expect_named(out, c("L1", "L2"))
+	expect_true(all(vapply(out, inherits, logical(1), "network")))
+})
+
+test_that("netify_to_statnet: stashes netify_na_cols and informs", {
+	actors <- letters[1:5]
+	dyads <- expand.grid(actor1 = actors, actor2 = actors,
+		stringsAsFactors = FALSE)
+	dyads <- dyads[dyads$actor1 != dyads$actor2, ]
+	dyads$weight <- rnorm(nrow(dyads))
+
+	nodes <- data.frame(
+		actor = actors,
+		polity = c(1, NA, 3, 4, 5),
+		gdp = c(10, 20, 30, NA, 50),
+		stringsAsFactors = FALSE
+	)
+
+	net <- netify(dyads, actor1 = "actor1", actor2 = "actor2",
+		symmetric = FALSE, weight = "weight")
+	net <- add_node_vars(net, nodes, "actor", NULL, NULL, FALSE)
+
+	sn <- suppressMessages(netify_to_statnet(net))
+	stash <- attr(sn, "netify_na_cols")
+	expect_setequal(stash, c("polity", "gdp"))
+})
+
+test_that("as.network.netify dispatches via the network generic", {
+	skip_if_not_installed("network")
+	dyads <- expand.grid(actor1 = letters[1:4], actor2 = letters[1:4],
+		stringsAsFactors = FALSE)
+	dyads <- dyads[dyads$actor1 != dyads$actor2, ]
+	dyads$weight <- rnorm(nrow(dyads))
+
+	net <- netify(dyads, actor1 = "actor1", actor2 = "actor2",
+		symmetric = FALSE, weight = "weight")
+
+	# direct method call
+	expect_s3_class(as.network.netify(net), "network")
+	# generic dispatch
+	expect_s3_class(network::as.network(net), "network")
+})

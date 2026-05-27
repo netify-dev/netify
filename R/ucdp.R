@@ -17,6 +17,9 @@
 #' @examples
 #' data(mexico)
 #' mexico[1:3, ]
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 NULL
 
 
@@ -39,4 +42,7 @@ NULL
 #' @examples
 #' data(myanmar)
 #' myanmar[1:3, ]
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 NULL

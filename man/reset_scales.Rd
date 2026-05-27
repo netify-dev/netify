@@ -37,3 +37,6 @@ ggplot() +
 \seealso{
 \code{\link[ggnewscale]{new_scale_color}}
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

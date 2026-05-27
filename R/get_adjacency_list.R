@@ -128,8 +128,7 @@ get_adjacency_list <- function(
 	# create weight string for storage as attribute in netify object
 	weight_label <- weight_string_label(weight, sum_dyads)
 
-	# if bipartite network then force diag_to_NA to be FALSE
-	# and force asymmetric, create copy to preserve user choice
+	# bipartite forces diag_to_NA=FALSE and asymmetric; preserve user choice
 	user_symmetric <- symmetric
 	if (mode == "bipartite") {
 		diag_to_NA <- FALSE
@@ -197,10 +196,10 @@ get_adjacency_list <- function(
 				stringsAsFactors = FALSE
 			)
 		} else {
-			# when not actor_time_uniform, we need to handle nodelist actors
+			# include nodelist actors that may be missing from edges
 			actor_pds <- get_actor_time_info(dyad_data, actor1, actor2, time)
 			
-			# add nodelist actors that aren't in actor_pds yet
+			# add nodelist actors absent from actor_pds
 			if (!is.null(nodelist)) {
 				existing_actors <- actor_pds$actor
 				missing_actors <- setdiff(nodelist, existing_actors)
@@ -235,9 +234,16 @@ get_adjacency_list <- function(
 		# rename columns consistently
 		names(actor_pds) <- c("actor", "min_time", "max_time")
 
-		# update time periods based on actor_pds
-		time_pds <- char(unique_vector(actor_pds$min_time, actor_pds$max_time))
-		time_pds_num <- as.numeric(time_pds)
+		# expand to every integer period between min and max
+		ap_min <- min(actor_pds$min_time, na.rm = TRUE)
+		ap_max <- max(actor_pds$max_time, na.rm = TRUE)
+		ap_span <- seq(ap_min, ap_max, by = 1)
+		time_pds_num <- sort(unique_vector(
+			ap_span,
+			actor_pds$min_time,
+			actor_pds$max_time
+		))
+		time_pds <- char(time_pds_num)
 
 		# get actors present in data
 		actors_in_data <- unique_vector(a1_all, a2_all)
@@ -245,7 +251,6 @@ get_adjacency_list <- function(
 			a1_all <- a2_all <- actors_in_data
 		}
 
-		# vectorized filtering - more efficient than string operations
 		# create logical vectors for filtering
 		actor1_valid <- dyad_data[, actor1] %in% actors_in_data
 		actor2_valid <- dyad_data[, actor2] %in% actors_in_data
@@ -262,7 +267,6 @@ get_adjacency_list <- function(
 			)
 		}
 
-		# more efficient actor-time filtering using vectorized operations
 		# create lookup table for valid actor-time combinations
 		actor_time_lookup <- do.call(rbind, lapply(1:nrow(actor_pds), function(i) {
 			data.frame(
@@ -286,10 +290,11 @@ get_adjacency_list <- function(
 		a2_all <- unique_vector(dyad_data[, actor2])
 	}
 
-	# check if there are repeating dyads
+	# auto-promote sum_dyads if repeats are present and weight is supplied
 	num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2, time)
 	if (num_repeat_dyads > 0) {
-		edge_value_check(w_orig, sum_dyads, TRUE)
+		evc <- edge_value_check(w_orig, sum_dyads, TRUE)
+		sum_dyads <- evc$sum_dyads
 	}
 
 	# aggregate data if sum dyads selected
@@ -297,13 +302,18 @@ get_adjacency_list <- function(
 		dyad_data <- aggregate_dyad(dyad_data, actor1, actor2, time, weight, symmetric, missing_to_zero)
 	}
 
-	# remove zeros early if missing_to_zero is TRUE
+	# drop zero-weight rows but keep NaN/NA so they propagate as missing
 	if (missing_to_zero) {
-		dyad_data <- dyad_data[dyad_data[, weight] != 0, ]
+		w_vec <- dyad_data[, weight]
+		nan_rows <- is.nan(w_vec)
+		if (any(nan_rows)) {
+			w_vec[nan_rows] <- NA_real_
+			dyad_data[, weight] <- w_vec
+		}
+		dyad_data <- dyad_data[which(is.na(w_vec) | w_vec != 0), , drop = FALSE]
 	}
 
 	# pre-compute actor presence matrix for all time periods
-	# this avoids recalculating for each time period
 	actor_presence_matrix <- matrix(FALSE, nrow = nrow(actor_pds), ncol = length(time_pds_num))
 	for (i in 1:nrow(actor_pds)) {
 		actor_presence_matrix[i, ] <- (time_pds_num >= actor_pds$min_time[i]) &
@@ -318,7 +328,7 @@ get_adjacency_list <- function(
 	dyad_actor2 <- dyad_data[, actor2]
 	dyad_weight <- dyad_data[, weight]
 
-	# iterate through time periods with optimized operations
+	# iterate through time periods
 	adj_out <- vector("list", length(time_pds))
 	names(adj_out) <- time_pds
 
@@ -330,7 +340,7 @@ get_adjacency_list <- function(
 		slice_indices <- time_indices[[as.character(time_pd_num)]]
 		if (is.null(slice_indices)) slice_indices <- integer(0)
 
-		# determine actors present in this time period using pre-computed matrix
+		# determine actors present in this time period
 		actor_present <- actor_presence_matrix[, t_idx]
 		actors <- sort(actor_pds$actor[actor_present])
 		actors_rows <- actors_cols <- actors
@@ -347,7 +357,7 @@ get_adjacency_list <- function(
 			slice_actor2 <- dyad_actor2[slice_indices]
 			value <- dyad_weight[slice_indices]
 
-			# pre-compute matrix indices to avoid repeated match() calls
+			# pre-compute matrix indices
 			mat_row_indices <- match(slice_actor1, actors_rows)
 			mat_col_indices <- match(slice_actor2, actors_cols)
 		} else {
@@ -359,7 +369,7 @@ get_adjacency_list <- function(
 		# create logical value that is TRUE if weight is just 0/1
 		is_binary <- length(value) == 0 || all(value %in% c(0, 1))
 
-		# get adj mat filled in using optimized C++ function
+		# build adjacency matrix
 		adj_mat <- get_matrix(
 			n_rows = length(actors_rows),
 			n_cols = length(actors_cols),
@@ -377,7 +387,7 @@ get_adjacency_list <- function(
 		weight_attr <- if (!sum_dyads && is.null(w_orig)) NULL else weight
 		layer_label <- if (is.null(weight_attr)) "weight1" else weight_attr
 
-		# add class info and attributes efficiently
+		# add class info and attributes
 		class(adj_mat) <- "netify"
 		attributes(adj_mat) <- c(attributes(adj_mat), list(
 			netify_type = "cross_sec",
@@ -409,7 +419,7 @@ get_adjacency_list <- function(
 	# get info on binary weights using vectorized operation
 	bin_check <- vapply(adj_out, function(x) attr(x, "is_binary"), logical(1))
 
-	# add attributes to list efficiently
+	# add attributes to list
 	class(adj_out) <- "netify"
 	attributes(adj_out) <- c(attributes(adj_out), list(
 		netify_type = "longit_list",

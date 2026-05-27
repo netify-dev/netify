@@ -12,3 +12,6 @@ List of plot arguments
 \description{
 A complete visual style optimized for displaying networks over time
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

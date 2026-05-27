@@ -16,15 +16,13 @@
 df_check <- function(
 	df,
 	msg = "Error: check data type. `dyad_data` is not a dataframe.") {
-	# check if `dyad_data` is df
 	if (!inherits(df, "data.frame")) {
 		cli::cli_abort(msg)
 	}
 
-	# convert to base R data.frame since we rely on base subsetting
+	# coerce tibble/data.table to base data.frame for base subsetting
 	df <- as.data.frame(df, stringsAsFactors = FALSE)
 
-	# check for empty dataset
 	if (nrow(df) == 0) {
 		cli::cli_abort(
 			c(
@@ -35,7 +33,6 @@ df_check <- function(
 		)
 	}
 
-	# return
 	return(df)
 }
 
@@ -59,34 +56,28 @@ logical_check <- function(
 	sum_dyads, symmetric,
 	diag_to_NA, missing_to_zero,
 	actor_time_uniform = NULL) {
-	# check data type for sum_dyads
 	if (!is.logical(sum_dyads)) {
 		cli::cli_abort("check data type. {.arg sum_dyads} is not a logical.")
 	}
 
-	# check data type for symmetric
 	if (!is.logical(symmetric)) {
 		cli::cli_abort("check data type. {.arg symmetric} is not a logical.")
 	}
 
-	# check data type for diag_to_NA
 	if (!is.logical(diag_to_NA)) {
 		cli::cli_abort("check data type. {.arg diag_to_NA} is not a logical.")
 	}
 
-	# check data type for missing_to_zero
 	if (!is.logical(missing_to_zero)) {
 		cli::cli_abort("check data type. {.arg missing_to_zero} is not a logical.")
 	}
 
-	# check actor_time_uniform
 	if (!is.null(actor_time_uniform)) {
 		if (!is.logical(actor_time_uniform)) {
 			cli::cli_abort("check data type. {.arg actor_time_uniform} is not a logical.")
 		}
 	}
 
-	#
 	return(invisible(NULL))
 }
 
@@ -109,23 +100,63 @@ logical_check <- function(
 #' @noRd
 
 actor_check <- function(actor1, actor2, dyad_data) {
-	# check if the fields were populated
+	cols_available <- colnames(dyad_data)
+
 	if (is.null(actor1) | is.null(actor2)) {
-		cli::cli_abort("{.arg actor1} or {.arg actor2} values are required.")
+		# suggest first two columns as a working example
+		example_hint <- if (length(cols_available) >= 2) {
+			sprintf(
+				"Try: netify(dyad_data, actor1 = \"%s\", actor2 = \"%s\")",
+				cols_available[1], cols_available[2]
+			)
+		} else {
+			NA_character_
+		}
+		msg <- c(
+			"x" = "{.arg actor1} or {.arg actor2} values are required.",
+			"i" = "Available columns in {.arg dyad_data}: {.val {cols_available}}"
+		)
+		if (!is.na(example_hint)) {
+			msg <- c(msg, "i" = example_hint)
+		}
+		cli::cli_abort(msg)
 	}
 
-	# check to make sure that actor1 and actor2 variables exists in data
-	if (!actor1 %in% colnames(dyad_data) | !actor2 %in% colnames(dyad_data)) {
-		cli::cli_abort("{.arg actor1} and/or {.arg actor2} variables do not exist in the {.arg dyad_data} object.")
+	if (!actor1 %in% cols_available | !actor2 %in% cols_available) {
+		missing_cols <- c(
+			if (!actor1 %in% cols_available) actor1 else NULL,
+			if (!actor2 %in% cols_available) actor2 else NULL
+		)
+		# suggest closest matches via edit distance / substring
+		hint_lines <- vapply(missing_cols, function(mc) {
+			contains_idx <- grep(mc, cols_available, fixed = TRUE)
+			if (length(contains_idx) >= 1L) {
+				return(sprintf(
+					"Did you mean '%s' instead of '%s'?",
+					cols_available[contains_idx[1]], mc
+				))
+			}
+			d <- utils::adist(mc, cols_available)[1, ]
+			best <- which.min(d)
+			thresh <- max(1L, min(nchar(mc) %/% 3L, nchar(cols_available[best]) %/% 3L))
+			if (length(best) && d[best] <= thresh) {
+				sprintf("Did you mean '%s' instead of '%s'?", cols_available[best], mc)
+			} else {
+				sprintf("Column '%s' not found in {.arg dyad_data}.", mc)
+			}
+		}, character(1))
+		msg <- c(
+			"x" = "{.arg actor1} and/or {.arg actor2} variables do not exist in the {.arg dyad_data} object.",
+			"i" = "Available columns: {.val {cols_available}}"
+		)
+		msg <- c(msg, stats::setNames(hint_lines, rep("i", length(hint_lines))))
+		cli::cli_abort(msg)
 	}
 
-	# check if actor1 or actor2 contain missing values
-	# and if they do give a missing warning
 	if (any(is.na(dyad_data[, actor1])) | any(is.na(dyad_data[, actor2]))) {
 		cli::cli_abort("{.arg actor1} and/or {.arg actor2} contains missing value(s).")
 	}
 
-	#
 	return(invisible(NULL))
 }
 
@@ -145,19 +176,56 @@ actor_check <- function(actor1, actor2, dyad_data) {
 #' @noRd
 
 weight_check <- function(weight, dyad_data) {
-	# check data type for weight
 	if (!is.null(weight) & !is.character(weight)) {
 		cli::cli_abort("check data type. {.arg weight} should be left NULL or a character value referring to a variable from the dyad_data object should be provided.")
 	}
 
-	# check to make sure that weight variable exists in data
 	if (!is.null(weight)) {
 		if (!weight %in% colnames(dyad_data)) {
 			cli::cli_abort("{.arg weight} variable does not exist in the {.arg dyad_data} object.")
 		}
 	}
 
-	#
+	# reject classes that would silently coerce to nonsensical numerics
+	if (!is.null(weight)) {
+		w_col <- dyad_data[, weight]
+		bad_class <- NULL
+		if (is.factor(w_col)) bad_class <- "factor"
+		else if (inherits(w_col, c("Date", "POSIXct", "POSIXlt", "difftime"))) bad_class <- class(w_col)[1]
+		else if (is.character(w_col)) bad_class <- "character"
+		else if (!(is.numeric(w_col) || is.logical(w_col))) bad_class <- class(w_col)[1]
+		if (!is.null(bad_class)) {
+			cli::cli_abort(c(
+				"{.arg weight} column {.val {weight}} is of class {.cls {bad_class}}; netify expects a numeric or logical weight.",
+				"i" = "Convert it explicitly before calling netify(), e.g. {.code dyad_data${weight} <- as.numeric(dyad_data${weight})}, so the resulting weights are intentional rather than coerced silently."
+			))
+		}
+
+		# warn once about Inf weights propagating to summaries
+		if (is.numeric(w_col) && any(is.infinite(w_col))) {
+			n_inf <- sum(is.infinite(w_col))
+			cli::cli_inform(c(
+				"!" = "{.arg weight} column {.val {weight}} contains {n_inf} infinite value{?s}; summary statistics that touch these cells will return Inf / NaN.",
+				"i" = "Replace with a large finite cap or NA before calling {.fn netify} if you want finite summaries."
+			),
+				.frequency = "once",
+				.frequency_id = paste0("netify_inf_weight_", weight)
+			)
+		}
+
+		# warn once about NaN weights being treated as NA
+		if (is.numeric(w_col) && any(is.nan(w_col))) {
+			n_nan <- sum(is.nan(w_col))
+			cli::cli_inform(c(
+				"!" = "{.arg weight} column {.val {weight}} contains {n_nan} NaN value{?s}; these will be treated as missing (NA).",
+				"i" = "Replace NaNs with explicit NA or a finite value before calling {.fn netify} if a different treatment is desired."
+			),
+				.frequency = "once",
+				.frequency_id = paste0("netify_nan_weight_", weight)
+			)
+		}
+	}
+
 	return(invisible(NULL))
 }
 
@@ -330,16 +398,23 @@ edge_value_check <- function(weight, sum_dyads, time = FALSE) {
 		)
 	}
 
-	# repeating dyads with weight variable supplied
-	# example use case for us: event data where we want to produce edges representing the sum of weighted interactions
+	# handle repeating dyads with a weight column: auto-promote sum_dyads
+	# so the matrix is a deterministic sum of the repeated weights
+	auto_promote <- FALSE
 	if (!is.null(weight) & !sum_dyads) {
 		cli::cli_alert_danger(
-			paste0(rep_wrn, "When `sum_dyads = FALSE` and `weight` variable is supplied but there are repeating dyads in the dataset, we cannot uniquely identify edges. Try sum_dyads=TRUE or remove repeating dyads.")
+			paste0(rep_wrn, "When `sum_dyads = FALSE` and `weight` is supplied, edges cannot be uniquely identified.")
 		)
+		cli::cli_inform(c(
+			"i" = "Auto-promoting to {.code sum_dyads = TRUE} so repeated weights are summed deterministically.",
+			"i" = "Set {.code sum_dyads = TRUE} explicitly, or pre-aggregate with {.fn aggregate_dyad}, to silence this message."
+		))
+		auto_promote <- TRUE
 	}
 
 	#
-	return(invisible(NULL))
+	return(invisible(list(sum_dyads = auto_promote || sum_dyads,
+		auto_promote = auto_promote)))
 }
 
 #' add_var_time_check

@@ -22,6 +22,16 @@
 #'   (any positive weight is a tie). Common values: 0 (default), mean(weights),
 #'   median(weights), or quantile-based thresholds. For pre-binarized networks,
 #'   consider using \code{mutate_weights()} first.
+#' @param signed_handling Character. Strategy for signed (negative-weight) edges:
+#'   \describe{
+#'     \item{\code{"abs"}}{(default) Take absolute values before thresholding so
+#'       any tie magnitude — positive or negative — can become a connection.}
+#'     \item{\code{"drop_negative"}}{Set negative weights to zero before
+#'       thresholding (positive ties only).}
+#'     \item{\code{"preserve_sign"}}{Treat any non-zero entry (positive or
+#'       negative) as a connection; \code{threshold} is ignored for sign decisions.}
+#'   }
+#'   Ignored when the network has no negative weights.
 #' @param significance_test Logical. Whether to perform permutation test. Default TRUE.
 #' @param n_permutations Number of permutations for significance testing. Default 1000.
 #' @param alpha Significance level for confidence intervals. Default 0.05.
@@ -46,6 +56,16 @@
 #'   }
 #'
 #' @details
+#' \strong{Auto-promotion to \code{categorical}:}
+#'
+#' If you leave \code{method} at its default and pass a \code{character},
+#' \code{factor}, or \code{logical} attribute, \code{homophily()} will
+#' switch to \code{method = "categorical"} automatically and inform you
+#' once per attribute. This avoids the C++-level error that would
+#' otherwise come from feeding non-numeric data to the correlation-based
+#' similarity routine. Pass \code{method = "categorical"} (or any other
+#' explicit choice) to silence the message.
+#'
 #' \strong{Similarity Metrics:}
 #'
 #' For continuous attributes:
@@ -82,6 +102,18 @@
 #' consider using \code{mutate_weights()} to pre-process your network.
 #'
 #' @examples
+#' # quick homophily check on the bundled classroom friendship data
+#' data(classroom_edges)
+#' data(classroom_nodes)
+#' net <- netify(
+#'     classroom_edges,
+#'     actor1 = "from", actor2 = "to",
+#'     symmetric = TRUE,
+#'     nodal_data = classroom_nodes
+#' )
+#' # do students cluster by gender?
+#' homophily(net, attribute = "gender", method = "categorical")
+#'
 #' \dontrun{
 #' # Basic homophily analysis with default threshold (> 0)
 #' homophily_default <- homophily(net, attribute = "group")
@@ -116,12 +148,15 @@
 #' )
 #' }
 #'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export homophily
 
 homophily <- function(
 	netlet, attribute,
 	method = "correlation",
 	threshold = 0,
+	signed_handling = c("abs", "drop_negative", "preserve_sign"),
 	significance_test = TRUE,
 	n_permutations = 1000,
 	alpha = 0.05,
@@ -130,7 +165,28 @@ homophily <- function(
 
 	# input validation
 	netify_check(netlet)
+	if (missing(attribute) || is.null(attribute)) {
+		nodal_data <- attr(netlet, "nodal_data")
+		avail <- NULL
+		if (is.data.frame(nodal_data)) {
+			avail <- setdiff(names(nodal_data), c("actor", "time"))
+		} else if (is.list(nodal_data) && length(nodal_data) > 0) {
+			avail <- setdiff(names(nodal_data[[1]]), c("actor", "time"))
+		}
+		msg <- c(
+			"!" = "{.arg attribute} is required: which nodal attribute should be tested for homophily?",
+			"i" = "Example: {.code homophily(net, attribute = \"gender\", method = \"categorical\")}."
+		)
+		if (length(avail) > 0) {
+			msg <- c(msg, "i" = "Available nodal attributes: {.val {avail}}.")
+		} else {
+			msg <- c(msg, "i" = "No nodal attributes attached yet -- use {.fn add_node_vars} first.")
+		}
+		cli::cli_abort(msg)
+	}
 	checkmate::assert_string(attribute)
+	# track whether user supplied method explicitly (for auto-categorical)
+	method_was_default <- missing(method)
 	checkmate::assert_choice(method, c(
 		"correlation", "euclidean", "manhattan",
 		"cosine", "categorical", "jaccard", "hamming"
@@ -138,6 +194,8 @@ homophily <- function(
 	if (!is.numeric(threshold) && !is.function(threshold)) {
 		cli::cli_abort("threshold must be numeric or a function that returns a numeric value")
 	}
+	# how to treat negative edge weights when building the binary tie matrix
+	signed_handling <- match.arg(signed_handling)
 	checkmate::assert_logical(significance_test, len = 1)
 	checkmate::assert_count(n_permutations, positive = TRUE)
 	checkmate::assert_number(alpha, lower = 0, upper = 1)
@@ -172,7 +230,7 @@ homophily <- function(
 	} else {
 		# for longit data, nodal_data can be either a list or a data.frame
 		if (is.data.frame(nodal_data)) {
-			# deprc format with time column
+			# data.frame format with time column
 			if (!attribute %in% names(nodal_data)) {
 				cli::cli_abort(
 					"Attribute '{attribute}' not found in nodal_data. Available attributes: {paste(setdiff(names(nodal_data), c('actor', 'time')), collapse = ', ')}"
@@ -186,6 +244,28 @@ homophily <- function(
 					"Attribute '{attribute}' not found in nodal_data. Available attributes: {paste(names(nodal_data[[first_time]]), collapse = ', ')}"
 				)
 			}
+		}
+	}
+
+	# auto-promote to categorical for non-numeric attributes when method is default
+	if (method_was_default) {
+		probe_vals <- NULL
+		if (is.data.frame(nodal_data)) {
+			probe_vals <- nodal_data[[attribute]]
+		} else if (is.list(nodal_data)) {
+			first_time <- names(nodal_data)[1]
+			if (!is.null(first_time)) {
+				probe_vals <- nodal_data[[first_time]][[attribute]]
+			}
+		}
+		if (!is.null(probe_vals) &&
+			(is.character(probe_vals) || is.factor(probe_vals) || is.logical(probe_vals))) {
+			cli::cli_inform(c(
+				"i" = "{.arg attribute} {.val {attribute}} is non-numeric; using {.val categorical} similarity. Pass {.code method=} explicitly to silence."
+			),
+			.frequency = "once",
+			.frequency_id = paste0("homophily_auto_categorical_", attribute))
+			method <- "categorical"
 		}
 	}
 
@@ -249,7 +329,7 @@ homophily <- function(
 					node_attrs <- time_data[[attribute]]
 					actors <- time_data$actor
 				} else if (is.data.frame(nodal_data)) {
-					# deprc format with time column
+					# data.frame format with time column
 					time_data <- nodal_data[nodal_data$time == time_id, ]
 					node_attrs <- time_data[[attribute]]
 					actors <- time_data$actor
@@ -302,10 +382,26 @@ homophily <- function(
 				threshold_value <- NA
 				binary_net <- net_matrix
 			} else {
+				# reshape signed weights per signed_handling before thresholding
+				net_matrix_t <- net_matrix
+				finite_w <- net_matrix_t[is.finite(net_matrix_t)]
+				has_negative <- length(finite_w) > 0 && any(finite_w < 0)
+				if (has_negative) {
+					net_matrix_t <- switch(signed_handling,
+						"abs" = abs(net_matrix_t),
+						"drop_negative" = {
+							tmp <- net_matrix_t
+							tmp[!is.na(tmp) & tmp < 0] <- 0
+							tmp
+						},
+						"preserve_sign" = net_matrix_t
+					)
+				}
+
 				# for weighted networks, apply threshold
 				if (is.function(threshold)) {
-					# calculate threshold from the network matrix
-					threshold_value <- threshold(net_matrix)
+					# calculate threshold from the matrix
+					threshold_value <- threshold(net_matrix_t)
 					if (!is.numeric(threshold_value) || length(threshold_value) != 1) {
 						cli::cli_abort("threshold function must return a single numeric value")
 					}
@@ -313,8 +409,12 @@ homophily <- function(
 					threshold_value <- threshold
 				}
 
-				# create binary network based on threshold
-				binary_net <- (net_matrix > threshold_value) & !is.na(net_matrix)
+				# binarize on threshold; preserve_sign treats any non-zero as connected
+				if (has_negative && signed_handling == "preserve_sign") {
+					binary_net <- (net_matrix_t != 0) & !is.na(net_matrix_t)
+				} else {
+					binary_net <- (net_matrix_t > threshold_value) & !is.na(net_matrix_t)
+				}
 			}
 
 			# calculate homophily statistics with the binary network
@@ -502,8 +602,8 @@ calculate_similarity_matrix <- function(attributes, method) {
 calculate_homophily_stats <- function(
 	similarity_matrix, net_matrix,
 	significance_test, n_permutations, alpha) {
-	# convert network to logical matrix for cpp function
-	binary_net <- (net_matrix > 0) & !is.na(net_matrix)
+	# convert network to logical matrix; non-zero counts as a tie
+	binary_net <- (net_matrix != 0) & !is.na(net_matrix)
 
 	# ensure diagonals are NA for the cpp function
 	diag(similarity_matrix) <- NA

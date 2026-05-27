@@ -284,8 +284,15 @@ Example: \code{log1p} for log(x+1) transformation. Applied before mapping to
 aesthetics.}
 \item{\code{return_components}}{Logical. Return plot components instead of
 assembled plot? Useful for manual customization. Default is \code{FALSE}.}
-\item{\code{style}}{A style function (e.g., \code{style_budapest}).
-Applies a complete visual style including colors, shapes, and layout preferences.}
+\item{\code{style}}{Either a style function (e.g., \code{style_budapest})
+that applies a complete visual style including colors, shapes, and layout
+preferences, or the string \code{"heatmap"} to render the adjacency
+matrix as a tile plot instead of a node-link diagram. When
+\code{style = "heatmap"} and edge weights cross zero (signed network),
+the fill scale automatically uses a diverging palette centred at zero;
+otherwise a sequential viridis ramp is used. Optional \code{low},
+\code{mid}, and \code{high} arguments override the diverging palette
+endpoints.}
 }
 }
 
@@ -409,4 +416,7 @@ g10$base +
     theme_netify()
 }
 
+}
+\author{
+Cassy Dorff, Shahryar Minhas
 }

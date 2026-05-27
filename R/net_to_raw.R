@@ -37,7 +37,6 @@ raw_list <- function(netlet) {
 	stopifnot("Not a netify object!" = is_netify(netlet))
 	netlet <- lapply(netlet, raw_matrix)
 	class(netlet) <- c("list")
-	# attributes(netlet)[2:length(attributes(netlet))] <- NULL
 	return(netlet)
 }
 
@@ -60,13 +59,10 @@ raw_list <- function(netlet) {
 #' @export get_raw
 
 get_raw <- function(netlet) {
-	# check
 	netify_check(netlet)
 
-	# get type
 	obj_type <- attributes(netlet)$netify_type
 
-	# strip netify attributes and return
 	if (obj_type %in% c("cross_sec", "longit_array")) {
 		return(raw_matrix(netlet))
 	}

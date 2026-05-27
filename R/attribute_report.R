@@ -116,10 +116,9 @@ attribute_report <- function(
 		}
 	}
 
-	# initialize results list
 	results <- list()
 
-	# 1. homophily analysis
+	# homophily analysis
 	if (include_homophily && length(node_vars) > 0) {
 		cli::cli_alert_info("Calculating homophily analysis...")
 
@@ -127,13 +126,12 @@ attribute_report <- function(
 		for (var in node_vars) {
 			tryCatch(
 				{
-					# determine appropriate similarity method based on variable type
+					# pick similarity method based on variable type
 					if (!is.null(nodal_data)) {
-						# extract variable values depending on data structure
+						# pull variable values for the right data structure
 						if (netify_type == "cross_sec") {
 							var_values <- nodal_data[[var]]
 						} else if (is.list(nodal_data)) {
-							# for longitudinal, get values from first time period
 							first_time <- names(nodal_data)[1]
 							var_values <- nodal_data[[first_time]][[var]]
 						} else {
@@ -166,7 +164,7 @@ attribute_report <- function(
 		results$homophily_analysis <- do.call(rbind, homophily_results)
 	}
 
-	# 2. mixing analysis
+	# mixing analysis
 	if (include_mixing && length(node_vars) > 0) {
 		cli::cli_alert_info("Calculating mixing matrices...")
 
@@ -201,7 +199,7 @@ attribute_report <- function(
 		results$mixing_analysis <- mixing_results
 	}
 
-	# 3. dyadic correlations
+	# dyadic correlations
 	if (include_dyadic_correlations && length(dyad_vars) > 0) {
 		cli::cli_alert_info("Calculating dyadic correlations...")
 
@@ -220,7 +218,7 @@ attribute_report <- function(
 		)
 	}
 
-	# 4. centrality correlations
+	# centrality correlations
 	if (include_centrality && length(node_vars) > 0) {
 		cli::cli_alert_info("Calculating centrality correlations...")
 
@@ -237,14 +235,14 @@ attribute_report <- function(
 		)
 	}
 
-	# 5. attribute summaries
+	# attribute summaries
 	cli::cli_alert_info("Calculating attribute summaries...")
 	attribute_summaries <- calculate_attribute_summaries(
 		netlet, node_vars, dyad_vars
 	)
 	results$attribute_summaries <- attribute_summaries
 
-	# 6. overall summary
+	# overall summary
 	overall_summary <- create_overall_summary(results, node_vars, dyad_vars)
 	results$overall_summary <- overall_summary
 
@@ -269,21 +267,19 @@ attribute_report <- function(
 	return(results)
 }
 
-# helper function to calculate centrality correlations
+# calculate correlations between attributes and centrality
 calculate_centrality_correlations <- function(netlet, node_vars, centrality_measures, significance_test) {
-	# extract network data
 	obj_attrs <- attributes(netlet)
 	nodal_data <- obj_attrs$nodal_data
 	layers <- obj_attrs$layers
 	netify_type <- obj_attrs$netify_type
 
-	# convert to list format for processing
+	# normalize to a list of time slices for processing
 	netlet_list <- switch(netify_type,
 		"cross_sec" = list("1" = netlet),
 		"longit_array" = {
-			# check if this is multilayer longitudinal (4D) or single layer (3D)
+			# 4D = multilayer longitudinal, 3D = single layer longitudinal
 			if (length(dim(netlet)) == 4) {
-				# multilayer longitudinal: extract time periods from 4th dimension
 				time_names <- dimnames(netlet)[[4]]
 				if (is.null(time_names)) {
 					time_names <- as.character(seq_len(dim(netlet)[4]))
@@ -294,7 +290,6 @@ calculate_centrality_correlations <- function(netlet, node_vars, centrality_meas
 				}
 				net_list
 			} else {
-				# single layer longitudinal: extract from 3rd dimension
 				time_names <- dimnames(netlet)[[3]]
 				if (is.null(time_names)) {
 					time_names <- as.character(seq_len(dim(netlet)[3]))
@@ -314,51 +309,45 @@ calculate_centrality_correlations <- function(netlet, node_vars, centrality_meas
 	for (layer_index in seq_along(layers)) {
 		layer <- layers[layer_index]
 		for (time_id in names(netlet_list)) {
-			# get network matrix
 			net_matrix <- netlet_list[[time_id]]
-			# extract specific layer for multilayer networks
+			# slice the requested layer for multilayer networks
 			if (length(layers) > 1) {
 				if (netify_type == "cross_sec") {
-					# for cross-sectional multilayer: 3D array [actors, actors, layers]
 					net_matrix <- netlet[, , layer_index]
 				} else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
-					# for longitudinal multilayer: 4D array [actors, actors, layers, time]
 					net_matrix <- net_matrix[, , layer_index]
 				}
 			}
 
-			# calculate centrality measures
 			centralities <- calculate_centrality_measures(net_matrix, centrality_measures)
 
-			# get nodal attributes for this time
+			# nodal attributes for this time
 			if (netify_type == "cross_sec") {
 				time_nodal_data <- nodal_data
 			} else {
 				time_nodal_data <- nodal_data[nodal_data$time == time_id, ]
 			}
 
-			# match actors
 			matrix_actors <- rownames(net_matrix)
 			if (is.null(matrix_actors)) {
 				matrix_actors <- as.character(seq_len(nrow(net_matrix)))
 			}
 
-			# calculate correlations between attributes and centrality
+			# correlate attributes with centralities
 			for (node_var in node_vars) {
 				if (node_var %in% names(time_nodal_data)) {
 					node_values <- time_nodal_data[[node_var]]
 					actors <- time_nodal_data$actor
 
-					# match to matrix
 					attr_indices <- match(matrix_actors, actors)
 					node_values <- node_values[attr_indices]
 
 					for (cent_measure in names(centralities)) {
 						cent_values <- centralities[[cent_measure]]
 
-						# calculate correlation
 						complete_cases <- !is.na(node_values) & !is.na(cent_values)
 						if (sum(complete_cases) > 2) {
+							# surface cor.test failures rather than letting them become silent NAs
 							corr_result <- tryCatch(
 								{
 									if (significance_test) {
@@ -379,6 +368,10 @@ calculate_centrality_correlations <- function(netlet, node_vars, centrality_meas
 									}
 								},
 								error = function(e) {
+									cli::cli_warn(c(
+										"!" = "cor.test failed for {.val {node_var}} vs {.val {cent_measure}}: {conditionMessage(e)}",
+										"i" = "Returning NA for this pair."
+									))
 									list(correlation = NA, p_value = NA, ci_lower = NA, ci_upper = NA)
 								}
 							)
@@ -408,18 +401,19 @@ calculate_centrality_correlations <- function(netlet, node_vars, centrality_meas
 	}
 }
 
-# helper function to calculate centrality measures
+# compute requested centralities via igraph
 calculate_centrality_measures <- function(net_matrix, centrality_measures) {
-	# convert to igraph object
+	# build an igraph from the binary version of the matrix
+	binary_matrix <- (net_matrix != 0) & !is.na(net_matrix)
+	diag(binary_matrix) <- FALSE
 	g <- tryCatch(
-		{
-			# remove self-loops and convert to binary for centrality calculation
-			binary_matrix <- (net_matrix > 0) & !is.na(net_matrix)
-			diag(binary_matrix) <- FALSE # remove self-loops
-			igraph::graph_from_adjacency_matrix(binary_matrix, mode = "directed")
-		},
+		igraph::graph_from_adjacency_matrix(binary_matrix, mode = "directed"),
 		error = function(e) {
-			return(NULL)
+			cli::cli_warn(c(
+				"!" = "Could not build igraph for centrality measures: {conditionMessage(e)}",
+				"i" = "Skipping centrality calculations for this slice."
+			))
+			NULL
 		}
 	)
 
@@ -463,7 +457,7 @@ calculate_centrality_measures <- function(net_matrix, centrality_measures) {
 	return(centralities)
 }
 
-# helper function to calculate attribute summaries
+# descriptive summaries for nodal and dyadic variables
 calculate_attribute_summaries <- function(netlet, node_vars, dyad_vars) {
 	obj_attrs <- attributes(netlet)
 	nodal_data <- obj_attrs$nodal_data
@@ -517,7 +511,7 @@ calculate_attribute_summaries <- function(netlet, node_vars, dyad_vars) {
 	return(summaries)
 }
 
-# helper function to create overall summary
+# build the high-level summary of key findings
 create_overall_summary <- function(results, node_vars, dyad_vars) {
 	summary_text <- character(0)
 

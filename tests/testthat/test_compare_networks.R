@@ -76,9 +76,6 @@ test_that("compare_networks correctly identifies comparison types", {
 	comp_temp = suppressWarnings(compare_networks(net_longit))
 	expect_equal(comp_temp$comparison_type, "temporal")
 
-	# by-group comparison would be tested here if implemented
-	# comp_group <- compare_networks(net1, by = "some_attribute")
-	# expect_equal(comp_group$comparison_type, "by_group")
 })
 
 # test all 'what' options work correctly
@@ -257,8 +254,7 @@ test_that("compare_networks structural comparison includes all metrics", {
 	expect_true("summary" %in% names(comp_struct))
 	struct_summary = comp_struct$summary
 
-	# should have key structural metrics
-	# note: these are now using the names from summary.netify
+	# should have key structural metrics from summary.netify
 	expected_metrics = c(
 		"num_actors", "num_edges", "density", "reciprocity",
 		"transitivity", "mean_degree"
@@ -419,10 +415,7 @@ test_that("compare_networks print method works", {
 
 	comp = suppressWarnings(compare_networks(list(net1, net2)))
 
-	# # test that print runs without error
-	# expect_invisible(print(comp))
-	
-	# check the structure of the comparison object instead of print output
+	# check the structure of the comparison object
 	expect_equal(comp$comparison_type, "cross_network")
 	expect_equal(comp$n_networks, 2)
 	expect_true(!is.null(comp$summary))

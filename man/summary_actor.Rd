@@ -4,7 +4,12 @@
 \alias{summary_actor}
 \title{Calculate actor-level network statistics}
 \usage{
-summary_actor(netlet, invert_weights_for_igraph = TRUE, other_stats = NULL)
+summary_actor(
+  netlet,
+  invert_weights_for_igraph = TRUE,
+  other_stats = NULL,
+  stats = c("all", "fast")
+)
 }
 \arguments{
 \item{netlet}{A netify object containing network data}
@@ -16,6 +21,14 @@ weights as distances. Set to FALSE if your weights already represent distances.}
 \item{other_stats}{Optional named list of custom functions to calculate additional
 actor-level statistics. Each function should accept a matrix and return a
 vector with one value per actor.}
+
+\item{stats}{One of \code{"all"} (default) or \code{"fast"}. The \code{"fast"} path
+returns only degree- and strength-style columns and skips closeness,
+betweenness, eigenvector, and HITS. When the user does not pass
+\code{stats} explicitly, the default auto-promotes to \code{"fast"} once the
+number of actors reaches
+\code{getOption("netify.fast_threshold", 1500L)}; passing
+\code{stats = "all"} explicitly always honors that request.}
 }
 \value{
 A data frame with actor-level statistics. Columns always include:

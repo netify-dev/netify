@@ -29,6 +29,8 @@
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_node}},
 #'   \code{\link{assemble_netify_plot}}
 #'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 netify_edge <- function(comp) {
 	if (!inherits(comp, "netify_plot_components")) {
@@ -66,6 +68,9 @@ netify_edge <- function(comp) {
 #' @return A ggplot object with the edge layer added
 #'
 #' @method ggplot_add netify_edge
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 ggplot_add.netify_edge <- function(object, plot, ...) {
 	plot$layers <- append(plot$layers, object)
@@ -101,6 +106,8 @@ ggplot_add.netify_edge <- function(object, plot, ...) {
 #'
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_edge}},
 #'   \code{\link{assemble_netify_plot}}
+#'
+#' @author Cassy Dorff, Shahryar Minhas
 #'
 #' @export
 netify_node <- function(comp) {
@@ -139,6 +146,9 @@ netify_node <- function(comp) {
 #' @return A ggplot object with the node layer added
 #'
 #' @method ggplot_add netify_node
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 ggplot_add.netify_node <- function(object, plot, ...) {
 	plot$layers <- append(plot$layers, object)
@@ -175,6 +185,8 @@ ggplot_add.netify_node <- function(object, plot, ...) {
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_label}},
 #'   \code{\link{assemble_netify_plot}}
 #'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 netify_text <- function(comp) {
 	if (!inherits(comp, "netify_plot_components")) {
@@ -210,6 +222,9 @@ netify_text <- function(comp) {
 #' @return A ggplot object with the text layer added
 #'
 #' @method ggplot_add netify_text
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 ggplot_add.netify_text <- function(object, plot, ...) {
 	plot$layers <- append(plot$layers, object)
@@ -246,6 +261,8 @@ ggplot_add.netify_text <- function(object, plot, ...) {
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_text}},
 #'   \code{\link{assemble_netify_plot}}
 #'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 netify_label <- function(comp) {
 	if (!inherits(comp, "netify_plot_components")) {
@@ -281,6 +298,9 @@ netify_label <- function(comp) {
 #' @return A ggplot object with the label layer added
 #'
 #' @method ggplot_add netify_label
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 ggplot_add.netify_label <- function(object, plot, ...) {
 	plot$layers <- append(plot$layers, object)
@@ -317,6 +337,8 @@ ggplot_add.netify_label <- function(object, plot, ...) {
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_text}},
 #'   \code{\link{assemble_netify_plot}}
 #'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 netify_text_repel <- function(comp) {
 	if (!inherits(comp, "netify_plot_components")) {
@@ -352,6 +374,9 @@ netify_text_repel <- function(comp) {
 #' @return A ggplot object with the text_repel layer added
 #'
 #' @method ggplot_add netify_text_repel
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 ggplot_add.netify_text_repel <- function(object, plot, ...) {
 	plot$layers <- append(plot$layers, object)
@@ -388,6 +413,8 @@ ggplot_add.netify_text_repel <- function(object, plot, ...) {
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_label}},
 #'   \code{\link{assemble_netify_plot}}
 #'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 netify_label_repel <- function(comp) {
 	if (!inherits(comp, "netify_plot_components")) {
@@ -423,6 +450,9 @@ netify_label_repel <- function(comp) {
 #' @return A ggplot object with the label_repel layer added
 #'
 #' @method ggplot_add netify_label_repel
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 ggplot_add.netify_label_repel <- function(object, plot, ...) {
 	plot$layers <- append(plot$layers, object)
@@ -458,6 +488,8 @@ ggplot_add.netify_label_repel <- function(object, plot, ...) {
 #'
 #' @seealso \code{\link[ggnewscale]{new_scale_color}}
 #'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 reset_scales <- function() {
 	structure(list(), class = c("netify_scale_reset", "list"))
@@ -475,6 +507,9 @@ reset_scales <- function() {
 #' @return A ggplot object with scale resets applied
 #'
 #' @method ggplot_add netify_scale_reset
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 ggplot_add.netify_scale_reset <- function(object, plot, ...) {
 	plot <- plot + ggnewscale::new_scale_color()
@@ -521,6 +556,8 @@ ggplot_add.netify_scale_reset <- function(object, plot, ...) {
 #'
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_edge}},
 #'   \code{\link{netify_node}}
+#'
+#' @author Cassy Dorff, Shahryar Minhas
 #'
 #' @export
 assemble_netify_plot <- function(comp) {
@@ -615,6 +652,9 @@ assemble_netify_plot <- function(comp) {
 #' }
 #'
 #' @method print netify_plot_components
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 print.netify_plot_components <- function(x, ...) {
 	cli::cli_h2("Netify plot components")
@@ -682,6 +722,8 @@ print.netify_plot_components <- function(x, ...) {
 #'
 #' @seealso \code{\link{plot.netify}}
 #'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 netify_scale_labels <- function(...) {
 	labels <- list(...)
@@ -705,6 +747,9 @@ netify_scale_labels <- function(...) {
 #' @return A ggplot object with updated scale labels
 #'
 #' @method ggplot_add netify_labels
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 ggplot_add.netify_labels <- function(object, plot, ...) {
 	# extract the netify plot data if available
@@ -761,8 +806,7 @@ ggplot_add.netify_labels <- function(object, plot, ...) {
 #' @keywords internal
 #' @noRd
 update_scale_label <- function(plot, aesthetic, label, component_type) {
-	# create the appropriate labs() call
-	# we need to handle all possible aesthetics
+	# build the labs() call for any supported aesthetic
 	labs_list <- list()
 	labs_list[[aesthetic]] <- label
 

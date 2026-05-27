@@ -13,3 +13,6 @@ List of plot arguments
 A network style that mimics Stata's default graph colors
 with navy blue and maroon
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

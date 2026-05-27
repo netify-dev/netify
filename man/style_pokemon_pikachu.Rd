@@ -12,3 +12,6 @@ List of plot arguments
 \description{
 A playful style inspired by Pikachu: energetic yellows, bold outlines, and lightning vibes
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

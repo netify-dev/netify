@@ -19,9 +19,13 @@ Event data from UCDP for Myanmar
 \examples{
 data(myanmar)
 myanmar[1:3, ]
+
 }
 \references{
 add UCDP reference
 (\href{https://ucdp.uu.se/}{ucdp})
+}
+\author{
+Cassy Dorff, Shahryar Minhas
 }
 \keyword{datasets}

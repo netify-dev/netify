@@ -39,3 +39,6 @@ ggplot() +
 \code{\link{plot.netify}}, \code{\link{netify_text}},
 \code{\link{assemble_netify_plot}}
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

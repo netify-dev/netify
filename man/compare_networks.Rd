@@ -130,6 +130,16 @@ A list of class "netify_comparison" containing:
 \item{node_changes}{List detailing added, removed, and maintained nodes (for node comparisons)}
 \item{significance_tests}{QAP test results if test = TRUE}
 \item{details}{Detailed comparison matrices if return_details = TRUE}
+\item{comparisons}{Long-format data frame for \code{what = "edges"}
+with one row per (network pair, metric) triple. Columns:
+\code{net_i}, \code{net_j} (the two network names),
+\code{metric} (e.g. \code{"correlation"}, \code{"jaccard"},
+\code{"hamming"}, \code{"qap_correlation"}, \code{"spectral"},
+\code{"weight_correlation"}), \code{value} (scalar metric),
+\code{p_value} (only populated for \code{qap_correlation};
+\code{NA} otherwise). Coerce to a tibble with
+\code{tibble::as_tibble(comp)} (the \code{as_tibble} S3 method
+returns this frame directly).}
 }
 }
 \description{

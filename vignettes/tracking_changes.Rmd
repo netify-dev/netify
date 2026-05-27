@@ -144,8 +144,7 @@ coop_comparison <- compare_networks(
     method = "all"
 )
 
-# Display comparison results
-# Extract key metrics for cleaner display
+# Render the summary frame as a knitr table
 knitr::kable(
     coop_comparison$summary,
     caption = "Verbal vs Material Cooperation Comparison Metrics",
@@ -178,6 +177,21 @@ if (coop_comparison$summary$correlation > 0.7) {
     cat("Weak alignment: Verbal promises don't strongly translate to material actions\n")
 }
 ```
+
+### The tidy `$comparisons` frame
+
+`compare_networks()` also returns a long-format `$comparisons` data frame with one row per (pair, metric). This is the artifact you usually want for downstream filtering and plotting -- the same column layout (`net_i`, `net_j`, `metric`, `value`, `p_value`) shows up regardless of whether you passed a list, a longitudinal netify, a multilayer netify, or used `by=`:
+
+```{r}
+knitr::kable(
+    coop_comparison$comparisons,
+    caption = "Tidy per-pair comparison frame",
+    digits = 3,
+    align = "c"
+)
+```
+
+With only two networks this is a small table, but the same column layout scales naturally to dozens of networks (longitudinal, multilayer, by-group), where it's much easier to filter and plot than the wide `$summary` table.
 
 ### Understanding the Output
 
@@ -222,13 +236,18 @@ change_summary <- data.frame(
 
 # Visualize
 ggplot(change_summary, aes(x = Type, y = Count)) +
-    geom_col(fill = "gray30") +
+    geom_col() +
     labs(
         title = "Verbal vs Material Cooperation Networks",
         subtitle = "Which relationships exist in each domain?",
         y = "Number of Dyadic Relationships"
     ) +
-    theme_minimal()
+    theme_bw() +
+    theme(
+        panel.border = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "top"
+    )
 ```
 
 The visualization makes the pattern clear: verbal cooperation (cheap talk) is far more common than material cooperation (costly actions). Note that this pattern may partly reflect reporting bias in event data, as verbal events (statements, promises) are more likely to be captured in news sources than material actions.
@@ -253,9 +272,13 @@ coop_conf_qap <- compare_networks(
 qap_msg <- paste0(
     "**QAP Test Results:**\n\n",
     "- Observed correlation: ", round(coop_conf_qap$summary$qap_correlation, 3), "\n",
-    "- P-value: ", ifelse(coop_conf_qap$summary$qap_pvalue == 0, 
-                         "< 0.002 (1/500 permutations)", 
-                         round(coop_conf_qap$summary$qap_pvalue, 3)), "\n"
+    "- P-value: ",
+    ifelse(
+        coop_conf_qap$summary$qap_pvalue == 0,
+        "< 0.002 (1/500 permutations)",
+        round(coop_conf_qap$summary$qap_pvalue, 3)
+    ),
+    "\n"
 )
 
 # Add interpretation based on significance
@@ -406,8 +429,7 @@ temporal_comparison <- compare_networks(
     coop_net_longit,
     method = "all"
 )
-# Display temporal comparison results
-# Show summary statistics in a cleaner format
+# Render the summary frame as a knitr table
 knitr::kable(
     temporal_comparison$summary,
     caption = "Temporal Network Comparison Summary",
@@ -476,11 +498,12 @@ ggplot(edge_change_long, aes(x = Comparison, y = Count, fill = Change_Type)) +
         x = "Year Comparison",
         y = "Number of Edges"
     ) +
-    theme_minimal() +
+    theme_bw() +
     theme(
-        axis.text.x = element_text(
-            angle = 45, hjust = 1
-        )
+        panel.border = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "top",
+        axis.text.x = element_text(angle = 45, hjust = 1)
     )
 ```
 
@@ -548,7 +571,7 @@ This table shows how network-wide properties evolve:
 
 - **n_nodes (152)**: Number of countries remains constant - same actors throughout
 - **n_edges**: Increases from 8,692 (2002) to 9,774 (2014) - more connections over time
-- **density**: Increases from 0.376 to 0.423 - the network becomes denser
+- **density**: Increases from 0.379 to 0.426 - the network becomes denser
 - **reciprocity**: Stays very high (0.97-0.98) — the correlation between each directed tie and its reverse is nearly perfect, meaning cooperation from A to B closely tracks cooperation from B to A in magnitude. (Note: this is a correlation-based measure, not the proportion of mutual edges.)
 - **transitivity**: Around 0.61-0.64 - moderate clustering (friend of a friend is often a friend)
 - **mean_degree**: Increases from 57.2 to 64.3 - average country has more partners over time
@@ -591,11 +614,16 @@ ggplot(
         subtitle = paste("Percent change from", baseline_year),
         x = "", y = ""
     ) +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 0))
+    theme_bw() +
+    theme(
+        panel.border = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "top",
+        axis.text.x = element_text(angle = 0)
+    )
 ```
 
-The heatmap reveals that density, number of edges, and mean degree all increase by about 14-15% from 2002 to 2010, while reciprocity slightly decreases and transitivity shows modest growth.
+The heatmap reveals that density, number of edges, and mean degree all increase by about 14-15% from 2002 to 2010 (and remain ~12-13% above baseline in 2014), while reciprocity stays essentially flat (within 1% in either direction) and transitivity shows modest growth (~3-5%).
 
 Many ways to visualize structural changes ... could also just do a line plot: 
 
@@ -624,8 +652,14 @@ ggplot(struct_long, aes(x = network, y = value, group = metric)) +
         subtitle = "Evolution of network characteristics",
         x = "", y = ""
     ) +
-    theme_minimal() +
-    theme(legend.position = "none")
+    theme_bw() +
+    theme(
+        panel.border = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none",
+        strip.background = element_rect(fill = "black", color = "black"),
+        strip.text = element_text(color = "white", hjust = 0)
+    )
 ```
 
 ## 5. Node Composition: Tracking Actor Dynamics
@@ -747,7 +781,7 @@ spectral_comp <- compare_networks(
     method = "spectral"
 )
 
-# Display spectral comparison results in a cleaner format
+# Render the spectral summary as a knitr table
 knitr::kable(
     spectral_comp$summary,
     caption = "Spectral Distance Results",
@@ -847,14 +881,19 @@ knitr::kable(
 
 # Create visualization for similarity metrics
 p_similarity <- ggplot(similarity_metrics, aes(x = Method, y = Value)) +
-    geom_col(fill = "gray30", width = 0.7) +
+    geom_col(width = 0.7) +
     geom_text(aes(label = round(Value, 3)), hjust = -0.1, size = 3.5) +
     scale_y_continuous(limits = c(0, 1.1), breaks = seq(0, 1, 0.2)) +
     labs(
         title = "Similarity Metrics (0-1 Scale)",
         x = NULL, y = "Similarity Score"
     ) +
-    theme_minimal() +
+    theme_bw() +
+    theme(
+        panel.border = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "top"
+    ) +
     coord_flip()
 
 # Create separate note for spectral distance
@@ -920,8 +959,7 @@ multilayer_2010 <- layer_netify(
 
 # Compare layers automatically
 layer_comparison <- compare_networks(multilayer_2010, method = "all")
-# Display multilayer comparison results
-# Extract summary for cleaner display
+# Render the layer-comparison summary as a knitr table
 knitr::kable(
     layer_comparison$summary,
     caption = "Multilayer Network Comparison Summary",
@@ -945,13 +983,23 @@ The output shows how different types of relationships relate to each other. For 
 
 ### Interpreting Multilayer Results
 
-The output shows all pairwise comparisons between the four network layers. Key insights:
+The output shows all six pairwise comparisons between the four network layers. To inspect them individually, pull the tidy `$comparisons` frame:
 
-- **Cooperation vs. Conflict**: Verbal cooperation has the highest correlation with verbal conflict (0.628), suggesting countries that cooperate verbally also engage in verbal conflicts
-- **Verbal vs. Material**: Within cooperation types, verbal and material cooperation are moderately correlated (0.587) 
-- **Cross-type patterns**: Material cooperation shows lower correlation with conflict types, indicating material actions may be more distinct from conflict behaviors
+```{r}
+knitr::kable(
+    subset(layer_comparison$comparisons, metric == "qap_correlation",
+        select = c(net_i, net_j, value)),
+    caption = "Pairwise edge-weight correlations across layers",
+    digits = 3, row.names = FALSE
+)
+```
 
-The summary statistics show correlations range from 0.42 to 0.64 across all layer pairs, indicating moderate but meaningful relationships between different interaction types.
+Key patterns:
+
+- **Verbal coop vs. verbal conflict (0.643)**: highest cross-domain correlation -- countries that talk a lot tend to do both cooperative and conflictual talking
+- **Verbal coop vs. material coop (0.623)**: within cooperation, the verbal and material channels overlap moderately
+- **Material coop vs. verbal conflict (~0.42)** and **material coop vs. material conflict (~0.43)**: the lowest correlations involve material cooperation -- costly material support is the layer that overlaps least with the others
+- **Range**: correlations span 0.42 to 0.64, all positive -- interaction density drives a baseline overlap even between cooperation and conflict.
 
 ### Longitudinal Multilayer Networks
 
@@ -1162,7 +1210,7 @@ diagnostic_results <- compare_networks(
     what = "edges",
     permutation_type = "degree_preserving",  # For sparse networks
     correlation_type = "spearman",           # For skewed weights
-    n_permutations = 10000,                  # For publication
+    n_permutations = 10000,                  # For final analysis
     p_adjust = "BH",                         # Multiple comparisons
     spectral_rank = 75,                      # Large network optimization
     return_details = TRUE,                   # For custom analysis
@@ -1230,7 +1278,7 @@ R = number of permutations, n = number of nodes, m = number of edges
 
 3. **Multiple Testing**
    - With 10+ comparisons, always use `p_adjust`
-   - Report both raw and adjusted p-values in publications
+   - Report both raw and adjusted p-values in your results
 
 4. **Reproducibility**
    - Always set `seed` for permutation tests

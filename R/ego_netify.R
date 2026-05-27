@@ -74,6 +74,31 @@
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #'
+#' @examples
+#' # cross-sectional ego network from the bundled classroom data
+#' data(classroom_edges)
+#' data(classroom_nodes)
+#' net <- netify(
+#'     classroom_edges,
+#'     actor1 = "from", actor2 = "to",
+#'     symmetric = TRUE,
+#'     nodal_data = classroom_nodes
+#' )
+#' s07_ego <- ego_netify(net, ego = "s07")
+#' print(s07_ego)
+#'
+#' \dontrun{
+#' # longitudinal ego network with a weighted, directed netlet
+#' data(icews)
+#' netlet <- netify(
+#'     icews,
+#'     actor1 = "i", actor2 = "j", time = "year",
+#'     weight = "verbCoop"
+#' )
+#' pakistan_ego <- ego_netify(netlet, ego = "Pakistan")
+#' summary(pakistan_ego)
+#' }
+#'
 #' @export ego_netify
 
 ego_netify <- function(
@@ -83,10 +108,7 @@ ego_netify <- function(
 	# check if netify object
 	netify_check(netlet)
 
-	# if longit array to longit list so we dont
-	# need separate processes and we cant stay in
-	# array format for ego nets anyhow
-	# (i.e., ego+alters change over time)
+	# convert longit array to longit list since ego sets vary over time
 	if (attr(netlet, "netify_type") == "longit_array") {
 		netlet <- array_to_list(netlet, preserveAttr = TRUE)
 	}
@@ -165,6 +187,31 @@ ego_netify <- function(
 	if (netlet_type == "cross_sec") {
 		raw_net <- list(raw_net)
 	}
+
+	# drop periods where the ego does not exist in the slice and inform the user
+	ego_dropped_periods <- character(0)
+	if (longitudinal) {
+		ego_in_slice <- vapply(raw_net, function(net) {
+			ego %in% rownames(net) || ego %in% colnames(net)
+		}, logical(1))
+		if (any(!ego_in_slice)) {
+			ego_dropped_periods <- names(raw_net)[!ego_in_slice]
+			raw_net <- raw_net[ego_in_slice]
+		}
+		if (length(raw_net) == 0) {
+			cli::cli_abort(c(
+				"!" = paste0("Ego '", ego, "' is not present in any time period of the netlet."),
+				"i" = "Check `get_actor_time_info(netlet)` for this actor's entry / exit window."
+			))
+		}
+		if (length(ego_dropped_periods) > 0) {
+			cli::cli_alert_info(paste0(
+				"Ego '", ego, "' not present in ", length(ego_dropped_periods),
+				" time period(s); dropping: ",
+				paste(ego_dropped_periods, collapse = ", "), "."
+			))
+		}
+	}
 	####
 
 	####
@@ -176,17 +223,14 @@ ego_netify <- function(
 	# if weighted then define neighborhood using mean of edge weights
 	# if threshold is not supplied
 	if (weighted) {
-		# if threshold provided and net is longit then check if
-		# threshold is a vector of length equal to the number of time points
-		# if not then rep the threshold to be the same for all time points
+		# recycle scalar threshold across time periods if needed
 		if (!is.null(threshold) && longitudinal) {
 			if (length(threshold) != length(raw_net)) {
 				threshold <- rep(threshold, length(raw_net))
 			}
 		}
 
-		# iterate through each list element and create new
-		# adjacency matrix with only the ego and its neighbors
+		# default threshold to per-slice mean edge weight
 		if (is.null(threshold)) {
 			threshold <- unlist(
 				lapply(raw_net, function(net) {

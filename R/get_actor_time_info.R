@@ -1,85 +1,128 @@
-#' Extract actor time range information from dyadic data
+#' Extract actor time range information
 #'
-#' `get_actor_time_info` analyzes a longitudinal dyadic dataset to determine when
-#' each actor enters and exits the network. Entry is defined as the first time
-#' period in which an actor appears in any interaction (as either sender or
-#' receiver), and exit as the last time period.
+#' `get_actor_time_info` returns a per-actor data.frame of entry and exit times.
+#' It dispatches on the first argument:
 #'
-#' @param dyad_data A data.frame containing longitudinal dyadic observations. Must
-#'   include columns for two actors and time periods. Will be coerced to data.frame
-#'   if a tibble or data.table is provided.
-#' @param actor1 Character string specifying the column name for the first actor
-#'   in each dyad.
-#' @param actor2 Character string specifying the column name for the second actor
-#'   in each dyad.
-#' @param time Character string specifying the column name for time periods.
+#' \itemize{
+#'   \item If `x` is a **netify object**, it returns the stored `actor_pds`
+#'     attribute directly (one row per actor with `min_time` / `max_time`).
+#'     This is the open-cohort roster the netlet was built with — and the
+#'     roster every per-period statistic (density, degree, homophily) is
+#'     computed against.
+#'   \item If `x` is a **data.frame** of dyadic observations, it computes the
+#'     entry / exit times from the data. Entry is defined as the first time
+#'     period in which an actor appears in any interaction (as either sender
+#'     or receiver), and exit as the last time period. Use this form to
+#'     prepare the `actor_pds` argument to `netify()`.
+#' }
 #'
-#' @return A data.frame with three columns containing actor-level time information:
+#' @param x A netify object, or a data.frame of dyadic observations.
+#' @param actor1 Character string specifying the column name for the first
+#'   actor in each dyad (data.frame method only).
+#' @param actor2 Character string specifying the column name for the second
+#'   actor in each dyad (data.frame method only).
+#' @param time Character string specifying the column name for time periods
+#'   (data.frame method only).
+#' @param ... Unused; reserved for future methods.
+#'
+#' @return A data.frame with three columns:
 #'   \itemize{
-#'     \item \strong{actor}: Character vector of unique actor identifiers found
-#'       in either actor1 or actor2 columns
-#'     \item \strong{min_time}: The earliest time period in which each actor
-#'       appears in the data (entry point)
-#'     \item \strong{max_time}: The latest time period in which each actor
-#'       appears in the data (exit point)
+#'     \item \strong{actor}: Character vector of unique actor identifiers.
+#'     \item \strong{min_time}: Earliest time period the actor is in the
+#'       network (entry point).
+#'     \item \strong{max_time}: Latest time period the actor is in the
+#'       network (exit point).
 #'   }
 #'
-#'   Actors are ordered as they appear in the aggregation, not alphabetically or
-#'   by time.
+#'   For the netify method, this is a verbatim copy of `attr(x, "actor_pds")`.
+#'   For the data.frame method, actors are ordered as they appear in the
+#'   aggregation, not alphabetically or by time.
 #'
 #' @details
-#' The function performs the following operations:
-#'
-#' \strong{Data processing:}
-#' \enumerate{
-#'   \item Combines actor1 and actor2 columns into a single nodal format
-#'   \item Aggregates by actor to find minimum and maximum time periods
-#'   \item Returns a clean data.frame with one row per unique actor
-#' }
-#'
 #' \strong{Use cases:}
 #'
-#' Main usage in this package is to:
 #' \itemize{
-#'   \item Preparing actor existence information for the `actor_pds` parameter in
-#'     `netify()`
+#'   \item On a **dyad data.frame**: build the `actor_pds` argument to
+#'     `netify(..., actor_time_uniform = FALSE, actor_pds = ...)` for
+#'     open-cohort panels (panel surveys with attrition, contact-tracing
+#'     chains, organizational membership over time, etc.).
+#'   \item On a **netify object**: inspect the entry / exit roster the netlet
+#'     is currently using — useful when debugging density denominators,
+#'     writing custom exporters, or verifying that an open-cohort netlet
+#'     has the actor windows you expect.
 #' }
 #'
-#' \strong{Assumptions:}
+#' \strong{Assumptions (data.frame method):}
 #' \itemize{
-#'   \item An actor is considered "present" in any time period where they appear
-#'     in the data, regardless of their role (sender/receiver)
-#'   \item Missing values in time periods are ignored when calculating min/max
-#'   \item Actors must appear in at least one non-missing time period
+#'   \item An actor is considered "present" in any time period where they
+#'     appear in the data, regardless of role (sender/receiver).
+#'   \item Missing values in time are ignored when calculating min/max.
+#'   \item Actors must appear in at least one non-missing time period.
 #' }
 #'
 #' @note
-#' The function assumes that presence in the data indicates network participation.
-#' If actors can be temporarily absent from the network while still being considered
-#' members, this function will not capture such gaps.
-#'
+#' The data.frame method assumes that presence in the data indicates network
+#' participation. If actors can be temporarily absent from the network while
+#' still being considered members, this method will not capture such gaps —
+#' supply an explicit `actor_pds` roster to `netify()` instead.
 #'
 #' @author Shahryar Minhas, Ha Eun Choi
 #'
+#' @examples
+#' # data.frame input: derive the roster
+#' df <- data.frame(
+#'     i = c("a", "a", "b", "c"),
+#'     j = c("b", "c", "c", "a"),
+#'     t = c(1, 2, 2, 3)
+#' )
+#' get_actor_time_info(df, "i", "j", "t")
+#'
+#' # netify input: read back the stored roster
+#' \dontrun{
+#' roster <- data.frame(actor = c("a", "b"), min_time = c(1, 1), max_time = c(3, 4))
+#' net <- netify(df, actor1 = "i", actor2 = "j", time = "t",
+#'               actor_time_uniform = FALSE, actor_pds = roster)
+#' get_actor_time_info(net)
+#' }
+#'
 #' @export get_actor_time_info
+get_actor_time_info <- function(x, ...) {
+	UseMethod("get_actor_time_info")
+}
 
-get_actor_time_info <- function(
-	dyad_data,
-	actor1, actor2,
-	time) {
+#' @rdname get_actor_time_info
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @export
+get_actor_time_info.netify <- function(x, ...) {
+	pds <- attr(x, "actor_pds")
+	if (is.null(pds)) {
+		# cross-sectional netlets carry no actor_pds; synthesize a flat one
+		# so callers can rely on a stable return shape
+		pds <- actor_pds_from_netlet(x)
+	}
+	pds
+}
+
+#' @rdname get_actor_time_info
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @export
+get_actor_time_info.data.frame <- function(x, actor1, actor2, time, ...) {
 	# input validation
-	checkmate::assert_data_frame(dyad_data)
 	checkmate::assert_string(actor1)
 	checkmate::assert_string(actor2)
 	checkmate::assert_string(time)
 
 	# check that specified columns exist in the data
-	checkmate::assert_choice(actor1, names(dyad_data))
-	checkmate::assert_choice(actor2, names(dyad_data))
-	checkmate::assert_choice(time, names(dyad_data))
+	checkmate::assert_choice(actor1, names(x))
+	checkmate::assert_choice(actor2, names(x))
+	checkmate::assert_choice(time, names(x))
 
 	# convert to dyadic data.frame
-	dyad_data <- data.frame(dyad_data, stringsAsFactors = FALSE)
+	dyad_data <- data.frame(x, stringsAsFactors = FALSE)
 
 	# restructure data into a nodal format so that we can more easily
 	# calculate min and max time points from the data
@@ -96,8 +139,8 @@ get_actor_time_info <- function(
 
 	# get time stats by actor
 	actor_year <- tapply(
-		nodal[, time], nodal[, actor1], function(x) {
-			c(num(min(x, na.rm = TRUE)), num(max(x, na.rm = TRUE)))
+		nodal[, time], nodal[, actor1], function(z) {
+			c(num(min(z, na.rm = TRUE)), num(max(z, na.rm = TRUE)))
 		}
 	)
 	rm(nodal)
@@ -112,6 +155,25 @@ get_actor_time_info <- function(
 
 	#
 	return(actor_info)
+}
+
+#' @rdname get_actor_time_info
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @export
+get_actor_time_info.default <- function(x, actor1, actor2, time, ...) {
+	# coerce tibble / data.table / matrix-like inputs and re-dispatch
+	if (is.data.frame(x) || inherits(x, c("tbl_df", "tbl", "data.table"))) {
+		return(get_actor_time_info.data.frame(
+			as.data.frame(x, stringsAsFactors = FALSE),
+			actor1 = actor1, actor2 = actor2, time = time
+		))
+	}
+	cli::cli_abort(c(
+		"!" = "{.fn get_actor_time_info} has no method for objects of class {.cls {class(x)[1]}}.",
+		"i" = "Pass a {.cls netify} object or a {.cls data.frame} of dyadic observations."
+	))
 }
 
 #' actor_pds_to_frame
@@ -138,24 +200,15 @@ actor_pds_to_frame <- function(netlet_actor_pds, time_labels = NULL) {
 		
 		# convert numeric time to labels if provided
 		if (!is.null(time_labels)) {
-			# for numeric time data, actor_pds might have actual year values (2000-2015)
-			# but we need to map them to the time_labels which are ordered
-			# check if time_range values are indices or actual time values
+			# map time_range to time_labels (actual values vs indices)
 			if (max(time_range) > length(time_labels)) {
-				# time_range contains actual time values, need to map to time_labels
-				# find which time_labels match our time values
 				time_label_nums <- as.numeric(time_labels)
 				if (!any(is.na(time_label_nums))) {
-					# time_labels are numeric strings like "2000", "2001"
-					# map time_range values to corresponding time_labels
 					ii_frame$time <- as.character(time_range)
 				} else {
-					# time_labels are not numeric, use them as is with indices
-					# this shouldn't happen in practice
 					ii_frame$time <- as.character(time_labels[match(time_range, sort(unique(c(netlet_actor_pds$min_time, netlet_actor_pds$max_time))))])
 				}
 			} else {
-				# time_range contains indices (1-based), use directly
 				ii_frame$time <- as.character(time_labels[ii_frame$time])
 			}
 		}

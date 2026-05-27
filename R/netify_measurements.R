@@ -185,5 +185,8 @@ netify_measurements <- function(netlet) {
 }
 
 #' @rdname netify_measurements
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 measurements <- netify_measurements

@@ -20,3 +20,6 @@ A ggplot object with the edge layer added
 S3 method to add netify_edge objects to ggplot objects. This method is called
 automatically when using the + operator with a netify_edge object.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

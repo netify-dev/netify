@@ -13,3 +13,6 @@ List of plot arguments
 A minimalist network style inspired by Edward Tufte's
 data visualization principles
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

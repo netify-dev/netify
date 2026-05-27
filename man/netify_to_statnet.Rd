@@ -16,24 +16,39 @@ to_statnet(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
 to_network(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
 }
 \arguments{
-\item{netlet}{A netify object containing network data. Currently supports
-single-layer networks only. For multilayer networks, use
-\code{\link{subset_netify}} to extract individual layers first.}
+\item{netlet}{A netify object containing network data. Cross-sectional,
+longitudinal, and multilayer netlets are all supported; multilayer
+inputs are dispatched layer-by-layer and the layer results are
+returned in a named list keyed by layer.}
 
 \item{add_nodal_attribs}{Logical. If TRUE (default), includes nodal attributes
 from the netify object as vertex attributes in the network object. Set to
 FALSE to create a network with structure only.}
 
 \item{add_dyad_attribs}{Logical. If TRUE (default), includes dyadic attributes
-from the netify object as edge attributes in the network object. Set to
-FALSE to exclude edge covariates.}
+from the netify object as edge attributes in the network object. Each
+dyad variable is attached in two places on the resulting network: as a
+network-level attribute under its original name (the full \eqn{n\times n}
+matrix) and as a per-edge attribute under \code{<var>_e}. The trailing
+\code{_e} disambiguates the per-edge edgelist from the network-level
+matrix. For \code{ergm::edgecov()} pass the \emph{original} (matrix)
+name, not the \code{_e} alias, since \code{edgecov()} reads a
+network-level matrix attribute. The \code{_e} per-edge attribute is
+exposed for descriptive use (e.g. coloring edges in
+\code{network::plot.network}).}
 }
 \value{
 A network object or list of network objects:
 \describe{
 \item{Cross-sectional networks}{Returns a single network object}
-\item{Longitudinal networks}{Returns a named list of network objects,
-with names corresponding to time periods}
+\item{Longitudinal networks}{Returns a named list of network objects
+with class \code{c("network.list", "list")}, names corresponding to
+time periods. The \code{network.list} class is the format that
+\pkg{tergm} CMLE (\code{tergm(nl ~ Form(.) + Persist(.), estimate = "CMLE",
+      times = seq_along(nl))}) and \code{stergm} expect directly, so the
+output is plug-and-play for longitudinal ERGMs.}
+\item{Multilayer networks}{Returns a named list of (per-time) network
+objects keyed by layer name}
 }
 
 The resulting network object(s) will have:
@@ -41,8 +56,14 @@ The resulting network object(s) will have:
 \item Vertices named according to actors in the netify object
 \item Edge weights from the netify weight variable stored as "weight" attribute
 \item Vertex attributes for each nodal variable (if add_nodal_attribs = TRUE)
-\item Edge attributes for each dyadic variable (if add_dyad_attribs = TRUE)
+\item Edge attributes for each dyadic variable (if add_dyad_attribs = TRUE);
+per-edge attributes carry the \code{_e} suffix, network-level
+attributes keep the original name
 \item Proper directedness based on the symmetric parameter of the netify object
+\item A \code{netify_na_cols} attribute (character vector) listing
+nodal columns that carry \code{NA}s; pass this directly to
+\code{\link{drop_na_actors}()} to drop the offending actors before
+fitting ergm formulas that reference those columns
 }
 }
 \description{
@@ -149,4 +170,6 @@ model <- ergm(ntwk ~ edges + mutual + nodematch("i_polity2"))
 }
 \author{
 Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+
+Cassy Dorff, Shahryar Minhas
 }

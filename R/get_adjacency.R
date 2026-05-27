@@ -5,7 +5,11 @@
 #' relationships at one point in time.
 #'
 #' @param dyad_data A data.frame containing dyadic observations. Will be coerced
-#'   to data.frame if a tibble or data.table is provided.
+#'   to data.frame if a tibble or data.table is provided. As a convenience,
+#'   an existing netify object is also accepted: in that case `get_adjacency()`
+#'   returns the underlying adjacency as a plain matrix (no class / attributes),
+#'   and for longitudinal inputs returns the first time slice with a cli hint
+#'   pointing to `as.matrix(net, time = ...)` for selecting a specific slice.
 #' @param actor1 Character string specifying the column name for the first actor
 #'   in each dyad.
 #' @param actor2 Character string specifying the column name for the second actor
@@ -102,23 +106,45 @@ get_adjacency <- function(
 	weight = NULL, sum_dyads = FALSE,
 	diag_to_NA = TRUE, missing_to_zero = TRUE,
 	nodelist = NULL) {
-	# if bipartite network then force diag_to_NA to be FALSE
-	# and force asymmetric, create copy to preserve user choice
+	# if input is a netify object, return the underlying adjacency as a plain matrix
+	if (inherits(dyad_data, "netify")) {
+		nt <- attr(dyad_data, "netify_type")
+		if (is.null(nt) || nt == "cross_sec") {
+			mat <- unclass(dyad_data)
+			attributes(mat) <- list(
+				dim = dim(dyad_data),
+				dimnames = dimnames(dyad_data)
+			)
+			return(mat)
+		}
+		if (nt == "longit_array") {
+			cli::cli_alert_info(
+				"{.fn get_adjacency} returned the first time slice of a longitudinal array. Use {.code as.matrix(net, time = ...)} to pick a specific slice."
+			)
+			mat <- unclass(dyad_data)[, , 1, drop = TRUE]
+			attributes(mat) <- list(
+				dim = dim(mat), dimnames = dimnames(mat)
+			)
+			return(mat)
+		}
+		if (nt == "longit_list") {
+			cli::cli_alert_info(
+				"{.fn get_adjacency} returned the first time slice of a longitudinal list. Use {.code as.matrix(net, time = ...)} to pick a specific slice."
+			)
+			first <- unclass(dyad_data)[[1]]
+			attributes(first) <- list(
+				dim = dim(first), dimnames = dimnames(first)
+			)
+			return(first)
+		}
+	}
+
+	# bipartite forces diag_to_NA=FALSE and asymmetric; preserve user choice
 	user_symmetric <- symmetric
 	if (mode == "bipartite") {
 		diag_to_NA <- FALSE
 		symmetric <- FALSE
 	}
-
-	# # if mode bipartite is specified make sure that
-	# # actors in actor1 and actor2 columns are distinct
-	# if(mode=='bipartite'){
-	#   if(length(intersect(dyad_data[,actor1], dyad_data[,actor2])) > 0){
-	#     cli::cli_alert_warning(
-	#       "Warning: Mode has been inputted as bipartite but actors are not distinct across the modes."
-	#     )
-	#   }
-	# }
 
 	# create weight string for storage as attribute in netify object
 	weight_label <- weight_string_label(weight, sum_dyads)
@@ -133,7 +159,7 @@ get_adjacency <- function(
 	# subset to relevant vars once
 	dyad_data <- dyad_data[, c(actor1, actor2, weight)]
 
-	# get vector of actors - optimized extraction
+	# get vector of actors
 	actors_rows <- unique_vector(dyad_data[, actor1])
 	actors_cols <- unique_vector(dyad_data[, actor2])
 	actors <- unique_vector(actors_rows, actors_cols)
@@ -167,10 +193,11 @@ get_adjacency <- function(
 	actor_pds$min_time <- 1
 	actor_pds$max_time <- 1
 
-	# check if there are repeating dyads
+	# auto-promote sum_dyads if repeats are present and weight is supplied
 	num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2)
 	if (num_repeat_dyads > 0) {
-		edge_value_check(w_orig, sum_dyads, TRUE)
+		evc <- edge_value_check(w_orig, sum_dyads, TRUE)
+		sum_dyads <- evc$sum_dyads
 	}
 
 	# aggregate data if sum dyads selected
@@ -178,12 +205,18 @@ get_adjacency <- function(
 		dyad_data <- aggregate_dyad(dyad_data, actor1, actor2, NULL, weight, symmetric, missing_to_zero)
 	}
 
-	# remove zeros early if missing_to_zero is TRUE
+	# drop zero-weight rows but keep NaN/NA so they propagate as missing
 	if (missing_to_zero) {
-		dyad_data <- dyad_data[dyad_data[, weight] != 0, ]
+		w_vec <- dyad_data[, weight]
+		nan_rows <- is.nan(w_vec)
+		if (any(nan_rows)) {
+			w_vec[nan_rows] <- NA_real_
+			dyad_data[, weight] <- w_vec
+		}
+		dyad_data <- dyad_data[which(is.na(w_vec) | w_vec != 0), , drop = FALSE]
 	}
 
-	# cache frequently accessed columns for efficiency
+	# cache frequently accessed columns
 	dyad_actor1 <- dyad_data[, actor1]
 	dyad_actor2 <- dyad_data[, actor2]
 	dyad_weight <- dyad_data[, weight]
@@ -191,14 +224,14 @@ get_adjacency <- function(
 	# assign cross-section value for adjmat depending on user inputs
 	value <- dyad_weight
 
-	# create logical value that is TRUE if weight is just 0/1 - optimized check
+	# create logical value that is TRUE if weight is just 0/1
 	is_binary <- length(value) == 0 || all(value %in% c(0, 1))
 
-	# pre-compute matrix indices to avoid repeated match() calls
+	# pre-compute matrix indices
 	mat_row_indices <- match(dyad_actor1, actors_rows)
 	mat_col_indices <- match(dyad_actor2, actors_cols)
 
-	# convert to adjacency matrix using optimized C++ function
+	# convert to adjacency matrix
 	adj_out <- get_matrix(
 		n_rows = length(actors_rows),
 		n_cols = length(actors_cols),
@@ -212,9 +245,7 @@ get_adjacency <- function(
 		diag_to_NA = diag_to_NA && mode == "unipartite"
 	)
 
-	# if user left weight NULL and set sum_dyads
-	# to FALSE then record weight as NULL for
-	# attribute purposes
+	# record weight as NULL when no weight supplied and sum_dyads is FALSE
 	if (!sum_dyads && is.null(w_orig)) {
 		weight <- NULL
 	}
@@ -226,7 +257,7 @@ get_adjacency <- function(
 		layer_label <- weight
 	}
 
-	# add class info and attributes efficiently
+	# add class info and attributes
 	class(adj_out) <- "netify"
 	attributes(adj_out) <- c(attributes(adj_out), list(
 		netify_type = "cross_sec",

@@ -15,3 +15,6 @@ A style list that can be passed to plot()
 \description{
 Randomly selects and returns one of the available network styles
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

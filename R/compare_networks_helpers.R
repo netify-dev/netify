@@ -155,14 +155,14 @@ compare_edges <- function(
 			loops1 <- attributes(nets_list[[i]])$loops %||% FALSE
 			loops2 <- attributes(nets_list[[j]])$loops %||% FALSE
 
-			# if networks have different loop settings, we need to include diagonal
+			# include the diagonal when the two networks disagree on loops
 			force_include_diagonal <- include_diagonal || (loops1 != loops2)
 
-			# get pre-aligned matrices
+			# pull the pre-aligned matrices
 			mat1 <- aligned_list[[i]]
 			mat2 <- aligned_list[[j]]
-			
-			# if diagonal handling differs, we need to re-align
+
+			# re-align when the diagonal policy just shifted
 			if (force_include_diagonal && !include_diagonal) {
 				# re-align with diagonal included
 				mats <- align_matrices(nets_list[[i]], nets_list[[j]],
@@ -709,7 +709,8 @@ compare_attributes <- function(
 		attr_comparisons[[attr]] <- attr_result
 	}
 
-	# compile summary
+	# compile summary; rbind with column union so categorical
+	# (no ks_pvalue) and numeric (with ks_pvalue) attribute rows stack
 	summary_list <- lapply(names(attr_comparisons), function(attr) {
 		comp <- attr_comparisons[[attr]]
 		if (!is.null(comp$summary)) {
@@ -718,8 +719,18 @@ compare_attributes <- function(
 			NULL
 		}
 	})
-
-	summary_df <- do.call(rbind, summary_list[!sapply(summary_list, is.null)])
+	summary_list <- summary_list[!vapply(summary_list, is.null, logical(1))]
+	if (length(summary_list) == 0L) {
+		summary_df <- NULL
+	} else {
+		all_cols <- unique(unlist(lapply(summary_list, names)))
+		summary_padded <- lapply(summary_list, function(df) {
+			missing_c <- setdiff(all_cols, names(df))
+			for (m in missing_c) df[[m]] <- NA
+			df[, all_cols, drop = FALSE]
+		})
+		summary_df <- do.call(rbind, c(summary_padded, list(make.row.names = FALSE)))
+	}
 	
 	# calculate custom statistics if provided
 	custom_stats_list <- NULL
@@ -786,8 +797,6 @@ compare_attributes <- function(
 
 	return(results)
 }
-
-# helper functions that were missing or need to be kept:
 
 #' Extract Network List from Netify Object
 #'
@@ -919,8 +928,43 @@ extract_network_list <- function(net) {
 
 			return(layer_list)
 		} else {
-			# regular longitudinal list
-			return(net)
+			# regular longit_list: per-period netifies with sliced
+			# nodal_data and dyad_data so downstream helpers
+			# (compare_attributes, etc.) see the right covariates
+			parent_nd <- attrs$nodal_data
+			parent_dd <- attrs$dyad_data
+			per_period <- vector("list", length(net))
+			names(per_period) <- names(net)
+			for (k in seq_along(net)) {
+				slice <- net[[k]]
+				attr(slice, "netify_type") <- "cross_sec"
+				attr(slice, "mode") <- attrs$mode
+				attr(slice, "symmetric") <- attrs$symmetric
+				attr(slice, "weight") <- attrs[["weight"]]
+				attr(slice, "is_binary") <- attrs[["is_binary"]]
+				attr(slice, "diag_to_NA") <- attrs$diag_to_NA %||% TRUE
+				attr(slice, "missing_to_zero") <- attrs$missing_to_zero %||% TRUE
+				attr(slice, "sum_dyads") <- attrs$sum_dyads %||% FALSE
+				attr(slice, "detail_weight") <- attrs$detail_weight
+				attr(slice, "layers") <- attrs$layers
+				if (!is.null(parent_nd) && is.data.frame(parent_nd) &&
+					"time" %in% names(parent_nd)) {
+					sub_nd <- parent_nd[
+						as.character(parent_nd$time) == as.character(names(net)[k]),
+						, drop = FALSE
+					]
+					attr(slice, "nodal_data") <- sub_nd
+				} else if (!is.null(parent_nd)) {
+					attr(slice, "nodal_data") <- parent_nd
+				}
+				if (!is.null(parent_dd) && is.list(parent_dd) &&
+					!is.null(parent_dd[[names(net)[k]]])) {
+					attr(slice, "dyad_data") <- list(parent_dd[[names(net)[k]]])
+				}
+				class(slice) <- "netify"
+				per_period[[k]] <- slice
+			}
+			return(per_period)
 		}
 	} else if (attrs$netify_type == "longit_array") {
 		# check if multilayer (4D array)
@@ -953,7 +997,39 @@ extract_network_list <- function(net) {
 				attr(layer_array, "netify_type") <- "longit_array"
 				attr(layer_array, "symmetric") <- if (length(attrs$symmetric) > 1) attrs$symmetric[l] else attrs$symmetric
 				attr(layer_array, "mode") <- attrs$mode
-				attr(layer_array, "weight") <- attrs[["weight"]]
+				# weight + detail_weight may be layer-specific
+				if (is.character(attrs[["weight"]]) && length(attrs[["weight"]]) > 1) {
+					attr(layer_array, "weight") <- attrs[["weight"]][l]
+					attr(layer_array, "detail_weight") <- paste("Weights from `", attrs[["weight"]][l], "`", sep = "")
+				} else {
+					attr(layer_array, "weight") <- attrs[["weight"]]
+					attr(layer_array, "detail_weight") <- attrs$detail_weight
+				}
+				# is_binary may be a vector across layers
+				if (length(attrs[["is_binary"]]) > 1) {
+					attr(layer_array, "is_binary") <- attrs[["is_binary"]][l]
+				} else {
+					attr(layer_array, "is_binary") <- attrs[["is_binary"]]
+				}
+				# attributes that summary/print downstream need
+				if (length(attrs$diag_to_NA) > 1) {
+					attr(layer_array, "diag_to_NA") <- attrs$diag_to_NA[l]
+				} else {
+					attr(layer_array, "diag_to_NA") <- attrs$diag_to_NA %||% TRUE
+				}
+				if (length(attrs$missing_to_zero) > 1) {
+					attr(layer_array, "missing_to_zero") <- attrs$missing_to_zero[l]
+				} else {
+					attr(layer_array, "missing_to_zero") <- attrs$missing_to_zero %||% TRUE
+				}
+				if (length(attrs$sum_dyads) > 1) {
+					attr(layer_array, "sum_dyads") <- attrs$sum_dyads[l]
+				} else {
+					attr(layer_array, "sum_dyads") <- attrs$sum_dyads %||% FALSE
+				}
+				attr(layer_array, "loops") <- attrs$loops %||% FALSE
+				attr(layer_array, "actor_time_uniform") <- attrs$actor_time_uniform %||% TRUE
+				attr(layer_array, "actor_pds") <- attrs$actor_pds
 				attr(layer_array, "layers") <- layer_names[l]
 				class(layer_array) <- "netify"
 
@@ -1111,12 +1187,16 @@ extract_network_list <- function(net) {
 
 #' Prepare Networks for By-Group Comparison
 #'
-#' `prepare_by_group_networks` subsets a network based on nodal attributes to create separate networks for each group value (currently not fully implemented).
+#' `prepare_by_group_networks` subsets a network based on a nodal attribute
+#' to produce one sub-network per group value. Each sub-network keeps only
+#' the actors that share the same attribute value, so downstream
+#' `compare_networks` calls can ask how within-group ties differ from one
+#' group to another.
 #'
 #' @param net A netify object containing nodal attributes.
 #' @param by Character string specifying the nodal attribute to group by.
 #'
-#' @return A list of netify objects, one for each group (currently returns original network).
+#' @return Named list of netify objects, one per non-NA group value.
 #'
 #' @author Cassy Dorff, Shahryar Minhas
 #'
@@ -1128,28 +1208,86 @@ prepare_by_group_networks <- function(net, by) {
 	attrs <- attributes(net)
 	nodal_data <- attrs$nodal_data
 
-	if (is.null(nodal_data) || !by %in% names(nodal_data)) {
+	# resolve the per-actor lookup frame, handling both cross-sectional
+	# (data.frame) and longitudinal (list or stacked data.frame) shapes
+	lookup_df <- NULL
+	if (is.data.frame(nodal_data)) {
+		lookup_df <- nodal_data
+	} else if (is.list(nodal_data) && length(nodal_data) > 0) {
+		# stack longitudinal slices; an actor's group can change over time
+		# so we keep the union and warn when group assignment is unstable
+		lookup_df <- do.call(rbind, lapply(nodal_data, function(d) {
+			if (is.data.frame(d)) d else NULL
+		}))
+	}
+
+	if (is.null(lookup_df) || !by %in% names(lookup_df)) {
+		avail <- if (is.null(lookup_df)) character(0) else setdiff(names(lookup_df), c("actor", "time"))
 		cli::cli_abort(
 			c(
-				"x" = "Attribute '{by}' not found in nodal data",
-				"i" = "Available attributes: {paste(names(nodal_data), collapse = ', ')}",
-				"!" = "Please specify a valid attribute name from nodal_data"
+				"x" = "Attribute {.val {by}} not found in nodal data.",
+				"i" = "Available attributes: {.val {avail}}",
+				"!" = "Pass a valid nodal attribute name to {.arg by}."
 			)
 		)
 	}
 
-	# get unique groups
-	groups <- unique(nodal_data[[by]])
-	groups <- groups[!is.na(groups)]
+	# build actor -> group map; drop NAs so empty/unknown buckets do not
+	# silently degrade the comparison
+	actor_col <- if ("actor" %in% names(lookup_df)) "actor" else names(lookup_df)[1]
+	keep <- !is.na(lookup_df[[by]])
+	actors <- as.character(lookup_df[[actor_col]][keep])
+	grp_vals <- as.character(lookup_df[[by]][keep])
 
-	# create subnetworks for each group
-	nets_list <- list()
+	# warn on multi-group actors (longitudinal attributes can drift)
+	dup_actors <- unique(actors[duplicated(actors)])
+	if (length(dup_actors) > 0L) {
+		shifters <- vapply(dup_actors, function(a) {
+			length(unique(grp_vals[actors == a])) > 1L
+		}, logical(1))
+		if (any(shifters)) {
+			cli::cli_inform(c(
+				"!" = "{sum(shifters)} actor{?s} changed {.arg {by}} value across time; using the first observed group."
+			))
+		}
+	}
 
-	# this is a simplified version - might need to implement proper subsetting
-	cli::cli_alert_warning("By-group comparison is not fully implemented yet")
+	# collapse to one row per actor (first observation wins)
+	first_idx <- !duplicated(actors)
+	actors <- actors[first_idx]
+	grp_vals <- grp_vals[first_idx]
 
-	# for now, just return the original network
-	return(list(net))
+	groups <- sort(unique(grp_vals))
+	if (length(groups) < 2L) {
+		cli::cli_abort(c(
+			"x" = "Need >= 2 groups in {.arg by = {by}} to compare; found {length(groups)}.",
+			"i" = "Pass an attribute with multiple categories."
+		))
+	}
+
+	# build one sub-network per group
+	nets_list <- lapply(groups, function(g) {
+		members <- actors[grp_vals == g]
+		if (length(members) < 2L) return(NULL)
+		tryCatch(
+			subset_netify(netlet = net, actors = members),
+			error = function(e) {
+				cli::cli_warn("Skipping group {.val {g}}: {e$message}")
+				NULL
+			}
+		)
+	})
+	names(nets_list) <- groups
+
+	# drop unusable groups
+	nets_list <- Filter(Negate(is.null), nets_list)
+	if (length(nets_list) < 2L) {
+		cli::cli_abort(c(
+			"x" = "After subsetting, fewer than 2 groups have enough actors to compare."
+		))
+	}
+
+	return(nets_list)
 }
 
 #' Analyze Network Comparisons by Group
@@ -1168,18 +1306,29 @@ prepare_by_group_networks <- function(net, by) {
 #' @noRd
 
 analyze_by_group <- function(results, nets_list, by) {
-	# extract similarity matrix from results
+	# count actors per group so callers can see how each subset was sized
+	n_actors_per_group <- vapply(nets_list, function(n) {
+		mst <- tryCatch(netify_measurements(n), error = function(e) NULL)
+		if (is.null(mst)) return(NA_integer_)
+		# unipartite networks have matching row/col actor counts
+		val <- mst$n_row_actors %||% mst$n_actors
+		if (is.null(val)) return(NA_integer_)
+		as.integer(val)
+	}, integer(1))
+
+	# pull pairwise similarity matrix if available, for downstream plots
+	sim_mat <- NULL
 	if (!is.null(results$details) && !is.null(results$details$correlation_matrix)) {
 		sim_mat <- results$details$correlation_matrix
-	} else {
-		cli::cli_alert_warning("Need return_details=TRUE for by-group analysis")
-		return(NULL)
 	}
 
-	# simplified version for now
-	return(list(
-		message = "By-group analysis not fully implemented"
-	))
+	out <- list(
+		by_attribute = by,
+		groups = names(nets_list),
+		n_actors_per_group = n_actors_per_group
+	)
+	if (!is.null(sim_mat)) out$similarity_matrix <- sim_mat
+	out
 }
 #' Create Edge Comparison Summary
 #'
@@ -1275,6 +1424,24 @@ create_edge_summary <- function(
 				max = max(hams, na.rm = TRUE),
 				stringsAsFactors = FALSE
 			))
+		}
+
+		# include qap row when qap was the requested method (or "all").
+		# without this branch, method="qap" with >2 networks produced an
+		# empty $summary frame and an empty "Edge Comparison Summary"
+		# table in print.netify_comparison.
+		if (method %in% c("qap", "all") && !is.null(qap_mat) && !all(is.na(qap_mat))) {
+			qaps <- qap_mat[lower.tri(qap_mat)]
+			if (length(qaps) && any(!is.na(qaps))) {
+				summary_df <- rbind(summary_df, data.frame(
+					metric = "qap_correlation",
+					mean = mean(qaps, na.rm = TRUE),
+					sd = sd(qaps, na.rm = TRUE),
+					min = min(qaps, na.rm = TRUE),
+					max = max(qaps, na.rm = TRUE),
+					stringsAsFactors = FALSE
+				))
+			}
 		}
 
 		if (method %in% c("spectral", "all")) {
@@ -1384,28 +1551,29 @@ compare_single_attribute <- function(
 	diag(comparison_mat) <- 1
 	if (test) diag(ks_test_mat) <- 1
 
-	# create summary
-	if (n_nets == 2) {
-		summary <- data.frame(
-			comparison = paste(net_names[1], "vs", net_names[2]),
-			similarity = comparison_mat[1, 2],
-			stringsAsFactors = FALSE
-		)
-		if (test && !is.na(ks_test_mat[1, 2])) {
-			summary$ks_pvalue <- ks_test_mat[1, 2]
+	# one row per pair, richer than scalar mean/sd so longitudinal
+	# users can see how each successive period compares
+	pair_rows <- list()
+	for (i in 1:(n_nets - 1)) {
+		for (j in (i + 1):n_nets) {
+			row <- data.frame(
+				comparison = paste(net_names[i], "vs", net_names[j]),
+				similarity = comparison_mat[i, j],
+				stringsAsFactors = FALSE
+			)
+			if (test && !is.na(ks_test_mat[i, j])) {
+				row$ks_pvalue <- ks_test_mat[i, j]
+			}
+			pair_rows[[length(pair_rows) + 1L]] <- row
 		}
-	} else {
-		# average similarities
-		summary <- data.frame(
-			mean_similarity = mean(comparison_mat[lower.tri(comparison_mat)],
-				na.rm = TRUE
-			),
-			sd_similarity = sd(comparison_mat[lower.tri(comparison_mat)],
-				na.rm = TRUE
-			),
-			stringsAsFactors = FALSE
-		)
 	}
+	all_cols <- unique(unlist(lapply(pair_rows, names)))
+	pair_padded <- lapply(pair_rows, function(df) {
+		missing_c <- setdiff(all_cols, names(df))
+		for (m in missing_c) df[[m]] <- NA
+		df[, all_cols, drop = FALSE]
+	})
+	summary <- do.call(rbind, c(pair_padded, list(make.row.names = FALSE)))
 
 	return(list(
 		summary = summary,
@@ -1434,7 +1602,7 @@ compare_single_attribute <- function(
 #' @noRd
 
 compare_distributions <- function(vals1, vals2) {
-	# simple approach: correlation of empirical CDFs
+	# correlate the empirical cdfs of the two value vectors
 
 	# check for empty or all-NA values first
 	if (length(vals1) == 0 || all(is.na(vals1)) ||
@@ -1466,8 +1634,18 @@ compare_distributions <- function(vals1, vals2) {
 	cdf1 <- ecdf1(all_vals)
 	cdf2 <- ecdf2(all_vals)
 
-	# return correlation of CDFs
+	# return correlation of CDFs; guard against zero-variance ramps
+	# (e.g., a constant covariate within each period) which would otherwise
+	# produce a `cor` zero-sd warning and NA result
 	if (length(all_vals) > 1) {
+		if (stats::sd(cdf1) == 0 || stats::sd(cdf2) == 0) {
+			# both constant -> identical step functions -> perfect similarity
+			if (stats::sd(cdf1) == 0 && stats::sd(cdf2) == 0 &&
+				isTRUE(all.equal(cdf1, cdf2))) {
+				return(1)
+			}
+			return(NA_real_)
+		}
 		return(cor(cdf1, cdf2))
 	} else {
 		return(NA)
@@ -1602,4 +1780,98 @@ calculate_spectral_distance <- function(mat1, mat2, laplacian = TRUE) {
 	spectral_dist <- sqrt(sum((eigen1 - eigen2)^2))
 
 	return(spectral_dist)
+}
+
+
+#' Build a tidy long-format per-pair comparison frame
+#'
+#' `build_comparisons_frame` reshapes the comparison artifacts into one row
+#' per (net_i, net_j, metric). Handles the cross-network, multilayer, and
+#' longitudinal cases by reading from `$summary`, `$edge_changes`, and
+#' `$significance_tests` matrices when available.
+#'
+#' @param results The partially-built `netify_comparison` list.
+#' @param nets_list The list of netify objects being compared.
+#'
+#' @return A data frame with columns `net_i`, `net_j`, `metric`, `value`,
+#'   `p_value`, or NULL if nothing usable is available.
+#'
+#' @keywords internal
+#' @noRd
+build_comparisons_frame <- function(results, nets_list) {
+	net_names <- names(nets_list)
+	if (is.null(net_names) || length(net_names) < 2) return(NULL)
+
+	# wide summary path: cross_network / multilayer / by_group return one
+	# row per pair with one column per metric, so we can pivot directly
+	wide_metrics <- c("correlation", "jaccard", "hamming",
+		"qap_correlation", "qap_pvalue", "spectral")
+	summary_df <- results$summary
+	if (!is.null(summary_df) && is.data.frame(summary_df) &&
+		"comparison" %in% names(summary_df)) {
+		rows <- list()
+		for (k in seq_len(nrow(summary_df))) {
+			comp_label <- summary_df$comparison[k]
+			pair <- strsplit(as.character(comp_label), " vs ", fixed = TRUE)[[1]]
+			if (length(pair) != 2) next
+			net_i <- pair[1]
+			net_j <- pair[2]
+			qap_p <- if ("qap_pvalue" %in% names(summary_df)) summary_df$qap_pvalue[k] else NA_real_
+			for (m in wide_metrics) {
+				if (m == "qap_pvalue") next
+				if (!m %in% names(summary_df)) next
+				val <- summary_df[[m]][k]
+				if (is.na(val)) next
+				pv <- if (m == "qap_correlation") qap_p else NA_real_
+				rows[[length(rows) + 1L]] <- data.frame(
+					net_i = net_i, net_j = net_j,
+					metric = m, value = val, p_value = pv,
+					stringsAsFactors = FALSE
+				)
+			}
+		}
+		if (length(rows) > 0L) return(do.call(rbind, rows))
+	}
+
+	# longitudinal path: $summary is aggregated (mean/sd/min/max). Use the
+	# per-pair qap matrix in $significance_tests, plus weight_correlation
+	# and edge_change tallies from $edge_changes
+	rows <- list()
+	qap_mat <- results$significance_tests$qap_correlations
+	qap_p_mat <- results$significance_tests$qap_pvalues
+	if (!is.null(qap_mat) && is.matrix(qap_mat)) {
+		mn <- rownames(qap_mat)
+		if (is.null(mn)) mn <- net_names
+		for (i in seq_len(nrow(qap_mat) - 1L)) {
+			for (j in (i + 1L):ncol(qap_mat)) {
+				val <- qap_mat[i, j]
+				pv <- if (!is.null(qap_p_mat)) qap_p_mat[i, j] else NA_real_
+				rows[[length(rows) + 1L]] <- data.frame(
+					net_i = mn[i], net_j = mn[j],
+					metric = "qap_correlation", value = val, p_value = pv,
+					stringsAsFactors = FALSE
+				)
+			}
+		}
+	}
+
+	ec <- results$edge_changes
+	if (!is.null(ec) && length(ec) > 0L && !is.null(names(ec))) {
+		for (nm in names(ec)) {
+			pair <- strsplit(nm, "_vs_", fixed = TRUE)[[1]]
+			if (length(pair) != 2L) next
+			entry <- ec[[nm]]
+			wc <- entry$weight_correlation
+			if (!is.null(wc) && !is.na(wc)) {
+				rows[[length(rows) + 1L]] <- data.frame(
+					net_i = pair[1], net_j = pair[2],
+					metric = "weight_correlation", value = wc,
+					p_value = NA_real_, stringsAsFactors = FALSE
+				)
+			}
+		}
+	}
+
+	if (length(rows) == 0L) return(NULL)
+	do.call(rbind, rows)
 }

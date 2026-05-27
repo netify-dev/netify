@@ -63,6 +63,21 @@ Mixing matrix elements represent ties between actors with attribute
 values i and j. For undirected networks, matrices are symmetrized.
 Assortativity ranges from -1 (disassortative) to 1 (assortative).
 }
+\examples{
+# who tends to befriend whom, by gender, in the bundled classroom data
+data(classroom_edges)
+data(classroom_nodes)
+net <- netify(
+    classroom_edges,
+    actor1 = "from", actor2 = "to",
+    symmetric = TRUE,
+    nodal_data = classroom_nodes
+)
+mm <- mixing_matrix(net, attribute = "gender")
+round(mm$mixing_matrices[[1]], 3)
+mm$summary_stats
+
+}
 \author{
 Casy Dorff, Shahryar Minhas
 }

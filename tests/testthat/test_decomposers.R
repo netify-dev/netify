@@ -12,8 +12,7 @@ create_test_data = function() {
 		stringsAsFactors = FALSE
 	)
 
-	# longitudinal data with nodal attributes as columns in the dyad data
-	# for netify to extract nodal vars, they need to be in the dyad data
+	# longitudinal data carrying nodal attributes as dyad-side columns
 	longit_data = data.frame(
 		from = rep(c("A", "A", "B", "B", "C"), 2),
 		to = rep(c("B", "C", "A", "C", "A"), 2),
@@ -175,14 +174,18 @@ test_that("decompose_igraph: weighted cross-sec with dyad and nodal attribs", {
 	expect_equal(dim(decomposed$adj_mat), c(3, 3))
 	expect_equal(rownames(decomposed$adj_mat), letters[1:3])
 
-	# check node data
+	# check node data: `name` is dropped when redundant with `actor`
 	expect_true(!is.null(decomposed$ndata))
-	expect_true(all(c("name", "var1", "var2", "actor") %in% names(decomposed$ndata)))
+	expect_true(all(c("var1", "var2", "actor") %in% names(decomposed$ndata)))
 	expect_equal(nrow(decomposed$ndata), 3)
+	# actor should be the leading column
+	expect_equal(names(decomposed$ndata)[1], "actor")
 
-	# check edge data
+	# check edge data: the chosen weight (`weight`) is folded into the
+	# adjacency, so dyad covariates only carry from/to and non-weight attrs
 	expect_true(!is.null(decomposed$ddata))
-	expect_true(all(c("from", "to", "weight", "var2", "var3", "var4") %in% names(decomposed$ddata)))
+	expect_true(all(c("from", "to", "var2", "var3", "var4") %in% names(decomposed$ddata)))
+	expect_false("weight" %in% names(decomposed$ddata))
 })
 
 test_that("decompose_igraph: bipartite networks", {

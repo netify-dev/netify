@@ -13,3 +13,6 @@ List of plot arguments
 A network style inspired by the Griffin School armor from The Witcher 3.
 Balanced between signs and swordplay - moderate, magical aesthetics.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

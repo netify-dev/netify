@@ -12,3 +12,6 @@ Character vector of available palette names
 \description{
 List available color palettes
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

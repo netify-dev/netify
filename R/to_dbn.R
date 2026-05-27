@@ -242,5 +242,8 @@ netify_to_dbn <- function(netlet) {
 }
 
 #' @rdname netify_to_dbn
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 to_dbn <- netify_to_dbn

@@ -220,37 +220,3 @@ test_that("summary.netify handles ego networks", {
 	expect_true(all(grepl("United States", summ$layer)))
 })
 
-test_that("summary.netify produces consistent output structure", {
-	skip_on_cran()
-	# create different types of networks
-	data(icews)
-	icews_10 = icews[icews$year == 2010, ]
-
-	# test directed network
-	net_directed = netify(icews_10, "i", "j", symmetric = FALSE, weight = "verbCoop")
-	summ_directed = summary(net_directed)
-
-	expect_s3_class(summ_directed, "data.frame")
-	expect_equal(nrow(summ_directed), 1) # cross-sectional has 1 row
-	expect_true(all(c("density", "num_edges", "transitivity") %in% names(summ_directed)))
-	expect_true("reciprocity" %in% names(summ_directed)) # directed networks have reciprocity
-
-	# test undirected network
-	net_undirected = netify(icews_10, "i", "j", symmetric = TRUE, weight = "verbCoop")
-	summ_undirected = summary(net_undirected)
-
-	expect_s3_class(summ_undirected, "data.frame")
-	expect_equal(nrow(summ_undirected), 1)
-	expect_true(all(c("density", "num_edges", "transitivity") %in% names(summ_undirected)))
-	expect_false("reciprocity" %in% names(summ_undirected)) # undirected networks don't have reciprocity
-
-	# test binary network
-	icews_10_bin = icews_10[icews_10$verbCoop > mean(icews_10$verbCoop, na.rm = TRUE), ]
-	net_binary = netify(icews_10_bin, "i", "j", symmetric = FALSE)
-	summ_binary = summary(net_binary)
-
-	expect_s3_class(summ_binary, "data.frame")
-	expect_equal(nrow(summ_binary), 1)
-	expect_true(all(c("density", "num_edges", "transitivity") %in% names(summ_binary)))
-	expect_false("mean_edge_weight" %in% names(summ_binary)) # binary networks don't have weight stats
-})

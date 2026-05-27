@@ -30,3 +30,6 @@ print(comp)
 }
 
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

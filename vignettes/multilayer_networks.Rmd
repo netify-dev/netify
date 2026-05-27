@@ -91,11 +91,15 @@ plot(multi_net, add_text = FALSE)
 
 Let's build a more complete multilayer network to study international cooperation patterns during a critical period -- 2002, shortly after 9/11 when cooperation dynamics were rapidly shifting.
 
+Note: ICEWS event counts are directed (i sends X to j). We symmetrize each layer here by summing i→j and j→i counts into a single undirected weight, because the cross-layer mixing, homophily, and regional-clustering analyses below are naturally undirected. For directed analyses (e.g. who initiates cooperation), set `symmetric = FALSE` instead.
+
 ```{r}
 # Focus on 2002 - post-9/11 cooperation dynamics
 icews_2002 <- icews[icews$year == 2002, ]
 
-# Create networks with relevant attributes
+# Create networks with relevant attributes. symmetric = TRUE collapses
+# i->j and j->i counts into a single undirected weight; appropriate for
+# the undirected mixing / homophily / multiplexity analyses below.
 verbal_coop_net <- netify(
     icews_2002,
     actor1 = "i", actor2 = "j",
@@ -120,7 +124,7 @@ multilayer_net <- layer_netify(
     layer_labels = c("Verbal", "Material")
 )
 
-print(multilayer_net)
+multilayer_net
 ```
 
 ## Visualizing Multilayer Structures
@@ -145,13 +149,13 @@ This visualization reveals the fundamental asymmetry in international cooperatio
 ```{r}
 # Get structural comparison
 struct_comp <- compare_networks(multilayer_net, what = "structure")
-print(struct_comp)
+struct_comp
 ```
 
 **What these numbers mean**:
 
-- **4x density difference**: For every material cooperation relationship, there are four verbal ones
-- **3.6x degree difference**: The average country verbally cooperates with 123 others but materially supports only 34
+- **~3.6x density difference**: For roughly every material cooperation relationship, there are about three to four verbal ones
+- **~3.6x degree difference**: The average country verbally cooperates with about 62 others (mean degree ~61.7 in the symmetrized layer) but materially with only about 17 (mean degree ~17.0)
 - **Different clustering**: Higher transitivity in verbal cooperation (0.606 vs 0.311) suggests diplomatic communities form more readily than material support clusters
 
 This structural evidence supports the "cheap talk" hypothesis but also reveals something deeper: material cooperation follows different organizational logics than diplomacy.
@@ -170,10 +174,10 @@ multilayer_homophily <- homophily(
     method = "correlation"
 )
 
-print(multilayer_homophily)
+multilayer_homophily
 ```
 
-Democratic homophily exists in verbal cooperation (p < 0.001) but not material cooperation (p = 0.13). This suggests the "democratic peace" operates primarily through diplomatic channels. Material support crosses regime boundaries, likely driven by strategic rather than ideological considerations.
+Democratic homophily registers in verbal cooperation (p < 0.001) but not material cooperation (p = 0.13). The verbal correlation is small in absolute terms (about 0.04) -- at this magnitude the significance flag mostly reflects the large dyad count, so read it as "consistent with a diplomatic-channel mechanism" rather than as a clean effect estimate. Material support, by contrast, crosses regime boundaries entirely, plausibly driven by strategic rather than ideological considerations.
 
 ### Theory 2: Regional Security Complexes
 
@@ -186,10 +190,10 @@ multilayer_mixing <- mixing_matrix(
     attribute = "i_region"
 )
 
-print(multilayer_mixing$summary_stats)
+multilayer_mixing$summary_stats
 ```
 
-Material cooperation shows stronger regional clustering (assortativity = 0.218) than verbal cooperation (0.156). This supports regional security complex theory -- when countries commit resources, they prioritize neighbors. Verbal cooperation, being cheaper, can afford to be more globally distributed.
+Material cooperation shows stronger regional clustering (assortativity = 0.218) than verbal cooperation (0.156), consistent with regional security complex theory -- when countries commit resources, they prioritize neighbors. Verbal cooperation, being cheaper, is more globally distributed. One caveat: material events are substantially sparser than verbal ones, and sparse networks mechanically push assortativity up (fewer ties means each within-region tie carries more weight in the index). Read the gap directionally rather than as a precise effect size.
 
 ### Theory 3: Conflict-Cooperation Dynamics
 
@@ -209,7 +213,7 @@ cross_layer_corr |>
     filter(row_number() <= 4) # Show first 4 unique combinations
 ```
 
-Verbal conflict strongly correlates with verbal cooperation (r = 0.456) -- countries that talk also argue. But material conflict shows weaker correlations with cooperation, suggesting material interactions follow different dynamics than diplomatic ones.
+Verbal conflict and verbal cooperation are moderately correlated (r = 0.456) -- countries that talk also argue. Material conflict shows lower correlations with both cooperation layers (~0.27-0.28), suggesting material interactions follow different dynamics than diplomatic ones.
 
 ## Identifying Strategic Actors
 
@@ -234,11 +238,10 @@ material_specialists <- centrality_comparison |>
     arrange(desc(material_bias)) |>
     head(5)
 
-print("Material cooperation brokers:")
-print(material_specialists[, c("actor", "betweenness_Verbal", "betweenness_Material", "material_bias")])
+material_specialists[, c("actor", "betweenness_Verbal", "betweenness_Material", "material_bias")]
 ```
 
-Japan leads as a material cooperation broker despite low verbal centrality -- reflecting its post-WWII strategy of economic rather than diplomatic leadership. Countries in conflict or transition (Colombia, DRC, Ukraine) also appear as material brokers, likely as aid conduits.
+The top material brokers in 2002 -- ranked by the ratio of material to verbal betweenness -- are Spain, India, France, the United Kingdom, and the Netherlands. None of these countries has appreciable verbal betweenness in 2002 (all close to zero), yet each accumulates substantial material betweenness, so the `material_bias` ratio is essentially their raw material betweenness. The pattern is consistent with middle-power donor states: Spain and the Netherlands sit on top development-aid pipelines; France and the UK route post-colonial material flows; India is a notable south-south aid hub in 2002. The headline US/China/Russia hegemons drop out of this ranking precisely because their verbal betweenness is high enough to anchor the ratio's denominator -- this filter is designed to surface countries that are *only* important in the material channel, not the overall biggest players.
 
 ### Power Dynamics Across Layers
 
@@ -297,7 +300,12 @@ ggplot(multiplexity_summary, aes(x = relationship_type)) +
         x = "Relationship Type",
         y = "Number of Country Pairs"
     ) +
-    theme_minimal()
+    theme_bw() +
+    theme(
+        panel.border = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "top"
+    )
 ```
 
 **Multiplexity Insights**:
@@ -316,8 +324,7 @@ multiplex_pairs <- multiplexity_summary |>
     arrange(desc(total_coop)) |>
     head(10)
 
-print("Strongest multiplex relationships:")
-print(multiplex_pairs[, c("Var1", "Var2", "value_verbal", "value_material")])
+multiplex_pairs[, c("Var1", "Var2", "value_verbal", "value_material")]
 ```
 
 US-Russia tops the list despite tensions, showing how former adversaries maintain multiple channels. US relationships with allies (Israel, Japan) and strategic competitors (China) also show high multiplexity, indicating relationship importance transcends simple friend/foe categories.
@@ -329,7 +336,7 @@ US-Russia tops the list despite tensions, showing how former adversaries maintai
 ```{r}
 # Comprehensive layer comparison
 layer_comparison <- compare_networks(multilayer_net, what = "edges", method = "all")
-print(layer_comparison)
+layer_comparison
 ```
 
 **Key Metrics Explained**:
@@ -339,21 +346,36 @@ print(layer_comparison)
 - **Hamming (0.305)**: About 30% of possible edges differ between layers
 - **QAP test (p < 0.001)**: The correlation is statistically significant, not due to chance
 
+For downstream filtering and plotting, `compare_networks()` also exposes a tidy `$comparisons` data frame with one row per (pair, metric). This is the layout you usually want when you have more than two networks (see the multilayer section of `vignette("tracking_changes")` for a fuller example):
+
+```{r}
+knitr::kable(
+    layer_comparison$comparisons,
+    caption = "Tidy per-pair comparison frame",
+    digits = 3, align = "c"
+)
+```
+
 ### Visualizing Layer Relationships
 
 ```{r, fig.width=8, fig.height=6}
 # Cross-layer scatter
 ggplot(edge_comparison, aes(x = log1p(value_verbal), y = log1p(value_material))) +
-    geom_point(alpha = 0.2, color = "darkblue") +
-    geom_smooth(method = "lm", color = "red", se = TRUE) +
-    geom_density_2d(color = "gray", alpha = 0.5) +
+    geom_point(alpha = 0.2) +
+    geom_smooth(method = "lm", se = TRUE) +
+    geom_density_2d(alpha = 0.5) +
     labs(
         title = "The Verbal-Material Cooperation Gap",
         subtitle = "Most relationships cluster along axes, not diagonal",
         x = "Log(Verbal Cooperation + 1)",
         y = "Log(Material Cooperation + 1)"
     ) +
-    theme_minimal() +
+    theme_bw() +
+    theme(
+        panel.border = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "top"
+    ) +
     annotate("text", x = 7, y = 1, label = "Talk without action", fontface = "italic") +
     annotate("text", x = 1, y = 5, label = "Quiet support", fontface = "italic") +
     annotate("text", x = 6, y = 5, label = "Full cooperation", fontface = "italic")

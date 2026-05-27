@@ -32,7 +32,7 @@ validate_plot_params <- function(plot_args, ...) {
 		"return_components", "style", "palette", "xlim", "ylim",
 		# filter parameters
 		"node_filter", "edge_filter", "time_filter",
-		# edge aesthetics - fixed
+		# edge aesthetics - constant
 		"edge_alpha", "edge_arrow", "edge_color", "edge_linewidth", "edge_linetype",
 		"edge_angle", "edge_curvature", "edge_ncp", "edge_lineend", "edge_linejoin",
 		"edge_arrow_fill",
@@ -43,7 +43,7 @@ validate_plot_params <- function(plot_args, ...) {
 		"edge_alpha_manual", "edge_alpha_label", "edge_color_manual", "edge_color_label",
 		"edge_linewidth_manual", "edge_linewidth_label", "edge_linetype_label",
 		"mutate_weight",
-		# node/Point aesthetics - fixed
+		# node/Point aesthetics - constant
 		"node_alpha", "point_alpha", "node_color", "point_color", "node_fill", "point_fill",
 		"node_shape", "point_shape", "node_size", "point_size", "node_stroke", "point_stroke",
 		# node/Point aesthetics - variable mappings (_by and legacy _var)
@@ -62,7 +62,7 @@ validate_plot_params <- function(plot_args, ...) {
 		"point_size_guide",
 		# node/Point - grouping
 		"node_group", "point_group", "node_group_by", "point_group_by",
-		# text aesthetics - fixed
+		# text aesthetics - constant
 		"text_alpha", "text_angle", "text_color", "text_family", "text_fill",
 		"text_fontface", "text_hjust", "text_vjust", "text_lineheight", "text_size",
 		# text aesthetics - variable and labels
@@ -70,7 +70,7 @@ validate_plot_params <- function(plot_args, ...) {
 		"text_size_var", "text_size_label",
 		# text selection
 		"select_text", "select_text_display",
-		# label aesthetics - fixed
+		# label aesthetics - constant
 		"label_alpha", "label_angle", "label_color", "label_family", "label_fill",
 		"label_fontface", "label_hjust", "label_vjust", "label_lineheight", "label_size",
 		# label aesthetics - variable and labels
@@ -149,7 +149,15 @@ validate_plot_params <- function(plot_args, ...) {
 		"text_repel" = "add_text_repel",
 		"label_repel" = "add_label_repel",
 		"repel_text" = "add_text_repel",
-		"repel_label" = "add_label_repel"
+		"repel_label" = "add_label_repel",
+		# bare ggplot-style aesthetics — beginners try these first
+		"color" = "node_color",
+		"colour" = "node_color",
+		"fill" = "node_fill",
+		"size" = "node_size",
+		"alpha" = "node_alpha",
+		"shape" = "node_shape",
+		"width" = "edge_linewidth"
 	)
 	
 	# check each parameter name

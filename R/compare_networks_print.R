@@ -20,6 +20,9 @@
 #'
 #' @importFrom utils head
 #' @method print netify_comparison
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 print.netify_comparison <- function(x, ..., n = 20) {
 	# helper function to format numeric values intelligently
@@ -224,6 +227,9 @@ print.netify_comparison <- function(x, ..., n = 20) {
 #' @return A summary data frame or list depending on comparison type
 #'
 #' @method summary netify_comparison
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 summary.netify_comparison <- function(object, ...) {
 	# return the main summary component

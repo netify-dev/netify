@@ -2,8 +2,8 @@
 #'
 #' `get_ego_layout` computes node positions for ego network visualization using
 #' ego-centric layout algorithms. These layouts place the ego at the center and
-#' arrange alters in meaningful patterns around it, making the ego's relationships
-#' more visually apparent.
+#' arrange alters around it (radially, by concentric ring, etc.) so that the
+#' ego's relationships are organized around the focal node.
 #'
 #' @param netlet A netify object (class "netify") that is an ego network, created
 #'   using \code{\link{ego_netify}}. The object must have ego_netify = TRUE attribute.
@@ -326,9 +326,9 @@ calculate_star_positions <- function(alters, order_by, nodal_attrs, ego_size, se
 	# calculate angles - evenly distributed
 	angles <- seq(0, 2 * pi, length.out = n_alters + 1)[-1]
 	
-	# fixed radius for all alters
+	# constant radius for all alters
 	radius <- 1
-	
+
 	# convert to x,y coordinates
 	x <- radius * cos(angles)
 	y <- radius * sin(angles)
@@ -426,7 +426,7 @@ calculate_radial_positions <- function(
 			max_radius <- 1
 			group_radii <- max_radius - norm_weights * (max_radius - min_radius)
 		} else {
-			# fixed radius for all
+			# constant radius for all
 			group_radii <- rep(1, n_group)
 		}
 		

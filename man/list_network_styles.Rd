@@ -12,3 +12,6 @@ A data frame with style names and descriptions
 \description{
 Shows all available preset network styles with descriptions
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

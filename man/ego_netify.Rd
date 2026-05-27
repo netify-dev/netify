@@ -91,6 +91,32 @@ as relationships change.
 To create ego networks for multiple egos, use \code{lapply} or a loop to call
 this function for each ego separately.
 }
+\examples{
+# cross-sectional ego network from the bundled classroom data
+data(classroom_edges)
+data(classroom_nodes)
+net <- netify(
+    classroom_edges,
+    actor1 = "from", actor2 = "to",
+    symmetric = TRUE,
+    nodal_data = classroom_nodes
+)
+s07_ego <- ego_netify(net, ego = "s07")
+print(s07_ego)
+
+\dontrun{
+# longitudinal ego network with a weighted, directed netlet
+data(icews)
+netlet <- netify(
+    icews,
+    actor1 = "i", actor2 = "j", time = "year",
+    weight = "verbCoop"
+)
+pakistan_ego <- ego_netify(netlet, ego = "Pakistan")
+summary(pakistan_ego)
+}
+
+}
 \author{
 Cassy Dorff, Shahryar Minhas
 }

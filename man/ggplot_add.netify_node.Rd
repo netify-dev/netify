@@ -20,3 +20,6 @@ A ggplot object with the node layer added
 S3 method to add netify_node objects to ggplot objects. This method is called
 automatically when using the + operator with a netify_node object.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

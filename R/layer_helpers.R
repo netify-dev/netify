@@ -58,8 +58,7 @@ set_layer_labels <- function(netlet_list, layer_labels) {
 #' @noRd
 
 check_layer_compatible <- function(a_list, elems, msg) {
-	# lets cycle through the elements one at a time so users
-	# can be told, if relevant, which element is not identical
+	# cycle through elements so we can name the offender on failure
 	for (elem in elems) {
 		# check if that attribute is identical across layers
 		elem_check <- identical_recursive(
@@ -123,7 +122,7 @@ reduce_combine_nodal_attr <- function(
 	# extract nodal data from each netlet into list
 	nodal_data_list <- lapply(attribs_list, `[[`, "nodal_data")
 
-	# check for and then drop any null elements - vectorized
+	# drop any null elements
 	nodal_data_list <- nodal_data_list[!vapply(nodal_data_list, is.null, logical(1))]
 
 	# if only one element left then just
@@ -137,9 +136,7 @@ reduce_combine_nodal_attr <- function(
 		# get a list of the vars across the netlets
 		nvars <- get_attribs(msrmnts_list, "nvars", get_unique = TRUE)
 
-		# check to make sure that the id column(s) are identical
-		# if columns are not identical then return NULL with
-		# warning that user needs to readd themselves
+		# check that id columns are identical across netlets
 		n_id_check <- if (netlet_type == "cross_sec") {
 			identical_recursive(lapply(nodal_data_list, function(x) x[, 1]))
 		} else {
@@ -155,10 +152,9 @@ reduce_combine_nodal_attr <- function(
 			return(NULL)
 		}
 
-		# if id columns match then iteratively go through
-		# nodal data and cbind together
+		# cbind nodal data when id columns match
 		if (n_id_check) {
-			# pre-filter nvars for each slice to avoid repeated intersections
+			# pre-filter nvars for each slice
 			ndata_list <- lapply(nodal_data_list, function(slice) {
 				nvars_slice <- names(slice)[names(slice) %in% nvars]
 				slice[, nvars_slice, drop = FALSE]
@@ -194,7 +190,7 @@ reduce_combine_dyad_attr <- function(
 	# extract dyad data from each netlet into list
 	dyad_data_list <- lapply(attribs_list, `[[`, "dyad_data")
 
-	# check for and then drop any null elements - already optimized
+	# drop any null elements
 	null_check <- vapply(dyad_data_list, function(x) {
 		is.null(x) || is.null(x[[1]])
 	}, logical(1))
@@ -211,12 +207,10 @@ reduce_combine_dyad_attr <- function(
 		# get a list of the vars across the netlets
 		dvars <- get_attribs(msrmnts_list, "dvars", get_unique = TRUE)
 
-		# check to make sure that the id row/col and time periods are
-		# identical across dyad_data from netlets
-		# for new structure: list(time) -> list(vars) -> matrix
+		# check that id row/col and time periods are identical across netlets
 		t_check <- identical_recursive(lapply(dyad_data_list, names))
 
-		# extract first time period's first variable matrix once
+		# extract first time period's first variable matrix
 		first_elements <- lapply(dyad_data_list, function(x) {
 			first_time <- x[[1]]
 			if (length(first_time) > 0) {
@@ -241,8 +235,7 @@ reduce_combine_dyad_attr <- function(
 			return(NULL)
 		}
 
-		# if id columns match then iteratively go through
-		# dyad data and combine matrices
+		# combine matrices when id columns match
 		if (all(c(t_check, r_check, c_check))) {
 			# get time periods from first dyad_data element
 			t_pds <- names(dyad_data_list[[1]])
@@ -251,7 +244,7 @@ reduce_combine_dyad_attr <- function(
 			ddata <- vector("list", length(t_pds))
 			names(ddata) <- t_pds
 
-			# process each time period more efficiently
+			# process each time period
 			for (tt_idx in seq_along(t_pds)) {
 				tt <- t_pds[tt_idx]
 
@@ -263,7 +256,7 @@ reduce_combine_dyad_attr <- function(
 					time_period_data <- netlet_dyad_data[[tt]]
 
 					if (!is.null(time_period_data) && length(time_period_data) > 0) {
-						# direct assignment is faster than repeated list operations
+						# direct assignment
 						for (var_name in names(time_period_data)) {
 							if (var_name %in% dvars) {
 								combined_vars[[var_name]] <- time_period_data[[var_name]]

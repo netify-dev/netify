@@ -43,9 +43,15 @@
 #' layout <- create_radial_ego_layout(ego_net, n_rings = 5)
 #' plot(ego_net, point_layout = layout)
 #' }
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 NULL
 
 #' @rdname ego_layouts
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 create_hierarchical_ego_layout <- function(netlet, min_radius = 2, max_radius = 5, seed = 123) {
 	# get ego name
@@ -107,7 +113,7 @@ create_hierarchical_ego_layout <- function(netlet, min_radius = 2, max_radius = 
 					} else if("degree" %in% names(actor_row)) {
 						alter_centrality[i] <- actor_row$degree
 					} else {
-						alter_centrality[i] <- 1  # default if no degree found
+						alter_centrality[i] <- 1
 					}
 				} else {
 					alter_centrality[i] <- 1
@@ -142,6 +148,9 @@ create_hierarchical_ego_layout <- function(netlet, min_radius = 2, max_radius = 
 }
 
 #' @rdname ego_layouts
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 create_radial_ego_layout <- function(netlet, ego_name = NULL, n_rings = 4, 
 								   min_radius = 1.5, max_radius = 5, seed = 123) {
@@ -258,6 +267,9 @@ create_radial_ego_layout <- function(netlet, ego_name = NULL, n_rings = 4,
 }
 
 #' @rdname ego_layouts
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 create_ego_centric_layout <- function(netlet, buffer_radius = 1.5, transition_zone = 0.5, seed = 123) {
 	# get ego name from attributes
@@ -351,6 +363,9 @@ create_ego_centric_layout <- function(netlet, buffer_radius = 1.5, transition_zo
 #'
 #' @param netlet An ego network created with ego_netify()
 #' @return A modified netify object with ego edges removed
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 #' @examples
 #' \dontrun{

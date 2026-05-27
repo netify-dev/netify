@@ -162,5 +162,8 @@ unnetify <- function(netlet, remove_zeros = FALSE) {
 }
 
 #' @rdname unnetify
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 netify_to_df <- unnetify

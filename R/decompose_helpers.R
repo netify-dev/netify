@@ -172,13 +172,14 @@ merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type) {
 #' @noRd
 finalize_edge_data <- function(edge_data, netify_type) {
 	# add time column for cross-sec if missing
+	# guard zero-row case: $<- on length-1 fails when nrow == 0
 	if (netify_type == "cross_sec" && !"L1" %in% names(edge_data)) {
-		edge_data$L1 <- "1"
+		edge_data$L1 <- rep("1", nrow(edge_data))
 	}
 
 	# ensure L1 exists
 	if (!"L1" %in% names(edge_data)) {
-		edge_data$L1 <- "1"
+		edge_data$L1 <- rep("1", nrow(edge_data))
 	}
 
 	# reorder columns efficiently using direct indexing

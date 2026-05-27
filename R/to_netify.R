@@ -96,6 +96,28 @@ to_netify <- function(
 
 	# single igraph object
 	if (inherits(net_obj, "igraph")) {
+		# guard zero-vertex graphs: netify's downstream construction
+		# (actor_pds, dimnames) requires at least one actor, so fail fast
+		# with an actionable message rather than a cryptic data.frame error
+		if (igraph::vcount(net_obj) == 0L) {
+			cli::cli_abort(c(
+				"Cannot build a netify object from an empty igraph (0 vertices).",
+				"i" = "Add at least one vertex before converting."
+			))
+		}
+		# auto-pick a numeric edge attr as weight if user did not name one,
+		# preferring a non-"weight" named column over the generic "weight"
+		if (is.null(weight)) {
+			ea <- igraph::edge_attr_names(net_obj)
+			named <- setdiff(ea, "weight")
+			for (nm in named) {
+				vals <- igraph::edge_attr(net_obj, nm)
+				if (!is.null(vals) && is.numeric(vals)) {
+					weight <- nm; break
+				}
+			}
+			if (is.null(weight) && "weight" %in% ea) weight <- "weight"
+		}
 		processed <- decompose_igraph(net_obj, weight = weight)
 		adj_data <- processed$adj_mat
 		nodal_data <- processed$ndata
@@ -103,9 +125,32 @@ to_netify <- function(
 		weight <- processed$weight
 		# get symmetry directly from igraph
 		is_symmetric <- !igraph::is_directed(net_obj)
+		# absent self-loops -> NA the diagonal so the netify-side
+		# diag_to_NA detection matches the source convention
+		if (is.matrix(adj_data) && nrow(adj_data) == ncol(adj_data)) {
+			any_loop <- igraph::ecount(net_obj) > 0L &&
+				any(igraph::which_loop(net_obj))
+			if (!any_loop) {
+				diag(adj_data) <- NA
+			}
+		}
 
 		# single network object
 	} else if (inherits(net_obj, "network")) {
+		# auto-pick a numeric edge attribute as weight if user did not name one
+		if (is.null(weight)) {
+			ea <- network::list.edge.attributes(net_obj)
+			# skip system attributes
+			ea <- setdiff(ea, c("na"))
+			named <- setdiff(ea, "weight")
+			for (nm in named) {
+				vals <- network::get.edge.attribute(net_obj, nm)
+				if (!is.null(vals) && is.numeric(vals)) {
+					weight <- nm; break
+				}
+			}
+			if (is.null(weight) && "weight" %in% ea) weight <- "weight"
+		}
 		processed <- decompose_statnet(net_obj, weight = weight)
 		adj_data <- processed$adj_mat
 		nodal_data <- processed$ndata
@@ -124,7 +169,24 @@ to_netify <- function(
 		adj_data <- net_obj
 		is_longitudinal <- length(dim(net_obj)) == 3
 
-		# list - need to check what type
+		# distinguish layers vs time periods when a user hands us a bare 3d
+		# array. netify treats the third dimension as a *time* index by
+		# default. for stacked layers (e.g. trade / alliance / conflict on
+		# the same actors) the user should route through `layer_netify()`.
+		if (is_longitudinal) {
+			dn <- dimnames(net_obj)
+			third_names <- if (is.null(dn)) NULL else dn[[3]]
+			cli::cli_inform(
+				c(
+					"i" = "3D array detected: third dimension treated as {.strong time periods}{if (!is.null(third_names)) paste0(' (', paste(utils::head(third_names, 3), collapse = ', '), if (length(third_names) > 3) ', ...' else '', ')')}.",
+					"!" = "If the third dimension instead represents distinct {.strong layers} (e.g. trade / alliances / conflict on the same actors), build separate cross-sectional netify objects and combine via {.fn layer_netify}."
+				),
+				.frequency = "once",
+				.frequency_id = "netify_3d_array_axis_hint"
+			)
+		}
+
+		# list of networks, type detected downstream
 	} else if (is.list(net_obj) && length(net_obj) > 0) {
 		# determine list type and process accordingly
 		list_result <- process_network_list(net_obj, weight)
@@ -232,9 +294,33 @@ process_network_list <- function(net_obj, weight = NULL) {
 
 	# check list type and process
 	if (all(vapply(net_obj, inherits, logical(1), "igraph"))) {
+		# auto-pick numeric edge attr as weight if user did not name one
+		if (is.null(weight)) {
+			ea <- igraph::edge_attr_names(net_obj[[1]])
+			named <- setdiff(ea, "weight")
+			for (nm in named) {
+				vals <- igraph::edge_attr(net_obj[[1]], nm)
+				if (!is.null(vals) && is.numeric(vals)) {
+					weight <- nm; break
+				}
+			}
+			if (is.null(weight) && "weight" %in% ea) weight <- "weight"
+			result$weight <- weight
+		}
 		# process igraph list
 		processed_list <- lapply(net_obj, decompose_igraph, weight = weight)
 		result$is_symmetric <- !igraph::is_directed(net_obj[[1]])
+		# NA-out diagonal on slices that have no self-loops
+		any_loop_per_slice <- vapply(net_obj, function(g) {
+			igraph::ecount(g) > 0L && any(igraph::which_loop(g))
+		}, logical(1))
+		for (k in seq_along(processed_list)) {
+			m <- processed_list[[k]]$adj_mat
+			if (is.matrix(m) && nrow(m) == ncol(m) && !any_loop_per_slice[k]) {
+				diag(m) <- NA
+				processed_list[[k]]$adj_mat <- m
+			}
+		}
 	} else if (all(vapply(net_obj, inherits, logical(1), "network"))) {
 		# process network list
 		processed_list <- lapply(net_obj, decompose_statnet, weight = weight)
@@ -302,6 +388,10 @@ process_longitudinal_nodal_data <- function(processed_list, net_obj) {
 	if (length(nodal_data_list) > 0) {
 		nodal_data <- do.call(rbind, nodal_data_list)
 		rownames(nodal_data) <- NULL
+		# canonical column order: actor, time, then everything else
+		lead_cols <- intersect(c("actor", "time"), names(nodal_data))
+		other_cols <- setdiff(names(nodal_data), lead_cols)
+		nodal_data <- nodal_data[, c(lead_cols, other_cols), drop = FALSE]
 		return(nodal_data)
 	} else {
 		return(NULL)
@@ -374,7 +464,7 @@ align_nodal_data_order <- function(ndata, adj_data, is_longitudinal) {
 #' @keywords internal
 #' @noRd
 align_dyad_data_order <- function(ddata, adj_data, is_longitudinal) {
-	# for longitudinal data, we need to align each time period separately
+	# align each time period separately for longitudinal data
 	if (is_longitudinal) {
 		ddata_ordered <- vector("list", length(ddata))
 		names(ddata_ordered) <- names(ddata)

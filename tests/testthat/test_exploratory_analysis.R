@@ -682,7 +682,6 @@ test_that("functions handle moderately large networks efficiently", {
 	time_taken = as.numeric(difftime(Sys.time(), start_time, units = "secs"))
 
 	expect_s3_class(result, "data.frame")
-	# expect_true(time_taken < 5)  # Should complete in less than 5 seconds
 })
 
 test_that("homophily handles networks with single connected component", {

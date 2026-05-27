@@ -14,12 +14,8 @@ test_that(
 		# 10x10 with same row/col => unipartite
 		expect_equal(attr(net_obj, "mode"), "unipartite")
 
-		# auto-detect diagonal usage
-		# with random data, we likely won't have all NAs on diag => diag_to_NA=FALSE
-		# also typically missing_to_zero=TRUE if we find NAs off diagonal, else FALSE
-		# but we can just check that the attributes exist:
+		# auto-detected diagonal and missing-value attributes
 		expect_false(attr(net_obj, "diag_to_NA"))
-		# depends on if there's no missing => so presumably missing_to_zero=FALSE
 		expect_true(attr(net_obj, "missing_to_zero"))
 
 		# random data => not symmetric => expect FALSE

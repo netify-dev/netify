@@ -14,3 +14,6 @@ A network style inspired by the Cat School armor from The Witcher 3.
 Light, agile, with emphasis on critical strikes - translates to sharp
 contrasts and sleek design.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

@@ -26,8 +26,20 @@ A data frame with one row per network/time period containing:
 \item{\code{num_actors}}{Number of actors (or \code{num_row_actors} and
 \code{num_col_actors} for bipartite networks)}
 \item{\code{density}}{Proportion of possible ties that exist}
-\item{\code{num_edges}}{Total number of edges (unweighted count)}
-\item{\code{prop_edges_missing}}{Proportion of potential edges that are NA}
+\item{\code{num_edges}}{Total number of edges (count of every
+non-zero entry; for signed networks, negative-weight ties are
+included alongside positive ones)}
+\item{\code{prop_edges_missing}}{Proportion of potential edge dyads
+that are NA. Uses the same denominator as \code{density} (off-diagonal
+cells for unipartite with \code{diag_to_NA}, halved for symmetric
+networks, all cells for bipartite), so
+\code{density + prop_edges_missing + observed_zero_fraction = 1}.}
+\item{\code{prop_unknown_edges}}{Proportion of potential edges that are
+NA because they were \emph{unobserved} at the data-entry stage (as opposed
+to structurally absent or on-diagonal). Only appears when the netlet
+was built with \code{missing_to_zero = FALSE}; otherwise unobserved
+dyads have been filled with 0 and the column would be identically
+zero.}
 }
 
 \strong{For weighted networks only:}

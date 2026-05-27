@@ -200,4 +200,6 @@ verbCoop_net <- add_dyad_vars(
 }
 \author{
 Cassy Dorff, Colin Henry, Shahryar Minhas
+
+Cassy Dorff, Shahryar Minhas
 }

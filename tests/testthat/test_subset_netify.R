@@ -639,7 +639,7 @@ test_that(
 
 # check that if only one pd selected then output is cross_sec
 test_that(
-	"subset_netify: longitudinal list, temporal subset check",
+	"subset_netify: longitudinal list, single-period collapse to cross_sec",
 	{
 	skip_on_cran()
 		# create netify object and then subset
@@ -674,7 +674,7 @@ test_that(
 
 # check that if only one pd selected then output is cross_sec
 test_that(
-	"subset_netify: longitudinal array, temporal subset check",
+	"subset_netify: longitudinal array, single-period collapse to cross_sec",
 	{
 	skip_on_cran()
 		# create netify object and then subset

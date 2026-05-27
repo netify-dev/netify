@@ -12,3 +12,6 @@ List of plot arguments
 \description{
 A soft, cheerful network style using pastel colors
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

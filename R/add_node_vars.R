@@ -143,28 +143,19 @@ add_node_vars <- function(
 	netlet, node_data, actor = NULL,
 	time = NULL, node_vars = NULL,
 	replace_existing = FALSE) {
-	# sanity check + error message
+	# user input checks
 	netify_check(netlet)
 	node_data <- df_check(node_data)
 	actor_check(actor, actor, node_data)
 	add_var_time_check(netlet, time)
 
-	# determine variables to merge if specific ones are not provided
+	# default to all variables if none specified
 	if (is.null(node_vars)) {
 		node_vars <- setdiff(names(node_data), c(actor, time))
 	}
 
-	# get underlying frame of netify object based on the
-	# actor_pds attribute
-
-	# if nodal data doesnt exist then create
-	# frame based on actor pds, we also have to do
-	# an adjustment in the time NULL case by removing
-	# the autmoatically created time variable, we remove
-	# the time column because in the time NULL already
-	# present nodal data case there is no time column
+	# build frame from actor_pds when no nodal data is attached yet
 	if (is.null(attr(netlet, "nodal_data"))) {
-		# for longitudinal data, pass the time labels from the netlet names
 		netlet_type <- attributes(netlet)$netify_type
 		if (netlet_type != "cross_sec") {
 			time_labels <- names(netlet)
@@ -177,18 +168,14 @@ add_node_vars <- function(
 		}
 	}
 
-	# if nodal data already present then pull out of netlet
-	# and also use replace_existing logical to determine
-	# whether variables should be replaced or not
+	# pull existing nodal data and honour replace_existing
 	if (!is.null(attr(netlet, "nodal_data"))) {
 		frame <- attr(netlet, "nodal_data")
 		existing_vars <- intersect(node_vars, names(frame))
 		if (length(existing_vars) > 0) {
 			if (replace_existing) {
-				# remove old columns so new ones can be added
 				frame <- frame[, !names(frame) %in% existing_vars, drop = FALSE]
 			} else {
-				# skip variables that already exist
 				cli::cli_warn(
 					"Variable(s) {.val {existing_vars}} already exist in nodal_data. Use {.arg replace_existing = TRUE} to overwrite."
 				)
@@ -198,7 +185,7 @@ add_node_vars <- function(
 		}
 	}
 
-	# create corresponding id in node_data
+	# build matching ids for the merge
 	if (is.null(time)) {
 		node_dataID <- paste(node_data[, actor], "1", sep = "_")
 		frame_dataID <- paste(frame[, "actor"], "1", sep = "_")
@@ -214,7 +201,7 @@ add_node_vars <- function(
 		)
 	}
 
-	# add selected nodal data as an attribute
+	# join selected nodal variables onto the frame
 	nfcol <- ncol(frame)
 	frame <- cbind(
 		frame,
@@ -226,14 +213,15 @@ add_node_vars <- function(
 	)
 	names(frame)[(nfcol + 1):ncol(frame)] <- node_vars
 
-	# cleanup and add as attrib
 	rownames(frame) <- NULL
 	attr(netlet, "nodal_data") <- frame
 
-	# return object
 	return(netlet)
 }
 
 #' @rdname add_node_vars
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 add_vertex_attributes <- add_node_vars

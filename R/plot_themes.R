@@ -16,6 +16,8 @@ theme_netify <- function() {
 			axis.text = element_blank(),
 			axis.title = element_blank(),
 			legend.position = "top",
+			# stack multiple legends vertically
+			legend.box = "vertical",
 			panel.border = element_blank(),
 			axis.ticks = element_blank(),
 			strip.text.x = element_text(color = "white", hjust = 0),
@@ -47,6 +49,84 @@ theme_stat_netify <- function() {
 		)
 }
 
+#' ggplot theme for netify network plots
+#'
+#' A ggplot theme with a larger base font, italicized legend titles, and
+#' (by default) stripped axes / panel chrome — the right default for a
+#' force-directed network layout. Drop on top of any `plot.netify()` output.
+#'
+#' @param base_size Base font size, passed to `theme_minimal()`. Default 12.
+#' @param for_network Logical. When `TRUE` (default) removes axis text /
+#'   titles / ticks / panel border, which is the right behavior for a
+#'   force-directed network layout. Set `FALSE` if you want to keep axes
+#'   on (e.g. for a heatmap or actor-stat plot).
+#' @return A ggplot2 theme object.
+#' @author Cassy Dorff, Shahryar Minhas
+#' @import ggplot2
+#' @export theme_publication_netify
+#'
+
+theme_publication_netify <- function(base_size = 12, for_network = TRUE) {
+	thm <- theme_minimal(base_size = base_size) +
+		theme(
+			plot.title = element_text(face = "bold", size = base_size + 2),
+			plot.subtitle = element_text(color = "grey30", size = base_size),
+			legend.title = element_text(face = "italic", size = base_size - 1),
+			legend.text = element_text(size = base_size - 1),
+			legend.position = "right",
+			legend.key.size = unit(0.8, "lines"),
+			strip.text.x = element_text(color = "white", hjust = 0, face = "bold"),
+			strip.text.y = element_text(color = "white", hjust = 0, face = "bold"),
+			strip.background = element_rect(fill = "black", color = "black"),
+			panel.grid.minor = element_blank()
+		)
+
+	# strip axis chrome for network layouts
+	if (isTRUE(for_network)) {
+		thm <- thm + theme(
+			axis.text = element_blank(),
+			axis.title = element_blank(),
+			axis.ticks = element_blank(),
+			panel.border = element_blank(),
+			panel.grid.major = element_blank()
+		)
+	}
+
+	thm
+}
+
+#' ggplot theme for netify time-series / stat plots
+#'
+#' Companion to `theme_publication_netify()` for plots that keep their
+#' axes — actor-stat time series, similarity heatmaps, mixing matrices,
+#' etc. Same typographic settings (italic legend titles, bold strip text,
+#' larger base font) but axes and gridlines are retained.
+#'
+#' @param base_size Base font size. Default 12.
+#' @return A ggplot2 theme object.
+#' @author Cassy Dorff, Shahryar Minhas
+#' @import ggplot2
+#' @export theme_publication_netify_ts
+#'
+
+theme_publication_netify_ts <- function(base_size = 12) {
+	theme_minimal(base_size = base_size) +
+		theme(
+			plot.title = element_text(face = "bold", size = base_size + 2),
+			plot.subtitle = element_text(color = "grey30", size = base_size),
+			axis.title = element_text(face = "bold", size = base_size),
+			axis.text = element_text(size = base_size - 1),
+			legend.title = element_text(face = "italic", size = base_size - 1),
+			legend.text = element_text(size = base_size - 1),
+			legend.position = "bottom",
+			legend.key.size = unit(0.8, "lines"),
+			strip.text.x = element_text(color = "white", hjust = 0, face = "bold"),
+			strip.text.y = element_text(color = "white", hjust = 0, face = "bold"),
+			strip.background = element_rect(fill = "black", color = "black"),
+			panel.grid.minor = element_blank()
+		)
+}
+
 #' Get smart defaults based on network properties
 #'
 #' Automatically adjusts plotting defaults based on network characteristics
@@ -73,7 +153,7 @@ get_smart_defaults <- function(netlet, msrmnts = NULL, plot_args = list()) {
 		n_nodes <- length(unique(c(msrmnts$row_actors, msrmnts$col_actors)))
 		# get edge count from raw network
 		net_raw <- get_raw(netlet)
-		n_edges <- sum(net_raw > 0, na.rm = TRUE)
+		n_edges <- sum(net_raw != 0, na.rm = TRUE)
 		if (all(attr(netlet, "symmetric"))) n_edges <- n_edges / 2
 	} else {
 		# for longitudinal, use average across time
@@ -81,11 +161,11 @@ get_smart_defaults <- function(netlet, msrmnts = NULL, plot_args = list()) {
 			all_actors <- unique(unlist(c(msrmnts$row_actors, msrmnts$col_actors)))
 			n_nodes <- length(all_actors)
 			# average edges across time
-			n_edges <- mean(sapply(netlet, function(x) sum(get_raw(x) > 0, na.rm = TRUE)))
+			n_edges <- mean(sapply(netlet, function(x) sum(get_raw(x) != 0, na.rm = TRUE)))
 		} else {
 			n_nodes <- length(unique(c(msrmnts$row_actors, msrmnts$col_actors)))
 			net_raw <- get_raw(netlet)
-			n_edges <- mean(apply(net_raw, 3, function(x) sum(x > 0, na.rm = TRUE)))
+			n_edges <- mean(apply(net_raw, 3, function(x) sum(x != 0, na.rm = TRUE)))
 		}
 	}
 

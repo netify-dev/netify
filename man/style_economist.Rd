@@ -13,3 +13,6 @@ List of plot arguments
 A network style inspired by The Economist's distinctive
 visual style with red accents and clean lines
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

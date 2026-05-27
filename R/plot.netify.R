@@ -221,8 +221,15 @@
 #'     aesthetics.}
 #'   \item{\code{return_components}}{Logical. Return plot components instead of
 #'     assembled plot? Useful for manual customization. Default is \code{FALSE}.}
-#'   \item{\code{style}}{A style function (e.g., \code{style_budapest}).
-#'     Applies a complete visual style including colors, shapes, and layout preferences.}
+#'   \item{\code{style}}{Either a style function (e.g., \code{style_budapest})
+#'     that applies a complete visual style including colors, shapes, and layout
+#'     preferences, or the string \code{"heatmap"} to render the adjacency
+#'     matrix as a tile plot instead of a node-link diagram. When
+#'     \code{style = "heatmap"} and edge weights cross zero (signed network),
+#'     the fill scale automatically uses a diverging palette centred at zero;
+#'     otherwise a sequential viridis ramp is used. Optional \code{low},
+#'     \code{mid}, and \code{high} arguments override the diverging palette
+#'     endpoints.}
 #' }
 #'
 #' @return
@@ -384,6 +391,8 @@
 #' @importFrom ggnewscale new_scale_color new_scale_fill new_scale
 #' @importFrom ggrepel GeomTextRepel GeomLabelRepel
 #'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export plot.netify
 #' @export
 
@@ -409,7 +418,15 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 
 	# anything passed in goes to the plot arg dumpster
 	plot_args <- list(...)
-	
+
+	# heatmap short-circuit: render the adjacency matrix as a tile plot.
+	# signed weights (range crossing zero) auto-fire a diverging palette
+	# centred at zero so positive/negative ties read at a glance.
+	if (identical(plot_args$style, "heatmap")) {
+		plot_args$style <- NULL
+		return(plot_netify_heatmap(x, obj_attrs, plot_args))
+	}
+
 	# validate parameters and warn about common mistakes
 	validate_plot_params(plot_args, ...)
 
@@ -976,6 +993,60 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 		if (isTRUE(plot_args$point_size_guide == "none") && !is.null(components$point_scales$size)) {
 			viz <- viz + guides(size = "none")
 		}
+
+		# apply node color / fill scales right after the points layer
+		# so that ggnewscale-renamed aesthetics resolve to the active scale
+		# (the original placement at the end of the function targeted the
+		# default `colour` aesthetic, which no geom uses once ggnewscale
+		# has reset the color scale — producing a spurious "no shared
+		# levels found" warning when `highlight=` is in use)
+		if (!is.null(plot_args$node_color_palette) && !is.null(components$point_scales$color)) {
+			var_data <- net_dfs$nodal_data[[components$point_scales$color]]
+			if (is.numeric(var_data) && length(unique(var_data)) > 10) {
+				viz <- viz + scale_color_distiller(
+					palette = plot_args$node_color_palette,
+					direction = plot_args$node_color_direction %||% 1
+				)
+			} else {
+				viz <- viz + scale_color_brewer(
+					palette = plot_args$node_color_palette,
+					type = "qual"
+				)
+			}
+		}
+		if (!is.null(plot_args$node_fill_palette) && !is.null(components$point_scales$fill)) {
+			var_data <- net_dfs$nodal_data[[components$point_scales$fill]]
+			if (is.numeric(var_data) && length(unique(var_data)) > 10) {
+				viz <- viz + scale_fill_distiller(
+					palette = plot_args$node_fill_palette,
+					direction = plot_args$node_fill_direction %||% 1
+				)
+			} else {
+				viz <- viz + scale_fill_brewer(
+					palette = plot_args$node_fill_palette,
+					type = "qual"
+				)
+			}
+		}
+
+		# apply highlight colors right after the points layer
+		if (isTRUE(plot_args$is_highlighting)) {
+			if (!is.null(components$point_scales$fill) && components$point_scales$fill == "highlight_status") {
+				viz <- viz + scale_fill_manual(
+					values = plot_args$highlight_color,
+					name = plot_args$highlight_label %||% "Highlighted",
+					breaks = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"],
+					labels = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"]
+				)
+			} else if (!is.null(components$point_scales$color) && components$point_scales$color == "highlight_status") {
+				viz <- viz + scale_color_manual(
+					values = plot_args$highlight_color,
+					name = plot_args$highlight_label %||% "Highlighted",
+					breaks = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"],
+					labels = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"]
+				)
+			}
+		}
 	}
 
 	# add text annotations to the plot if they exist
@@ -1118,56 +1189,9 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 		}
 	}
 
-	# apply color palettes if specified
-	if (!is.null(plot_args$node_color_palette) && !is.null(components$point_scales$color)) {
-		var_data <- net_dfs$nodal_data[[components$point_scales$color]]
-		if (is.numeric(var_data) && length(unique(var_data)) > 10) {
-			viz <- viz + scale_color_distiller(
-				palette = plot_args$node_color_palette,
-				direction = plot_args$node_color_direction %||% 1
-			)
-		} else {
-			viz <- viz + scale_color_brewer(
-				palette = plot_args$node_color_palette,
-				type = "qual"
-			)
-		}
-	}
-
-	# ditto for fill
-	if (!is.null(plot_args$node_fill_palette) && !is.null(components$point_scales$fill)) {
-		var_data <- net_dfs$nodal_data[[components$point_scales$fill]]
-		if (is.numeric(var_data) && length(unique(var_data)) > 10) {
-			viz <- viz + scale_fill_distiller(
-				palette = plot_args$node_fill_palette,
-				direction = plot_args$node_fill_direction %||% 1
-			)
-		} else {
-			viz <- viz + scale_fill_brewer(
-				palette = plot_args$node_fill_palette,
-				type = "qual"
-			)
-		}
-	}
-
-	# apply highlight colors if highlighting is active
-	if (isTRUE(plot_args$is_highlighting)) {
-		if (!is.null(components$point_scales$fill) && components$point_scales$fill == "highlight_status") {
-			viz <- viz + scale_fill_manual(
-				values = plot_args$highlight_color,
-				name = plot_args$highlight_label %||% "Highlighted",
-				breaks = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"],
-				labels = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"]
-			)
-		} else if (!is.null(components$point_scales$color) && components$point_scales$color == "highlight_status") {
-			viz <- viz + scale_color_manual(
-				values = plot_args$highlight_color,
-				name = plot_args$highlight_label %||% "Highlighted",
-				breaks = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"],
-				labels = names(plot_args$highlight_color)[names(plot_args$highlight_color) != "Other"]
-			)
-		}
-	}
+	# node color/fill scales and highlight scales are now applied inline
+	# immediately after the points layer (see above), so that they target
+	# the active (possibly ggnewscale-renamed) aesthetic.
 
 	# add facets to the plot if they are defined (useful for longitudinal data)
 	if (!is.null(components$facets)) {
@@ -1329,4 +1353,102 @@ apply_node_filter <- function(nodal_data, filter_input) {
 			))
 		}
 	)
+}
+
+
+#' Adjacency-matrix heatmap renderer for netify objects
+#'
+#' Builds a ggplot tile heatmap from a netify adjacency matrix. Used by
+#' `plot.netify` when the caller passes `style = "heatmap"`. For weights that
+#' straddle zero (signed networks), the fill scale auto-flips to a diverging
+#' palette centred at zero; otherwise a sequential viridis ramp is used.
+#'
+#' @param x A netify object.
+#' @param obj_attrs Attribute list pulled from `attributes(x)`.
+#' @param plot_args Named list of optional plot tweaks (currently honors
+#'   `title`, `xlab`, `ylab`, `low`, `mid`, `high`).
+#'
+#' @return A ggplot object.
+#' @keywords internal
+#' @noRd
+plot_netify_heatmap <- function(x, obj_attrs, plot_args = list()) {
+	netify_type <- obj_attrs$netify_type
+
+	# pull one or more matrices (cross-sec returns single, longit returns list)
+	mats <- switch(netify_type,
+		"cross_sec" = list("1" = get_raw(x)),
+		"longit_array" = {
+			arr <- get_raw(x)
+			if (length(dim(arr)) == 4) {
+				cli::cli_abort("{.code style = \"heatmap\"} does not yet support multilayer longit arrays.")
+			}
+			t_names <- dimnames(arr)[[3]] %||% as.character(seq_len(dim(arr)[3]))
+			stats::setNames(lapply(seq_along(t_names), function(t) arr[, , t]), t_names)
+		},
+		"longit_list" = lapply(x, get_raw)
+	)
+
+	# long-format edge frame across all matrices
+	df_parts <- lapply(names(mats), function(nm) {
+		m <- mats[[nm]]
+		rn <- rownames(m) %||% as.character(seq_len(nrow(m)))
+		cn <- colnames(m) %||% as.character(seq_len(ncol(m)))
+		data.frame(
+			from = rep(rn, times = ncol(m)),
+			to = rep(cn, each = nrow(m)),
+			weight = as.numeric(m),
+			time = nm,
+			stringsAsFactors = FALSE
+		)
+	})
+	df <- do.call(rbind, df_parts)
+
+	# preserve row/col ordering exactly as the netlet stores them
+	first <- mats[[1]]
+	row_levels <- rownames(first) %||% as.character(seq_len(nrow(first)))
+	col_levels <- colnames(first) %||% as.character(seq_len(ncol(first)))
+	df$from <- factor(df$from, levels = rev(row_levels))
+	df$to   <- factor(df$to, levels = col_levels)
+
+	# pick palette: diverging if weights cross zero, sequential otherwise
+	w_finite <- df$weight[is.finite(df$weight)]
+	is_signed <- length(w_finite) > 0 &&
+		min(w_finite, na.rm = TRUE) < 0 &&
+		max(w_finite, na.rm = TRUE) > 0
+
+	low_col  <- plot_args$low  %||% "#2166AC"
+	mid_col  <- plot_args$mid  %||% "#F7F7F7"
+	high_col <- plot_args$high %||% "#B2182B"
+
+	p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$to, y = .data$from, fill = .data$weight)) +
+		ggplot2::geom_tile(color = NA) +
+		ggplot2::coord_equal() +
+		ggplot2::labs(
+			x = plot_args$xlab %||% "",
+			y = plot_args$ylab %||% "",
+			fill = obj_attrs$weight %||% "weight",
+			title = plot_args$title
+		) +
+		ggplot2::theme_minimal(base_size = 11) +
+		ggplot2::theme(
+			axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust = 1),
+			panel.grid = ggplot2::element_blank()
+		)
+
+	if (is_signed) {
+		lim <- max(abs(w_finite), na.rm = TRUE)
+		p <- p + ggplot2::scale_fill_gradient2(
+			low = low_col, mid = mid_col, high = high_col,
+			midpoint = 0, limits = c(-lim, lim), na.value = "grey90"
+		)
+	} else {
+		p <- p + ggplot2::scale_fill_viridis_c(option = "magma", na.value = "grey90")
+	}
+
+	# facet over time for longitudinal nets
+	if (netify_type != "cross_sec" && length(mats) > 1) {
+		p <- p + ggplot2::facet_wrap(~ time)
+	}
+
+	p
 }

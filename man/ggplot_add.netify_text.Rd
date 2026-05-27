@@ -20,3 +20,6 @@ A ggplot object with the text layer added
 S3 method to add netify_text objects to ggplot objects. This method is called
 automatically when using the + operator with a netify_text object.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

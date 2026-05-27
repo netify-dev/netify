@@ -22,6 +22,7 @@ articles:
     navbar: ~
     contents:
     - foundations
+    - foundations_lite
     - event_data
     - ego_networks
     - manual_plotting
@@ -31,7 +32,12 @@ articles:
     - multilayer_networks
     - tracking_changes
     - attribute_analysis
+    - pipeline_netify_ergm
     - pipeline_lame_dbn
+  - title: "Under the Hood"
+    navbar: ~
+    contents:
+    - internals
   - title: "Resources"
     contents:
     - resources
@@ -43,9 +49,12 @@ reference:
     - netify
     - new_netify
     - layer_netify
+    - bind_netifies
+    - merge.netify
     - ego_netify
     - to_netify
     - pivot_dyad_to_network
+    - netify_workflows
 
   - title: "Adding Attributes"
     desc: "Add nodal and dyadic attributes"
@@ -54,13 +63,15 @@ reference:
     - add_dyad_vars
 
   - title: "Manipulating Networks"
-    desc: "Subset, transform, and reshape networks"
+    desc: "Subset, transform, reshape, and clean networks"
     contents:
     - subset_netify
     - subset.netify
     - mutate_weights
     - aggregate_dyad
+    - binarize
     - decompose_netify
+    - drop_na_actors
     - gen_symm_id
 
   - title: "Analysis"
@@ -78,17 +89,29 @@ reference:
     - attribute_report
     - get_actor_time_info
 
+  - title: "Inference"
+    desc: "Bootstrap, null comparison, and simulation"
+    contents:
+    - bootstrap_netlet
+    - compare_to_null
+    - simulate.netify
+
   - title: "Visualization"
     desc: "Plot networks and statistics"
     contents:
     - plot.netify
+    - plot.netify_comparison
+    - plot.summary_actor
     - plot_actor_stats
     - plot_graph_stats
     - plot_homophily
     - plot_mixing_matrix
     - plot_mixing_matrix_facet
+    - animate_netify
     - theme_netify
     - theme_stat_netify
+    - theme_publication_netify
+    - theme_publication_netify_ts
     - list_network_styles
     - list_palettes
 
@@ -154,14 +177,24 @@ reference:
     - netify_to_igraph
     - netify_to_statnet
     - netify_to_amen
+    - netify_to_lame
     - netify_to_dbn
+    - from_lame_fit
     - unnetify
     - melt
     - decompose_igraph
     - decompose_statnet
+    - read_external
+    - as.matrix.netify
+    - as.igraph.netify
+    - as.network.netify
+    - as_tibble.netify
+    - as_tibble.netify_comparison
+    - tidy.netify
+    - glance.netify
 
   - title: "Inspection"
-    desc: "Examine and extract from netify objects"
+    desc: "Examine and query netify objects"
     contents:
     - print.netify
     - peek
@@ -170,6 +203,8 @@ reference:
     - get_adjacency_array
     - get_adjacency_list
     - is_netify
+    - netify_predicates
+    - validate_netify
 
   - title: "Data"
     desc: "Example datasets"
@@ -177,3 +212,5 @@ reference:
     - icews
     - mexico
     - myanmar
+    - classroom_edges
+    - classroom_nodes

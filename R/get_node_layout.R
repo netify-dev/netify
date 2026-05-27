@@ -176,8 +176,7 @@ get_node_layout <- function(
 		}
 	}
 
-	# convert to igraph without attributes
-	# cuz we got a need for speed
+	# convert to igraph without attributes for speed
 	if (is.null(ig_netlet)) {
 		g <- netify_to_igraph(netlet,
 			add_nodal_attribs = FALSE,

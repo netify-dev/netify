@@ -1,10 +1,5 @@
-# tests for nodelist parameter functionality
-# nodelist ensures all nodes are included, even isolates missing from edgelists
-#
-# implementation status:
-# - get_adjacency(): fully implemented
-# - get_adjacency_array(): fully implemented
-# - get_adjacency_list(): fully implemented
+# tests for nodelist parameter, which ensures all nodes are included
+# (including isolates missing from edgelists)
 
 test_that("nodelist parameter is accepted by all functions without error", {
 	# create simple dyadic data
@@ -99,20 +94,20 @@ test_that("get_adjacency() correctly adds isolates with nodelist", {
 		nodelist = full_nodelist
 	)
 	
-	# test 1: Dimensions increase to include isolates
+	# dimensions increase to include isolates
 	expect_equal(dim(adj_no_isolates), c(3, 3))
 	expect_equal(dim(adj_with_isolates), c(6, 6))
-	
-	# test 2: All nodes from nodelist are included
+
+	# all nodes from nodelist are included
 	expect_equal(rownames(adj_with_isolates), full_nodelist)
 	expect_equal(colnames(adj_with_isolates), full_nodelist)
-	
-	# test 3: Original edges are preserved
+
+	# original edges are preserved
 	expect_equal(adj_with_isolates["A", "B"], 1)
 	expect_equal(adj_with_isolates["B", "C"], 2)
 	expect_equal(adj_with_isolates["C", "A"], 3)
-	
-	# test 4: Isolates have no connections (all 0s by default)
+
+	# isolates have no connections (all 0s by default)
 	# check isolate D
 	expect_true(all(adj_with_isolates["D", ] == 0 | is.na(adj_with_isolates["D", ])))
 	expect_true(all(adj_with_isolates[, "D"] == 0 | is.na(adj_with_isolates[, "D"])))
@@ -285,8 +280,6 @@ test_that("nodelist parameter produces informative message for bipartite network
 })
 
 test_that("existing network creation functionality works without nodelist", {
-	# this test ensures that the existing functionality is not broken
-	
 	# create simple dyadic data
 	dyad_df = data.frame(
 		from = c("A", "B", "C"),
@@ -415,8 +408,6 @@ test_that("get_adjacency_array() correctly adds isolates with nodelist", {
 	expect_true("F" %in% dimnames(arr_with_nodelist)[[2]])
 	
 	# check that data is preserved correctly for both time periods
-	# note: Need to check what values are actually there first
-	# the test data has repeating patterns so values might be different
 	expect_true(!is.na(arr_with_nodelist["A", "B", "2020"]) || 
 				arr_with_nodelist["A", "B", "2020"] != 0)
 	
@@ -545,7 +536,7 @@ test_that("netify() with longitudinal data correctly uses nodelist", {
 })
 
 test_that("nodelist handles edge cases correctly", {
-	# test 1: Empty nodelist
+	# empty nodelist
 	dyad_df = data.frame(
 		a1 = c("A", "B"), 
 		a2 = c("B", "C"),
@@ -565,7 +556,7 @@ test_that("nodelist handles edge cases correctly", {
 	})
 	expect_equal(dim(net_empty), c(3, 3))  # only actors from data
 	
-	# test 2: Nodelist with duplicates
+	# nodelist with duplicates
 	nodelist_dup = c("A", "B", "C", "D", "D", "E", "A")
 	net_dup = get_adjacency(
 		dyad_df,
@@ -577,7 +568,7 @@ test_that("nodelist handles edge cases correctly", {
 	# should handle duplicates gracefully
 	expect_equal(dim(net_dup), c(5, 5))  # 5 unique actors
 	
-	# test 3: Nodelist is subset of data actors (fewer actors than in data)
+	# nodelist is subset of data actors (fewer actors than in data)
 	nodelist_subset = c("A", "B")  # c is in data but not in nodelist
 	net_subset = get_adjacency(
 		dyad_df,
@@ -590,7 +581,7 @@ test_that("nodelist handles edge cases correctly", {
 	expect_equal(dim(net_subset), c(3, 3))
 	expect_true("C" %in% rownames(net_subset))  # c from data is still included
 	
-	# test 4: Special characters in actor names
+	# special characters in actor names
 	dyad_special = data.frame(
 		from = c("User A", "User-B", "User.C"),
 		to = c("User-B", "User.C", "User@D"),
@@ -714,18 +705,18 @@ test_that("nodelist interaction with sum_dyads parameter", {
 	expect_equal(net_sum["B", "C"], 7)  # 3 + 4
 	expect_true("E" %in% rownames(net_sum))  # isolate still included
 	
-	# test with sum_dyads = FALSE (default - last value)
-	net_last = get_adjacency(
+	# sum_dyads = FALSE auto-promotes to TRUE when weight has repeating dyads
+	net_last = suppressMessages(get_adjacency(
 		dyad_dup,
 		actor1 = "a1",
 		actor2 = "a2",
 		weight = "w",
 		sum_dyads = FALSE,
 		nodelist = nodelist
-	)
-	
-	expect_equal(net_last["A", "B"], 2)  # last value
-	expect_equal(net_last["B", "C"], 4)  # last value
+	))
+
+	expect_equal(net_last["A", "B"], 3)  # 1 + 2 (auto-summed)
+	expect_equal(net_last["B", "C"], 7)  # 3 + 4 (auto-summed)
 })
 
 test_that("nodelist works with self-loops and diag_to_NA", {
@@ -888,10 +879,7 @@ test_that("nodelist works with actor_pds specification", {
 		nodelist = nodelist
 	)
 	
-	# when actor_pds is provided, it overrides the actor list
-	# the current implementation may not add nodelist actors to actor_pds
-	# this is a limitation that could be documented or fixed
-	# for now, check basic functionality
+	# actor_pds overrides the actor list
 	expect_equal(length(list_with_pds), 3)  # 3 time periods
 	
 	# test without actor_pds to confirm nodelist works
@@ -960,9 +948,9 @@ test_that("nodelist performance with large number of isolates", {
 		stringsAsFactors = FALSE
 	)
 	
-	# but we need to include 100 total actors (80 isolates)
+	# include 100 total actors (80 isolates)
 	all_actors = c(active_actors, paste0("isolate", 1:80))
-	
+
 	# time the operation
 	start_time = Sys.time()
 	net_large = get_adjacency(

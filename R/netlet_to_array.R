@@ -8,7 +8,6 @@
 #' @return An array object of dimensions nr x nc x t,
 #' where nr is the number of row actors, nc is the number
 #' of column actors, and t is the number of time periods.
-#' #' @author Shahryar Minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -92,7 +91,6 @@ longit_dv_to_arr <- function(netlet) {
 #' where nr is the number of row actors, nc is the number
 #' of column actors, pn is the number of dyadic variables,
 #' and t is the number of time periods.
-#' #' @author Shahryar Minhas
 #'
 #' @importFrom stats setNames
 #'
@@ -285,28 +283,26 @@ longit_nodal_to_arr <- function(netlet) {
 	time_periods <- msrmnts$time
 	n_time <- msrmnts$n_time
 
-	# helper function to fill array - optimized
+	# build nodal array for one actor set (row or col mode)
 	fill_nodal_array <- function(actors, n_actors) {
-		# initialize array
 		arr <- array(NA,
 			dim = c(n_actors, n_nvars, n_time),
 			dimnames = list(actors, nvars, time_periods)
 		)
 
-		# convert to matrix once for efficiency
 		nodal_matrix <- as.matrix(nodal_df[, nvars, drop = FALSE])
 
-		# group by time for efficiency
+		# bucket rows by time period
 		time_indices <- split(seq_len(nrow(nodal_df)), nodal_df$time)
 
-		# fill array by time period
 		for (i in seq_along(time_periods)) {
 			tt <- time_periods[i]
 			idx <- time_indices[[tt]]
-			if (length(idx) > 0) {
-				actors_tt <- nodal_df$actor[idx]
-				arr[actors_tt, , i] <- nodal_matrix[idx, , drop = FALSE]
-			}
+			if (length(idx) == 0L) next
+			actors_tt <- as.character(nodal_df$actor[idx])
+			keep <- actors_tt %in% actors
+			if (!any(keep)) next
+			arr[actors_tt[keep], , i] <- nodal_matrix[idx[keep], , drop = FALSE]
 		}
 		return(arr)
 	}

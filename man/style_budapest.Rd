@@ -13,3 +13,6 @@ List of plot arguments
 A network style inspired by the pastel color palette of
 Wes Anderson's Grand Budapest Hotel
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

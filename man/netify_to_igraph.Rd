@@ -5,14 +5,25 @@
 \alias{to_igraph}
 \title{Convert netify objects to igraph format}
 \usage{
-netify_to_igraph(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
+netify_to_igraph(
+  netlet,
+  add_nodal_attribs = TRUE,
+  add_dyad_attribs = TRUE,
+  .quiet_na = FALSE
+)
 
-to_igraph(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
+to_igraph(
+  netlet,
+  add_nodal_attribs = TRUE,
+  add_dyad_attribs = TRUE,
+  .quiet_na = FALSE
+)
 }
 \arguments{
-\item{netlet}{A netify object containing network data. Currently supports
-single-layer networks only. For multilayer networks, use
-\code{\link{subset_netify}} to extract individual layers first.}
+\item{netlet}{A netify object containing network data. Single-layer
+networks return a single igraph (or a list of igraphs for longitudinal
+input); multilayer networks return a named list keyed by layer, with
+each element itself an igraph or list of igraphs.}
 
 \item{add_nodal_attribs}{Logical. If TRUE (default), includes nodal attributes
 from the netify object as vertex attributes in the igraph object. Set to
@@ -21,6 +32,10 @@ FALSE to create a network with structure only.}
 \item{add_dyad_attribs}{Logical. If TRUE (default), includes dyadic attributes
 from the netify object as edge attributes in the igraph object. Set to
 FALSE to exclude edge covariates.}
+
+\item{.quiet_na}{Logical. Internal flag to suppress the
+one-shot NA-to-zero cli alert when called from inside netify's
+own summary path. Default \code{FALSE}; do not set in user code.}
 }
 \value{
 An igraph object or list of igraph objects:
@@ -28,6 +43,8 @@ An igraph object or list of igraph objects:
 \item{Cross-sectional networks}{Returns a single igraph object}
 \item{Longitudinal networks}{Returns a named list of igraph objects,
 with names corresponding to time periods}
+\item{Multilayer networks}{Returns a named list keyed by layer; each
+element is itself an igraph or (for longitudinal) a list of igraphs}
 }
 
 The resulting igraph object(s) will have:
@@ -136,4 +153,6 @@ igraph::edge_attr_names(ig_structure_only) # only "weight" (if present)
 }
 \author{
 Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+
+Cassy Dorff, Shahryar Minhas
 }

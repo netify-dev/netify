@@ -23,6 +23,7 @@ netify(
   dyad_vars_symmetric = rep(symmetric, length(dyad_vars)),
   input_type = c("auto", "dyad_df", "netify_obj"),
   nodelist = NULL,
+  force_dense = FALSE,
   ...
 )
 }
@@ -49,9 +50,16 @@ numeric, Date, POSIXct/POSIXlt, or character values. Non-numeric types
 will be converted to numeric indices while preserving original labels.
 If no time is provided then a cross-sectional network will be created.}
 
-\item{symmetric}{logical: whether ties are symmetric, default is TRUE}
+\item{symmetric}{logical: whether ties are symmetric, default is TRUE.
+For matrix, array, list, igraph, or network inputs this default is
+ignored unless explicitly set by the caller; symmetry is instead
+detected from the input itself. The default applies for data.frame
+inputs.}
 
-\item{mode}{character: whether the network is unipartite or bipartite, default is unipartite}
+\item{mode}{character: whether the network is unipartite or bipartite,
+default is unipartite. As with \code{symmetric}, this default applies to
+data.frame inputs and is auto-detected for matrix / array / list /
+igraph / network inputs unless explicitly set.}
 
 \item{weight}{character: name of the weighted edge variable in
 the data, default is NULL}
@@ -74,9 +82,16 @@ in a list format.}
 actor, this can be created using \code{get_actor_time_info}, unless provided this will
 estimated for the user based on their choice of \code{actor_time_uniform}}
 
-\item{diag_to_NA}{logical: whether diagonals should be set to NA, default is TRUE}
+\item{diag_to_NA}{logical: whether diagonals should be set to NA,
+default is TRUE. For matrix / array / list inputs, the default is
+ignored unless explicitly set: instead, \code{diag_to_NA} is auto-detected
+by inspecting whether the diagonal of the supplied matrix is already
+\code{NA}. Pass an explicit value to override the auto-detection.}
 
-\item{missing_to_zero}{logical: whether missing values should be set to zero, default is TRUE}
+\item{missing_to_zero}{logical: whether missing values should be set to
+zero, default is TRUE. As with \code{diag_to_NA}, this is auto-detected
+for matrix / array / list inputs based on whether the supplied data
+already contains off-diagonal \code{NA}s.}
 
 \item{output_format}{character: "cross_sec", "longit_array", or
 "longit_list". If not specified and time is NULL then output_format
@@ -101,6 +116,11 @@ igraph/network interpretation.}
 be included in the network. This ensures isolates (nodes with no edges) are
 properly represented. Particularly useful when working with edgelists that
 only contain active dyads.}
+
+\item{force_dense}{logical: when a \code{Matrix::sparseMatrix} input would
+densify to a large allocation (N > 5000 and density < 1\%), \code{netify()}
+aborts with a guidance message. Set \code{force_dense = TRUE} to override
+the guard and proceed with densification.}
 
 \item{...}{additional arguments passed to \code{to_netify} when processing network objects}
 }
@@ -137,6 +157,14 @@ g <- sample_gnp(10, 0.3)
 net_from_igraph <- netify(g)
 }
 
+}
+\seealso{
+\code{\link{netify_workflows}} for an overview of the
+Create / Explore / Advance pipeline and how \code{netify()} fits
+into it; \code{\link{add_node_vars}}, \code{\link{add_dyad_vars}}
+for attaching attributes after construction; and
+\code{\link{classroom_edges}} / \code{\link{classroom_nodes}}
+for a small worked example.
 }
 \author{
 Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas

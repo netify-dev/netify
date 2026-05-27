@@ -176,7 +176,10 @@ gg_params <- function(plot_args) {
 		size = plot_args$text_size,
 		family = plot_args$text_family,
 		fontface = plot_args$text_fontface,
-		angle = plot_args$text_angle
+		angle = plot_args$text_angle,
+		# select_text intentionally leaves non-focal rows as NA in
+		# name_text; drop them silently so ggplot does not warn
+		na.rm = TRUE
 	)
 
 	# prepare a list to conditionally build the aes()
@@ -219,7 +222,10 @@ gg_params <- function(plot_args) {
 		angle = plot_args$label_angle,
 		hjust = plot_args$label_hjust,
 		vjust = plot_args$label_vjust,
-		lineheight = plot_args$label_lineheight
+		lineheight = plot_args$label_lineheight,
+		# select_label intentionally leaves non-focal rows as NA in
+		# name_label; drop them silently so ggplot does not warn
+		na.rm = TRUE
 	)
 
 	# prepare a list to conditionally build the aes()
@@ -293,9 +299,12 @@ gg_params <- function(plot_args) {
 		segment.angle = plot_args$text_repel_segment_angle,
 		segment.ncp = plot_args$text_repel_segment_ncp,
 		segment.square = plot_args$text_repel_segment_square,
-		segment.inflect = plot_args$text_repel_segment_inflect
+		segment.inflect = plot_args$text_repel_segment_inflect,
+		# select_text intentionally leaves non-focal rows as NA in
+		# name_text; drop them silently so ggplot does not warn
+		na.rm = TRUE
 	)
-	
+
 	# use same aes as regular text
 	text_repel_aes_list <- text_aes_list
 	
@@ -359,9 +368,12 @@ gg_params <- function(plot_args) {
 		segment.inflect = plot_args$label_repel_segment_inflect,
 		label.padding = plot_args$label_repel_label_padding,
 		label.r = plot_args$label_repel_label_r,
-		label.size = plot_args$label_repel_label_size
+		label.size = plot_args$label_repel_label_size,
+		# select_label intentionally leaves non-focal rows as NA in
+		# name_label; drop them silently so ggplot does not warn
+		na.rm = TRUE
 	)
-	
+
 	# use same aes as regular label
 	label_repel_aes_list <- label_aes_list
 	

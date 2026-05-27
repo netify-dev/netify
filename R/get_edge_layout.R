@@ -88,8 +88,7 @@ get_edge_layout <- function(
 	#
 	netify_check(netlet)
 
-	# convert to igraph without attributes
-	# cuz we got a need for speed
+	# convert to igraph without attributes for speed
 	if (is.null(ig_netlet)) {
 		g <- netify_to_igraph(netlet,
 			add_nodal_attribs = FALSE,
@@ -136,7 +135,6 @@ get_edge_layout <- function(
 		return(list(edges_df))
 	}
 
-	# for multiple time periods, process more efficiently
 	edges_list <- vector("list", length(g))
 	names(edges_list) <- names(g)
 

@@ -13,3 +13,6 @@ List of plot arguments
 A network style inspired by FiveThirtyEight's data visualization
 style with gray background and bright accents
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

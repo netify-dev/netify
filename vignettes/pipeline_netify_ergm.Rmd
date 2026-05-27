@@ -1,0 +1,241 @@
+---
+title: "Pipeline: netify to ergm (statnet)"
+author: "Cassy Dorff and Shahryar Minhas"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Pipeline: netify to ergm (statnet)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+    dev = "png", dpi = 150,
+    cache = FALSE,
+    echo = TRUE,
+    collapse = TRUE,
+    comment = "#>"
+)
+
+# this vignette needs network + ergm; gracefully exit if not installed
+pkg_check <- c("network", "ergm")
+missing_pkgs <- pkg_check[!vapply(pkg_check, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing_pkgs) > 0) {
+    message(
+        "This vignette requires: ", paste(missing_pkgs, collapse = ", "), "\n",
+        "Install with: install.packages(c(",
+        paste0("'", missing_pkgs, "'", collapse = ", "), "))"
+    )
+    knitr::knit_exit()
+}
+```
+
+ERGMs (Exponential Random Graph Models) are the workhorse of inferential network analysis in the [statnet](https://statnet.org/) ecosystem. `netify` provides a clean bridge: build your network with `netify()`, attach attributes with `add_node_vars()` / `add_dyad_vars()`, then convert to the `network` format that `ergm` expects with `to_statnet()`.
+
+This vignette covers:
+
+1. The cross-sectional pipeline (single network → single ergm fit)
+2. The longitudinal pipeline (per-time ergm fits)
+3. The multilayer pipeline (per-layer ergm fits — `to_statnet()` now iterates layers automatically)
+4. Round-tripping ergm-simulated networks back into netify for descriptive checks
+
+```{r}
+library(netify)
+library(ggplot2)
+library(network)
+library(ergm)
+
+data(icews)
+```
+
+## 1. Cross-sectional pipeline
+
+The simplest case: one snapshot, one model.
+
+```{r}
+# build a single-year netify object with nodal and dyadic attributes
+icews_2010 <- icews[icews$year == 2010, ]
+
+verb_coop <- netify(
+    icews_2010,
+    actor1 = "i", actor2 = "j",
+    symmetric = FALSE,
+    weight   = "verbCoop",
+    nodal_vars = c("i_polity2", "i_log_gdp"),
+    dyad_vars  = "matlCoop"
+)
+
+# convert to statnet 'network' object
+sn_2010 <- to_statnet(verb_coop)
+sn_2010
+```
+
+`to_statnet()` carries nodal attributes through as vertex attributes and dyadic attributes through as edge attributes.
+
+### Before you fit: three sanity checks
+
+ERGMs fail in cryptic ways when the underlying network is malformed. Three checks catch most "invalid output from statistic" headaches before you ever call `ergm()`:
+
+```{r}
+# 1. NAs in nodal covariates referenced by nodecov / nodematch
+nd <- attr(verb_coop, "nodal_data")
+na_cols <- names(nd)[vapply(nd, function(c) any(is.na(c)), logical(1))]
+na_cols <- setdiff(na_cols, c("actor", "time", "layer"))
+na_cols
+
+# 2. isolates -- ergm fits but some terms (e.g. gwdegree) degenerate
+m <- get_raw(verb_coop)
+bin <- (m != 0) & !is.na(m)
+deg_total <- rowSums(bin) + colSums(bin)
+isolates <- rownames(m)[deg_total == 0]
+length(isolates)
+
+# 3. symmetry: the netify flag must match how your model treats ties
+attr(verb_coop, "symmetric")
+```
+
+If `na_cols` is non-empty, drop the affected actors with `drop_na_actors(verb_coop, cols = na_cols)` or impute before converting. Now fit an ergm:
+
+```{r, eval = FALSE}
+# Note: this chunk is not evaluated by default to keep vignette build fast.
+# Replace eval = FALSE with eval = TRUE to actually run.
+set.seed(6886)
+m <- ergm(
+    sn_2010 ~ edges +
+        nodecov("i_polity2") +
+        nodecov("i_log_gdp")
+)
+summary(m)
+```
+
+One footgun worth flagging: `nodecov("i_polity2")` will refuse to fit if any vertex has an `NA` polity score. Either subset to actors with complete covariates or impute before passing to `to_statnet()`. `netify` emits a one-shot inform when it detects NAs in a nodal attribute and stashes the offending column names on the resulting network object so you can introspect:
+
+```{r, eval = FALSE}
+attr(sn_2010, "netify_na_cols")   # character vector of NA-bearing nodal vars
+```
+
+If non-empty, drop or impute those columns before fitting `ergm()` formulas that reference them with `nodecov()` / `nodematch()`. The `drop_na_actors()` helper does this in one call and works for cross-sectional, longitudinal, and bipartite netlets:
+
+```{r, eval = FALSE}
+clean <- drop_na_actors(verb_coop, cols = attr(sn_2010, "netify_na_cols"))
+sn_2010_clean <- to_statnet(clean)
+```
+
+### Dyadic edge covariates: the `_e` suffix
+
+Any dyadic covariate you passed to `netify()` (e.g. `dyad_vars = "matlCoop"`) is attached to the resulting `network` object in two places:
+
+- as a network-level attribute under its original name (the full `n x n` matrix), accessible via `network::get.network.attribute(sn, "matlCoop")`, and
+- as a per-edge attribute under `<var>_e` (here, `matlCoop_e`), populated only on edges that actually exist.
+
+The trailing `_e` disambiguates the per-edge edgelist from the network-level matrix. For `ergm::edgecov()`, pass the **original (matrix) name** — `edgecov()` resolves its argument as a network-level matrix attribute, so the `_e` per-edge alias will not work there:
+
+```{r, eval = FALSE}
+m <- ergm(sn_2010 ~ edges + edgecov("matlCoop"))
+```
+
+The `_e` per-edge attribute is exposed for descriptive uses (for example, coloring edges by covariate in `network::plot.network`). `to_statnet()` emits a one-shot inform listing both forms the first time it attaches dyadic covariates.
+
+Goodness-of-fit, mcmc.diagnostics, and other postestimation tools live in `ergm` itself.
+
+## 2. Longitudinal pipeline (per-time fits)
+
+For a longitudinal netify, `to_statnet()` returns a named list — one `network` object per time period:
+
+```{r}
+verb_longit <- netify(
+    icews[icews$year %in% 2010:2012, ],
+    actor1 = "i", actor2 = "j", time = "year",
+    symmetric = FALSE,
+    weight = "verbCoop",
+    nodal_vars = "i_polity2"
+)
+
+sn_list <- to_statnet(verb_longit)
+length(sn_list)
+names(sn_list)
+class(sn_list[[1]])
+```
+
+Fit a separate ergm per period:
+
+```{r, eval = FALSE}
+set.seed(6886)
+fits <- lapply(sn_list, function(n) {
+    ergm(n ~ edges + nodecov("i_polity2"))
+})
+```
+
+For *coevolution* models (where ties change as a function of past ties), look at `tergm` from the statnet suite — `netify` provides the data, `tergm` does the modeling. A typical tergm 4.x call against the same per-period list looks like this:
+
+```{r, eval = FALSE}
+# Longitudinal ERGM via tergm 4.x
+library(tergm)
+set.seed(6886)
+
+nets <- to_statnet(verb_longit)   # named list of network objects
+fit <- tergm(
+    nets ~ Form(~ edges + nodecov("i_polity2")) +
+           Persist(~ edges),
+    estimate = "CMLE",
+    times = seq_along(nets)
+)
+summary(fit)
+```
+
+In the tergm 4.x split formulation, `Form()` models the *formation* of new edges between periods, and `Persist()` models the *persistence* of existing edges from one period to the next; both formulas accept the same ergm terms (`edges`, `nodecov`, `nodematch`, `mutual`, `gwesp`, etc.). (Note: `i_polity2` has missing values for some country-years — `to_statnet()` flags this and stashes the offending column names on `attr(net, "netify_na_cols")` so you can drop or impute before fitting.)
+
+## 3. Multilayer pipeline (per-layer fits)
+
+Multilayer ergm modeling is its own research literature. The simple pragmatic approach is to fit one ergm per layer. `to_statnet()` handles this automatically: pass a multilayer netify, get back a named list keyed by layer.
+
+```{r}
+verb <- netify(icews_2010, actor1 = "i", actor2 = "j",
+               symmetric = FALSE, weight = "verbCoop")
+matl <- netify(icews_2010, actor1 = "i", actor2 = "j",
+               symmetric = FALSE, weight = "matlCoop")
+multi <- layer_netify(list(verbal = verb, material = matl))
+
+sn_multi <- to_statnet(multi)
+length(sn_multi)
+names(sn_multi)
+```
+
+Each element is a `network` object you can plug straight into `ergm()`.
+
+## 4. Round-tripping simulated networks back to netify
+
+A useful descriptive check after fitting an ergm is to simulate from the fit, compute descriptives on the simulated networks, and compare to the observed network. `simulate.ergm()` returns `network` objects, which means you can pipe them straight back into a netify for any of netify's descriptive tools:
+
+```{r, eval = FALSE}
+set.seed(6886)
+sims <- simulate(m, nsim = 100)  # list of network objects
+
+# convert each simulated network back into a netify for comparison
+sim_nets <- lapply(sims, function(s) to_netify(s))
+
+# compare observed vs simulated at the structural level
+all_nets <- c(list(observed = verb_coop), sim_nets)
+struct_comp <- compare_networks(all_nets, what = "structure")
+```
+
+This gives you observed-vs-simulated comparisons for density, reciprocity, transitivity, mean degree, etc. — useful for assessing whether your ergm captured the descriptive features you care about.
+
+## tl;dr
+
+```r
+# build → attach attrs → export → model
+net <- netify(df, actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "x")
+net <- add_node_vars(net, attrs, actor = "id")
+sn  <- to_statnet(net)               # single network, longit list, or multilayer list
+m   <- ergm(sn ~ edges + ...)        # modeling happens in ergm/statnet
+```
+
+For modeling beyond ergm:
+
+- Latent factor / additive-multiplicative: [`pipeline_lame_dbn`](pipeline_lame_dbn.html) vignette
+- Social relations model: [netify-dev/srm](https://github.com/netify-dev/srm) via `to_amen(net)`
+- Social influence regression (Minhas & Hoff): [netify-dev/sir](https://github.com/netify-dev/sir)
+
+Have fun!

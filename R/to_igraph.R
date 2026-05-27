@@ -4,9 +4,10 @@
 #' preserving network structure and optionally including nodal and dyadic attributes as vertex
 #' and edge attributes.
 #'
-#' @param netlet A netify object containing network data. Currently supports
-#'   single-layer networks only. For multilayer networks, use
-#'   \code{\link{subset_netify}} to extract individual layers first.
+#' @param netlet A netify object containing network data. Single-layer
+#'   networks return a single igraph (or a list of igraphs for longitudinal
+#'   input); multilayer networks return a named list keyed by layer, with
+#'   each element itself an igraph or list of igraphs.
 #' @param add_nodal_attribs Logical. If TRUE (default), includes nodal attributes
 #'   from the netify object as vertex attributes in the igraph object. Set to
 #'   FALSE to create a network with structure only.
@@ -19,6 +20,8 @@
 #'     \item{Cross-sectional networks}{Returns a single igraph object}
 #'     \item{Longitudinal networks}{Returns a named list of igraph objects,
 #'       with names corresponding to time periods}
+#'     \item{Multilayer networks}{Returns a named list keyed by layer; each
+#'       element is itself an igraph or (for longitudinal) a list of igraphs}
 #'   }
 #'
 #'   The resulting igraph object(s) will have:
@@ -119,27 +122,38 @@
 #' igraph::vertex_attr_names(ig_structure_only) # only "name"
 #' igraph::edge_attr_names(ig_structure_only) # only "weight" (if present)
 #'
+#' @param .quiet_na Logical. Internal flag to suppress the
+#'   one-shot NA-to-zero cli alert when called from inside netify's
+#'   own summary path. Default `FALSE`; do not set in user code.
+#'
 #' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 #'
 #' @export netify_to_igraph
 #' @aliases to_igraph
 
 netify_to_igraph <- function(
-	netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE) {
+	netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE,
+	.quiet_na = FALSE) {
 	# check if netify object
 	netify_check(netlet)
 
-	# if more than one layer tell user they must specify a single layer
-	if (length(attributes(netlet)$layers) > 1) {
-		cli::cli_abort(
-			"This object has multiple layers.
-	  `netify_to_igraph` does not currently support multilayer `netify` inputs.
-	  Please use the `subset_netify` function to create a `netify` object with a single layer."
-		)
-	}
-
 	# assert dependencies for remapping data to igraph
 	assert_dependency("igraph")
+
+	# multilayer: dispatch one call per layer and return a named list
+	layer_names <- attributes(netlet)$layers
+	if (length(layer_names) > 1) {
+		igrph_by_layer <- lapply(layer_names, function(lyr) {
+			netify_to_igraph(
+				subset_netify(netlet, layers = lyr),
+				add_nodal_attribs = add_nodal_attribs,
+				add_dyad_attribs = add_dyad_attribs,
+				.quiet_na = .quiet_na
+			)
+		})
+		names(igrph_by_layer) <- layer_names
+		return(igrph_by_layer)
+	}
 
 	## three cases: cross-sec/matrix, longit list, longit array
 	netlet_type <- attr(netlet, "netify_type")
@@ -161,7 +175,7 @@ netify_to_igraph <- function(
 	# cross-sec case
 	if (netlet_type == "cross_sec") {
 		# convert to igraph object
-		igrph <- netify_net_to_igraph(netlet)
+		igrph <- netify_net_to_igraph(netlet, .quiet_na = .quiet_na)
 
 		# process nodal attributes if exist
 		if (nodal_data_exist) {
@@ -189,7 +203,8 @@ netify_to_igraph <- function(
 		if ((!nodal_data_exist || !add_nodal_attribs) &&
 			(!dyad_data_exist || !add_dyad_attribs)) {
 			# just convert to igraph without attributes
-			igrph <- lapply(netlet, netify_net_to_igraph)
+			igrph <- lapply(netlet, netify_net_to_igraph,
+				.quiet_na = .quiet_na)
 			names(igrph) <- time_vals
 		} else {
 			# pre-process nodal data by time if needed
@@ -206,7 +221,8 @@ netify_to_igraph <- function(
 				time_val <- time_vals[ii]
 
 				# convert to igraph
-				igrph_slice <- netify_net_to_igraph(netlet_slice)
+				igrph_slice <- netify_net_to_igraph(netlet_slice,
+					.quiet_na = .quiet_na)
 
 				# add nodal attributes if needed
 				if (nodal_data_exist && add_nodal_attribs && !is.null(nodal_data_by_time[[time_val]])) {
@@ -251,8 +267,33 @@ netify_to_igraph <- function(
 }
 
 #' @rdname netify_to_igraph
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 to_igraph <- netify_to_igraph
+
+#' as.igraph method for netify objects
+#'
+#' S3 method that lets igraph's \code{\link[igraph]{as.igraph}} generic
+#' dispatch on netify objects. Equivalent to \code{netify_to_igraph(x, ...)}.
+#' Registered against the \pkg{igraph} namespace in \code{.onLoad}, so the
+#' dispatch works regardless of whether \pkg{igraph} is attached before or
+#' after \pkg{netify}.
+#'
+#' @param x A netify object.
+#' @param ... Extra arguments forwarded to \code{\link{netify_to_igraph}}
+#'   (e.g. \code{add_nodal_attribs}, \code{add_dyad_attribs}).
+#' @return An igraph object, or a list of igraph objects (longitudinal /
+#'   multilayer), as produced by \code{netify_to_igraph}.
+#'
+#' @author Shahryar Minhas
+#'
+#' @rawNamespace if (requireNamespace("igraph", quietly = TRUE)) S3method(igraph::as.igraph, netify)
+
+as.igraph.netify <- function(x, ...) {
+	netify_to_igraph(x, ...)
+}
 
 #' netify_net_to_igraph
 #'
@@ -265,7 +306,7 @@ to_igraph <- netify_to_igraph
 #' @keywords internal
 #' @noRd
 
-netify_net_to_igraph <- function(netlet) {
+netify_net_to_igraph <- function(netlet, .quiet_na = FALSE) {
 	# check if bipartite
 	bipartite_logical <- ifelse(attr(netlet, "mode") == "bipartite", TRUE, FALSE)
 
@@ -279,15 +320,14 @@ netify_net_to_igraph <- function(netlet) {
 	# strip netify attribs away
 	raw_net <- get_raw(netlet)
 
-	# replace NAs with 0 for igraph compatibility
-	# check for non-diagonal NAs and warn the user
+	# replace NAs with 0 for igraph compatibility, warn on non-diagonal NAs
 	diag_na <- if (!attr(netlet, "diag_to_NA")) FALSE else TRUE
 	if (diag_na) {
 		non_diag_na <- sum(is.na(raw_net)) - sum(is.na(diag(raw_net)))
 	} else {
 		non_diag_na <- sum(is.na(raw_net))
 	}
-	if (non_diag_na > 0) {
+	if (non_diag_na > 0 && !.quiet_na) {
 		cli::cli_alert_warning(
 			"Replacing {non_diag_na} non-diagonal NA value{?s} with 0 for igraph compatibility."
 		)
@@ -296,8 +336,7 @@ netify_net_to_igraph <- function(netlet) {
 
 	# convert to igraph_object
 	if (!bipartite_logical) {
-		# for symmetric networks, use "max" to handle the new igraph behavior
-		# this takes the maximum of the upper and lower triangle values
+		# symmetric: use "max" to merge upper and lower triangle values
 		mode_val <- if(all(attr(netlet, "symmetric"))) "max" else "directed"
 		
 		igraph_object <- igraph::graph_from_adjacency_matrix(
@@ -353,15 +392,6 @@ add_nodal_to_igraph <- function(
 	netlet, node_data, igraph_object, time = NULL) {
 	# slice by time if relevant
 	if (!is.null(time)) {
-		# # if ego network, then time variable includes ego name
-		# # modify to pull out year only since that' the only
-		# # thing that will match with the name of dyad_data_list
-		# ego_netlet = attr(netlet, 'ego_netlet')
-		# if(!is.null(ego_netlet)){
-		#   if(ego_netlet){
-		#     time = strsplit(time, '__')[[1]][2] } }
-
-		#
 		node_data <- node_data[node_data[, 2] == time, ]
 	}
 
@@ -418,8 +448,79 @@ add_dyad_to_igraph <- function(netlet, dyad_data_list, igraph_object, time = NUL
 	netlet_diag_to_NA <- attr(netlet, "diag_to_NA")
 	bipartite_logical <- netlet_mode == "bipartite"
 
-	# get edge positions
-	e_pos_igraph <- adj_igraph_positions(var_matrices[[1]], igraph_object)
+	# union of nonzero/non-NA cells across dyad vars so the round-trip stays lossless
+	first_mat <- var_matrices[[1]]
+	ar <- rownames(first_mat); ac <- colnames(first_mat)
+
+	v_names_now <- igraph::V(igraph_object)$name
+
+	cell_mat <- matrix(FALSE, nrow = nrow(first_mat), ncol = ncol(first_mat))
+	for (v in vars) {
+		m <- var_matrices[[v]]
+		if (!bipartite_logical && netlet_diag_to_NA) diag(m) <- 0
+		cell_mat <- cell_mat | (!is.na(m) & m != 0)
+	}
+
+	# add edges that exist in covariates but not yet in the graph
+	miss_idx <- which(cell_mat, arr.ind = TRUE)
+	if (nrow(miss_idx) > 0) {
+		miss_from <- ar[miss_idx[, 1]]
+		miss_to <- ac[miss_idx[, 2]]
+
+		# drop any that already are edges
+		cur_e <- igraph::as_data_frame(igraph_object, what = "edges")
+		if (nrow(cur_e) > 0) {
+			key_cur <- paste0(cur_e[, 1], "", cur_e[, 2])
+			key_miss <- paste0(miss_from, "", miss_to)
+			keep <- !(key_miss %in% key_cur)
+			miss_from <- miss_from[keep]; miss_to <- miss_to[keep]
+		}
+
+		# for symmetric/undirected graphs, also dedupe (a,b) vs (b,a)
+		if (length(miss_from) > 0 && !igraph::is_directed(igraph_object)) {
+			# canonical order via pmin/pmax
+			pmf <- pmin(miss_from, miss_to); pmt <- pmax(miss_from, miss_to)
+			key_pair <- paste0(pmf, "", pmt)
+			dup <- duplicated(key_pair)
+			miss_from <- miss_from[!dup]; miss_to <- miss_to[!dup]
+			# also check existing edges in canonical order
+			if (nrow(cur_e) > 0) {
+				cpmf <- pmin(cur_e[, 1], cur_e[, 2]); cpmt <- pmax(cur_e[, 1], cur_e[, 2])
+				cur_key <- paste0(cpmf, "", cpmt)
+				new_key <- paste0(pmin(miss_from, miss_to), "", pmax(miss_from, miss_to))
+				keep <- !(new_key %in% cur_key)
+				miss_from <- miss_from[keep]; miss_to <- miss_to[keep]
+			}
+		}
+
+		if (length(miss_from) > 0) {
+			ev <- as.vector(rbind(miss_from, miss_to))
+			# record how many edges exist before to identify the new ones
+			n_before <- igraph::ecount(igraph_object)
+			igraph_object <- igraph::add_edges(igraph_object, ev)
+
+			# if the main weight edge attr exists, set the new edges' weight to
+			# 0 so the round-trip adjacency does not gain spurious NAs.
+			# also set any pre-existing edge attribute on new edges to 0/NA-safe
+			n_after <- igraph::ecount(igraph_object)
+			new_eids <- seq.int(n_before + 1L, n_after)
+			cur_ea <- igraph::edge_attr_names(igraph_object)
+			for (ea_nm in cur_ea) {
+				cur_vals <- igraph::edge_attr(igraph_object, ea_nm)
+				# pad new edges with 0 for numeric, NA otherwise
+				fill <- if (is.numeric(cur_vals)) 0 else NA
+				cur_vals[new_eids] <- fill
+				igraph_object <- igraph::set_edge_attr(
+					igraph_object,
+					name = ea_nm,
+					value = cur_vals
+				)
+			}
+		}
+	}
+
+	# get edge positions AFTER any added edges
+	e_pos_igraph <- adj_igraph_positions(first_mat, igraph_object)
 
 	# go through dyad vars
 	edge_attrs <- lapply(vars, function(var_name) {

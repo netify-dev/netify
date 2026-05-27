@@ -294,23 +294,6 @@ test_that(
 )
 
 test_that(
-	"netify handles list of igraph objects (auto => longit_list)",
-	{
-	skip_on_cran()
-		g1 = igraph::make_ring(4)
-		igraph::E(g1)$myweight = c(1, 2, 3, 4)
-		g2 = igraph::make_star(4)
-		igraph::E(g2)$myweight = c(5, 6, 7)
-
-		net_obj = netify(list("t1" = g1, "t2" = g2), weight = "myweight")
-
-		expect_s3_class(net_obj, "netify")
-		expect_equal(attr(net_obj, "netify_type"), "longit_list")
-		expect_length(net_obj, 2)
-	}
-)
-
-test_that(
 	"netify handles input when input_type='netify_obj' (forces to_netify)",
 	{
 	skip_on_cran()

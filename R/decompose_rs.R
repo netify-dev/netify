@@ -148,7 +148,8 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
 	nodal_data <- process_nodal_data(obj_attrs, netify_type, time_labels)
 
 	# synchronize time variables
-	if (netify_type == "cross_sec" && nrow(nodal_data) > 0) {
+	# guard zero-row edge_data: scalar $<- fails when nrow(edge_data) == 0
+	if (netify_type == "cross_sec" && nrow(nodal_data) > 0 && nrow(edge_data) > 0) {
 		edge_data$time <- as.character(nodal_data$time[1])
 	}
 
@@ -266,7 +267,6 @@ decompose_igraph <- function(grph, weight = NULL) {
 	vertex_names <- igraph::V(grph)$name
 
 	if (is_bipartite) {
-		# now we know vertex_types is logical
 		n_type1 <- sum(!vertex_types)
 		n_type2 <- sum(vertex_types)
 
@@ -303,7 +303,14 @@ decompose_igraph <- function(grph, weight = NULL) {
 		# create vertex names if they don't exist
 		if (is.null(vertex_names)) {
 			n_vertices <- igraph::vcount(grph)
-			vertex_names <- paste0("a", seq_len(n_vertices))
+			# paste0("a", seq_len(0)) recycles to "a" (length 1), so guard the
+			# zero-vertex case explicitly to keep dimnames consistent with the
+			# 0x0 adjacency
+			vertex_names <- if (n_vertices == 0L) {
+				character(0)
+			} else {
+				paste0("a", seq_len(n_vertices))
+			}
 			rownames(adj_mat) <- vertex_names
 			colnames(adj_mat) <- vertex_names
 		} else {
@@ -319,6 +326,14 @@ decompose_igraph <- function(grph, weight = NULL) {
 		ndata <- igraph::as_data_frame(grph, what = "vertices")
 		# always add vertex names as 'actor' column
 		ndata$actor <- vertex_names
+		# drop a redundant igraph `name` column that duplicates `actor`
+		if ("name" %in% names(ndata) &&
+			identical(as.character(ndata$name), as.character(vertex_names))) {
+			ndata$name <- NULL
+		}
+		# put 'actor' first so downstream column-position assumptions hold
+		other_cols <- setdiff(names(ndata), "actor")
+		ndata <- ndata[, c("actor", other_cols), drop = FALSE]
 	} else {
 		ndata <- NULL
 	}
@@ -331,6 +346,26 @@ decompose_igraph <- function(grph, weight = NULL) {
 		if (is.numeric(ddata$from) && is.numeric(ddata$to)) {
 			ddata$from <- vertex_names[ddata$from]
 			ddata$to <- vertex_names[ddata$to]
+		}
+		# drop duplicated `weight` column if it shadows a named weight
+		if (!is.null(weight) && !identical(weight, "weight") &&
+			"weight" %in% names(ddata) && weight %in% names(ddata)) {
+			wcol <- ddata$weight
+			named_col <- ddata[[weight]]
+			if (is.numeric(wcol) && is.numeric(named_col) &&
+				length(wcol) == length(named_col) &&
+				isTRUE(all.equal(wcol, named_col, check.attributes = FALSE))) {
+				ddata$weight <- NULL
+			}
+		}
+		# the weight column already lives in the adjacency, so drop it from
+		# dyad covariates to avoid double-storage on the round-trip
+		if (!is.null(weight) && weight %in% names(ddata)) {
+			ddata[[weight]] <- NULL
+		}
+		# if only from/to are left, there are no real edge covariates
+		if (all(names(ddata) %in% c("from", "to"))) {
+			ddata <- NULL
 		}
 	} else {
 		ddata <- NULL
@@ -540,5 +575,8 @@ decompose_statnet <- function(ntwk, weight = NULL) {
 }
 
 #' @rdname decompose_statnet
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 decompose_network <- decompose_statnet

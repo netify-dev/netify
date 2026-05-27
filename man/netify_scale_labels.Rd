@@ -52,3 +52,6 @@ plot(my_netify_obj,
 \seealso{
 \code{\link{plot.netify}}
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

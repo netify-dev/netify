@@ -13,3 +13,6 @@ List of plot arguments
 A network style based on the popular Solarized color scheme,
 optimized for reduced eye strain
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

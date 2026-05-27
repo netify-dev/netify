@@ -39,19 +39,6 @@ test_that("to_netify handles single matrices", {
 
 # longit tests
 
-test_that("to_netify handles 3D arrays (longitudinal)", {
-	# 3D array (longitudinal)
-	arr = array(runif(75), dim = c(5, 5, 3))
-	dimnames(arr) = list(
-		paste0("actor", 1:5),
-		paste0("actor", 1:5),
-		c("2001", "2002", "2003")
-	)
-	net_arr = to_netify(arr)
-	expect_s3_class(net_arr, "netify")
-	expect_equal(attr(net_arr, "netify_type"), "longit_array")
-})
-
 test_that("to_netify handles arrays comprehensively", {
 	# 2D array (should be treated as matrix)
 	arr_2d = array(runif(25), dim = c(5, 5))
@@ -215,14 +202,15 @@ test_that("to_netify correctly extracts and converts dyad data", {
 	# check structure
 	expect_true(is.list(dyad_data))
 	expect_equal(names(dyad_data), "1")
-	expect_equal(names(dyad_data[["1"]]), c("weight", "type"))
+	# `weight` is stored in the adjacency, so it should not be duplicated
+	# in dyad_data; only non-weight edge attributes appear there
+	expect_equal(names(dyad_data[["1"]]), "type")
 
-	# check weight matrix matches adjacency
-	weight_mat = dyad_data[["1"]][["weight"]]
-	expect_equal(dim(weight_mat), c(5, 5))
-	expect_true(isSymmetric(weight_mat))
-	expect_equal(weight_mat[1, 2], 1)
-	expect_equal(weight_mat[2, 3], 2)
+	# weight values land in the adjacency itself
+	adj = get_raw(net_g)
+	expect_equal(dim(adj), c(5, 5))
+	expect_equal(adj[1, 2], 1)
+	expect_equal(adj[2, 3], 2)
 
 	# check type matrix
 	type_mat = dyad_data[["1"]][["type"]]
@@ -237,19 +225,15 @@ test_that("to_netify handles vertex attributes correctly", {
 	igraph::V(g)$type = c("hub", "spoke", "spoke", "spoke", "spoke")
 	igraph::V(g)$value = c(10, 1, 2, 3, 4)
 
-	# suppressing warnings because
-	# there will be a warning thrown as we are passing type
-	# for a directed igraph object which igraph will
-	# then think is bipartite, but since the type attribute
-	# is not logical igraph will not handle it correctly,
-	# so we just throw a warning and say we will treat
-	# as unipartite and have type as an attribute
+	# suppress warning: directed igraph with non-logical `type` attribute
+	# is treated as unipartite with type kept as an attribute
 	net_g = suppressWarnings(to_netify(g))
 	nodal_data = attr(net_g, "nodal_data")
 
 	# check nodal data
 	expect_true(is.data.frame(nodal_data))
-	expect_equal(nodal_data$name, c("Center", "Node1", "Node2", "Node3", "Node4"))
+	# `name` is normalized to `actor` when redundant
+	expect_equal(nodal_data$actor, c("Center", "Node1", "Node2", "Node3", "Node4"))
 	expect_equal(nodal_data$type, c("hub", "spoke", "spoke", "spoke", "spoke"))
 	expect_equal(nodal_data$value, c(10, 1, 2, 3, 4))
 })
@@ -324,20 +308,18 @@ test_that("to_netify handles directed vs undirected networks", {
 	igraph::E(g_dir)$weight = 1:4
 	net_dir = to_netify(g_dir, weight = "weight")
 
-	# check that directed edges are not symmetrized
-	dyad_data_dir = attr(net_dir, "dyad_data")
-	weight_mat_dir = dyad_data_dir[["1"]][["weight"]]
-	expect_false(isSymmetric(weight_mat_dir))
+	# check that directed edges are not symmetrized; weight lives in the
+	# adjacency, so test the adjacency itself rather than dyad_data
+	adj_dir = get_raw(net_dir)
+	expect_false(isSymmetric(unname(replace(adj_dir, is.na(adj_dir), 0))))
 
 	# undirected igraph
 	g_undir = igraph::make_ring(4, directed = FALSE)
 	igraph::E(g_undir)$weight = 1:4
 	net_undir = to_netify(g_undir, weight = "weight")
 
-	# check that undirected edges are symmetrized
-	dyad_data_undir = attr(net_undir, "dyad_data")
-	weight_mat_undir = dyad_data_undir[["1"]][["weight"]]
-	expect_true(isSymmetric(weight_mat_undir))
+	adj_undir = get_raw(net_undir)
+	expect_true(isSymmetric(unname(replace(adj_undir, is.na(adj_undir), 0))))
 })
 
 test_that("to_netify handles weighted networks correctly", {
@@ -379,10 +361,11 @@ test_that("to_netify validates and aligns data correctly", {
 	expect_equal(rownames(net_list[[1]]), c("USA", "CHN", "RUS", "GBR"))
 	expect_equal(rownames(net_list[[2]]), c("USA", "CHN", "RUS", "GBR"))
 
-	# check dyad data
-	dyad_data = attr(net_list, "dyad_data")
-	expect_equal(dyad_data[["2001"]][["trade"]]["USA", "CHN"], 100)
-	expect_equal(dyad_data[["2002"]][["trade"]]["USA", "CHN"], 120)
+	# trade is the weight, so it lives in the adjacency
+	adj_2001 = net_list[[1]]
+	adj_2002 = net_list[[2]]
+	expect_equal(adj_2001["USA", "CHN"], 100)
+	expect_equal(adj_2002["USA", "CHN"], 120)
 })
 
 test_that("to_netify preserves attributes across different input types", {
@@ -407,9 +390,15 @@ test_that("to_netify preserves attributes across different input types", {
 	nw = network::network(adj, directed = FALSE)
 	net_nw = to_netify(nw)
 
-	# all should produce same adjacency structure
-	expect_equal(get_raw(net_mat), net_ig[, ])
-	expect_equal(get_raw(net_mat), net_nw[, ])
+	# all should produce same adjacency structure modulo diag-to-NA stamping
+	strip_diag <- function(m) {
+		out <- m
+		diag(out) <- 0
+		out[is.na(out)] <- 0
+		out
+	}
+	expect_equal(strip_diag(get_raw(net_mat)), strip_diag(net_ig[, ]))
+	expect_equal(strip_diag(get_raw(net_mat)), strip_diag(net_nw[, ]))
 })
 
 # icews tests

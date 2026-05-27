@@ -12,3 +12,6 @@ List of plot arguments
 \description{
 A futuristic network style with neon colors on dark background
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

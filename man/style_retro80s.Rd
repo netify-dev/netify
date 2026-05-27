@@ -13,3 +13,6 @@ List of plot arguments
 A network style channeling 1980s design aesthetics
 with bold colors and geometric shapes
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

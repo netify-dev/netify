@@ -40,6 +40,20 @@
 #'
 #' @author Casy Dorff, Shahryar Minhas
 #'
+#' @examples
+#' # who tends to befriend whom, by gender, in the bundled classroom data
+#' data(classroom_edges)
+#' data(classroom_nodes)
+#' net <- netify(
+#'     classroom_edges,
+#'     actor1 = "from", actor2 = "to",
+#'     symmetric = TRUE,
+#'     nodal_data = classroom_nodes
+#' )
+#' mm <- mixing_matrix(net, attribute = "gender")
+#' round(mm$mixing_matrices[[1]], 3)
+#' mm$summary_stats
+#'
 #' @export mixing_matrix
 
 mixing_matrix <- function(
@@ -53,6 +67,26 @@ mixing_matrix <- function(
 	...) {
 	# input validation
 	netify_check(netlet)
+	if (missing(attribute) || is.null(attribute)) {
+		# build a hint with available nodal attributes if we can
+		nodal_data <- attr(netlet, "nodal_data")
+		avail <- NULL
+		if (is.data.frame(nodal_data)) {
+			avail <- setdiff(names(nodal_data), c("actor", "time"))
+		} else if (is.list(nodal_data) && length(nodal_data) > 0) {
+			avail <- setdiff(names(nodal_data[[1]]), c("actor", "time"))
+		}
+		msg <- c(
+			"!" = "{.arg attribute} is required: which nodal attribute should be mixed?",
+			"i" = "Example: {.code mixing_matrix(net, attribute = \"gender\")}."
+		)
+		if (length(avail) > 0) {
+			msg <- c(msg, "i" = "Available nodal attributes: {.val {avail}}.")
+		} else {
+			msg <- c(msg, "i" = "No nodal attributes attached yet -- use {.fn add_node_vars} first.")
+		}
+		cli::cli_abort(msg)
+	}
 	checkmate::assert_string(attribute)
 	checkmate::assert_string(row_attribute, null.ok = TRUE)
 	checkmate::assert_logical(normalized, len = 1)
@@ -81,7 +115,7 @@ mixing_matrix <- function(
 	} else {
 		# for longitudinal data, nodal_data can be either a list or a data.frame
 		if (is.data.frame(nodal_data)) {
-			# legacy format with time column
+			# data.frame format with time column
 			if (!attribute %in% names(nodal_data)) {
 				cli::cli_abort("Attribute '{attribute}' not found in nodal_data. Available attributes: {paste(setdiff(names(nodal_data), c('actor', 'time')), collapse = ', ')}")
 			}
@@ -173,7 +207,7 @@ mixing_matrix <- function(
 					row_attrs <- time_data[[row_attribute]]
 					actors <- time_data$actor
 				} else if (is.data.frame(nodal_data)) {
-					# legacy format with time column
+					# data.frame format with time column
 					time_data <- nodal_data[nodal_data$time == time_id, ]
 					col_attrs <- time_data[[attribute]]
 					row_attrs <- time_data[[row_attribute]]
@@ -184,30 +218,36 @@ mixing_matrix <- function(
 				}
 			}
 
-			# match actors to matrix rows/columns
-			matrix_actors <- rownames(net_matrix)
-			if (is.null(matrix_actors)) {
-				matrix_actors <- as.character(seq_len(nrow(net_matrix)))
+			# match actors to matrix rows/columns; bipartite uses disjoint row/col sets
+			row_matrix_actors <- rownames(net_matrix)
+			col_matrix_actors <- colnames(net_matrix)
+			if (is.null(row_matrix_actors)) {
+				row_matrix_actors <- as.character(seq_len(nrow(net_matrix)))
+			}
+			if (is.null(col_matrix_actors)) {
+				col_matrix_actors <- as.character(seq_len(ncol(net_matrix)))
 			}
 
 			# subset attributes to match matrix
-			attr_indices <- match(matrix_actors, actors)
-			if (any(is.na(attr_indices))) {
+			row_attr_idx <- match(row_matrix_actors, actors)
+			col_attr_idx <- match(col_matrix_actors, actors)
+			if (any(is.na(row_attr_idx)) || any(is.na(col_attr_idx))) {
 				cli::cli_warn("Some actors in network matrix not found in nodal data for time {time_id}")
 			}
-			col_attrs <- col_attrs[attr_indices]
-			row_attrs <- row_attrs[attr_indices]
+			row_attrs <- row_attrs[row_attr_idx]
+			col_attrs <- col_attrs[col_attr_idx]
 
-			# remove actors with missing attributes
-			complete_cases <- !is.na(col_attrs) & !is.na(row_attrs)
-			if (sum(complete_cases) < 2) {
+			# remove actors with missing attributes per axis
+			row_keep <- !is.na(row_attrs)
+			col_keep <- !is.na(col_attrs)
+			if (sum(row_keep) < 2 || sum(col_keep) < 2) {
 				cli::cli_warn("Insufficient non-missing attribute data for time {time_id}")
 				next
 			}
 
-			net_matrix <- net_matrix[complete_cases, complete_cases]
-			col_attrs <- col_attrs[complete_cases]
-			row_attrs <- row_attrs[complete_cases]
+			net_matrix <- net_matrix[row_keep, col_keep, drop = FALSE]
+			row_attrs <- row_attrs[row_keep]
+			col_attrs <- col_attrs[col_keep]
 
 			# create mixing matrix
 			mixing_result <- create_mixing_matrix(
@@ -274,10 +314,11 @@ create_mixing_matrix <- function(net_matrix, row_attrs, col_attrs,
 		dimnames = list(row_levels, col_levels)
 	)
 
-	# fill mixing matrix
-	n <- length(row_attrs)
-	for (i in seq_len(n)) {
-		for (j in seq_len(n)) {
+	# fill mixing matrix iterating over the actual matrix shape (handles bipartite)
+	n_r <- nrow(net_matrix)
+	n_c <- ncol(net_matrix)
+	for (i in seq_len(n_r)) {
+		for (j in seq_len(n_c)) {
 			if (i != j || !is.na(net_matrix[i, j])) { # allow self-loops if they exist
 				tie_value <- net_matrix[i, j]
 
@@ -295,8 +336,9 @@ create_mixing_matrix <- function(net_matrix, row_attrs, col_attrs,
 	# store raw matrix before normalization
 	raw_matrix <- mixing_matrix
 
-	# for undirected networks, symmetrize the matrix
-	is_symmetric <- isSymmetric(net_matrix, tol = .Machine$double.eps^0.5)
+	# symmetrize for undirected nets; short-circuit for non-square (bipartite) inputs
+	is_symmetric <- nrow(net_matrix) == ncol(net_matrix) &&
+		isSymmetric(unname(net_matrix), tol = .Machine$double.eps^0.5)
 	if (is_symmetric && identical(row_attrs, col_attrs)) {
 		mixing_matrix <- (mixing_matrix + t(mixing_matrix)) / 2
 	}

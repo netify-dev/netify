@@ -46,9 +46,13 @@ and additional nodal variables from the World Bank and Polity IV.
 \examples{
 data(icews)
 icews[1:3, ]
+
 }
 \references{
 add icews reference
 (\href{https://dataverse.harvard.edu/dataverse/icews}{icews})
+}
+\author{
+Cassy Dorff, Shahryar Minhas
 }
 \keyword{datasets}

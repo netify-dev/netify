@@ -110,31 +110,23 @@
 #' @export net_plot_data
 
 net_plot_data <- function(netlet, plot_args = list()) {
-	####
-	# check if netify object
 	netify_check(netlet)
-	####
 
-	####
 	# handle multilayer networks by processing each layer
 	layers <- attributes(netlet)$layers
 	n_layers <- length(layers)
 
 	if (n_layers > 1) {
-		# process multilayer networks
 		layer_results <- list()
 
 		for (i in seq_along(layers)) {
 			layer_name <- layers[i]
 
-			# subset to single layer
 			layer_net <- subset_netify(netlet, layers = layer_name)
 
-			# recursive call to process this single layer
-			# pass plot_args through
 			layer_result <- net_plot_data(layer_net, plot_args)
 
-			# add layer information to the data frames
+			# tag rows with layer
 			if (!is.null(layer_result$net_dfs$nodal_data) && nrow(layer_result$net_dfs$nodal_data) > 0) {
 				layer_result$net_dfs$nodal_data$layer <- layer_name
 			}
@@ -145,11 +137,9 @@ net_plot_data <- function(netlet, plot_args = list()) {
 			layer_results[[i]] <- layer_result
 		}
 
-		# combine results from all layers
-		# use the first layer's plot_args and ggnet_params
+		# seed combined result from first layer's params
 		combined_result <- layer_results[[1]]
 
-		# combine nodal data
 		nodal_list <- lapply(layer_results, function(x) x$net_dfs$nodal_data)
 		nodal_list <- nodal_list[!sapply(nodal_list, is.null)]
 		if (length(nodal_list) > 0) {
@@ -157,42 +147,32 @@ net_plot_data <- function(netlet, plot_args = list()) {
 			rownames(combined_result$net_dfs$nodal_data) <- NULL
 		}
 
-		# combine edge data
 		edge_list <- lapply(layer_results, function(x) x$net_dfs$edge_data)
 		edge_list <- edge_list[!sapply(edge_list, is.null)]
 		if (length(edge_list) > 0) {
-			# before combining, ensure consistent column names
-			# the 4th column is typically the weight column, but might have different names
+			# normalize the weight column name across layers
 			for (i in seq_along(edge_list)) {
 				if (ncol(edge_list[[i]]) >= 4) {
-					# rename the weight column to a generic name
 					names(edge_list[[i]])[4] <- "weight"
 				}
 			}
 			combined_result$net_dfs$edge_data <- do.call(rbind, edge_list)
 			rownames(combined_result$net_dfs$edge_data) <- NULL
 
-			# for multilayer, set edge_alpha_var to the generic weight column
-			# if the user hasn't explicitly disabled it
 			if (!isFALSE(plot_args$edge_alpha)) {
 				combined_result$plot_args$edge_alpha_var <- "weight"
 
-				# set a default label if not provided
 				if (is.null(combined_result$plot_args$edge_alpha_label)) {
 					combined_result$plot_args$edge_alpha_label <- "Edge Weight"
 				}
 			}
 
-			# handle edge weight rescaling if requested
 			if (isTRUE(plot_args$rescale_edge_weights)) {
-				# get all edge weights across layers
 				all_weights <- combined_result$net_dfs$edge_data$weight
 
-				# remove NA values for scaling
 				valid_weights <- all_weights[!is.na(all_weights)]
 
 				if (length(valid_weights) > 0) {
-					# rescale to 0-1 range
 					min_weight <- min(valid_weights)
 					max_weight <- max(valid_weights)
 
@@ -201,7 +181,6 @@ net_plot_data <- function(netlet, plot_args = list()) {
 							(combined_result$net_dfs$edge_data$weight - min_weight) /
 								(max_weight - min_weight)
 
-						# update the label to indicate rescaling
 						if (is.null(plot_args$edge_alpha_label)) {
 							combined_result$plot_args$edge_alpha_label <- "Edge Weight (Rescaled)"
 						}
@@ -210,13 +189,11 @@ net_plot_data <- function(netlet, plot_args = list()) {
 			}
 		}
 
-		# add multilayer flag to plot_args
 		combined_result$plot_args$is_multilayer <- TRUE
 		combined_result$plot_args$n_layers <- n_layers
 		combined_result$plot_args$layer_names <- layers
 
-		# for temporal multilayer networks, center each network if using default facet_grid
-		# check if this is actually temporal (multiple time periods)
+		# detect temporal multilayer
 		is_temporal <- FALSE
 		if ("time" %in% names(combined_result$net_dfs$nodal_data)) {
 			n_times <- length(unique(combined_result$net_dfs$nodal_data$time))
@@ -226,19 +203,18 @@ net_plot_data <- function(netlet, plot_args = list()) {
 		if (is_temporal) {
 			facet_type <- plot_args$facet_type %||% "grid"
 			if (facet_type == "grid") {
-				# center each network at (0,0) for consistent display in facet_grid
+				# center each network at (0,0) for facet_grid display
 				if (!is.null(combined_result$net_dfs$nodal_data) && nrow(combined_result$net_dfs$nodal_data) > 0) {
-					# calculate centering adjustments for each time-layer combination
 					nodal_data <- combined_result$net_dfs$nodal_data
 					unique_combos <- unique(nodal_data[, c("time", "layer")])
-					
+
 					centering_adj <- data.frame()
 					for (i in 1:nrow(unique_combos)) {
 						time_val <- unique_combos$time[i]
 						layer_val <- unique_combos$layer[i]
-						
+
 						subset_data <- nodal_data[nodal_data$time == time_val & nodal_data$layer == layer_val, ]
-						
+
 						centering_adj <- rbind(centering_adj, data.frame(
 							time = time_val,
 							layer = layer_val,
@@ -247,7 +223,6 @@ net_plot_data <- function(netlet, plot_args = list()) {
 						))
 					}
 
-					# apply centering to node positions
 					nodal_data <- merge(nodal_data, centering_adj, by = c("time", "layer"))
 					nodal_data$x <- nodal_data$x - nodal_data$x_center
 					nodal_data$y <- nodal_data$y - nodal_data$y_center
@@ -255,7 +230,6 @@ net_plot_data <- function(netlet, plot_args = list()) {
 					nodal_data$y_center <- NULL
 					combined_result$net_dfs$nodal_data <- nodal_data
 
-					# apply same centering to edge coordinates
 					if (!is.null(combined_result$net_dfs$edge_data) && nrow(combined_result$net_dfs$edge_data) > 0) {
 						edge_data <- combined_result$net_dfs$edge_data
 						edge_data <- merge(edge_data, centering_adj, by = c("time", "layer"))
@@ -268,35 +242,28 @@ net_plot_data <- function(netlet, plot_args = list()) {
 						combined_result$net_dfs$edge_data <- edge_data
 					}
 
-					# calculate common axis limits
 					x_range <- range(combined_result$net_dfs$nodal_data$x, na.rm = TRUE)
 					y_range <- range(combined_result$net_dfs$nodal_data$y, na.rm = TRUE)
 					max_extent <- max(abs(c(x_range, y_range)))
 
-					# store limits in plot_args for later use
 					combined_result$plot_args$xlim <- c(-max_extent, max_extent)
 					combined_result$plot_args$ylim <- c(-max_extent, max_extent)
 				}
 			}
 		}
 
-		# regenerate ggnet_params with the updated plot_args that includes edge_alpha_var
 		combined_result$ggnet_params <- gg_params(combined_result$plot_args)
 
 		return(combined_result)
 	}
-	####
 
-	####
-	# if ego net modify names and stop if more than one ego
+	# ego networks: only one ego allowed
 	ego_netlet <- attr(netlet, "ego_netlet")
 	ego_longit <- FALSE
 	if (!is.null(ego_netlet)) {
-		# get info on ego network
 		ego_longit <- attr(netlet, "ego_longit")
 		ego_entry <- attr(netlet, "ego_entry")
 
-		# stop if more than one ego
 		if (length(ego_entry) > 1) {
 			cli::cli_abort(
 				"This object has multiple egos.
@@ -307,40 +274,29 @@ net_plot_data <- function(netlet, plot_args = list()) {
 			)
 		}
 	}
-	####
 
-	####
-	# pull out attrs
 	obj_attrs <- attributes(netlet)
-
-	# pull out msrmnts
 	msrmnts <- netify_measurements(netlet)
 
-	# try to set some smart defaults if auto_format is TRUE (default)
-	# extract and remove auto_format from plot_args
+	# apply smart defaults unless disabled
 	auto_format <- plot_args$auto_format %||% TRUE
 	plot_args$auto_format <- NULL
-	
+
 	if (auto_format) {
 		plot_args <- get_smart_defaults(netlet, msrmnts, plot_args)
 	}
-	####
 
-	####
-	#
 	g_list <- netify_to_igraph(netlet,
 		add_nodal_attribs = FALSE,
 		add_dyad_attribs = FALSE
 	)
 
-	# modify get_node_layout to accept pre-converted igraph
 	if (is.null(plot_args$point_layout)) {
-		# extract ego-specific parameters from plot_args
 		ego_params <- plot_args[grep("^ego_", names(plot_args))]
-		
+
 		nodes_list <- do.call(get_node_layout, c(
 			list(
-				netlet = netlet, 
+				netlet = netlet,
 				ig_netlet = g_list,
 				layout = plot_args$layout,
 				static_actor_positions = plot_args$static_actor_positions,
@@ -350,83 +306,33 @@ net_plot_data <- function(netlet, plot_args = list()) {
 			ego_params
 		))
 	} else {
-		# use provided custom layout
 		nodes_list <- plot_args$point_layout
 	}
 
-	# modify get_edge_layout to use the same igraph
 	edges_list <- get_edge_layout(
 		netlet = netlet,
 		nodes_layout = nodes_list,
 		ig_netlet = g_list
 	)
-	####
 
-	####
-	# org the netlet into a  and dyadic df with all the
-	# relev attributes so that we can plot
+	# merge layout with nodal/dyadic attributes for plotting
 	net_dfs <- merge_layout_attribs(netlet, nodes_list, edges_list)
-	####
 
-	####
-	# adjust plot args
 	out <- adjust_plot_args(plot_args, net_dfs, obj_attrs)
 	plot_args <- out$plot_args
 	net_dfs <- out$net_dfs
 	rm(out)
-	####
 
-	####
-	# get aesthetic parameters
 	ggnet_params <- gg_params(plot_args)
-	####
 
-	# ######################
-	# # check if the network is directed and arrow endpoints need adjustment
-	# if (!obj_attrs$symmetric && plot_args$adjust_arrow_endpoints && plot_args$add_edges) {
-
-	# # figure out the size of nodes being used
-	# if (!is.null(plot_args$point_size_var)) {
-	#     # nodes have variable sizes, use the column name for size info
-	#     node_size_info <- plot_args$point_size_var
-	# } else {
-	#     # nodes have fixed sizes, use the numeric value for size info
-	#     node_size_info <- plot_args$point_size
-	# }
-
-	# # calculate the size scale if it hasn't been provided
-	# if (is.null(plot_args$edge_arrow_size_scale)) {
-	#     size_scale <- calculate_size_scale(net_dfs$nodal_data)
-	# } else {
-	#     size_scale <- plot_args$edge_arrow_size_scale
-	# }
-
-	# # adjust the endpoints of edges to account for node sizes and other parameters
-	# net_dfs$edge_data <- adjust_edge_endpoints(
-	#     edge_data = net_dfs$edge_data,
-	#     node_data = net_dfs$nodal_data,
-	#     node_size = node_size_info,
-	#     size_scale = size_scale,
-	#     arrow_gap = plot_args$edge_arrow_gap,
-	#     curved = plot_args$curve_edges,
-	#     curvature = plot_args$edge_curvature %||% 0.5
-	# )
-	# }
-	# ######################
-
-	####
-	# remove isolates
 	if (plot_args$remove_isolates) {
-		# get actor summary
 		actor_summ <- summary_actor(netlet)
 
-		# figure out what to keep and need to
-		# do separate for symmetric and asymmetric
-		# for mixed multilayer, use whichever degree column is available
+		# pick degree column based on directedness
 		if (all(obj_attrs$symmetric)) {
 			to_keep <- actor_summ[actor_summ$degree > 0, ]
 		} else if (length(obj_attrs$symmetric) > 1) {
-			# mixed directedness: actor has ties if degree > 0 OR degree_total > 0
+			# mixed multilayer: keep if any degree column shows ties
 			has_degree <- !is.na(actor_summ$degree) & actor_summ$degree > 0
 			has_degree_total <- !is.na(actor_summ$degree_total) & actor_summ$degree_total > 0
 			to_keep <- actor_summ[has_degree | has_degree_total, ]
@@ -434,24 +340,16 @@ net_plot_data <- function(netlet, plot_args = list()) {
 			to_keep <- actor_summ[actor_summ$degree_total > 0, ]
 		}
 
-		# add time var to to_keep if cross_sec
 		if (obj_attrs$netify_type == "cross_sec") {
 			to_keep$time <- net_dfs$nodal_data$time[1]
 		}
 
-		# create id vars
 		to_keep$id <- with(to_keep, paste(actor, time, sep = "_"))
 		net_dfs$nodal_data$id <- with(net_dfs$nodal_data, paste(name, time, sep = "_"))
-		# net_dfs$edge_data$from_id = with(net_dfs$edge_data, paste(from, time, sep='_'))
-		# net_dfs$edge_data$to_id = with(net_dfs$edge_data, paste(to, time, sep='_'))
 
-		# subset
 		net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$id %in% to_keep$id, ]
 	}
-	####
 
-	####
-	# return all prepared data
 	return(
 		list(
 			plot_args = plot_args,
@@ -460,4 +358,3 @@ net_plot_data <- function(netlet, plot_args = list()) {
 		)
 	)
 }
-####

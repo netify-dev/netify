@@ -86,6 +86,16 @@
 #'     \item{node_changes}{List detailing added, removed, and maintained nodes (for node comparisons)}
 #'     \item{significance_tests}{QAP test results if test = TRUE}
 #'     \item{details}{Detailed comparison matrices if return_details = TRUE}
+#'     \item{comparisons}{Long-format data frame for \code{what = "edges"}
+#'       with one row per (network pair, metric) triple. Columns:
+#'       \code{net_i}, \code{net_j} (the two network names),
+#'       \code{metric} (e.g. \code{"correlation"}, \code{"jaccard"},
+#'       \code{"hamming"}, \code{"qap_correlation"}, \code{"spectral"},
+#'       \code{"weight_correlation"}), \code{value} (scalar metric),
+#'       \code{p_value} (only populated for \code{qap_correlation};
+#'       \code{NA} otherwise). Coerce to a tibble with
+#'       \code{tibble::as_tibble(comp)} (the \code{as_tibble} S3 method
+#'       returns this frame directly).}
 #'   }
 #'
 #' @details
@@ -356,15 +366,33 @@ compare_networks <- function(
 	}
 
 	# merge comparison results with initial results
-	# the comp_results will have its own 'method' field that indicates the comparison type
+	# the comp_results will have its own 'method' field (the comparison
+	# type like "structural_comparison" / "qap") that the print method
+	# expects; drop any keys that would duplicate top-level entries to
+	# avoid two `n_networks` / `method` slots in the returned list.
+	dup_keys <- intersect(names(comp_results), names(results))
+	# preserve `method` since print.netify_comparison renders it as the
+	# inner method label, distinct from the top-level `comparison_method`
+	dup_keys <- setdiff(dup_keys, "method")
+	if (length(dup_keys)) {
+		comp_results <- comp_results[setdiff(names(comp_results), dup_keys)]
+	}
 	results <- c(results, comp_results)
-	
+
 	#
 	results$comparison_type <- comparison_type
 
 	#
 	if (!is.null(by) && comparison_type == "by_group") {
 		results$by_group <- analyze_by_group(results, nets_list, by)
+	}
+
+	# build a tidy long-format per-pair comparison frame (one row per
+	# net_i, net_j, metric). useful for downstream filtering/plotting,
+	# especially in temporal / multilayer / by-group settings where the
+	# wide $summary either collapses across pairs or has many columns.
+	if (what == "edges") {
+		results$comparisons <- build_comparisons_frame(results, nets_list)
 	}
 
 	#

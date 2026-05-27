@@ -146,7 +146,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 		}
 	}
 
-	# user input checks - use lapply instead of vapply since netify_check doesn't return a value
+	# user input checks
 	lapply(netlet_list, netify_check)
 
 	# set layer labels
@@ -174,7 +174,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 	# extract first set of attributes for reuse
 	first_attribs <- attribs_list[[1]]
 
-	# generate weights value for multilayer case - optimized
+	# generate weights value for multilayer case
 	weight_collapse <- vapply(attribs_list, function(x) {
 		w <- x[["weight"]]
 		if (is.null(w)) {
@@ -187,13 +187,13 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 	}, character(1))
 	weight_collapse <- paste(weight_collapse, collapse = ", ")
 
-	# do the same for longer weight label descriptors - optimized
+	# build weight label descriptor
 	weight_label_collapse <- paste(
 		vapply(attribs_list, `[[`, character(1), "detail_weight"),
 		collapse = " | "
 	)
 
-	# pull out logical for whether we have binary weights - already optimized
+	# pull out logical for whether we have binary weights
 	is_binary_vec <- vapply(attribs_list, `[[`, logical(1), "is_binary")
 
 	# check to make sure that the networks can be layered
@@ -229,8 +229,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 	# pull out raw versions of data
 	netlet_raws <- lapply(netlet_list, get_raw)
 
-	# handle symmetric attribute: store as named vector per layer
-	# when layers have mixed directedness, otherwise keep as scalar
+	# symmetric: named vector if mixed directedness, otherwise scalar
 	symmetric_vec <- vapply(attribs_list, `[[`, logical(1), "symmetric")
 	names(symmetric_vec) <- layer_labels
 	if (length(unique(symmetric_vec)) == 1) {
@@ -239,7 +238,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 		symmetric_out <- symmetric_vec
 	}
 
-	# create base attributes list to avoid repetition
+	# create base attributes list
 	base_attrs <- list(
 		netify_type = netlet_type,
 		actor_time_uniform = first_attribs$actor_time_uniform,
@@ -259,7 +258,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 
 	# cross-sec case
 	if (netlet_type == "cross_sec") {
-		# define and fill array efficiently
+		# define and fill array
 		netlet <- array(NA,
 			dim = c(n_row_actors, n_col_actors, n_layers),
 			dimnames = list(row_actors, col_actors, layer_labels)
@@ -272,7 +271,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 
 	# array case
 	if (netlet_type == "longit_array") {
-		# define and fill array efficiently
+		# define and fill array
 		netlet <- array(NA,
 			dim = c(n_row_actors, n_col_actors, n_layers, n_time),
 			dimnames = list(row_actors, col_actors, layer_labels, time)
@@ -283,7 +282,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 		}
 	}
 
-	# longit list case - optimized
+	# longit list case
 	if (netlet_type == "longit_list") {
 		# pre-allocate list
 		netlet <- vector("list", n_time)
@@ -307,7 +306,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 				arr[, , ii] <- netlet_raws[[ii]][[tt]]
 			}
 
-			# add attributes efficiently
+			# add attributes
 			class(arr) <- "netify"
 			attributes(arr) <- c(attributes(arr), cs_attrs)
 
@@ -319,7 +318,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 	class(netlet) <- "netify"
 	attributes(netlet) <- c(attributes(netlet), base_attrs)
 
-	# handle nodal data - optimized checks
+	# handle nodal data
 	nodal_data_list <- lapply(attribs_list, `[[`, "nodal_data")
 	if (identical_recursive(nodal_data_list)) {
 		attr(netlet, "nodal_data") <- nodal_data_list[[1]]
@@ -329,7 +328,7 @@ layer_netify <- function(netlet_list, ..., layer_labels = NULL) {
 		)
 	}
 
-	# handle dyad data - optimized checks
+	# handle dyad data
 	dyad_data_list <- lapply(attribs_list, `[[`, "dyad_data")
 	if (identical_recursive(dyad_data_list)) {
 		attr(netlet, "dyad_data") <- dyad_data_list[[1]]

@@ -631,8 +631,9 @@ extract_similarity_data <- function(netlet, attribute, method) {
 	rownames(similarity_matrix) <- rownames(net_matrix)
 	colnames(similarity_matrix) <- colnames(net_matrix)
 
-	# turn the network into a binary matrix
-	binary_net <- (net_matrix > 0) & !is.na(net_matrix)
+	# turn the network into a binary matrix — non-zero counts as tie so
+	# signed networks survive
+	binary_net <- (net_matrix != 0) & !is.na(net_matrix)
 
 	# debug: check matrix dimensions before melting
 	cli::cli_alert_info("Similarity matrix: {nrow(similarity_matrix)}x{ncol(similarity_matrix)}")

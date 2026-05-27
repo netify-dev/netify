@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Cassy Dorff and Shahryar Minhas" />
+
+<meta name="date" content="2026-05-27" />
+
+<title>Internals: object structure &amp; writing custom extensions</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Internals: object structure &amp; writing
+custom extensions</h1>
+<h4 class="author">Cassy Dorff and Shahryar Minhas</h4>
+<h4 class="date">2026-05-27</h4>
+
+
+
+<p>This vignette is for <strong>package developers</strong>,
+<strong>methodologists writing custom extensions</strong>, and
+<strong>anyone who wants to inspect the underlying object
+structure</strong>. End-user workflows are covered in
+<code>vignette(&quot;foundations_lite&quot;, package = &quot;netify&quot;)</code> and the
+topic-specific vignettes; this one goes one layer deeper.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(netify)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">data</span>(icews)</span></code></pre></div>
+<div id="the-netify-object-a-base-r-object-with-attributes" class="section level2">
+<h2>The netify object: a base R object with attributes</h2>
+<p>A <strong>netify object</strong> is a base R matrix / 3D array /
+list-of-matrices with <code>class = &quot;netify&quot;</code> and a bundle of
+attributes carrying all metadata. The <code>netify_type</code> attribute
+records one of three shapes:</p>
+<table>
+<colgroup>
+<col width="14%" />
+<col width="39%" />
+<col width="45%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><code>netify_type</code></th>
+<th>Underlying R object</th>
+<th>When used</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>cross_sec</code></td>
+<td><code>[n × n]</code> matrix (or <code>[r × c]</code> bipartite)</td>
+<td>One time period</td>
+</tr>
+<tr class="even">
+<td><code>longit_array</code></td>
+<td><code>[n × n × T]</code> array (or
+<code>[n × n × p × T]</code>)</td>
+<td>Multi-period, constant actor set</td>
+</tr>
+<tr class="odd">
+<td><code>longit_list</code></td>
+<td>Named list of matrices, one per time</td>
+<td>Multi-period, varying actor composition</td>
+</tr>
+</tbody>
+</table>
+<p>Multilayer networks insert a layer dimension (position 3) and store
+layer names in <code>attr(x, &quot;layers&quot;)</code>. Mixed-directedness
+multilayer is supported via a vector-valued <code>symmetric</code>
+attribute.</p>
+<p><code>dgCMatrix</code> inputs from the <strong>Matrix</strong>
+package are accepted but densified at construction (a one-shot cli
+inform is emitted); a true sparse storage backend is not yet
+implemented.</p>
+<p>Inspect any netify object’s attribute bundle:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>net <span class="ot">&lt;-</span> <span class="fu">netify</span>(icews[icews<span class="sc">$</span>year <span class="sc">==</span> <span class="dv">2010</span>, ],</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>              <span class="at">actor1 =</span> <span class="st">&quot;i&quot;</span>, <span class="at">actor2 =</span> <span class="st">&quot;j&quot;</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>              <span class="at">symmetric =</span> <span class="cn">FALSE</span>, <span class="at">weight =</span> <span class="st">&quot;verbCoop&quot;</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>              <span class="at">nodal_vars =</span> <span class="st">&quot;i_polity2&quot;</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>              <span class="at">dyad_vars  =</span> <span class="st">&quot;matlCoop&quot;</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; ℹ `missing_to_zero` is set to &quot;TRUE&quot; (the default).</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; ! Missing dyads will be filled with zeros. For latent space or other</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt;   statistical network models, structural zeros and missing data have different</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt;   meanings. Set `missing_to_zero = FALSE` to preserve NAs if this distinction</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt;   matters for your analysis.</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; This message is displayed once per session.</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="fu">class</span>(net)</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; [1] &quot;netify&quot;</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="fu">str</span>(<span class="fu">attributes</span>(net), <span class="at">max.level =</span> <span class="dv">1</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; List of 17</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt;  $ dim               : int [1:2] 152 152</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt;  $ dimnames          :List of 2</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt;  $ class             : chr &quot;netify&quot;</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt;  $ netify_type       : chr &quot;cross_sec&quot;</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt;  $ actor_time_uniform: logi TRUE</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt;  $ actor_pds         :&#39;data.frame&#39;:  152 obs. of  3 variables:</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt;  $ weight            : chr &quot;verbCoop&quot;</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt;  $ detail_weight     : chr &quot;Weights from `verbCoop`&quot;</span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt;  $ is_binary         : logi FALSE</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="co">#&gt;  $ symmetric         : logi FALSE</span></span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="co">#&gt;  $ mode              : chr &quot;unipartite&quot;</span></span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="co">#&gt;  $ layers            : chr &quot;verbCoop&quot;</span></span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="co">#&gt;  $ diag_to_NA        : logi TRUE</span></span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a><span class="co">#&gt;  $ missing_to_zero   : logi TRUE</span></span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="co">#&gt;  $ sum_dyads         : logi FALSE</span></span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="co">#&gt;  $ nodal_data        :&#39;data.frame&#39;:  152 obs. of  2 variables:</span></span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a><span class="co">#&gt;  $ dyad_data         :List of 1</span></span></code></pre></div>
+<p>Key attributes:</p>
+<ul>
+<li><code>netify_type</code> — <code>&quot;cross_sec&quot;</code>,
+<code>&quot;longit_array&quot;</code>, or <code>&quot;longit_list&quot;</code></li>
+<li><code>mode</code> — <code>&quot;unipartite&quot;</code> or
+<code>&quot;bipartite&quot;</code></li>
+<li><code>symmetric</code> — scalar logical (or named vector for
+mixed-directedness multilayer)</li>
+<li><code>weight</code> — column name (or <code>NULL</code> for
+binary)</li>
+<li><code>is_binary</code>, <code>detail_weight</code>,
+<code>diag_to_NA</code>, <code>missing_to_zero</code>,
+<code>sum_dyads</code></li>
+<li><code>layers</code> — character vector; length &gt; 1 means
+multilayer</li>
+<li><code>actor_pds</code> — data.frame with <code>actor</code>,
+<code>min_time</code>, <code>max_time</code> per actor</li>
+<li><code>nodal_data</code> — data.frame with <code>actor</code>,
+optional <code>time</code>, and one column per nodal variable</li>
+<li><code>dyad_data</code> — <strong>nested list</strong>:
+<code>list[[time]][[var]] = matrix</code>. Cross-sec uses
+<code>&quot;1&quot;</code> as the time key.</li>
+</ul>
+</div>
+<div id="extracting-parts" class="section level2">
+<h2>Extracting parts</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Want this</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>The raw matrix / array / list</td>
+<td><code>get_raw(net)</code></td>
+</tr>
+<tr class="even">
+<td>A quick numeric peek</td>
+<td><code>peek(net, from = 5, to = 5)</code></td>
+</tr>
+<tr class="odd">
+<td>The full long edge data frame</td>
+<td><code>unnetify(net)</code> or <code>tidy(net)</code></td>
+</tr>
+<tr class="even">
+<td>Lean wide-to-long edge frame (no nodal merge)</td>
+<td><code>melt(net)</code></td>
+</tr>
+<tr class="odd">
+<td>Graph-level stats</td>
+<td><code>summary(net)</code> or <code>glance(net)</code></td>
+</tr>
+<tr class="even">
+<td>Actor-level stats</td>
+<td><code>summary_actor(net)</code></td>
+</tr>
+<tr class="odd">
+<td>Size / composition descriptors</td>
+<td><code>measurements(net)</code></td>
+</tr>
+<tr class="even">
+<td>Edge data + layout for plotting</td>
+<td><code>net_plot_data(net)$net_dfs</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>tidy()</code> and <code>glance()</code> are S3 methods on the
+broom generics — they’re registered on package load if
+<code>generics</code> (or anything that imports it, like
+<code>broom</code>, <code>dplyr</code>, <code>tidymodels</code>) is
+installed. No hard dependency on broom.</p>
+</div>
+<div id="tidy-interop" class="section level2">
+<h2>Tidy interop</h2>
+<p>If <code>tibble</code> and <code>broom</code> are installed, three
+tidyverse-flavored entry points are available.
+<code>as_tibble.netify</code> is registered against
+<code>tibble::as_tibble</code> via <code>.onLoad</code>, so
+<code>tibble</code> must be installed to use the unprefixed call;
+<code>tidy()</code> and <code>glance()</code> are likewise registered
+against the broom generics.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; Attaching package: &#39;tibble&#39;</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; The following objects are masked from &#39;package:netify&#39;:</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt;     char, num</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="fu">library</span>(broom)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co"># one row per dyad (long edge frame, wrapped in a tibble)</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="fu">as_tibble</span>(net)</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; # A tibble: 22,952 × 9</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt;    from  to    time  verbCoop matlCoop from_id to_id i_polity2_from i_polity2_to</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;          &lt;int&gt;        &lt;int&gt;</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;  1 Afgh… Alba… 1            0        1 Afghan… Alba…             NA            9</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt;  2 Afgh… Alge… 1            0        0 Afghan… Alge…             NA            2</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt;  3 Afgh… Ango… 1            0        0 Afghan… Ango…             NA           -2</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt;  4 Afgh… Arge… 1            1        0 Afghan… Arge…             NA            8</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt;  5 Afgh… Arme… 1            7        2 Afghan… Arme…             NA            5</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;  6 Afgh… Aust… 1          125        0 Afghan… Aust…             NA           10</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;  7 Afgh… Aust… 1            1        0 Afghan… Aust…             NA           10</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt;  8 Afgh… Azer… 1            7        0 Afghan… Azer…             NA           -7</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt;  9 Afgh… Bahr… 1            3        0 Afghan… Bahr…             NA           -5</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; 10 Afgh… Bang… 1           14        0 Afghan… Bang…             NA            5</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; # ℹ 22,942 more rows</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co"># broom-style tidy summary: a tibble with one row per (non-zero) dyad</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">tidy</span>(net))</span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; # A tibble: 6 × 9</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt;   from   to    time  verbCoop matlCoop from_id to_id i_polity2_from i_polity2_to</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;          &lt;int&gt;        &lt;int&gt;</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co">#&gt; 1 Afgha… Arge… 1            1        0 Afghan… Arge…             NA            8</span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="co">#&gt; 2 Afgha… Arme… 1            7        2 Afghan… Arme…             NA            5</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co">#&gt; 3 Afgha… Aust… 1          125        0 Afghan… Aust…             NA           10</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#&gt; 4 Afgha… Aust… 1            1        0 Afghan… Aust…             NA           10</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="co">#&gt; 5 Afgha… Azer… 1            7        0 Afghan… Azer…             NA           -7</span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="co">#&gt; 6 Afgha… Bahr… 1            3        0 Afghan… Bahr…             NA           -5</span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a><span class="co"># one-row-per-network model-card summary (one row per time/layer if applicable)</span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a><span class="fu">glance</span>(net)</span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a><span class="co">#&gt; ℹ Some dyad_vars carry non-zero values on non-edge cells; igraph stores edge</span></span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a><span class="co">#&gt;   attributes only on existing edges, so those values will not be recoverable</span></span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a><span class="co">#&gt;   from the igraph object.</span></span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a><span class="co">#&gt; ℹ Keep the original netlet or convert with `to_statnet()` (matrix-valued</span></span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="co">#&gt;   network attributes) if you need to preserve them.</span></span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a><span class="co">#&gt; This message is displayed once per session.</span></span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 18</span></span>
+<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a><span class="co">#&gt;   num_actors density num_edges prop_edges_missing prop_unknown_edges</span></span>
+<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a><span class="co">#&gt;        &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;              &lt;dbl&gt;              &lt;dbl&gt;</span></span>
+<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a><span class="co">#&gt; 1        152   0.435      9976                  0                  0</span></span>
+<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a><span class="co">#&gt; # ℹ 13 more variables: mean_edge_weight &lt;dbl&gt;, sd_edge_weight &lt;dbl&gt;,</span></span>
+<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a><span class="co">#&gt; #   median_edge_weight &lt;dbl&gt;, min_edge_weight &lt;dbl&gt;, max_edge_weight &lt;dbl&gt;,</span></span>
+<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a><span class="co">#&gt; #   competition_row &lt;dbl&gt;, competition_col &lt;dbl&gt;, sd_of_row_means &lt;dbl&gt;,</span></span>
+<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a><span class="co">#&gt; #   sd_of_col_means &lt;dbl&gt;, covar_of_row_col_means &lt;dbl&gt;, reciprocity &lt;dbl&gt;,</span></span>
+<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a><span class="co">#&gt; #   mutual &lt;dbl&gt;, transitivity &lt;dbl&gt;</span></span></code></pre></div>
+<p><code>as_tibble(net)</code> and <code>tidy(net)</code> share the same
+long-format payload as <code>unnetify(net)</code> — they differ only in
+whether zero-weight edges are dropped by default (<code>tidy()</code>
+drops them, matching the broom convention). <code>glance(net)</code> is
+the broom-flavored sibling of <code>summary(net)</code> — one row of
+graph-level statistics per network (or per (time, layer) slice for
+longitudinal / multilayer inputs).</p>
+<p><code>as_tibble()</code> also has a method for
+<code>netify_comparison</code> objects (from
+<code>compare_networks()</code>), returning the per-pair
+<code>$comparisons</code> frame directly so you can pipe straight into
+<code>filter()</code> / <code>arrange()</code> /
+<code>pivot_wider()</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>cmp <span class="ot">&lt;-</span> <span class="fu">compare_networks</span>(<span class="fu">list</span>(<span class="st">&quot;2010&quot;</span> <span class="ot">=</span> net1, <span class="st">&quot;2011&quot;</span> <span class="ot">=</span> net2))</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">as_tibble</span>(cmp)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 x 5</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt;   net_i net_j metric      value p_value</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;       &lt;dbl&gt;   &lt;dbl&gt;</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; 1 2011  2010  correlation 0.884      NA</span></span></code></pre></div>
+</div>
+<div id="predicates-and-descriptors" class="section level2">
+<h2>Predicates and descriptors</h2>
+<p>For programmatic dispatch — e.g. inside a custom exporter or pipeline
+step — netify ships a small set of non-masking predicates and size
+accessors:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># class / structure predicates</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">is_netify</span>(net)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">is_bipartite</span>(net)          <span class="co"># may be masked by igraph::is_bipartite</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; [1] FALSE</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="fu">is_bipartite_netify</span>(net)   <span class="co"># alias that won&#39;t be masked</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; [1] FALSE</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">is_directed_netify</span>(net)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="fu">is_longitudinal</span>(net)</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; [1] FALSE</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="fu">is_multilayer</span>(net)</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; [1] FALSE</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co"># size / composition accessors</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="fu">n_actors</span>(net)              <span class="co"># number of unique actors</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; [1] 152</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="fu">n_periods</span>(net)             <span class="co"># number of time periods (1 for cross-sec)</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="fu">n_layers</span>(net)              <span class="co"># number of layers (1 for single-layer)</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="fu">get_actor_time_info</span>(net)   <span class="co"># returns the stored actor_pds: actor, min_time, max_time</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt;                                          actor min_time max_time</span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt; 1                                  Afghanistan        1        1</span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt; 2                                      Albania        1        1</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt; 3                                      Algeria        1        1</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; 4                                       Angola        1        1</span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt; 5                                    Argentina        1        1</span></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt; 6                                      Armenia        1        1</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt; 7                                    Australia        1        1</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="co">#&gt; 8                                      Austria        1        1</span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="co">#&gt; 9                                   Azerbaijan        1        1</span></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="co">#&gt; 10                                     Bahrain        1        1</span></span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a><span class="co">#&gt; 11                                  Bangladesh        1        1</span></span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a><span class="co">#&gt; 12                                     Belarus        1        1</span></span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a><span class="co">#&gt; 13                                     Belgium        1        1</span></span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a><span class="co">#&gt; 14                                       Benin        1        1</span></span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a><span class="co">#&gt; 15             Bolivia, Plurinational State Of        1        1</span></span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a><span class="co">#&gt; 16                      Bosnia And Herzegovina        1        1</span></span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a><span class="co">#&gt; 17                                      Brazil        1        1</span></span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a><span class="co">#&gt; 18                                    Bulgaria        1        1</span></span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a><span class="co">#&gt; 19                                Burkina Faso        1        1</span></span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a><span class="co">#&gt; 20                                     Burundi        1        1</span></span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a><span class="co">#&gt; 21                                    Cambodia        1        1</span></span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a><span class="co">#&gt; 22                                    Cameroon        1        1</span></span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a><span class="co">#&gt; 23                                      Canada        1        1</span></span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a><span class="co">#&gt; 24                                  Cape Verde        1        1</span></span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a><span class="co">#&gt; 25                    Central African Republic        1        1</span></span>
+<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a><span class="co">#&gt; 26                                        Chad        1        1</span></span>
+<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a><span class="co">#&gt; 27                                       Chile        1        1</span></span>
+<span id="cb5-51"><a href="#cb5-51" tabindex="-1"></a><span class="co">#&gt; 28                                       China        1        1</span></span>
+<span id="cb5-52"><a href="#cb5-52" tabindex="-1"></a><span class="co">#&gt; 29                                    Colombia        1        1</span></span>
+<span id="cb5-53"><a href="#cb5-53" tabindex="-1"></a><span class="co">#&gt; 30                                     Comoros        1        1</span></span>
+<span id="cb5-54"><a href="#cb5-54" tabindex="-1"></a><span class="co">#&gt; 31                          Congo, Republic Of        1        1</span></span>
+<span id="cb5-55"><a href="#cb5-55" tabindex="-1"></a><span class="co">#&gt; 32           Congo, The Democratic Republic Of        1        1</span></span>
+<span id="cb5-56"><a href="#cb5-56" tabindex="-1"></a><span class="co">#&gt; 33                                  Costa Rica        1        1</span></span>
+<span id="cb5-57"><a href="#cb5-57" tabindex="-1"></a><span class="co">#&gt; 34                               Cote D&#39;ivoire        1        1</span></span>
+<span id="cb5-58"><a href="#cb5-58" tabindex="-1"></a><span class="co">#&gt; 35                                     Croatia        1        1</span></span>
+<span id="cb5-59"><a href="#cb5-59" tabindex="-1"></a><span class="co">#&gt; 36                                        Cuba        1        1</span></span>
+<span id="cb5-60"><a href="#cb5-60" tabindex="-1"></a><span class="co">#&gt; 37                                      Cyprus        1        1</span></span>
+<span id="cb5-61"><a href="#cb5-61" tabindex="-1"></a><span class="co">#&gt; 38                                     Denmark        1        1</span></span>
+<span id="cb5-62"><a href="#cb5-62" tabindex="-1"></a><span class="co">#&gt; 39                                    Djibouti        1        1</span></span>
+<span id="cb5-63"><a href="#cb5-63" tabindex="-1"></a><span class="co">#&gt; 40                          Dominican Republic        1        1</span></span>
+<span id="cb5-64"><a href="#cb5-64" tabindex="-1"></a><span class="co">#&gt; 41                                     Ecuador        1        1</span></span>
+<span id="cb5-65"><a href="#cb5-65" tabindex="-1"></a><span class="co">#&gt; 42                                       Egypt        1        1</span></span>
+<span id="cb5-66"><a href="#cb5-66" tabindex="-1"></a><span class="co">#&gt; 43                                 El Salvador        1        1</span></span>
+<span id="cb5-67"><a href="#cb5-67" tabindex="-1"></a><span class="co">#&gt; 44                           Equatorial Guinea        1        1</span></span>
+<span id="cb5-68"><a href="#cb5-68" tabindex="-1"></a><span class="co">#&gt; 45                                     Estonia        1        1</span></span>
+<span id="cb5-69"><a href="#cb5-69" tabindex="-1"></a><span class="co">#&gt; 46                                    Ethiopia        1        1</span></span>
+<span id="cb5-70"><a href="#cb5-70" tabindex="-1"></a><span class="co">#&gt; 47                                        Fiji        1        1</span></span>
+<span id="cb5-71"><a href="#cb5-71" tabindex="-1"></a><span class="co">#&gt; 48                                     Finland        1        1</span></span>
+<span id="cb5-72"><a href="#cb5-72" tabindex="-1"></a><span class="co">#&gt; 49                                      France        1        1</span></span>
+<span id="cb5-73"><a href="#cb5-73" tabindex="-1"></a><span class="co">#&gt; 50                                       Gabon        1        1</span></span>
+<span id="cb5-74"><a href="#cb5-74" tabindex="-1"></a><span class="co">#&gt; 51                                      Gambia        1        1</span></span>
+<span id="cb5-75"><a href="#cb5-75" tabindex="-1"></a><span class="co">#&gt; 52                                     Georgia        1        1</span></span>
+<span id="cb5-76"><a href="#cb5-76" tabindex="-1"></a><span class="co">#&gt; 53                                     Germany        1        1</span></span>
+<span id="cb5-77"><a href="#cb5-77" tabindex="-1"></a><span class="co">#&gt; 54                                       Ghana        1        1</span></span>
+<span id="cb5-78"><a href="#cb5-78" tabindex="-1"></a><span class="co">#&gt; 55                                      Greece        1        1</span></span>
+<span id="cb5-79"><a href="#cb5-79" tabindex="-1"></a><span class="co">#&gt; 56                                   Guatemala        1        1</span></span>
+<span id="cb5-80"><a href="#cb5-80" tabindex="-1"></a><span class="co">#&gt; 57                                      Guinea        1        1</span></span>
+<span id="cb5-81"><a href="#cb5-81" tabindex="-1"></a><span class="co">#&gt; 58                               Guinea-Bissau        1        1</span></span>
+<span id="cb5-82"><a href="#cb5-82" tabindex="-1"></a><span class="co">#&gt; 59                                      Guyana        1        1</span></span>
+<span id="cb5-83"><a href="#cb5-83" tabindex="-1"></a><span class="co">#&gt; 60                                       Haiti        1        1</span></span>
+<span id="cb5-84"><a href="#cb5-84" tabindex="-1"></a><span class="co">#&gt; 61                                    Honduras        1        1</span></span>
+<span id="cb5-85"><a href="#cb5-85" tabindex="-1"></a><span class="co">#&gt; 62                                     Hungary        1        1</span></span>
+<span id="cb5-86"><a href="#cb5-86" tabindex="-1"></a><span class="co">#&gt; 63                                       India        1        1</span></span>
+<span id="cb5-87"><a href="#cb5-87" tabindex="-1"></a><span class="co">#&gt; 64                                   Indonesia        1        1</span></span>
+<span id="cb5-88"><a href="#cb5-88" tabindex="-1"></a><span class="co">#&gt; 65                   Iran, Islamic Republic Of        1        1</span></span>
+<span id="cb5-89"><a href="#cb5-89" tabindex="-1"></a><span class="co">#&gt; 66                                        Iraq        1        1</span></span>
+<span id="cb5-90"><a href="#cb5-90" tabindex="-1"></a><span class="co">#&gt; 67                                     Ireland        1        1</span></span>
+<span id="cb5-91"><a href="#cb5-91" tabindex="-1"></a><span class="co">#&gt; 68                                      Israel        1        1</span></span>
+<span id="cb5-92"><a href="#cb5-92" tabindex="-1"></a><span class="co">#&gt; 69                                       Italy        1        1</span></span>
+<span id="cb5-93"><a href="#cb5-93" tabindex="-1"></a><span class="co">#&gt; 70                                     Jamaica        1        1</span></span>
+<span id="cb5-94"><a href="#cb5-94" tabindex="-1"></a><span class="co">#&gt; 71                                       Japan        1        1</span></span>
+<span id="cb5-95"><a href="#cb5-95" tabindex="-1"></a><span class="co">#&gt; 72                                      Jordan        1        1</span></span>
+<span id="cb5-96"><a href="#cb5-96" tabindex="-1"></a><span class="co">#&gt; 73                                  Kazakhstan        1        1</span></span>
+<span id="cb5-97"><a href="#cb5-97" tabindex="-1"></a><span class="co">#&gt; 74                                       Kenya        1        1</span></span>
+<span id="cb5-98"><a href="#cb5-98" tabindex="-1"></a><span class="co">#&gt; 75      Korea, Democratic People&#39;s Republic Of        1        1</span></span>
+<span id="cb5-99"><a href="#cb5-99" tabindex="-1"></a><span class="co">#&gt; 76                          Korea, Republic Of        1        1</span></span>
+<span id="cb5-100"><a href="#cb5-100" tabindex="-1"></a><span class="co">#&gt; 77                                      Kuwait        1        1</span></span>
+<span id="cb5-101"><a href="#cb5-101" tabindex="-1"></a><span class="co">#&gt; 78                                  Kyrgyzstan        1        1</span></span>
+<span id="cb5-102"><a href="#cb5-102" tabindex="-1"></a><span class="co">#&gt; 79            Lao People&#39;s Democratic Republic        1        1</span></span>
+<span id="cb5-103"><a href="#cb5-103" tabindex="-1"></a><span class="co">#&gt; 80                                      Latvia        1        1</span></span>
+<span id="cb5-104"><a href="#cb5-104" tabindex="-1"></a><span class="co">#&gt; 81                                     Lebanon        1        1</span></span>
+<span id="cb5-105"><a href="#cb5-105" tabindex="-1"></a><span class="co">#&gt; 82                                     Liberia        1        1</span></span>
+<span id="cb5-106"><a href="#cb5-106" tabindex="-1"></a><span class="co">#&gt; 83                      Libyan Arab Jamahiriya        1        1</span></span>
+<span id="cb5-107"><a href="#cb5-107" tabindex="-1"></a><span class="co">#&gt; 84                                   Lithuania        1        1</span></span>
+<span id="cb5-108"><a href="#cb5-108" tabindex="-1"></a><span class="co">#&gt; 85                                  Luxembourg        1        1</span></span>
+<span id="cb5-109"><a href="#cb5-109" tabindex="-1"></a><span class="co">#&gt; 86  Macedonia, The Former Yugoslav Republic Of        1        1</span></span>
+<span id="cb5-110"><a href="#cb5-110" tabindex="-1"></a><span class="co">#&gt; 87                                  Madagascar        1        1</span></span>
+<span id="cb5-111"><a href="#cb5-111" tabindex="-1"></a><span class="co">#&gt; 88                                      Malawi        1        1</span></span>
+<span id="cb5-112"><a href="#cb5-112" tabindex="-1"></a><span class="co">#&gt; 89                                    Malaysia        1        1</span></span>
+<span id="cb5-113"><a href="#cb5-113" tabindex="-1"></a><span class="co">#&gt; 90                                        Mali        1        1</span></span>
+<span id="cb5-114"><a href="#cb5-114" tabindex="-1"></a><span class="co">#&gt; 91                                  Mauritania        1        1</span></span>
+<span id="cb5-115"><a href="#cb5-115" tabindex="-1"></a><span class="co">#&gt; 92                                   Mauritius        1        1</span></span>
+<span id="cb5-116"><a href="#cb5-116" tabindex="-1"></a><span class="co">#&gt; 93                                      Mexico        1        1</span></span>
+<span id="cb5-117"><a href="#cb5-117" tabindex="-1"></a><span class="co">#&gt; 94                        Moldova, Republic Of        1        1</span></span>
+<span id="cb5-118"><a href="#cb5-118" tabindex="-1"></a><span class="co">#&gt; 95                                    Mongolia        1        1</span></span>
+<span id="cb5-119"><a href="#cb5-119" tabindex="-1"></a><span class="co">#&gt; 96                                     Morocco        1        1</span></span>
+<span id="cb5-120"><a href="#cb5-120" tabindex="-1"></a><span class="co">#&gt; 97                                  Mozambique        1        1</span></span>
+<span id="cb5-121"><a href="#cb5-121" tabindex="-1"></a><span class="co">#&gt; 98                                     Myanmar        1        1</span></span>
+<span id="cb5-122"><a href="#cb5-122" tabindex="-1"></a><span class="co">#&gt; 99                                       Nepal        1        1</span></span>
+<span id="cb5-123"><a href="#cb5-123" tabindex="-1"></a><span class="co">#&gt; 100                                Netherlands        1        1</span></span>
+<span id="cb5-124"><a href="#cb5-124" tabindex="-1"></a><span class="co">#&gt; 101                                New Zealand        1        1</span></span>
+<span id="cb5-125"><a href="#cb5-125" tabindex="-1"></a><span class="co">#&gt; 102                                  Nicaragua        1        1</span></span>
+<span id="cb5-126"><a href="#cb5-126" tabindex="-1"></a><span class="co">#&gt; 103                                      Niger        1        1</span></span>
+<span id="cb5-127"><a href="#cb5-127" tabindex="-1"></a><span class="co">#&gt; 104                                    Nigeria        1        1</span></span>
+<span id="cb5-128"><a href="#cb5-128" tabindex="-1"></a><span class="co">#&gt; 105                                     Norway        1        1</span></span>
+<span id="cb5-129"><a href="#cb5-129" tabindex="-1"></a><span class="co">#&gt; 106                                       Oman        1        1</span></span>
+<span id="cb5-130"><a href="#cb5-130" tabindex="-1"></a><span class="co">#&gt; 107                                   Pakistan        1        1</span></span>
+<span id="cb5-131"><a href="#cb5-131" tabindex="-1"></a><span class="co">#&gt; 108                                     Panama        1        1</span></span>
+<span id="cb5-132"><a href="#cb5-132" tabindex="-1"></a><span class="co">#&gt; 109                           Papua New Guinea        1        1</span></span>
+<span id="cb5-133"><a href="#cb5-133" tabindex="-1"></a><span class="co">#&gt; 110                                   Paraguay        1        1</span></span>
+<span id="cb5-134"><a href="#cb5-134" tabindex="-1"></a><span class="co">#&gt; 111                                       Peru        1        1</span></span>
+<span id="cb5-135"><a href="#cb5-135" tabindex="-1"></a><span class="co">#&gt; 112                                Philippines        1        1</span></span>
+<span id="cb5-136"><a href="#cb5-136" tabindex="-1"></a><span class="co">#&gt; 113                                     Poland        1        1</span></span>
+<span id="cb5-137"><a href="#cb5-137" tabindex="-1"></a><span class="co">#&gt; 114                                   Portugal        1        1</span></span>
+<span id="cb5-138"><a href="#cb5-138" tabindex="-1"></a><span class="co">#&gt; 115                                      Qatar        1        1</span></span>
+<span id="cb5-139"><a href="#cb5-139" tabindex="-1"></a><span class="co">#&gt; 116                                    Romania        1        1</span></span>
+<span id="cb5-140"><a href="#cb5-140" tabindex="-1"></a><span class="co">#&gt; 117                         Russian Federation        1        1</span></span>
+<span id="cb5-141"><a href="#cb5-141" tabindex="-1"></a><span class="co">#&gt; 118                                     Rwanda        1        1</span></span>
+<span id="cb5-142"><a href="#cb5-142" tabindex="-1"></a><span class="co">#&gt; 119                               Saudi Arabia        1        1</span></span>
+<span id="cb5-143"><a href="#cb5-143" tabindex="-1"></a><span class="co">#&gt; 120                                    Senegal        1        1</span></span>
+<span id="cb5-144"><a href="#cb5-144" tabindex="-1"></a><span class="co">#&gt; 121                               Sierra Leone        1        1</span></span>
+<span id="cb5-145"><a href="#cb5-145" tabindex="-1"></a><span class="co">#&gt; 122                                  Singapore        1        1</span></span>
+<span id="cb5-146"><a href="#cb5-146" tabindex="-1"></a><span class="co">#&gt; 123                                   Slovakia        1        1</span></span>
+<span id="cb5-147"><a href="#cb5-147" tabindex="-1"></a><span class="co">#&gt; 124                                   Slovenia        1        1</span></span>
+<span id="cb5-148"><a href="#cb5-148" tabindex="-1"></a><span class="co">#&gt; 125                            Solomon Islands        1        1</span></span>
+<span id="cb5-149"><a href="#cb5-149" tabindex="-1"></a><span class="co">#&gt; 126                                    Somalia        1        1</span></span>
+<span id="cb5-150"><a href="#cb5-150" tabindex="-1"></a><span class="co">#&gt; 127                               South Africa        1        1</span></span>
+<span id="cb5-151"><a href="#cb5-151" tabindex="-1"></a><span class="co">#&gt; 128                                      Spain        1        1</span></span>
+<span id="cb5-152"><a href="#cb5-152" tabindex="-1"></a><span class="co">#&gt; 129                                  Sri Lanka        1        1</span></span>
+<span id="cb5-153"><a href="#cb5-153" tabindex="-1"></a><span class="co">#&gt; 130                                      Sudan        1        1</span></span>
+<span id="cb5-154"><a href="#cb5-154" tabindex="-1"></a><span class="co">#&gt; 131                                   Suriname        1        1</span></span>
+<span id="cb5-155"><a href="#cb5-155" tabindex="-1"></a><span class="co">#&gt; 132                                     Sweden        1        1</span></span>
+<span id="cb5-156"><a href="#cb5-156" tabindex="-1"></a><span class="co">#&gt; 133                                Switzerland        1        1</span></span>
+<span id="cb5-157"><a href="#cb5-157" tabindex="-1"></a><span class="co">#&gt; 134                       Syrian Arab Republic        1        1</span></span>
+<span id="cb5-158"><a href="#cb5-158" tabindex="-1"></a><span class="co">#&gt; 135                                 Tajikistan        1        1</span></span>
+<span id="cb5-159"><a href="#cb5-159" tabindex="-1"></a><span class="co">#&gt; 136               Tanzania, United Republic Of        1        1</span></span>
+<span id="cb5-160"><a href="#cb5-160" tabindex="-1"></a><span class="co">#&gt; 137                                   Thailand        1        1</span></span>
+<span id="cb5-161"><a href="#cb5-161" tabindex="-1"></a><span class="co">#&gt; 138                                       Togo        1        1</span></span>
+<span id="cb5-162"><a href="#cb5-162" tabindex="-1"></a><span class="co">#&gt; 139                        Trinidad And Tobago        1        1</span></span>
+<span id="cb5-163"><a href="#cb5-163" tabindex="-1"></a><span class="co">#&gt; 140                                    Tunisia        1        1</span></span>
+<span id="cb5-164"><a href="#cb5-164" tabindex="-1"></a><span class="co">#&gt; 141                               Turkmenistan        1        1</span></span>
+<span id="cb5-165"><a href="#cb5-165" tabindex="-1"></a><span class="co">#&gt; 142                                     Uganda        1        1</span></span>
+<span id="cb5-166"><a href="#cb5-166" tabindex="-1"></a><span class="co">#&gt; 143                                    Ukraine        1        1</span></span>
+<span id="cb5-167"><a href="#cb5-167" tabindex="-1"></a><span class="co">#&gt; 144                       United Arab Emirates        1        1</span></span>
+<span id="cb5-168"><a href="#cb5-168" tabindex="-1"></a><span class="co">#&gt; 145                             United Kingdom        1        1</span></span>
+<span id="cb5-169"><a href="#cb5-169" tabindex="-1"></a><span class="co">#&gt; 146                              United States        1        1</span></span>
+<span id="cb5-170"><a href="#cb5-170" tabindex="-1"></a><span class="co">#&gt; 147                                    Uruguay        1        1</span></span>
+<span id="cb5-171"><a href="#cb5-171" tabindex="-1"></a><span class="co">#&gt; 148                                 Uzbekistan        1        1</span></span>
+<span id="cb5-172"><a href="#cb5-172" tabindex="-1"></a><span class="co">#&gt; 149                                    Vietnam        1        1</span></span>
+<span id="cb5-173"><a href="#cb5-173" tabindex="-1"></a><span class="co">#&gt; 150                                      Yemen        1        1</span></span>
+<span id="cb5-174"><a href="#cb5-174" tabindex="-1"></a><span class="co">#&gt; 151                                     Zambia        1        1</span></span>
+<span id="cb5-175"><a href="#cb5-175" tabindex="-1"></a><span class="co">#&gt; 152                                   Zimbabwe        1        1</span></span></code></pre></div>
+<p>The <code>_netify</code> suffix on <code>is_bipartite_netify()</code>
+and <code>is_directed_netify()</code> avoids masking the same-named
+predicates from <code>igraph</code> and <code>network</code>. The
+unsuffixed versions exist too and defer to the foreign package if a
+non-netify graph object is passed.</p>
+</div>
+<div id="object-level-validation" class="section level2">
+<h2>Object-level validation</h2>
+<p><code>validate_netify()</code> is the developer’s pre-flight check.
+It walks the attribute bundle and confirms the invariants the rest of
+the package relies on:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">validate_netify</span>(net, <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; ✔ netify object passes all coherence checks (11 checks).</span></span></code></pre></div>
+<p>The full list of checks:</p>
+<ul>
+<li><code>netify_type</code> — one of <code>&quot;cross_sec&quot;</code>,
+<code>&quot;longit_array&quot;</code>, <code>&quot;longit_list&quot;</code>, and matches the
+underlying R object</li>
+<li><code>mode</code> — <code>&quot;unipartite&quot;</code> or
+<code>&quot;bipartite&quot;</code></li>
+<li><code>symmetric_type</code> — scalar logical, or named logical of
+length <code>n_layers</code> for mixed-directedness multilayer</li>
+<li><code>layers_consistent</code> — <code>attr(net, &quot;layers&quot;)</code>
+length matches the layer dimension where applicable</li>
+<li><code>nodal_actors_known</code> — every actor referenced in
+<code>nodal_data</code> exists in the network’s actor set</li>
+<li><code>is_binary_consistent</code> — the stored
+<code>is_binary</code> flag matches the actual content</li>
+<li><code>symmetric_consistent</code> — if stored as symmetric, the
+matrix content is actually symmetric</li>
+<li><code>unipartite_dimnames</code> — row and column names agree for
+unipartite networks</li>
+<li><code>slice_dimnames_consistent</code> — every slice of a
+longitudinal array/list has dimnames in the order recorded in
+<code>actor_pds</code></li>
+<li><code>nodal_time_known</code> — time keys in nodal/dyad data are a
+subset of the network’s time axis</li>
+</ul>
+<p>A quick demo on a clean netlet versus one tampered to introduce a
+stray actor:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># clean netlet ticks every box</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">all</span>(<span class="fu">unlist</span>(<span class="fu">validate_netify</span>(net, <span class="at">verbose =</span> <span class="cn">FALSE</span>)))</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># tamper: inject a stray actor into nodal_data</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>bad <span class="ot">&lt;-</span> net</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">attr</span>(bad, <span class="st">&quot;nodal_data&quot;</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">rbind</span>(nd, nd[<span class="dv">1</span>, , <span class="at">drop =</span> <span class="cn">FALSE</span>])</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>nd<span class="sc">$</span>actor[<span class="fu">nrow</span>(nd)] <span class="ot">&lt;-</span> <span class="st">&quot;ZZZ_not_in_network&quot;</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="fu">attr</span>(bad, <span class="st">&quot;nodal_data&quot;</span>) <span class="ot">&lt;-</span> nd</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="fu">validate_netify</span>(bad, <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; ! nodal_data references 1 actor not in the netlet: &quot;ZZZ_not_in_network&quot;</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; ✖ netify object failed 1 coherence check: &quot;nodal_actors_known&quot;.</span></span></code></pre></div>
+<p>If a custom exporter or an internal manipulation breaks one of these,
+<code>validate_netify()</code> is the first place to look.</p>
+</div>
+<div id="open-cohort-panels-with-actor_pds" class="section level2">
+<h2>Open-cohort panels with <code>actor_pds</code></h2>
+<p>When the actor roster changes over time — entries, exits, attrition,
+contact-tracing windows — pass <code>actor_time_uniform = FALSE</code>
+and supply an <code>actor_pds</code> data.frame giving each actor’s
+<code>[min_time, max_time]</code> window. Each period’s netlet then
+contains only the actors whose window covers that period; densities,
+degree counts, and per-period actor sets respect those entry / exit
+boundaries.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># roster: actors with entry / exit times</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>roster <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>    <span class="at">actor =</span> <span class="fu">c</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>, <span class="st">&quot;c&quot;</span>, <span class="st">&quot;d&quot;</span>, <span class="st">&quot;e&quot;</span>),</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>    <span class="at">min_time =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>),</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>    <span class="at">max_time =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">5</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co"># edges (only show up while both endpoints are in the roster)</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>edges <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>    <span class="at">i =</span> <span class="fu">c</span>(<span class="st">&quot;a&quot;</span>, <span class="st">&quot;a&quot;</span>, <span class="st">&quot;b&quot;</span>, <span class="st">&quot;c&quot;</span>, <span class="st">&quot;d&quot;</span>, <span class="st">&quot;e&quot;</span>, <span class="st">&quot;d&quot;</span>, <span class="st">&quot;e&quot;</span>),</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>    <span class="at">j =</span> <span class="fu">c</span>(<span class="st">&quot;b&quot;</span>, <span class="st">&quot;c&quot;</span>, <span class="st">&quot;c&quot;</span>, <span class="st">&quot;d&quot;</span>, <span class="st">&quot;e&quot;</span>, <span class="st">&quot;a&quot;</span>, <span class="st">&quot;e&quot;</span>, <span class="st">&quot;d&quot;</span>),</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>    <span class="at">t =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">5</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>)</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>net_oc <span class="ot">&lt;-</span> <span class="fu">netify</span>(edges,</span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>    <span class="at">actor1 =</span> <span class="st">&quot;i&quot;</span>, <span class="at">actor2 =</span> <span class="st">&quot;j&quot;</span>, <span class="at">time =</span> <span class="st">&quot;t&quot;</span>,</span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>    <span class="at">actor_time_uniform =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>    <span class="at">actor_pds =</span> roster</span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>)</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="fu">get_actor_time_info</span>(net_oc)</span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt;   actor min_time max_time</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt; 1     a        1        3</span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co">#&gt; 2     b        1        4</span></span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a><span class="co">#&gt; 3     c        2        4</span></span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a><span class="co">#&gt; 4     d        3        5</span></span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a><span class="co">#&gt; 5     e        3        5</span></span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="fu">n_actors</span>(net_oc)</span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="co">#&gt; [1] 5</span></span>
+<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a><span class="fu">n_periods</span>(net_oc)</span>
+<span id="cb8-33"><a href="#cb8-33" tabindex="-1"></a><span class="co">#&gt; [1] 5</span></span></code></pre></div>
+<p>This is the standard path for open-cohort longitudinal data — panel
+surveys with attrition, contact-tracing chains, organizational
+membership over time, animal co-occurrence with births / deaths, and
+similar settings where treating every actor as present in every period
+would distort denominators.</p>
+<p>The key correctness guarantee: density (and every other per-period
+statistic) is computed against the actor set <em>alive in that
+period</em>, not the union of all actors ever observed. A quick walk
+through the roster above makes this concrete — actors <code>d</code> and
+<code>e</code> enter at <code>t = 3</code>, so periods 1 and 2 should
+use smaller denominators than period 5:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>oc_summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(net_oc)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>oc_summary[, <span class="fu">c</span>(<span class="st">&quot;net&quot;</span>, <span class="st">&quot;num_actors&quot;</span>, <span class="st">&quot;density&quot;</span>, <span class="st">&quot;num_edges&quot;</span>)]</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt;   net num_actors   density num_edges</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; 1   1          2 1.0000000         2</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; 2   2          3 0.6666667         4</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; 3   3          5 0.2000000         4</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; 4   4          4 0.1666667         2</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; 5   5          2 1.0000000         2</span></span></code></pre></div>
+<p><code>num_actors</code> shifts period by period (only <code>a</code>
+and <code>b</code> are alive at <code>t = 1</code>, the whole roster
+except <code>a</code> is alive at <code>t = 5</code>), and
+<code>density = num_edges / (num_actors * (num_actors - 1))</code> is
+computed against that period-local denominator. The same accounting
+flows into <code>summary_actor()</code>, <code>homophily()</code>,
+<code>mixing_matrix()</code>, and the plot helpers — open-cohort actors
+never show up as zero-degree placeholders in periods they did not
+exist.</p>
+</div>
+<div id="na-versus-zero-in-weighted-networks" class="section level2">
+<h2>NA versus zero in weighted networks</h2>
+<p>For weighted data, the distinction between <code>0</code> (observed,
+but no edge / zero-valued interaction) and <code>NA</code> (unobserved /
+not-at-risk) is semantically important in many domains — epidemiology,
+animal behavior, sparse survey rosters. By default
+<code>netify(missing_to_zero = TRUE)</code> fills unobserved dyads with
+<code>0</code>. Pass <code>missing_to_zero = FALSE</code> to keep them
+as <code>NA</code>, in which case
+<code>summary()$prop_edges_missing</code> reports the non-trivial
+missingness fraction and downstream centrality / homophily routines
+propagate the NA semantics rather than silently treating the dyad as a
+zero-weight tie.</p>
+</div>
+<div id="writing-a-custom-graph-level-statistic" class="section level2">
+<h2>Writing a custom graph-level statistic</h2>
+<p><code>summary(net, other_stats = list(my_stat = fn))</code> accepts
+user-supplied functions. Each function receives the <strong>netify
+object</strong> for the current time period / layer (not a stripped
+matrix), so you can call <code>netify_to_igraph()</code>,
+<code>peek()</code>, or whatever you want inside.</p>
+<p>Return a <strong>named numeric vector</strong> — names become column
+names in the output frame.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Example: number of weakly connected components with at least 2 nodes</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>n_components_2plus <span class="ot">&lt;-</span> <span class="cf">function</span>(net) {</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  g <span class="ot">&lt;-</span> <span class="fu">netify_to_igraph</span>(net)</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">n_components_2plus =</span> <span class="fu">sum</span>(igraph<span class="sc">::</span><span class="fu">components</span>(g)<span class="sc">$</span>csize <span class="sc">&gt;=</span> <span class="dv">2</span>))</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>}</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co"># Example: edge weight skewness</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>weight_skew <span class="ot">&lt;-</span> <span class="cf">function</span>(net) {</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>  v <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(net)</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  v <span class="ot">&lt;-</span> v[<span class="sc">!</span><span class="fu">is.na</span>(v) <span class="sc">&amp;</span> v <span class="sc">!=</span> <span class="dv">0</span>]</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(v) <span class="sc">&lt;</span> <span class="dv">3</span>) <span class="fu">return</span>(<span class="fu">c</span>(<span class="at">weight_skew =</span> <span class="cn">NA_real_</span>))</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">weight_skew =</span> <span class="fu">mean</span>((v <span class="sc">-</span> <span class="fu">mean</span>(v))<span class="sc">^</span><span class="dv">3</span>) <span class="sc">/</span> (stats<span class="sc">::</span><span class="fu">sd</span>(v)<span class="sc">^</span><span class="dv">3</span>))</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>}</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="fu">summary</span>(net, <span class="at">other_stats =</span> <span class="fu">list</span>(</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>  <span class="at">comp =</span> n_components_2plus,</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>  <span class="at">skew =</span> weight_skew</span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a>))</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt;   num_actors   density num_edges prop_edges_missing prop_unknown_edges</span></span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="co">#&gt; 1        152 0.4346462      9976                  0                  0</span></span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a><span class="co">#&gt;   mean_edge_weight sd_edge_weight median_edge_weight min_edge_weight</span></span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="co">#&gt; 1         18.13393        132.367                  0               0</span></span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="co">#&gt;   max_edge_weight competition_row competition_col sd_of_row_means</span></span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="co">#&gt; 1            4937      0.04071163      0.03493156         41.4412</span></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="co">#&gt;   sd_of_col_means covar_of_row_col_means reciprocity    mutual transitivity</span></span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a><span class="co">#&gt; 1        37.76971              0.9934913   0.9823385 0.8402509    0.6386063</span></span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a><span class="co">#&gt;   comp.n_components_2plus skew.weight_skew</span></span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a><span class="co">#&gt; 1                       1         13.76129</span></span></code></pre></div>
+<p>The same <code>other_stats</code> mechanism is available in
+<code>summary_actor()</code>, <code>compare_networks()</code>,
+<code>homophily()</code>, <code>mixing_matrix()</code>, and
+<code>dyad_correlation()</code>. In each case the function gets called
+once per time period / layer / iteration as appropriate; check the
+function’s <code>?</code> for the exact contract.</p>
+</div>
+<div id="writing-a-custom-actor-level-statistic" class="section level2">
+<h2>Writing a custom actor-level statistic</h2>
+<p><code>summary_actor(net, other_stats = list(my_stat = fn))</code>.
+The function should return a vector with one value per actor (in row
+order):</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Example: per-actor mean tie weight to non-isolates</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>mean_active_tie <span class="ot">&lt;-</span> <span class="cf">function</span>(mat) {</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="fu">apply</span>(mat, <span class="dv">1</span>, <span class="cf">function</span>(row) {</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>    nonzero <span class="ot">&lt;-</span> row[<span class="sc">!</span><span class="fu">is.na</span>(row) <span class="sc">&amp;</span> row <span class="sc">!=</span> <span class="dv">0</span>]</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(nonzero) <span class="sc">==</span> <span class="dv">0</span>) <span class="cn">NA_real_</span> <span class="cf">else</span> <span class="fu">mean</span>(nonzero)</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  })</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>}</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">summary_actor</span>(net, <span class="at">other_stats =</span> <span class="fu">list</span>(<span class="at">mean_active =</span> mean_active_tie)))</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt;         actor degree_in degree_out degree_total prop_ties_in prop_ties_out</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; 1 Afghanistan        95         80          175    0.6250000     0.5263158</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt; 2     Albania        53         51          104    0.3486842     0.3355263</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt; 3     Algeria        78         94          172    0.5131579     0.6184211</span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt; 4      Angola        68         61          129    0.4473684     0.4013158</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; 5   Argentina        64         66          130    0.4210526     0.4342105</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt; 6     Armenia        56         56          112    0.3684211     0.3684211</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt;   prop_ties_total network_share_in network_share_out network_share_total</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt; 1               1      0.025958050       0.021073497         0.023515773</span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt; 2               1      0.001170082       0.001158069         0.001164076</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="co">#&gt; 3               1      0.002919199       0.003056150         0.002987674</span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#&gt; 4               1      0.002349775       0.002011004         0.002180390</span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="co">#&gt; 5               1      0.003925903       0.004175777         0.004050840</span></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="co">#&gt; 6               1      0.004995075       0.004862930         0.004929002</span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt;   closeness_in closeness_out closeness_all betweenness authority_score</span></span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="co">#&gt; 1     75.02924      77.65736      84.88753 0.000000000     0.470595036</span></span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="co">#&gt; 2     27.33008      34.93426      36.10978 0.000000000     0.006988585</span></span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a><span class="co">#&gt; 3     54.67594      56.74705      60.24392 0.012935982     0.022841447</span></span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="co">#&gt; 4     46.69231      44.39330      50.34317 0.013024283     0.016299497</span></span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="co">#&gt; 5     52.91716      55.58606      58.96712 0.006534216     0.033471704</span></span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a><span class="co">#&gt; 6     67.60190      70.05650      75.55675 0.000000000     0.064875541</span></span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a><span class="co">#&gt;     hub_score strength_sum_in strength_sum_out strength_sum_total</span></span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a><span class="co">#&gt; 1 0.233837051           10804             8771              19575</span></span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a><span class="co">#&gt; 2 0.005265195             487              482                969</span></span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a><span class="co">#&gt; 3 0.014840880            1215             1272               2487</span></span>
+<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a><span class="co">#&gt; 4 0.009186279             978              837               1815</span></span>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a><span class="co">#&gt; 5 0.023840418            1634             1738               3372</span></span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a><span class="co">#&gt; 6 0.039673958            2079             2024               4103</span></span>
+<span id="cb11-38"><a href="#cb11-38" tabindex="-1"></a><span class="co">#&gt;   strength_avg_in strength_avg_out strength_avg_total strength_std_in</span></span>
+<span id="cb11-39"><a href="#cb11-39" tabindex="-1"></a><span class="co">#&gt; 1       71.549669        58.086093          64.817881      350.116660</span></span>
+<span id="cb11-40"><a href="#cb11-40" tabindex="-1"></a><span class="co">#&gt; 2        3.225166         3.192053           3.208609        7.694303</span></span>
+<span id="cb11-41"><a href="#cb11-41" tabindex="-1"></a><span class="co">#&gt; 3        8.046358         8.423841           8.235099       22.421221</span></span>
+<span id="cb11-42"><a href="#cb11-42" tabindex="-1"></a><span class="co">#&gt; 4        6.476821         5.543046           6.009934       16.701231</span></span>
+<span id="cb11-43"><a href="#cb11-43" tabindex="-1"></a><span class="co">#&gt; 5       10.821192        11.509934          11.165563       31.414452</span></span>
+<span id="cb11-44"><a href="#cb11-44" tabindex="-1"></a><span class="co">#&gt; 6       13.768212        13.403974          13.586093       65.122392</span></span>
+<span id="cb11-45"><a href="#cb11-45" tabindex="-1"></a><span class="co">#&gt;   strength_std_out strength_std_total strength_median_in strength_median_out</span></span>
+<span id="cb11-46"><a href="#cb11-46" tabindex="-1"></a><span class="co">#&gt; 1        285.28528         317.700972                  2                   1</span></span>
+<span id="cb11-47"><a href="#cb11-47" tabindex="-1"></a><span class="co">#&gt; 2          8.35122           8.022761                  0                   0</span></span>
+<span id="cb11-48"><a href="#cb11-48" tabindex="-1"></a><span class="co">#&gt; 3         21.96283          22.192025                  1                   1</span></span>
+<span id="cb11-49"><a href="#cb11-49" tabindex="-1"></a><span class="co">#&gt; 4         14.70543          15.703333                  0                   0</span></span>
+<span id="cb11-50"><a href="#cb11-50" tabindex="-1"></a><span class="co">#&gt; 5         32.11954          31.766997                  0                   0</span></span>
+<span id="cb11-51"><a href="#cb11-51" tabindex="-1"></a><span class="co">#&gt; 6         63.81538          64.468885                  0                   0</span></span>
+<span id="cb11-52"><a href="#cb11-52" tabindex="-1"></a><span class="co">#&gt;   strength_median_total mean_active</span></span>
+<span id="cb11-53"><a href="#cb11-53" tabindex="-1"></a><span class="co">#&gt; 1                   1.5   109.63750</span></span>
+<span id="cb11-54"><a href="#cb11-54" tabindex="-1"></a><span class="co">#&gt; 2                   0.0     9.45098</span></span>
+<span id="cb11-55"><a href="#cb11-55" tabindex="-1"></a><span class="co">#&gt; 3                   1.0    13.53191</span></span>
+<span id="cb11-56"><a href="#cb11-56" tabindex="-1"></a><span class="co">#&gt; 4                   0.0    13.72131</span></span>
+<span id="cb11-57"><a href="#cb11-57" tabindex="-1"></a><span class="co">#&gt; 5                   0.0    26.33333</span></span>
+<span id="cb11-58"><a href="#cb11-58" tabindex="-1"></a><span class="co">#&gt; 6                   0.0    36.14286</span></span></code></pre></div>
+</div>
+<div id="reading-the-dyad_data-nested-list" class="section level2">
+<h2>Reading the dyad_data nested list</h2>
+<p><code>attr(net, &quot;dyad_data&quot;)</code> is the structure that gives
+netify O(1) access to per-time dyadic covariates. Its shape is:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>dd <span class="ot">&lt;-</span> <span class="fu">attr</span>(net, <span class="st">&quot;dyad_data&quot;</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">names</span>(dd)             <span class="co"># cross-sec: just &quot;1&quot;</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; [1] &quot;1&quot;</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="fu">names</span>(dd[[<span class="st">&quot;1&quot;</span>]])      <span class="co"># one entry per dyadic variable</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; [1] &quot;matlCoop&quot;</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="fu">str</span>(dd[[<span class="st">&quot;1&quot;</span>]][[<span class="st">&quot;matlCoop&quot;</span>]])</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt;  int [1:152, 1:152] 0 4 0 0 0 2 19 0 1 0 ...</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt;  - attr(*, &quot;dimnames&quot;)=List of 2</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt;   ..$ : chr [1:152] &quot;Afghanistan&quot; &quot;Albania&quot; &quot;Algeria&quot; &quot;Angola&quot; ...</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt;   ..$ : chr [1:152] &quot;Afghanistan&quot; &quot;Albania&quot; &quot;Algeria&quot; &quot;Angola&quot; ...</span></span></code></pre></div>
+<p>For longitudinal networks the top level has one entry per period:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># pseudo-structure for a 3-period network with 2 dyadic vars:</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co"># dd[[&quot;2010&quot;]][[&quot;matlCoop&quot;]]   -&gt; n×n matrix</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co"># dd[[&quot;2010&quot;]][[&quot;verbConf&quot;]]   -&gt; n×n matrix</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co"># dd[[&quot;2011&quot;]][[&quot;matlCoop&quot;]]   -&gt; n×n matrix</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co"># ... etc.</span></span></code></pre></div>
+<p>If you’re writing a converter (e.g., to a new modeling format), this
+is the structure to iterate over.</p>
+</div>
+<div id="writing-a-custom-exporter-to_-function" class="section level2">
+<h2>Writing a custom exporter (<code>to_*</code> function)</h2>
+<p>The existing <code>to_amen()</code>, <code>to_lame()</code>,
+<code>to_dbn()</code>, <code>to_igraph()</code>,
+<code>to_statnet()</code> give you templates. (<code>to_lame()</code> is
+the modern AME / latent-factor handoff and emits a snippet of executable
+code under the binding <code>nl</code>; <code>to_amen()</code> is the
+historical alias and now redirects to <code>to_lame()</code>.) A new
+exporter generally needs to:</p>
+<ol style="list-style-type: decimal">
+<li>Validate the netify object with
+<code>netify_check(netlet)</code></li>
+<li>Branch on <code>attr(netlet, &quot;netify_type&quot;)</code> (cross_sec /
+longit_array / longit_list)</li>
+<li>For multilayer, decide whether to iterate per layer (use
+<code>subset_netify(netlet, layers = X)</code> and return a named list)
+or to produce a joint structure (4D array, etc.)</li>
+<li>Pull the raw network data with <code>get_raw(netlet)</code></li>
+<li>Pull nodal data with <code>attr(netlet, &quot;nodal_data&quot;)</code> and
+align to your target package’s actor order</li>
+<li>Pull dyadic data with <code>attr(netlet, &quot;dyad_data&quot;)</code> and
+reshape to your target format</li>
+<li>Handle missing values according to your target package’s convention
+(most don’t accept NAs)</li>
+</ol>
+<p>If your target package expects per-layer outputs but takes multilayer
+netify inputs, the standard pattern is:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>to_mymodel <span class="ot">&lt;-</span> <span class="cf">function</span>(netlet, ...) {</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>    <span class="fu">netify_check</span>(netlet)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>    layer_names <span class="ot">&lt;-</span> <span class="fu">attributes</span>(netlet)<span class="sc">$</span>layers</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(layer_names) <span class="sc">&gt;</span> <span class="dv">1</span>) {</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>        out <span class="ot">&lt;-</span> <span class="fu">lapply</span>(layer_names, <span class="cf">function</span>(lyr) {</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>            <span class="fu">to_mymodel</span>(<span class="fu">subset_netify</span>(netlet, <span class="at">layers =</span> lyr), ...)</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>        })</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>        <span class="fu">names</span>(out) <span class="ot">&lt;-</span> layer_names</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>        <span class="fu">return</span>(out)</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>    }</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>    <span class="co"># ... single-layer logic ...</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>}</span></code></pre></div>
+<p>This is what <code>to_igraph()</code>, <code>to_statnet()</code>, and
+<code>to_lame()</code> do.</p>
+</div>
+<div id="performance-characteristics" class="section level2">
+<h2>Performance characteristics</h2>
+<table>
+<colgroup>
+<col width="37%" />
+<col width="37%" />
+<col width="24%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>Complexity</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>netify(df)</code> cross-sec</td>
+<td>O(N × E)</td>
+<td>C++ via Rcpp; fast</td>
+</tr>
+<tr class="even">
+<td><code>netify(df, time = ...)</code> longit</td>
+<td>O(N × E × T)</td>
+<td>C++; fast</td>
+</tr>
+<tr class="odd">
+<td><code>summary(net)</code></td>
+<td>O(N²) per period</td>
+<td>igraph backend</td>
+</tr>
+<tr class="even">
+<td><code>summary_actor(net)</code></td>
+<td>O(N²) per period × per layer</td>
+<td>igraph; closeness/betweenness dominate</td>
+</tr>
+<tr class="odd">
+<td><code>summary_actor(net, bootstrap = TRUE)</code></td>
+<td>O(B × n × N²)</td>
+<td>linear in <code>n_boot</code>; defaults to 200</td>
+</tr>
+<tr class="even">
+<td><code>compare_networks(method = &quot;qap&quot;)</code></td>
+<td>O(R × N²)</td>
+<td>C++ permutations; tunable via <code>n_permutations</code></td>
+</tr>
+<tr class="odd">
+<td><code>compare_networks(method = &quot;spectral&quot;)</code></td>
+<td>O(N³)</td>
+<td>use <code>spectral_rank = round(sqrt(N))</code> for large nets</td>
+</tr>
+<tr class="even">
+<td><code>unnetify(net)</code></td>
+<td>O(N² × T)</td>
+<td>use <code>remove_zeros = TRUE</code> for sparse output</td>
+</tr>
+<tr class="odd">
+<td><code>melt(net)</code></td>
+<td>O(N² × T)</td>
+<td>leaner than <code>unnetify</code>; no nodal merge</td>
+</tr>
+<tr class="even">
+<td><code>plot(net)</code></td>
+<td>O(N²) layout + O(E) render</td>
+<td>igraph layout dominates</td>
+</tr>
+</tbody>
+</table>
+<p>For networks of a few hundred actors over a dozen time periods,
+everything runs in seconds. The C++ routines for <code>netify()</code>,
+<code>compare_networks()</code> QAP, and similarity calculations handle
+the heaviest paths. The R-side wrappers (especially in plotting and
+attribute handling) are not as optimized.</p>
+<p><strong>Memory budget rule of thumb.</strong> netify stores
+adjacencies densely: an N × N double-precision matrix is 8·N² bytes. For
+longitudinal stacks the cost is 8·N²·T (<code>longit_array</code>) or
+the sum over per-period sizes (<code>longit_list</code>, when actor
+composition varies). Concretely:</p>
+<table>
+<thead>
+<tr class="header">
+<th>N</th>
+<th>per-snapshot RAM</th>
+<th>T = 12 (monthly year)</th>
+<th>T = 52 (weekly year)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>200</td>
+<td>320 KB</td>
+<td>3.8 MB</td>
+<td>17 MB</td>
+</tr>
+<tr class="even">
+<td>1,000</td>
+<td>8 MB</td>
+<td>96 MB</td>
+<td>416 MB</td>
+</tr>
+<tr class="odd">
+<td>5,000</td>
+<td>200 MB</td>
+<td>2.4 GB</td>
+<td>10 GB</td>
+</tr>
+<tr class="even">
+<td>10,000</td>
+<td>800 MB</td>
+<td>9.4 GB</td>
+<td>41 GB</td>
+</tr>
+<tr class="odd">
+<td>50,000</td>
+<td>20 GB</td>
+<td>234 GB</td>
+<td>1 TB</td>
+</tr>
+</tbody>
+</table>
+<p><code>longit_list</code> netlets cost the <em>sum</em> of per-period
+sizes rather than <code>T × max(N)²</code>, so they pay less when actor
+composition is sparse over time. For 15,000-node weekly Twitter
+snapshots over a year (<code>T = 52</code>), a <code>longit_array</code>
+is ~93 GB and would not fit on a laptop; a <code>longit_list</code>
+whose typical-period N is much smaller is the only viable in-memory
+shape.</p>
+<p>Above ~10,000 actors, prefer building the netlet from an edgelist
+data.frame (skips the dense intermediate at construction) and consider
+exiting to a sparse representation via
+<code>unnetify(net, as = &quot;sparseMatrix&quot;)</code>, or to
+<code>igraph</code> via <code>to_igraph(net)</code> for community
+detection and other large-N algorithms.
+<code>summary_actor(stats = &quot;fast&quot;)</code> skips closeness / betweenness
+/ eigen / HITS and auto-promotes when N exceeds
+<code>getOption(&quot;netify.fast_threshold&quot;, 1500L)</code>.</p>
+<p><strong>Sparse-input guard.</strong> Passing a
+<code>Matrix::dgCMatrix</code> (or any <code>sparseMatrix</code>) with
+density &lt; 1% and N &gt; 5,000 aborts construction with a pointer to
+the edgelist path. The motivating case is a 15K × 15K follower graph at
+density 0.001: densifying allocates ~1.7 GB of mostly zeros, which is
+almost never what the caller wants. Pass <code>force_dense = TRUE</code>
+to override if you really do want the dense allocation.</p>
+<p><strong>Benchmark, three ER networks.</strong> Wall-clock for the
+dense-matrix path on a representative laptop (single core, single
+snapshot, p = 0.01). Re-run locally with the chunk below if you want
+numbers for your own machine.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">library</span>(netify)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>bench_one <span class="ot">&lt;-</span> <span class="cf">function</span>(N, <span class="at">p =</span> <span class="fl">0.01</span>) {</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>  <span class="co"># build an ER adjacency directly as an edgelist (skips the dense intermediate)</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>  i <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(N, <span class="at">size =</span> <span class="fu">round</span>(p <span class="sc">*</span> N <span class="sc">*</span> N), <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>  j <span class="ot">&lt;-</span> <span class="fu">sample.int</span>(N, <span class="at">size =</span> <span class="fu">length</span>(i), <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">from =</span> i, <span class="at">to =</span> j)</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>  t0 <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>(); net <span class="ot">&lt;-</span> <span class="fu">netify</span>(df, <span class="at">actor1 =</span> <span class="st">&quot;from&quot;</span>, <span class="at">actor2 =</span> <span class="st">&quot;to&quot;</span>); t_build <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>() <span class="sc">-</span> t0</span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>  t0 <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>(); s   <span class="ot">&lt;-</span> <span class="fu">summary</span>(net);                                 t_summary <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>() <span class="sc">-</span> t0</span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>  t0 <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>(); sa  <span class="ot">&lt;-</span> <span class="fu">summary_actor</span>(net, <span class="at">stats =</span> <span class="st">&quot;fast&quot;</span>);           t_actor_fast <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>() <span class="sc">-</span> t0</span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>  t0 <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>(); ig  <span class="ot">&lt;-</span> <span class="fu">to_igraph</span>(net);                               t_igraph <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>() <span class="sc">-</span> t0</span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">N =</span> N,</span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>             <span class="at">build_s =</span> <span class="fu">as.numeric</span>(t_build, <span class="at">units =</span> <span class="st">&quot;secs&quot;</span>),</span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>             <span class="at">summary_s =</span> <span class="fu">as.numeric</span>(t_summary, <span class="at">units =</span> <span class="st">&quot;secs&quot;</span>),</span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a>             <span class="at">summary_actor_fast_s =</span> <span class="fu">as.numeric</span>(t_actor_fast, <span class="at">units =</span> <span class="st">&quot;secs&quot;</span>),</span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a>             <span class="at">to_igraph_s =</span> <span class="fu">as.numeric</span>(t_igraph, <span class="at">units =</span> <span class="st">&quot;secs&quot;</span>))</span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a>}</span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="dv">1000</span>, <span class="dv">5000</span>, <span class="dv">10000</span>), bench_one))</span></code></pre></div>
+<p>Indicative results (single-core, 16 GB laptop):</p>
+<table>
+<colgroup>
+<col width="9%" />
+<col width="14%" />
+<col width="16%" />
+<col width="40%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>N</th>
+<th><code>netify()</code></th>
+<th><code>summary()</code></th>
+<th><code>summary_actor(stats = &quot;fast&quot;)</code></th>
+<th><code>to_igraph()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1,000</td>
+<td>&lt; 1 s</td>
+<td>&lt; 1 s</td>
+<td>&lt; 1 s</td>
+<td>&lt; 1 s</td>
+</tr>
+<tr class="even">
+<td>5,000</td>
+<td>~2 s</td>
+<td>~3 s</td>
+<td>~1 s</td>
+<td>~2 s</td>
+</tr>
+<tr class="odd">
+<td>10,000</td>
+<td>~9 s</td>
+<td>~13 s</td>
+<td>~3 s</td>
+<td>~7 s</td>
+</tr>
+</tbody>
+</table>
+<p>The full <code>summary_actor()</code> (with
+closeness/betweenness/eigen/HITS) blows up roughly quadratically — at N
+= 10,000 it takes several minutes versus the few seconds shown above for
+the fast path. That’s why the auto-promote fires by default.</p>
+</div>
+<div id="see-also" class="section level2">
+<h2>See also</h2>
+<ul>
+<li><code>vignette(&quot;foundations_lite&quot;, package = &quot;netify&quot;)</code> —
+minimal end-to-end tour</li>
+<li><code>vignette(&quot;foundations&quot;, package = &quot;netify&quot;)</code> — full IR
+walkthrough</li>
+<li><code>vignette(&quot;pipeline_lame_dbn&quot;, package = &quot;netify&quot;)</code> —
+modeling handoff to amen / lame / dbn</li>
+<li><code>vignette(&quot;pipeline_netify_ergm&quot;, package = &quot;netify&quot;)</code> —
+modeling handoff to ergm / statnet</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

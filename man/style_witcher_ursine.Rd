@@ -13,3 +13,6 @@ List of plot arguments
 A network style inspired by the Bear School armor from The Witcher 3.
 Heavy, tank-like armor - translates to bold, substantial visuals.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

@@ -20,3 +20,6 @@ A ggplot object with the label layer added
 S3 method to add netify_label objects to ggplot objects. This method is called
 automatically when using the + operator with a netify_label object.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

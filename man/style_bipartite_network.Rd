@@ -13,3 +13,6 @@ List of plot arguments
 A complete visual style optimized for displaying bipartite networks
 with two distinct node sets
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

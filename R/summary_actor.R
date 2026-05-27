@@ -11,6 +11,13 @@
 #' @param other_stats Optional named list of custom functions to calculate additional
 #'   actor-level statistics. Each function should accept a matrix and return a
 #'   vector with one value per actor.
+#' @param stats One of `"all"` (default) or `"fast"`. The `"fast"` path
+#'   returns only degree- and strength-style columns and skips closeness,
+#'   betweenness, eigenvector, and HITS. When the user does not pass
+#'   `stats` explicitly, the default auto-promotes to `"fast"` once the
+#'   number of actors reaches
+#'   `getOption("netify.fast_threshold", 1500L)`; passing
+#'   `stats = "all"` explicitly always honors that request.
 #'
 #' @return A data frame with actor-level statistics. Columns always include:
 #'   \describe{
@@ -161,13 +168,41 @@
 #' @export summary_actor
 #'
 
-summary_actor <- function(netlet, invert_weights_for_igraph = TRUE, other_stats = NULL) {
+summary_actor <- function(netlet, invert_weights_for_igraph = TRUE,
+	other_stats = NULL, stats = c("all", "fast")) {
 	####
 	# check if netify object
 	netify_check(netlet)
 
+	# track whether caller supplied stats= explicitly
+	user_set_stats <- !missing(stats)
+
+	# "fast" skips closeness / betweenness / eigen / HITS
+	stats <- match.arg(stats)
+
 	# pull out attrs
 	obj_attrs <- attributes(netlet)
+
+	# auto-promote to fast at large N unless user set stats= explicitly
+	fast_threshold <- as.integer(getOption("netify.fast_threshold", 1500L))
+	n_actors_probe <- if (obj_attrs$netify_type == "longit_list") {
+		nrow(netlet[[1]])
+	} else if (obj_attrs$netify_type == "longit_array") {
+		dim(netlet)[1]
+	} else {
+		nrow(netlet)
+	}
+	if (!user_set_stats && stats == "all" && is.finite(n_actors_probe) &&
+		n_actors_probe >= fast_threshold) {
+		cli::cli_inform(
+			c("i" = "Auto-promoting to {.code stats = \"fast\"} at N = {n_actors_probe} (>= {.code getOption(\"netify.fast_threshold\", 1500L)}).",
+			  "*" = "Set {.code stats = \"all\"} explicitly to force centralities, or raise the threshold via {.code options(netify.fast_threshold = ...)}."),
+			.frequency = "once",
+			.frequency_id = "summary_actor_auto_fast"
+		)
+		stats <- "fast"
+	}
+	is_fast <- stats == "fast"
 
 	# pull out number of layers
 	layers <- obj_attrs$layers
@@ -223,7 +258,8 @@ summary_actor <- function(netlet, invert_weights_for_igraph = TRUE, other_stats 
 			actor_stats_for_netlet(
 				mat, obj_attrs,
 				invert_weights_for_igraph = invert_weights_for_igraph,
-				other_stats = other_stats
+				other_stats = other_stats,
+				fast = is_fast
 			)
 		})
 		####
@@ -245,8 +281,7 @@ summary_actor <- function(netlet, invert_weights_for_igraph = TRUE, other_stats 
 	####
 
 	####
-	# bind into one data frame - use rbind.fill logic for mixed columns
-	# (e.g., when layers have different directedness producing different stats)
+	# bind into one data frame with rbind.fill logic for mixed columns
 	all_cols <- unique(unlist(lapply(net_stats_l_mutli, names)))
 	net_stats_l_mutli <- lapply(net_stats_l_mutli, function(df) {
 		missing_cols <- setdiff(all_cols, names(df))
@@ -264,14 +299,13 @@ summary_actor <- function(netlet, invert_weights_for_igraph = TRUE, other_stats 
 	}
 
 	# if longitudinal, actor contains both year and name information
-	# more efficient string splitting
 	if (is_longit) {
 		actor_split <- strsplit(net_stats_actor$actor, ".", fixed = TRUE)
 		net_stats_actor$time <- vapply(actor_split, `[`, character(1), 1)
 		net_stats_actor$actor <- vapply(actor_split, `[`, character(1), 2)
 	}
 
-	# cleanup - more efficient column reordering
+	# reorder columns with id vars first
 	id_vars <- c("actor", "layer", "time")
 	existing_id_vars <- intersect(id_vars, names(net_stats_actor))
 	stat_vars <- setdiff(names(net_stats_actor), id_vars)
@@ -290,39 +324,59 @@ summary_actor <- function(netlet, invert_weights_for_igraph = TRUE, other_stats 
 		# layer will be added and used for ego
 		# net will stand in for time if ego data is longit
 
-		# if no longit info for ego then need to modify id vars
+		# non-longit ego: layer holds ego name
 		if (!ego_longit) {
-			# if just one time point and one ego then layer is just ego_vec
-			# otherwise the net column will have multiple egos
 			if (obj_attrs$netify_type == "cross_sec") {
 				net_stats_actor$layer <- ego_vec
 			} else {
 				net_stats_actor$layer <- net_stats_actor$time
 			}
 
-			# set id vars and drop time if present
 			net_stats_actor$time <- NULL
 			existing_id_vars <- c("actor", "layer")
 		}
 
-		# if longit info for ego
+		# longit ego: split ego__time into layer + time
 		if (ego_longit) {
-			# more efficient string splitting
 			time_split <- strsplit(net_stats_actor$time, "__", fixed = TRUE)
 			net_stats_actor$layer <- vapply(time_split, `[`, character(1), 1)
 			net_stats_actor$time <- vapply(time_split, `[`, character(1), 2)
 
-			# set id vars
 			existing_id_vars <- c("actor", "layer", "time")
 		}
 
-		# organize - reorder columns efficiently
 		stat_vars <- setdiff(names(net_stats_actor), existing_id_vars)
 		net_stats_actor <- net_stats_actor[, c(existing_id_vars, stat_vars)]
 	}
 	####
 
+	# tag stats mode so downstream helpers can adapt
+	attr(net_stats_actor, "stats") <- stats
+
+	# tag class so plot() dispatches to plot_actor_stats
+	class(net_stats_actor) <- c("summary_actor", "data.frame")
+
 	####
 	return(net_stats_actor)
 	####
+}
+
+#' Plot method for summary_actor output
+#'
+#' S3 method that dispatches `plot()` on a `summary_actor` data frame to
+#' [plot_actor_stats()] so the `summary_actor(net) |> plot()` idiom works
+#' without the user having to remember the helper name. Pass any
+#' [plot_actor_stats()] argument through `...`.
+#'
+#' @param x A `summary_actor` data frame from [summary_actor()].
+#' @param ... Additional arguments passed to [plot_actor_stats()] (e.g.
+#'   `across_actor`, `specific_stats`, `specific_actors`).
+#'
+#' @return A `ggplot` object.
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @export
+plot.summary_actor <- function(x, ...) {
+	plot_actor_stats(x, ...)
 }

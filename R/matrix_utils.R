@@ -1,10 +1,94 @@
-#' Matrix utility functions for netify
+# Matrix utility functions for netify
+#
+# Internal file: shared matrix manipulation utilities used across the
+# netify package. The only user-facing export is `as.matrix.netify`,
+# documented below; the remaining helpers are internal (`@noRd`).
+
+#' Coerce a netify object to a plain matrix
 #'
-#' This file contains shared matrix manipulation utilities used across
-#' the netify package, eliminating redundancy and improving performance.
+#' Strips the netify class and netify-specific attributes so the result
+#' is a clean numeric matrix carrying only `dim` and `dimnames`. For
+#' longitudinal netify objects, `time` selects which slice to return;
+#' it defaults to the first time period and emits a hint. Round-trips
+#' (`net |> as.matrix() |> netify()`) recover a fresh cross-sectional
+#' netify object, but structural attributes (symmetric / diag_to_NA /
+#' weight) are re-detected from the matrix on the way back in rather
+#' than copied across, so a directed matrix or one with a non-NA
+#' diagonal will be flagged accordingly.
 #'
-#' @name matrix_utils
-#' @keywords internal
+#' @param x A netify object.
+#' @param time For longitudinal netify objects, either the integer index
+#'   or character label of the time slice to extract. Defaults to the
+#'   first slice and emits a hint when used implicitly.
+#' @param ... Additional args (ignored).
+#'
+#' @return A plain numeric matrix with `dim` and `dimnames` only (no
+#'   `netify` class, no netify metadata attributes).
+#'
+#' @seealso \code{\link{get_adjacency}} for the data.frame-input
+#'   counterpart that also accepts a netify object; \code{\link{netify}}
+#'   for rebuilding a netify object from a plain matrix.
+#'
+#' @examples
+#' data(icews)
+#' icews_2010 <- icews[icews$year == 2010, ]
+#' net <- netify(icews_2010, actor1 = "i", actor2 = "j",
+#'     symmetric = FALSE, weight = "verbCoop")
+#' m <- as.matrix(net)
+#' dim(m)
+#' class(m)
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
+#' @export
+as.matrix.netify <- function(x, time = NULL, ...) {
+	nt <- attr(x, "netify_type")
+	if (is.null(nt) || nt == "cross_sec") {
+		mat <- unclass(x)
+		attributes(mat) <- list(
+			dim = dim(x),
+			dimnames = dimnames(x)
+		)
+		return(mat)
+	}
+
+	# longitudinal: select a slice
+	if (nt == "longit_array") {
+		dn3 <- dimnames(x)[[3]]
+		if (is.null(time)) {
+			time <- 1L
+			cli::cli_alert_info(
+				"{.fn as.matrix.netify} returning slice {.val {dn3[time] %||% time}} (first period). Pass {.arg time} to choose another."
+			)
+		}
+		idx <- if (is.character(time)) match(time, dn3) else as.integer(time)
+		if (is.na(idx) || idx < 1L || idx > dim(x)[3]) {
+			cli::cli_abort("time = {.val {time}} is out of range for this netify object.")
+		}
+		mat <- unclass(x)[, , idx, drop = TRUE]
+		attributes(mat) <- list(dim = dim(mat), dimnames = dimnames(mat))
+		return(mat)
+	}
+
+	if (nt == "longit_list") {
+		nms <- names(unclass(x))
+		if (is.null(time)) {
+			time <- 1L
+			cli::cli_alert_info(
+				"{.fn as.matrix.netify} returning slice {.val {nms[time] %||% time}} (first period). Pass {.arg time} to choose another."
+			)
+		}
+		idx <- if (is.character(time)) match(time, nms) else as.integer(time)
+		if (is.na(idx) || idx < 1L || idx > length(unclass(x))) {
+			cli::cli_abort("time = {.val {time}} is out of range for this netify object.")
+		}
+		mat <- unclass(x)[[idx]]
+		attributes(mat) <- list(dim = dim(mat), dimnames = dimnames(mat))
+		return(mat)
+	}
+
+	cli::cli_abort("Unknown netify_type {.val {nt}}.")
+}
 
 #' Extract matrix from netify object
 #'

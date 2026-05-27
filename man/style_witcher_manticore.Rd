@@ -13,3 +13,6 @@ List of plot arguments
 A network style inspired by the Manticore School armor from The Witcher 3.
 Exotic, alchemical focus - poisonous and mysterious.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

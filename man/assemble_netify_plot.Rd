@@ -47,3 +47,6 @@ print(p)
 \code{\link{plot.netify}}, \code{\link{netify_edge}},
 \code{\link{netify_node}}
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

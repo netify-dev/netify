@@ -30,3 +30,6 @@ comp <- compare_networks(list("2010" = net1, "2011" = net2))
 print(comp)
 
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

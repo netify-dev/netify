@@ -104,6 +104,12 @@
 #' For multilayer longitudinal models that require a 4D array
 #' \code{[n, n, p, T]}, see \code{\link{netify_to_dbn}} instead.
 #'
+#' \strong{Bipartite networks.} `amen::ame()` does not accept
+#' rectangular Y matrices; passing the output of `to_amen()` on a
+#' bipartite netify to `amen::ame()` will fail. Use
+#' \code{\link{netify_to_lame}} (which sets `mode = "bipartite"` and
+#' targets `lame::ame()`) for bipartite networks instead.
+#'
 #' @examples
 #' # Load example data
 #' data(icews)
@@ -186,14 +192,15 @@ netify_to_amen <- function(netlet, lame = FALSE) {
 					msrmnts[[paste0("n_", dlab, "_actors")]],
 					msrmnts$n_nvars
 				)
-				mat_labs <- list(
-					msrmnts[[paste0(dlab, "_actors")]],
-					msrmnts$nvars
-				)
+				mat_actors <- msrmnts[[paste0(dlab, "_actors")]]
+				mat_labs <- list(mat_actors, msrmnts$nvars)
 				mat <- array(NA, mat_dim, dimnames = mat_labs)
 
-				# fill in matrix
+				# pull nodal_data and restrict to actors in this mode
 				to_add <- attr(netlet, "nodal_data")
+				keep <- to_add$actor %in% mat_actors
+				to_add <- to_add[keep, , drop = FALSE]
+				if (nrow(to_add) == 0L) return(mat)
 				to_add_rows <- to_add$actor
 				to_add <- to_add[, msrmnts$nvars, drop = FALSE]
 				to_add <- data.matrix(to_add)
@@ -236,7 +243,7 @@ netify_to_amen <- function(netlet, lame = FALSE) {
 
 	# longitudinal cases
 	if (netlet_type %in% c("longit_array", "longit_list")) {
-		# if lame = FALSE, use array format (original behavior)
+		# array format for standard amen
 		if (!lame) {
 			if (netlet_type == "longit_array") {
 				out <- list(
@@ -257,7 +264,7 @@ netify_to_amen <- function(netlet, lame = FALSE) {
 			}
 		}
 
-		# if lame = TRUE, convert to list format
+		# list format for lame
 		if (lame) {
 			# get raw data
 			raw_data <- get_raw(netlet)
@@ -298,19 +305,48 @@ netify_to_amen <- function(netlet, lame = FALSE) {
 			Xcol_list <- NULL
 			if (nodal_data_exists) {
 				nodal_df <- attr(netlet, "nodal_data")
-				# use time periods from the network data, not from nodal_data
 				time_periods <- names(Y_list)
+				is_bipartite <- identical(attr(netlet, "mode"), "bipartite")
 
-				Xrow_list <- lapply(time_periods, function(t) {
-					subset_df <- nodal_df[nodal_df$time == t, ]
+				# pre-compute row/col actor sets for bipartite mode split
+				row_actor_sets <- if (is_bipartite) {
+					if (is.list(msrmnts$row_actors)) msrmnts$row_actors
+					else rep(list(msrmnts$row_actors), length(time_periods))
+				} else NULL
+				col_actor_sets <- if (is_bipartite) {
+					if (is.list(msrmnts$col_actors)) msrmnts$col_actors
+					else rep(list(msrmnts$col_actors), length(time_periods))
+				} else NULL
+				if (!is.null(row_actor_sets)) names(row_actor_sets) <- time_periods
+				if (!is.null(col_actor_sets)) names(col_actor_sets) <- time_periods
+
+				build_slice <- function(t, keep_actors) {
+					subset_df <- nodal_df[nodal_df$time == t, , drop = FALSE]
+					if (!is.null(keep_actors)) {
+						subset_df <- subset_df[
+							as.character(subset_df$actor) %in% as.character(keep_actors),
+							, drop = FALSE
+						]
+					}
 					mat <- as.matrix(subset_df[, msrmnts$nvars, drop = FALSE])
 					rownames(mat) <- subset_df$actor
 					mat
+				}
+
+				Xrow_list <- lapply(time_periods, function(t) {
+					build_slice(t, if (is_bipartite) row_actor_sets[[t]] else NULL)
 				})
 				names(Xrow_list) <- time_periods
 
-				# for symmetric networks, Xcol = Xrow
-				Xcol_list <- Xrow_list
+				Xcol_list <- if (is_bipartite) {
+					out <- lapply(time_periods, function(t) {
+						build_slice(t, col_actor_sets[[t]])
+					})
+					names(out) <- time_periods
+					out
+				} else {
+					Xrow_list
+				}
 			}
 
 			out <- list(
@@ -327,5 +363,8 @@ netify_to_amen <- function(netlet, lame = FALSE) {
 }
 
 #' @rdname netify_to_amen
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 to_amen <- netify_to_amen

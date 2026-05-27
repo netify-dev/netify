@@ -32,7 +32,14 @@ melt(data, ...)
 \value{
 See method-specific documentation (e.g., \code{\link{melt.netify}})
 
-Data frame with columns: row, col, value (and optionally time/layer)
+Data frame with columns: \code{Var1}, \code{Var2}, \code{value} (and optionally
+\code{time} / \code{layer}). The \code{Var1} / \code{Var2} names are inherited from base R's
+\code{as.data.frame.table} / \code{reshape2::melt} heritage and are used by internal
+helpers (\code{decompose_helpers}, \code{plot_homophily}, etc.); rename them yourself
+downstream if you need snake_case (e.g.
+\code{rlang::set_names(out, c("from", "to", "value", ...))}). For a fully
+snake_case, dyad-attribute-merged edge frame, use \code{\link[=unnetify]{unnetify()}} or
+\code{\link[=as_tibble.netify]{as_tibble.netify()}} instead.
 }
 \description{
 Convert netify matrices/arrays to long format data frames.
@@ -44,8 +51,11 @@ The melt method converts netify objects from their matrix representation to
 a long format data frame suitable for analysis and visualization. The output
 format depends on the type of netify object:
 \itemize{
-\item Cross-sectional: Returns columns row, col, value
-\item Longitudinal: Returns columns row, col, time, value
-\item Multilayer: Returns columns row, col, layer, value (and time if longitudinal)
+\item Cross-sectional: Returns columns \code{Var1}, \code{Var2}, \code{value}
+\item Longitudinal: Returns columns \code{Var1}, \code{Var2}, \code{time}, \code{value}
+\item Multilayer: Returns columns \code{Var1}, \code{Var2}, \code{layer}, \code{value} (and \code{time} if longitudinal)
 }
+}
+\author{
+Cassy Dorff, Shahryar Minhas
 }

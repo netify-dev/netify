@@ -13,3 +13,6 @@ List of plot arguments
 A network style using ColorBrewer's Dark2 palette
 for high contrast and accessibility
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

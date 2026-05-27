@@ -82,7 +82,6 @@ get_palette <- function(palette_name) {
 		)
 	)
 
-	# return the selected palette or NULL if not found
 	if (palette_name %in% names(palettes)) {
 		return(palettes[[palette_name]])
 	} else {
@@ -93,6 +92,9 @@ get_palette <- function(palette_name) {
 #' List available color palettes
 #'
 #' @return Character vector of available palette names
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 
 list_palettes <- function() {

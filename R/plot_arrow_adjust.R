@@ -34,7 +34,7 @@ adjust_edge_endpoints <- function(edge_data, node_data, node_size = 1.5,
 	if (is.character(node_size) && length(node_size) == 1 && node_size %in% names(node_data)) {
 		node_sizes <- node_data[[node_size]]
 	} else if (is.numeric(node_size)) {
-		# if node_size is numeric, use a fixed size for all nodes
+		# constant size across all nodes
 		node_sizes <- rep(node_size, nrow(node_data))
 	} else {
 		# fallback to a default size for nodes

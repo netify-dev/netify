@@ -19,9 +19,13 @@ Event data from UCDP for Mexico
 \examples{
 data(mexico)
 mexico[1:3, ]
+
 }
 \references{
 add UCDP reference
 (\href{https://ucdp.uu.se/}{ucdp})
+}
+\author{
+Cassy Dorff, Shahryar Minhas
 }
 \keyword{datasets}

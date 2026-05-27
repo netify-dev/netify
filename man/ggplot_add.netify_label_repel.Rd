@@ -20,3 +20,6 @@ A ggplot object with the label_repel layer added
 S3 method to add netify_label_repel objects to ggplot objects. This method is called
 automatically when using the + operator with a netify_label_repel object.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

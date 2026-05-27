@@ -189,9 +189,10 @@ dyad_correlation <- function(
 					next
 				}
 
-				# convert to binary if requested
+				# convert to binary if requested — non-zero counts as edge so
+				# signed weights are not silently dropped
 				if (binary_network) {
-					edge_matrix <- (edge_matrix > 0) & !is.na(edge_matrix)
+					edge_matrix <- (edge_matrix != 0) & !is.na(edge_matrix)
 					edge_matrix <- as.numeric(edge_matrix)
 				}
 
@@ -256,6 +257,23 @@ dyad_correlation <- function(
 	final_results <- do.call(rbind, results_list)
 	rownames(final_results) <- NULL
 
+	# dedupe: when multiple layers and edge_vars are specified, the outer
+	# layer loop produces redundant rows because edge_matrix is keyed off
+	# edge_var (not layer). collapse to one row per (net, dyad_var, edge_var)
+	# and prefer the row where layer == edge_var so the layer label is
+	# coherent with the matrix actually correlated.
+	if (length(layers) > 1 && nrow(final_results) > 0) {
+		final_results$.layer_matches_edge <- final_results$layer == final_results$edge_var
+		# order so rows with layer == edge_var come first within each group
+		ord <- order(final_results$net, final_results$dyad_var,
+			final_results$edge_var, -final_results$.layer_matches_edge)
+		final_results <- final_results[ord, , drop = FALSE]
+		dup_key <- paste(final_results$net, final_results$dyad_var, final_results$edge_var, sep = "\r")
+		final_results <- final_results[!duplicated(dup_key), , drop = FALSE]
+		final_results$.layer_matches_edge <- NULL
+		rownames(final_results) <- NULL
+	}
+
 	return(final_results)
 }
 
@@ -301,7 +319,8 @@ calculate_dyadic_correlation <- function(dyad_matrix, edge_matrix, method,
 			remove_diagonal, method
 		)
 	} else {
-		# calculate simple correlation
+		# calculate simple correlation; warn on failure so cor.test errors
+		# (zero variance, too few points, etc.) do not silently become NA
 		cor_result <- tryCatch(
 			{
 				cor_test <- stats::cor.test(dyad_vec, edge_vec, method = method)
@@ -313,6 +332,10 @@ calculate_dyadic_correlation <- function(dyad_matrix, edge_matrix, method,
 				)
 			},
 			error = function(e) {
+				cli::cli_warn(c(
+					"!" = "cor.test failed for {.val {current_var}}: {conditionMessage(e)}",
+					"i" = "Returning NA. Often caused by zero variance or too few non-NA dyads."
+				))
 				list(
 					correlation = NA,
 					p_value = NA,
@@ -379,7 +402,9 @@ calculate_partial_correlation <- function(dyad_vec, edge_vec, dyad_matrix,
 		))
 	}
 
-	# calculate partial correlation using linear regression approach
+	# calculate partial correlation using linear regression approach;
+	# surface unexpected failures so collinearity/degenerate input gets
+	# noticed instead of silently NA-ing
 	tryCatch(
 		{
 			# regress target variable on control variables
@@ -405,6 +430,10 @@ calculate_partial_correlation <- function(dyad_vec, edge_vec, dyad_matrix,
 			)
 		},
 		error = function(e) {
+			cli::cli_warn(c(
+				"!" = "Partial correlation failed for {.val {current_var}}: {conditionMessage(e)}",
+				"i" = "Returning NA. Check for collinearity among control dyad vars."
+			))
 			list(
 				correlation = NA,
 				p_value = NA,

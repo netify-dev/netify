@@ -19,7 +19,11 @@ get_adjacency(
 }
 \arguments{
 \item{dyad_data}{A data.frame containing dyadic observations. Will be coerced
-to data.frame if a tibble or data.table is provided.}
+to data.frame if a tibble or data.table is provided. As a convenience,
+an existing netify object is also accepted: in that case \code{get_adjacency()}
+returns the underlying adjacency as a plain matrix (no class / attributes),
+and for longitudinal inputs returns the first time slice with a cli hint
+pointing to \code{as.matrix(net, time = ...)} for selecting a specific slice.}
 
 \item{actor1}{Character string specifying the column name for the first actor
 in each dyad.}

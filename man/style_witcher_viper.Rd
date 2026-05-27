@@ -13,3 +13,6 @@ List of plot arguments
 A network style inspired by the Viper School armor from The Witcher 3.
 Lethal, assassination-focused - stealth and poison.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

@@ -21,3 +21,6 @@ S3 method to add netify_labels objects to ggplot objects. This method updates
 the labels of existing scales based on the specifications in the netify_labels
 object.
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

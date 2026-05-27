@@ -146,36 +146,132 @@
 #'
 #' @keywords internal
 #' @noRd
+NULL
+
+#' Validate that *_by columns exist in the right data frame
+#'
+#' Catches user typos like `node_color_by = "deg_total"` (missing the second
+#' "e") or referencing a column the user forgot to attach (e.g. asking for
+#' "degree_total" without first calling `add_node_vars(net, summary_actor(net))`).
+#' Without this guard ggplot fails downstream with "object 'X' not found",
+#' which never names the offending kwarg or hints at available columns.
+#'
+#' @param plot_args internal-name plot args (already translated _by -> _var)
+#' @param net_dfs list with `nodal_data` and `edge_data` data frames
+#' @keywords internal
+#' @noRd
+validate_plot_by_cols <- function(plot_args, net_dfs) {
+	# map internal _var arg names back to user-facing _by names for error messages
+	node_var_args <- c(
+		point_alpha_var  = "node_alpha_by",
+		point_color_var  = "node_color_by",
+		point_fill_var   = "node_fill_by",
+		point_shape_var  = "node_shape_by",
+		point_size_var   = "node_size_by",
+		point_stroke_var = "node_stroke_by",
+		text_alpha_var   = "text_alpha_by",
+		text_color_var   = "text_color_by",
+		text_size_var    = "text_size_by",
+		label_alpha_var  = "label_alpha_by",
+		label_color_var  = "label_color_by",
+		label_fill_var   = "label_fill_by",
+		label_size_var   = "label_size_by"
+	)
+	edge_var_args <- c(
+		edge_alpha_var     = "edge_alpha_by",
+		edge_color_var     = "edge_color_by",
+		edge_linewidth_var = "edge_linewidth_by",
+		edge_linetype_var  = "edge_linetype_by"
+	)
+
+	nodal_cols <- if (!is.null(net_dfs$nodal_data)) names(net_dfs$nodal_data) else character(0)
+	edge_cols  <- if (!is.null(net_dfs$edge_data))  names(net_dfs$edge_data)  else character(0)
+
+	check_one <- function(internal_arg, user_arg, df_cols, df_label) {
+		col <- plot_args[[internal_arg]]
+		if (is.null(col) || !is.character(col) || length(col) != 1) return(invisible())
+		if (col %in% df_cols) return(invisible())
+
+		# suggest closest match if available
+		hint <- NULL
+		if (length(df_cols) > 0) {
+			dists <- utils::adist(col, df_cols)[1, ]
+			best <- df_cols[which.min(dists)]
+			if (length(best) == 1 && min(dists) <= max(3, ceiling(nchar(col) / 2))) {
+				hint <- paste0("Did you mean '", best, "'?")
+			}
+		}
+
+		# hint for network statistics that have not been attached yet
+		stat_cols <- c(
+			"degree", "degree_in", "degree_out", "degree_total",
+			"closeness", "betweenness", "eigen_vector",
+			"prop_ties", "network_share"
+		)
+		stat_hint <- if (col %in% stat_cols) {
+			paste0(
+				"'", col, "' is a network statistic. ",
+				"Attach it first with: ",
+				"net <- add_node_vars(net, summary_actor(net), \"actor\")"
+			)
+		} else NULL
+
+		avail <- if (length(df_cols) > 0) {
+			paste0("Available ", df_label, " columns: ",
+				paste(shQuote(df_cols), collapse = ", "))
+		} else {
+			paste0("No ", df_label, " columns are attached to this netify object.")
+		}
+
+		msg <- c(
+			"x" = paste0("`", user_arg, " = \"", col,
+				"\"` refers to a column that does not exist."),
+			if (!is.null(stat_hint)) c("i" = stat_hint),
+			if (!is.null(hint))      c("i" = hint),
+			"i" = avail
+		)
+		cli::cli_abort(msg, call = NULL)
+	}
+
+	for (internal_arg in names(node_var_args)) {
+		check_one(internal_arg, node_var_args[[internal_arg]], nodal_cols, "nodal")
+	}
+	for (internal_arg in names(edge_var_args)) {
+		check_one(internal_arg, edge_var_args[[internal_arg]], edge_cols, "edge")
+	}
+
+	invisible(NULL)
+}
 
 adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
-	# by default specify to use theme_netify
+	# default to theme_netify
 	if (is.null(plot_args$use_theme_netify)) {
 		plot_args$use_theme_netify <- TRUE
 	}
 
-	# by default remove isolates
+	# default to removing isolates
 	if (is.null(plot_args$remove_isolates)) {
 		plot_args$remove_isolates <- TRUE
 	}
 
-	# by default set check overlap for text/label to TRUE
+	# default to checking text/label overlap
 	if (is.null(plot_args$check_overlap)) {
 		plot_args$check_overlap <- TRUE
 	}
-	
-	# set defaults for ego networks
+
+	# ego network defaults
 	if (isTRUE(obj_attrs$ego_netify)) {
-		# override remove_isolates default for ego networks
+		# keep ego alters even if they are isolates
 		if (is.null(plot_args$remove_isolates) || plot_args$remove_isolates == TRUE) {
 			plot_args$remove_isolates <- FALSE
 		}
-		
-		# set default layout to hierarchical for ego networks
+
+		# hierarchical layout default for ego networks
 		if (is.null(plot_args$layout)) {
 			plot_args$layout <- "hierarchical"
 		}
-		
-		# set default parameters for hierarchical layout if not specified
+
+		# radius defaults for hierarchical layout
 		if (plot_args$layout == "hierarchical") {
 			if (is.null(plot_args$min_radius)) {
 				plot_args$min_radius <- 1.5
@@ -184,8 +280,8 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 				plot_args$max_radius <- 4.5
 			}
 		}
-		
-		# set default highlight for ego
+
+		# highlight the ego node by default
 		ego_name <- obj_attrs$ego_id
 		if (!is.null(ego_name) && is.null(plot_args$highlight)) {
 			plot_args$highlight <- ego_name
@@ -199,8 +295,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		}
 	}
 
-	# convert node_* to point_* internally for backward compatibility
-	# allow users to use either node_* or point_* parameters
+	# map node_* to point_* internally so users can use either
 	node_to_point_mapping <- list(
 		# static parameters
 		"node_alpha" = "point_alpha",
@@ -225,7 +320,6 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		"node_stroke_var" = "point_stroke_var"
 	)
 
-	# apply the mapping
 	for (old_name in names(node_to_point_mapping)) {
 		new_name <- node_to_point_mapping[[old_name]]
 		if (!is.null(plot_args[[old_name]]) && is.null(plot_args[[new_name]])) {
@@ -234,7 +328,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		}
 	}
 
-	# convert _by to _var for all parameters (edge, point, text, label)
+	# map _by to _var for edge, point, text, label parameters
 	by_to_var_mapping <- list(
 		# edge parameters
 		"edge_alpha_by" = "edge_alpha_var",
@@ -259,7 +353,6 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		"label_size_by" = "label_size_var"
 	)
 
-	# apply the by to var mapping
 	for (old_name in names(by_to_var_mapping)) {
 		new_name <- by_to_var_mapping[[old_name]]
 		if (!is.null(plot_args[[old_name]]) && is.null(plot_args[[new_name]])) {
@@ -268,12 +361,15 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		}
 	}
 
-	# process palette if provided #####################
+	# validate that columns referenced by *_by mappings exist on the data
+	validate_plot_by_cols(plot_args, net_dfs)
+
+	# palette settings
 	if (!is.null(plot_args$palette)) {
 		palette_settings <- get_palette(plot_args$palette)
 
 		if (!is.null(palette_settings)) {
-			# apply palette settings only if user hasn't explicitly set them
+			# apply palette only when the user has not overridden
 			if (is.null(plot_args$edge_color)) {
 				plot_args$edge_color <- palette_settings$edge_color
 			}
@@ -289,7 +385,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 			if (is.null(plot_args$curve_edges)) {
 				plot_args$curve_edges <- palette_settings$curve_edges
 			}
-			# set shape to 21 to use fill color
+			# shape 21 supports the fill color
 			if (is.null(plot_args$point_shape) && is.null(plot_args$node_shape)) {
 				plot_args$point_shape <- 21
 			}
@@ -299,12 +395,18 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 			)
 		}
 	}
-	####
 
-	# process geom choices #####################
+	# geom choices
 	if (is.null(plot_args$add_points)) {
 		plot_args$add_points <- TRUE
 	}
+	# small networks get readable repel labels by default
+	n_actors_plot <- if (!is.null(net_dfs$nodal_data)) {
+		length(unique(net_dfs$nodal_data$name))
+	} else {
+		NA_integer_
+	}
+	small_net <- isTRUE(!is.na(n_actors_plot) && n_actors_plot <= 30)
 	if (is.null(plot_args$add_text)) {
 		plot_args$add_text <- FALSE
 	}
@@ -312,7 +414,13 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		plot_args$add_label <- FALSE
 	}
 	if (is.null(plot_args$add_text_repel)) {
-		plot_args$add_text_repel <- FALSE
+		auto_text <- small_net &&
+			!isTRUE(plot_args$add_text) &&
+			!isTRUE(plot_args$add_label) &&
+			!isTRUE(plot_args$add_label_repel) &&
+			is.null(plot_args$select_text) &&
+			is.null(plot_args$select_label)
+		plot_args$add_text_repel <- auto_text
 	}
 	if (is.null(plot_args$add_label_repel)) {
 		plot_args$add_label_repel <- FALSE
@@ -323,88 +431,70 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if (is.null(plot_args$curve_edges)) {
 		plot_args$curve_edges <- FALSE
 	}
-	####
 
-	# label specific nodes via text or label #####################
-
-	# add columns for text and label
+	# selective text/label for individual nodes
 	net_dfs$nodal_data$name_text <- net_dfs$nodal_data$name
 	net_dfs$nodal_data$name_label <- net_dfs$nodal_data$name
 
-	# if users chose to label specific nodes
-	# then replace name column for text
+	# apply user choice for text labels on specific nodes
 	if (!is.null(plot_args$select_text) && length(plot_args$select_text) > 0) {
-		# if user supplied alternative text in
-		# select_text_display then use that instead of
-		# the name in the df
 		if (!is.null(plot_args$select_text_display)) {
-			# create a mapping from select_text to select_text_display
+			# map select_text -> custom display text
 			text_mapping <- setNames(plot_args$select_text_display, plot_args$select_text)
 
-			# apply the mapping, using NA for non-selected nodes
 			net_dfs$nodal_data$name_text <- ifelse(
 				net_dfs$nodal_data$name %in% plot_args$select_text,
 				text_mapping[net_dfs$nodal_data$name],
 				NA
 			)
 		} else {
-			# no display text provided, use the actual names for selected nodes
+			# use actor names as text on selected nodes
 			net_dfs$nodal_data$name_text <- ifelse(
 				net_dfs$nodal_data$name %in% plot_args$select_text,
 				net_dfs$nodal_data$name,
 				NA
-			) # Use NA instead of ''
+			)
 		}
 
-		# use text_repel for selective labeling
+		# prefer repel for selective labeling
 		plot_args$add_text_repel <- TRUE
 		plot_args$add_text <- FALSE
 	}
 
-	# if users chose to label specific nodes
-	# then replace name column for label
+	# apply user choice for box labels on specific nodes
 	if (!is.null(plot_args$select_label) && length(plot_args$select_label) > 0) {
-		# if user supplied alternative label in
-		# select_label_display then use that instead of
-		# the name in the df
 		if (!is.null(plot_args$select_label_display)) {
-			# create a mapping from select_label to select_label_display
+			# map select_label -> custom display label
 			label_mapping <- setNames(plot_args$select_label_display, plot_args$select_label)
 
-			# apply the mapping, using NA for non-selected nodes
 			net_dfs$nodal_data$name_label <- ifelse(
 				net_dfs$nodal_data$name %in% plot_args$select_label,
 				label_mapping[net_dfs$nodal_data$name],
 				NA
 			)
 		} else {
-			# no display label provided, use the actual names for selected nodes
+			# use actor names as labels on selected nodes
 			net_dfs$nodal_data$name_label <- ifelse(
 				net_dfs$nodal_data$name %in% plot_args$select_label,
 				net_dfs$nodal_data$name,
 				NA
-			) # Use NA instead of ''
+			)
 		}
 
-		# when using select_label, ALWAYS use label_repel for better readability
-		# this ensures selective labeling doesn't overlap with nodes
+		# always use label_repel to avoid node overlap
 		plot_args$add_label_repel <- TRUE
 		plot_args$add_label <- FALSE
 	}
-	####
-	
-	# handle mutual exclusivity of text/label with their repel versions
-	# this check is done after select_text/select_label processing
+
+	# text/label are mutually exclusive with their repel versions
 	if (plot_args$add_text_repel && plot_args$add_text) {
-		# silently use repel version as it was explicitly set by user
 		plot_args$add_text <- FALSE
 	}
 	if (plot_args$add_label_repel && plot_args$add_label) {
-		# silently use repel version as it was explicitly set by user
 		plot_args$add_label <- FALSE
 	}
 
-	# set up static geom_point defaults #####################
+	# static geom_point defaults
 	if (is.null(plot_args$point_alpha)) {
 		plot_args$point_alpha <- NA
 	}
@@ -423,9 +513,8 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if (is.null(plot_args$point_stroke)) {
 		plot_args$point_stroke <- 0.5
 	}
-	####
 
-	# set up static geom_text defaults #####################
+	# static geom_text defaults
 	if (is.null(plot_args$text_alpha)) {
 		plot_args$text_alpha <- NA
 	}
@@ -456,9 +545,8 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if (is.null(plot_args$text_lineheight)) {
 		plot_args$text_lineheight <- 1.2
 	}
-	####
 
-	# set up static geom_label defaults #####################
+	# static geom_label defaults
 	if (is.null(plot_args$label_alpha)) {
 		plot_args$label_alpha <- NA
 	}
@@ -489,18 +577,23 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if (is.null(plot_args$label_lineheight)) {
 		plot_args$label_lineheight <- 1.2
 	}
-	####
 
-	# set up static geom_text_repel defaults #####################
+	# static geom_text_repel defaults, scaled by network size
+	repel_force_default <- if (isTRUE(n_actors_plot >= 20)) 3 else 1
+	repel_max_overlaps_default <- if (isTRUE(n_actors_plot >= 20)) Inf else 10
+	repel_box_pad_default <- if (isTRUE(n_actors_plot >= 20)) 0.6 else 0.25
+	repel_point_pad_default <- if (isTRUE(n_actors_plot >= 20)) 0.3 else 0
+	repel_min_seg_default <- if (isTRUE(n_actors_plot >= 20)) 0 else 0.5
+	repel_max_time_default <- if (isTRUE(n_actors_plot >= 20)) 2 else 0.5
 	# basic repel parameters
 	if (is.null(plot_args$text_repel_force)) {
-		plot_args$text_repel_force <- 1
+		plot_args$text_repel_force <- repel_force_default
 	}
 	if (is.null(plot_args$text_repel_force_pull)) {
 		plot_args$text_repel_force_pull <- 1
 	}
 	if (is.null(plot_args$text_repel_max_overlaps)) {
-		plot_args$text_repel_max_overlaps <- 10
+		plot_args$text_repel_max_overlaps <- repel_max_overlaps_default
 	}
 	if (is.null(plot_args$text_repel_nudge_x)) {
 		plot_args$text_repel_nudge_x <- 0
@@ -509,19 +602,19 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		plot_args$text_repel_nudge_y <- 0
 	}
 	if (is.null(plot_args$text_repel_box_padding)) {
-		plot_args$text_repel_box_padding <- 0.25
+		plot_args$text_repel_box_padding <- repel_box_pad_default
 	}
 	if (is.null(plot_args$text_repel_point_padding)) {
-		plot_args$text_repel_point_padding <- 0
+		plot_args$text_repel_point_padding <- repel_point_pad_default
 	}
 	if (is.null(plot_args$text_repel_min_segment_length)) {
-		plot_args$text_repel_min_segment_length <- 0.5
+		plot_args$text_repel_min_segment_length <- repel_min_seg_default
 	}
 	if (is.null(plot_args$text_repel_arrow)) {
 		plot_args$text_repel_arrow <- NULL
 	}
 	if (is.null(plot_args$text_repel_max_time)) {
-		plot_args$text_repel_max_time <- 0.5
+		plot_args$text_repel_max_time <- repel_max_time_default
 	}
 	if (is.null(plot_args$text_repel_max_iter)) {
 		plot_args$text_repel_max_iter <- 10000
@@ -566,18 +659,16 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if (is.null(plot_args$text_repel_segment_inflect)) {
 		plot_args$text_repel_segment_inflect <- FALSE
 	}
-	####
 
-	# set up static geom_label_repel defaults #####################
-	# basic repel parameters
+	# static geom_label_repel defaults
 	if (is.null(plot_args$label_repel_force)) {
-		plot_args$label_repel_force <- 1
+		plot_args$label_repel_force <- repel_force_default
 	}
 	if (is.null(plot_args$label_repel_force_pull)) {
 		plot_args$label_repel_force_pull <- 1
 	}
 	if (is.null(plot_args$label_repel_max_overlaps)) {
-		plot_args$label_repel_max_overlaps <- 10
+		plot_args$label_repel_max_overlaps <- repel_max_overlaps_default
 	}
 	if (is.null(plot_args$label_repel_nudge_x)) {
 		plot_args$label_repel_nudge_x <- 0
@@ -586,19 +677,19 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		plot_args$label_repel_nudge_y <- 0
 	}
 	if (is.null(plot_args$label_repel_box_padding)) {
-		plot_args$label_repel_box_padding <- 0.25
+		plot_args$label_repel_box_padding <- repel_box_pad_default
 	}
 	if (is.null(plot_args$label_repel_point_padding)) {
-		plot_args$label_repel_point_padding <- 0
+		plot_args$label_repel_point_padding <- repel_point_pad_default
 	}
 	if (is.null(plot_args$label_repel_min_segment_length)) {
-		plot_args$label_repel_min_segment_length <- 0.5
+		plot_args$label_repel_min_segment_length <- repel_min_seg_default
 	}
 	if (is.null(plot_args$label_repel_arrow)) {
 		plot_args$label_repel_arrow <- NULL
 	}
 	if (is.null(plot_args$label_repel_max_time)) {
-		plot_args$label_repel_max_time <- 0.5
+		plot_args$label_repel_max_time <- repel_max_time_default
 	}
 	if (is.null(plot_args$label_repel_max_iter)) {
 		plot_args$label_repel_max_iter <- 10000
@@ -653,10 +744,8 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 	if (is.null(plot_args$label_repel_label_size)) {
 		plot_args$label_repel_label_size <- 0.25
 	}
-	####
 
-	# highlight parameters #####################
-	# only set defaults if highlight is actually being used
+	# highlight defaults, only when highlight is in use
 	if (!is.null(plot_args$highlight) && length(plot_args$highlight) > 0) {
 		if (is.null(plot_args$highlight_color)) {
 			plot_args$highlight_color <- NULL
@@ -671,11 +760,10 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 			plot_args$show_other_in_legend <- FALSE
 		}
 	}
-	####
 
-	# set up geom_segment/curve/arrow defaults ####################
+	# geom_segment / curve / arrow defaults
 
-	# general segment
+	# segment
 	if (is.null(plot_args$edge_color)) {
 		plot_args$edge_color <- "black"
 	}
@@ -689,7 +777,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		plot_args$edge_alpha <- NA
 	}
 
-	# general curve
+	# curve
 	if (is.null(plot_args$edge_curvature)) {
 		plot_args$edge_curvature <- 0.5
 	}
@@ -708,25 +796,22 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		plot_args$edge_linejoin <- "round"
 	}
 
-	# general arrow
+	# arrow
 	plot_args$edge_arrow_fill <- NULL
 	if (!all(obj_attrs$symmetric)) {
 		if (is.null(plot_args$edge_arrow)) {
 			plot_args$edge_arrow <- ggplot2::arrow(length = unit(0.2, "cm"))
 		}
 	} else {
-		# for symmetric networks, no arrows
+		# no arrows on symmetric networks
 		plot_args$edge_arrow <- NULL
 	}
-	####
 
-	####
-	# set up scale label parameters #####################
+	# scale label defaults
 	# edge scale labels
 	if (is.null(plot_args$edge_alpha_label)) {
-		# if edge_alpha_var is set, provide a default label
+		# default the label to the variable name
 		if (!is.null(plot_args$edge_alpha_var)) {
-			# use the weight variable name as the default label
 			plot_args$edge_alpha_label <- plot_args$edge_alpha_var
 		} else {
 			plot_args$edge_alpha_label <- NULL
@@ -742,7 +827,7 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		plot_args$edge_linetype_label <- NULL
 	}
 
-	# node/point scale labels (supporting both node_ and point_ prefixes)
+	# node/point scale labels (accept either node_ or point_ prefix)
 	if (is.null(plot_args$node_size_label) && is.null(plot_args$point_size_label)) {
 		plot_args$node_size_label <- NULL
 	} else {
@@ -819,16 +904,13 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 		plot_args$edge_color_direction <- 1
 	}
 
-	# apply smart palette selection
 	plot_args <- apply_smart_palettes(plot_args, net_dfs)
-	####
 
-	# process highlight nodes #####################
+	# process highlight nodes
 	if (!is.null(plot_args$highlight) && length(plot_args$highlight) > 0) {
-		# ensure highlight is a character vector
 		plot_args$highlight <- as.character(plot_args$highlight)
 
-		# set highlight defaults based on context
+		# highlight defaults
 		if (is.null(plot_args$highlight_color)) {
 			plot_args$highlight_color <- NULL
 		}
@@ -839,105 +921,92 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 			plot_args$show_other_in_legend <- FALSE
 		}
 
-		# default for highlight_size_increase: no size change
-		# users can explicitly set this if they want highlighted nodes to be larger
+		# default to no size change for highlighted nodes
 		if (is.null(plot_args$highlight_size_increase)) {
-			plot_args$highlight_size_increase <- 1 # No size change by default
+			plot_args$highlight_size_increase <- 1
 		}
 
-		# create a factor variable for highlighting
+		# build a factor variable for highlighting
 		net_dfs$nodal_data$highlight_status <- ifelse(
 			net_dfs$nodal_data$name %in% plot_args$highlight,
 			net_dfs$nodal_data$name,
 			"Other"
 		)
 
-		# convert to factor with specific levels (highlighted nodes first, then "Other")
+		# factor levels put highlighted nodes first, then "Other"
 		highlight_levels <- c(plot_args$highlight, "Other")
 		net_dfs$nodal_data$highlight_status <- factor(
 			net_dfs$nodal_data$highlight_status,
 			levels = highlight_levels[highlight_levels %in% net_dfs$nodal_data$highlight_status]
 		)
 
-		# if no color variable is set, use highlight_status for coloring
+		# map highlight_status to color or fill based on point shape
 		if (is.null(plot_args$point_color_var) && is.null(plot_args$point_fill_var)) {
-			# determine which aesthetic to use based on shape
 			if (!is.null(plot_args$point_shape) && plot_args$point_shape %in% c(21:25)) {
-				# shapes with fill - use fill
 				plot_args$point_fill_var <- "highlight_status"
 			} else {
-				# shapes without fill - use color
 				plot_args$point_color_var <- "highlight_status"
 			}
 		}
 
-		# set up highlight colors if not provided
+		# default highlight colors
 		if (is.null(plot_args$highlight_color)) {
-			# default color scheme: highlighted nodes get distinct colors, others get grey
 			n_highlights <- length(plot_args$highlight)
 			if (n_highlights <= 3) {
-				# manual colors for small number of highlights
 				highlight_node_colors <- c("#E41A1C", "#377EB8", "#4DAF4A")[1:n_highlights]
 			} else {
-				# use a color palette for more highlights
 				assert_dependency("scales")
 				highlight_node_colors <- scales::hue_pal()(n_highlights)
 			}
-			# add grey for non-highlighted nodes
+			# grey for non-highlighted nodes
 			plot_args$highlight_color <- c(highlight_node_colors, "#999999")
 			names(plot_args$highlight_color) <- c(plot_args$highlight, "Other")
 		}
 
-		# process size increase - now supports vector input
-		# check if highlight_size_increase is a vector
+		# size increase accepts a scalar or a vector
 		if (length(plot_args$highlight_size_increase) > 1) {
-			# vector input - expect length to match highlight + 1 for "Other"
+			# vector must match length(highlight) + 1 for "Other"
 			if (length(plot_args$highlight_size_increase) != length(plot_args$highlight) + 1) {
 				cli::cli_abort("{.arg highlight_size_increase} must have length 1 or {length(highlight) + 1} (for 'Other' category)")
 			}
-			
-			# create size multiplier mapping
+
 			size_multipliers <- plot_args$highlight_size_increase
 			names(size_multipliers) <- c(plot_args$highlight, "Other")
-			
+
 			if (is.null(plot_args$point_size_var)) {
-				# no existing size variable - create one based on highlight status
+				# build a size variable based on highlight status
 				net_dfs$nodal_data$highlight_size <- plot_args$point_size
 				for (i in seq_along(plot_args$highlight)) {
-					net_dfs$nodal_data$highlight_size[net_dfs$nodal_data$name == plot_args$highlight[i]] <- 
+					net_dfs$nodal_data$highlight_size[net_dfs$nodal_data$name == plot_args$highlight[i]] <-
 						plot_args$point_size * size_multipliers[plot_args$highlight[i]]
 				}
-				# apply "Other" category size
-				net_dfs$nodal_data$highlight_size[!net_dfs$nodal_data$name %in% plot_args$highlight] <- 
+				net_dfs$nodal_data$highlight_size[!net_dfs$nodal_data$name %in% plot_args$highlight] <-
 					plot_args$point_size * size_multipliers["Other"]
-				
+
 				plot_args$point_size_var <- "highlight_size"
 				plot_args$point_size_guide <- "none"
 			} else {
-				# there's already a size variable
+				# combine with an existing size variable
 				original_size_var <- plot_args$point_size_var
-				
+
 				if (original_size_var %in% names(net_dfs$nodal_data)) {
-					# create combined size variable
 					net_dfs$nodal_data$highlight_combined_size <- net_dfs$nodal_data[[original_size_var]]
-					
+
 					for (i in seq_along(plot_args$highlight)) {
-						net_dfs$nodal_data$highlight_combined_size[net_dfs$nodal_data$name == plot_args$highlight[i]] <- 
-							net_dfs$nodal_data[[original_size_var]][net_dfs$nodal_data$name == plot_args$highlight[i]] * 
+						net_dfs$nodal_data$highlight_combined_size[net_dfs$nodal_data$name == plot_args$highlight[i]] <-
+							net_dfs$nodal_data[[original_size_var]][net_dfs$nodal_data$name == plot_args$highlight[i]] *
 							size_multipliers[plot_args$highlight[i]]
 					}
-					# apply "Other" category size
-					net_dfs$nodal_data$highlight_combined_size[!net_dfs$nodal_data$name %in% plot_args$highlight] <- 
-						net_dfs$nodal_data[[original_size_var]][!net_dfs$nodal_data$name %in% plot_args$highlight] * 
+					net_dfs$nodal_data$highlight_combined_size[!net_dfs$nodal_data$name %in% plot_args$highlight] <-
+						net_dfs$nodal_data[[original_size_var]][!net_dfs$nodal_data$name %in% plot_args$highlight] *
 						size_multipliers["Other"]
-					
+
 					plot_args$point_size_var <- "highlight_combined_size"
 				}
 			}
 		} else if (plot_args$highlight_size_increase != 1) {
-			# single value - original behavior
+			# scalar multiplier
 			if (is.null(plot_args$point_size_var)) {
-				# no existing size variable - create one based on highlight status
 				net_dfs$nodal_data$highlight_size <- ifelse(
 					net_dfs$nodal_data$name %in% plot_args$highlight,
 					plot_args$point_size * plot_args$highlight_size_increase,
@@ -945,76 +1014,56 @@ adjust_plot_args <- function(plot_args, net_dfs, obj_attrs) {
 				)
 				plot_args$point_size_var <- "highlight_size"
 
-				# set flag to hide the size legend since it's redundant with color
+				# hide the size legend since it duplicates color
 				plot_args$point_size_guide <- "none"
 			} else {
-				# there's already a size variable
 				original_size_var <- plot_args$point_size_var
 
-				# only try to modify if it's a simple column reference
+				# only modify if it is a simple column reference
 				if (original_size_var %in% names(net_dfs$nodal_data)) {
-					# it's a simple column name - we can multiply it
 					net_dfs$nodal_data$highlight_combined_size <- ifelse(
 						net_dfs$nodal_data$name %in% plot_args$highlight,
 						net_dfs$nodal_data[[original_size_var]] * plot_args$highlight_size_increase,
 						net_dfs$nodal_data[[original_size_var]]
 					)
 
-					# update to use the combined size variable
 					plot_args$point_size_var <- "highlight_combined_size"
 				}
-				# if it's an expression, just leave the size variable as-is
 			}
 		}
 
-		# store highlight info for legend customization
 		plot_args$is_highlighting <- TRUE
 	}
-	####
 
-	# choose weight var #####################
-	# if network is weighted and users did not
-	# specify alpha level choose for them
-	# okay this is a hacky way to look at
-	# whether the edge has weight, ie
-	# is not just a check for presence but
-	# it should work ... main thing it depends on
-	# is just the position of the weight column
-	# which should always be the third column because
-	# of how the edge_data object inside of net_dfs
-	# is created in decompose_netify
+	# auto-assign edge_alpha_var for weighted networks
+	# the weight column lives at position 4 of edge_data from decompose_netify
 	if (length(unique(net_dfs$edge_data[, 4])) > 1) {
 		if (is.null(plot_args$edge_alpha_var)) {
 			weight_col_name <- names(net_dfs$edge_data)[4]
-			# check if this is a multilayer network (weight name contains comma)
-			# if so, use a generic name or skip auto-setting edge_alpha_var
+			# multilayer weight names contain commas
 			if (!grepl(",", weight_col_name)) {
 				plot_args$edge_alpha_var <- weight_col_name
 			} else if (weight_col_name == "weight") {
-				# for multilayer networks, the column is renamed to "weight"
 				plot_args$edge_alpha_var <- "weight"
 			}
-			# for other multilayer cases, edge_alpha_var will remain NULL
-			# unless explicitly set by the user
 		}
 	}
-	####
 
-	# ######################
-	# # arrow adjustment parameters
-	# if(is.null(plot_args$adjust_arrow_endpoints)){ plot_args$adjust_arrow_endpoints = FALSE }
-	# if(is.null(plot_args$edge_arrow_gap)){ plot_args$edge_arrow_gap = 0.05 }
-	# # rely on gg
-	# if(is.null(plot_args$edge_arrow_size_scale)){ plot_args$edge_arrow_size_scale = NULL }
-	# ######################
+	# friendlier label for the auto-assigned edge_alpha_var
+	if (!is.null(plot_args$edge_alpha_var) &&
+		(is.null(plot_args$edge_alpha_label) ||
+			identical(plot_args$edge_alpha_label, "weight_var"))) {
+		plot_args$edge_alpha_label <- if (identical(plot_args$edge_alpha_var, "weight_var")) {
+			"Edge weight"
+		} else {
+			plot_args$edge_alpha_var
+		}
+	}
 
-	####
-	#
 	return(
 		list(
 			plot_args = plot_args,
 			net_dfs = net_dfs
 		)
 	)
-	####
 }

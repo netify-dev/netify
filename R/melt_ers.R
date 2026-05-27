@@ -11,6 +11,9 @@
 #'
 #' @name melt
 #' @rdname melt
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 melt <- function(data, ...) {
 	UseMethod("melt")
@@ -18,6 +21,9 @@ melt <- function(data, ...) {
 
 #' @rdname melt
 #' @method melt netify
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 #' @export
 #' @param data A netify object
 #' @param ... Additional arguments (see details)
@@ -25,15 +31,22 @@ melt <- function(data, ...) {
 #' @param remove_zeros Logical. Remove zero values (default: TRUE)
 #' @param na.rm Logical. Remove NA values (default: TRUE)
 #' @param value.name Character. Name for value column (default: "value")
-#' @return Data frame with columns: row, col, value (and optionally time/layer)
+#' @return Data frame with columns: `Var1`, `Var2`, `value` (and optionally
+#'   `time` / `layer`). The `Var1` / `Var2` names are inherited from base R's
+#'   `as.data.frame.table` / `reshape2::melt` heritage and are used by internal
+#'   helpers (`decompose_helpers`, `plot_homophily`, etc.); rename them yourself
+#'   downstream if you need snake_case (e.g.
+#'   `rlang::set_names(out, c("from", "to", "value", ...))`). For a fully
+#'   snake_case, dyad-attribute-merged edge frame, use [unnetify()] or
+#'   [as_tibble.netify()] instead.
 #' @details
 #' The melt method converts netify objects from their matrix representation to
 #' a long format data frame suitable for analysis and visualization. The output
 #' format depends on the type of netify object:
 #' \itemize{
-#'   \item Cross-sectional: Returns columns row, col, value
-#'   \item Longitudinal: Returns columns row, col, time, value
-#'   \item Multilayer: Returns columns row, col, layer, value (and time if longitudinal)
+#'   \item Cross-sectional: Returns columns `Var1`, `Var2`, `value`
+#'   \item Longitudinal: Returns columns `Var1`, `Var2`, `time`, `value`
+#'   \item Multilayer: Returns columns `Var1`, `Var2`, `layer`, `value` (and `time` if longitudinal)
 #' }
 melt.netify <- function(data, ...,
 						remove_diagonal = TRUE,
@@ -156,7 +169,7 @@ melt_matrix_base <- function(mat) {
 #' @noRd
 melt_matrix_sparse <- function(mat, remove_zeros = TRUE, remove_diagonal = TRUE) {
 	result <- melt_matrix(mat, remove_diagonal = remove_diagonal, remove_zeros = remove_zeros, na.rm = TRUE)
-	# ensure consistent column names for backward compatibility
+	# ensure consistent column names
 	names(result)[names(result) == "row"] <- "Var1"
 	names(result)[names(result) == "col"] <- "Var2"
 	return(result)
@@ -187,7 +200,7 @@ melt_list_sparse <- function(lst, remove_zeros = TRUE, remove_diagonal = TRUE) {
 	result <- do.call(rbind, results[sapply(results, nrow) > 0])
 	rownames(result) <- NULL
 
-	# reorder columns to match expected format
+	# reorder columns
 	time_col <- which(names(result) == "L1")
 	other_cols <- setdiff(seq_along(result), time_col)
 	result[c(other_cols[1:2], time_col, other_cols[3:length(other_cols)])]
@@ -208,7 +221,7 @@ melt_var_time_list <- function(var_time_list) {
 		))
 	}
 
-	# process each time period in the list (for cross-sectional, this is typically "1")
+	# process each time period in the list
 	results <- lapply(names(var_time_list), function(time_name) {
 		time_data <- var_time_list[[time_name]]
 
@@ -232,8 +245,7 @@ melt_var_time_list <- function(var_time_list) {
 			})
 			do.call(rbind, Filter(Negate(is.null), var_results))
 		} else if (is.matrix(time_data)) {
-			# this is a single matrix (shouldn't happen with proper structure)
-			# handle character matrices differently
+			# fallback single-matrix branch (character handled separately)
 			if (is.character(time_data)) {
 				df <- melt_matrix_character(time_data, remove_diagonal = TRUE)
 			} else {
@@ -251,7 +263,7 @@ melt_var_time_list <- function(var_time_list) {
 	result <- do.call(rbind, Filter(Negate(is.null), results))
 	if (!is.null(result) && nrow(result) > 0) {
 		rownames(result) <- NULL
-		# reorder columns: Var1, Var2, Var3, L1, value
+		# reorder columns
 		result[c("Var1", "Var2", "Var3", "L1", "value")]
 	} else {
 		data.frame(

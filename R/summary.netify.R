@@ -21,8 +21,20 @@
 #'     \item{\code{num_actors}}{Number of actors (or \code{num_row_actors} and
 #'       \code{num_col_actors} for bipartite networks)}
 #'     \item{\code{density}}{Proportion of possible ties that exist}
-#'     \item{\code{num_edges}}{Total number of edges (unweighted count)}
-#'     \item{\code{prop_edges_missing}}{Proportion of potential edges that are NA}
+#'     \item{\code{num_edges}}{Total number of edges (count of every
+#'       non-zero entry; for signed networks, negative-weight ties are
+#'       included alongside positive ones)}
+#'     \item{\code{prop_edges_missing}}{Proportion of potential edge dyads
+#'       that are NA. Uses the same denominator as \code{density} (off-diagonal
+#'       cells for unipartite with \code{diag_to_NA}, halved for symmetric
+#'       networks, all cells for bipartite), so
+#'       \code{density + prop_edges_missing + observed_zero_fraction = 1}.}
+#'     \item{\code{prop_unknown_edges}}{Proportion of potential edges that are
+#'       NA because they were *unobserved* at the data-entry stage (as opposed
+#'       to structurally absent or on-diagonal). Only appears when the netlet
+#'       was built with \code{missing_to_zero = FALSE}; otherwise unobserved
+#'       dyads have been filled with 0 and the column would be identically
+#'       zero.}
 #'   }
 #'
 #'   \strong{For weighted networks only:}
@@ -214,6 +226,10 @@ summary.netify <- function(object, ...) {
 		# efficient data frame creation
 		net_stats <- do.call("rbind", net_stats_list)
 		net_names <- names(netlet_list) %||% rownames(net_stats)
+		# backfill so the net identifier column is always present
+		if (is.null(net_names) || length(net_names) == 0L) {
+			net_names <- as.character(seq_len(length(netlet_list)))
+		}
 
 		net_stats <- as.data.frame(net_stats, stringsAsFactors = FALSE)
 		net_stats$net <- net_names
@@ -280,6 +296,12 @@ summary.netify <- function(object, ...) {
 		)
 		net_stats[weight_cols] <- NULL
 	}
+
+	# prop_unknown_edges only carries information when missing_to_zero is FALSE
+	mtz_all <- all(vapply(
+		attr(object, "missing_to_zero"), isTRUE, logical(1)
+	))
+	if (mtz_all) net_stats$prop_unknown_edges <- NULL
 	####
 
 	####

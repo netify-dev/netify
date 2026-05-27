@@ -82,4 +82,8 @@ plot(ego_net, point_layout = layout)
 layout <- create_radial_ego_layout(ego_net, n_rings = 5)
 plot(ego_net, point_layout = layout)
 }
+
+}
+\author{
+Cassy Dorff, Shahryar Minhas
 }

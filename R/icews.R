@@ -44,4 +44,7 @@
 #' @examples
 #' data(icews)
 #' icews[1:3, ]
+#'
+#' @author Cassy Dorff, Shahryar Minhas
+#'
 NULL

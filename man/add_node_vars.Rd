@@ -167,4 +167,6 @@ verbCoop_net <- add_node_vars(
 }
 \author{
 Colin Henry, Shahryar Minhas
+
+Cassy Dorff, Shahryar Minhas
 }

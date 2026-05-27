@@ -1,0 +1,419 @@
+---
+title: "Internals: object structure & writing custom extensions"
+author: "Cassy Dorff and Shahryar Minhas"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Internals: object structure & writing custom extensions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+    dev = "png", dpi = 150,
+    cache = FALSE,
+    echo = TRUE,
+    collapse = TRUE,
+    comment = "#>"
+)
+```
+
+This vignette is for **package developers**, **methodologists writing custom extensions**, and **anyone who wants to inspect the underlying object structure**. End-user workflows are covered in `vignette("foundations_lite", package = "netify")` and the topic-specific vignettes; this one goes one layer deeper.
+
+```{r}
+library(netify)
+data(icews)
+```
+
+## The netify object: a base R object with attributes
+
+A **netify object** is a base R matrix / 3D array / list-of-matrices with `class = "netify"` and a bundle of attributes carrying all metadata. The `netify_type` attribute records one of three shapes:
+
+| `netify_type`   | Underlying R object                         | When used                                          |
+|-----------------|---------------------------------------------|----------------------------------------------------|
+| `cross_sec`     | `[n × n]` matrix (or `[r × c]` bipartite)   | One time period                                    |
+| `longit_array`  | `[n × n × T]` array (or `[n × n × p × T]`)  | Multi-period, constant actor set                   |
+| `longit_list`   | Named list of matrices, one per time        | Multi-period, varying actor composition            |
+
+Multilayer networks insert a layer dimension (position 3) and store layer names in `attr(x, "layers")`. Mixed-directedness multilayer is supported via a vector-valued `symmetric` attribute.
+
+`dgCMatrix` inputs from the **Matrix** package are accepted but densified at construction (a one-shot cli inform is emitted); a true sparse storage backend is not yet implemented.
+
+Inspect any netify object's attribute bundle:
+
+```{r}
+net <- netify(icews[icews$year == 2010, ],
+              actor1 = "i", actor2 = "j",
+              symmetric = FALSE, weight = "verbCoop",
+              nodal_vars = "i_polity2",
+              dyad_vars  = "matlCoop")
+
+class(net)
+str(attributes(net), max.level = 1)
+```
+
+Key attributes:
+
+- `netify_type` — `"cross_sec"`, `"longit_array"`, or `"longit_list"`
+- `mode` — `"unipartite"` or `"bipartite"`
+- `symmetric` — scalar logical (or named vector for mixed-directedness multilayer)
+- `weight` — column name (or `NULL` for binary)
+- `is_binary`, `detail_weight`, `diag_to_NA`, `missing_to_zero`, `sum_dyads`
+- `layers` — character vector; length > 1 means multilayer
+- `actor_pds` — data.frame with `actor`, `min_time`, `max_time` per actor
+- `nodal_data` — data.frame with `actor`, optional `time`, and one column per nodal variable
+- `dyad_data` — **nested list**: `list[[time]][[var]] = matrix`. Cross-sec uses `"1"` as the time key.
+
+## Extracting parts
+
+| Want this | Use |
+|-----------|-----|
+| The raw matrix / array / list | `get_raw(net)` |
+| A quick numeric peek | `peek(net, from = 5, to = 5)` |
+| The full long edge data frame | `unnetify(net)` or `tidy(net)` |
+| Lean wide-to-long edge frame (no nodal merge) | `melt(net)` |
+| Graph-level stats | `summary(net)` or `glance(net)` |
+| Actor-level stats | `summary_actor(net)` |
+| Size / composition descriptors | `measurements(net)` |
+| Edge data + layout for plotting | `net_plot_data(net)$net_dfs` |
+
+`tidy()` and `glance()` are S3 methods on the broom generics — they're registered on package load if `generics` (or anything that imports it, like `broom`, `dplyr`, `tidymodels`) is installed. No hard dependency on broom.
+
+## Tidy interop
+
+If `tibble` and `broom` are installed, three tidyverse-flavored entry points are available. `as_tibble.netify` is registered against `tibble::as_tibble` via `.onLoad`, so `tibble` must be installed to use the unprefixed call; `tidy()` and `glance()` are likewise registered against the broom generics.
+
+```{r, eval = requireNamespace("tibble", quietly = TRUE) && requireNamespace("broom", quietly = TRUE)}
+library(tibble)
+library(broom)
+
+# one row per dyad (long edge frame, wrapped in a tibble)
+as_tibble(net)
+
+# broom-style tidy summary: a tibble with one row per (non-zero) dyad
+head(tidy(net))
+
+# one-row-per-network model-card summary (one row per time/layer if applicable)
+glance(net)
+```
+
+`as_tibble(net)` and `tidy(net)` share the same long-format payload as `unnetify(net)` — they differ only in whether zero-weight edges are dropped by default (`tidy()` drops them, matching the broom convention). `glance(net)` is the broom-flavored sibling of `summary(net)` — one row of graph-level statistics per network (or per (time, layer) slice for longitudinal / multilayer inputs).
+
+`as_tibble()` also has a method for `netify_comparison` objects (from `compare_networks()`), returning the per-pair `$comparisons` frame directly so you can pipe straight into `filter()` / `arrange()` / `pivot_wider()`:
+
+```{r, eval = FALSE}
+cmp <- compare_networks(list("2010" = net1, "2011" = net2))
+as_tibble(cmp)
+#> # A tibble: 1 x 5
+#>   net_i net_j metric      value p_value
+#>   <chr> <chr> <chr>       <dbl>   <dbl>
+#> 1 2011  2010  correlation 0.884      NA
+```
+
+## Predicates and descriptors
+
+For programmatic dispatch — e.g. inside a custom exporter or pipeline step — netify ships a small set of non-masking predicates and size accessors:
+
+```{r}
+# class / structure predicates
+is_netify(net)
+is_bipartite(net)          # may be masked by igraph::is_bipartite
+is_bipartite_netify(net)   # alias that won't be masked
+is_directed_netify(net)
+is_longitudinal(net)
+is_multilayer(net)
+
+# size / composition accessors
+n_actors(net)              # number of unique actors
+n_periods(net)             # number of time periods (1 for cross-sec)
+n_layers(net)              # number of layers (1 for single-layer)
+get_actor_time_info(net)   # returns the stored actor_pds: actor, min_time, max_time
+```
+
+The `_netify` suffix on `is_bipartite_netify()` and `is_directed_netify()` avoids masking the same-named predicates from `igraph` and `network`. The unsuffixed versions exist too and defer to the foreign package if a non-netify graph object is passed.
+
+## Object-level validation
+
+`validate_netify()` is the developer's pre-flight check. It walks the attribute bundle and confirms the invariants the rest of the package relies on:
+
+```{r}
+validate_netify(net, verbose = TRUE)
+```
+
+The full list of checks:
+
+- `netify_type` — one of `"cross_sec"`, `"longit_array"`, `"longit_list"`, and matches the underlying R object
+- `mode` — `"unipartite"` or `"bipartite"`
+- `symmetric_type` — scalar logical, or named logical of length `n_layers` for mixed-directedness multilayer
+- `layers_consistent` — `attr(net, "layers")` length matches the layer dimension where applicable
+- `nodal_actors_known` — every actor referenced in `nodal_data` exists in the network's actor set
+- `is_binary_consistent` — the stored `is_binary` flag matches the actual content
+- `symmetric_consistent` — if stored as symmetric, the matrix content is actually symmetric
+- `unipartite_dimnames` — row and column names agree for unipartite networks
+- `slice_dimnames_consistent` — every slice of a longitudinal array/list has dimnames in the order recorded in `actor_pds`
+- `nodal_time_known` — time keys in nodal/dyad data are a subset of the network's time axis
+
+A quick demo on a clean netlet versus one tampered to introduce a stray actor:
+
+```{r}
+# clean netlet ticks every box
+all(unlist(validate_netify(net, verbose = FALSE)))
+
+# tamper: inject a stray actor into nodal_data
+bad <- net
+nd <- attr(bad, "nodal_data")
+nd <- rbind(nd, nd[1, , drop = FALSE])
+nd$actor[nrow(nd)] <- "ZZZ_not_in_network"
+attr(bad, "nodal_data") <- nd
+
+validate_netify(bad, verbose = TRUE)
+```
+
+If a custom exporter or an internal manipulation breaks one of these, `validate_netify()` is the first place to look.
+
+## Open-cohort panels with `actor_pds`
+
+When the actor roster changes over time — entries, exits, attrition, contact-tracing windows — pass `actor_time_uniform = FALSE` and supply an `actor_pds` data.frame giving each actor's `[min_time, max_time]` window. Each period's netlet then contains only the actors whose window covers that period; densities, degree counts, and per-period actor sets respect those entry / exit boundaries.
+
+### The `actor_pds` roster, step by step
+
+Three pieces have to line up for an open-cohort netlet to be well-formed:
+
+1. **A roster** — one row per actor, with `actor`, `min_time`, `max_time`. The `[min_time, max_time]` interval is *closed* (the actor is alive in the boundary periods themselves).
+2. **An edgelist** — one row per observed interaction. Edges whose endpoints or time fall outside the roster's windows are silently dropped during construction.
+3. **`netify(actor_time_uniform = FALSE, actor_pds = roster, ...)`** — this is what tells the constructor to honor the roster instead of treating every actor as present in every period.
+
+Below, actor `a` is in the network only during periods 1-2 (enters at `t = 1`, exits after `t = 2`), and actors `d` / `e` arrive at `t = 3`. The edgelist deliberately includes a tie at `t = 2` involving `a` and ties at `t = 3` involving `d` so we can verify the period-by-period actor sets afterwards.
+
+```{r}
+set.seed(1)
+
+# roster: actors with closed-interval entry / exit times
+roster <- data.frame(
+    actor = c("a", "b", "c", "d", "e"),
+    min_time = c(1, 1, 1, 3, 3),
+    max_time = c(2, 5, 4, 5, 5)   # a exits after t = 2
+)
+
+# edges (only show up while both endpoints are in the roster)
+edges <- data.frame(
+    i = c("a", "a", "b", "c", "d", "c", "d", "e"),
+    j = c("b", "c", "c", "b", "e", "d", "e", "b"),
+    t = c(1, 2, 2, 3, 4, 3, 5, 5)
+)
+
+net_oc <- netify(edges,
+    actor1 = "i", actor2 = "j", time = "t",
+    actor_time_uniform = FALSE,
+    actor_pds = roster
+)
+
+# read the roster back off the netlet itself
+get_actor_time_info(net_oc)
+n_actors(net_oc)
+n_periods(net_oc)
+```
+
+`get_actor_time_info()` on a netify object returns the stored `actor_pds` directly (it is also the argument name on `netify()` itself, so the round trip is exact). On a raw dyad data.frame the same function *derives* the roster from observed activity — that's how you build the `actor_pds` argument in the first place.
+
+This is the standard path for open-cohort longitudinal data — panel surveys with attrition, contact-tracing chains, organizational membership over time, animal co-occurrence with births / deaths, and similar settings where treating every actor as present in every period would distort denominators.
+
+### Density and per-period actor sets
+
+The key correctness guarantee: density (and every other per-period statistic) is computed against the actor set *alive in that period*, not the union of all actors ever observed. With the roster above:
+
+- `t = 1`: actors `a`, `b`, `c` are alive (3 actors)
+- `t = 2`: actors `a`, `b`, `c` are alive (3 actors; `a`'s last period)
+- `t = 3`: actors `b`, `c`, `d`, `e` are alive (4 actors; `a` is now out, `d` / `e` enter)
+- `t = 4`: actors `b`, `c`, `d`, `e` are alive (4 actors)
+- `t = 5`: actors `b`, `d`, `e` are alive (3 actors; `c`'s last period was 4)
+
+```{r}
+oc_summary <- summary(net_oc)
+oc_summary[, c("net", "num_actors", "density", "num_edges")]
+```
+
+The period-3 denominator is **4 × 3 = 12** (directed) or **4 × 3 / 2 = 6** (symmetric), *not* 5 × 4 — actor `a` is not counted because its `max_time` is 2. This is the load-bearing invariant: density at `t = 3` excludes the actor present only in periods 1-2, so a researcher comparing densities across periods is not comparing apples to oranges.
+
+The same accounting flows into `summary_actor()`, `homophily()`, `mixing_matrix()`, and the plot helpers — open-cohort actors never show up as zero-degree placeholders in periods they did not exist.
+
+## NA versus zero in weighted networks
+
+For weighted data, the distinction between `0` (observed, but no edge / zero-valued interaction) and `NA` (unobserved / not-at-risk) is semantically important in many domains — epidemiology, animal behavior, sparse survey rosters. By default `netify(missing_to_zero = TRUE)` fills unobserved dyads with `0`. Pass `missing_to_zero = FALSE` to keep them as `NA`, in which case `summary()$prop_edges_missing` reports the non-trivial missingness fraction and downstream centrality / homophily routines propagate the NA semantics rather than silently treating the dyad as a zero-weight tie.
+
+Both `prop_edges_missing` and `prop_unknown_edges` use the same denominator as `density` — the number of *potential edge dyads* (off-diagonal for unipartite + `diag_to_NA`, halved for symmetric, all cells for bipartite). That means `density + prop_edges_missing + observed_zero_fraction = 1` is an identity, which is the property you want when you are reading them as competing fractions. The `prop_unknown_edges` column is suppressed when `missing_to_zero = TRUE` because every unobserved dyad has been filled with 0 and the value would be identically zero in every row; when present it tracks `prop_edges_missing` and serves as the "this netlet carries NA semantics" cue downstream.
+
+## Writing a custom graph-level statistic
+
+`summary(net, other_stats = list(my_stat = fn))` accepts user-supplied functions. Each function receives the **netify object** for the current time period / layer (not a stripped matrix), so you can call `netify_to_igraph()`, `peek()`, or whatever you want inside.
+
+Return a **named numeric vector** — names become column names in the output frame.
+
+```{r}
+# Example: number of weakly connected components with at least 2 nodes
+n_components_2plus <- function(net) {
+  g <- netify_to_igraph(net)
+  c(n_components_2plus = sum(igraph::components(g)$csize >= 2))
+}
+
+# Example: edge weight skewness
+weight_skew <- function(net) {
+  v <- as.vector(net)
+  v <- v[!is.na(v) & v != 0]
+  if (length(v) < 3) return(c(weight_skew = NA_real_))
+  c(weight_skew = mean((v - mean(v))^3) / (stats::sd(v)^3))
+}
+
+summary(net, other_stats = list(
+  comp = n_components_2plus,
+  skew = weight_skew
+))
+```
+
+The same `other_stats` mechanism is available in `summary_actor()`, `compare_networks()`, `homophily()`, `mixing_matrix()`, and `dyad_correlation()`. In each case the function gets called once per time period / layer / iteration as appropriate; check the function's `?` for the exact contract.
+
+## Writing a custom actor-level statistic
+
+`summary_actor(net, other_stats = list(my_stat = fn))`. The function should return a vector with one value per actor (in row order):
+
+```{r}
+# Example: per-actor mean tie weight to non-isolates
+mean_active_tie <- function(mat) {
+  apply(mat, 1, function(row) {
+    nonzero <- row[!is.na(row) & row != 0]
+    if (length(nonzero) == 0) NA_real_ else mean(nonzero)
+  })
+}
+
+head(summary_actor(net, other_stats = list(mean_active = mean_active_tie)))
+```
+
+## Reading the dyad_data nested list
+
+`attr(net, "dyad_data")` is the structure that gives netify O(1) access to per-time dyadic covariates. Its shape is:
+
+```{r}
+dd <- attr(net, "dyad_data")
+names(dd)             # cross-sec: just "1"
+names(dd[["1"]])      # one entry per dyadic variable
+str(dd[["1"]][["matlCoop"]])
+```
+
+For longitudinal networks the top level has one entry per period:
+
+```{r, eval = FALSE}
+# pseudo-structure for a 3-period network with 2 dyadic vars:
+# dd[["2010"]][["matlCoop"]]   -> n×n matrix
+# dd[["2010"]][["verbConf"]]   -> n×n matrix
+# dd[["2011"]][["matlCoop"]]   -> n×n matrix
+# ... etc.
+```
+
+If you're writing a converter (e.g., to a new modeling format), this is the structure to iterate over.
+
+## Writing a custom exporter (`to_*` function)
+
+The existing `to_amen()`, `to_lame()`, `to_dbn()`, `to_igraph()`, `to_statnet()` give you templates. (`to_lame()` is the modern AME / latent-factor handoff and emits a snippet of executable code under the binding `nl`; `to_amen()` is the historical alias and now redirects to `to_lame()`.) A new exporter generally needs to:
+
+1. Validate the netify object with `netify_check(netlet)`
+2. Branch on `attr(netlet, "netify_type")` (cross_sec / longit_array / longit_list)
+3. For multilayer, decide whether to iterate per layer (use `subset_netify(netlet, layers = X)` and return a named list) or to produce a joint structure (4D array, etc.)
+4. Pull the raw network data with `get_raw(netlet)`
+5. Pull nodal data with `attr(netlet, "nodal_data")` and align to your target package's actor order
+6. Pull dyadic data with `attr(netlet, "dyad_data")` and reshape to your target format
+7. Handle missing values according to your target package's convention (most don't accept NAs)
+
+If your target package expects per-layer outputs but takes multilayer netify inputs, the standard pattern is:
+
+```{r, eval = FALSE}
+to_mymodel <- function(netlet, ...) {
+    netify_check(netlet)
+    layer_names <- attributes(netlet)$layers
+    if (length(layer_names) > 1) {
+        out <- lapply(layer_names, function(lyr) {
+            to_mymodel(subset_netify(netlet, layers = lyr), ...)
+        })
+        names(out) <- layer_names
+        return(out)
+    }
+    # ... single-layer logic ...
+}
+```
+
+This is what `to_igraph()`, `to_statnet()`, and `to_lame()` do.
+
+## Performance characteristics
+
+| Operation | Complexity | Notes |
+|-----------|-----------|-------|
+| `netify(df)` cross-sec | O(N × E) | C++ via Rcpp; fast |
+| `netify(df, time = ...)` longit | O(N × E × T) | C++; fast |
+| `summary(net)` | O(N²) per period | igraph backend |
+| `summary_actor(net)` | O(N²) per period × per layer | igraph; closeness/betweenness dominate |
+| `summary_actor(net, bootstrap = TRUE)` | O(B × n × N²) | linear in `n_boot`; defaults to 200 |
+| `compare_networks(method = "qap")` | O(R × N²) | C++ permutations; tunable via `n_permutations` |
+| `compare_networks(method = "spectral")` | O(N³) | use `spectral_rank = round(sqrt(N))` for large nets |
+| `unnetify(net)` | O(N² × T) | use `remove_zeros = TRUE` for sparse output |
+| `melt(net)` | O(N² × T) | leaner than `unnetify`; no nodal merge |
+| `plot(net)` | O(N²) layout + O(E) render | igraph layout dominates |
+
+For networks of a few hundred actors over a dozen time periods, everything runs in seconds. The C++ routines for `netify()`, `compare_networks()` QAP, and similarity calculations handle the heaviest paths. The R-side wrappers (especially in plotting and attribute handling) are not as optimized.
+
+**Memory budget rule of thumb.** netify stores adjacencies densely: an N × N double-precision matrix is 8·N² bytes. For longitudinal stacks the cost is 8·N²·T (`longit_array`) or the sum over per-period sizes (`longit_list`, when actor composition varies). Concretely:
+
+| N | per-snapshot RAM | T = 12 (monthly year) | T = 52 (weekly year) |
+|---|------------------|-----------------------|----------------------|
+| 200    | 320 KB | 3.8 MB | 17 MB |
+| 1,000  | 8 MB   | 96 MB  | 416 MB |
+| 5,000  | 200 MB | 2.4 GB | 10 GB |
+| 10,000 | 800 MB | 9.4 GB | 41 GB |
+| 50,000 | 20 GB  | 234 GB | 1 TB  |
+
+`longit_list` netlets cost the *sum* of per-period sizes rather than `T × max(N)²`, so they pay less when actor composition is sparse over time. For 15,000-node weekly Twitter snapshots over a year (`T = 52`), a `longit_array` is ~93 GB and would not fit on a laptop; a `longit_list` whose typical-period N is much smaller is the only viable in-memory shape.
+
+Above ~10,000 actors, prefer building the netlet from an edgelist data.frame (skips the dense intermediate at construction) and consider exiting to an edge data.frame via `unnetify(net, remove_zeros = TRUE)`, or to `igraph` via `to_igraph(net)` for community detection and other large-N algorithms. `summary_actor(stats = "fast")` skips closeness / betweenness / eigen / HITS and auto-promotes when N exceeds `getOption("netify.fast_threshold", 1500L)`.
+
+**Sparse-input guard.** Passing a `Matrix::dgCMatrix` (or any `sparseMatrix`) with density < 1% and N > 5,000 aborts construction with a pointer to the edgelist path. The motivating case is a 15K × 15K follower graph at density 0.001: densifying allocates ~1.7 GB of mostly zeros, which is almost never what the caller wants. Pass `force_dense = TRUE` to override if you really do want the dense allocation.
+
+**Benchmark, three ER networks.** Wall-clock for the dense-matrix path on a representative laptop (single core, single snapshot, p = 0.01). Re-run locally with the chunk below if you want numbers for your own machine.
+
+```{r benchmark, eval = FALSE}
+library(netify)
+set.seed(1)
+bench_one <- function(N, p = 0.01) {
+  # build an ER adjacency directly as an edgelist (skips the dense intermediate)
+  i <- sample.int(N, size = round(p * N * N), replace = TRUE)
+  j <- sample.int(N, size = length(i), replace = TRUE)
+  df <- data.frame(from = i, to = j)
+
+  t0 <- Sys.time(); net <- netify(df, actor1 = "from", actor2 = "to"); t_build <- Sys.time() - t0
+  t0 <- Sys.time(); s   <- summary(net);                                 t_summary <- Sys.time() - t0
+  t0 <- Sys.time(); sa  <- summary_actor(net, stats = "fast");           t_actor_fast <- Sys.time() - t0
+  t0 <- Sys.time(); ig  <- to_igraph(net);                               t_igraph <- Sys.time() - t0
+
+  data.frame(N = N,
+             build_s = as.numeric(t_build, units = "secs"),
+             summary_s = as.numeric(t_summary, units = "secs"),
+             summary_actor_fast_s = as.numeric(t_actor_fast, units = "secs"),
+             to_igraph_s = as.numeric(t_igraph, units = "secs"))
+}
+do.call(rbind, lapply(c(1000, 5000, 10000), bench_one))
+```
+
+Indicative results (single-core, 16 GB laptop):
+
+| N      | `netify()` | `summary()` | `summary_actor(stats = "fast")` | `to_igraph()` |
+|--------|------------|-------------|---------------------------------|---------------|
+| 1,000  | < 1 s      | < 1 s       | < 1 s                           | < 1 s |
+| 5,000  | ~2 s       | ~4 s        | ~1 s                            | < 1 s |
+| 10,000 | ~2 s       | ~14 s       | ~3 s                            | ~3 s |
+
+`summary()` is dominated by the igraph-based global metrics and grows fastest; `netify()` itself stays under a few seconds even at N = 10,000 when fed an edgelist. The full `summary_actor()` (with closeness / betweenness / eigen / HITS) blows up roughly quadratically — at N = 10,000 it takes several minutes versus the few seconds shown above for the fast path. That's why the auto-promote fires by default.
+
+## See also
+
+- `vignette("foundations_lite", package = "netify")` — minimal end-to-end tour
+- `vignette("foundations", package = "netify")` — full IR walkthrough
+- `vignette("pipeline_lame_dbn", package = "netify")` — modeling handoff to amen / lame / dbn
+- `vignette("pipeline_netify_ergm", package = "netify")` — modeling handoff to ergm / statnet

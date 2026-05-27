@@ -104,4 +104,6 @@ dim(dbn_single$Y) # [n_actors, n_actors, 1, n_years]
 }
 \author{
 Shahryar Minhas
+
+Cassy Dorff, Shahryar Minhas
 }

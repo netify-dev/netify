@@ -41,13 +41,7 @@ test_that(
 	}
 )
 
-# longitudinal, symmetric weighted network
-# note that this is a strange case because the user is noting
-# the data is symmetric but the data.frame itself has
-# repeating dyads like a-b-t1 and b-a-t1, which we end up
-# counting up as separate interactions. in the case
-# of event data this might be reasonable but not
-# for every other case
+# longitudinal, symmetric weighted network with repeating dyads summed
 test_that(
 	"get_adjacency_list: longitudinal, symmetric weighted network",
 	{

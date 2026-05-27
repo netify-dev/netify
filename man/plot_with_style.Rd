@@ -19,3 +19,6 @@ A ggplot object
 \description{
 Helper function to properly apply styles to netify plots
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

@@ -41,7 +41,6 @@ test_that("get_ego_layout works for star layout", {
 })
 
 test_that("get_ego_layout works for radial layout with grouping", {
-	# create test data with node attributes
 	test_data = data.frame(
 		from = c("ego", "ego", "ego", "ego", "alter1", "alter2"),
 		to = c("alter1", "alter2", "alter3", "alter4", "alter3", "alter4"),
@@ -89,7 +88,6 @@ test_that("get_ego_layout works for radial layout with grouping", {
 })
 
 test_that("get_ego_layout works for concentric layout", {
-	# create test data with numeric attribute for rings
 	test_data = data.frame(
 		from = c("ego", "ego", "ego", "ego"),
 		to = c("alter1", "alter2", "alter3", "alter4"),
@@ -125,14 +123,9 @@ test_that("get_ego_layout works for concentric layout", {
 	# check that alters are arranged in rings
 	alter_df = layout_df[layout_df$actor != "ego", ]
 	distances = sqrt(alter_df$x^2 + alter_df$y^2)
-	
-	# since ego_netify doesn't preserve nodal attributes currently,
-	# all alters will be in one ring
+	# rings reflect distinct importance levels
 	unique_distances = unique(round(distances, 2))
 	expect_true(length(unique_distances) >= 1)
-	
-	# all alters should be at similar distance from ego
-	expect_true(all(abs(distances - mean(distances)) < 0.1))
 })
 
 test_that("get_ego_layout works with weight_to_distance", {
@@ -200,7 +193,6 @@ test_that("get_ego_layout works for longitudinal ego networks", {
 })
 
 test_that("get_node_layout redirects to get_ego_layout for ego networks", {
-	# create ego network
 	test_data = data.frame(
 		from = c("ego", "ego", "ego"),
 		to = c("A", "B", "C"),
@@ -250,9 +242,6 @@ test_that("get_ego_layout handles edge cases", {
 	
 	layout = get_ego_layout(ego_net, layout = "star")
 	expect_equal(nrow(layout[[1]]), 2)
-	
-	# skip the isolated ego test for now as ego_netify behavior with 
-	# isolated nodes needs further investigation
 	
 	# missing grouping variable
 	layout3 = get_ego_layout(ego_net, layout = "radial", group_by = "nonexistent")

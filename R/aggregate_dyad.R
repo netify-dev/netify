@@ -177,9 +177,8 @@ aggregate_dyad <- function(
 	weight,
 	symmetric,
 	ignore_missing = TRUE) {
-	# if symmetric, use gen_symm_id for more efficient aggregation
+	# symmetric aggregation via gen_symm_id
 	if (symmetric) {
-		# create symmetric ids
 		dyad_data$symm_id <- gen_symm_id(
 			dyad_data,
 			actor1,
@@ -190,7 +189,7 @@ aggregate_dyad <- function(
 		# aggregate by symmetric id
 		formula_str <- paste(weight, "~ symm_id")
 
-		# custom sum function that handles NAs correctly
+		# sum handler honouring ignore_missing
 		sum_func <- if (ignore_missing) {
 			function(x) sum(x, na.rm = TRUE)
 		} else {
@@ -203,7 +202,7 @@ aggregate_dyad <- function(
 			as.formula(formula_str),
 			data = dyad_data,
 			FUN = sum_func,
-			na.action = na.pass # Important: pass NAs through to the function
+			na.action = na.pass
 		)
 
 		# expand back to directed format
@@ -215,14 +214,13 @@ aggregate_dyad <- function(
 			weight
 		)
 	} else {
-		# for non-symmetric, use standard aggregation
+		# directed aggregation
 		if (is.null(time)) {
 			formula_agg <- as.formula(paste(weight, "~", actor1, "+", actor2))
 		} else {
 			formula_agg <- as.formula(paste(weight, "~", actor1, "+", actor2, "+", time))
 		}
 
-		# custom sum function that handles NAs correctly
 		sum_func <- if (ignore_missing) {
 			function(x) sum(x, na.rm = TRUE)
 		} else {
@@ -235,10 +233,10 @@ aggregate_dyad <- function(
 			formula_agg,
 			data = dyad_data,
 			FUN = sum_func,
-			na.action = na.pass # Important: pass NAs through to the function
+			na.action = na.pass
 		)
 
-		# ensure correct column order
+		# enforce column order
 		if (is.null(time)) {
 			dyad_data <- dyad_data[, c(actor1, actor2, weight)]
 		} else {
@@ -246,7 +244,6 @@ aggregate_dyad <- function(
 		}
 	}
 
-	# reset row names
 	rownames(dyad_data) <- NULL
 
 	return(dyad_data)
@@ -386,17 +383,13 @@ gen_symm_id <- function(
 		))
 	}
 
-	# extract actor columns
 	a1 <- as.character(dyad_data[[actor1]])
 	a2 <- as.character(dyad_data[[actor2]])
 
-	# vectorized approach to create sorted actor pairs
-	# this is much faster than using apply() row-by-row
-	# use pmin/pmax for element-wise min/max comparison
+	# pmin/pmax sorts each actor pair element-wise without an apply loop
 	actor_min <- pmin(a1, a2)
 	actor_max <- pmax(a1, a2)
 
-	# create base symmetric id
 	symm_id <- paste(actor_min, actor_max, sep = "_")
 
 	# append time if specified
@@ -432,7 +425,6 @@ expand_symmetric_dyads <- function(agg_result, actor1, actor2, time, weight) {
 	id_parts <- strsplit(agg_result$symm_id, "_", fixed = TRUE)
 	n_dyads <- length(id_parts)
 
-	# extract all parts at once for efficiency
 	parts_matrix <- matrix(unlist(id_parts), ncol = if (is.null(time)) 2 else 3, byrow = TRUE)
 	a1_vals <- parts_matrix[, 1]
 	a2_vals <- parts_matrix[, 2]
@@ -443,33 +435,32 @@ expand_symmetric_dyads <- function(agg_result, actor1, actor2, time, weight) {
 	n_regular <- sum(!is_self_loop)
 	n_self <- sum(is_self_loop)
 
-	# calculate total rows needed
 	total_rows <- 2 * n_regular + n_self
 
 	# build result vectors
 	if (is.null(time)) {
-		# cross-sectional case
+		# cross-sectional
 		result <- data.frame(
 			actor1 = c(
-				a1_vals[!is_self_loop], # regular dyads, direction 1
-				a2_vals[!is_self_loop], # regular dyads, direction 2
-				a1_vals[is_self_loop] # self-loops
+				a1_vals[!is_self_loop],
+				a2_vals[!is_self_loop],
+				a1_vals[is_self_loop]
 			),
 			actor2 = c(
-				a2_vals[!is_self_loop], # regular dyads, direction 1
-				a1_vals[!is_self_loop], # regular dyads, direction 2
-				a2_vals[is_self_loop] # self-loops
+				a2_vals[!is_self_loop],
+				a1_vals[!is_self_loop],
+				a2_vals[is_self_loop]
 			),
 			weight = c(
-				wt_vals[!is_self_loop], # regular dyads, direction 1
-				wt_vals[!is_self_loop], # regular dyads, direction 2
-				wt_vals[is_self_loop] # self-loops
+				wt_vals[!is_self_loop],
+				wt_vals[!is_self_loop],
+				wt_vals[is_self_loop]
 			),
 			stringsAsFactors = FALSE
 		)
 		names(result) <- c(actor1, actor2, weight)
 	} else {
-		# longitudinal case
+		# longitudinal
 		tm_vals <- parts_matrix[, 3]
 		result <- data.frame(
 			actor1 = c(

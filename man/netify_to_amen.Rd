@@ -116,6 +116,12 @@ For multilayer networks, first extract individual layers using
 
 For multilayer longitudinal models that require a 4D array
 \code{[n, n, p, T]}, see \code{\link{netify_to_dbn}} instead.
+
+\strong{Bipartite networks.} \code{amen::ame()} does not accept
+rectangular Y matrices; passing the output of \code{to_amen()} on a
+bipartite netify to \code{amen::ame()} will fail. Use
+\code{\link{netify_to_lame}} (which sets \code{mode = "bipartite"} and
+targets \code{lame::ame()}) for bipartite networks instead.
 }
 \examples{
 # Load example data
@@ -149,4 +155,6 @@ lame_data <- netify_to_amen(longit_net, lame = TRUE)
 }
 \author{
 Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+
+Cassy Dorff, Shahryar Minhas
 }

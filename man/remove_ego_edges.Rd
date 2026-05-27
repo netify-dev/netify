@@ -24,3 +24,6 @@ alter_only_net <- remove_ego_edges(ego_net)
 plot(alter_only_net)
 }
 }
+\author{
+Cassy Dorff, Shahryar Minhas
+}

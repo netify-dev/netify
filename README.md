@@ -33,7 +33,7 @@ If you're on **macOS** or **Windows** and want to avoid installing developer too
 #### ✅ Steps:
 
 1. Go to: [https://github.com/netify-dev/netify/releases](https://github.com/netify-dev/netify/releases)
-2. Click on the latest release (e.g., **v0.1.3**)
+2. Click on the latest release (e.g., **v1.5**)
 3. Download the file that matches your system
 
 #### 📦 First, install dependencies (if needed):
@@ -68,22 +68,22 @@ Most users can choose based on chip type:
 ```r
 # Example: Apple Silicon (M1/M2/M3)
 install.packages(
-  "~/Downloads/netify_0.1.3-macos-arm64.tgz", 
+  "~/Downloads/netify_1.5-macos-arm64.tgz", 
   repos = NULL, type = "mac.binary")
 
 # Example: Intel Mac
 install.packages(
-  "~/Downloads/netify_0.1.3-macos-intel.tgz", 
+  "~/Downloads/netify_1.5-macos-intel.tgz", 
   repos = NULL, type = "mac.binary")
 ```
 
 #### 🪟 Windows users:
 
-Download the `.zip` file named `netify_0.1.3-windows.zip` and install:
+Download the `.zip` file named `netify_1.5-windows.zip` and install:
 
 ```r
 install.packages(
-  "C:/path/to/netify_0.1.3-windows.zip", 
+  "C:/path/to/netify_1.5-windows.zip", 
   repos = NULL)
 ```
 
@@ -95,7 +95,7 @@ You can use the precompiled `.tgz` file, or install from source (see Option 1). 
 
 ```r
 install.packages(
-  "~/Downloads/netify_0.1.3-linux.tgz", 
+  "~/Downloads/netify_1.5-linux.tgz", 
   repos = NULL, type = "source")
 ```
 
@@ -268,6 +268,21 @@ This returns a data frame with network statistics for each time period:
 | Convert to amen | `to_amen()` | `amen_data <- to_amen(net)` |
 | Back to data frame | `unnetify()` | `df <- unnetify(net)` |
 
+
+## Scaling to large networks
+
+netify stores adjacencies as dense matrices/arrays, which keeps the API uniform but makes memory the binding constraint at large N (a single dense `N x N` slice costs `8 * N^2` bytes; e.g. ~7.6 MB at N=1K, ~191 MB at N=5K, and ~1.7 GB at N=15K). A few knobs and benchmarks to keep in mind:
+
+- **Sparse matrix guard.** Passing a `Matrix::sparseMatrix` (e.g. `dgCMatrix`) to `netify()` densifies internally. When `N > 5000` and density is under 1%, `netify()` aborts with a guidance message rather than silently allocating gigabytes. Override with `force_dense = TRUE` if you really want the dense object, or build from an edgelist `data.frame` to skip the matrix intermediate entirely.
+- **Fast actor stats.** `summary_actor()` defaults to `stats = "all"` (degree + closeness + betweenness + eigenvector + HITS). The closeness/betweenness paths dominate wall-clock at large N, so at `N >= getOption("netify.fast_threshold", 1500L)` netify auto-promotes the default call to `stats = "fast"`, which returns only the degree- and strength-style columns. Pass `stats = "all"` explicitly to force centralities, or raise the threshold via `options(netify.fast_threshold = ...)`.
+- **Indicative timings** (single laptop core, directed weighted toy nets):
+
+| N    | edges | `netify()` | `summary()` | `summary_actor(fast)` | `to_igraph()` |
+|------|------:|-----------:|------------:|----------------------:|--------------:|
+| 1000 |  ~10K |    0.08 s  |   0.6 s     |        0.6 s          |    0.1 s      |
+| 5000 |  ~50K |    0.8 s   |   4.8 s     |        4.5 s          |    0.6 s      |
+
+For 10K+ actor / weekly-slice workflows, prefer edgelist inputs, set `stats = "fast"` explicitly, and consider `to_igraph()` for any heavy centrality work.
 
 ## When you might need something else
 
