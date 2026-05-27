@@ -12,3 +12,7 @@ style_nature()
 ## Value
 
 List of plot arguments
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

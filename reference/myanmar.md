@@ -20,6 +20,10 @@ A data frame with dyadic event observations.
 
 add UCDP reference ([ucdp](https://ucdp.uu.se/))
 
+## Author
+
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r

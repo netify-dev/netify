@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Network Tools • netify</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Network Tools">
 <meta name="description" content="Provides functions for building, analyzing, and visualizing network data.">
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,13 +36,16 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/foundations.html">Foundations</a></li>
+    <li><a class="dropdown-item" href="articles/foundations_lite.html">Foundations (lite)</a></li>
     <li><a class="dropdown-item" href="articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
     <li><a class="dropdown-item" href="articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
+    <li><a class="dropdown-item" href="articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="articles/index.html">More articles...</a></li>
   </ul>
@@ -76,7 +79,7 @@
 </h2>
 <p>You have two options for installing <code>netify</code>.</p>
 <div class="section level3">
-<h3 id="id_-option-1-install-from-github-requires-build-tools">🔧 Option 1: Install from GitHub (requires build tools)<a class="anchor" aria-label="anchor" href="#id_-option-1-install-from-github-requires-build-tools"></a>
+<h3 id="wrench-option-1-install-from-github-requires-build-tools">🔧 Option 1: Install from GitHub (requires build tools)<a class="anchor" aria-label="anchor" href="#wrench-option-1-install-from-github-requires-build-tools"></a>
 </h3>
 <blockquote>
 <p>⚠️ Requires R build tools:</p>
@@ -96,17 +99,17 @@
 </h3>
 <p>If you’re on <strong>macOS</strong> or <strong>Windows</strong> and want to avoid installing developer tools (like compilers, Xcode, or Rtools), you can use our pre-built binaries from the <a href="https://github.com/netify-dev/netify/releases" class="external-link">Releases page</a>:</p>
 <div class="section level4">
-<h4 id="id_-steps">✅ Steps:<a class="anchor" aria-label="anchor" href="#id_-steps"></a>
+<h4 id="white_check_mark-steps">✅ Steps:<a class="anchor" aria-label="anchor" href="#white_check_mark-steps"></a>
 </h4>
 <ol style="list-style-type: decimal">
 <li>Go to: <a href="https://github.com/netify-dev/netify/releases" class="external-link">https://github.com/netify-dev/netify/releases</a>
 </li>
-<li>Click on the latest release (e.g., <strong>v0.1.3</strong>)</li>
+<li>Click on the latest release (e.g., <strong>v1.5</strong>)</li>
 <li>Download the file that matches your system</li>
 </ol>
 </div>
 <div class="section level4">
-<h4 id="id_-first-install-dependencies-if-needed">📦 First, install dependencies (if needed):<a class="anchor" aria-label="anchor" href="#id_-first-install-dependencies-if-needed"></a>
+<h4 id="package-first-install-dependencies-if-needed">📦 First, install dependencies (if needed):<a class="anchor" aria-label="anchor" href="#package-first-install-dependencies-if-needed"></a>
 </h4>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Install required packages if you don't already have them</span></span>
@@ -131,20 +134,20 @@
 <col width="18%">
 <col width="81%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>File</th>
 <th>For…</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>macos-arm64.tgz</code></td>
 <td>Macs with Apple Silicon (M1, M2, M3 chips) running recent macOS</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>macos-intel.tgz</code></td>
 <td>Macs with Intel chips</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>macos-asan.tgz</code></td>
 <td>Developer/debug version (for advanced users only; includes sanitizer flags)</td>
 </tr>
@@ -154,31 +157,31 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example: Apple Silicon (M1/M2/M3)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
-<span>  <span class="st">"~/Downloads/netify_0.1.3-macos-arm64.tgz"</span>, </span>
+<span>  <span class="st">"~/Downloads/netify_1.5-macos-arm64.tgz"</span>, </span>
 <span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"mac.binary"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Example: Intel Mac</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
-<span>  <span class="st">"~/Downloads/netify_0.1.3-macos-intel.tgz"</span>, </span>
+<span>  <span class="st">"~/Downloads/netify_1.5-macos-intel.tgz"</span>, </span>
 <span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"mac.binary"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="id_-windows-users">🪟 Windows users:<a class="anchor" aria-label="anchor" href="#id_-windows-users"></a>
+<h4 id="window-windows-users">🪟 Windows users:<a class="anchor" aria-label="anchor" href="#window-windows-users"></a>
 </h4>
-<p>Download the <code>.zip</code> file named <code>netify_0.1.3-windows.zip</code> and install:</p>
+<p>Download the <code>.zip</code> file named <code>netify_1.5-windows.zip</code> and install:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
-<span>  <span class="st">"C:/path/to/netify_0.1.3-windows.zip"</span>, </span>
+<span>  <span class="st">"C:/path/to/netify_1.5-windows.zip"</span>, </span>
 <span>  repos <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
 <p>Be sure to replace the file path with where you saved the download.</p>
 </div>
 <div class="section level4">
-<h4 id="id_-linux-users">🐧 Linux users:<a class="anchor" aria-label="anchor" href="#id_-linux-users"></a>
+<h4 id="penguin-linux-users">🐧 Linux users:<a class="anchor" aria-label="anchor" href="#penguin-linux-users"></a>
 </h4>
 <p>You can use the precompiled <code>.tgz</code> file, or install from source (see Option 1). Example:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
-<span>  <span class="st">"~/Downloads/netify_0.1.3-linux.tgz"</span>, </span>
+<span>  <span class="st">"~/Downloads/netify_1.5-linux.tgz"</span>, </span>
 <span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"source"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
@@ -291,7 +294,7 @@ matlConf 0.113    0 1.471 0.594 0.387
 <col width="18%">
 <col width="20%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Year</th>
 <th>Actors</th>
 <th>Density</th>
@@ -301,7 +304,7 @@ matlConf 0.113    0 1.471 0.594 0.387
 <th>Transitivity</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>2002</td>
 <td>152</td>
 <td>0.090</td>
@@ -310,7 +313,7 @@ matlConf 0.113    0 1.471 0.594 0.387
 <td>0.200</td>
 <td>0.354</td>
 </tr>
-<tr class="even">
+<tr>
 <td>2003</td>
 <td>152</td>
 <td>0.095</td>
@@ -319,7 +322,7 @@ matlConf 0.113    0 1.471 0.594 0.387
 <td>0.294</td>
 <td>0.358</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>2004</td>
 <td>152</td>
 <td>0.115</td>
@@ -328,7 +331,7 @@ matlConf 0.113    0 1.471 0.594 0.387
 <td>0.647</td>
 <td>0.391</td>
 </tr>
-<tr class="even">
+<tr>
 <td>…</td>
 <td>…</td>
 <td>…</td>
@@ -432,98 +435,98 @@ matlConf 0.113    0 1.471 0.594 0.387
 <col width="40%">
 <col width="36%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Task</th>
 <th>Function</th>
 <th>Example</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Create network</td>
 <td><code><a href="reference/netify.html">netify()</a></code></td>
 <td><code>netify(data, actor1="from", actor2="to")</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Extract ego network</td>
 <td><code><a href="reference/ego_netify.html">ego_netify()</a></code></td>
 <td><code>ego_netify(net, ego="USA")</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Create multilayer</td>
 <td><code><a href="reference/layer_netify.html">layer_netify()</a></code></td>
 <td><code>layer_netify(list(net1, net2))</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Add node data</td>
 <td><code><a href="reference/add_node_vars.html">add_node_vars()</a></code></td>
 <td><code>add_node_vars(net, node_df, actor="id")</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Add dyad data</td>
 <td><code><a href="reference/add_dyad_vars.html">add_dyad_vars()</a></code></td>
 <td><code>add_dyad_vars(net, dyad_df, actor1="from", actor2="to")</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Subset network</td>
 <td><code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code></td>
 <td><code>subset(net, time="2020")</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Get graph level summary statistics</td>
 <td><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code></td>
 <td><code>summary(net)</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Get actor level summary statistics</td>
 <td><code><a href="reference/summary_actor.html">summary_actor()</a></code></td>
 <td><code>summary_actor(net)</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Test homophily</td>
 <td><code><a href="reference/homophily.html">homophily()</a></code></td>
 <td><code>homophily(net, attribute="democracy", method="correlation")</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Create mixing matrix</td>
 <td><code><a href="reference/mixing_matrix.html">mixing_matrix()</a></code></td>
 <td><code>mixing_matrix(net, attribute="regime_type", normalized=TRUE)</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Test dyadic correlations</td>
 <td><code><a href="reference/dyad_correlation.html">dyad_correlation()</a></code></td>
 <td><code>dyad_correlation(net, dyad_vars="geographic_distance")</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Comprehensive attribute analysis</td>
 <td><code><a href="reference/attribute_report.html">attribute_report()</a></code></td>
 <td><code>attribute_report(net, node_vars=c("region", "democracy"), dyad_vars="distance")</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Compare networks</td>
 <td><code><a href="reference/compare_networks.html">compare_networks()</a></code></td>
 <td><code>compare_networks(list(net1, net2), method="all")</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Plot network</td>
 <td><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code></td>
 <td><code>plot(net)</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Convert to igraph</td>
 <td><code><a href="reference/netify_to_igraph.html">to_igraph()</a></code></td>
 <td><code>g &lt;- to_igraph(net)</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Convert to statnet/network</td>
 <td><code><a href="reference/netify_to_statnet.html">to_statnet()</a></code></td>
 <td><code>g &lt;- to_statnet(net)</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Convert to amen</td>
 <td><code><a href="reference/netify_to_amen.html">to_amen()</a></code></td>
 <td><code>amen_data &lt;- to_amen(net)</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Back to data frame</td>
 <td><code><a href="reference/unnetify.html">unnetify()</a></code></td>
 <td><code>df &lt;- unnetify(net)</code></td>
@@ -531,6 +534,56 @@ matlConf 0.113    0 1.471 0.594 0.387
 </tbody>
 </table>
 </div>
+</div>
+<div class="section level2">
+<h2 id="scaling-to-large-networks">Scaling to large networks<a class="anchor" aria-label="anchor" href="#scaling-to-large-networks"></a>
+</h2>
+<p>netify stores adjacencies as dense matrices/arrays, which keeps the API uniform but makes memory the binding constraint at large N (a single dense <code>N x N</code> slice costs <code>8 * N^2</code> bytes; e.g. ~7.6 MB at N=1K, ~191 MB at N=5K, and ~1.7 GB at N=15K). A few knobs and benchmarks to keep in mind:</p>
+<ul>
+<li>
+<strong>Sparse matrix guard.</strong> Passing a <code><a href="https://rdrr.io/pkg/Matrix/man/sparseMatrix.html" class="external-link">Matrix::sparseMatrix</a></code> (e.g. <code>dgCMatrix</code>) to <code><a href="reference/netify.html">netify()</a></code> densifies internally. When <code>N &gt; 5000</code> and density is under 1%, <code><a href="reference/netify.html">netify()</a></code> aborts with a guidance message rather than silently allocating gigabytes. Override with <code>force_dense = TRUE</code> if you really want the dense object, or build from an edgelist <code>data.frame</code> to skip the matrix intermediate entirely.</li>
+<li>
+<strong>Fast actor stats.</strong> <code><a href="reference/summary_actor.html">summary_actor()</a></code> defaults to <code>stats = "all"</code> (degree + closeness + betweenness + eigenvector + HITS). The closeness/betweenness paths dominate wall-clock at large N, so at <code>N &gt;= getOption("netify.fast_threshold", 1500L)</code> netify auto-promotes the default call to <code>stats = "fast"</code>, which returns only the degree- and strength-style columns. Pass <code>stats = "all"</code> explicitly to force centralities, or raise the threshold via <code>options(netify.fast_threshold = ...)</code>.</li>
+<li>
+<strong>Indicative timings</strong> (single laptop core, directed weighted toy nets):</li>
+</ul>
+<table class="table">
+<colgroup>
+<col width="7%">
+<col width="9%">
+<col width="15%">
+<col width="17%">
+<col width="30%">
+<col width="19%">
+</colgroup>
+<thead><tr>
+<th>N</th>
+<th align="right">edges</th>
+<th align="right"><code><a href="reference/netify.html">netify()</a></code></th>
+<th align="right"><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code></th>
+<th align="right"><code>summary_actor(fast)</code></th>
+<th align="right"><code><a href="reference/netify_to_igraph.html">to_igraph()</a></code></th>
+</tr></thead>
+<tbody>
+<tr>
+<td>1000</td>
+<td align="right">~10K</td>
+<td align="right">0.08 s</td>
+<td align="right">0.6 s</td>
+<td align="right">0.6 s</td>
+<td align="right">0.1 s</td>
+</tr>
+<tr>
+<td>5000</td>
+<td align="right">~50K</td>
+<td align="right">0.8 s</td>
+<td align="right">4.8 s</td>
+<td align="right">4.5 s</td>
+<td align="right">0.6 s</td>
+</tr>
+</tbody>
+</table>
+<p>For 10K+ actor / weekly-slice workflows, prefer edgelist inputs, set <code>stats = "fast"</code> explicitly, and consider <code><a href="reference/netify_to_igraph.html">to_igraph()</a></code> for any heavy centrality work.</p>
 </div>
 <div class="section level2">
 <h2 id="when-you-might-need-something-else">When you might need something else<a class="anchor" aria-label="anchor" href="#when-you-might-need-something-else"></a>

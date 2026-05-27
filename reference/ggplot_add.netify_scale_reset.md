@@ -28,3 +28,7 @@ ggplot_add(object, plot, ...)
 ## Value
 
 A ggplot object with scale resets applied
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

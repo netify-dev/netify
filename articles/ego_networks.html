@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Ego Networks • netify</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Ego Networks">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,13 +34,16 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
+    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Foundations (lite)</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
     <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -69,7 +72,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-03-29</h4>
+            <h4 data-toc-skip class="date">2026-05-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/ego_networks.Rmd" class="external-link"><code>vignettes/ego_networks.Rmd</code></a></small>
       <div class="d-none name"><code>ego_networks.Rmd</code></div>
@@ -134,13 +137,12 @@ network data. You can study:</p>
 <p>We’ll use data from the Integrated Crisis Early Warning System
 (ICEWS) to demonstrate:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Load ICEWS data</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create a network of verbal cooperation between countries</span></span>
+<span><span class="co"># verbal cooperation between countries</span></span>
 <span><span class="va">netlet</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews</span>,</span>
-<span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>, </span>
+<span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
 <span>    time <span class="op">=</span> <span class="st">"year"</span>,</span>
 <span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span>,</span>
 <span>    nodal_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"i_polity2"</span>, <span class="st">"i_log_gdp"</span>, <span class="st">'i_region'</span><span class="op">)</span>,</span>
@@ -152,14 +154,12 @@ network data. You can study:</p>
 <p>The <code><a href="../reference/ego_netify.html">ego_netify()</a></code> function makes extraction
 straightforward:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Extract Pakistan's ego network</span></span>
-<span><span class="va">pakistan_ego_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ego_netify.html">ego_netify</a></span><span class="op">(</span></span>
-<span>    <span class="va">netlet</span>, </span>
+<code class="sourceCode R"><span><span class="va">pakistan_ego_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ego_netify.html">ego_netify</a></span><span class="op">(</span></span>
+<span>    <span class="va">netlet</span>,</span>
 <span>    ego <span class="op">=</span> <span class="st">"Pakistan"</span></span>
 <span>    <span class="op">)</span></span>
 <span></span>
-<span><span class="co"># That's it! You now have Pakistan's ego network across all years</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">pakistan_ego_net</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -169,16 +169,15 @@ straightforward:</p>
 <h3 id="network-statistics">1. Network Statistics<a class="anchor" aria-label="anchor" href="#network-statistics"></a>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Get network-level stats</span></span>
-<span><span class="va">ngbd_summ</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">ngbd_summ</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ngbd_summ</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    net num_actors   density num_edges prop_edges_missing mean_edge_weight</span></span>
-<span><span class="co">#&gt; 1 2002         33 0.8049242       850                  0         182.9545</span></span>
-<span><span class="co">#&gt; 2 2003         28 0.9312169       704                  0         285.6905</span></span>
-<span><span class="co">#&gt; 3 2004         49 0.7891156      1856                  0         101.3461</span></span>
-<span><span class="co">#&gt; 4 2005         44 0.8985201      1700                  0         138.4968</span></span>
-<span><span class="co">#&gt; 5 2006         40 0.8846154      1380                  0         150.0731</span></span>
-<span><span class="co">#&gt; 6 2007         39 0.9082321      1346                  0         182.9852</span></span>
+<span><span class="co">#&gt; 1 2002         33 0.8049242       425                  0         182.9545</span></span>
+<span><span class="co">#&gt; 2 2003         28 0.9312169       352                  0         285.6905</span></span>
+<span><span class="co">#&gt; 3 2004         49 0.7891156       928                  0         101.3461</span></span>
+<span><span class="co">#&gt; 4 2005         44 0.8985201       850                  0         138.4968</span></span>
+<span><span class="co">#&gt; 5 2006         40 0.8846154       690                  0         150.0731</span></span>
+<span><span class="co">#&gt; 6 2007         39 0.9082321       673                  0         182.9852</span></span>
 <span><span class="co">#&gt;   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition</span></span>
 <span><span class="co">#&gt; 1       541.2426               16.0               0            5760  0.08270328</span></span>
 <span><span class="co">#&gt; 2       718.2698               43.5               0            5937  0.08521930</span></span>
@@ -200,8 +199,7 @@ density persists. This isn’t a hub-and-spoke pattern where Pakistan
 connects otherwise isolated actors; it’s a dense web where multilateral
 dynamics likely matter.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Visualize trends</span></span>
-<span><span class="fu"><a href="../reference/plot_graph_stats.html">plot_graph_stats</a></span><span class="op">(</span><span class="va">ngbd_summ</span><span class="op">)</span> <span class="op">+</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_graph_stats.html">plot_graph_stats</a></span><span class="op">(</span><span class="va">ngbd_summ</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_x_discrete</a></span><span class="op">(</span></span>
 <span>        breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">2002</span>, <span class="fl">2014</span>, by <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
@@ -217,8 +215,7 @@ neighborhood rather than structural holes Pakistan could exploit.</p>
 <h3 id="actor-level-analysis">2. Actor-Level Analysis<a class="anchor" aria-label="anchor" href="#actor-level-analysis"></a>
 </h3>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Who matters in Pakistan's network?</span></span>
-<span><span class="va">ngbd_actor_summ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">ngbd_actor_summ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ngbd_actor_summ</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         actor time degree prop_ties strength_sum strength_avg strength_std</span></span>
 <span><span class="co">#&gt; 1    Pakistan 2002     32 0.9696970        10766    336.43750    671.72383</span></span>
@@ -240,8 +237,7 @@ important actors. China’s high and growing eigenvector centrality
 reflects not just bilateral ties with Pakistan but its connections to
 other key players in Pakistan’s neighborhood.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Track key players over time</span></span>
-<span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span><span class="va">ngbd_actor_summ</span>, </span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span><span class="va">ngbd_actor_summ</span>,</span>
 <span>    across_actor<span class="op">=</span><span class="cn">FALSE</span>,</span>
 <span>    specific_actors<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'United States'</span>, <span class="st">'China'</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
@@ -271,18 +267,17 @@ maintaining presence.</p>
 <p>For clearer visualization of alter-alter relationships, remove the
 ego’s edges—we already know everyone connects to Pakistan:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Add node statistics for visualization</span></span>
+<code class="sourceCode R"><span><span class="co"># attach actor stats so we can map them to node aesthetics</span></span>
 <span><span class="va">pakistan_ego_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span>
 <span>    <span class="va">pakistan_ego_net</span>,</span>
 <span>    <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span>,</span>
 <span>    <span class="st">"actor"</span>, <span class="st">"time"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Remove ego edges for cleaner visualization</span></span>
+<span><span class="co"># strip ties incident to ego so the alter-alter structure stands on its own</span></span>
 <span><span class="va">pakistan_no_ego_edges</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/remove_ego_edges.html">remove_ego_edges</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create a more informative plot</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pakistan_no_ego_edges</span>,</span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pakistan_no_ego_edges</span>,</span>
 <span>    layout <span class="op">=</span> <span class="st">"hierarchical"</span>,  </span>
 <span>    node_size_by <span class="op">=</span> <span class="st">"i_log_gdp"</span>,</span>
 <span>    node_size_label <span class="op">=</span> <span class="st">"Log(GDP)"</span>,</span>
@@ -315,25 +310,27 @@ occupying central positions.</p>
 </h3>
 <p>One strength of ego network analysis is systematic comparison:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Extract multiple ego networks</span></span>
-<span><span class="va">powers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"United States"</span>, <span class="st">"China"</span>, <span class="st">"Russian Federation"</span>, <span class="st">"India"</span>, <span class="st">"Pakistan"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">powers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"United States"</span>, <span class="st">"China"</span>, <span class="st">"Russian Federation"</span>, <span class="st">"India"</span>, <span class="st">"Pakistan"</span><span class="op">)</span></span>
 <span><span class="va">ego_networks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">powers</span>, <span class="kw">function</span><span class="op">(</span><span class="va">country</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="../reference/ego_netify.html">ego_netify</a></span><span class="op">(</span><span class="va">netlet</span>, ego <span class="op">=</span> <span class="va">country</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">ego_networks</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">powers</span></span>
 <span></span>
-<span><span class="co"># Compare network properties</span></span>
 <span><span class="va">summaries</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">ego_networks</span>, <span class="va">summary</span><span class="op">)</span></span>
 <span><span class="va">comparison_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">summaries</span>, .id <span class="op">=</span> <span class="st">"country"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Visualize differences</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">comparison_df</span>, </span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">comparison_df</span>,</span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">net</span>, y <span class="op">=</span> <span class="va">density</span>, color <span class="op">=</span> <span class="va">country</span>, group <span class="op">=</span> <span class="va">country</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Ego Network Density Over Time"</span>,</span>
 <span>         subtitle <span class="op">=</span> <span class="st">"How interconnected are different countries' diplomatic neighborhoods?"</span>,</span>
 <span>         x <span class="op">=</span> <span class="st">"Year"</span>, y <span class="op">=</span> <span class="st">"Density"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>        panel.border <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.position <span class="op">=</span> <span class="st">"top"</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
 <p><img src="ego_networks_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="672"></p>
 <p>Pakistan and India maintain the highest density—their partners are
 highly interconnected. The US shows lower density, suggesting more of a
@@ -346,14 +343,12 @@ alliances during this period.</p>
 <p>Do birds of a feather flock together? Let’s test if similar regime
 types cluster:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Test regime type homophily</span></span>
-<span><span class="va">pakistan_homophily</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/homophily.html">homophily</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">pakistan_homophily</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/homophily.html">homophily</a></span><span class="op">(</span></span>
 <span>    <span class="va">pakistan_ego_net</span>,</span>
 <span>    attribute <span class="op">=</span> <span class="st">"i_polity2"</span>,</span>
 <span>    method <span class="op">=</span> <span class="st">"correlation"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Visualize over time</span></span>
 <span><span class="fu"><a href="../reference/plot_homophily.html">plot_homophily</a></span><span class="op">(</span><span class="va">pakistan_homophily</span>, type <span class="op">=</span> <span class="st">"temporal"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Do Democracies Cluster in Pakistan's Network?"</span>,</span>
 <span>         subtitle <span class="op">=</span> <span class="st">"Testing regime type homophily over time"</span><span class="op">)</span></span></code></pre></div>
@@ -367,13 +362,12 @@ Geopolitics seems to override ideological alignment.</p>
 </h3>
 <p>Sometimes you want to focus on only the strongest relationships:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Default includes all connections</span></span>
+<code class="sourceCode R"><span><span class="co"># default includes all connections</span></span>
 <span><span class="va">pakistan_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ego_netify.html">ego_netify</a></span><span class="op">(</span><span class="va">netlet</span>, ego <span class="op">=</span> <span class="st">"Pakistan"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Only strong connections (threshold = 50 cooperation events)</span></span>
+<span><span class="co"># only strong connections (threshold = 50 cooperation events)</span></span>
 <span><span class="va">pakistan_strong</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ego_netify.html">ego_netify</a></span><span class="op">(</span><span class="va">netlet</span>, ego <span class="op">=</span> <span class="st">"Pakistan"</span>, threshold <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Compare sizes</span></span>
 <span><span class="va">all_size</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pakistan_all</span><span class="op">)</span><span class="op">$</span><span class="va">num_actors</span><span class="op">)</span></span>
 <span><span class="va">strong_size</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pakistan_strong</span><span class="op">)</span><span class="op">$</span><span class="va">num_actors</span><span class="op">)</span></span>
 <span></span>
@@ -405,19 +399,17 @@ Geopolitics seems to override ideological alignment.</p>
 <p>Networks of cooperation and conflict often follow different
 logics:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create a conflict network</span></span>
-<span><span class="va">conflict_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">conflict_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
 <span>    time <span class="op">=</span> <span class="st">"year"</span>,</span>
 <span>    weight <span class="op">=</span> <span class="st">"verbConf"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Compare cooperation vs conflict ego networks</span></span>
+<span><span class="co"># cooperation vs conflict ego networks for Pakistan</span></span>
 <span><span class="va">pak_coop_ego</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ego_netify.html">ego_netify</a></span><span class="op">(</span><span class="va">netlet</span>, ego <span class="op">=</span> <span class="st">"Pakistan"</span><span class="op">)</span></span>
 <span><span class="va">pak_conf_ego</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ego_netify.html">ego_netify</a></span><span class="op">(</span><span class="va">conflict_net</span>, ego <span class="op">=</span> <span class="st">"Pakistan"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Summarize differences</span></span>
 <span><span class="va">coop_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pak_coop_ego</span><span class="op">)</span></span>
 <span><span class="va">conf_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pak_conf_ego</span><span class="op">)</span></span>
 <span></span>
@@ -462,10 +454,9 @@ bilateral while cooperation tends to be multilateral.</p>
 </h3>
 <p>How stable are relationships over time?</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Analyze year-to-year changes</span></span>
-<span><span class="va">pakistan_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span>, what <span class="op">=</span> <span class="st">"edges"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">pakistan_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">pakistan_ego_net</span>, what <span class="op">=</span> <span class="st">"edges"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Look at a specific transition</span></span>
+<span><span class="co"># zoom in on one transition</span></span>
 <span><span class="va">changes_2010_2011</span> <span class="op">&lt;-</span> <span class="va">pakistan_comparison</span><span class="op">$</span><span class="va">edge_changes</span><span class="op">$</span><span class="va">`2010_vs_2011`</span></span>
 <span></span>
 <span><span class="va">stability_ratio</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span></span>
@@ -490,10 +481,10 @@ bilateral while cooperation tends to be multilateral.</p>
 </tr></thead>
 <tbody><tr class="odd">
 <td align="left">2010 to 2011</td>
-<td align="right">114</td>
-<td align="right">204</td>
-<td align="right">324</td>
-<td align="right">0.614</td>
+<td align="right">444</td>
+<td align="right">720</td>
+<td align="right">512</td>
+<td align="right">0.416</td>
 </tr></tbody>
 </table>
 <p>A stability ratio of 0.614 indicates moderate turnover—about 40% of
@@ -505,17 +496,14 @@ relationships don’t persist year-to-year.</p>
 <p>How do the US and China structure their diplomatic neighborhoods
 differently?</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Extract ego networks</span></span>
-<span><span class="va">us_ego</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ego_netify.html">ego_netify</a></span><span class="op">(</span><span class="va">netlet</span>, ego <span class="op">=</span> <span class="st">"United States"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">us_ego</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ego_netify.html">ego_netify</a></span><span class="op">(</span><span class="va">netlet</span>, ego <span class="op">=</span> <span class="st">"United States"</span><span class="op">)</span></span>
 <span><span class="va">china_ego</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ego_netify.html">ego_netify</a></span><span class="op">(</span><span class="va">netlet</span>, ego <span class="op">=</span> <span class="st">"China"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Compare structural properties</span></span>
 <span><span class="va">structural_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"US"</span> <span class="op">=</span> <span class="va">us_ego</span>, <span class="st">"China"</span> <span class="op">=</span> <span class="va">china_ego</span><span class="op">)</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"US"</span> <span class="op">=</span> <span class="va">us_ego</span>, <span class="st">"China"</span> <span class="op">=</span> <span class="va">china_ego</span><span class="op">)</span>,</span>
 <span>    what <span class="op">=</span> <span class="st">'structure'</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Summarize average properties</span></span>
 <span><span class="va">comp_summary</span> <span class="op">&lt;-</span> <span class="va">structural_comp</span><span class="op">$</span><span class="va">summary</span></span>
 <span><span class="va">avg_props</span> <span class="op">&lt;-</span> <span class="va">comp_summary</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">network</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -554,20 +542,16 @@ hub-and-spoke pattern. China’s denser network suggests its partners are
 more interconnected, potentially reflecting regional concentration.</p>
 <p>Let’s look at the temporal patterns:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Get temporal summaries for each ego network</span></span>
-<span><span class="va">us_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">us_ego</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">us_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">us_ego</span><span class="op">)</span></span>
 <span><span class="va">china_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">china_ego</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Combine for visualization</span></span>
 <span><span class="va">temporal_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
 <span>    <span class="va">us_summary</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>network <span class="op">=</span> <span class="st">"US"</span><span class="op">)</span>,</span>
 <span>    <span class="va">china_summary</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>network <span class="op">=</span> <span class="st">"China"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Extract year from net column (assuming format like "2002", "2003", etc.)</span></span>
 <span><span class="va">temporal_comparison</span><span class="op">$</span><span class="va">year</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">temporal_comparison</span><span class="op">$</span><span class="va">net</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Density comparison</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">temporal_comparison</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">year</span>, y <span class="op">=</span> <span class="va">density</span>, color <span class="op">=</span> <span class="va">network</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
@@ -575,13 +559,16 @@ more interconnected, potentially reflecting regional concentration.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Ego Network Density: US vs China"</span>,</span>
 <span>         subtitle <span class="op">=</span> <span class="st">"China's increasing density reflects growing multilateral engagement"</span>,</span>
 <span>         x <span class="op">=</span> <span class="st">"Year"</span>, y <span class="op">=</span> <span class="st">"Density"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"top"</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>        panel.border <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.position <span class="op">=</span> <span class="st">"top"</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
 <p><img src="ego_networks_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="672"></p>
 <p>Now let’s examine how similar their cooperation patterns are:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compare 2012 networks</span></span>
-<span><span class="va">comp_2012</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">comp_2012</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>        <span class="st">"US_2012"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">us_ego</span>, time <span class="op">=</span> <span class="st">"2012"</span><span class="op">)</span>,</span>
 <span>        <span class="st">"China_2012"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">china_ego</span>, time <span class="op">=</span> <span class="st">"2012"</span><span class="op">)</span></span>
@@ -590,11 +577,9 @@ more interconnected, potentially reflecting regional concentration.</p>
 <span>    method <span class="op">=</span> <span class="st">"all"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Extract key statistics</span></span>
 <span><span class="va">edge_stats</span> <span class="op">&lt;-</span> <span class="va">comp_2012</span><span class="op">$</span><span class="va">summary</span></span>
 <span><span class="va">edge_changes</span> <span class="op">&lt;-</span> <span class="va">comp_2012</span><span class="op">$</span><span class="va">edge_changes</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
-<span><span class="co"># Create summary table</span></span>
 <span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
 <span>  Metric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Edge correlation"</span>, <span class="st">"Jaccard similarity"</span>, </span>
 <span>             <span class="st">"Unique to US"</span>, <span class="st">"Unique to China"</span>, <span class="st">"Shared"</span><span class="op">)</span>,</span>

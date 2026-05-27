@@ -1,7 +1,5 @@
 # Helpful Resources
 
-## Helpful Resources
-
 Greetings! This list of resources is not meant to be exhaustive. There
 is a lot of great network research out there that is not included below!
 We have tried to share a brief list of resources relevant to
@@ -9,9 +7,9 @@ quantitative political science researchers of two main types: (1)
 new(ish) to networks users and (2) researchers focused on studying
 networks and conflict.
 
-### New to networks
+## New to networks
 
-#### Overview Books
+### Overview Books
 
 - Larson, J. M. (2024). *Designing empirical social networks research*.
   Cambridge University Press.
@@ -25,7 +23,7 @@ networks and conflict.
 - Wasserman, S., & Faust, K. (1994). *Social network analysis: Methods
   and applications*.
 
-#### Academic Articles
+### Academic Articles
 
 - Cranmer, S. J., & Desmarais, B. A. (2016). A critique of dyadic
   design. *International Studies Quarterly*, 60(2), 355-362.
@@ -41,7 +39,7 @@ networks and conflict.
   & Ward, M. D. (2022). Taking dyads seriously. *Political Science
   Research and Methods*, 10(4), 703-721.
 
-### Networks & Conflict
+## Networks & Conflict
 
 - Dorff, C., Gallop, M., & Minhas, S. (2020). Networks of violence:
   Predicting conflict in Nigeria. *The Journal of Politics*, 82(2),
@@ -54,7 +52,7 @@ networks and conflict.
 - Larson, J. M. (2021). Networks of conflict and cooperation. *Annual
   Review of Political Science*, 24, 89-107.
 
-### Model/Approach Specific
+## Model/Approach Specific
 
 - Cranmer, S. J., & Desmarais, B. A. (2011). Inferential network
   analysis with exponential random graph models. *Political Analysis*,

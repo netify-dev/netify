@@ -26,6 +26,7 @@ relation types: verbal cooperation, material cooperation, verbal
 conflict, and material conflict.
 
 ``` r
+
 library(netify)
 library(ggplot2)
 
@@ -51,6 +52,7 @@ We create a single directed, weighted network representing verbal
 cooperation over time.
 
 ``` r
+
 verbal_net = netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
@@ -63,7 +65,7 @@ verbal_net = netify(
     output_format = "longit_array"
 )
 
-print(verbal_net)
+verbal_net
 ```
 
 Key choices:
@@ -82,6 +84,7 @@ Key choices:
 Before modeling, it’s worth checking basic properties.
 
 ``` r
+
 # quick summary
 net_summary = summary(verbal_net)
 head(net_summary[, c("net", "num_actors", "density", "num_edges", "reciprocity")])
@@ -95,6 +98,7 @@ head(net_summary[, c("net", "num_actors", "density", "num_edges", "reciprocity")
 ```
 
 ``` r
+
 # visualize a single year
 verbal_2010 = subset(verbal_net, time = "2010")
 plot(verbal_2010, add_text = FALSE)
@@ -109,17 +113,24 @@ converts a single-layer netify object into the list structure that
 [`amen::ame()`](https://rdrr.io/pkg/amen/man/ame.html) expects.
 
 ``` r
+
 amen_data = to_amen(verbal_net)
 
-# what did we get?
-cat("Y dimensions:", paste(dim(amen_data$Y), collapse = " x "), "\n")
-#> Y dimensions: 152 x 152 x 13
-cat("Xdyad dimensions:", paste(dim(amen_data$Xdyad), collapse = " x "), "\n")
-#> Xdyad dimensions: 152 x 152 x 2 x 13
-cat("Xrow dimensions:", paste(dim(amen_data$Xrow), collapse = " x "), "\n")
-#> Xrow dimensions: 152 x 2 x 13
-cat("Xcol dimensions:", paste(dim(amen_data$Xcol), collapse = " x "), "\n")
-#> Xcol dimensions: 152 x 2 x 13
+# inspect the resulting array shapes
+data.frame(
+    object = c("Y", "Xdyad", "Xrow", "Xcol"),
+    dims = c(
+        paste(dim(amen_data$Y), collapse = " x "),
+        paste(dim(amen_data$Xdyad), collapse = " x "),
+        paste(dim(amen_data$Xrow), collapse = " x "),
+        paste(dim(amen_data$Xcol), collapse = " x ")
+    )
+)
+#>   object               dims
+#> 1      Y     152 x 152 x 13
+#> 2  Xdyad 152 x 152 x 2 x 13
+#> 3   Xrow       152 x 2 x 13
+#> 4   Xcol       152 x 2 x 13
 ```
 
 The output is:
@@ -134,6 +145,7 @@ These can be plugged directly into
 [`amen::ame()`](https://rdrr.io/pkg/amen/man/ame.html):
 
 ``` r
+
 library(amen)
 
 # cross-sectional model for a single year
@@ -152,13 +164,22 @@ ame_fit = ame(
 
 ## Part 2: Longitudinal Pipeline with lame
 
-For longitudinal modeling with time-varying actor compositions, the
-`lame` package expects data as lists of matrices rather than arrays. Use
-`to_amen(netlet, lame = TRUE)`.
+For longitudinal modeling with time-varying actor compositions, use
+[`to_lame()`](https://netify-dev.github.io/netify/reference/netify_to_lame.md).
+This is a thin specialization of
+[`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)
+that (a) auto-pads ragged per-period matrices into a 3D array via
+`lame::list_to_array()`, (b) emits a ready-to-run `lame::lame()`
+snippet, and (c) provides
+[`from_lame_fit()`](https://netify-dev.github.io/netify/reference/from_lame_fit.md)
+for round-tripping posterior predictions back into a netify for
+plotting.
 
 ### When to use lame format
 
-Use `lame = TRUE` when:
+Use
+[`to_lame()`](https://netify-dev.github.io/netify/reference/netify_to_lame.md)
+when:
 
 - Actors enter and exit the network over time (e.g., new states forming,
   organizations dissolving)
@@ -167,6 +188,7 @@ Use `lame = TRUE` when:
 ### Create a network with varying actors
 
 ``` r
+
 # use longit_list format for varying actor compositions
 verbal_list = netify(
     icews,
@@ -180,51 +202,92 @@ verbal_list = netify(
     dyad_vars_symmetric = c(FALSE)
 )
 
-print(verbal_list)
+verbal_list
 ```
 
 ### Convert to lame format
 
 ``` r
-lame_data = to_amen(verbal_list, lame = TRUE)
 
-# what did we get?
-cat("Y: list of", length(lame_data$Y), "matrices\n")
-#> Y: list of 13 matrices
-cat("First period dimensions:", paste(dim(lame_data$Y[[1]]), collapse = " x "), "\n")
-#> First period dimensions: 152 x 152
-cat("Last period dimensions:", paste(dim(lame_data$Y[[length(lame_data$Y)]]), collapse = " x "), "\n")
-#> Last period dimensions: 152 x 152
+nl = to_lame(verbal_list, lame = TRUE)
+
+# inspect the shape of the returned per-period matrices
+data.frame(
+    description = c("number of periods", "first period dims", "last period dims"),
+    value = c(
+        length(nl$Y),
+        paste(dim(nl$Y[[1]]), collapse = " x "),
+        paste(dim(nl$Y[[length(nl$Y)]]), collapse = " x ")
+    )
+)
+#>         description     value
+#> 1 number of periods        13
+#> 2 first period dims 152 x 152
+#> 3  last period dims 152 x 152
 
 # check actor counts across time
-actor_counts = sapply(lame_data$Y, nrow)
-cat("\nActors per time period:\n")
-#> 
-#> Actors per time period:
-print(actor_counts)
+actor_counts = sapply(nl$Y, nrow)
+actor_counts
 #> 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 
 #>  152  152  152  152  152  152  152  152  152  152  152  152  152
 ```
 
-Each element of the list can have a different set of actors. This is the
-format `lame` expects:
+Each element of the list can have a different set of actors.
+[`to_lame()`](https://netify-dev.github.io/netify/reference/netify_to_lame.md)
+also bundles a copy-paste-ready snippet that pads the ragged list into a
+3D array with `lame::list_to_array()` and then fits `lame::lame()`:
 
 ``` r
-# fit a longitudinal latent space model with lame
+
+cat(nl$ame_call)
+#> U <- unique(unlist(lapply(nl$Y, rownames)))
+#> padded <- lame::list_to_array(actors = U, Y = nl$Y, Xdyad = nl$Xdyad, Xrow = nl$Xrow, Xcol = nl$Xcol)
+#> lame::lame(Y = padded$Y, Xdyad = padded$Xdyad, Xrow = padded$Xrow, Xcol = padded$Xcol, family = "normal", method = "mcmc", nscan = 1000, burn = 500)
+```
+
+Run that snippet to fit the model. Conceptually:
+
+``` r
+
 library(lame)
 
-lame_fit = lame(
-    Y = lame_data$Y,
-    Xdyad = lame_data$Xdyad,
-    Xrow = lame_data$Xrow,
-    Xcol = lame_data$Xcol,
-    R = 2,
-    symmetric = FALSE,
-    family = "nrm",
-    nscan = 1000, burn = 500, odens = 1,
-    plot = FALSE, print = FALSE
+U <- unique(unlist(lapply(nl$Y, rownames)))
+padded <- lame::list_to_array(actors = U, Y = nl$Y, Xdyad = nl$Xdyad,
+    Xrow = nl$Xrow, Xcol = nl$Xcol)
+
+lame_fit = lame::lame(
+    Y = padded$Y, Xdyad = padded$Xdyad,
+    Xrow = padded$Xrow, Xcol = padded$Xcol,
+    R = 2, family = "normal",
+    method = "mcmc", nscan = 1000, burn = 500
 )
 ```
+
+### Round-tripping fitted values back to netify
+
+Once a fit is in hand,
+[`from_lame_fit()`](https://netify-dev.github.io/netify/reference/from_lame_fit.md)
+pulls the posterior-mean linear predictor (or a residual / probability /
+per-cell quantile) back into a cross-sectional netify so it can be
+plotted or compared against the observed network:
+
+``` r
+
+# posterior-mean linear predictor
+pred_net = from_lame_fit(lame_fit, value = "fitted")
+plot(pred_net, style = "heatmap")
+
+# 90% per-cell credible interval bounds on the probability scale
+# (only for binary families; here for illustration)
+lo = from_lame_fit(lame_fit, value = "prob_lower", alpha = 0.05)
+hi = from_lame_fit(lame_fit, value = "prob_upper", alpha = 0.05)
+```
+
+[`from_lame_fit()`](https://netify-dev.github.io/netify/reference/from_lame_fit.md)
+auto-detects the link function: probit for `lame::ame_als()` /
+[`amen::ame()`](https://rdrr.io/pkg/amen/man/ame.html) fits, logit for
+`lame::lame()` Gibbs fits, with an explicit `link` slot taking
+precedence.
 
 ## Part 3: Multilayer Pipeline (netify to dbn)
 
@@ -235,6 +298,7 @@ Bilinear Network models. It expects a 4D array with dimensions
 ### Step 1: Create individual layer networks
 
 ``` r
+
 # verbal cooperation layer (symmetric - mutual diplomatic engagement)
 verbal_coop = netify(
     icews,
@@ -270,12 +334,13 @@ inherently symmetric (alliance status) while others are directed (trade
 exports).
 
 ``` r
+
 multi_net = layer_netify(
     list(verbal_coop, material_coop),
     layer_labels = c("Verbal", "Material")
 )
 
-print(multi_net)
+multi_net
 ```
 
 Notice that the print output shows the mixed directedness across layers.
@@ -287,6 +352,7 @@ extracts the multilayer longitudinal netify object into the exact 4D
 array format that `dbn` expects.
 
 ``` r
+
 dbn_data = to_dbn(multi_net)
 
 # what did we get?
@@ -310,6 +376,7 @@ The output structure:
 - **Xcol**: `[n_actors x n_nodal_vars x n_time]`, receiver covariates
 
 ``` r
+
 # fit a dynamic bilinear network model
 library(dbn)
 
@@ -328,6 +395,7 @@ also handles single-layer longitudinal networks by adding a layer
 dimension of size 1:
 
 ``` r
+
 dbn_single = to_dbn(verbal_coop)
 cat("Single-layer Y dimensions:", paste(dim(dbn_single$Y), collapse = " x "), "\n")
 #> Single-layer Y dimensions: 152 x 152 x 1 x 13
@@ -349,6 +417,7 @@ both symmetric and directed relations. For example:
 ### Creating mixed-directedness multilayer networks
 
 ``` r
+
 # symmetric layer: average verbal cooperation
 verbal_symm = netify(
     icews,
@@ -385,6 +454,7 @@ cat("Layer names:", attr(mixed_net, "layers"), "\n")
 When you subset to a single layer, the correct symmetry is preserved:
 
 ``` r
+
 # subset to the symmetric layer
 verbal_only = subset(mixed_net, layers = "Verbal_Symm")
 cat("Verbal layer symmetric:", attr(verbal_only, "symmetric"), "\n")
@@ -402,6 +472,7 @@ cat("Material layer symmetric:", attr(material_only, "symmetric"), "\n")
 handles mixed-directedness multilayer objects:
 
 ``` r
+
 dbn_mixed = to_dbn(mixed_net)
 cat("Y dimensions:", paste(dim(dbn_mixed$Y), collapse = " x "), "\n")
 #> Y dimensions: 152 x 152 x 2 x 13
@@ -423,6 +494,7 @@ statistical models.
 ### Why it matters
 
 ``` r
+
 # compare the two approaches
 net_zeros = netify(
     icews[icews$year == 2010, ],
@@ -473,13 +545,14 @@ dyads represent genuine zeros.
 
 ## Quick Reference: Choosing Your Export Function
 
-| Scenario                                     | Function                                                                       | Output                     |
-|----------------------------------------------|--------------------------------------------------------------------------------|----------------------------|
-| Single-layer, cross-sectional                | [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md) | list(Y, Xdyad, Xrow, Xcol) |
-| Single-layer, longitudinal (constant actors) | [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md) | 3D arrays                  |
-| Single-layer, longitudinal (varying actors)  | `to_amen(lame=TRUE)`                                                           | lists of matrices          |
-| Multilayer, longitudinal                     | [`to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md)   | 4D array `[n, n, p, T]`    |
-| Single-layer, longitudinal (dbn format)      | [`to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md)   | 4D array `[n, n, 1, T]`    |
+| Scenario | Function | Output |
+|----|----|----|
+| Single-layer, cross-sectional | [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md) | list(Y, Xdyad, Xrow, Xcol) |
+| Single-layer, longitudinal (constant actors) | [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md) | 3D arrays |
+| Single-layer, longitudinal (varying actors) | `to_lame(lame=TRUE)` | padded 3D arrays + ame_call snippet |
+| Round-trip AME/LAME fit back to netify | [`from_lame_fit()`](https://netify-dev.github.io/netify/reference/from_lame_fit.md) | netify (fitted / residual / prob / quantiles) |
+| Multilayer, longitudinal | [`to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md) | 4D array `[n, n, p, T]` |
+| Single-layer, longitudinal (dbn format) | [`to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md) | 4D array `[n, n, 1, T]` |
 
 ## tl;dr
 
@@ -491,7 +564,13 @@ layers with
 [`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md)
 when multilayer structure is needed, export with
 [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)
-or
+/
+[`to_lame()`](https://netify-dev.github.io/netify/reference/netify_to_lame.md)
+/
 [`to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md)
 depending on the target modeling package, and pass the resulting output
-directly to the model fitting function.
+(or the bundled `ame_call` snippet) directly to the model fitting
+function. After fitting,
+[`from_lame_fit()`](https://netify-dev.github.io/netify/reference/from_lame_fit.md)
+round-trips posterior predictions back into a netify so they can be
+plotted alongside the observed network.

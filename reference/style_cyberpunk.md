@@ -11,3 +11,7 @@ style_cyberpunk()
 ## Value
 
 List of plot arguments
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

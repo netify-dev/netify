@@ -8,7 +8,12 @@ weighted/unweighted) appropriately.
 ## Usage
 
 ``` r
-summary_actor(netlet, invert_weights_for_igraph = TRUE, other_stats = NULL)
+summary_actor(
+  netlet,
+  invert_weights_for_igraph = TRUE,
+  other_stats = NULL,
+  stats = c("all", "fast")
+)
 ```
 
 ## Arguments
@@ -28,6 +33,15 @@ summary_actor(netlet, invert_weights_for_igraph = TRUE, other_stats = NULL)
   Optional named list of custom functions to calculate additional
   actor-level statistics. Each function should accept a matrix and
   return a vector with one value per actor.
+
+- stats:
+
+  One of `"all"` (default) or `"fast"`. The `"fast"` path returns only
+  degree- and strength-style columns and skips closeness, betweenness,
+  eigenvector, and HITS. When the user does not pass `stats` explicitly,
+  the default auto-promotes to `"fast"` once the number of actors
+  reaches `getOption("netify.fast_threshold", 1500L)`; passing
+  `stats = "all"` explicitly always honors that request.
 
 ## Value
 
@@ -171,6 +185,7 @@ represent distances or weaker relationships, set
 Add custom metrics using the `other_stats` parameter. Each function
 receives the adjacency matrix and should return a vector with one value
 per actor:
+
 
     # Example: Maximum tie weight for each actor
     max_out <- function(mat) apply(mat, 1, max, na.rm = TRUE)

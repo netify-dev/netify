@@ -12,3 +12,7 @@ style_witcher_manticore()
 ## Value
 
 List of plot arguments
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

@@ -28,14 +28,14 @@ examples and minimal writing.
 `netify` provides a suite of primary functions to help achieve these
 goals:
 
-| Create💡                                                                            | Explore 🔎                                                                                | Advance ️🚀                                                                                  |
-|-------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
-| [`netify()`](https://netify-dev.github.io/netify/reference/netify.md)               | [`peek()`](https://netify-dev.github.io/netify/reference/peek.md)                         | [`netify_to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)       |
-| [`add_node_vars()`](https://netify-dev.github.io/netify/reference/add_node_vars.md) | [`summary_actor()`](https://netify-dev.github.io/netify/reference/summary_actor.md)       | [`netify_to_igraph()`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md)   |
-| [`add_dyad_vars()`](https://netify-dev.github.io/netify/reference/add_dyad_vars.md) | [`summary()`](https://rdrr.io/r/base/summary.html)                                        | [`netify_to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md) |
-| [`subset_netify()`](https://netify-dev.github.io/netify/reference/subset_netify.md) | [`plot_actor_stats()`](https://netify-dev.github.io/netify/reference/plot_actor_stats.md) |                                                                                             |
-|                                                                                     | [`plot_graph_stats()`](https://netify-dev.github.io/netify/reference/plot_graph_stats.md) |                                                                                             |
-|                                                                                     | [`plot()`](https://rdrr.io/r/graphics/plot.default.html)                                  |                                                                                             |
+| Create💡 | Explore 🔎 | Advance ️🚀 |
+|----|----|----|
+| [`netify()`](https://netify-dev.github.io/netify/reference/netify.md) | [`peek()`](https://netify-dev.github.io/netify/reference/peek.md) | [`netify_to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md) |
+| [`add_node_vars()`](https://netify-dev.github.io/netify/reference/add_node_vars.md) | [`summary_actor()`](https://netify-dev.github.io/netify/reference/summary_actor.md) | [`netify_to_igraph()`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md) |
+| [`add_dyad_vars()`](https://netify-dev.github.io/netify/reference/add_dyad_vars.md) | [`summary()`](https://rdrr.io/r/base/summary.html) | [`netify_to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md) |
+| [`subset_netify()`](https://netify-dev.github.io/netify/reference/subset_netify.md) | [`plot_actor_stats()`](https://netify-dev.github.io/netify/reference/plot_actor_stats.md) |  |
+|  | [`plot_graph_stats()`](https://netify-dev.github.io/netify/reference/plot_graph_stats.md) |  |
+|  | [`plot()`](https://rdrr.io/r/graphics/plot.default.html) |  |
 
 `netify` begins with the user’s data input. Our core function,
 [`netify()`](https://netify-dev.github.io/netify/reference/netify.md),
@@ -61,6 +61,7 @@ Begin by loading packages and supplying the data. We will use the
 `peacesciencer` package to grab some familiar data.
 
 ``` r
+
 # load packages
 library(netify)
 library(peacesciencer)
@@ -98,6 +99,7 @@ parameters, but the most important ones to highlight are:
   or `longit_array`).
 
 ``` r
+
 mid_long_network <- netify(
     input = cow_dyads,
     actor1 = "ccode1", actor2 = "ccode2", time = "year",
@@ -129,6 +131,7 @@ For example, lets add a logged variable measuring gdp for each node in
 the network over time:
 
 ``` r
+
 # create a vector of nodal data
 node_data <- unique(cow_dyads[, c("ccode1", "year", "wbgdppc2011est2")])
 node_data$wbgdppc2011est2_log <- log(node_data$wbgdppc2011est2)
@@ -166,6 +169,7 @@ cross-sectional. (To actually subset the netlet object and make a new
 object use netify’s `subset` function.)
 
 ``` r
+
 peek(mid_long_network,
     from = 5, to = 5,
     time = c("2009", "2010")
@@ -192,6 +196,7 @@ Next, let’s examine a few basic summary statistics about the network
 using our[`summary()`](https://rdrr.io/r/base/summary.html) function.
 
 ``` r
+
 # create data.frame that provides network-level summary stats
 # for each year of the network
 mid_long_summary <- summary(mid_long_network)
@@ -201,6 +206,7 @@ We can also make a quick visualization of network statistics over time
 using the summary statistics data frame.
 
 ``` r
+
 plot_graph_stats(mid_long_summary)
 ```
 
@@ -216,6 +222,7 @@ statistic across all actors (shown in a density plot) or for specific
 actors:
 
 ``` r
+
 # every year & every actor
 summary_actor_mids <- summary_actor(mid_long_network)
 head(summary_actor_mids)
@@ -240,6 +247,7 @@ We can look at the distribution of the statistic for all actors over
 time:
 
 ``` r
+
 # density plot across all actors
 # for each stat
 plot_actor_stats(
@@ -254,6 +262,7 @@ Or we might like to select a specific statistic to focus on across
 actors over time:
 
 ``` r
+
 # focus on closeness
 plot_actor_stats(
     summary_actor_mids,
@@ -275,6 +284,7 @@ can use the plot_actor_stats function for this as well, though it’s
 plot.
 
 ``` r
+
 # top 5 GDP countries (USA, China, Japan, Germany, India)
 top_5 <- c("2", "710", "740", "255", "750")
 
@@ -297,6 +307,7 @@ plot_actor_stats(
 We can also zoom into a specific time slice of the network:
 
 ``` r
+
 summary_df_static <- summary_actor_mids[summary_actor_mids$time == 2011, ]
 
 plot_actor_stats(
@@ -326,6 +337,7 @@ labels appear for small networks (≤15 nodes). You can disable this with
 individual parameter.
 
 ``` r
+
 # default plot with auto_format
 plot(mid_long_network,
     static_actor_positions = TRUE,
@@ -333,12 +345,10 @@ plot(mid_long_network,
 )
 ```
 
-    ## Warning: Removed 773 rows containing missing values or values outside the scale range
-    ## (`geom_segment()`).
-
 ![](foundations_files/figure-html/unnamed-chunk-12-1.png)
 
 ``` r
+
 # override specific defaults
 plot(
     mid_long_network,
@@ -347,15 +357,13 @@ plot(
 )
 ```
 
-    ## Warning: Removed 773 rows containing missing values or values outside the scale range
-    ## (`geom_segment()`).
-
 ![](foundations_files/figure-html/unnamed-chunk-12-2.png)
 
 We can also use `netify` functions to explore actor level summary
 statistics in the network graph.
 
 ``` r
+
 # add actor variables from summary_actor_mids
 mid_long_network <- add_node_vars(
     mid_long_network,
@@ -368,6 +376,7 @@ mid_long_network <- add_node_vars(
 We can quickly inspect the object with the `print` function.
 
 ``` r
+
 # print netlet obj to make sure they got added to nodal features
 print(mid_long_network)
 ```
@@ -389,6 +398,7 @@ As well as look at the attributes of the data and specify showing the
 nodal data information.
 
 ``` r
+
 # if you're curious as to where they live
 head(
     attr(
@@ -414,6 +424,7 @@ head(
     ## 6      1 0.005235602 4.953675e-03
 
 ``` r
+
 # i.e.,
 head(attributes(mid_long_network)$nodal_data)
 ```
@@ -440,6 +451,7 @@ naming convention (e.g., `node_size_by`, `node_color_by`). The legacy
 you prefer that style.
 
 ``` r
+
 # vary node size by degree
 plot(
     mid_long_network,
@@ -448,12 +460,10 @@ plot(
 )
 ```
 
-    ## Warning: Removed 773 rows containing missing values or values outside the scale range
-    ## (`geom_segment()`).
-
 ![](foundations_files/figure-html/unnamed-chunk-16-1.png)
 
 ``` r
+
 # vary node color by polyarchy
 plot(
     mid_long_network,
@@ -469,14 +479,12 @@ plot(
     ## Scale for colour is already present.
     ## Adding another scale for colour, which will replace the existing scale.
 
-    ## Warning: Removed 773 rows containing missing values or values outside the scale range
-    ## (`geom_segment()`).
-
 ![](foundations_files/figure-html/unnamed-chunk-16-2.png)
 
 We might also prefer to add labels, but only a select few:
 
 ``` r
+
 library(countrycode)
 cowns <- countrycode(
     c(
@@ -501,18 +509,10 @@ plot(
     scale_color_gradient2()
 ```
 
-    ## Scale for colour is already present.
-    ## Adding another scale for colour, which will replace the existing scale.
-
-    ## Warning: Removed 773 rows containing missing values or values outside the scale range
-    ## (`geom_segment()`).
-
-    ## Warning: Removed 839 rows containing missing values or values outside the scale range
-    ## (`geom_text_repel()`).
-
 ![](foundations_files/figure-html/unnamed-chunk-17-1.png)
 
 ``` r
+
 # or we can go with labels only
 # and remove points
 plot(
@@ -536,9 +536,6 @@ plot(
     ## ℹ Did you mean 'label_fill'?
     ## ℹ The parameter 'label_fill_by' is being ignored.
 
-    ## Warning: Removed 773 rows containing missing values or values outside the scale range
-    ## (`geom_segment()`).
-
 ![](foundations_files/figure-html/unnamed-chunk-17-2.png)
 
 ### Extracting data back to a data frame
@@ -548,6 +545,7 @@ for example, to run regressions or export to other software — use
 [`unnetify()`](https://netify-dev.github.io/netify/reference/unnetify.md):
 
 ``` r
+
 mid_long_df <- unnetify(mid_long_network)
 head(mid_long_df[, 1:5])
 ```
@@ -574,6 +572,7 @@ for the sake of convergence lets go with cross-sectional networks.
 First, prep the data:
 
 ``` r
+
 # prep data
 cow_cross <- cow_dyads |>
     group_by(ccode1, ccode2) |>
@@ -625,6 +624,7 @@ installed (`install.packages("amen")`). If `amen` is not available, the
 chunk is skipped but the rest of the vignette is unaffected.*
 
 ``` r
+
 library(amen)
 
 # prep for amen
@@ -654,6 +654,7 @@ str(mid_cross_amen)
     ##   .. ..$ : chr [1:6] "polity21" "polity22" "wbgdp2011est1" "wbgdp2011est2" ...
 
 ``` r
+
 # plug and run
 mid_amen_mod <- ame(
     Y = mid_cross_amen$Y,
@@ -679,6 +680,7 @@ is not available, the chunk is skipped but the rest of the vignette is
 unaffected.*
 
 ``` r
+
 library(ergm)
 ```
 
@@ -701,9 +703,24 @@ library(ergm)
     ## changes.
 
 ``` r
+
 # netify_to_statnet converts to a network object,
 # which is what ergm uses
 mid_cross_ergm <- netify_to_statnet(mid_cross_network)
+```
+
+    ## ! Nodal columns with "NA" detected: "polity21". Ergm terms like
+    ##   `nodecov()`/`nodematch()` will refuse to fit.
+    ## ℹ Use `drop_na_actors(net, cols = c('polity21'))` (or impute) before refitting.
+    ## This message is displayed once per session.
+
+    ## ℹ Dyad covariates attached as per-edge attributes under "capdist_e" and as
+    ##   network-level matrices under their original names ("capdist").
+    ## ℹ For `ergm::edgecov()` use the matrix name (e.g. `edgecov('capdist')`); the
+    ##   "_e" per-edge attribute is for descriptive use such as edge styling.
+    ## This message is displayed once per session.
+
+``` r
 
 # attributes should all be loaded into the
 # appropriate slot
@@ -731,6 +748,7 @@ mid_cross_ergm
     ##     capdist_e cowmidonset
 
 ``` r
+
 # set NA values to 0 for the three nodecov variables
 # this is only for demonstration purposes in the vignette/example
 # in any real analysis, carefully consider how to handle missing data
@@ -763,15 +781,10 @@ ergm_model <- ergm(
 ```
 
     ## Starting maximum pseudolikelihood estimation (MPLE):
-
     ## Obtaining the responsible dyads.
-
     ## Evaluating the predictor and response matrix.
-
     ## Maximizing the pseudolikelihood.
-
     ## Finished MPLE.
-
     ## Evaluating log-likelihood at the estimate.
 
 ## References

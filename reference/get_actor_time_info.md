@@ -1,89 +1,135 @@
-# Extract actor time range information from dyadic data
+# Extract actor time range information
 
-`get_actor_time_info` analyzes a longitudinal dyadic dataset to
-determine when each actor enters and exits the network. Entry is defined
-as the first time period in which an actor appears in any interaction
-(as either sender or receiver), and exit as the last time period.
+`get_actor_time_info` returns a per-actor data.frame of entry and exit
+times. It dispatches on the first argument:
 
 ## Usage
 
 ``` r
-get_actor_time_info(dyad_data, actor1, actor2, time)
+get_actor_time_info(x, ...)
+
+# S3 method for class 'netify'
+get_actor_time_info(x, ...)
+
+# S3 method for class 'data.frame'
+get_actor_time_info(x, actor1, actor2, time, ...)
+
+# Default S3 method
+get_actor_time_info(x, actor1, actor2, time, ...)
 ```
 
 ## Arguments
 
-- dyad_data:
+- x:
 
-  A data.frame containing longitudinal dyadic observations. Must include
-  columns for two actors and time periods. Will be coerced to data.frame
-  if a tibble or data.table is provided.
+  A netify object, or a data.frame of dyadic observations.
+
+- ...:
+
+  Unused; reserved for future methods.
 
 - actor1:
 
   Character string specifying the column name for the first actor in
-  each dyad.
+  each dyad (data.frame method only).
 
 - actor2:
 
   Character string specifying the column name for the second actor in
-  each dyad.
+  each dyad (data.frame method only).
 
 - time:
 
-  Character string specifying the column name for time periods.
+  Character string specifying the column name for time periods
+  (data.frame method only).
 
 ## Value
 
-A data.frame with three columns containing actor-level time information:
+A data.frame with three columns:
 
-- **actor**: Character vector of unique actor identifiers found in
-  either actor1 or actor2 columns
+- **actor**: Character vector of unique actor identifiers.
 
-- **min_time**: The earliest time period in which each actor appears in
-  the data (entry point)
+- **min_time**: Earliest time period the actor is in the network (entry
+  point).
 
-- **max_time**: The latest time period in which each actor appears in
-  the data (exit point)
+- **max_time**: Latest time period the actor is in the network (exit
+  point).
 
-Actors are ordered as they appear in the aggregation, not alphabetically
-or by time.
+For the netify method, this is a verbatim copy of
+`attr(x, "actor_pds")`. For the data.frame method, actors are ordered as
+they appear in the aggregation, not alphabetically or by time.
 
 ## Details
 
-The function performs the following operations:
+- If `x` is a **netify object**, it returns the stored `actor_pds`
+  attribute directly (one row per actor with `min_time` / `max_time`).
+  This is the open-cohort roster the netlet was built with — and the
+  roster every per-period statistic (density, degree, homophily) is
+  computed against.
 
-**Data processing:**
-
-1.  Combines actor1 and actor2 columns into a single nodal format
-
-2.  Aggregates by actor to find minimum and maximum time periods
-
-3.  Returns a clean data.frame with one row per unique actor
+- If `x` is a **data.frame** of dyadic observations, it computes the
+  entry / exit times from the data. Entry is defined as the first time
+  period in which an actor appears in any interaction (as either sender
+  or receiver), and exit as the last time period. Use this form to
+  prepare the `actor_pds` argument to
+  [`netify()`](https://netify-dev.github.io/netify/reference/netify.md).
 
 **Use cases:**
 
-Main usage in this package is to:
+- On a **dyad data.frame**: build the `actor_pds` argument to
+  `netify(..., actor_time_uniform = FALSE, actor_pds = ...)` for
+  open-cohort panels (panel surveys with attrition, contact-tracing
+  chains, organizational membership over time, etc.).
 
-- Preparing actor existence information for the `actor_pds` parameter in
-  [`netify()`](https://netify-dev.github.io/netify/reference/netify.md)
+- On a **netify object**: inspect the entry / exit roster the netlet is
+  currently using — useful when debugging density denominators, writing
+  custom exporters, or verifying that an open-cohort netlet has the
+  actor windows you expect.
 
-**Assumptions:**
+**Assumptions (data.frame method):**
 
 - An actor is considered "present" in any time period where they appear
-  in the data, regardless of their role (sender/receiver)
+  in the data, regardless of role (sender/receiver).
 
-- Missing values in time periods are ignored when calculating min/max
+- Missing values in time are ignored when calculating min/max.
 
-- Actors must appear in at least one non-missing time period
+- Actors must appear in at least one non-missing time period.
 
 ## Note
 
-The function assumes that presence in the data indicates network
-participation. If actors can be temporarily absent from the network
-while still being considered members, this function will not capture
-such gaps.
+The data.frame method assumes that presence in the data indicates
+network participation. If actors can be temporarily absent from the
+network while still being considered members, this method will not
+capture such gaps — supply an explicit `actor_pds` roster to
+[`netify()`](https://netify-dev.github.io/netify/reference/netify.md)
+instead.
 
 ## Author
 
 Shahryar Minhas, Ha Eun Choi
+
+Cassy Dorff, Shahryar Minhas
+
+## Examples
+
+``` r
+# data.frame input: derive the roster
+df <- data.frame(
+    i = c("a", "a", "b", "c"),
+    j = c("b", "c", "c", "a"),
+    t = c(1, 2, 2, 3)
+)
+get_actor_time_info(df, "i", "j", "t")
+#>   actor min_time max_time
+#> 1     a        1        3
+#> 2     b        1        2
+#> 3     c        2        3
+
+# netify input: read back the stored roster
+if (FALSE) { # \dontrun{
+roster <- data.frame(actor = c("a", "b"), min_time = c(1, 1), max_time = c(3, 4))
+net <- netify(df, actor1 = "i", actor2 = "j", time = "t",
+              actor_time_uniform = FALSE, actor_pds = roster)
+get_actor_time_info(net)
+} # }
+```

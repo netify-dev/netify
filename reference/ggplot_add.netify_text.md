@@ -29,3 +29,7 @@ ggplot_add(object, plot, ...)
 ## Value
 
 A ggplot object with the text layer added
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

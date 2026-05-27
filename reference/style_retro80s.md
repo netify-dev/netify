@@ -12,3 +12,7 @@ style_retro80s()
 ## Value
 
 List of plot arguments
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

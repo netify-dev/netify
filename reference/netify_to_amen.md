@@ -152,9 +152,20 @@ For multilayer longitudinal models that require a 4D array
 [`netify_to_dbn`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md)
 instead.
 
+**Bipartite networks.**
+[`amen::ame()`](https://rdrr.io/pkg/amen/man/ame.html) does not accept
+rectangular Y matrices; passing the output of `to_amen()` on a bipartite
+netify to [`amen::ame()`](https://rdrr.io/pkg/amen/man/ame.html) will
+fail. Use
+[`netify_to_lame`](https://netify-dev.github.io/netify/reference/netify_to_lame.md)
+(which sets `mode = "bipartite"` and targets `lame::ame()`) for
+bipartite networks instead.
+
 ## Author
 
 Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+
+Cassy Dorff, Shahryar Minhas
 
 ## Examples
 

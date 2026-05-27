@@ -85,6 +85,10 @@ connections are placed in inner rings.
 remains at center with a buffer zone. Preserves natural clustering while
 maintaining ego visibility.
 
+## Author
+
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r

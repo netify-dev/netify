@@ -264,6 +264,16 @@ A list of class "netify_comparison" containing:
 
   Detailed comparison matrices if return_details = TRUE
 
+- comparisons:
+
+  Long-format data frame for `what = "edges"` with one row per (network
+  pair, metric) triple. Columns: `net_i`, `net_j` (the two network
+  names), `metric` (e.g. `"correlation"`, `"jaccard"`, `"hamming"`,
+  `"qap_correlation"`, `"spectral"`, `"weight_correlation"`), `value`
+  (scalar metric), `p_value` (only populated for `qap_correlation`; `NA`
+  otherwise). Coerce to a tibble with `tibble::as_tibble(comp)` (the
+  `as_tibble` S3 method returns this frame directly).
+
 ## Details
 
 The function supports four types of comparisons:

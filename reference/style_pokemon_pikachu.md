@@ -12,3 +12,7 @@ style_pokemon_pikachu()
 ## Value
 
 List of plot arguments
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

@@ -2,8 +2,8 @@
 
 `get_ego_layout` computes node positions for ego network visualization
 using ego-centric layout algorithms. These layouts place the ego at the
-center and arrange alters in meaningful patterns around it, making the
-ego's relationships more visually apparent.
+center and arrange alters around it (radially, by concentric ring, etc.)
+so that the ego's relationships are organized around the focal node.
 
 ## Usage
 

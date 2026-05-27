@@ -53,11 +53,23 @@ A data frame with one row per network/time period containing:
 
 - `num_edges`:
 
-  Total number of edges (unweighted count)
+  Total number of edges (count of every non-zero entry; for signed
+  networks, negative-weight ties are included alongside positive ones)
 
 - `prop_edges_missing`:
 
-  Proportion of potential edges that are NA
+  Proportion of potential edge dyads that are NA. Uses the same
+  denominator as `density` (off-diagonal cells for unipartite with
+  `diag_to_NA`, halved for symmetric networks, all cells for bipartite),
+  so `density + prop_edges_missing + observed_zero_fraction = 1`.
+
+- `prop_unknown_edges`:
+
+  Proportion of potential edges that are NA because they were
+  *unobserved* at the data-entry stage (as opposed to structurally
+  absent or on-diagonal). Only appears when the netlet was built with
+  `missing_to_zero = FALSE`; otherwise unobserved dyads have been filled
+  with 0 and the column would be identically zero.
 
 **For weighted networks only:**
 
@@ -145,6 +157,7 @@ dynamics or resource distribution in networks.
 **Custom Statistics:**
 
 Add custom graph-level metrics using the `other_stats` parameter:
+
 
     # Example: Community detection
     modularity_stat <- function(mat) {

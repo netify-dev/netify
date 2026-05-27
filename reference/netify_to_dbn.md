@@ -76,6 +76,8 @@ longitudinal data.
 
 Shahryar Minhas
 
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r

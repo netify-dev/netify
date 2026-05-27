@@ -22,3 +22,7 @@ summary(object, ...)
 ## Value
 
 A summary data frame or list depending on comparison type
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

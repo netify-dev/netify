@@ -133,6 +133,7 @@ Cassy Dorff, Shahryar Minhas
 ## Examples
 
 ``` r
+
 # \donttest{
 # load example directed event data from ICEWS
 data(icews)

@@ -118,6 +118,10 @@ A data frame with dyadic observations and the following variables:
 add icews reference
 ([icews](https://dataverse.harvard.edu/dataverse/icews))
 
+## Author
+
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r

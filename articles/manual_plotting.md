@@ -1,11 +1,24 @@
 # Manual Plotting with ggplot2
 
+## tl;dr
+
+[`plot.netify()`](https://netify-dev.github.io/netify/reference/plot.netify.md)
+handles 90% of cases out of the box. This vignette is for the other 10%
+— when you want full control over geometry, layout, or combinations of
+color scales that the built-in path doesn’t expose. We cover extracting
+node and edge data, layering them with `ggplot2`, highlighting a single
+actor, layering multiple color scales, applying a ggplot theme, and
+exporting with
+[`ggsave()`](https://ggplot2.tidyverse.org/reference/ggsave.html). Have
+fun!
+
 This vignette provides an overview of how to create customizable plots
 using `ggplot2` while still using `netify` to prepare the data.
 
 Let’s load the necessary libraries.
 
 ``` r
+
 library(netify)
 library(ggplot2)
 ```
@@ -16,15 +29,17 @@ the core plotting workflow still runs; only the advanced
 edge-information section will be skipped.
 
 ``` r
+
 library(ggnewscale)
 ```
 
 ## Preparing data
 
-First lets create a `netlet` object from some dyadic data (ICEWS data)
+First let’s create a `netlet` object from some dyadic data (ICEWS data)
 using the `netify` package.
 
 ``` r
+
 # load icews data
 data(icews)
 
@@ -87,15 +102,46 @@ This is a longitudinal, weighted network with nodal and dyadic
 attributes. In a few more steps we will show how to highlight these
 attributes in the plot.
 
-Next, we use the `net_plot_data` function to create a data frame for
-`ggplot2`. `net_plot_data` extracts and sets up node and edge data from
-a `netify` object according to specified plotting arguments. It returns
-a list of different components but the most important one for users is
-the `net_dfs` element. This element contains two objects: `edge_data`
-and `nodal_data`. These are data frames that can be passed to `ggplot2`.
+## Quick start: just `plot(net)`
+
+Before reaching for `ggplot2` directly, remember that the fastest path
+to a network plot is the built-in
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) method. It
+picks a layout, draws edges, points, and (for small networks)
+auto-repelling labels, and returns a `ggplot` object you can keep
+customizing with `+` layers. Add
+[`theme_publication_netify()`](https://netify-dev.github.io/netify/reference/theme_publication_netify.md)
+to apply the netify theme:
 
 ``` r
+
+# one-liner -- works for cross-sectional or longitudinal netify objects
+set.seed(6886)
+plot(netlet) + theme_publication_netify()
+```
+
+![](manual_plotting_files/figure-html/unnamed-chunk-5-1.png)
+
+That single call is usually enough for a first look. The rest of this
+vignette shows what to do when you want **finer control** over the
+underlying data and layers — for example, swapping the layout algorithm,
+adding edge-level information that the default plot doesn’t expose, or
+combining multiple color scales with `ggnewscale`.
+
+## Going manual: extract the plot data frames
+
+When you need that finer control, use `net_plot_data` to create a data
+frame for `ggplot2`. `net_plot_data` extracts and sets up node and edge
+data from a `netify` object according to specified plotting arguments.
+It returns a list of different components but the most important one for
+users is the `net_dfs` element. This element contains two objects:
+`edge_data` and `nodal_data`. These are data frames that can be passed
+to `ggplot2`.
+
+``` r
+
 # create a data frame for plotting
+set.seed(6886)
 plot_data <- net_plot_data(netlet)
 
 # get relevant dfs
@@ -131,6 +177,7 @@ str(net_dfs)
     ##   ..$ id        : chr [1:442] "Australia_2002" "Australia_2003" "Australia_2004" "Australia_2005" ...
 
 ``` r
+
 # check the first few rows of the edge data
 head(net_dfs$edge_data)
 ```
@@ -151,6 +198,7 @@ head(net_dfs$edge_data)
     ## 6 0.1316246 -0.0063939248 -0.10525516
 
 ``` r
+
 # check the first few rows of the nodal data
 head(net_dfs$nodal_data)
 ```
@@ -181,6 +229,7 @@ use `geom_segment` and `geom_point` (or `geom_label`, `geom_text`, and
 the `ggrepel` equivalents) to plot the edges and nodes, respectively.
 
 ``` r
+
 ggplot() +
     geom_segment(
         data = net_dfs$edge_data,
@@ -206,12 +255,16 @@ ggplot() +
         color = "Polity",
         size = "Log(Pop.)"
     ) +
-    scale_color_gradient(low = "#a6bddb", high = "#014636") +
+    scale_color_viridis_c(option = "cividis") +
     facet_wrap(~time, scales = "free") +
     theme_netify()
 ```
 
-![](manual_plotting_files/figure-html/unnamed-chunk-6-1.png)
+![](manual_plotting_files/figure-html/unnamed-chunk-7-1.png)
+
+Note `scale_color_viridis_c(option = "cividis")` — a colorblind-safe
+perceptually-uniform palette. For continuous variables this is almost
+always a better default than a hand-picked two-color gradient.
 
 ### Changing the layout
 
@@ -220,7 +273,9 @@ algorithm in the `igraph` package. Users can specify other layouts as,
 for example, say that you wanted to use the `mds` algorithm instead:
 
 ``` r
+
 # create a df using mds instead
+set.seed(6886)
 plot_data_mds <- net_plot_data(
     netlet,
     list(
@@ -264,6 +319,76 @@ lapply(plot_data_mds$net_dfs, head)
     ## 83 Australia  Australia Australia_2006
     ## 84 Australia  Australia Australia_2007
 
+### Highlighting a single actor
+
+A common task: label or visually pop one specific actor in the plot.
+With the built-in
+[`plot.netify()`](https://netify-dev.github.io/netify/reference/plot.netify.md)
+you can do this directly via `highlight = "United States"` plus
+`select_text` / `select_text_display`:
+
+``` r
+
+set.seed(6886)
+plot(netlet,
+    highlight = "United States",
+    highlight_color = c("United States" = "#0A3161", "Other" = "grey70"),
+    select_text = "United States",
+    select_text_display = "United States",
+    time_filter = "2010"
+) +
+    theme_publication_netify()
+```
+
+    ## Warning: Non-positive edge weight found, ignoring all weights during
+    ## graph layout.
+
+    ## Warning in betweenness_cutoff_impl(graph = graph, vids = v, directed = directed, : Some weights are smaller than epsilon, calculations may suffer from numerical precision issues.
+    ## Source: centrality/betweenness.c:441
+
+![](manual_plotting_files/figure-html/unnamed-chunk-9-1.png)
+
+If you are assembling the plot manually from
+[`net_plot_data()`](https://netify-dev.github.io/netify/reference/net_plot_data.md),
+the same effect is one extra layer — flag the focal actor in
+`nodal_data` and add a `geom_text` (or
+[`ggrepel::geom_text_repel`](https://ggrepel.slowkow.com/reference/geom_text_repel.html))
+layer just for it. Note that
+[`net_plot_data()`](https://netify-dev.github.io/netify/reference/net_plot_data.md)
+stores actor names in the column called `name`:
+
+``` r
+
+focal <- "United States"
+nodal_focal <- subset(net_dfs$nodal_data, name == focal)
+
+ggplot() +
+    geom_segment(
+        data = net_dfs$edge_data,
+        aes(x = x1, y = y1, xend = x2, yend = y2),
+        color = "lightgrey", alpha = .2
+    ) +
+    geom_point(
+        data = net_dfs$nodal_data,
+        aes(x = x, y = y),
+        color = "grey60", size = 2
+    ) +
+    geom_point(
+        data = nodal_focal,
+        aes(x = x, y = y),
+        color = "#0A3161", size = 4
+    ) +
+    geom_text(
+        data = nodal_focal,
+        aes(x = x, y = y, label = name),
+        nudge_y = .05, fontface = "bold"
+    ) +
+    facet_wrap(~time, scales = "free") +
+    theme_netify()
+```
+
+![](manual_plotting_files/figure-html/unnamed-chunk-10-1.png)
+
 ### Add Edge Information
 
 So far, we have focused on using color to convey information about nodal
@@ -275,6 +400,7 @@ when higher than average levels of material conflict occur in the
 network. First, let’s create the variable in the edge data.
 
 ``` r
+
 library(dplyr)
 ```
 
@@ -290,6 +416,7 @@ library(dplyr)
     ##     intersect, setdiff, setequal, union
 
 ``` r
+
 # create high_matlConf variable
 net_dfs$edge_data <- net_dfs$edge_data |>
     group_by(time) |>
@@ -322,9 +449,10 @@ Now that we have the new variable in the data.frame, we can plot by it
 but note that we now need a color aesthetic for both points and
 segments, even though `ggplot2` only supports one legend by aesthetic by
 default. We can get around this by using the `new_scale_color` function
-from the \``ggnewscale` package.
+from the `ggnewscale` package.
 
 ``` r
+
 # color line segments by this new variable
 ggplot() +
     geom_segment(
@@ -353,21 +481,55 @@ ggplot() +
             color = i_polity2
         )
     ) +
-    scale_color_gradient(
-        name = "Polity",
-        low = "#a6bddb", high = "#014636"
-    ) +
+    scale_color_viridis_c(name = "Polity", option = "cividis") +
     labs(
         size = "Log(Pop.)"
     ) +
     facet_wrap(~time, scales = "free") +
-    theme_netify() +
-    theme(
-        legend.position = "right"
-    )
+    theme_publication_netify() +
+    theme(legend.position = "right")
 ```
 
-![](manual_plotting_files/figure-html/unnamed-chunk-9-1.png)
+![](manual_plotting_files/figure-html/unnamed-chunk-12-1.png)
+
+## Saving and exporting figures
+
+Once a plot is laid out the way you want, export it with
+[`ggsave()`](https://ggplot2.tidyverse.org/reference/ggsave.html). The
+function writes whatever ggplot was last printed (or whichever ggplot
+object you pass via `plot=`) to disk. A vector format (PDF or SVG) holds
+up at any size; for the web a PNG at 300 dpi is fine.
+
+``` r
+
+# last plot rendered
+ggsave("icews_network.pdf", width = 9, height = 8)
+
+# or pass an explicit plot object
+p <- plot(netlet, time_filter = "2010") + theme_publication_netify()
+ggsave("icews_2010.png", plot = p, width = 7, height = 6, dpi = 300)
+```
+
+### Colorblind-safe palette guidance
+
+A quick reference for picking colors that survive both colorblindness
+and grayscale printing:
+
+- **Continuous variables** — use
+  [`scale_color_viridis_c()`](https://ggplot2.tidyverse.org/reference/scale_viridis.html)
+  /
+  [`scale_fill_viridis_c()`](https://ggplot2.tidyverse.org/reference/scale_viridis.html).
+  The `viridis`, `magma`, `plasma`, and `cividis` options are all
+  perceptually uniform and colorblind-safe; `cividis` is the safest for
+  the broadest set of color vision deficiencies and also prints well in
+  black & white.
+- **Categorical variables (≤8 levels)** — use ColorBrewer’s `Set2`,
+  `Dark2`, or `Paired`. Pass `palette = "Set2"` to
+  [`scale_color_brewer()`](https://ggplot2.tidyverse.org/reference/scale_brewer.html),
+  or `node_color_palette = "Set2"` to
+  [`plot.netify()`](https://netify-dev.github.io/netify/reference/plot.netify.md).
+- **Two-class highlights** — pair a strong color with neutral grey, as
+  in the United States highlight example above (`#0A3161` vs `grey70`).
 
 ## References
 

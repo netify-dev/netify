@@ -132,7 +132,7 @@ print(net)
 #> • # Unique Actors: 152
 #> Network Summary Statistics:
 #>           dens miss   mean recip trans
-#> verbCoop 0.435    0 18.134 0.982 0.639
+#> verbCoop 0.435    0 18.134 0.982 0.646
 #> • Nodal Features: None
 #> • Dyad Features: matlCoop
 
@@ -155,8 +155,8 @@ print(net_pivoted)
 #> • Cross-Sectional
 #> • # Unique Actors: 152
 #> Network Summary Statistics:
-#>           dens   miss  mean recip trans
-#> verbCoop 0.093 -0.007 0.467 0.442 0.333
+#>           dens miss  mean recip trans
+#> verbCoop 0.093    0 0.467 0.442 0.646
 #> • Nodal Features: None
 #> • Dyad Features: verbCoop
 

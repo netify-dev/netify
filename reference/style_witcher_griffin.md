@@ -12,3 +12,7 @@ style_witcher_griffin()
 ## Value
 
 List of plot arguments
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

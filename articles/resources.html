@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Helpful Resources • netify</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Helpful Resources">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,13 +34,16 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
+    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Foundations (lite)</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
     <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -69,7 +72,7 @@
                         <h4 data-toc-skip class="author">Various
 Authors</h4>
             
-            <h4 data-toc-skip class="date">2026-03-29</h4>
+            <h4 data-toc-skip class="date">2026-05-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/resources.Rmd" class="external-link"><code>vignettes/resources.Rmd</code></a></small>
       <div class="d-none name"><code>resources.Rmd</code></div>
@@ -77,21 +80,18 @@ Authors</h4>
 
     
     
-<div class="section level2">
-<h2 id="helpful-resources">Helpful Resources<a class="anchor" aria-label="anchor" href="#helpful-resources"></a>
-</h2>
 <p>Greetings! This list of resources is not meant to be exhaustive.
 There is a lot of great network research out there that is not included
 below! We have tried to share a brief list of resources relevant to
 quantitative political science researchers of two main types: (1)
 new(ish) to networks users and (2) researchers focused on studying
 networks and conflict.</p>
+<div class="section level2">
+<h2 id="new-to-networks">New to networks<a class="anchor" aria-label="anchor" href="#new-to-networks"></a>
+</h2>
 <div class="section level3">
-<h3 id="new-to-networks">New to networks<a class="anchor" aria-label="anchor" href="#new-to-networks"></a>
+<h3 id="overview-books">Overview Books<a class="anchor" aria-label="anchor" href="#overview-books"></a>
 </h3>
-<div class="section level4">
-<h4 id="overview-books">Overview Books<a class="anchor" aria-label="anchor" href="#overview-books"></a>
-</h4>
 <ul>
 <li><p>Larson, J. M. (2024). <em>Designing empirical social networks
 research</em>. Cambridge University Press.</p></li>
@@ -105,9 +105,9 @@ University Press.</p></li>
 analysis: Methods and applications</em>.</p></li>
 </ul>
 </div>
-<div class="section level4">
-<h4 id="academic-articles">Academic Articles<a class="anchor" aria-label="anchor" href="#academic-articles"></a>
-</h4>
+<div class="section level3">
+<h3 id="academic-articles">Academic Articles<a class="anchor" aria-label="anchor" href="#academic-articles"></a>
+</h3>
 <ul>
 <li><p>Cranmer, S. J., &amp; Desmarais, B. A. (2016). A critique of
 dyadic design. <em>International Studies Quarterly</em>, 60(2),
@@ -125,9 +125,9 @@ Tellez, J., &amp; Ward, M. D. (2022). Taking dyads seriously.
 </ul>
 </div>
 </div>
-<div class="section level3">
-<h3 id="networks-conflict">Networks &amp; Conflict<a class="anchor" aria-label="anchor" href="#networks-conflict"></a>
-</h3>
+<div class="section level2">
+<h2 id="networks-conflict">Networks &amp; Conflict<a class="anchor" aria-label="anchor" href="#networks-conflict"></a>
+</h2>
 <ul>
 <li><p>Dorff, C., Gallop, M., &amp; Minhas, S. (2020). Networks of
 violence: Predicting conflict in Nigeria. <em>The Journal of
@@ -139,9 +139,9 @@ Journal of Political Science</em>, 53(2), 441-459.</p></li>
 <em>Annual Review of Political Science</em>, 24, 89-107.</p></li>
 </ul>
 </div>
-<div class="section level3">
-<h3 id="modelapproach-specific">Model/Approach Specific<a class="anchor" aria-label="anchor" href="#modelapproach-specific"></a>
-</h3>
+<div class="section level2">
+<h2 id="modelapproach-specific">Model/Approach Specific<a class="anchor" aria-label="anchor" href="#modelapproach-specific"></a>
+</h2>
 <ul>
 <li><p>Cranmer, S. J., &amp; Desmarais, B. A. (2011). Inferential
 network analysis with exponential random graph models. <em>Political
@@ -159,7 +159,6 @@ David R. Hunter, Carter T. Butts, Chad Klumb, Steven M. Goodreau, &amp;
 Martina Morris). (2003-2023). statnet: Software tools for the
 Statistical Modeling of Network Data. <a href="http://statnet.org" class="external-link uri">http://statnet.org</a></p></li>
 </ul>
-</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

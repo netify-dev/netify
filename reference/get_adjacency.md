@@ -26,7 +26,12 @@ get_adjacency(
 - dyad_data:
 
   A data.frame containing dyadic observations. Will be coerced to
-  data.frame if a tibble or data.table is provided.
+  data.frame if a tibble or data.table is provided. As a convenience, an
+  existing netify object is also accepted: in that case
+  `get_adjacency()` returns the underlying adjacency as a plain matrix
+  (no class / attributes), and for longitudinal inputs returns the first
+  time slice with a cli hint pointing to `as.matrix(net, time = ...)`
+  for selecting a specific slice.
 
 - actor1:
 

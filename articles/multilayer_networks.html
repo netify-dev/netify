@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Multilayer Networks • netify</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Multilayer Networks">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,13 +34,16 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
+    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Foundations (lite)</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
     <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -69,7 +72,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-03-29</h4>
+            <h4 data-toc-skip class="date">2026-05-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/multilayer_networks.Rmd" class="external-link"><code>vignettes/multilayer_networks.Rmd</code></a></small>
       <div class="d-none name"><code>multilayer_networks.Rmd</code></div>
@@ -159,11 +162,19 @@ material support.</p>
 <p>Let’s build a more complete multilayer network to study international
 cooperation patterns during a critical period – 2002, shortly after 9/11
 when cooperation dynamics were rapidly shifting.</p>
+<p>Note: ICEWS event counts are directed (i sends X to j). We symmetrize
+each layer here by summing i→j and j→i counts into a single undirected
+weight, because the cross-layer mixing, homophily, and
+regional-clustering analyses below are naturally undirected. For
+directed analyses (e.g. who initiates cooperation), set
+<code>symmetric = FALSE</code> instead.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Focus on 2002 - post-9/11 cooperation dynamics</span></span>
 <span><span class="va">icews_2002</span> <span class="op">&lt;-</span> <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2002</span>, <span class="op">]</span></span>
 <span></span>
-<span><span class="co"># Create networks with relevant attributes</span></span>
+<span><span class="co"># Create networks with relevant attributes. symmetric = TRUE collapses</span></span>
+<span><span class="co"># i-&gt;j and j-&gt;i counts into a single undirected weight; appropriate for</span></span>
+<span><span class="co"># the undirected mixing / homophily / multiplexity analyses below.</span></span>
 <span><span class="va">verbal_coop_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews_2002</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
@@ -188,7 +199,7 @@ when cooperation dynamics were rapidly shifting.</p>
 <span>    layer_labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Verbal"</span>, <span class="st">"Material"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multilayer_net</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">multilayer_net</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualizing-multilayer-structures">Visualizing Multilayer Structures<a class="anchor" aria-label="anchor" href="#visualizing-multilayer-structures"></a>
@@ -220,20 +231,20 @@ function of capacity.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get structural comparison</span></span>
 <span><span class="va">struct_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">multilayer_net</span>, what <span class="op">=</span> <span class="st">"structure"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">struct_comp</span><span class="op">)</span></span>
+<span><span class="va">struct_comp</span></span>
 <span><span class="co">#&gt;    network num_actors density num_edges prop_edges_missing mean_edge_weight</span></span>
-<span><span class="co">#&gt; 1   Verbal        152   0.409      9378                  0           19.800</span></span>
-<span><span class="co">#&gt; 2 Material        152   0.112      2576                  0            0.521</span></span>
+<span><span class="co">#&gt; 1   Verbal        152   0.409      4689                  0           19.800</span></span>
+<span><span class="co">#&gt; 2 Material        152   0.112      1288                  0            0.521</span></span>
 <span><span class="co">#&gt;   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition</span></span>
 <span><span class="co">#&gt; 1          145.3                  0               0            5760       0.040</span></span>
 <span><span class="co">#&gt; 2            5.5                  0               0             380       0.038</span></span>
 <span><span class="co">#&gt;   sd_of_actor_means transitivity mean_degree</span></span>
-<span><span class="co">#&gt; 1             44.80        0.606       123.4</span></span>
-<span><span class="co">#&gt; 2              1.14        0.311        33.9</span></span>
+<span><span class="co">#&gt; 1             44.80        0.606        61.7</span></span>
+<span><span class="co">#&gt; 2              1.14        0.311        16.9</span></span>
 <span><span class="co">#&gt;                                metric value_net1 value_net2 absolute_change</span></span>
 <span><span class="co">#&gt; num_actors                 num_actors    152.000    152.000           0.000</span></span>
 <span><span class="co">#&gt; density                       density      0.409      0.112          -0.296</span></span>
-<span><span class="co">#&gt; num_edges                   num_edges   9378.000   2576.000       -6802.000</span></span>
+<span><span class="co">#&gt; num_edges                   num_edges   4689.000   1288.000       -3401.000</span></span>
 <span><span class="co">#&gt; prop_edges_missing prop_edges_missing      0.000      0.000           0.000</span></span>
 <span><span class="co">#&gt; mean_edge_weight     mean_edge_weight     19.800      0.521         -19.300</span></span>
 <span><span class="co">#&gt; sd_edge_weight         sd_edge_weight    145.300      5.500        -139.800</span></span>
@@ -243,7 +254,7 @@ function of capacity.</p>
 <span><span class="co">#&gt; competition               competition      0.040      0.038          -0.002</span></span>
 <span><span class="co">#&gt; sd_of_actor_means   sd_of_actor_means     44.800      1.140         -43.700</span></span>
 <span><span class="co">#&gt; transitivity             transitivity      0.606      0.311          -0.295</span></span>
-<span><span class="co">#&gt; mean_degree               mean_degree    123.400     33.900         -89.500</span></span>
+<span><span class="co">#&gt; mean_degree               mean_degree     61.700     16.900         -44.800</span></span>
 <span><span class="co">#&gt;                    percent_change</span></span>
 <span><span class="co">#&gt; num_actors                   0.00</span></span>
 <span><span class="co">#&gt; density                    -72.50</span></span>
@@ -261,11 +272,14 @@ function of capacity.</p>
 <p><strong>What these numbers mean</strong>:</p>
 <ul>
 <li>
-<strong>4x density difference</strong>: For every material
-cooperation relationship, there are four verbal ones</li>
+<strong>~3.6x density difference</strong>: For roughly every
+material cooperation relationship, there are about three to four verbal
+ones</li>
 <li>
-<strong>3.6x degree difference</strong>: The average country
-verbally cooperates with 123 others but materially supports only 34</li>
+<strong>~3.6x degree difference</strong>: The average country
+verbally cooperates with about 62 others (mean degree ~61.7 in the
+symmetrized layer) but materially with only about 17 (mean degree
+~17.0)</li>
 <li>
 <strong>Different clustering</strong>: Higher transitivity in verbal
 cooperation (0.606 vs 0.311) suggests diplomatic communities form more
@@ -292,24 +306,27 @@ cooperation type?</p>
 <span>    method <span class="op">=</span> <span class="st">"correlation"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multilayer_homophily</span><span class="op">)</span></span>
+<span><span class="va">multilayer_homophily</span></span>
 <span><span class="co">#&gt;   net    layer attribute      method threshold_value homophily_correlation</span></span>
 <span><span class="co">#&gt; 1   1   Verbal i_polity2 correlation               0            0.04162793</span></span>
 <span><span class="co">#&gt; 2   1 Material i_polity2 correlation               0            0.01444973</span></span>
 <span><span class="co">#&gt;   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
 <span><span class="co">#&gt; 1                 -6.964294                   -7.444698             0.4804043</span></span>
 <span><span class="co">#&gt; 2                 -7.016653                   -7.279288             0.2626347</span></span>
-<span><span class="co">#&gt;   p_value     ci_lower   ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">#&gt; 1   0.000  0.022115007 0.06080321              4453                6573</span></span>
-<span><span class="co">#&gt; 2   0.124 -0.006809547 0.03453941              1201                9825</span></span>
+<span><span class="co">#&gt;   p_value     ci_lower  ci_upper n_connected_pairs n_unconnected_pairs</span></span>
+<span><span class="co">#&gt; 1   0.000  0.023477413 0.0599541              4453                6573</span></span>
+<span><span class="co">#&gt; 2   0.136 -0.006875631 0.0335228              1201                9825</span></span>
 <span><span class="co">#&gt;   n_missing n_pairs</span></span>
 <span><span class="co">#&gt; 1         3   11476</span></span>
 <span><span class="co">#&gt; 2         3   11476</span></span></code></pre></div>
-<p>Democratic homophily exists in verbal cooperation (p &lt; 0.001) but
-not material cooperation (p = 0.13). This suggests the “democratic
-peace” operates primarily through diplomatic channels. Material support
-crosses regime boundaries, likely driven by strategic rather than
-ideological considerations.</p>
+<p>Democratic homophily registers in verbal cooperation (p &lt; 0.001)
+but not material cooperation (p = 0.13). The verbal correlation is small
+in absolute terms (about 0.04) – at this magnitude the significance flag
+mostly reflects the large dyad count, so read it as “consistent with a
+diplomatic-channel mechanism” rather than as a clean effect estimate.
+Material support, by contrast, crosses regime boundaries entirely,
+plausibly driven by strategic rather than ideological
+considerations.</p>
 </div>
 <div class="section level3">
 <h3 id="theory-2-regional-security-complexes">Theory 2: Regional Security Complexes<a class="anchor" aria-label="anchor" href="#theory-2-regional-security-complexes"></a>
@@ -323,7 +340,7 @@ examine regional patterns:</p>
 <span>    attribute <span class="op">=</span> <span class="st">"i_region"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multilayer_mixing</span><span class="op">$</span><span class="va">summary_stats</span><span class="op">)</span></span>
+<span><span class="va">multilayer_mixing</span><span class="op">$</span><span class="va">summary_stats</span></span>
 <span><span class="co">#&gt;   net    layer attribute assortativity diagonal_proportion  entropy modularity</span></span>
 <span><span class="co">#&gt; 1   1   Verbal  i_region     0.1558717           0.3365323 3.350767   0.122512</span></span>
 <span><span class="co">#&gt; 2   1 Material  i_region     0.2184878           0.3835404 3.346822   0.172344</span></span>
@@ -331,10 +348,14 @@ examine regional patterns:</p>
 <span><span class="co">#&gt; 1        7       9378</span></span>
 <span><span class="co">#&gt; 2        7       2576</span></span></code></pre></div>
 <p>Material cooperation shows stronger regional clustering
-(assortativity = 0.218) than verbal cooperation (0.156). This supports
+(assortativity = 0.218) than verbal cooperation (0.156), consistent with
 regional security complex theory – when countries commit resources, they
-prioritize neighbors. Verbal cooperation, being cheaper, can afford to
-be more globally distributed.</p>
+prioritize neighbors. Verbal cooperation, being cheaper, is more
+globally distributed. One caveat: material events are substantially
+sparser than verbal ones, and sparse networks mechanically push
+assortativity up (fewer ties means each within-region tie carries more
+weight in the index). Read the gap directionally rather than as a
+precise effect size.</p>
 </div>
 <div class="section level3">
 <h3 id="theory-3-conflict-cooperation-dynamics">Theory 3: Conflict-Cooperation Dynamics<a class="anchor" aria-label="anchor" href="#theory-3-conflict-cooperation-dynamics"></a>
@@ -353,14 +374,15 @@ be more globally distributed.</p>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">dyad_var</span>, <span class="va">edge_var</span>, <span class="va">correlation</span>, <span class="va">p_value</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="fl">4</span><span class="op">)</span> <span class="co"># Show first 4 unique combinations</span></span>
 <span><span class="co">#&gt;   dyad_var edge_var correlation p_value</span></span>
-<span><span class="co">#&gt; 1 verbConf   Verbal   0.4557314       0</span></span>
+<span><span class="co">#&gt; 1 matlConf Material   0.2791647       0</span></span>
 <span><span class="co">#&gt; 2 matlConf   Verbal   0.2783377       0</span></span>
 <span><span class="co">#&gt; 3 verbConf Material   0.2692519       0</span></span>
-<span><span class="co">#&gt; 4 matlConf Material   0.2791647       0</span></span></code></pre></div>
-<p>Verbal conflict strongly correlates with verbal cooperation (r =
-0.456) – countries that talk also argue. But material conflict shows
-weaker correlations with cooperation, suggesting material interactions
-follow different dynamics than diplomatic ones.</p>
+<span><span class="co">#&gt; 4 verbConf   Verbal   0.4557314       0</span></span></code></pre></div>
+<p>Verbal conflict and verbal cooperation are moderately correlated (r =
+0.456) – countries that talk also argue. Material conflict shows lower
+correlations with both cooperation layers (~0.27-0.28), suggesting
+material interactions follow different dynamics than diplomatic
+ones.</p>
 </div>
 </div>
 <div class="section level2">
@@ -388,22 +410,29 @@ diplomatic engagement:</p>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">material_bias</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Material cooperation brokers:"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Material cooperation brokers:"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">material_specialists</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"actor"</span>, <span class="st">"betweenness_Verbal"</span>, <span class="st">"betweenness_Material"</span>, <span class="st">"material_bias"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">material_specialists</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"actor"</span>, <span class="st">"betweenness_Verbal"</span>, <span class="st">"betweenness_Material"</span>, <span class="st">"material_bias"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
-<span><span class="co">#&gt;   actor              betweenness_Verbal betweenness_Material material_bias</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Afghanistan                 0.013<span style="text-decoration: underline;">2</span>                   0.421        0.415 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> United States               0.793                    0.691        0.386 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Japan                       0.000<span style="text-decoration: underline;">088</span>3                0.142        0.142 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Iraq                        0.026<span style="text-decoration: underline;">0</span>                   0.116        0.113 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Russian Federation          0.462                    0.126        0.086<span style="text-decoration: underline;">0</span></span></span></code></pre></div>
-<p>Japan leads as a material cooperation broker despite low verbal
-centrality – reflecting its post-WWII strategy of economic rather than
-diplomatic leadership. Countries in conflict or transition (Colombia,
-DRC, Ukraine) also appear as material brokers, likely as aid
-conduits.</p>
+<span><span class="co">#&gt;   actor          betweenness_Verbal betweenness_Material material_bias</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Spain                     0                      <span style="text-decoration: underline;">2</span>978.         <span style="text-decoration: underline;">2</span>978.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> India                     0.124                  <span style="text-decoration: underline;">2</span>215.         <span style="text-decoration: underline;">1</span>970.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> France                    0.018<span style="text-decoration: underline;">2</span>                 <span style="text-decoration: underline;">2</span>004.         <span style="text-decoration: underline;">1</span>969.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> United Kingdom            0.003<span style="text-decoration: underline;">77</span>                <span style="text-decoration: underline;">1</span>776.         <span style="text-decoration: underline;">1</span>770.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Netherlands               0.003<span style="text-decoration: underline;">38</span>                <span style="text-decoration: underline;">1</span>644.         <span style="text-decoration: underline;">1</span>639.</span></span></code></pre></div>
+<p>The top material brokers in 2002 – ranked by the ratio of material to
+verbal betweenness – are Spain, India, France, the United Kingdom, and
+the Netherlands. None of these countries has appreciable verbal
+betweenness in 2002 (all close to zero), yet each accumulates
+substantial material betweenness, so the <code>material_bias</code>
+ratio is essentially their raw material betweenness. The pattern is
+consistent with middle-power donor states: Spain and the Netherlands sit
+on top development-aid pipelines; France and the UK route post-colonial
+material flows; India is a notable south-south aid hub in 2002. The
+headline US/China/Russia hegemons drop out of this ranking precisely
+because their verbal betweenness is high enough to anchor the ratio’s
+denominator – this filter is designed to surface countries that are
+<em>only</em> important in the material channel, not the overall biggest
+players.</p>
 </div>
 <div class="section level3">
 <h3 id="power-dynamics-across-layers">Power Dynamics Across Layers<a class="anchor" aria-label="anchor" href="#power-dynamics-across-layers"></a>
@@ -472,7 +501,12 @@ stability:</p>
 <span>        x <span class="op">=</span> <span class="st">"Relationship Type"</span>,</span>
 <span>        y <span class="op">=</span> <span class="st">"Number of Country Pairs"</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>        panel.border <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.position <span class="op">=</span> <span class="st">"top"</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
 <p><img src="multilayer_networks_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="672"></p>
 <p><strong>Multiplexity Insights</strong>:</p>
 <ul>
@@ -495,9 +529,7 @@ international cooperation</li>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">total_coop</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="st">"Strongest multiplex relationships:"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Strongest multiplex relationships:"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multiplex_pairs</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Var1"</span>, <span class="st">"Var2"</span>, <span class="st">"value_verbal"</span>, <span class="st">"value_material"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">multiplex_pairs</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Var1"</span>, <span class="st">"Var2"</span>, <span class="st">"value_verbal"</span>, <span class="st">"value_material"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;                  Var1               Var2 value_verbal value_material</span></span>
 <span><span class="co">#&gt; 1  Russian Federation      United States         5760             64</span></span>
 <span><span class="co">#&gt; 2       United States Russian Federation         5760             64</span></span>
@@ -525,7 +557,7 @@ friend/foe categories.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Comprehensive layer comparison</span></span>
 <span><span class="va">layer_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">multilayer_net</span>, what <span class="op">=</span> <span class="st">"edges"</span>, method <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">layer_comparison</span><span class="op">)</span></span>
+<span><span class="va">layer_comparison</span></span>
 <span><span class="co">#&gt;           comparison correlation jaccard hamming qap_correlation qap_pvalue</span></span>
 <span><span class="co">#&gt; 1 Verbal vs Material       0.472   0.258   0.305           0.472          0</span></span>
 <span><span class="co">#&gt;   spectral</span></span>
@@ -553,27 +585,91 @@ between layers</li>
 <strong>QAP test (p &lt; 0.001)</strong>: The correlation is
 statistically significant, not due to chance</li>
 </ul>
+<p>For downstream filtering and plotting,
+<code><a href="../reference/compare_networks.html">compare_networks()</a></code> also exposes a tidy
+<code>$comparisons</code> data frame with one row per (pair, metric).
+This is the layout you usually want when you have more than two networks
+(see the multilayer section of <code><a href="../articles/tracking_changes.html">vignette("tracking_changes")</a></code>
+for a fuller example):</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>    <span class="va">layer_comparison</span><span class="op">$</span><span class="va">comparisons</span>,</span>
+<span>    caption <span class="op">=</span> <span class="st">"Tidy per-pair comparison frame"</span>,</span>
+<span>    digits <span class="op">=</span> <span class="fl">3</span>, align <span class="op">=</span> <span class="st">"c"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Tidy per-pair comparison frame</caption>
+<thead><tr class="header">
+<th align="center">net_i</th>
+<th align="center">net_j</th>
+<th align="center">metric</th>
+<th align="center">value</th>
+<th align="center">p_value</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="center">Verbal</td>
+<td align="center">Material</td>
+<td align="center">correlation</td>
+<td align="center">0.472</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">Verbal</td>
+<td align="center">Material</td>
+<td align="center">jaccard</td>
+<td align="center">0.258</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">Verbal</td>
+<td align="center">Material</td>
+<td align="center">hamming</td>
+<td align="center">0.305</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">Verbal</td>
+<td align="center">Material</td>
+<td align="center">qap_correlation</td>
+<td align="center">0.472</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">Verbal</td>
+<td align="center">Material</td>
+<td align="center">spectral</td>
+<td align="center">91163.546</td>
+<td align="center">NA</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section level3">
 <h3 id="visualizing-layer-relationships">Visualizing Layer Relationships<a class="anchor" aria-label="anchor" href="#visualizing-layer-relationships"></a>
 </h3>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Cross-layer scatter</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">edge_comparison</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log1p</a></span><span class="op">(</span><span class="va">value_verbal</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log1p</a></span><span class="op">(</span><span class="va">value_material</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.2</span>, color <span class="op">=</span> <span class="st">"darkblue"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, color <span class="op">=</span> <span class="st">"red"</span>, se <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density_2d.html" class="external-link">geom_density_2d</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"gray"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html" class="external-link">geom_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span>, se <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density_2d.html" class="external-link">geom_density_2d</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>        title <span class="op">=</span> <span class="st">"The Verbal-Material Cooperation Gap"</span>,</span>
 <span>        subtitle <span class="op">=</span> <span class="st">"Most relationships cluster along axes, not diagonal"</span>,</span>
 <span>        x <span class="op">=</span> <span class="st">"Log(Verbal Cooperation + 1)"</span>,</span>
 <span>        y <span class="op">=</span> <span class="st">"Log(Material Cooperation + 1)"</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>        panel.border <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.position <span class="op">=</span> <span class="st">"top"</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">7</span>, y <span class="op">=</span> <span class="fl">1</span>, label <span class="op">=</span> <span class="st">"Talk without action"</span>, fontface <span class="op">=</span> <span class="st">"italic"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">1</span>, y <span class="op">=</span> <span class="fl">5</span>, label <span class="op">=</span> <span class="st">"Quiet support"</span>, fontface <span class="op">=</span> <span class="st">"italic"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html" class="external-link">annotate</a></span><span class="op">(</span><span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">6</span>, y <span class="op">=</span> <span class="fl">5</span>, label <span class="op">=</span> <span class="st">"Full cooperation"</span>, fontface <span class="op">=</span> <span class="st">"italic"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="768"></p>
+<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 </div>
 <div class="section level2">
@@ -581,7 +677,7 @@ statistically significant, not due to chance</li>
 </h2>
 <p>Understanding how different layers evolve over time reveals changing
 cooperation dynamics:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create temporal multilayer network</span></span>
 <span><span class="va">years_example</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2001</span>, <span class="fl">2002</span>, <span class="fl">2003</span><span class="op">)</span> <span class="co"># Around 9/11</span></span>
 <span><span class="va">icews_subset</span> <span class="op">&lt;-</span> <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">years_example</span>, <span class="op">]</span></span>
@@ -613,7 +709,7 @@ cooperation dynamics:</p>
 <span>    facet_type <span class="op">=</span> <span class="st">"wrap"</span>,</span>
 <span>    facet_ncol <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="1152"></p>
+<p><img src="multilayer_networks_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="1152"></p>
 <p>The post-9/11 period shows network evolution. Both layers densify
 from 2001 to 2003, but material cooperation grows more selectively,
 suggesting crisis-driven coalition building.</p>

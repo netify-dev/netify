@@ -12,3 +12,7 @@ style_dark2()
 ## Value
 
 List of plot arguments
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

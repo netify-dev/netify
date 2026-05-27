@@ -29,6 +29,10 @@ layer with all its aesthetic mappings and data.
 [`netify_text`](https://netify-dev.github.io/netify/reference/netify_text.md),
 [`assemble_netify_plot`](https://netify-dev.github.io/netify/reference/assemble_netify_plot.md)
 
+## Author
+
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r

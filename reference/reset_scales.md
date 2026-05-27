@@ -26,6 +26,10 @@ have different color mappings for edges and nodes, for example.
 
 [`new_scale_color`](https://eliocamp.github.io/ggnewscale/reference/new_scale.html)
 
+## Author
+
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r

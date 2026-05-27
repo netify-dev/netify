@@ -78,3 +78,27 @@ Assortativity ranges from -1 (disassortative) to 1 (assortative).
 ## Author
 
 Casy Dorff, Shahryar Minhas
+
+## Examples
+
+``` r
+# who tends to befriend whom, by gender, in the bundled classroom data
+data(classroom_edges)
+data(classroom_nodes)
+net <- netify(
+    classroom_edges,
+    actor1 = "from", actor2 = "to",
+    symmetric = TRUE,
+    nodal_data = classroom_nodes
+)
+mm <- mixing_matrix(net, attribute = "gender")
+round(mm$mixing_matrices[[1]], 3)
+#>       F     M
+#> F 0.078 0.167
+#> M 0.167 0.588
+mm$summary_stats
+#>   net   layer attribute assortativity diagonal_proportion  entropy modularity
+#> 1   1 weight1    gender    0.09922078           0.6666667 1.109037 0.03671665
+#>   n_groups total_ties
+#> 1        2        102
+```

@@ -24,6 +24,7 @@ You have two options for installing `netify`.
 > - Linux: build-essential and related packages
 
 ``` r
+
 # Install from GitHub
 # install.packages("devtools")
 devtools::install_github("netify-dev/netify", dependencies = TRUE)
@@ -39,12 +40,13 @@ page](https://github.com/netify-dev/netify/releases):
 #### ✅ Steps:
 
 1.  Go to: <https://github.com/netify-dev/netify/releases>
-2.  Click on the latest release (e.g., **v0.1.3**)
+2.  Click on the latest release (e.g., **v1.5**)
 3.  Download the file that matches your system
 
 #### 📦 First, install dependencies (if needed):
 
 ``` r
+
 # Install required packages if you don't already have them
 deps <- c("Rcpp", "stats", "rlang", "cli", "checkmate", "igraph", 
           "ggplot2", "scales", "ggnewscale", "ggridges", 
@@ -63,33 +65,35 @@ if(length(missing_deps) > 0) {
 
 There are several macOS builds — choose the one that fits your system:
 
-| File              | For…                                                                        |
-|-------------------|-----------------------------------------------------------------------------|
-| `macos-arm64.tgz` | Macs with Apple Silicon (M1, M2, M3 chips) running recent macOS             |
-| `macos-intel.tgz` | Macs with Intel chips                                                       |
-| `macos-asan.tgz`  | Developer/debug version (for advanced users only; includes sanitizer flags) |
+| File | For… |
+|----|----|
+| `macos-arm64.tgz` | Macs with Apple Silicon (M1, M2, M3 chips) running recent macOS |
+| `macos-intel.tgz` | Macs with Intel chips |
+| `macos-asan.tgz` | Developer/debug version (for advanced users only; includes sanitizer flags) |
 
 Most users can choose based on chip type:
 
 ``` r
+
 # Example: Apple Silicon (M1/M2/M3)
 install.packages(
-  "~/Downloads/netify_0.1.3-macos-arm64.tgz", 
+  "~/Downloads/netify_1.5-macos-arm64.tgz", 
   repos = NULL, type = "mac.binary")
 
 # Example: Intel Mac
 install.packages(
-  "~/Downloads/netify_0.1.3-macos-intel.tgz", 
+  "~/Downloads/netify_1.5-macos-intel.tgz", 
   repos = NULL, type = "mac.binary")
 ```
 
 #### 🪟 Windows users:
 
-Download the `.zip` file named `netify_0.1.3-windows.zip` and install:
+Download the `.zip` file named `netify_1.5-windows.zip` and install:
 
 ``` r
+
 install.packages(
-  "C:/path/to/netify_0.1.3-windows.zip", 
+  "C:/path/to/netify_1.5-windows.zip", 
   repos = NULL)
 ```
 
@@ -101,8 +105,9 @@ You can use the precompiled `.tgz` file, or install from source (see
 Option 1). Example:
 
 ``` r
+
 install.packages(
-  "~/Downloads/netify_0.1.3-linux.tgz", 
+  "~/Downloads/netify_1.5-linux.tgz", 
   repos = NULL, type = "source")
 ```
 
@@ -112,6 +117,7 @@ Transform your relational data into a network object with just one
 function:
 
 ``` r
+
 library(netify)
 data(icews)
 
@@ -145,6 +151,7 @@ print(icews_conflict)
 ### Quick visualization
 
 ``` r
+
 # Plot the network
 plot(icews_conflict)
 ```
@@ -159,6 +166,7 @@ netify’s plotting system is highly customizable. Here’s how you can
 create a more sophisticated visualization:
 
 ``` r
+
 # Create democracy indicator
 icews$i_democ <- factor(
   ifelse(icews$i_polity2 >= 6, 1, 0), 
@@ -208,6 +216,7 @@ Advanced ICEWS network plot with node colors, sizes, and shapes
 ### Get network statistics
 
 ``` r
+
 summary(icews_conflict)
 ```
 
@@ -287,26 +296,67 @@ This returns a data frame with network statistics for each time period:
 
 ### Essential Functions
 
-| Task                               | Function                                                                                  | Example                                                                           |
-|------------------------------------|-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
-| Create network                     | [`netify()`](https://netify-dev.github.io/netify/reference/netify.md)                     | `netify(data, actor1="from", actor2="to")`                                        |
-| Extract ego network                | [`ego_netify()`](https://netify-dev.github.io/netify/reference/ego_netify.md)             | `ego_netify(net, ego="USA")`                                                      |
-| Create multilayer                  | [`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md)         | `layer_netify(list(net1, net2))`                                                  |
-| Add node data                      | [`add_node_vars()`](https://netify-dev.github.io/netify/reference/add_node_vars.md)       | `add_node_vars(net, node_df, actor="id")`                                         |
-| Add dyad data                      | [`add_dyad_vars()`](https://netify-dev.github.io/netify/reference/add_dyad_vars.md)       | `add_dyad_vars(net, dyad_df, actor1="from", actor2="to")`                         |
-| Subset network                     | [`subset()`](https://rdrr.io/r/base/subset.html)                                          | `subset(net, time="2020")`                                                        |
-| Get graph level summary statistics | [`summary()`](https://rdrr.io/r/base/summary.html)                                        | `summary(net)`                                                                    |
-| Get actor level summary statistics | [`summary_actor()`](https://netify-dev.github.io/netify/reference/summary_actor.md)       | `summary_actor(net)`                                                              |
-| Test homophily                     | [`homophily()`](https://netify-dev.github.io/netify/reference/homophily.md)               | `homophily(net, attribute="democracy", method="correlation")`                     |
-| Create mixing matrix               | [`mixing_matrix()`](https://netify-dev.github.io/netify/reference/mixing_matrix.md)       | `mixing_matrix(net, attribute="regime_type", normalized=TRUE)`                    |
-| Test dyadic correlations           | [`dyad_correlation()`](https://netify-dev.github.io/netify/reference/dyad_correlation.md) | `dyad_correlation(net, dyad_vars="geographic_distance")`                          |
-| Comprehensive attribute analysis   | [`attribute_report()`](https://netify-dev.github.io/netify/reference/attribute_report.md) | `attribute_report(net, node_vars=c("region", "democracy"), dyad_vars="distance")` |
-| Compare networks                   | [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md) | `compare_networks(list(net1, net2), method="all")`                                |
-| Plot network                       | [`plot()`](https://rdrr.io/r/graphics/plot.default.html)                                  | `plot(net)`                                                                       |
-| Convert to igraph                  | [`to_igraph()`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md)        | `g <- to_igraph(net)`                                                             |
-| Convert to statnet/network         | [`to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)      | `g <- to_statnet(net)`                                                            |
-| Convert to amen                    | [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)            | `amen_data <- to_amen(net)`                                                       |
-| Back to data frame                 | [`unnetify()`](https://netify-dev.github.io/netify/reference/unnetify.md)                 | `df <- unnetify(net)`                                                             |
+| Task | Function | Example |
+|----|----|----|
+| Create network | [`netify()`](https://netify-dev.github.io/netify/reference/netify.md) | `netify(data, actor1="from", actor2="to")` |
+| Extract ego network | [`ego_netify()`](https://netify-dev.github.io/netify/reference/ego_netify.md) | `ego_netify(net, ego="USA")` |
+| Create multilayer | [`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md) | `layer_netify(list(net1, net2))` |
+| Add node data | [`add_node_vars()`](https://netify-dev.github.io/netify/reference/add_node_vars.md) | `add_node_vars(net, node_df, actor="id")` |
+| Add dyad data | [`add_dyad_vars()`](https://netify-dev.github.io/netify/reference/add_dyad_vars.md) | `add_dyad_vars(net, dyad_df, actor1="from", actor2="to")` |
+| Subset network | [`subset()`](https://rdrr.io/r/base/subset.html) | `subset(net, time="2020")` |
+| Get graph level summary statistics | [`summary()`](https://rdrr.io/r/base/summary.html) | `summary(net)` |
+| Get actor level summary statistics | [`summary_actor()`](https://netify-dev.github.io/netify/reference/summary_actor.md) | `summary_actor(net)` |
+| Test homophily | [`homophily()`](https://netify-dev.github.io/netify/reference/homophily.md) | `homophily(net, attribute="democracy", method="correlation")` |
+| Create mixing matrix | [`mixing_matrix()`](https://netify-dev.github.io/netify/reference/mixing_matrix.md) | `mixing_matrix(net, attribute="regime_type", normalized=TRUE)` |
+| Test dyadic correlations | [`dyad_correlation()`](https://netify-dev.github.io/netify/reference/dyad_correlation.md) | `dyad_correlation(net, dyad_vars="geographic_distance")` |
+| Comprehensive attribute analysis | [`attribute_report()`](https://netify-dev.github.io/netify/reference/attribute_report.md) | `attribute_report(net, node_vars=c("region", "democracy"), dyad_vars="distance")` |
+| Compare networks | [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md) | `compare_networks(list(net1, net2), method="all")` |
+| Plot network | [`plot()`](https://rdrr.io/r/graphics/plot.default.html) | `plot(net)` |
+| Convert to igraph | [`to_igraph()`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md) | `g <- to_igraph(net)` |
+| Convert to statnet/network | [`to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md) | `g <- to_statnet(net)` |
+| Convert to amen | [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md) | `amen_data <- to_amen(net)` |
+| Back to data frame | [`unnetify()`](https://netify-dev.github.io/netify/reference/unnetify.md) | `df <- unnetify(net)` |
+
+## Scaling to large networks
+
+netify stores adjacencies as dense matrices/arrays, which keeps the API
+uniform but makes memory the binding constraint at large N (a single
+dense `N x N` slice costs `8 * N^2` bytes; e.g. ~7.6 MB at N=1K, ~191 MB
+at N=5K, and ~1.7 GB at N=15K). A few knobs and benchmarks to keep in
+mind:
+
+- **Sparse matrix guard.** Passing a
+  [`Matrix::sparseMatrix`](https://rdrr.io/pkg/Matrix/man/sparseMatrix.html)
+  (e.g. `dgCMatrix`) to
+  [`netify()`](https://netify-dev.github.io/netify/reference/netify.md)
+  densifies internally. When `N > 5000` and density is under 1%,
+  [`netify()`](https://netify-dev.github.io/netify/reference/netify.md)
+  aborts with a guidance message rather than silently allocating
+  gigabytes. Override with `force_dense = TRUE` if you really want the
+  dense object, or build from an edgelist `data.frame` to skip the
+  matrix intermediate entirely.
+- **Fast actor stats.**
+  [`summary_actor()`](https://netify-dev.github.io/netify/reference/summary_actor.md)
+  defaults to `stats = "all"` (degree + closeness + betweenness +
+  eigenvector + HITS). The closeness/betweenness paths dominate
+  wall-clock at large N, so at
+  `N >= getOption("netify.fast_threshold", 1500L)` netify auto-promotes
+  the default call to `stats = "fast"`, which returns only the degree-
+  and strength-style columns. Pass `stats = "all"` explicitly to force
+  centralities, or raise the threshold via
+  `options(netify.fast_threshold = ...)`.
+- **Indicative timings** (single laptop core, directed weighted toy
+  nets):
+
+| N | edges | [`netify()`](https://netify-dev.github.io/netify/reference/netify.md) | [`summary()`](https://rdrr.io/r/base/summary.html) | `summary_actor(fast)` | [`to_igraph()`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md) |
+|----|---:|---:|---:|---:|---:|
+| 1000 | ~10K | 0.08 s | 0.6 s | 0.6 s | 0.1 s |
+| 5000 | ~50K | 0.8 s | 4.8 s | 4.5 s | 0.6 s |
+
+For 10K+ actor / weekly-slice workflows, prefer edgelist inputs, set
+`stats = "fast"` explicitly, and consider
+[`to_igraph()`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md)
+for any heavy centrality work.
 
 ## When you might need something else
 
@@ -345,6 +395,7 @@ We play well with others! 🤝
 If you use netify in your research, please cite:
 
 ``` r
+
 citation("netify")
 ```
 

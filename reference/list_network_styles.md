@@ -11,3 +11,7 @@ list_network_styles()
 ## Value
 
 A data frame with style names and descriptions
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

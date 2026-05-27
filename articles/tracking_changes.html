@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Tracking Changes in Cooperation and Conflict: Comparing Networks • netify</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Tracking Changes in Cooperation and Conflict: Comparing Networks">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,13 +34,16 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
+    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Foundations (lite)</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
     <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -69,7 +72,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-03-29</h4>
+            <h4 data-toc-skip class="date">2026-05-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/tracking_changes.Rmd" class="external-link"><code>vignettes/tracking_changes.Rmd</code></a></small>
       <div class="d-none name"><code>tracking_changes.Rmd</code></div>
@@ -262,8 +265,7 @@ get a comprehensive comparison:</p>
 <span>    method <span class="op">=</span> <span class="st">"all"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Display comparison results</span></span>
-<span><span class="co"># Extract key metrics for cleaner display</span></span>
+<span><span class="co"># Render the summary frame as a knitr table</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="va">coop_comparison</span><span class="op">$</span><span class="va">summary</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"Verbal vs Material Cooperation Comparison Metrics"</span>,</span>
@@ -351,6 +353,76 @@ get a comprehensive comparison:</p>
 <span><span class="op">}</span></span></code></pre></div>
 <pre><code><span><span class="co">## Moderate alignment: Verbal and material cooperation partially overlap</span></span></code></pre>
 <div class="section level3">
+<h3 id="the-tidy-comparisons-frame">The tidy <code>$comparisons</code> frame<a class="anchor" aria-label="anchor" href="#the-tidy-comparisons-frame"></a>
+</h3>
+<p><code><a href="../reference/compare_networks.html">compare_networks()</a></code> also returns a long-format
+<code>$comparisons</code> data frame with one row per (pair, metric).
+This is the artifact you usually want for downstream filtering and
+plotting – the same column layout (<code>net_i</code>,
+<code>net_j</code>, <code>metric</code>, <code>value</code>,
+<code>p_value</code>) shows up regardless of whether you passed a list,
+a longitudinal netify, a multilayer netify, or used
+<code>by=</code>:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>    <span class="va">coop_comparison</span><span class="op">$</span><span class="va">comparisons</span>,</span>
+<span>    caption <span class="op">=</span> <span class="st">"Tidy per-pair comparison frame"</span>,</span>
+<span>    digits <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>    align <span class="op">=</span> <span class="st">"c"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Tidy per-pair comparison frame</caption>
+<thead><tr class="header">
+<th align="center">net_i</th>
+<th align="center">net_j</th>
+<th align="center">metric</th>
+<th align="center">value</th>
+<th align="center">p_value</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="center">verbal</td>
+<td align="center">material</td>
+<td align="center">correlation</td>
+<td align="center">0.507</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">verbal</td>
+<td align="center">material</td>
+<td align="center">jaccard</td>
+<td align="center">0.190</td>
+<td align="center">NA</td>
+</tr>
+<tr class="odd">
+<td align="center">verbal</td>
+<td align="center">material</td>
+<td align="center">hamming</td>
+<td align="center">0.308</td>
+<td align="center">NA</td>
+</tr>
+<tr class="even">
+<td align="center">verbal</td>
+<td align="center">material</td>
+<td align="center">qap_correlation</td>
+<td align="center">0.507</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">verbal</td>
+<td align="center">material</td>
+<td align="center">spectral</td>
+<td align="center">91481.762</td>
+<td align="center">NA</td>
+</tr>
+</tbody>
+</table>
+<p>With only two networks this is a small table, but the same column
+layout scales naturally to dozens of networks (longitudinal, multilayer,
+by-group), where it’s much easier to filter and plot than the wide
+<code>$summary</code> table.</p>
+</div>
+<div class="section level3">
 <h3 id="understanding-the-output">Understanding the Output<a class="anchor" aria-label="anchor" href="#understanding-the-output"></a>
 </h3>
 <p>Let’s break down what each metric tells us:</p>
@@ -407,7 +479,7 @@ actions.</p>
 <div class="section level3">
 <h3 id="visualizing-domain-differences">Visualizing Domain Differences<a class="anchor" aria-label="anchor" href="#visualizing-domain-differences"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract edge change information</span></span>
 <span><span class="va">edge_changes</span> <span class="op">&lt;-</span> <span class="va">coop_comparison</span><span class="op">$</span><span class="va">edge_changes</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
@@ -423,14 +495,19 @@ actions.</p>
 <span></span>
 <span><span class="co"># Visualize</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">change_summary</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Type</span>, y <span class="op">=</span> <span class="va">Count</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"gray30"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>        title <span class="op">=</span> <span class="st">"Verbal vs Material Cooperation Networks"</span>,</span>
 <span>        subtitle <span class="op">=</span> <span class="st">"Which relationships exist in each domain?"</span>,</span>
 <span>        y <span class="op">=</span> <span class="st">"Number of Dyadic Relationships"</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="tracking_changes_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="1200"></p>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>        panel.border <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.position <span class="op">=</span> <span class="st">"top"</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
+<p><img src="tracking_changes_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="1200"></p>
 <p>The visualization makes the pattern clear: verbal cooperation (cheap
 talk) is far more common than material cooperation (costly actions).
 Note that this pattern may partly reflect reporting bias in event data,
@@ -443,7 +520,7 @@ in news sources than material actions.</p>
 </h2>
 <p>Are cooperation and conflict networks related? Let’s use the QAP
 (Quadratic Assignment Procedure) method for statistical testing:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Perform QAP test between cooperation and conflict</span></span>
 <span><span class="va">coop_conf_qap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -459,9 +536,13 @@ in news sources than material actions.</p>
 <span><span class="va">qap_msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
 <span>    <span class="st">"**QAP Test Results:**\n\n"</span>,</span>
 <span>    <span class="st">"- Observed correlation: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">coop_conf_qap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_correlation</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span>,</span>
-<span>    <span class="st">"- P-value: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">coop_conf_qap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_pvalue</span> <span class="op">==</span> <span class="fl">0</span>, </span>
-<span>                         <span class="st">"&lt; 0.002 (1/500 permutations)"</span>, </span>
-<span>                         <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">coop_conf_qap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_pvalue</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span></span>
+<span>    <span class="st">"- P-value: "</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span></span>
+<span>        <span class="va">coop_conf_qap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_pvalue</span> <span class="op">==</span> <span class="fl">0</span>,</span>
+<span>        <span class="st">"&lt; 0.002 (1/500 permutations)"</span>,</span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">coop_conf_qap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_pvalue</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    <span class="st">"\n"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Add interpretation based on significance</span></span>
@@ -514,7 +595,7 @@ effect.</p>
 </h3>
 <p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function supports multiple
 permutation schemes for more sophisticated hypothesis testing:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare different permutation schemes</span></span>
 <span><span class="va">qap_methods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    classic <span class="op">=</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
@@ -606,7 +687,7 @@ can shrink and occasionally flip sign; what matters is the
 </h3>
 <p>For networks with skewed weight distributions, Spearman correlation
 may be more appropriate:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare using different correlation types</span></span>
 <span><span class="va">cor_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    Correlation_Type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Pearson"</span>, <span class="st">"Spearman"</span><span class="op">)</span>,</span>
@@ -665,7 +746,7 @@ is useful when edge weights have extreme values.</p>
 <p>How do international networks evolve over time? When you pass a
 longitudinal netify object to <code><a href="../reference/compare_networks.html">compare_networks()</a></code>, it
 automatically compares consecutive time periods:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create networks for multiple years</span></span>
 <span><span class="va">years_to_compare</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">2002</span>, <span class="fl">2014</span>, by <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span></span>
@@ -684,8 +765,7 @@ automatically compares consecutive time periods:</p>
 <span>    <span class="va">coop_net_longit</span>,</span>
 <span>    method <span class="op">=</span> <span class="st">"all"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co"># Display temporal comparison results</span></span>
-<span><span class="co"># Show summary statistics in a cleaner format</span></span>
+<span><span class="co"># Render the summary frame as a knitr table</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="va">temporal_comparison</span><span class="op">$</span><span class="va">summary</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"Temporal Network Comparison Summary"</span>,</span>
@@ -724,6 +804,13 @@ automatically compares consecutive time periods:</p>
 <td align="center">0.225</td>
 </tr>
 <tr class="even">
+<td align="center">qap_correlation</td>
+<td align="center">0.828</td>
+<td align="center">0.034</td>
+<td align="center">0.771</td>
+<td align="center">0.874</td>
+</tr>
+<tr class="odd">
 <td align="center">spectral</td>
 <td align="center">13325.806</td>
 <td align="center">3718.830</td>
@@ -774,7 +861,7 @@ years.</p>
 <div class="section level3">
 <h3 id="visualizing-temporal-changes">Visualizing Temporal Changes<a class="anchor" aria-label="anchor" href="#visualizing-temporal-changes"></a>
 </h3>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract edge changes over time</span></span>
 <span><span class="va">edge_change_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    Comparison <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">temporal_comparison</span><span class="op">$</span><span class="va">edge_changes</span><span class="op">)</span>,</span>
@@ -807,13 +894,14 @@ years.</p>
 <span>        x <span class="op">=</span> <span class="st">"Year Comparison"</span>,</span>
 <span>        y <span class="op">=</span> <span class="st">"Number of Edges"</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
-<span>        axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span></span>
-<span>            angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span></span>
-<span>        <span class="op">)</span></span>
+<span>        panel.border <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.position <span class="op">=</span> <span class="st">"top"</span>,</span>
+<span>        axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span>    <span class="op">)</span></span></code></pre></div>
-<p><img src="tracking_changes_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="1500"></p>
+<p><img src="tracking_changes_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="1500"></p>
 <p>Notice that “Maintained” edges dominate - most relationships persist
 across time periods, confirming the stability we observed in the
 correlation metrics.</p>
@@ -824,7 +912,7 @@ correlation metrics.</p>
 <p>When comparing multiple networks, it’s important to adjust p-values
 for multiple comparisons. The <code>p_adjust</code> parameter offers
 several correction methods:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Demonstrate multiple testing correction</span></span>
 <span><span class="co"># Compare all years pairwise with QAP</span></span>
 <span><span class="va">multi_year_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
@@ -839,10 +927,10 @@ several correction methods:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Number of pairwise comparisons:"</span>, </span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Special.html" class="external-link">choose</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">coop_net_longit</span><span class="op">)</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Number of pairwise comparisons: 6</span></span></code></pre>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"P-value adjustment method: Benjamini-Hochberg (FDR)\n\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## P-value adjustment method: Benjamini-Hochberg (FDR)</span></span></code></pre>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Display the p-value matrix</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">multi_year_comparison</span><span class="op">$</span><span class="va">significance_tests</span><span class="op">$</span><span class="va">qap_pvalues</span>, <span class="fl">4</span><span class="op">)</span>,</span>
@@ -912,7 +1000,7 @@ Type I error rates.</p>
 </h2>
 <p>The <code>what = "structure"</code> option compares network-level
 properties rather than individual edges:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare structural properties across years</span></span>
 <span><span class="va">struct_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="va">coop_net_longit</span>,</span>
@@ -1068,7 +1156,7 @@ properties rather than individual edges:</p>
 <strong>n_edges</strong>: Increases from 8,692 (2002) to 9,774
 (2014) - more connections over time</li>
 <li>
-<strong>density</strong>: Increases from 0.376 to 0.423 - the
+<strong>density</strong>: Increases from 0.379 to 0.426 - the
 network becomes denser</li>
 <li>
 <strong>reciprocity</strong>: Stays very high (0.97-0.98) — the
@@ -1089,7 +1177,7 @@ interconnectedness in international cooperation.</p>
 <div class="section level3">
 <h3 id="visualizing-structural-changes">Visualizing Structural Changes<a class="anchor" aria-label="anchor" href="#visualizing-structural-changes"></a>
 </h3>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Prepare data for visualization</span></span>
 <span><span class="co"># struct_comparison$summary contains a</span></span>
 <span><span class="co"># data.frame with structural metrics over time</span></span>
@@ -1123,15 +1211,21 @@ interconnectedness in international cooperation.</p>
 <span>        subtitle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Percent change from"</span>, <span class="va">baseline_year</span><span class="op">)</span>,</span>
 <span>        x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">""</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="tracking_changes_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="1500"></p>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>        panel.border <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.position <span class="op">=</span> <span class="st">"top"</span>,</span>
+<span>        axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
+<p><img src="tracking_changes_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="1500"></p>
 <p>The heatmap reveals that density, number of edges, and mean degree
-all increase by about 14-15% from 2002 to 2010, while reciprocity
-slightly decreases and transitivity shows modest growth.</p>
+all increase by about 14-15% from 2002 to 2010 (and remain ~12-13% above
+baseline in 2014), while reciprocity stays essentially flat (within 1%
+in either direction) and transitivity shows modest growth (~3-5%).</p>
 <p>Many ways to visualize structural changes … could also just do a line
 plot:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Reshape data for visualization</span></span>
 <span><span class="va">struct_long</span> <span class="op">&lt;-</span> <span class="va">struct_data</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">num_actors</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Remove num_actors since it doesn't change</span></span>
@@ -1156,9 +1250,15 @@ plot:</p>
 <span>        subtitle <span class="op">=</span> <span class="st">"Evolution of network characteristics"</span>,</span>
 <span>        x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">""</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="tracking_changes_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="1500"></p>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>        panel.border <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.position <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>        strip.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"black"</span>, color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span>,</span>
+<span>        strip.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"white"</span>, hjust <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
+<p><img src="tracking_changes_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="1500"></p>
 </div>
 </div>
 <div class="section level2">
@@ -1166,7 +1266,7 @@ plot:</p>
 </h2>
 <p>The <code>what = "nodes"</code> option tracks which actors enter and
 exit the network:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare node composition</span></span>
 <span><span class="va">node_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="va">coop_net_longit</span>,</span>
@@ -1231,7 +1331,7 @@ entering or exiting the network over time.</p>
 </h2>
 <p>The <code>return_details = TRUE</code> option provides access to full
 comparison matrices:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare 2002 and 2014 cooperation networks with full details</span></span>
 <span><span class="va">early_late_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="co"># note subset here is</span></span>
@@ -1249,7 +1349,7 @@ comparison matrices:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">early_late_comp</span><span class="op">$</span><span class="va">details</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "correlation_matrix" "jaccard_matrix"     "hamming_matrix"    </span></span>
 <span><span class="co">## [4] "spectral_matrix"</span></span></code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get edge changes</span></span>
 <span><span class="va">changes</span> <span class="op">&lt;-</span> <span class="va">early_late_comp</span><span class="op">$</span><span class="va">edge_changes</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
@@ -1324,7 +1424,7 @@ Eigenvalues<a class="anchor" aria-label="anchor" href="#spectral-distance-compar
 based on their fundamental structural properties captured by eigenvalues
 (See <a href="https://www.nature.com/articles/srep34944.pdf" class="external-link">Shimada et
 al 2016</a> for a useful introduction):</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare networks using spectral distance</span></span>
 <span><span class="va">spectral_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -1334,7 +1434,7 @@ al 2016</a> for a useful introduction):</p>
 <span>    method <span class="op">=</span> <span class="st">"spectral"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Display spectral comparison results in a cleaner format</span></span>
+<span><span class="co"># Render the spectral summary as a knitr table</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="va">spectral_comp</span><span class="op">$</span><span class="va">summary</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"Spectral Distance Results"</span>,</span>
@@ -1352,7 +1452,7 @@ al 2016</a> for a useful introduction):</p>
 <td align="center">14369.14</td>
 </tr></tbody>
 </table>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Interpretation</span></span>
 <span><span class="co"># Build spectral interpretation message</span></span>
 <span><span class="va">spec_dist</span> <span class="op">&lt;-</span> <span class="va">spectral_comp</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">spectral</span></span>
@@ -1418,7 +1518,7 @@ computationally expensive. The <code>spectral_rank</code> parameter
 allows you to use only the top-k eigenvalues.</p>
 <p><em>Example: adapt the code below with your own large network objects
 to run it.</em></p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># For large networks, use spectral_rank to improve performance</span></span>
 <span><span class="va">spectral_comp_fast</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">large_net1</span>, <span class="va">large_net2</span><span class="op">)</span>,</span>
@@ -1432,7 +1532,7 @@ where n is the number of nodes.</p>
 <div class="section level3">
 <h3 id="combining-with-other-methods">Combining with Other Methods<a class="anchor" aria-label="anchor" href="#combining-with-other-methods"></a>
 </h3>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare all methods including spectral</span></span>
 <span><span class="va">full_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -1490,17 +1590,22 @@ where n is the number of nodes.</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create visualization for similarity metrics</span></span>
 <span><span class="va">p_similarity</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">similarity_metrics</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Method</span>, y <span class="op">=</span> <span class="va">Value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"gray30"</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Value</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>, hjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span>, size <span class="op">=</span> <span class="fl">3.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1.1</span><span class="op">)</span>, breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>        title <span class="op">=</span> <span class="st">"Similarity Metrics (0-1 Scale)"</span>,</span>
 <span>        x <span class="op">=</span> <span class="cn">NULL</span>, y <span class="op">=</span> <span class="st">"Similarity Score"</span></span>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
+<span>        panel.border <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        legend.position <span class="op">=</span> <span class="st">"top"</span></span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Create separate note for spectral distance</span></span>
@@ -1513,7 +1618,7 @@ where n is the number of nodes.</p>
 <span>    subtitle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"2002 vs 2014 Cooperation Networks |"</span>, <span class="va">spectral_note</span><span class="op">)</span>,</span>
 <span>    theme <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="tracking_changes_files/figure-html/unnamed-chunk-19-1.png" class="r-plt" alt="" width="1093.75"></p>
+<p><img src="tracking_changes_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="" width="1093.75"></p>
 <p>Note that spectral distance is on a different scale than the other
 metrics (which are typically 0-1), so it’s best interpreted relative to
 other spectral distance values rather than in absolute terms.</p>
@@ -1526,7 +1631,7 @@ other spectral distance values rather than in absolute terms.</p>
 multilayer networks created with <code><a href="../reference/layer_netify.html">layer_netify()</a></code>. This
 allows you to compare different types of relationships (layers) within
 the same set of actors:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create multilayer network for 2010</span></span>
 <span><span class="va">icews_2010</span> <span class="op">&lt;-</span> <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span></span>
 <span></span>
@@ -1571,8 +1676,7 @@ the same set of actors:</p>
 <span></span>
 <span><span class="co"># Compare layers automatically</span></span>
 <span><span class="va">layer_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">multilayer_2010</span>, method <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span>
-<span><span class="co"># Display multilayer comparison results</span></span>
-<span><span class="co"># Extract summary for cleaner display</span></span>
+<span><span class="co"># Render the layer-comparison summary as a knitr table</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="va">layer_comparison</span><span class="op">$</span><span class="va">summary</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"Multilayer Network Comparison Summary"</span>,</span>
@@ -1611,6 +1715,13 @@ the same set of actors:</p>
 <td align="center">0.351</td>
 </tr>
 <tr class="even">
+<td align="center">qap_correlation</td>
+<td align="center">0.531</td>
+<td align="center">0.106</td>
+<td align="center">0.422</td>
+<td align="center">0.643</td>
+</tr>
+<tr class="odd">
 <td align="center">spectral</td>
 <td align="center">42200.921</td>
 <td align="center">42019.957</td>
@@ -1641,30 +1752,81 @@ these are distinct relationship patterns</li>
 <div class="section level3">
 <h3 id="interpreting-multilayer-results">Interpreting Multilayer Results<a class="anchor" aria-label="anchor" href="#interpreting-multilayer-results"></a>
 </h3>
-<p>The output shows all pairwise comparisons between the four network
-layers. Key insights:</p>
+<p>The output shows all six pairwise comparisons between the four
+network layers. To inspect them individually, pull the tidy
+<code>$comparisons</code> frame:</p>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">layer_comparison</span><span class="op">$</span><span class="va">comparisons</span>, <span class="va">metric</span> <span class="op">==</span> <span class="st">"qap_correlation"</span>,</span>
+<span>        select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">net_i</span>, <span class="va">net_j</span>, <span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    caption <span class="op">=</span> <span class="st">"Pairwise edge-weight correlations across layers"</span>,</span>
+<span>    digits <span class="op">=</span> <span class="fl">3</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<caption>Pairwise edge-weight correlations across layers</caption>
+<thead><tr class="header">
+<th align="left">net_i</th>
+<th align="left">net_j</th>
+<th align="right">value</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">verbal_coop</td>
+<td align="left">material_coop</td>
+<td align="right">0.623</td>
+</tr>
+<tr class="even">
+<td align="left">verbal_coop</td>
+<td align="left">verbal_conf</td>
+<td align="right">0.643</td>
+</tr>
+<tr class="odd">
+<td align="left">verbal_coop</td>
+<td align="left">material_conf</td>
+<td align="right">0.459</td>
+</tr>
+<tr class="even">
+<td align="left">material_coop</td>
+<td align="left">verbal_conf</td>
+<td align="right">0.422</td>
+</tr>
+<tr class="odd">
+<td align="left">material_coop</td>
+<td align="left">material_conf</td>
+<td align="right">0.427</td>
+</tr>
+<tr class="even">
+<td align="left">verbal_conf</td>
+<td align="left">material_conf</td>
+<td align="right">0.613</td>
+</tr>
+</tbody>
+</table>
+<p>Key patterns:</p>
 <ul>
 <li>
-<strong>Cooperation vs. Conflict</strong>: Verbal cooperation has
-the highest correlation with verbal conflict (0.628), suggesting
-countries that cooperate verbally also engage in verbal conflicts</li>
+<strong>Verbal coop vs. verbal conflict (0.643)</strong>: highest
+cross-domain correlation – countries that talk a lot tend to do both
+cooperative and conflictual talking</li>
 <li>
-<strong>Verbal vs. Material</strong>: Within cooperation types,
-verbal and material cooperation are moderately correlated (0.587)</li>
+<strong>Verbal coop vs. material coop (0.623)</strong>: within
+cooperation, the verbal and material channels overlap moderately</li>
 <li>
-<strong>Cross-type patterns</strong>: Material cooperation shows
-lower correlation with conflict types, indicating material actions may
-be more distinct from conflict behaviors</li>
+<strong>Material coop vs. verbal conflict (~0.42)</strong> and
+<strong>material coop vs. material conflict (~0.43)</strong>: the lowest
+correlations involve material cooperation – costly material support is
+the layer that overlaps least with the others</li>
+<li>
+<strong>Range</strong>: correlations span 0.42 to 0.64, all positive
+– interaction density drives a baseline overlap even between cooperation
+and conflict.</li>
 </ul>
-<p>The summary statistics show correlations range from 0.42 to 0.64
-across all layer pairs, indicating moderate but meaningful relationships
-between different interaction types.</p>
 </div>
 <div class="section level3">
 <h3 id="longitudinal-multilayer-networks">Longitudinal Multilayer Networks<a class="anchor" aria-label="anchor" href="#longitudinal-multilayer-networks"></a>
 </h3>
 <p>You can also compare multilayer networks that evolve over time:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create longitudinal multilayer networks</span></span>
 <span><span class="va">verb_coop_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews</span>,</span>
@@ -1720,7 +1882,7 @@ cooperation remains stable or changes over time.</p>
 <p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function is your go-to tool for
 understanding how networks differ and change:</p>
 <p><strong>Basic usage:</strong></p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare two networks</span></span>
 <span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">net1</span>, <span class="va">net2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -2012,7 +2174,7 @@ weight distributions</li>
 </h3>
 <p><em>Example: adapt the template below to your own networks to run
 it.</em></p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Comprehensive diagnostic before ERGM fitting</span></span>
 <span><span class="va">diagnostic_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="va">network_list</span>,</span>
@@ -2020,7 +2182,7 @@ it.</em></p>
 <span>    what <span class="op">=</span> <span class="st">"edges"</span>,</span>
 <span>    permutation_type <span class="op">=</span> <span class="st">"degree_preserving"</span>,  <span class="co"># For sparse networks</span></span>
 <span>    correlation_type <span class="op">=</span> <span class="st">"spearman"</span>,           <span class="co"># For skewed weights</span></span>
-<span>    n_permutations <span class="op">=</span> <span class="fl">10000</span>,                  <span class="co"># For publication</span></span>
+<span>    n_permutations <span class="op">=</span> <span class="fl">10000</span>,                  <span class="co"># For final analysis</span></span>
 <span>    p_adjust <span class="op">=</span> <span class="st">"BH"</span>,                         <span class="co"># Multiple comparisons</span></span>
 <span>    spectral_rank <span class="op">=</span> <span class="fl">75</span>,                      <span class="co"># Large network optimization</span></span>
 <span>    return_details <span class="op">=</span> <span class="cn">TRUE</span>,                   <span class="co"># For custom analysis</span></span>
@@ -2170,7 +2332,7 @@ edges</p>
 <ul>
 <li>With 10+ comparisons, always use <code>p_adjust</code>
 </li>
-<li>Report both raw and adjusted p-values in publications</li>
+<li>Report both raw and adjusted p-values in your results</li>
 </ul>
 </li>
 <li>

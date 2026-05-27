@@ -43,6 +43,10 @@ automatically:
 [`netify_edge`](https://netify-dev.github.io/netify/reference/netify_edge.md),
 [`netify_node`](https://netify-dev.github.io/netify/reference/netify_node.md)
 
+## Author
+
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r

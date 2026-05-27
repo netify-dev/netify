@@ -115,6 +115,8 @@ of actors rather than quadratically.
 
 Colin Henry, Shahryar Minhas
 
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r

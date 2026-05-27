@@ -29,3 +29,7 @@ ggplot_add(object, plot, ...)
 ## Value
 
 A ggplot object with the label layer added
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

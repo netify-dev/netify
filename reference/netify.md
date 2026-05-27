@@ -26,6 +26,7 @@ netify(
   dyad_vars_symmetric = rep(symmetric, length(dyad_vars)),
   input_type = c("auto", "dyad_df", "netify_obj"),
   nodelist = NULL,
+  force_dense = FALSE,
   ...
 )
 ```
@@ -69,12 +70,17 @@ netify(
 
 - symmetric:
 
-  logical: whether ties are symmetric, default is TRUE
+  logical: whether ties are symmetric, default is TRUE. For matrix,
+  array, list, igraph, or network inputs this default is ignored unless
+  explicitly set by the caller; symmetry is instead detected from the
+  input itself. The default applies for data.frame inputs.
 
 - mode:
 
   character: whether the network is unipartite or bipartite, default is
-  unipartite
+  unipartite. As with `symmetric`, this default applies to data.frame
+  inputs and is auto-detected for matrix / array / list / igraph /
+  network inputs unless explicitly set.
 
 - weight:
 
@@ -106,11 +112,18 @@ netify(
 
 - diag_to_NA:
 
-  logical: whether diagonals should be set to NA, default is TRUE
+  logical: whether diagonals should be set to NA, default is TRUE. For
+  matrix / array / list inputs, the default is ignored unless explicitly
+  set: instead, `diag_to_NA` is auto-detected by inspecting whether the
+  diagonal of the supplied matrix is already `NA`. Pass an explicit
+  value to override the auto-detection.
 
 - missing_to_zero:
 
-  logical: whether missing values should be set to zero, default is TRUE
+  logical: whether missing values should be set to zero, default is
+  TRUE. As with `diag_to_NA`, this is auto-detected for matrix / array /
+  list inputs based on whether the supplied data already contains
+  off-diagonal `NA`s.
 
 - output_format:
 
@@ -150,6 +163,15 @@ netify(
   are properly represented. Particularly useful when working with
   edgelists that only contain active dyads.
 
+- force_dense:
+
+  logical: when a
+  [`Matrix::sparseMatrix`](https://rdrr.io/pkg/Matrix/man/sparseMatrix.html)
+  input would densify to a large allocation (N \> 5000 and density \<
+  1%), `netify()` aborts with a guidance message. Set
+  `force_dense = TRUE` to override the guard and proceed with
+  densification.
+
 - ...:
 
   additional arguments passed to `to_netify` when processing network
@@ -159,6 +181,19 @@ netify(
 
 a netify object
 
+## See also
+
+[`netify_workflows`](https://netify-dev.github.io/netify/reference/netify_workflows.md)
+for an overview of the Create / Explore / Advance pipeline and how
+`netify()` fits into it;
+[`add_node_vars`](https://netify-dev.github.io/netify/reference/add_node_vars.md),
+[`add_dyad_vars`](https://netify-dev.github.io/netify/reference/add_dyad_vars.md)
+for attaching attributes after construction; and
+[`classroom_edges`](https://netify-dev.github.io/netify/reference/classroom_edges.md)
+/
+[`classroom_nodes`](https://netify-dev.github.io/netify/reference/classroom_nodes.md)
+for a small worked example.
+
 ## Author
 
 Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
@@ -166,6 +201,7 @@ Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 ## Examples
 
 ``` r
+
 # load example directed event data from ICEWS
 # this data comes in the form of a dyadic
 # dataframe where all dyad pairs are listed

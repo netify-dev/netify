@@ -25,3 +25,7 @@ plot_with_style(netlet, style_fun, ...)
 ## Value
 
 A ggplot object
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

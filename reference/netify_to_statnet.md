@@ -22,10 +22,10 @@ to_network(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
 
 - netlet:
 
-  A netify object containing network data. Currently supports
-  single-layer networks only. For multilayer networks, use
-  [`subset_netify`](https://netify-dev.github.io/netify/reference/subset_netify.md)
-  to extract individual layers first.
+  A netify object containing network data. Cross-sectional,
+  longitudinal, and multilayer netlets are all supported; multilayer
+  inputs are dispatched layer-by-layer and the layer results are
+  returned in a named list keyed by layer.
 
 - add_nodal_attribs:
 
@@ -36,8 +36,16 @@ to_network(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
 - add_dyad_attribs:
 
   Logical. If TRUE (default), includes dyadic attributes from the netify
-  object as edge attributes in the network object. Set to FALSE to
-  exclude edge covariates.
+  object as edge attributes in the network object. Each dyad variable is
+  attached in two places on the resulting network: as a network-level
+  attribute under its original name (the full \\n\times n\\ matrix) and
+  as a per-edge attribute under `<var>_e`. The trailing `_e`
+  disambiguates the per-edge edgelist from the network-level matrix. For
+  `ergm::edgecov()` pass the *original* (matrix) name, not the `_e`
+  alias, since `edgecov()` reads a network-level matrix attribute. The
+  `_e` per-edge attribute is exposed for descriptive use (e.g. coloring
+  edges in
+  [`network::plot.network`](https://rdrr.io/pkg/network/man/plot.network.html)).
 
 ## Value
 
@@ -49,8 +57,16 @@ A network object or list of network objects:
 
 - Longitudinal networks:
 
-  Returns a named list of network objects, with names corresponding to
-  time periods
+  Returns a named list of network objects with class
+  `c("network.list", "list")`, names corresponding to time periods. The
+  `network.list` class is the format that tergm CMLE
+  (`tergm(nl ~ Form(.) + Persist(.), estimate = "CMLE", times = seq_along(nl))`)
+  and `stergm` expect directly, so the output is plug-and-play for
+  longitudinal ERGMs.
+
+- Multilayer networks:
+
+  Returns a named list of (per-time) network objects keyed by layer name
 
 The resulting network object(s) will have:
 
@@ -62,10 +78,18 @@ The resulting network object(s) will have:
 - Vertex attributes for each nodal variable (if add_nodal_attribs =
   TRUE)
 
-- Edge attributes for each dyadic variable (if add_dyad_attribs = TRUE)
+- Edge attributes for each dyadic variable (if add_dyad_attribs = TRUE);
+  per-edge attributes carry the `_e` suffix, network-level attributes
+  keep the original name
 
 - Proper directedness based on the symmetric parameter of the netify
   object
+
+- A `netify_na_cols` attribute (character vector) listing nodal columns
+  that carry `NA`s; pass this directly to
+  [`drop_na_actors()`](https://netify-dev.github.io/netify/reference/drop_na_actors.md)
+  to drop the offending actors before fitting ergm formulas that
+  reference those columns
 
 ## Details
 
@@ -100,6 +124,8 @@ loaded after creating the network objects.
 
 Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
 
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r
@@ -125,6 +151,17 @@ verbCoop_net <- netify(
 
 # Convert to statnet network object
 ntwk <- netify_to_statnet(verbCoop_net)
+#> ! Nodal columns with "NA" detected: "i_polity2" and "i_log_gdp". Ergm terms
+#>   like `nodecov()`/`nodematch()` will refuse to fit.
+#> ℹ Use `drop_na_actors(net, cols = c('i_polity2', 'i_log_gdp'))` (or impute)
+#>   before refitting.
+#> This message is displayed once per session.
+#> ℹ Dyad covariates attached as per-edge attributes under "matlCoop_e",
+#>   "verbConf_e", and "matlConf_e" and as network-level matrices under their
+#>   original names ("matlCoop", "verbConf", and "matlConf").
+#> ℹ For `ergm::edgecov()` use the matrix name (e.g. `edgecov('matlCoop')`); the
+#>   "_e" per-edge attribute is for descriptive use such as edge styling.
+#> This message is displayed once per session.
 
 # Examine the result
 ntwk

@@ -26,6 +26,10 @@ print(x, ...)
 
 Invisibly returns the input object
 
+## Author
+
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r

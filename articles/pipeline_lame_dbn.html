@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Pipeline: netify to lame and dbn • netify</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Pipeline: netify to lame and dbn">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,13 +34,16 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
+    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Foundations (lite)</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
     <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -69,7 +72,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-03-29</h4>
+            <h4 data-toc-skip class="date">2026-05-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/pipeline_lame_dbn.Rmd" class="external-link"><code>vignettes/pipeline_lame_dbn.Rmd</code></a></small>
       <div class="d-none name"><code>pipeline_lame_dbn.Rmd</code></div>
@@ -135,7 +138,7 @@ time.</p>
 <span>    output_format <span class="op">=</span> <span class="st">"longit_array"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">verbal_net</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">verbal_net</span></span></code></pre></div>
 <p>Key choices:</p>
 <ul>
 <li>
@@ -181,15 +184,21 @@ list structure that <code><a href="https://rdrr.io/pkg/amen/man/ame.html" class=
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">amen_data</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify_to_amen.html">to_amen</a></span><span class="op">(</span><span class="va">verbal_net</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># what did we get?</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Y dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">amen_data</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Y dimensions: 152 x 152 x 13</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Xdyad dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">amen_data</span><span class="op">$</span><span class="va">Xdyad</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Xdyad dimensions: 152 x 152 x 2 x 13</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Xrow dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">amen_data</span><span class="op">$</span><span class="va">Xrow</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Xrow dimensions: 152 x 2 x 13</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Xcol dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">amen_data</span><span class="op">$</span><span class="va">Xcol</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Xcol dimensions: 152 x 2 x 13</span></span></code></pre></div>
+<span><span class="co"># inspect the resulting array shapes</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    object <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Y"</span>, <span class="st">"Xdyad"</span>, <span class="st">"Xrow"</span>, <span class="st">"Xcol"</span><span class="op">)</span>,</span>
+<span>    dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">amen_data</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span>,</span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">amen_data</span><span class="op">$</span><span class="va">Xdyad</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span>,</span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">amen_data</span><span class="op">$</span><span class="va">Xrow</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span>,</span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">amen_data</span><span class="op">$</span><span class="va">Xcol</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;   object               dims</span></span>
+<span><span class="co">#&gt; 1      Y     152 x 152 x 13</span></span>
+<span><span class="co">#&gt; 2  Xdyad 152 x 152 x 2 x 13</span></span>
+<span><span class="co">#&gt; 3   Xrow       152 x 2 x 13</span></span>
+<span><span class="co">#&gt; 4   Xcol       152 x 2 x 13</span></span></code></pre></div>
 <p>The output is:</p>
 <ul>
 <li>
@@ -228,13 +237,17 @@ covariates</li>
 <div class="section level2">
 <h2 id="part-2-longitudinal-pipeline-with-lame">Part 2: Longitudinal Pipeline with lame<a class="anchor" aria-label="anchor" href="#part-2-longitudinal-pipeline-with-lame"></a>
 </h2>
-<p>For longitudinal modeling with time-varying actor compositions, the
-<code>lame</code> package expects data as lists of matrices rather than
-arrays. Use <code>to_amen(netlet, lame = TRUE)</code>.</p>
+<p>For longitudinal modeling with time-varying actor compositions, use
+<code><a href="../reference/netify_to_lame.html">to_lame()</a></code>. This is a thin specialization of
+<code><a href="../reference/netify_to_amen.html">to_amen()</a></code> that (a) auto-pads ragged per-period matrices
+into a 3D array via <code>lame::list_to_array()</code>, (b) emits a
+ready-to-run <code>lame::lame()</code> snippet, and (c) provides
+<code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code> for round-tripping posterior predictions
+back into a netify for plotting.</p>
 <div class="section level3">
 <h3 id="when-to-use-lame-format">When to use lame format<a class="anchor" aria-label="anchor" href="#when-to-use-lame-format"></a>
 </h3>
-<p>Use <code>lame = TRUE</code> when:</p>
+<p>Use <code><a href="../reference/netify_to_lame.html">to_lame()</a></code> when:</p>
 <ul>
 <li>Actors enter and exit the network over time (e.g., new states
 forming, organizations dissolving)</li>
@@ -258,47 +271,77 @@ forming, organizations dissolving)</li>
 <span>    dyad_vars_symmetric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">verbal_list</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">verbal_list</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="convert-to-lame-format">Convert to lame format<a class="anchor" aria-label="anchor" href="#convert-to-lame-format"></a>
 </h3>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lame_data</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify_to_amen.html">to_amen</a></span><span class="op">(</span><span class="va">verbal_list</span>, lame <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">nl</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify_to_lame.html">to_lame</a></span><span class="op">(</span><span class="va">verbal_list</span>, lame <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># what did we get?</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Y: list of"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">lame_data</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span>, <span class="st">"matrices\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Y: list of 13 matrices</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"First period dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">lame_data</span><span class="op">$</span><span class="va">Y</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; First period dimensions: 152 x 152</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Last period dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">lame_data</span><span class="op">$</span><span class="va">Y</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">lame_data</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Last period dimensions: 152 x 152</span></span>
+<span><span class="co"># inspect the shape of the returned per-period matrices</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    description <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"number of periods"</span>, <span class="st">"first period dims"</span>, <span class="st">"last period dims"</span><span class="op">)</span>,</span>
+<span>    value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">nl</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span>,</span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">nl</span><span class="op">$</span><span class="va">Y</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span>,</span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">nl</span><span class="op">$</span><span class="va">Y</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">nl</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;         description     value</span></span>
+<span><span class="co">#&gt; 1 number of periods        13</span></span>
+<span><span class="co">#&gt; 2 first period dims 152 x 152</span></span>
+<span><span class="co">#&gt; 3  last period dims 152 x 152</span></span>
 <span></span>
 <span><span class="co"># check actor counts across time</span></span>
-<span><span class="va">actor_counts</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">lame_data</span><span class="op">$</span><span class="va">Y</span>, <span class="va">nrow</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nActors per time period:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Actors per time period:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">actor_counts</span><span class="op">)</span></span>
+<span><span class="va">actor_counts</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">nl</span><span class="op">$</span><span class="va">Y</span>, <span class="va">nrow</span><span class="op">)</span></span>
+<span><span class="va">actor_counts</span></span>
 <span><span class="co">#&gt; 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 </span></span>
 <span><span class="co">#&gt;  152  152  152  152  152  152  152  152  152  152  152  152  152</span></span></code></pre></div>
-<p>Each element of the list can have a different set of actors. This is
-the format <code>lame</code> expects:</p>
+<p>Each element of the list can have a different set of actors.
+<code><a href="../reference/netify_to_lame.html">to_lame()</a></code> also bundles a copy-paste-ready snippet that pads
+the ragged list into a 3D array with <code>lame::list_to_array()</code>
+and then fits <code>lame::lame()</code>:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># fit a longitudinal latent space model with lame</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">lame</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">nl</span><span class="op">$</span><span class="va">ame_call</span><span class="op">)</span></span>
+<span><span class="co">#&gt; U &lt;- unique(unlist(lapply(nl$Y, rownames)))</span></span>
+<span><span class="co">#&gt; padded &lt;- lame::list_to_array(actors = U, Y = nl$Y, Xdyad = nl$Xdyad, Xrow = nl$Xrow, Xcol = nl$Xcol)</span></span>
+<span><span class="co">#&gt; lame::lame(Y = padded$Y, Xdyad = padded$Xdyad, Xrow = padded$Xrow, Xcol = padded$Xcol, family = "normal", method = "mcmc", nscan = 1000, burn = 500)</span></span></code></pre></div>
+<p>Run that snippet to fit the model. Conceptually:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">lame</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">lame_fit</span> <span class="op">=</span> <span class="fu">lame</span><span class="op">(</span></span>
-<span>    Y <span class="op">=</span> <span class="va">lame_data</span><span class="op">$</span><span class="va">Y</span>,</span>
-<span>    Xdyad <span class="op">=</span> <span class="va">lame_data</span><span class="op">$</span><span class="va">Xdyad</span>,</span>
-<span>    Xrow <span class="op">=</span> <span class="va">lame_data</span><span class="op">$</span><span class="va">Xrow</span>,</span>
-<span>    Xcol <span class="op">=</span> <span class="va">lame_data</span><span class="op">$</span><span class="va">Xcol</span>,</span>
-<span>    R <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>    family <span class="op">=</span> <span class="st">"nrm"</span>,</span>
-<span>    nscan <span class="op">=</span> <span class="fl">1000</span>, burn <span class="op">=</span> <span class="fl">500</span>, odens <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>    plot <span class="op">=</span> <span class="cn">FALSE</span>, print <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="va">U</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">nl</span><span class="op">$</span><span class="va">Y</span>, <span class="va">rownames</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">padded</span> <span class="op">&lt;-</span> <span class="fu">lame</span><span class="fu">::</span><span class="fu">list_to_array</span><span class="op">(</span>actors <span class="op">=</span> <span class="va">U</span>, Y <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Y</span>, Xdyad <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Xdyad</span>,</span>
+<span>    Xrow <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Xrow</span>, Xcol <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Xcol</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">lame_fit</span> <span class="op">=</span> <span class="fu">lame</span><span class="fu">::</span><span class="fu">lame</span><span class="op">(</span></span>
+<span>    Y <span class="op">=</span> <span class="va">padded</span><span class="op">$</span><span class="va">Y</span>, Xdyad <span class="op">=</span> <span class="va">padded</span><span class="op">$</span><span class="va">Xdyad</span>,</span>
+<span>    Xrow <span class="op">=</span> <span class="va">padded</span><span class="op">$</span><span class="va">Xrow</span>, Xcol <span class="op">=</span> <span class="va">padded</span><span class="op">$</span><span class="va">Xcol</span>,</span>
+<span>    R <span class="op">=</span> <span class="fl">2</span>, family <span class="op">=</span> <span class="st">"normal"</span>,</span>
+<span>    method <span class="op">=</span> <span class="st">"mcmc"</span>, nscan <span class="op">=</span> <span class="fl">1000</span>, burn <span class="op">=</span> <span class="fl">500</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="round-tripping-fitted-values-back-to-netify">Round-tripping fitted values back to netify<a class="anchor" aria-label="anchor" href="#round-tripping-fitted-values-back-to-netify"></a>
+</h3>
+<p>Once a fit is in hand, <code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code> pulls the
+posterior-mean linear predictor (or a residual / probability / per-cell
+quantile) back into a cross-sectional netify so it can be plotted or
+compared against the observed network:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># posterior-mean linear predictor</span></span>
+<span><span class="va">pred_net</span> <span class="op">=</span> <span class="fu"><a href="../reference/from_lame_fit.html">from_lame_fit</a></span><span class="op">(</span><span class="va">lame_fit</span>, value <span class="op">=</span> <span class="st">"fitted"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pred_net</span>, style <span class="op">=</span> <span class="st">"heatmap"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 90% per-cell credible interval bounds on the probability scale</span></span>
+<span><span class="co"># (only for binary families; here for illustration)</span></span>
+<span><span class="va">lo</span> <span class="op">=</span> <span class="fu"><a href="../reference/from_lame_fit.html">from_lame_fit</a></span><span class="op">(</span><span class="va">lame_fit</span>, value <span class="op">=</span> <span class="st">"prob_lower"</span>, alpha <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
+<span><span class="va">hi</span> <span class="op">=</span> <span class="fu"><a href="../reference/from_lame_fit.html">from_lame_fit</a></span><span class="op">(</span><span class="va">lame_fit</span>, value <span class="op">=</span> <span class="st">"prob_upper"</span>, alpha <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code> auto-detects the link function: probit
+for <code>lame::ame_als()</code> / <code><a href="https://rdrr.io/pkg/amen/man/ame.html" class="external-link">amen::ame()</a></code> fits, logit
+for <code>lame::lame()</code> Gibbs fits, with an explicit
+<code>link</code> slot taking precedence.</p>
 </div>
 </div>
 <div class="section level2">
@@ -311,7 +354,7 @@ of relation types (layers).</p>
 <div class="section level3">
 <h3 id="step-1-create-individual-layer-networks">Step 1: Create individual layer networks<a class="anchor" aria-label="anchor" href="#step-1-create-individual-layer-networks"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># verbal cooperation layer (symmetric - mutual diplomatic engagement)</span></span>
 <span><span class="va">verbal_coop</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews</span>,</span>
@@ -344,13 +387,13 @@ of relation types (layers).</p>
 layers can have different symmetry settings. This is common in IR
 applications where some relations are inherently symmetric (alliance
 status) while others are directed (trade exports).</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multi_net</span> <span class="op">=</span> <span class="fu"><a href="../reference/layer_netify.html">layer_netify</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">verbal_coop</span>, <span class="va">material_coop</span><span class="op">)</span>,</span>
 <span>    layer_labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Verbal"</span>, <span class="st">"Material"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">multi_net</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">multi_net</span></span></code></pre></div>
 <p>Notice that the print output shows the mixed directedness across
 layers.</p>
 </div>
@@ -359,7 +402,7 @@ layers.</p>
 </h3>
 <p><code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code> extracts the multilayer longitudinal netify
 object into the exact 4D array format that <code>dbn</code> expects.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dbn_data</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify_to_dbn.html">to_dbn</a></span><span class="op">(</span><span class="va">multi_net</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># what did we get?</span></span>
@@ -389,7 +432,7 @@ covariates</li>
 <code>[n_actors x n_nodal_vars x n_time]</code>, receiver
 covariates</li>
 </ul>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># fit a dynamic bilinear network model</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">dbn</span><span class="op">)</span></span>
 <span></span>
@@ -405,7 +448,7 @@ covariates</li>
 </h3>
 <p><code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code> also handles single-layer longitudinal networks
 by adding a layer dimension of size 1:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dbn_single</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify_to_dbn.html">to_dbn</a></span><span class="op">(</span><span class="va">verbal_coop</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Single-layer Y dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dbn_single</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Single-layer Y dimensions: 152 x 152 x 1 x 13</span></span>
@@ -430,7 +473,7 @@ transfers</li>
 <div class="section level3">
 <h3 id="creating-mixed-directedness-multilayer-networks">Creating mixed-directedness multilayer networks<a class="anchor" aria-label="anchor" href="#creating-mixed-directedness-multilayer-networks"></a>
 </h3>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># symmetric layer: average verbal cooperation</span></span>
 <span><span class="va">verbal_symm</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews</span>,</span>
@@ -464,7 +507,7 @@ transfers</li>
 <span><span class="co">#&gt; Layer names: Verbal_Symm Material_Dir</span></span></code></pre></div>
 <p>When you subset to a single layer, the correct symmetry is
 preserved:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># subset to the symmetric layer</span></span>
 <span><span class="va">verbal_only</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">mixed_net</span>, layers <span class="op">=</span> <span class="st">"Verbal_Symm"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Verbal layer symmetric:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">verbal_only</span>, <span class="st">"symmetric"</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -480,7 +523,7 @@ preserved:</p>
 </h3>
 <p><code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code> handles mixed-directedness multilayer
 objects:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dbn_mixed</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify_to_dbn.html">to_dbn</a></span><span class="op">(</span><span class="va">mixed_net</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Y dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dbn_mixed</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">" x "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Y dimensions: 152 x 152 x 2 x 13</span></span></code></pre></div>
@@ -501,7 +544,7 @@ statistical models.</p>
 <div class="section level3">
 <h3 id="why-it-matters">Why it matters<a class="anchor" aria-label="anchor" href="#why-it-matters"></a>
 </h3>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># compare the two approaches</span></span>
 <span><span class="va">net_zeros</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span>,</span>
@@ -579,16 +622,21 @@ unobserved dyads represent genuine zeros.</p>
 </tr>
 <tr class="odd">
 <td>Single-layer, longitudinal (varying actors)</td>
-<td><code>to_amen(lame=TRUE)</code></td>
-<td>lists of matrices</td>
+<td><code>to_lame(lame=TRUE)</code></td>
+<td>padded 3D arrays + ame_call snippet</td>
 </tr>
 <tr class="even">
+<td>Round-trip AME/LAME fit back to netify</td>
+<td><code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code></td>
+<td>netify (fitted / residual / prob / quantiles)</td>
+</tr>
+<tr class="odd">
 <td>Multilayer, longitudinal</td>
 <td><code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code></td>
 <td>4D array <code>[n, n, p, T]</code>
 </td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Single-layer, longitudinal (dbn format)</td>
 <td><code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code></td>
 <td>4D array <code>[n, n, 1, T]</code>
@@ -605,8 +653,12 @@ by providing a four-step workflow: create the network with
 <code><a href="../reference/netify.html">netify()</a></code> (using <code>missing_to_zero = FALSE</code> for
 modeling applications), combine layers with <code><a href="../reference/layer_netify.html">layer_netify()</a></code>
 when multilayer structure is needed, export with <code><a href="../reference/netify_to_amen.html">to_amen()</a></code>
-or <code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code> depending on the target modeling package, and
-pass the resulting output directly to the model fitting function.</p>
+/ <code><a href="../reference/netify_to_lame.html">to_lame()</a></code> / <code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code> depending on the target
+modeling package, and pass the resulting output (or the bundled
+<code>ame_call</code> snippet) directly to the model fitting function.
+After fitting, <code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code> round-trips posterior
+predictions back into a netify so they can be plotted alongside the
+observed network.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

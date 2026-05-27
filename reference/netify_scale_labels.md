@@ -46,6 +46,10 @@ It will issue a warning if used with other ggplot objects.
 
 [`plot.netify`](https://netify-dev.github.io/netify/reference/plot.netify.md)
 
+## Author
+
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r

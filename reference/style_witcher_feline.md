@@ -13,3 +13,7 @@ style_witcher_feline()
 ## Value
 
 List of plot arguments
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

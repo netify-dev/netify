@@ -17,3 +17,7 @@ style_random(seed = NULL)
 ## Value
 
 A style list that can be passed to plot()
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

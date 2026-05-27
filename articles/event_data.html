@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Event Data • netify</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Event Data">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,13 +34,16 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
+    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Foundations (lite)</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
     <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
     <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -69,7 +72,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-03-29</h4>
+            <h4 data-toc-skip class="date">2026-05-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/event_data.Rmd" class="external-link"><code>vignettes/event_data.Rmd</code></a></small>
       <div class="d-none name"><code>event_data.Rmd</code></div>
@@ -78,39 +81,43 @@ Shahryar Minhas</h4>
     
     
 <div class="section level2">
-<h2 id="vignette-summary">Vignette Summary<a class="anchor" aria-label="anchor" href="#vignette-summary"></a>
+<h2 id="tldr">tl;dr<a class="anchor" aria-label="anchor" href="#tldr"></a>
 </h2>
-<p>Below is a demonstration of how to use the <strong>netify</strong> R
-package to build and analyze various conflict networks. We will walk
-through data preparation, network construction, summary statistics,
-visualizations, and special use cases like weighted networks,
-longitudinal networks, and bipartite networks.</p>
-<p>A common data type used to create conflict networks is in the
-structure of event data, where actors are repeated across rows but there
-is no specific variable that denotes the ‘edge’ as shown in our previous
-example.</p>
-<p>We show how to use <code>netify</code> and UCDP data as just one
-example of potential applications to intrastate event data. The first
-step is to go to <a href="https://ucdp.uu.se/downloads/" class="external-link uri">https://ucdp.uu.se/downloads/</a> and download the data you
-want to use. For this tutorial we have downloaded UCDP GED event data
-version 23.1 and subset the data for the case of Mexico. We also have
-saved this example internal to the package to that users can easily run
-the code below.</p>
+<p>Event data come in two flavors. <strong>One-mode</strong> event data
+(actor-on-actor: who fought who, who cited whom) becomes a unipartite
+network. <strong>Two-mode</strong> event data (actor-on-venue: firms in
+jurisdictions, attendees at meetings) becomes a bipartite network. This
+vignette walks through both. Along the way we cover transforming
+weights, single-actor highlighting, applying a ggplot theme, and how to
+export a figure with <code><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave()</a></code>. Have fun!</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/netify/">netify</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="one-mode-event-data-ucdp-conflict-in-mexico">One-mode event data: UCDP conflict in Mexico<a class="anchor" aria-label="anchor" href="#one-mode-event-data-ucdp-conflict-in-mexico"></a>
+</h2>
+<p>A common data type used to build conflict networks is <strong>event
+data</strong>, where actors are repeated across rows but no single
+column explicitly encodes an edge weight. <code><a href="../reference/netify.html">netify()</a></code> handles
+this case by counting interactions when no <code>weight</code> is
+provided.</p>
+<p>We use UCDP GED data on Mexico as one example of an application to
+intrastate event data. The data come from <a href="https://ucdp.uu.se/downloads/" class="external-link uri">https://ucdp.uu.se/downloads/</a> (version 23.1, subset to
+Mexico); the subset ships internally so the code below runs as-is.</p>
 <ol style="list-style-type: decimal">
-<li>Create: generate an aggregated, weighted network of conflict between
-actors in Mexico. The default here, when the user does not supply a
-‘weight’ value, is for the function to simply count up interactions and
-return this as the weight. When this is the case, the user will get the
-warning shown in the example below.</li>
+<li>
+<strong>Create</strong>: generate an aggregated, weighted network of
+conflict between actors in Mexico. When the user does not supply a
+<code>weight</code> value, <code><a href="../reference/netify.html">netify()</a></code> counts interactions and
+returns the count as the edge weight, with an informational message
+indicating that this has happened.</li>
 </ol>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Load UCDP GED data on Mexico</span></span>
+<code class="sourceCode R"><span><span class="co"># load UCDP GED data on Mexico</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">mexico</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Construct unweighted network (number_of_events by default)</span></span>
+<span><span class="co"># construct count-weighted network (number_of_events by default)</span></span>
 <span><span class="va">mex_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">mexico</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"side_a"</span>,</span>
@@ -122,10 +129,10 @@ warning shown in the example below.</li>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> Warning: there are repeating dyads within time periods in the dataset. When `sum_dyads = TRUE` and `weight` is not supplied, edges in the outputted adjacency matrix represent a count of interactions between actors.</span></span></code></pre>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Summaries at the graph and actor levels</span></span>
+<code class="sourceCode R"><span><span class="co"># summaries at the graph and actor levels</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   num_actors    density num_edges prop_edges_missing mean_edge_weight</span></span>
-<span><span class="co">## 1         74 0.02554609       138                  0         7.018512</span></span>
+<pre><code><span><span class="co">##   net num_actors    density num_edges prop_edges_missing mean_edge_weight</span></span>
+<span><span class="co">## 1   1         74 0.02554609        69                  0         7.018512</span></span>
 <span><span class="co">##   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition</span></span>
 <span><span class="co">## 1        113.395                  0               0            3757   0.1371326</span></span>
 <span><span class="co">##   sd_of_actor_means transitivity</span></span>
@@ -134,12 +141,79 @@ warning shown in the example below.</li>
 <code class="sourceCode R"><span><span class="va">actor_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span><span class="va">actor_stats</span><span class="op">)</span></span></code></pre></div>
 <p><img src="event_data_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="1093.75"></p>
-<ol start="2" style="list-style-type: decimal">
-<li>Explore: next we can quickly use the basic plot function in the
-<code>netify</code> package to plot network of violent interactions in
-Mexico.</li>
-</ol>
+<div class="section level3">
+<h3 id="tldr-sidebar-na-versus-zero-in-event-count-weights">tl;dr Sidebar: NA versus zero in event-count weights<a class="anchor" aria-label="anchor" href="#tldr-sidebar-na-versus-zero-in-event-count-weights"></a>
+</h3>
+<p>Event counts have a sharp interpretation gap that does not show up
+in, say, a 0/1 alliance network: the difference between <strong>“these
+two actors were both in the data and recorded zero events
+together”</strong> and <strong>“we have no information on whether these
+two actors interacted at all”</strong> is the difference between a
+substantive zero and a missing observation. The default
+<code>missing_to_zero = TRUE</code> collapses both into <code>0</code>.
+For routine event-data uses this is what you want — a missing UCDP dyad
+really does mean “no recorded violent event between these two sides in
+this slice of the data,” which is closer to a substantive zero than a
+Bayesian “we don’t know.” But for epidemiology / contact-tracing /
+sparse rosters, the asymmetry matters and you’ll want
+<code>missing_to_zero = FALSE</code>.</p>
+<p>A 5-actor toy makes the bookkeeping concrete. Suppose four
+contact-tracing interviews surfaced four edges among five named
+individuals; the remaining dyads were never asked about:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tiny</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    a1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p1"</span>, <span class="st">"p1"</span>, <span class="st">"p2"</span>, <span class="st">"p3"</span><span class="op">)</span>,</span>
+<span>    a2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p2"</span>, <span class="st">"p3"</span>, <span class="st">"p3"</span>, <span class="st">"p4"</span><span class="op">)</span>,</span>
+<span>    n_contacts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># preserve unobserved dyads as NA</span></span>
+<span><span class="va">net_na</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
+<span>    <span class="va">tiny</span>,</span>
+<span>    actor1 <span class="op">=</span> <span class="st">"a1"</span>, actor2 <span class="op">=</span> <span class="st">"a2"</span>,</span>
+<span>    weight <span class="op">=</span> <span class="st">"n_contacts"</span>,</span>
+<span>    symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    missing_to_zero <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    nodelist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"p1"</span>, <span class="st">"p2"</span>, <span class="st">"p3"</span>, <span class="st">"p4"</span>, <span class="st">"p5"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># the raw matrix carries explicit NAs for the never-asked dyads</span></span>
+<span><span class="fu"><a href="../reference/get_raw.html">get_raw</a></span><span class="op">(</span><span class="va">net_na</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##    p1 p2 p3 p4 p5</span></span>
+<span><span class="co">## p1 NA  2  1 NA NA</span></span>
+<span><span class="co">## p2  2 NA  3 NA NA</span></span>
+<span><span class="co">## p3  1  3 NA  1 NA</span></span>
+<span><span class="co">## p4 NA NA  1 NA NA</span></span>
+<span><span class="co">## p5 NA NA NA NA NA</span></span></code></pre>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># summary() reports the missingness fraction in its own column when</span></span>
+<span><span class="co"># missing_to_zero = FALSE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">net_na</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"num_actors"</span>, <span class="st">"density"</span>, <span class="st">"num_edges"</span>,</span>
+<span>                    <span class="st">"prop_edges_missing"</span>, <span class="st">"prop_unknown_edges"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">##   num_actors density num_edges prop_edges_missing prop_unknown_edges</span></span>
+<span><span class="co">## 1          5     0.4         4                0.6                0.6</span></span></code></pre>
+<p><code>prop_unknown_edges</code> only shows up when
+<code>missing_to_zero = FALSE</code> — that is the cue that the netlet
+is actually carrying NA semantics downstream. Build the same netlet with
+the default and the NAs are silently replaced with <code>0</code>s and
+the column disappears; that is fine for UCDP / GED event counts (the
+rest of this vignette uses the default for exactly that reason) but it
+is the wrong choice when “we did not measure this dyad” is a meaningful
+state. Have fun choosing!</p>
+<ol start="2" style="list-style-type: decimal">
+<li>
+<strong>Explore</strong>: next we use the basic <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>
+method to visualize the network of violent interactions in Mexico. The
+dead-simple call labels every actor:</li>
+</ol>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">6886</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>, add_text <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="event_data_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="900"></p>
+<p>For a less cluttered view, pass a vector of actors to
+<code>select_text</code> / <code>select_text_display</code>:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># select 10 random names for plotting</span></span>
 <span><span class="va">select_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">6886</span><span class="op">)</span></span>
@@ -147,48 +221,139 @@ Mexico.</li>
 <span><span class="va">random_names</span> <span class="op">&lt;-</span> <span class="va">select_names</span><span class="op">[</span><span class="va">random_indices</span><span class="op">]</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
-<span>    add_text <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Removed 69 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">## (`geom_segment()`).</span></span></code></pre>
-<p><img src="event_data_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="900"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
 <span>    select_text <span class="op">=</span> <span class="va">random_names</span>,</span>
 <span>    select_text_display <span class="op">=</span> <span class="va">random_names</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Removed 69 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">## (`geom_segment()`).</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: Removed 64 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">## (`geom_text_repel()`).</span></span></code></pre>
-<p><img src="event_data_files/figure-html/unnamed-chunk-3-2.png" class="r-plt" alt="" width="900"></p>
-<p>The graphs above reveal the need to transform the data to increase
-interpretability. To do so, we can log the values of the edges. The
-<code>netify</code> plot function has a built-in parameter for this
-where the user can pass the function they want to use to transform the
-weights of the data (see the general <code>mutate_weights</code>
-function in the package to transform weights outside of plotting.)</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
+<p><img src="event_data_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="900"></p>
+<p>The graphs above reveal the need to transform the edge weights to
+increase interpretability. Logging the values is a common move. The
+<code>netify</code> plot function has a built-in parameter for this —
+pass any function to <code>mutate_weight</code> (see also the general
+<code><a href="../reference/mutate_weights.html">mutate_weights()</a></code> function for transforming weights outside
+of plotting). The <code>edge_alpha_label</code> parameter just relabels
+the resulting legend:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">6886</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
 <span>    select_text <span class="op">=</span> <span class="va">random_names</span>,</span>
 <span>    select_text_display <span class="op">=</span> <span class="va">random_names</span>,</span>
-<span>    <span class="co"># log(x+1) to better see range of connects</span></span>
-<span>    mutate_weight <span class="op">=</span> <span class="va">log1p</span></span>
+<span>    <span class="co"># log(x+1) to better see the range of connections</span></span>
+<span>    mutate_weight <span class="op">=</span> <span class="va">log1p</span>,</span>
+<span>    edge_alpha_label <span class="op">=</span> <span class="st">"Log(Event Count)"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Removed 69 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">## (`geom_segment()`).</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: Removed 64 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">## (`geom_text_repel()`).</span></span></code></pre>
-<p><img src="event_data_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="900"></p>
-<p>Let’s make the same graph as above but this time make sure we remove
-any isolates from the graph as well as refine the edges. In addition,
-there are some points that are overlapping and difficult to see. To get
-ideas about how to improve the plot, we might like to inspect each
-component of the plot. This is an option when the plot parameter,
-<code>return_components = TRUE</code>. We can also directly modify these
-components, as shown below by adding a label specification.</p>
+<p><img src="event_data_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="900"></p>
+</div>
+<div class="section level3">
+<h3 id="highlighting-a-single-actor">Highlighting a single actor<a class="anchor" aria-label="anchor" href="#highlighting-a-single-actor"></a>
+</h3>
+<p>Often there is one actor you really want to call out — a focal group,
+a state agency, a single firm. <code><a href="../reference/plot.netify.html">plot.netify()</a></code> supports this
+directly via <code>highlight=</code>, which takes either a character
+vector of focal actors or a named color vector mapping actor names to
+colors:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">focal</span> <span class="op">&lt;-</span> <span class="st">"Government of Mexico"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">6886</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
+<span>    mutate_weight <span class="op">=</span> <span class="va">log1p</span>,</span>
+<span>    edge_alpha_label <span class="op">=</span> <span class="st">"Log(Event Count)"</span>,</span>
+<span>    highlight <span class="op">=</span> <span class="va">focal</span>,</span>
+<span>    highlight_color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Government of Mexico"</span> <span class="op">=</span> <span class="st">"#0A3161"</span>, <span class="st">"Other"</span> <span class="op">=</span> <span class="st">"grey70"</span><span class="op">)</span>,</span>
+<span>    select_text <span class="op">=</span> <span class="va">focal</span>,</span>
+<span>    select_text_display <span class="op">=</span> <span class="va">focal</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="event_data_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="900"></p>
+<p>The focal actor is now visually distinct from the rest of the network
+— useful for storytelling and for slide decks.</p>
+</div>
+<div class="section level3">
+<h3 id="applying-a-theme">Applying a theme<a class="anchor" aria-label="anchor" href="#applying-a-theme"></a>
+</h3>
+<p>Drop on <code><a href="../reference/theme_publication_netify.html">theme_publication_netify()</a></code> — a ggplot theme with
+a larger base font, italic legend titles, and stripped axes (the right
+default for force-directed layouts):</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># add degree centrality from summary_actor()</span></span>
+<span><span class="va">mex_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span>
+<span>    <span class="va">mex_network</span>,</span>
+<span>    <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span>,</span>
+<span>    actor <span class="op">=</span> <span class="st">"actor"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">6886</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
+<span>    mutate_weight <span class="op">=</span> <span class="va">log1p</span>,</span>
+<span>    edge_alpha_label <span class="op">=</span> <span class="st">"Log(Event Count)"</span>,</span>
+<span>    node_size_by <span class="op">=</span> <span class="st">"degree"</span>,</span>
+<span>    node_size_label <span class="op">=</span> <span class="st">"Degree"</span>,</span>
+<span>    node_alpha <span class="op">=</span> <span class="fl">.5</span>,</span>
+<span>    check_overlap <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="../reference/theme_publication_netify.html">theme_publication_netify</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="event_data_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="900"></p>
+<p><code><a href="../reference/theme_publication_netify.html">theme_publication_netify()</a></code> is built for network layouts
+(no axes). For actor-level summaries or heatmaps — where you <em>do</em>
+want axes — use <code><a href="../reference/theme_publication_netify_ts.html">theme_publication_netify_ts()</a></code> (the
+<code>_ts</code> is for “tables / time-series”, anything that isn’t a
+node-edge layout).</p>
+</div>
+<div class="section level3">
+<h3 id="saving-the-figure">Saving the figure<a class="anchor" aria-label="anchor" href="#saving-the-figure"></a>
+</h3>
+<p>Once you have a plot you like, export it with <code><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave()</a></code>.
+A vector format (PDF or SVG) holds up at any size; for the web or
+social, a PNG at 300 dpi is fine.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># the last plot rendered is captured by ggsave() by default</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="st">"mexico_conflict.pdf"</span>, width <span class="op">=</span> <span class="fl">7</span>, height <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># or store the plot and pass it explicitly</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>, mutate_weight <span class="op">=</span> <span class="va">log1p</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="../reference/theme_publication_netify.html">theme_publication_netify</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="st">"mexico_conflict.png"</span>, plot <span class="op">=</span> <span class="va">p</span>, width <span class="op">=</span> <span class="fl">7</span>, height <span class="op">=</span> <span class="fl">6</span>, dpi <span class="op">=</span> <span class="fl">300</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="a-note-on-color-choice">A note on color choice<a class="anchor" aria-label="anchor" href="#a-note-on-color-choice"></a>
+</h3>
+<p>Colors matter for accessibility — roughly 8% of men and 0.5% of women
+have some form of color vision deficiency. When you encode a variable in
+color, prefer a colorblind-safe palette. Two easy options:</p>
+<ul>
+<li>
+<strong>ColorBrewer qualitative palettes</strong> like
+<code>Set2</code>, <code>Dark2</code>, and <code>Paired</code> are
+colorblind-safe by design. Use
+<code>scale_color_brewer(palette = "Set2")</code> or just pass
+<code>node_color_palette = "Set2"</code> to
+<code><a href="../reference/plot.netify.html">plot.netify()</a></code>.</li>
+<li>
+<strong>viridis</strong> (<code>viridis</code>, <code>magma</code>,
+<code>plasma</code>, <code>cividis</code>) gives a perceptually uniform,
+colorblind-safe gradient for continuous variables.</li>
+</ul>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># example: colorblind-safe categorical fill via plot.netify()</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
+<span>    node_color_by <span class="op">=</span> <span class="st">"side"</span>,         <span class="co"># some categorical attribute</span></span>
+<span>    node_color_palette <span class="op">=</span> <span class="st">"Set2"</span>     <span class="co"># ColorBrewer colorblind-safe</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="../reference/theme_publication_netify.html">theme_publication_netify</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># example: colorblind-safe continuous color, manual</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_color_viridis_c</a></span><span class="op">(</span>option <span class="op">=</span> <span class="st">"cividis"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="../reference/theme_publication_netify.html">theme_publication_netify</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="advanced-assemble-the-plot-from-components">Advanced: assemble the plot from components<a class="anchor" aria-label="anchor" href="#advanced-assemble-the-plot-from-components"></a>
+</h3>
+<p>For most uses the calls above are enough. If you want full control
+over how the layers are stacked — say, to insert a custom annotation
+between the edge layer and the node layer — set
+<code>return_components = TRUE</code> and reassemble the pieces
+yourself.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># investigate each component of the plot</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">6886</span><span class="op">)</span></span>
 <span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mex_network</span>,</span>
 <span>    remove_isolates <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -198,7 +363,7 @@ components, as shown below by adding a label specification.</p>
 <span>    return_components <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">comp</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span></code></pre>
 <pre><code><span><span class="co">## ── <span style="font-weight: bold;">Netify plot components</span> ──</span></span></code></pre>
 <pre><code><span><span class="co">## </span></span></code></pre>
@@ -209,7 +374,7 @@ components, as shown below by adding a label specification.</p>
 <pre><code><span><span class="co">## • Theme: theme_netify</span></span></code></pre>
 <pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Use `assemble_netify_plot()` to build or construct manually with</span></span>
 <span><span class="co">##   `netify_edge()`, `netify_node()`, etc.</span></span></code></pre>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># modify component</span></span>
 <span><span class="va">comp</span><span class="op">$</span><span class="va">base</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="../reference/netify_edge.html">netify_edge</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span> <span class="op">+</span></span>
@@ -218,61 +383,225 @@ components, as shown below by adding a label specification.</p>
 <span>    <span class="fu"><a href="../reference/netify_node.html">netify_node</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="../reference/netify_text_repel.html">netify_text_repel</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="va">comp</span><span class="op">$</span><span class="va">theme</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Removed 69 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">## (`geom_segment()`).</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: Removed 64 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">## (`geom_text_repel()`).</span></span></code></pre>
-<p><img src="event_data_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="900"></p>
-<p>There is, however, a more straightforward way to do this which is via
-the <code>edge_alpha_label</code> parameter inside the netify plot
-function:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># and even simpler</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
-<span>    select_text <span class="op">=</span> <span class="va">random_names</span>,</span>
-<span>    select_text_display <span class="op">=</span> <span class="va">random_names</span>,</span>
-<span>    mutate_weight <span class="op">=</span> <span class="va">log1p</span>,</span>
-<span>    edge_alpha_label <span class="op">=</span> <span class="st">"Log(Event Count)"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Removed 69 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">## (`geom_segment()`).</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: Removed 64 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">## (`geom_text_repel()`).</span></span></code></pre>
-<p><img src="event_data_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="900"></p>
-<p>For conflict data, we often like to see which actors are involved in
-the most conflict. To do this, however, we’d need to calculate degree
-centrality. To do this we can use the <code><a href="../reference/add_node_vars.html">add_node_vars()</a></code>
-function (there is also a <code><a href="../reference/add_dyad_vars.html">add_dyad_vars()</a></code> function) which
-takes a netlet object (the network of study), nodal data, and a string
-to specify the column name in the nodal data that matches with each
-actor in the network. Below, we use <code><a href="../reference/summary_actor.html">summary_actor()</a></code> to
-create the nodal data frame.</p>
+<p><img src="event_data_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="900"></p>
+</div>
+<div class="section level3">
+<h3 id="a-note-on-missingness">A note on missingness<a class="anchor" aria-label="anchor" href="#a-note-on-missingness"></a>
+</h3>
+<p>When you build a network from event data, <code><a href="../reference/netify.html">netify()</a></code> by
+default fills unobserved dyads with 0
+(<code>missing_to_zero = TRUE</code>). For some applications — contact
+tracing, animal interactions, partially-observed survey rosters — the
+difference between <em>observed-no-interaction</em> (0) and
+<em>not-observed-at-all</em> (NA) matters. Set
+<code>missing_to_zero = FALSE</code> to keep NAs as NAs. Similarly,
+<code>actor_time_uniform = FALSE</code> lets actor composition vary
+across periods (useful for open-cohort longitudinal data); the netlet
+then stores an <code>actor_pds</code> data.frame recording each actor’s
+entry / exit window. See <code><a href="../reference/netify.html">?netify</a></code> for details.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="two-mode-bipartite-event-data-offshore-jurisdictions">Two-mode (bipartite) event data: offshore jurisdictions<a class="anchor" aria-label="anchor" href="#two-mode-bipartite-event-data-offshore-jurisdictions"></a>
+</h2>
+<p>Event data are not limited to one-mode actor-on-actor interactions.
+People attending venues, students enrolling in classes, firms registered
+in jurisdictions — anywhere two distinct sets of entities are linked by
+observed events — calls for a <strong>bipartite</strong> network.</p>
+<p>A concrete data-journalism example: leaks like the Panama Papers or
+Paradise Papers connect <em>entities</em> (companies, trusts) to
+<em>jurisdictions</em> (tax havens). Each entity-jurisdiction pairing is
+an event (“firm X was incorporated in haven Y”). The result is a
+two-mode network with firms on one side and jurisdictions on the
+other.</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># toy offshore-leak data: firms incorporated in jurisdictions</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">6886</span><span class="op">)</span></span>
+<span><span class="va">firms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"firm_"</span>, <span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">havens</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BVI"</span>, <span class="st">"Cayman"</span>, <span class="st">"Bermuda"</span>, <span class="st">"Jersey"</span>, <span class="st">"Panama"</span>, <span class="st">"Mauritius"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">offshore</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    firm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">firms</span>, <span class="fl">40</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>    haven <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">havens</span>, <span class="fl">40</span>, replace <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>        prob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.30</span>, <span class="fl">0.25</span>, <span class="fl">0.15</span>, <span class="fl">0.12</span>, <span class="fl">0.10</span>, <span class="fl">0.08</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">offshore</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##     firm     haven</span></span>
+<span><span class="co">## 1 firm_C    Cayman</span></span>
+<span><span class="co">## 2 firm_F   Bermuda</span></span>
+<span><span class="co">## 3 firm_D   Bermuda</span></span>
+<span><span class="co">## 4 firm_B Mauritius</span></span>
+<span><span class="co">## 5 firm_F    Cayman</span></span>
+<span><span class="co">## 6 firm_G       BVI</span></span></code></pre>
+<p>To build the bipartite netlet, set <code>mode = "bipartite"</code>
+and point <code>actor1</code> / <code>actor2</code> at the two entity
+columns. <code>sum_dyads = TRUE</code> aggregates repeated firm-haven
+incorporations into an edge weight.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># add degree centrality</span></span>
-<span><span class="va">mex_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span>
-<span>    <span class="va">mex_network</span>,</span>
-<span>    <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">mex_network</span><span class="op">)</span>,</span>
-<span>    actor <span class="op">=</span> <span class="st">"actor"</span></span>
+<code class="sourceCode R"><span><span class="va">bp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
+<span>    <span class="va">offshore</span>,</span>
+<span>    actor1 <span class="op">=</span> <span class="st">"firm"</span>, actor2 <span class="op">=</span> <span class="st">"haven"</span>,</span>
+<span>    mode <span class="op">=</span> <span class="st">"bipartite"</span>,</span>
+<span>    sum_dyads <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> `missing_to_zero` is set to <span style="color: #0000BB;">"TRUE"</span> (the default).</span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> Missing dyads will be filled with zeros. For latent space or other</span></span>
+<span><span class="co">##   statistical network models, structural zeros and missing data have different</span></span>
+<span><span class="co">##   meanings. Set `missing_to_zero = FALSE` to preserve NAs if this distinction</span></span>
+<span><span class="co">##   matters for your analysis.</span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> Warning: there are repeating dyads within time periods in the dataset. When `sum_dyads = TRUE` and `weight` is not supplied, edges in the outputted adjacency matrix represent a count of interactions between actors.</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## <span style="color: #555555;">This message is displayed once per session.</span></span></span></code></pre>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bp</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span></span>
+<span><span class="co">## • Bipartite</span></span>
+<span><span class="co">## • Sum of Binary Weights</span></span>
+<span><span class="co">## • Cross-Sectional</span></span>
+<span><span class="co">## • # Unique Row Actors: 8</span></span>
+<span><span class="co">## • # Unique Column Actors: 6</span></span>
+<span><span class="co">## • # Unique Actors: 8</span></span>
+<span><span class="co">## Network Summary Statistics:</span></span>
+<span><span class="co">##             dens miss  mean</span></span>
+<span><span class="co">## weight_var 0.542    0 0.833</span></span>
+<span><span class="co">## • Nodal Features: None</span></span>
+<span><span class="co">## • Dyad Features: None</span></span></code></pre>
+<p>Because the row actors (firms) and column actors (havens) are
+different sets, the resulting adjacency is rectangular and asymmetric.
+The cleanest way to read it is as a <strong>heatmap</strong> — one cell
+per firm-haven pair, color encoding the number of incorporations.</p>
+<p><code><a href="../reference/plot.netify.html">plot.netify()</a></code> does not currently ship a built-in heatmap
+style, but the data extraction is one call away: <code><a href="../reference/get_raw.html">get_raw()</a></code>
+returns the underlying adjacency matrix, and
+<code><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">ggplot2::geom_tile()</a></code> does the rest. Wrap it as a function
+and reuse it:</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># turn a netify bipartite adjacency into a tidy long data.frame</span></span>
+<span><span class="va">heatmap_long</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">net</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_raw.html">get_raw</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>        row <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span>, times <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>            levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>        col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>            levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>        value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">bp_long</span> <span class="op">&lt;-</span> <span class="fu">heatmap_long</span><span class="op">(</span><span class="va">bp</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">bp_long</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">col</span>, y <span class="op">=</span> <span class="va">row</span>, fill <span class="op">=</span> <span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"white"</span>, linewidth <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_c</a></span><span class="op">(</span>option <span class="op">=</span> <span class="st">"cividis"</span>, name <span class="op">=</span> <span class="st">"Incorporations"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Jurisdiction"</span>, y <span class="op">=</span> <span class="st">"Firm"</span>,</span>
+<span>         title <span class="op">=</span> <span class="st">"Offshore footprint by jurisdiction"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="../reference/theme_publication_netify_ts.html">theme_publication_netify_ts</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">11</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="event_data_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="900"></p>
+<p>Note the use of <code><a href="../reference/theme_publication_netify_ts.html">theme_publication_netify_ts()</a></code> here
+instead of <code><a href="../reference/theme_publication_netify.html">theme_publication_netify()</a></code> — heatmaps need their
+axes, so the <code>_ts</code> variant (which keeps axes on) is the right
+choice. The <code>cividis</code> viridis palette is colorblind-safe and
+prints well in grayscale.</p>
+<p>Bipartite networks use a different family of summaries than
+unipartite ones: there is no transitivity or mutuality (a triangle would
+have to span the bipartition), and degree / centralization are reported
+separately for row and column actors. Run <code>summary(bp)</code> for
+the full set.</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">bp</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   net num_row_actors num_col_actors   density num_edges prop_edges_missing</span></span>
+<span><span class="co">## 1   1              8              6 0.5416667        26                  0</span></span>
+<span><span class="co">##   mean_edge_weight sd_edge_weight median_edge_weight min_edge_weight</span></span>
+<span><span class="co">## 1        0.8333333       1.017576                  1               0</span></span>
+<span><span class="co">##   max_edge_weight competition sd_of_actor_means</span></span>
+<span><span class="co">## 1               4     0.13875         0.2954684</span></span></code></pre>
+<p>To save the heatmap for a story or a slide deck:</p>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="st">"offshore_heatmap.pdf"</span>, width <span class="op">=</span> <span class="fl">7</span>, height <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="cookbook-twitter-mentions">Cookbook: Twitter <code>@mentions</code><a class="anchor" aria-label="anchor" href="#cookbook-twitter-mentions"></a>
+</h2>
+<p>Event data is not just for conflict. Anything that arrives as rows of
+<code>(source, target, time)</code> – a tweet that mentions another
+handle, an email between coworkers, a code review that requests a
+reviewer – can be netified the exact same way. Here is a tiny
+self-contained Twitter <code>@mentions</code> example so you can
+copy/paste and adapt.</p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># tiny synthetic edge list: who mentioned whom, on which day</span></span>
+<span><span class="va">mentions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"@alice"</span>, <span class="st">"@alice"</span>, <span class="st">"@bob"</span>,  <span class="st">"@bob"</span>,  <span class="st">"@carol"</span>,</span>
+<span>             <span class="st">"@dave"</span>,  <span class="st">"@alice"</span>, <span class="st">"@eve"</span>,  <span class="st">"@eve"</span>,  <span class="st">"@frank"</span><span class="op">)</span>,</span>
+<span>    to   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"@bob"</span>,   <span class="st">"@carol"</span>, <span class="st">"@alice"</span>,<span class="st">"@dave"</span>, <span class="st">"@dave"</span>,</span>
+<span>             <span class="st">"@carol"</span>, <span class="st">"@eve"</span>,   <span class="st">"@bob"</span>,  <span class="st">"@alice"</span>,<span class="st">"@alice"</span><span class="op">)</span>,</span>
+<span>    day  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mex_network</span>,</span>
-<span>    mutate_weight <span class="op">=</span> <span class="va">log1p</span>,</span>
-<span>    edge_alpha_label <span class="op">=</span> <span class="st">"Log(Event Count)"</span>,</span>
-<span>    node_size_by <span class="op">=</span> <span class="st">"degree"</span>,</span>
-<span>    node_size_label <span class="op">=</span> <span class="st">"Degree"</span>,</span>
-<span>    node_alpha <span class="op">=</span> <span class="fl">.5</span>,</span>
-<span>    check_overlap <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Removed 69 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">## (`geom_segment()`).</span></span></code></pre>
-<p><img src="event_data_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="900"></p>
+<span><span class="co"># directed (a mention has a sender and receiver); sum repeat mentions as</span></span>
+<span><span class="co"># the edge weight by letting netify count them for us</span></span>
+<span><span class="va">mention_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
+<span>    <span class="va">mentions</span>,</span>
+<span>    actor1 <span class="op">=</span> <span class="st">"from"</span>, actor2 <span class="op">=</span> <span class="st">"to"</span>,</span>
+<span>    time <span class="op">=</span> <span class="st">"day"</span>,</span>
+<span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    sum_dyads <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mention_net</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span></span>
+<span><span class="co">## • Unipartite</span></span>
+<span><span class="co">## • Asymmetric</span></span>
+<span><span class="co">## • Sum of Binary Weights</span></span>
+<span><span class="co">## • Longitudinal: 3 Periods</span></span>
+<span><span class="co">## • # Unique Actors: 6</span></span>
+<span><span class="co">## Network Summary Statistics (averaged across time):</span></span>
+<span><span class="co">##             dens miss recip trans</span></span>
+<span><span class="co">## weight_var 0.111    0 0.561     0</span></span>
+<span><span class="co">## • Nodal Features: None</span></span>
+<span><span class="co">## • Dyad Features: None</span></span></code></pre>
+<p>A quick <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> already gives you the picture:</p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mention_net</span><span class="op">)</span></span></code></pre></div>
+<p><img src="event_data_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" alt="" width="900"></p>
+<p>And the usual <code>summary*</code> helpers tell you who is most
+active and who is most mentioned:</p>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mention_net</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   net num_actors   density num_edges prop_edges_missing competition_row</span></span>
+<span><span class="co">## 1   1          6 0.1000000         3                  0       0.5555556</span></span>
+<span><span class="co">## 2   2          6 0.1000000         3                  0       0.3333333</span></span>
+<span><span class="co">## 3   3          6 0.1333333         4                  0       0.3750000</span></span>
+<span><span class="co">##   competition_col sd_of_row_means sd_of_col_means covar_of_row_col_means</span></span>
+<span><span class="co">## 1       0.3333333       0.1673320       0.1095445              0.6546537</span></span>
+<span><span class="co">## 2       0.5555556       0.1095445       0.1673320              0.6546537</span></span>
+<span><span class="co">## 3       0.3750000       0.1632993       0.1632993              0.4000000</span></span>
+<span><span class="co">##   reciprocity    mutual transitivity</span></span>
+<span><span class="co">## 1   0.6296296 0.5000000            0</span></span>
+<span><span class="co">## 2   0.6296296 0.5000000            0</span></span>
+<span><span class="co">## 3   0.4230769 0.3333333            0</span></span></code></pre>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># directed networks split degree into in / out / total</span></span>
+<span><span class="va">mention_actor</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">mention_net</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mention_actor</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"actor"</span>, <span class="st">"time"</span>, <span class="st">"degree_in"</span>, <span class="st">"degree_out"</span>, <span class="st">"degree_total"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##    actor time degree_in degree_out degree_total</span></span>
+<span><span class="co">## 1 @alice    1         1          2            3</span></span>
+<span><span class="co">## 2   @bob    1         1          1            2</span></span>
+<span><span class="co">## 3 @carol    1         1          0            1</span></span>
+<span><span class="co">## 4  @dave    1         0          0            0</span></span>
+<span><span class="co">## 5   @eve    1         0          0            0</span></span>
+<span><span class="co">## 6 @frank    1         0          0            0</span></span></code></pre>
+<p>Same recipe, different domain – the only thing that changes is the
+column names you hand to <code><a href="../reference/netify.html">netify()</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <ul>
 <li>Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP
-Georeferenced Event Dataset. Journal of Peace Research 50(4).</li>
+Georeferenced Event Dataset. <em>Journal of Peace Research</em>
+50(4).</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

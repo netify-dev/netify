@@ -29,6 +29,10 @@ print(x, ..., n = 20)
 
 Invisibly returns the input object
 
+## Author
+
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r
@@ -47,7 +51,7 @@ print(comp)
 #> Algorithm: correlation
 #> Permutation type: classic
 #> Correlation type: pearson
-#> Random seed: 1567385691
+#> Random seed: 1378665888
 #> ────────────────────────────────────────────────────────────────────────────────
 #> 
 #> ── Edge Comparison Summary ──

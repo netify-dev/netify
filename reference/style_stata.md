@@ -12,3 +12,7 @@ style_stata()
 ## Value
 
 List of plot arguments
+
+## Author
+
+Cassy Dorff, Shahryar Minhas

@@ -119,3 +119,46 @@ this function for each ego separately.
 ## Author
 
 Cassy Dorff, Shahryar Minhas
+
+## Examples
+
+``` r
+# cross-sectional ego network from the bundled classroom data
+data(classroom_edges)
+data(classroom_nodes)
+net <- netify(
+    classroom_edges,
+    actor1 = "from", actor2 = "to",
+    symmetric = TRUE,
+    nodal_data = classroom_nodes
+)
+s07_ego <- ego_netify(net, ego = "s07")
+print(s07_ego)
+#> ✔ Hello, you have created a neighborhood network for ego(s) (s07), yay!
+#> • Type: Ego Network
+#> • Ego: s07
+#> • Direction: Any ties (in or out)
+#> • Ego included: Yes
+#> • Unipartite
+#> • Symmetric
+#> • Binary Weights
+#> • Cross-Sectional
+#> • # Unique Egos: 1 | # Unique Alters: 5
+#> Neighborhood Network Summary Statistics:
+#>          dens miss trans
+#> weight1 0.333    0     0
+#> • Nodal Features: gender, grade, gpa
+#> • Dyad Features: None
+
+if (FALSE) { # \dontrun{
+# longitudinal ego network with a weighted, directed netlet
+data(icews)
+netlet <- netify(
+    icews,
+    actor1 = "i", actor2 = "j", time = "year",
+    weight = "verbCoop"
+)
+pakistan_ego <- ego_netify(netlet, ego = "Pakistan")
+summary(pakistan_ego)
+} # }
+```

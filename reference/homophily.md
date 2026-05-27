@@ -13,6 +13,7 @@ homophily(
   attribute,
   method = "correlation",
   threshold = 0,
+  signed_handling = c("abs", "drop_negative", "preserve_sign"),
   significance_test = TRUE,
   n_permutations = 1000,
   alpha = 0.05,
@@ -73,6 +74,27 @@ homophily(
   thresholds. For pre-binarized networks, consider using
   [`mutate_weights()`](https://netify-dev.github.io/netify/reference/mutate_weights.md)
   first.
+
+- signed_handling:
+
+  Character. Strategy for signed (negative-weight) edges:
+
+  `"abs"`
+
+  :   (default) Take absolute values before thresholding so any tie
+      magnitude — positive or negative — can become a connection.
+
+  `"drop_negative"`
+
+  :   Set negative weights to zero before thresholding (positive ties
+      only).
+
+  `"preserve_sign"`
+
+  :   Treat any non-zero entry (positive or negative) as a connection;
+      `threshold` is ignored for sign decisions.
+
+  Ignored when the network has no negative weights.
 
 - significance_test:
 
@@ -153,6 +175,16 @@ Data frame with homophily statistics per network/time period:
 
 ## Details
 
+**Auto-promotion to `categorical`:**
+
+If you leave `method` at its default and pass a `character`, `factor`,
+or `logical` attribute, `homophily()` will switch to
+`method = "categorical"` automatically and inform you once per
+attribute. This avoids the C++-level error that would otherwise come
+from feeding non-numeric data to the correlation-based similarity
+routine. Pass `method = "categorical"` (or any other explicit choice) to
+silence the message.
+
 **Similarity Metrics:**
 
 For continuous attributes:
@@ -198,9 +230,33 @@ period), consider using
 [`mutate_weights()`](https://netify-dev.github.io/netify/reference/mutate_weights.md)
 to pre-process your network.
 
+## Author
+
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r
+# quick homophily check on the bundled classroom friendship data
+data(classroom_edges)
+data(classroom_nodes)
+net <- netify(
+    classroom_edges,
+    actor1 = "from", actor2 = "to",
+    symmetric = TRUE,
+    nodal_data = classroom_nodes
+)
+# do students cluster by gender?
+homophily(net, attribute = "gender", method = "categorical")
+#>   net   layer attribute      method threshold_value homophily_correlation
+#> 1   1 weight1    gender categorical              NA            0.07436588
+#>   mean_similarity_connected mean_similarity_unconnected similarity_difference
+#> 1                 0.6666667                   0.5520833             0.1145833
+#>   p_value    ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing
+#> 1   0.127 -0.02056023 0.1595074                51                 384         0
+#>   n_pairs
+#> 1     435
+
 if (FALSE) { # \dontrun{
 # Basic homophily analysis with default threshold (> 0)
 homophily_default <- homophily(net, attribute = "group")

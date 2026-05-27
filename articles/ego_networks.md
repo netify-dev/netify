@@ -40,6 +40,7 @@ network data. You can study:
 - Whether an actor brokers between otherwise disconnected groups
 
 ``` r
+
 library(netify)
 library(dplyr)
 library(ggplot2)
@@ -51,13 +52,13 @@ We’ll use data from the Integrated Crisis Early Warning System (ICEWS)
 to demonstrate:
 
 ``` r
-# Load ICEWS data
+
 data(icews)
 
-# Create a network of verbal cooperation between countries
+# verbal cooperation between countries
 netlet <- netify(
     icews,
-    actor1 = "i", actor2 = "j", 
+    actor1 = "i", actor2 = "j",
     time = "year",
     weight = "verbCoop",
     nodal_vars = c("i_polity2", "i_log_gdp", 'i_region'),
@@ -72,14 +73,13 @@ The
 function makes extraction straightforward:
 
 ``` r
-# Extract Pakistan's ego network
+
 pakistan_ego_net <- ego_netify(
-    netlet, 
+    netlet,
     ego = "Pakistan"
     )
 
-# That's it! You now have Pakistan's ego network across all years
-print(pakistan_ego_net)
+pakistan_ego_net
 ```
 
 ## Key Features
@@ -87,16 +87,16 @@ print(pakistan_ego_net)
 ### 1. Network Statistics
 
 ``` r
-# Get network-level stats
+
 ngbd_summ <- summary(pakistan_ego_net)
 head(ngbd_summ)
 #>    net num_actors   density num_edges prop_edges_missing mean_edge_weight
-#> 1 2002         33 0.8049242       850                  0         182.9545
-#> 2 2003         28 0.9312169       704                  0         285.6905
-#> 3 2004         49 0.7891156      1856                  0         101.3461
-#> 4 2005         44 0.8985201      1700                  0         138.4968
-#> 5 2006         40 0.8846154      1380                  0         150.0731
-#> 6 2007         39 0.9082321      1346                  0         182.9852
+#> 1 2002         33 0.8049242       425                  0         182.9545
+#> 2 2003         28 0.9312169       352                  0         285.6905
+#> 3 2004         49 0.7891156       928                  0         101.3461
+#> 4 2005         44 0.8985201       850                  0         138.4968
+#> 5 2006         40 0.8846154       690                  0         150.0731
+#> 6 2007         39 0.9082321       673                  0         182.9852
 #>   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition
 #> 1       541.2426               16.0               0            5760  0.08270328
 #> 2       718.2698               43.5               0            5937  0.08521930
@@ -121,7 +121,7 @@ connects otherwise isolated actors; it’s a dense web where multilateral
 dynamics likely matter.
 
 ``` r
-# Visualize trends
+
 plot_graph_stats(ngbd_summ) +
     scale_x_discrete(
         breaks = seq(2002, 2014, by = 4)
@@ -140,7 +140,7 @@ neighborhood rather than structural holes Pakistan could exploit.
 ### 2. Actor-Level Analysis
 
 ``` r
-# Who matters in Pakistan's network?
+
 ngbd_actor_summ <- summary_actor(pakistan_ego_net)
 head(ngbd_actor_summ)
 #>         actor time degree prop_ties strength_sum strength_avg strength_std
@@ -166,8 +166,8 @@ bilateral ties with Pakistan but its connections to other key players in
 Pakistan’s neighborhood.
 
 ``` r
-# Track key players over time
-plot_actor_stats(ngbd_actor_summ, 
+
+plot_actor_stats(ngbd_actor_summ,
     across_actor=FALSE,
     specific_actors=c('United States', 'China')
     ) +
@@ -192,6 +192,7 @@ By default, [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
 highlights the ego:
 
 ``` r
+
 plot(pakistan_ego_net)
 ```
 
@@ -203,19 +204,20 @@ For clearer visualization of alter-alter relationships, remove the ego’s
 edges—we already know everyone connects to Pakistan:
 
 ``` r
-# Add node statistics for visualization
+
+# attach actor stats so we can map them to node aesthetics
 pakistan_ego_net <- add_node_vars(
     pakistan_ego_net,
     summary_actor(pakistan_ego_net),
     "actor", "time"
 )
 
-# Remove ego edges for cleaner visualization
+# strip ties incident to ego so the alter-alter structure stands on its own
 pakistan_no_ego_edges <- remove_ego_edges(pakistan_ego_net)
 ```
 
 ``` r
-# Create a more informative plot
+
 plot(pakistan_no_ego_edges,
     layout = "hierarchical",  
     node_size_by = "i_log_gdp",
@@ -250,25 +252,28 @@ occupying central positions.
 One strength of ego network analysis is systematic comparison:
 
 ``` r
-# Extract multiple ego networks
+
 powers <- c("United States", "China", "Russian Federation", "India", "Pakistan")
 ego_networks <- lapply(powers, function(country) {
     ego_netify(netlet, ego = country)
 })
 names(ego_networks) <- powers
 
-# Compare network properties
 summaries <- lapply(ego_networks, summary)
 comparison_df <- bind_rows(summaries, .id = "country")
 
-# Visualize differences
-ggplot(comparison_df, 
+ggplot(comparison_df,
     aes(x = net, y = density, color = country, group = country)) +
     geom_line(linewidth = 1.2) +
     labs(title = "Ego Network Density Over Time",
          subtitle = "How interconnected are different countries' diplomatic neighborhoods?",
          x = "Year", y = "Density") +
-    theme_minimal()
+    theme_bw() +
+    theme(
+        panel.border = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "top"
+    )
 ```
 
 ![](ego_networks_files/figure-html/unnamed-chunk-11-1.png)
@@ -284,14 +289,13 @@ Do birds of a feather flock together? Let’s test if similar regime types
 cluster:
 
 ``` r
-# Test regime type homophily
+
 pakistan_homophily <- homophily(
     pakistan_ego_net,
     attribute = "i_polity2",
     method = "correlation"
 )
 
-# Visualize over time
 plot_homophily(pakistan_homophily, type = "temporal") +
     labs(title = "Do Democracies Cluster in Pakistan's Network?",
          subtitle = "Testing regime type homophily over time")
@@ -308,13 +312,13 @@ Geopolitics seems to override ideological alignment.
 Sometimes you want to focus on only the strongest relationships:
 
 ``` r
-# Default includes all connections
+
+# default includes all connections
 pakistan_all <- ego_netify(netlet, ego = "Pakistan")
 
-# Only strong connections (threshold = 50 cooperation events)
+# only strong connections (threshold = 50 cooperation events)
 pakistan_strong <- ego_netify(netlet, ego = "Pakistan", threshold = 50)
 
-# Compare sizes
 all_size <- mean(summary(pakistan_all)$num_actors)
 strong_size <- mean(summary(pakistan_strong)$num_actors)
 
@@ -335,7 +339,7 @@ tibble(
 Networks of cooperation and conflict often follow different logics:
 
 ``` r
-# Create a conflict network
+
 conflict_net <- netify(
     icews,
     actor1 = "i", actor2 = "j",
@@ -343,11 +347,10 @@ conflict_net <- netify(
     weight = "verbConf"
 )
 
-# Compare cooperation vs conflict ego networks
+# cooperation vs conflict ego networks for Pakistan
 pak_coop_ego <- ego_netify(netlet, ego = "Pakistan")
 pak_conf_ego <- ego_netify(conflict_net, ego = "Pakistan")
 
-# Summarize differences
 coop_stats <- summary(pak_coop_ego)
 conf_stats <- summary(pak_conf_ego)
 
@@ -380,10 +383,10 @@ while cooperation tends to be multilateral.
 How stable are relationships over time?
 
 ``` r
-# Analyze year-to-year changes
+
 pakistan_comparison <- compare_networks(pakistan_ego_net, what = "edges")
 
-# Look at a specific transition
+# zoom in on one transition
 changes_2010_2011 <- pakistan_comparison$edge_changes$`2010_vs_2011`
 
 stability_ratio <- round(
@@ -402,7 +405,7 @@ tibble(
 
 | Transition   | Added | Removed | Maintained | Stability Ratio |
 |:-------------|------:|--------:|-----------:|----------------:|
-| 2010 to 2011 |   114 |     204 |        324 |           0.614 |
+| 2010 to 2011 |   444 |     720 |        512 |           0.416 |
 
 A stability ratio of 0.614 indicates moderate turnover—about 40% of
 relationships don’t persist year-to-year.
@@ -413,17 +416,15 @@ How do the US and China structure their diplomatic neighborhoods
 differently?
 
 ``` r
-# Extract ego networks
+
 us_ego <- ego_netify(netlet, ego = "United States")
 china_ego <- ego_netify(netlet, ego = "China")
 
-# Compare structural properties
 structural_comp <- compare_networks(
-    list("US" = us_ego, "China" = china_ego), 
+    list("US" = us_ego, "China" = china_ego),
     what = 'structure'
 )
 
-# Summarize average properties
 comp_summary <- structural_comp$summary
 avg_props <- comp_summary |>
     group_by(network) |>
@@ -449,20 +450,17 @@ interconnected, potentially reflecting regional concentration.
 Let’s look at the temporal patterns:
 
 ``` r
-# Get temporal summaries for each ego network
+
 us_summary <- summary(us_ego)
 china_summary <- summary(china_ego)
 
-# Combine for visualization
 temporal_comparison <- bind_rows(
     us_summary |> mutate(network = "US"),
     china_summary |> mutate(network = "China")
 )
 
-# Extract year from net column (assuming format like "2002", "2003", etc.)
 temporal_comparison$year <- as.integer(temporal_comparison$net)
 
-# Density comparison
 ggplot(temporal_comparison, aes(x = year, y = density, color = network)) +
     geom_line(linewidth = 1.2) +
     geom_point(size = 2) +
@@ -470,8 +468,12 @@ ggplot(temporal_comparison, aes(x = year, y = density, color = network)) +
     labs(title = "Ego Network Density: US vs China",
          subtitle = "China's increasing density reflects growing multilateral engagement",
          x = "Year", y = "Density") +
-    theme_minimal() +
-    theme(legend.position = "top")
+    theme_bw() +
+    theme(
+        panel.border = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "top"
+    )
 ```
 
 ![](ego_networks_files/figure-html/unnamed-chunk-17-1.png)
@@ -479,7 +481,7 @@ ggplot(temporal_comparison, aes(x = year, y = density, color = network)) +
 Now let’s examine how similar their cooperation patterns are:
 
 ``` r
-# Compare 2012 networks
+
 comp_2012 <- compare_networks(
     list(
         "US_2012" = subset(us_ego, time = "2012"),
@@ -489,11 +491,9 @@ comp_2012 <- compare_networks(
     method = "all"
 )
 
-# Extract key statistics
 edge_stats <- comp_2012$summary
 edge_changes <- comp_2012$edge_changes[[1]]
 
-# Create summary table
 tibble(
   Metric = c("Edge correlation", "Jaccard similarity", 
              "Unique to US", "Unique to China", "Shared"),
@@ -524,6 +524,7 @@ unique relationships (2,222 vs 1,104).
 Finally, who’s in these networks?
 
 ``` r
+
 # Compare node composition
 node_comp <- compare_networks(
     list("US" = us_ego, "China" = china_ego),
@@ -535,13 +536,14 @@ node_comp <- compare_networks(
 knitr::kable(node_comp$summary)
 ```
 
-| comparison  | nodes_net1 | nodes_net2 | common_nodes | jaccard_similarity | nodes_added | nodes_removed |
-|:------------|-----------:|-----------:|-------------:|-------------------:|------------:|--------------:|
-| US vs China |        120 |        104 |           96 |               0.75 |           8 |            24 |
+| comparison | nodes_net1 | nodes_net2 | common_nodes | jaccard_similarity | nodes_added | nodes_removed |
+|:---|---:|---:|---:|---:|---:|---:|
+| US vs China | 120 | 104 | 96 | 0.75 | 8 | 24 |
 
 ## tl;dr
 
 ``` r
+
 # Extract ego network
 ego_net <- ego_netify(netlet, ego = "Actor Name")
 

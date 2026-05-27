@@ -21,6 +21,10 @@ remove_ego_edges(netlet)
 
 A modified netify object with ego edges removed
 
+## Author
+
+Cassy Dorff, Shahryar Minhas
+
 ## Examples
 
 ``` r

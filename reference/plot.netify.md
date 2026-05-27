@@ -487,8 +487,18 @@ additional layout options control the ego-centric visualization:
 
 - `style`:
 
-  A style function (e.g., `style_budapest`). Applies a complete visual
-  style including colors, shapes, and layout preferences.
+  Either a style function (e.g., `style_budapest`) that applies a
+  complete visual style including colors, shapes, and layout
+  preferences, or the string `"heatmap"` to render the adjacency matrix
+  as a tile plot instead of a node-link diagram. When
+  `style = "heatmap"` and edge weights cross zero (signed network), the
+  fill scale automatically uses a diverging palette centred at zero;
+  otherwise a sequential viridis ramp is used. Optional `low`, `mid`,
+  and `high` arguments override the diverging palette endpoints.
+
+## Author
+
+Cassy Dorff, Shahryar Minhas
 
 ## Examples
 
@@ -574,8 +584,6 @@ plot(net_10,
     text_size = 3,
     text_color = "darkred"
 )
-#> Warning: Removed 149 rows containing missing values or values outside the scale range
-#> (`geom_text_repel()`).
 
 
 # choose alternative labels for selected text
@@ -586,8 +594,6 @@ plot(net_10,
     text_size = 3,
     text_color = "darkred"
 )
-#> Warning: Removed 149 rows containing missing values or values outside the scale range
-#> (`geom_text_repel()`).
 
 
 # Time subsetting example

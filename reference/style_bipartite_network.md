@@ -12,3 +12,7 @@ style_bipartite_network()
 ## Value
 
 List of plot arguments
+
+## Author
+
+Cassy Dorff, Shahryar Minhas
