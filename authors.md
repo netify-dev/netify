@@ -13,7 +13,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/netify-dev/netify/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/netify-dev/netify/blob/v1.5/DESCRIPTION)
 
 Dorff C, Minhas S (2026). *netify: Network Tools*. R package version
 1.5, <https://netify-dev.github.io/netify/>.

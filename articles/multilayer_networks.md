@@ -232,9 +232,9 @@ multilayer_homophily
 #>   mean_similarity_connected mean_similarity_unconnected similarity_difference
 #> 1                 -6.964294                   -7.444698             0.4804043
 #> 2                 -7.016653                   -7.279288             0.2626347
-#>   p_value     ci_lower  ci_upper n_connected_pairs n_unconnected_pairs
-#> 1   0.000  0.023477413 0.0599541              4453                6573
-#> 2   0.136 -0.006875631 0.0335228              1201                9825
+#>   p_value     ci_lower   ci_upper n_connected_pairs n_unconnected_pairs
+#> 1   0.000  0.022732580 0.06135970              4453                6573
+#> 2   0.135 -0.005385876 0.03611122              1201                9825
 #>   n_missing n_pairs
 #> 1         3   11476
 #> 2         3   11476
