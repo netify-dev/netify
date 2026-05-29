@@ -1,5 +1,5 @@
 ---
-title: "Internals: object structure & writing custom extensions"
+title: "Internals: object structure & custom extensions"
 author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

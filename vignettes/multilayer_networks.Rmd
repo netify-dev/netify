@@ -456,3 +456,11 @@ Multilayer network analysis in `netify` reveals how different types of political
 4. Track how relationship portfolios evolve over time
 5. Most importantly ... have fun!
 
+## References
+
+1. Dorff, C., Gallop, M., & Minhas, S. (2020). Networks of Violence: Predicting Conflict in Nigeria. The Journal of Politics, 82(2), 476–493.
+https://doi.org/10.1086/706459
+
+2. Minhas, S., Dorff, C., Gallop, M., Foster, M., Liu, H., Tellez, J., & Ward, M. D. (2022). Taking dyads seriously. Political Science Research and Methods, 10(4), 703–721. https://doi.org/10.1017/psrm.2021.56
+
+3.    Minhas, S., Hoff, P. D., & Ward, M. D. (2016). A new approach to analyzing coevolving longitudinal networks in international relations. Journal of Peace Research, 53(3), 491–505. https://doi.org/10.1177/0022343316630783Minhas, 

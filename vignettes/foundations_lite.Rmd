@@ -1,5 +1,5 @@
 ---
-title: "Foundations (lite)"
+title: "Quickstart to Inference"
 author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette

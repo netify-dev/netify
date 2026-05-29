@@ -442,3 +442,7 @@ homophily(ego_net, attribute = "democracy")     # Test homophily
 compare_networks(ego_net, what = "edges")       # Temporal comparison
 compare_networks(list(ego1, ego2), what = "edges")  # Cross-sectional comparison
 ```
+
+## References
+
+Boschee, E., Lautenschlager, J., O'Brien, S., Shellman, S., Starz, J., & Ward, M. (2015). ICEWS Coded Event Data. Harvard Dataverse. DOI 10.7910/DVN/28075.

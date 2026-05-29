@@ -1,5 +1,5 @@
 ---
-title: "Measuring Who Connects with Whom: Homophily & Dyadic Analysis"
+title: "Measuring Connections: Homophily & Dyadic Analysis"
 author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -1116,3 +1116,9 @@ if (!is.null(comprehensive_longit$homophily_analysis)) {
    - What attributes make countries central/influential
    - Complete homophily patterns across all variables
    - Comprehensive view of all network-attribute relationships
+   
+## References
+
+1. Leeds, B. A., Ritter, J. M., Mitchell, S. M., & Long, A. G. (2002). Alliance Treaty Obligations and Provisions, 1815–1944. International Interactions, 28(3), 237–260. DOI 10.1080/03050620213653. 
+
+2. Miller, S. V. (2022). peacesciencer: An R Package for Quantitative Peace Science Research. Conflict Management and Peace Science, 39(6), 755–779. DOI 10.1177/07388942221077926. 
