@@ -1,4 +1,4 @@
-# Measuring Who Connects with Whom: Homophily & Dyadic Analysis
+# Measuring Connections: Homophily & Dyadic Analysis
 
 ## Vignette Summary
 
@@ -263,7 +263,7 @@ knitr::kable(democracy_homophily, digits=3, align='c')
 
 | net | layer | attribute | method | threshold_value | homophily_correlation | mean_similarity_connected | mean_similarity_unconnected | similarity_difference | p_value | ci_lower | ci_upper | n_connected_pairs | n_unconnected_pairs | n_missing | n_pairs |
 |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| 1 | cooperation | democracy | correlation | 0 | 0.142 | -0.245 | -0.316 | 0.07 | 0 | 0.126 | 0.156 | 3571 | 11480 | 21 | 18915 |
+| 1 | cooperation | democracy | correlation | 0 | 0.142 | -0.245 | -0.316 | 0.07 | 0 | 0.127 | 0.157 | 3571 | 11480 | 21 | 18915 |
 
 ``` r
 
@@ -427,7 +427,7 @@ knitr::kable(regime_homophily, digits=3, align='c')
 
 | net | layer | attribute | method | threshold_value | homophily_correlation | mean_similarity_connected | mean_similarity_unconnected | similarity_difference | p_value | ci_lower | ci_upper | n_connected_pairs | n_unconnected_pairs | n_missing | n_pairs |
 |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| 1 | cooperation | regime_type | categorical | 0 | 0.122 | 0.394 | 0.259 | 0.135 | 0 | 0.107 | 0.138 | 4046 | 14869 | 0 | 18915 |
+| 1 | cooperation | regime_type | categorical | 0 | 0.122 | 0.394 | 0.259 | 0.135 | 0 | 0.107 | 0.137 | 4046 | 14869 | 0 | 18915 |
 
 ``` r
 
@@ -525,7 +525,7 @@ knitr::kable(gdp_homophily, digits=3, align='c')
 
 | net | layer | attribute | method | threshold_value | homophily_correlation | mean_similarity_connected | mean_similarity_unconnected | similarity_difference | p_value | ci_lower | ci_upper | n_connected_pairs | n_unconnected_pairs | n_missing | n_pairs |
 |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| 1 | cooperation | log_gdp | correlation | 0 | 0.111 | -0.085 | -0.106 | 0.02 | 0 | 0.099 | 0.125 | 3915 | 13851 | 6 | 18915 |
+| 1 | cooperation | log_gdp | correlation | 0 | 0.111 | -0.085 | -0.106 | 0.02 | 0 | 0.098 | 0.124 | 3915 | 13851 | 6 | 18915 |
 
 ``` r
 
@@ -1270,11 +1270,11 @@ democracy_homophily_longit
     ## 4                -0.2504444                  -0.3140721            0.06362762
     ## 5                -0.2520272                  -0.3131798            0.06115268
     ##   p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing
-    ## 1       0 0.1403424 0.1701305              3497               11381        22
-    ## 2       0 0.1386186 0.1695541              3497               11554        21
-    ## 3       0 0.1267928 0.1576644              3571               11480        21
-    ## 4       0 0.1134952 0.1445502              3645               11406        21
-    ## 5       0 0.1099324 0.1389262              3646               11405        21
+    ## 1       0 0.1386013 0.1683144              3497               11381        22
+    ## 2       0 0.1391608 0.1687566              3497               11554        21
+    ## 3       0 0.1270204 0.1563408              3571               11480        21
+    ## 4       0 0.1148233 0.1440566              3645               11406        21
+    ## 5       0 0.1092188 0.1406721              3646               11405        21
     ##   n_pairs
     ## 1   18915
     ## 2   18915
@@ -1465,3 +1465,13 @@ coverage, analyze each time period separately.
     - What attributes make countries central/influential
     - Complete homophily patterns across all variables
     - Comprehensive view of all network-attribute relationships
+
+## References
+
+1.  Leeds, B. A., Ritter, J. M., Mitchell, S. M., & Long, A. G. (2002).
+    Alliance Treaty Obligations and Provisions, 1815–1944. International
+    Interactions, 28(3), 237–260. DOI 10.1080/03050620213653.
+
+2.  Miller, S. V. (2022). peacesciencer: An R Package for Quantitative
+    Peace Science Research. Conflict Management and Peace Science,
+    39(6), 755–779. DOI 10.1177/07388942221077926.

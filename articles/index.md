@@ -3,8 +3,8 @@
 ### Getting Started
 
 - [Foundations](https://netify-dev.github.io/netify/articles/foundations.md):
-- [Foundations
-  (lite)](https://netify-dev.github.io/netify/articles/foundations_lite.md):
+- [Quickstart to
+  Inference](https://netify-dev.github.io/netify/articles/foundations_lite.md):
 - [Event
   Data](https://netify-dev.github.io/netify/articles/event_data.md):
 - [Ego
@@ -16,9 +16,9 @@
 
 - [Multilayer
   Networks](https://netify-dev.github.io/netify/articles/multilayer_networks.md):
-- [Tracking Changes in Cooperation and Conflict: Comparing
+- [Tracking Changes & Comparing
   Networks](https://netify-dev.github.io/netify/articles/tracking_changes.md):
-- [Measuring Who Connects with Whom: Homophily & Dyadic
+- [Measuring Connections: Homophily & Dyadic
   Analysis](https://netify-dev.github.io/netify/articles/attribute_analysis.md):
 - [Pipeline: netify to ergm
   (statnet)](https://netify-dev.github.io/netify/articles/pipeline_netify_ergm.md):
@@ -27,7 +27,7 @@
 
 ### Under the Hood
 
-- [Internals: object structure & writing custom
+- [Internals: object structure & custom
   extensions](https://netify-dev.github.io/netify/articles/internals.md):
 
 ### Resources

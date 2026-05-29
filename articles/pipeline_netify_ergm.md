@@ -350,3 +350,28 @@ For modeling beyond ergm:
   [netify-dev/sir](https://github.com/netify-dev/sir)
 
 Have fun!
+
+## References
+
+1.  Butts, C.Butts, C. T. (2008). network: A Package for Managing
+    Relational Data in R. Journal of Statistical Software, 24(2), 1–36.
+    <https://doi.org/10.18637/jss.v024.i02>
+
+2.  Cranmer, S. J., Desmarais, B. A., & Morgan, J. W. (2021).
+    Inferential Network Analysis. Cambridge University Press.
+    <https://doi.org/10.1017/9781316662915>
+
+3.  Hunter, D. R., Handcock, M. S., Butts, C. T., Goodreau, S. M., &
+    Morris, M. (2008). ergm: A Package to Fit, Simulate and Diagnose
+    Exponential-Family Models for Networks. Journal of Statistical
+    Software, 24(3), 1–29. <https://doi.org/10.18637/jss.v024.i03>
+
+4.  Krivitsky, P. N., & Handcock, M. S. (2014). A Separable Model for
+    Dynamic Networks. Journal of the Royal Statistical Society: Series B
+    (Statistical Methodology), 76(1), 29–46.
+    <https://doi.org/10.1111/rssb.12014>
+
+5.  Snijders, T. A. B., Pattison, P. E., Robins, G. L., &
+    Handcock, M. S. (2006). New Specifications for Exponential Random
+    Graph Models. Sociological Methodology, 36(1), 99–153.
+    <https://doi.org/10.1111/j.1467-9531.2006.00176.x>

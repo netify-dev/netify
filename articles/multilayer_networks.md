@@ -233,8 +233,8 @@ multilayer_homophily
 #> 1                 -6.964294                   -7.444698             0.4804043
 #> 2                 -7.016653                   -7.279288             0.2626347
 #>   p_value     ci_lower   ci_upper n_connected_pairs n_unconnected_pairs
-#> 1   0.000  0.022732580 0.06135970              4453                6573
-#> 2   0.135 -0.005385876 0.03611122              1201                9825
+#> 1   0.000  0.023587017 0.06056327              4453                6573
+#> 2   0.133 -0.005243832 0.03430080              1201                9825
 #>   n_missing n_pairs
 #> 1         3   11476
 #> 2         3   11476
@@ -656,3 +656,19 @@ single-layer analysis, we can:
 3.  Understand the architecture of complex political systems
 4.  Track how relationship portfolios evolve over time
 5.  Most importantly … have fun!
+
+## References
+
+1.  Dorff, C., Gallop, M., & Minhas, S. (2020). Networks of Violence:
+    Predicting Conflict in Nigeria. The Journal of Politics, 82(2),
+    476–493. <https://doi.org/10.1086/706459>
+
+2.  Minhas, S., Dorff, C., Gallop, M., Foster, M., Liu, H., Tellez, J.,
+    & Ward, M. D. (2022). Taking dyads seriously. Political Science
+    Research and Methods, 10(4), 703–721.
+    <https://doi.org/10.1017/psrm.2021.56>
+
+3.  Minhas, S., Hoff, P. D., & Ward, M. D. (2016). A new approach to
+    analyzing coevolving longitudinal networks in international
+    relations. Journal of Peace Research, 53(3), 491–505.
+    <https://doi.org/10.1177/0022343316630783Minhas>,

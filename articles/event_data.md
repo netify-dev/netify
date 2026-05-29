@@ -629,3 +629,7 @@ column names you hand to
 
 - Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP
   Georeferenced Event Dataset. *Journal of Peace Research* 50(4).
+
+- Boschee, E., Lautenschlager, J., O’Brien, S., Shellman, S., Starz, J.,
+  & Ward, M. (2015). ICEWS Coded Event Data. Harvard Dataverse. DOI
+  10.7910/DVN/28075.

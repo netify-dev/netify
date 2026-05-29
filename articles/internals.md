@@ -1,4 +1,4 @@
-# Internals: object structure & writing custom extensions
+# Internals: object structure & custom extensions
 
 This vignette is for **package developers**, **methodologists writing
 custom extensions**, and **anyone who wants to inspect the underlying

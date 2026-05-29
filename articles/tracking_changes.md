@@ -1,4 +1,4 @@
-# Tracking Changes in Cooperation and Conflict: Comparing Networks
+# Tracking Changes & Comparing Networks
 
 ## Vignette Summary
 
@@ -1680,3 +1680,17 @@ The
 function is your comprehensive pre-modeling diagnostic tool. Use it
 early and often to ensure your subsequent modeling choices are
 well-informed and defensible.
+
+## References
+
+1.  Krackhardt, D. (1988). Predicting with networks: Nonparametric
+    multiple regression analysis of dyadic data. Social Networks, 10(4),
+    359–381
+
+2.  Freedman, D., & Lane, D. (1983). A nonstochastic interpretation of
+    reported significance levels. Journal of Business & Economic
+    Statistics, 1(4), 292–298.
+
+3.  Dekker, D., Krackhardt, D., & Snijders, T. A. B. (2007). Sensitivity
+    of MRQAP tests to collinearity and autocorrelation conditions.
+    Psychometrika, 72(4), 563–581.

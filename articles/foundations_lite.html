@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Foundations (lite) • netify</title>
+<title>Quickstart to Inference • netify</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Foundations (lite)">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Quickstart to Inference">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -34,16 +34,16 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Foundations (lite)</a></li>
+    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -68,13 +68,13 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Foundations (lite)</h1>
+      <h1>Quickstart to Inference</h1>
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-05-27</h4>
+            <h4 data-toc-skip class="date">2026-05-29</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/v1.5/vignettes/foundations_lite.Rmd" class="external-link"><code>vignettes/foundations_lite.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/foundations_lite.Rmd" class="external-link"><code>vignettes/foundations_lite.Rmd</code></a></small>
       <div class="d-none name"><code>foundations_lite.Rmd</code></div>
     </div>
 
@@ -284,12 +284,12 @@ cooperate more? Test it:</p>
 <span><span class="co">#&gt; 5                 -6.812569                   -7.315192             0.5026230</span></span>
 <span><span class="co">#&gt; 6                 -6.893420                   -7.213425             0.3200055</span></span>
 <span><span class="co">#&gt;   p_value    ci_lower   ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">#&gt; 1   0.000 0.028138826 0.06663770              4117                6909</span></span>
-<span><span class="co">#&gt; 2   0.000 0.045766375 0.08455991              4105                6626</span></span>
-<span><span class="co">#&gt; 3   0.000 0.029923185 0.06664417              4475                6403</span></span>
-<span><span class="co">#&gt; 4   0.000 0.024864998 0.06381455              4481                6545</span></span>
-<span><span class="co">#&gt; 5   0.000 0.023982732 0.06242881              4503                6523</span></span>
-<span><span class="co">#&gt; 6   0.002 0.008712398 0.04589234              4635                6391</span></span>
+<span><span class="co">#&gt; 1   0.000 0.027520711 0.06647919              4117                6909</span></span>
+<span><span class="co">#&gt; 2   0.000 0.046870917 0.08523940              4105                6626</span></span>
+<span><span class="co">#&gt; 3   0.000 0.028388089 0.06668147              4475                6403</span></span>
+<span><span class="co">#&gt; 4   0.000 0.025422777 0.06282340              4481                6545</span></span>
+<span><span class="co">#&gt; 5   0.000 0.023632765 0.06090860              4503                6523</span></span>
+<span><span class="co">#&gt; 6   0.002 0.008053892 0.04686962              4635                6391</span></span>
 <span><span class="co">#&gt;   n_missing n_pairs</span></span>
 <span><span class="co">#&gt; 1         3   11476</span></span>
 <span><span class="co">#&gt; 2         5   11476</span></span>

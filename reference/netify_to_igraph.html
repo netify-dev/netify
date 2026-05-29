@@ -23,16 +23,16 @@ and edge attributes."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Foundations (lite)</a></li>
+    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
@@ -49,7 +49,7 @@ and edge attributes."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Convert netify objects to igraph format</h1>
-      <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/v1.5/R/to_igraph.R" class="external-link"><code>R/to_igraph.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/R/to_igraph.R" class="external-link"><code>R/to_igraph.R</code></a></small>
       <div class="d-none name"><code>netify_to_igraph.Rd</code></div>
     </div>
 
@@ -174,11 +174,11 @@ that period.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Examine the result</span></span></span>
 <span class="r-in"><span><span class="va">ig</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> IGRAPH b92a9af DNW- 152 10420 -- </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> IGRAPH 560a748 DNW- 152 10420 -- </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> + attr: name (v/c), i_polity2 (v/n), i_log_gdp (v/n), i_log_pop (v/n),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> | weight (e/n), verbCoop (e/n), matlCoop (e/n), verbConf (e/n),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> | matlConf (e/n)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> + edges from b92a9af (vertex names):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> + edges from 560a748 (vertex names):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] Afghanistan-&gt;Argentina  Afghanistan-&gt;Armenia    Afghanistan-&gt;Australia </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [4] Afghanistan-&gt;Austria    Afghanistan-&gt;Azerbaijan Afghanistan-&gt;Bahrain   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [7] Afghanistan-&gt;Bangladesh Afghanistan-&gt;Belgium    Afghanistan-&gt;Brazil    </span>
@@ -812,11 +812,11 @@ that period.</p>
 <span class="r-in"><span><span class="co"># Access specific time period</span></span></span>
 <span class="r-in"><span><span class="va">ig_2002</span> <span class="op">&lt;-</span> <span class="va">ig_list</span><span class="op">[[</span><span class="st">"2002"</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">ig_2002</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> IGRAPH bcc78cf DNW- 152 9046 -- </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> IGRAPH ba55a00 DNW- 152 9046 -- </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> + attr: name (v/c), i_polity2 (v/n), i_log_gdp (v/n), i_log_pop (v/n),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> | weight (e/n), verbCoop (e/n), matlCoop (e/n), verbConf (e/n),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> | matlConf (e/n)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> + edges from bcc78cf (vertex names):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> + edges from ba55a00 (vertex names):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] Afghanistan-&gt;Albania    Afghanistan-&gt;Armenia    Afghanistan-&gt;Australia </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [4] Afghanistan-&gt;Austria    Afghanistan-&gt;Azerbaijan Afghanistan-&gt;Bahrain   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [7] Afghanistan-&gt;Bangladesh Afghanistan-&gt;Belgium    Afghanistan-&gt;Brazil    </span>

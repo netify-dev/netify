@@ -23,16 +23,16 @@ multiple similarity metrics and significance testing."></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Foundations (lite)</a></li>
+    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
@@ -49,7 +49,7 @@ multiple similarity metrics and significance testing."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Analyze homophily in network data</h1>
-      <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/v1.5/R/homophily.R" class="external-link"><code>R/homophily.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/R/homophily.R" class="external-link"><code>R/homophily.R</code></a></small>
       <div class="d-none name"><code>homophily.Rd</code></div>
     </div>
 
@@ -254,7 +254,7 @@ consider using <code><a href="mutate_weights.html">mutate_weights()</a></code> t
 <span class="r-out co"><span class="r-pr">#&gt;</span>   mean_similarity_connected mean_similarity_unconnected similarity_difference</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1                 0.6666667                   0.5520833             0.1145833</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   p_value    ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   0.135 -0.02497386 0.1653797                51                 384         0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   0.125 -0.01847974 0.1638452                51                 384         0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   n_pairs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1     435</span>
 <span class="r-in"><span></span></span>

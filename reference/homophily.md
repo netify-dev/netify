@@ -253,7 +253,7 @@ homophily(net, attribute = "gender", method = "categorical")
 #>   mean_similarity_connected mean_similarity_unconnected similarity_difference
 #> 1                 0.6666667                   0.5520833             0.1145833
 #>   p_value    ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing
-#> 1   0.135 -0.02497386 0.1653797                51                 384         0
+#> 1   0.125 -0.01847974 0.1638452                51                 384         0
 #>   n_pairs
 #> 1     435
 
