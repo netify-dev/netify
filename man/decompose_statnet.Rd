@@ -3,39 +3,39 @@
 \name{decompose_statnet}
 \alias{decompose_statnet}
 \alias{decompose_network}
-\title{Decompose a network object into base R components}
+\title{decompose a network object into base r components}
 \usage{
 decompose_statnet(ntwk, weight = NULL)
 
 decompose_network(ntwk, weight = NULL)
 }
 \arguments{
-\item{ntwk}{A network object (class "network") to be decomposed.}
+\item{ntwk}{a network object (class "network") to be decomposed.}
 
-\item{weight}{Character string specifying the edge attribute to use as weights
-in the adjacency matrix. If NULL (default), the unweighted adjacency matrix
+\item{weight}{character string specifying the edge attribute to use as weights
+in the adjacency matrix. if NULL (default), the unweighted adjacency matrix
 is returned with 1s for edges and 0s for non-edges.}
 }
 \value{
-A list containing four elements:
+a list containing four elements:
 \itemize{
-\item \strong{adj_mat}: The adjacency matrix extracted from the network object
+\item \strong{adj_mat}: the adjacency matrix extracted from the network object
 \itemize{
-\item For unipartite networks: Square matrix of dimension n×n
-\item For bipartite networks: Full square matrix of dimension (n₁+n₂)×(n₁+n₂)
-\item Values are edge weights if specified, otherwise 0/1
+\item for unipartite networks: square matrix of dimension \eqn{n \times n}{n x n}
+\item for bipartite networks: full square matrix of dimension \eqn{(n_1 + n_2) \times (n_1 + n_2)}{(n1 + n2) x (n1 + n2)}
+\item values are edge weights if specified, otherwise 0/1
 }
-\item \strong{ndata}: A data frame of vertex attributes, or NULL if none exist
+\item \strong{ndata}: a data frame of vertex attributes, or NULL if none exist
 \itemize{
-\item Always includes an 'actor' column with vertex names
-\item Additional columns for each vertex attribute (excluding system attributes)
+\item always includes an 'actor' column with vertex names
+\item additional columns for each vertex attribute (excluding system attributes)
 }
-\item \strong{ddata}: A data frame of edge attributes, or NULL if none exist
+\item \strong{ddata}: a data frame of edge attributes, or NULL if none exist
 \itemize{
-\item Columns 'from' and 'to' specify edge endpoints using vertex names
-\item Additional columns for each edge attribute
+\item columns 'from' and 'to' specify edge endpoints using vertex names
+\item additional columns for each edge attribute
 }
-\item \strong{weight}: The edge attribute name used for weights, if provided
+\item \strong{weight}: the edge attribute name used for weights, if provided
 }
 }
 \description{
@@ -45,51 +45,51 @@ from a network object (from the statnet suite), returning them in a standardized
 list format.
 }
 \details{
-The function handles both unipartite and bipartite networks appropriately:
+the function handles both unipartite and bipartite networks appropriately:
 
-\strong{Network type detection:}
+\strong{network type detection:}
 \itemize{
-\item Bipartite networks are identified using \code{is.bipartite()}
-\item The bipartite partition size is retrieved from the 'bipartite' network attribute
+\item bipartite networks are identified using \code{is.bipartite()}
+\item the bipartite partition size is retrieved from the 'bipartite' network attribute
 }
 
-\strong{Vertex naming:}
+\strong{vertex naming:}
 
-The function checks for existing vertex names in the 'vertex.names' attribute.
-If names are just the default numeric sequence (1, 2, 3, ...), they are treated
-as missing. Default names are assigned when needed:
+the function checks for existing vertex names in the 'vertex.names' attribute.
+if names are just the default numeric sequence (1, 2, 3, ...), they are treated
+as missing. default names are assigned when needed:
 \itemize{
-\item Unipartite networks: "a1", "a2", ..., "an"
-\item Bipartite networks: "r1", "r2", ... for first partition; "c1", "c2", ... for second partition
+\item unipartite networks: "a1", "a2", ..., "an"
+\item bipartite networks: "r1", "r2", ... for first partition; "c1", "c2", ... for second partition
 }
 
-\strong{Matrix extraction:}
+\strong{matrix extraction:}
 
-Unlike igraph's bipartite handling, the network package returns the full
-adjacency matrix even for bipartite networks. The function:
+unlike igraph's bipartite handling, the network package returns the full
+adjacency matrix even for bipartite networks. the function:
 \itemize{
-\item Extracts the full matrix using \code{as.matrix.network.adjacency()}
-\item For bipartite networks, the matrix has dimension (n₁+n₂)×(n₁+n₂) with
-the first n₁ rows/columns for the first partition
+\item extracts the full matrix using \code{as.matrix.network.adjacency()}
+\item for bipartite networks, the matrix has dimension \eqn{(n_1 + n_2) \times (n_1 + n_2)}{(n1 + n2) x (n1 + n2)} with
+the first \eqn{n_1}{n1} rows/columns for the first partition
 }
 
-\strong{Attribute handling:}
+\strong{attribute handling:}
 
-System attributes ('vertex.names' and 'na') are excluded from the vertex
-attribute data frame. All user-defined vertex and edge attributes are preserved.
+system attributes ('vertex.names' and 'na') are excluded from the vertex
+attribute data frame. all user-defined vertex and edge attributes are preserved.
 }
 \note{
-For longitudinal networks with changing actor composition, explicitly set vertex
+for longitudinal networks with changing actor composition, explicitly set vertex
 names before decomposition to ensure consistent actor identification across time
 periods.
 
-The adjacency matrix format differs between this function and \code{decompose_igraph}
+the adjacency matrix format differs between this function and \code{decompose_igraph}
 for bipartite networks: this function returns the full square matrix while
 \code{decompose_igraph} returns only the rectangular bipartite portion.
 
-Edge directions are preserved in the adjacency matrix according to the network's
+edge directions are preserved in the adjacency matrix according to the network's
 directed/undirected property.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

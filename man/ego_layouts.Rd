@@ -31,59 +31,59 @@ create_ego_centric_layout(
 )
 }
 \arguments{
-\item{netlet}{A netify object created with ego_netify()}
+\item{netlet}{a netify object created with ego_netify()}
 
-\item{min_radius}{Minimum distance from ego to any alter}
+\item{min_radius}{minimum distance from ego to any alter}
 
-\item{max_radius}{Maximum distance from ego to any alter}
+\item{max_radius}{maximum distance from ego to any alter}
 
-\item{seed}{Random seed for reproducible layouts}
+\item{seed}{random seed for reproducible layouts}
 
-\item{ego_name}{Name of the ego node (extracted from netlet attributes if not provided)}
+\item{ego_name}{name of the ego node (extracted from netlet attributes if not provided)}
 
-\item{n_rings}{Number of concentric rings for radial layout}
+\item{n_rings}{number of concentric rings for radial layout}
 
-\item{buffer_radius}{Minimum distance from ego for ego_centric layout}
+\item{buffer_radius}{minimum distance from ego for ego_centric layout}
 
-\item{transition_zone}{Smooth transition zone width for ego_centric layout}
+\item{transition_zone}{smooth transition zone width for ego_centric layout}
 }
 \value{
-A list of data frames with x,y coordinates for each time period
+a list of data frames with x,y coordinates for each time period
 }
 \description{
-These functions create specialized layouts for ego networks that place the ego
+these functions create specialized layouts for ego networks that place the ego
 at the center and arrange alters in meaningful ways around it.
 }
 \details{
-Three layout algorithms are provided:
+three layout algorithms are provided:
 
-\strong{Hierarchical Layout}: Places ego at center and arranges alters in
-concentric circles based on their network centrality. More central alters
+\strong{hierarchical layout}: places ego at center and arranges alters in
+concentric circles based on their network centrality. more central alters
 are placed closer to the ego.
 
-\strong{Radial Layout}: Places ego at center and arranges alters in
-concentric rings based on connection strength quartiles. Stronger connections
+\strong{radial layout}: places ego at center and arranges alters in
+concentric rings based on connection strength quartiles. stronger connections
 are placed in inner rings.
 
-\strong{Ego Centric Layout}: Uses force-directed layout but ensures ego
-remains at center with a buffer zone. Preserves natural clustering while
+\strong{ego centric layout}: uses force-directed layout but ensures ego
+remains at center with a buffer zone. preserves natural clustering while
 maintaining ego visibility.
 }
 \examples{
 \dontrun{
-# Create ego network
-ego_net <- ego_netify(my_network, ego = "Pakistan")
+# create ego network
+ego_net <- ego_netify(my_network, ego = "pakistan")
 
-# Hierarchical layout
+# hierarchical layout
 layout <- create_hierarchical_ego_layout(ego_net)
 plot(ego_net, point_layout = layout)
 
-# Radial layout with custom rings
+# radial layout with custom rings
 layout <- create_radial_ego_layout(ego_net, n_rings = 5)
 plot(ego_net, point_layout = layout)
 }
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

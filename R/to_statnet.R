@@ -1,91 +1,91 @@
 #' Convert netify objects to statnet network format
 #'
-#' Transforms netify network objects into statnet's network
+#' transforms netify network objects into statnet's network
 #' objects (also available as `netify_to_network`,
 #' `to_statnet`, and `to_network`),
 #' providing access to the extensive statistical modeling capabilities
-#' of the statnet suite, including ERGMs (Exponential Random Graph Models),
+#' of the statnet suite, including ergms (exponential random graph models),
 #' descriptive statistics, and network visualization tools.
 #'
-#' @param netlet A netify object containing network data. Cross-sectional,
+#' @param netlet a netify object containing network data. cross-sectional,
 #'   longitudinal, and multilayer netlets are all supported; multilayer
 #'   inputs are dispatched layer-by-layer and the layer results are
 #'   returned in a named list keyed by layer.
-#' @param add_nodal_attribs Logical. If TRUE (default), includes nodal attributes
-#'   from the netify object as vertex attributes in the network object. Set to
+#' @param add_nodal_attribs logical. if TRUE (default), includes nodal attributes
+#'   from the netify object as vertex attributes in the network object. set to
 #'   FALSE to create a network with structure only.
-#' @param add_dyad_attribs Logical. If TRUE (default), includes dyadic attributes
-#'   from the netify object as edge attributes in the network object. Each
+#' @param add_dyad_attribs logical. if TRUE (default), includes dyadic attributes
+#'   from the netify object as edge attributes in the network object. each
 #'   dyad variable is attached in two places on the resulting network: as a
 #'   network-level attribute under its original name (the full \eqn{n\times n}
-#'   matrix) and as a per-edge attribute under \code{<var>_e}. The trailing
+#'   matrix) and as a per-edge attribute under \code{<var>_e}. the trailing
 #'   \code{_e} disambiguates the per-edge edgelist from the network-level
-#'   matrix. For \code{ergm::edgecov()} pass the \emph{original} (matrix)
+#'   matrix. for \code{ergm::edgecov()} pass the \emph{original} (matrix)
 #'   name, not the \code{_e} alias, since \code{edgecov()} reads a
-#'   network-level matrix attribute. The \code{_e} per-edge attribute is
+#'   network-level matrix attribute. the \code{_e} per-edge attribute is
 #'   exposed for descriptive use (e.g. coloring edges in
 #'   \code{network::plot.network}).
 #'
-#' @return A network object or list of network objects:
+#' @return a network object or list of network objects:
 #'   \describe{
-#'     \item{Cross-sectional networks}{Returns a single network object}
-#'     \item{Longitudinal networks}{Returns a named list of network objects
+#'     \item{cross-sectional networks}{returns a single network object}
+#'     \item{longitudinal networks}{returns a named list of network objects
 #'       with class \code{c("network.list", "list")}, names corresponding to
-#'       time periods. The \code{network.list} class is the format that
-#'       \pkg{tergm} CMLE (\code{tergm(nl ~ Form(.) + Persist(.), estimate = "CMLE",
+#'       time periods. the \code{network.list} class is the format that
+#'       \pkg{tergm} cmle (\code{tergm(nl ~ form(.) + persist(.), estimate = "cmle",
 #'       times = seq_along(nl))}) and \code{stergm} expect directly, so the
-#'       output is plug-and-play for longitudinal ERGMs.}
-#'     \item{Multilayer networks}{Returns a named list of (per-time) network
+#'       output is plug-and-play for longitudinal ergms.}
+#'     \item{multilayer networks}{returns a named list of (per-time) network
 #'       objects keyed by layer name}
 #'   }
 #'
-#'   The resulting network object(s) will have:
+#'   the resulting network object(s) will have:
 #'   \itemize{
-#'     \item Vertices named according to actors in the netify object
-#'     \item Edge weights from the netify weight variable stored as "weight" attribute
-#'     \item Vertex attributes for each nodal variable (if add_nodal_attribs = TRUE)
-#'     \item Edge attributes for each dyadic variable (if add_dyad_attribs = TRUE);
+#'     \item vertices named according to actors in the netify object
+#'     \item edge weights from the netify weight variable stored as "weight" attribute
+#'     \item vertex attributes for each nodal variable (if add_nodal_attribs = TRUE)
+#'     \item edge attributes for each dyadic variable (if add_dyad_attribs = TRUE);
 #'       per-edge attributes carry the \code{_e} suffix, network-level
 #'       attributes keep the original name
-#'     \item Proper directedness based on the symmetric parameter of the netify object
-#'     \item A \code{netify_na_cols} attribute (character vector) listing
-#'       nodal columns that carry \code{NA}s; pass this directly to
+#'     \item proper directedness based on the symmetric parameter of the netify object
+#'     \item a \code{netify_na_cols} attribute (character vector) listing
+#'       nodal columns that carry \code{na}s; pass this directly to
 #'       \code{\link{drop_na_actors}()} to drop the offending actors before
 #'       fitting ergm formulas that reference those columns
 #'   }
 #'
 #' @details
-#' The conversion process handles different netify structures:
+#' the conversion process handles different netify structures:
 #' \itemize{
-#'   \item \strong{Cross-sectional}: Direct conversion to a single network object
-#'   \item \strong{Longitudinal arrays}: Internally converted to list format, then
+#'   \item \strong{cross-sectional}: direct conversion to a single network object
+#'   \item \strong{longitudinal arrays}: internally converted to list format, then
 #'     each time slice becomes a separate network object
-#'   \item \strong{Longitudinal lists}: Each time period converted to separate network object
+#'   \item \strong{longitudinal lists}: each time period converted to separate network object
 #' }
 #'
-#' The statnet network format stores networks as an edgelist with attributes,
-#' making it memory-efficient for sparse networks. All nodal and dyadic attributes
-#' from the netify object are preserved and can be used in subsequent ERGM
+#' the statnet network format stores networks as an edgelist with attributes,
+#' making it memory-efficient for sparse networks. all nodal and dyadic attributes
+#' from the netify object are preserved and can be used in subsequent ergm
 #' modeling or network analysis.
 #'
-#' For longitudinal data, each time period results in an independent network
-#' object. This format is suitable for discrete-time network analysis or
-#' pooled ERGM estimation across time periods.
+#' for longitudinal data, each time period results in an independent network
+#' object. this format is suitable for discrete-time network analysis or
+#' pooled ergm estimation across time periods.
 #'
 #' @note
-#' This function requires the network package (part of statnet) to be installed.
+#' this function requires the network package (part of statnet) to be installed.
 #'
-#' For ERGM modeling, the ergm package (also part of statnet) should be loaded
+#' for ergm modeling, the ergm package (also part of statnet) should be loaded
 #' after creating the network objects.
 #'
 #' @examples
-#' # Load example data
+#' # load example data
 #' data(icews)
 #'
-#' # Cross-sectional example
+#' # cross-sectional example
 #' icews_10 <- icews[icews$year == 2010, ]
 #'
-#' # Create netify object with attributes
+#' # create netify object with attributes
 #' dvars <- c("matlCoop", "verbConf", "matlConf")
 #' nvars <- c("i_polity2", "i_log_gdp", "i_log_pop")
 #'
@@ -99,26 +99,26 @@
 #'     nodal_vars = nvars
 #' )
 #'
-#' # Convert to statnet network object
+#' # convert to statnet network object
 #' ntwk <- netify_to_statnet(verbCoop_net)
 #'
-#' # Examine the result
+#' # examine the result
 #' ntwk
 #' network::network.size(ntwk) # number of vertices
 #' network::network.edgecount(ntwk) # number of edges
 #' network::list.vertex.attributes(ntwk) # nodal attributes
 #' network::list.edge.attributes(ntwk) # edge attributes
 #'
-#' # Access specific attributes
+#' # access specific attributes
 #' network::get.vertex.attribute(ntwk, "i_polity2") # polity scores
-#' network::get.edge.attribute(ntwk, "matlCoop") # material cooperation
+#' network::get.edge.attribute(ntwk, "matlCoop_e") # material cooperation on edges
 #'
-#' # Check network properties
+#' # check network properties
 #' network::is.directed(ntwk) # TRUE for this example
 #' network::has.loops(ntwk) # FALSE (no self-ties)
 #'
 #' \donttest{
-#' # Longitudinal example
+#' # longitudinal example
 #' verbCoop_longit <- netify(
 #'     icews,
 #'     actor1 = "i", actor2 = "j", time = "year",
@@ -129,25 +129,25 @@
 #'     nodal_vars = nvars
 #' )
 #'
-#' # Convert to list of network objects
+#' # convert to list of network objects
 #' ntwk_list <- netify_to_statnet(verbCoop_longit)
 #'
-#' # Examine structure
+#' # examine structure
 #' length(ntwk_list) # number of time periods
 #' names(ntwk_list) # time period labels
 #'
-#' # Access specific time period
+#' # access specific time period
 #' ntwk_2002 <- ntwk_list[["2002"]]
 #' ntwk_2002
 #' }
 #'
 #' \dontrun{
-#' # Use with ergm for modeling (requires ergm package)
+#' # use with ergm for modeling (requires ergm package)
 #' library(ergm)
 #' model <- ergm(ntwk ~ edges + mutual + nodematch("i_polity2"))
 #' }
 #'
-#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+#' @author ha eun choi, cassy dorff, colin henry, shahryar minhas
 #'
 #' @export netify_to_statnet
 #' @aliases netify_to_network to_statnet to_network
@@ -193,8 +193,8 @@ netify_to_statnet <- function(
 		attr(netlet, "dyad_data")[[1]]
 	)
 
-	# detect nodal columns that carry NAs; ergm terms like nodecov() and
-	# nodematch() reject NA-bearing vertex attributes, so stash the
+	# detect nodal columns that carry nas; ergm terms like nodecov() and
+	# nodematch() reject na-bearing vertex attributes, so stash the
 	# offending columns on the resulting object(s) and inform the user
 	# once how to clean them up via `drop_na_actors()`
 	na_cols <- detect_na_cols(attr(netlet, "nodal_data"))
@@ -233,7 +233,7 @@ netify_to_statnet <- function(
 			)
 		}
 
-		# stash NA-bearing nodal columns on the network for downstream
+		# stash na-bearing nodal columns on the network for downstream
 		# introspection (e.g. drop_na_actors(net, cols = attr(., "netify_na_cols")))
 		attr(ntwk, "netify_na_cols") <- na_cols
 	} # done with cross-sec case
@@ -267,7 +267,7 @@ netify_to_statnet <- function(
 				)
 			}
 
-			# carry NA-bearing nodal column list onto each slice
+			# carry na-bearing nodal column list onto each slice
 			attr(ntwk_slice, "netify_na_cols") <- na_cols
 
 			#
@@ -285,12 +285,12 @@ netify_to_statnet <- function(
 
 #' detect_na_cols
 #'
-#' Return the names of columns in a nodal_data frame (or list of frames,
-#' for longit) that contain any NA; skips bookkeeping columns (actor,
+#' return the names of columns in a nodal_data frame (or list of frames,
+#' for longit) that contain any na; skips bookkeeping columns (actor,
 #' time, layer).
 #'
 #' @param nodal_data nodal_data attribute from a netify object
-#' @return character vector of column names with NAs (possibly empty)
+#' @return character vector of column names with nas (possibly empty)
 #'
 #' @keywords internal
 #' @noRd
@@ -322,32 +322,32 @@ detect_na_cols <- function(nodal_data) {
 
 #' @rdname netify_to_statnet
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 netify_to_network <- netify_to_statnet
 
 #' @rdname netify_to_statnet
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 to_statnet <- netify_to_statnet
 
 #' @rdname netify_to_statnet
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 to_network <- netify_to_statnet
 
 #' netify_net_to_statnet
 #'
-#' Convert netify object to a statnet network object
+#' convert netify object to a statnet network object
 #'
 #' @param netlet netify object
 #' @return statnet network object
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -356,7 +356,7 @@ netify_net_to_statnet <- function(netlet) {
 	# check if bipartite
 	bipartite_logical <- ifelse(attr(netlet, "mode") == "bipartite", TRUE, FALSE)
 
-	# if weight is NULL then create logical to set value for ignore.eval
+	# if weight is null then create logical to set value for ignore.eval
 	if (is.null(attr(netlet, "weight", exact = TRUE))) {
 		ignore_eval <- TRUE
 	} else {
@@ -364,9 +364,9 @@ netify_net_to_statnet <- function(netlet) {
 	}
 
 	# bipartite networks have two disjoint vertex sets, so loops are
-	# undefined; force loops = FALSE in the bipartite branch even if
-	# diag_to_NA was left as FALSE in the netify (the default for
-	# bipartite). otherwise statnet stamps `loops = TRUE` on the network
+	# undefined; force loops = false in the bipartite branch even if
+	# diag_to_NA was left as false in the netify (the default for
+	# bipartite). otherwise statnet stamps `loops = true` on the network
 	# object, which is conceptually wrong and trips up some ergm terms
 	# that introspect on `has.loops()`.
 	loops_flag <- if (bipartite_logical) FALSE else !attr(netlet, "diag_to_NA")
@@ -396,14 +396,14 @@ netify_net_to_statnet <- function(netlet) {
 
 #' add_nodal_to_statnet
 #'
-#' Add nodal attributes to a network object from netify object
+#' add nodal attributes to a network object from netify object
 #'
 #' @param netlet netify object
 #' @param node_data node data from netlet object
 #' @param statnet_object network object to modify
 #' @param time time indicator for longit case
 #' @return statnet network object with nodal attributes added
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -426,7 +426,7 @@ add_nodal_to_statnet <- function(
 	}
 
 	# align nodal rows to the network's vertex.names so padded actors
-	# (e.g., from bind_netifies(align_actors="union")) receive NA, not
+	# (e.g., from bind_netifies(align_actors="union")) receive na, not
 	# the wrong-actor values that positional indexing would assign
 	vnames <- network::get.vertex.attribute(statnet_object, "vertex.names")
 	actor_col <- if ("actor" %in% names(node_data)) "actor" else names(node_data)[1]
@@ -445,14 +445,14 @@ add_nodal_to_statnet <- function(
 
 #' add_dyad_to_statnet
 #'
-#' Add dyad attributes to a network object from netify object
+#' add dyad attributes to a network object from netify object
 #'
 #' @param netlet netify object
 #' @param dyad_data_list dyad data from netlet object
 #' @param statnet_object network object to modify
 #' @param time time indicator for longit case
 #' @return statnet network object with dyad attributes added
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -499,7 +499,7 @@ add_dyad_to_statnet <- function(
 
 		# replace diagonal with 0s except if
 		# netlet is bipartite or
-		# diag_to_NA is set to FALSE
+		# diag_to_NA is set to false
 		if (!bipartite_logical && netlet_diag_to_NA) {
 			diag(d_data) <- 0
 		}
@@ -535,19 +535,19 @@ add_dyad_to_statnet <- function(
 
 #' as.network method for netify objects
 #'
-#' S3 method that lets statnet's \code{\link[network]{as.network}} generic
-#' dispatch on netify objects. Equivalent to \code{netify_to_statnet(x, ...)}.
-#' Registered against the \pkg{network} namespace in \code{.onLoad}, so the
+#' s3 method that lets statnet's \code{\link[network]{as.network}} generic
+#' dispatch on netify objects. equivalent to \code{netify_to_statnet(x, ...)}.
+#' registered against the \pkg{network} namespace in \code{.onload}, so the
 #' dispatch works regardless of whether \pkg{network} is attached before or
 #' after \pkg{netify}.
 #'
-#' @param x A netify object.
-#' @param ... Extra arguments forwarded to \code{\link{netify_to_statnet}}
+#' @param x a netify object.
+#' @param ... extra arguments forwarded to \code{\link{netify_to_statnet}}
 #'   (e.g. \code{add_nodal_attribs}, \code{add_dyad_attribs}).
-#' @return A statnet \code{network} object or list of network objects, as
+#' @return a statnet \code{network} object or list of network objects, as
 #'   produced by \code{netify_to_statnet}.
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @rawNamespace if (requireNamespace("network", quietly = TRUE)) S3method(network::as.network, netify)
 

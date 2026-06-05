@@ -19,87 +19,87 @@ get_adjacency_array(
 )
 }
 \arguments{
-\item{dyad_data}{A data.frame containing longitudinal dyadic observations. Will
+\item{dyad_data}{a data.frame containing longitudinal dyadic observations. will
 be coerced to data.frame if a tibble or data.table is provided.}
 
-\item{actor1}{Character string specifying the column name for the first actor
+\item{actor1}{character string specifying the column name for the first actor
 in each dyad.}
 
-\item{actor2}{Character string specifying the column name for the second actor
+\item{actor2}{character string specifying the column name for the second actor
 in each dyad.}
 
-\item{time}{Character string specifying the column name for time periods.}
+\item{time}{character string specifying the column name for time periods.}
 
-\item{symmetric}{Logical. If TRUE (default), treats the network as undirected
-(i.e., edges have no direction). If FALSE, treats the network as directed.}
+\item{symmetric}{logical. if TRUE (default), treats the network as undirected
+(i.e., edges have no direction). if FALSE, treats the network as directed.}
 
-\item{mode}{Character string specifying network structure. Options are:
+\item{mode}{character string specifying network structure. options are:
 \itemize{
-\item \code{"unipartite"}: One set of actors (default)
-\item \code{"bipartite"}: Two distinct sets of actors
+\item \code{"unipartite"}: one set of actors (default)
+\item \code{"bipartite"}: two distinct sets of actors
 }}
 
-\item{weight}{Character string specifying the column name containing edge weights.
-If NULL (default), edges are treated as unweighted (binary).}
+\item{weight}{character string specifying the column name containing edge weights.
+if NULL (default), edges are treated as unweighted (binary).}
 
-\item{sum_dyads}{Logical. If TRUE, sums weight values when multiple edges exist
-between the same actor pair in the same time period. If FALSE (default), uses
+\item{sum_dyads}{logical. if TRUE, sums weight values when multiple edges exist
+between the same actor pair in the same time period. if FALSE (default), uses
 the last observed value.}
 
-\item{diag_to_NA}{Logical. If TRUE (default), sets diagonal values (self-loops)
-to NA. Automatically set to FALSE for bipartite networks.}
+\item{diag_to_NA}{logical. if TRUE (default), sets diagonal values (self-loops)
+to na. automatically set to FALSE for bipartite networks.}
 
-\item{missing_to_zero}{Logical. If TRUE (default), treats missing edges as zeros.
-If FALSE, missing edges remain as NA.}
+\item{missing_to_zero}{logical. if TRUE (default), treats missing edges as zeros.
+if FALSE, missing edges remain as na.}
 
-\item{nodelist}{Character vector of actor names to include in the network.
-If provided, ensures all listed actors appear in the network even if they
-have no edges (isolates). Useful when working with edgelists that only
+\item{nodelist}{character vector of actor names to include in the network.
+if provided, ensures all listed actors appear in the network even if they
+have no edges (isolates). useful when working with edgelists that only
 contain active dyads.}
 }
 \value{
-A three-dimensional array of class "netify" (a netify array) with:
+a three-dimensional array of class "netify" (a netify array) with:
 \itemize{
-\item \strong{Dimensions}: \code{[n_actors × n_actors × n_time]} for unipartite
-networks or \code{[n_actors1 × n_actors2 × n_time]} for bipartite networks
-\item \strong{Class}: "netify" - this is a full netify object compatible
+\item \strong{dimensions}: \code{[n_actors x n_actors x n_time]} for unipartite
+networks or \code{[n_actors1 x n_actors2 x n_time]} for bipartite networks
+\item \strong{class}: "netify" - this is a full netify object compatible
 with all netify functions
-\item \strong{Attributes}: Extensive metadata including network properties,
+\item \strong{attributes}: extensive metadata including network properties,
 actor information, and processing parameters
 }
 
-The returned object is a netify array that can be used with all netify
+the returned object is a netify array that can be used with all netify
 functions such as \code{summary()}, \code{plot()}, \code{to_igraph()}, etc.
 }
 \description{
 \code{get_adjacency_array} converts longitudinal dyadic data into a three-dimensional
 netify array where the first two dimensions represent actors and the third
-dimension represents time periods. This function creates an array of class
+dimension represents time periods. this function creates an array of class
 "netify" and should only be used when actor composition remains constant
 across all time periods.
 }
 \details{
-\strong{Note on usage:}
+\strong{note on usage:}
 
-While this function is exported and available for direct use, the primary and
+while this function is exported and available for direct use, the primary and
 recommended way to create netify arrays from longitudinal dyadic data is through
-the \code{netify()} function. The \code{netify()} function:
+the \code{netify()} function. the \code{netify()} function:
 \itemize{
-\item Automatically determines whether to create an array or list structure
-\item Handles time-varying actor composition
-\item Provides more comprehensive data validation
-\item Offers a unified interface for all types of network data
+\item automatically determines whether to create an array or list structure
+\item handles time-varying actor composition
+\item validates inputs before constructing arrays
+\item offers a unified interface for all types of network data
 }
 
-Use \code{get_adjacency_array()} directly only when you specifically need low-level
+use \code{get_adjacency_array()} directly only when you specifically need low-level
 control over array creation and are certain your actors remain constant across
 time.
 }
 \examples{
-# Load example data
+# load example data
 data(icews)
 
-# Create a netify array (longitudinal directed network)
+# create a netify array (longitudinal directed network)
 # with material conflict as edge weights
 icews_array <- get_adjacency_array(
     dyad_data = icews,
@@ -110,16 +110,16 @@ icews_array <- get_adjacency_array(
     weight = "matlConf"
 )
 
-# Verify it's a netify object
+# verify it's a netify object
 class(icews_array) # "netify"
 
-# Check dimensions
+# check dimensions
 dim(icews_array) # [n_actors, n_actors, n_years]
 
-# Access specific time period
+# access specific time period
 icews_2010 <- icews_array[, , "2010"]
 
 }
 \author{
-Cassy Dorff, Ha Eun Choi, Shahryar Minhas
+cassy dorff, ha eun choi, shahryar minhas
 }

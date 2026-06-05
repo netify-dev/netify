@@ -1,26 +1,26 @@
 #' Read a network from common file formats into a netify object
 #'
-#' Thin wrappers around `igraph::read_graph()` for the formats users
+#' thin wrappers around `igraph::read_graph()` for the formats users
 #' coming from gephi / pajek / networkx most often hand over (graphml,
-#' pajek `.net`, gml). Each reader loads the file via igraph and
+#' pajek `.net`, gml). each reader loads the file via igraph and
 #' immediately runs `netify()` on the result so the user gets a
 #' netify back in one call, with edge weights auto-detected and
 #' directedness preserved.
 #'
-#' @param file Path to the input file.
-#' @param ... Passed to `netify(igraph_obj, ...)` — typically
+#' @param file path to the input file.
+#' @param ... passed to `netify(igraph_obj, ...)` -- typically
 #' `symmetric=`, `mode=`, or `weight=` overrides.
-#' @return A netify object.
+#' @return a netify object.
 #' @name read_external
 #' @rdname read_external
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 NULL
 
 #' @rdname read_external
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export read_graphml
 read_graphml <- function(file, ...) {
@@ -36,7 +36,7 @@ read_graphml <- function(file, ...) {
 
 #' @rdname read_external
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export read_pajek
 read_pajek <- function(file, ...) {
@@ -52,7 +52,7 @@ read_pajek <- function(file, ...) {
 
 #' @rdname read_external
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export read_gml
 read_gml <- function(file, ...) {

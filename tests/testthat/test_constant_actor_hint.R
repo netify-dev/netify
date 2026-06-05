@@ -35,7 +35,7 @@ test_that("explicit output_format never triggers the hint", {
 
 test_that("default longit_list is still the resulting netify_type", {
 	# regression: even when the hint suggests longit_array, the actual
-	# default behavior is unchanged — netify still returns longit_list
+	# default behavior is unchanged -- netify still returns longit_list
 	# until the user opts in
 	data(icews)
 	n = suppressMessages(netify(

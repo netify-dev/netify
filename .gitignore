@@ -11,3 +11,16 @@ ego_networks.md
 figure/
 minimal_repro.R
 *:Zone.Identifier
+*.o
+*.so
+*.dll
+*.dylib
+*.tar.gz
+*.Rcheck/
+PACKAGES
+PACKAGES.gz
+PACKAGES.rds
+Library/
+Outputs/
+tests/testthat/testthat-problems.rds
+/.quarto/

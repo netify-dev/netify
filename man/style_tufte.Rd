@@ -2,17 +2,17 @@
 % Please edit documentation in R/plot_styles.R
 \name{style_tufte}
 \alias{style_tufte}
-\title{Minimal Tufte-inspired network style}
+\title{minimal tufte-inspired network style}
 \usage{
 style_tufte()
 }
 \value{
-List of plot arguments
+list of plot arguments
 }
 \description{
-A minimalist network style inspired by Edward Tufte's
+a minimalist network style inspired by edward tufte's
 data visualization principles
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

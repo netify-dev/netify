@@ -1,38 +1,39 @@
-#' Simulate null-model networks from a netify object
+#' Simulate NULL-model networks from a netify object
 #'
-#' Generates `nsim` new netify objects from one of three standard
-#' null models, holding the actor set fixed (and, where applicable,
-#' the observed density / degree sequence). Useful for sanity-checking
+#' generates `nsim` new netify objects from one of three standard
+#' NULL models, holding the actor set fixed (and, where applicable,
+#' the observed density / degree sequence). useful for sanity-checking
 #' whether an observed network statistic (transitivity, modularity,
 #' etc.) is surprising relative to a chance benchmark, without
-#' reaching for `statnet::ergm` for a simple null.
+#' reaching for `statnet::ergm` for a simple NULL.
 #'
-#' @param object A netify object (cross-sectional or per-period; for
+#' @param object a netify object (cross-sectional or per-period; for
 #' longitudinal input each period is simulated independently).
-#' @param nsim Integer. Number of simulated draws to return.
-#' @param seed Optional integer. Local RNG seed; the user's global
-#' `set.seed()` stream is left untouched.
-#' @param model Character. One of:
+#' @param nsim integer. number of simulated draws to return.
+#' @param seed optional integer. if supplied, sets a local rng seed and
+#' restores the user's global `set.seed()` stream afterward. if `NULL`,
+#' simulation uses and advances the current rng stream normally.
+#' @param model character. one of:
 #' \describe{
-#' \item{`"erdos_renyi"`}{Independent Bernoulli edges matched
+#' \item{`"erdos_renyi"`}{independent bernoulli edges matched
 #' to the observed density (and directedness).}
-#' \item{`"configuration"`}{Configuration-model rewire that
+#' \item{`"configuration"`}{configuration-model rewire that
 #' preserves the observed degree sequence (in/out for directed
-#' inputs). Uses `igraph::sample_degseq()`.}
-#' \item{`"dyad_permutation"`}{Permute dyads (Snijders-Borgatti
-#' vertex relabel + symmetric reshuffle). Preserves density and,
+#' inputs). uses `igraph::sample_degseq()`.}
+#' \item{`"dyad_permutation"`}{permute dyads (snijders-borgatti
+#' vertex relabel + symmetric reshuffle). preserves density and,
 #' conditional on permutation symmetry, degree distribution
 #' shape.}
 #' }
-#' @param ... Passed to the underlying model implementation.
+#' @param ... passed to the underlying model implementation.
 #'
-#' @return A list of length `nsim` of netify objects with the same
+#' @return a list of length `nsim` of netify objects with the same
 #' class / mode / symmetry as the input.
 #'
 #' @importFrom stats simulate
 #' @method simulate netify
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 simulate.netify <- function(object, nsim = 1L, seed = NULL,
@@ -40,14 +41,17 @@ simulate.netify <- function(object, nsim = 1L, seed = NULL,
 							...) {
 	netify_check(object)
 	model <- match.arg(model)
-	if (!is.numeric(nsim) || length(nsim) != 1L || nsim < 1) {
+	if (!is.numeric(nsim) || length(nsim) != 1L ||
+		is.na(nsim) || !is.finite(nsim) || nsim < 1 || nsim != floor(nsim)) {
 		cli::cli_abort("{.arg nsim} must be a positive integer.")
 	}
 	nsim <- as.integer(nsim)
 
-	restore_rng <- save_rng_state()
-	on.exit(restore_rng(), add = TRUE)
-	if (!is.null(seed)) set.seed(seed)
+	if (!is.null(seed)) {
+		restore_rng <- save_rng_state()
+		on.exit(restore_rng(), add = TRUE)
+		set.seed(seed)
+	}
 
 	obj_attrs <- attributes(object)
 	netlet_type <- obj_attrs$netify_type
@@ -55,6 +59,13 @@ simulate.netify <- function(object, nsim = 1L, seed = NULL,
 	ibin <- if (length(obj_attrs$is_binary) > 1) obj_attrs$is_binary[1] else obj_attrs$is_binary
 	wlab <- obj_attrs$weight
 	sim_weighted <- !isTRUE(ibin)
+
+	if (length(obj_attrs$layers) > 1) {
+		cli::cli_abort(c(
+			"x" = "{.fn simulate.netify} doesn't yet support multilayer netlets.",
+			"i" = "Subset to one layer first: {.code simulate(subset_netify(net, layers = '<lyr>), ...)}."
+		))
+	}
 
 	if (isTRUE(obj_attrs$mode == "bipartite")) {
 		cli::cli_abort(c(
@@ -68,11 +79,26 @@ simulate.netify <- function(object, nsim = 1L, seed = NULL,
 		"cross_sec" = list("1" = get_raw(object)),
 		"longit_array" = {
 			arr <- get_raw(object)
-			lapply(seq_len(dim(arr)[3]), function(t) arr[, , t]) |>
-				setNames(dimnames(arr)[[3]] %||% as.character(seq_len(dim(arr)[3])))
+			setNames(
+				lapply(seq_len(dim(arr)[3]), function(t) arr[, , t]),
+				dimnames(arr)[[3]] %||% as.character(seq_len(dim(arr)[3]))
+			)
 		},
-		"longit_list" = lapply(object, get_raw) |> setNames(names(object))
+		"longit_list" = setNames(lapply(object, get_raw), names(object))
 	)
+
+	if (model == "configuration" && !isTRUE(obj_attrs$missing_to_zero)) {
+		has_unknown_dyads <- any(vapply(raw_list, function(mat) {
+			off_diag <- row(mat) != col(mat)
+			any(is.na(mat[off_diag]))
+		}, logical(1)))
+		if (has_unknown_dyads) {
+			cli::cli_abort(c(
+				"x" = "Configuration-model simulation cannot preserve non-diagonal missing dyads.",
+				"i" = "Use {.code model = 'dyad_permutation'} to keep the observed missingness pattern, or set {.code missing_to_zero = TRUE} before simulation."
+			))
+		}
+	}
 
 	# sample_degseq wrapper that falls through alternate methods
 	sample_degseq_safe <- function(...) {
@@ -96,7 +122,7 @@ simulate.netify <- function(object, nsim = 1L, seed = NULL,
 	simulate_one <- function(mat) {
 		actors <- rownames(mat) %||% paste0("a", seq_len(nrow(mat)))
 		n <- nrow(mat)
-		# density over off-diagonal non-NA cells
+		# density over off-diagonal non-na cells
 		off_mask <- row(mat) != col(mat)
 		off_vals <- mat[off_mask]
 		finite_off <- off_vals[!is.na(off_vals)]
@@ -126,7 +152,7 @@ simulate.netify <- function(object, nsim = 1L, seed = NULL,
 			# binarize for degree sequence calculation
 			adj <- (mat != 0) & !is.na(mat)
 			if (isTRUE(sym)) {
-				# undirected degree from rowSums alone
+				# undirected degree from rowsums alone
 				deg <- rowSums(adj)
 				g <- sample_degseq_safe(deg)
 				out <- as.matrix(igraph::as_adjacency_matrix(g))
@@ -164,28 +190,39 @@ simulate.netify <- function(object, nsim = 1L, seed = NULL,
 			}
 		}
 
-		diag(out) <- if (isTRUE(attr(object, "diag_to_NA"))) NA else 0
+		if (!isTRUE(obj_attrs$missing_to_zero) && model != "dyad_permutation") {
+			out[is.na(out) & !is.na(mat)] <- 0
+			out[is.na(mat)] <- NA
+		}
+		diag(out) <- if (isTRUE(obj_attrs$diag_to_NA)) NA else 0
 		out
 	}
 
 	# draw nsim independent replicates
 	sim_is_binary <- if (sim_weighted) FALSE else TRUE
 	sim_weight   <- if (sim_weighted) wlab else NULL
-	out <- lapply(seq_len(nsim), function(k) {
-		sim_list <- lapply(raw_list, simulate_one)
-		# rebuild netlet matching input topology
-		if (netlet_type == "cross_sec") {
-			suppressMessages(suppressWarnings(
-				new_netify(sim_list[[1]], mode = obj_attrs$mode,
-					symmetric = sym, is_binary = sim_is_binary, weight = sim_weight)
-			))
-		} else {
-			suppressMessages(suppressWarnings(
-				new_netify(sim_list, mode = obj_attrs$mode,
-					symmetric = sym, is_binary = sim_is_binary, weight = sim_weight)
-			))
-		}
-	})
+		out <- lapply(seq_len(nsim), function(k) {
+			sim_list <- lapply(raw_list, simulate_one)
+			# rebuild netlet matching input topology
+			if (netlet_type == "cross_sec") {
+					sim_net <- suppressMessages(suppressWarnings(
+						new_netify(sim_list[[1]], mode = obj_attrs$mode,
+							symmetric = sym, is_binary = sim_is_binary, weight = sim_weight,
+							diag_to_NA = isTRUE(obj_attrs$diag_to_NA),
+							missing_to_zero = isTRUE(obj_attrs$missing_to_zero))
+					))
+				} else {
+					sim_net <- suppressMessages(suppressWarnings(
+						new_netify(sim_list, mode = obj_attrs$mode,
+							symmetric = sym, is_binary = sim_is_binary, weight = sim_weight,
+							diag_to_NA = isTRUE(obj_attrs$diag_to_NA),
+							missing_to_zero = isTRUE(obj_attrs$missing_to_zero))
+					))
+				}
+			attr(sim_net, "nodal_data") <- obj_attrs$nodal_data
+			attr(sim_net, "dyad_data") <- obj_attrs$dyad_data
+			sim_net
+		})
 	# stamp class + metadata
 	class(out) <- c("netify_sim_list", "list")
 	attr(out, "model") <- model

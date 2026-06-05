@@ -1,14 +1,14 @@
 #' Calculate graph-level statistics for a single netlet
 #'
-#' `graph_stats_for_netlet` calculates various graph-level statistics for a single netlet (network slice) within a netify object. This function is designed to be used internally by the `summary.netify` function to process each netlet separately.
+#' `graph_stats_for_netlet` calculates various graph-level statistics for a single netlet (network slice) within a netify object. this function is designed to be used internally by the `summary.netify` function to process each netlet separately.
 #'
-#' @param mat A matrix representing a single netlet (network slice) from a netify object.
-#' @param obj_attrs A list of attributes associated with the netify object, including information about the network type, mode, and other properties.
-#' @param summary_args A list of additional arguments passed from the `summary.netify` function, which can include user-defined statistical functions.
+#' @param mat a matrix representing a single netlet (network slice) from a netify object.
+#' @param obj_attrs a list of attributes associated with the netify object, including information about the network type, mode, and other properties.
+#' @param summary_args a list of additional arguments passed from the `summary.netify` function, which can include user-defined statistical functions.
 #'
-#' @return A named vector containing the calculated graph-level statistics for the given netlet. The specific statistics included depend on the network type and attributes.
+#' @return a named vector containing the calculated graph-level statistics for the given netlet. the specific statistics included depend on the network type and attributes.
 #'
-#' @details This function is not meant to be called directly by users but is instead used internally by the `summary.netify` function to process each netlet separately. It calculates a wide range of graph-level statistics based on the input matrix and the attributes of the netify object.
+#' @details this function is not meant to be called directly by users but is instead used internally by the `summary.netify` function to process each netlet separately. it calculates a wide range of graph-level statistics based on the input matrix and the attributes of the netify object.
 #'
 #' @importFrom stats median
 #'
@@ -27,6 +27,14 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
 	# cache dimensions
 	n_row <- nrow(mat)
 	n_col <- ncol(mat)
+	is_unipartite <- identical(obj_attrs$mode, "unipartite")
+	raw_symm <- if (length(obj_attrs$symmetric) > 1) {
+		obj_attrs$symmetric[1]
+	} else {
+		obj_attrs$symmetric
+	}
+	is_symm <- is_unipartite && isTRUE(raw_symm)
+	is_weighted <- !isTRUE(obj_attrs$is_binary)
 
 	# vectorize matrix operations early
 	vec_mat <- c(mat)
@@ -44,17 +52,12 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
 
 	# proportion missing uses the same potential-edge denominator as density
 	n_na <- sum(na_mask)
-	is_symm_for_miss <- if (length(obj_attrs$symmetric) > 1) {
-		obj_attrs$symmetric[1]
-	} else {
-		obj_attrs$symmetric
-	}
 	if (n_row == n_col) {
 		diag_na <- sum(is.na(diag(mat)))
 		off_diag_na <- n_na - diag_na
 		if (obj_attrs$diag_to_NA) {
 			# diagonal excluded from potential edges
-			if (isTRUE(is_symm_for_miss)) {
+			if (is_symm) {
 				na_count <- off_diag_na / 2
 				poss <- n_row * (n_row - 1) / 2
 			} else {
@@ -63,7 +66,7 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
 			}
 		} else {
 			# self-loops allowed; include diagonal
-			if (isTRUE(is_symm_for_miss)) {
+			if (is_symm) {
 				na_count <- off_diag_na / 2 + diag_na
 				poss <- n_row * (n_row + 1) / 2
 			} else {
@@ -77,24 +80,30 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
 		prop_edges_missing <- n_na / length(vec_mat)
 	}
 
-	# only meaningful when missing_to_zero = FALSE
+	# only meaningful when missing_to_zero = false
 	mtz <- isTRUE(obj_attrs$missing_to_zero)
 	prop_unknown_edges <- if (mtz) 0 else prop_edges_missing
 
-	# calculate all statistics on non-NA values at once
-	if (length(non_na_vec) > 0) {
-		min_edge_weight <- min(non_na_vec)
-		max_edge_weight <- max(non_na_vec)
-		median_edge_weight <- median(non_na_vec)
-		mean_edge_weight <- mean(non_na_vec)
-		sd_edge_weight <- sd(non_na_vec)
+	# calculate edge-weight statistics over realized edges, not zero non-edges
+	if (isTRUE(is_symm) && n_row == n_col) {
+		weight_mask <- upper.tri(mat, diag = !isTRUE(obj_attrs$diag_to_NA))
+		edge_weight_vec <- mat[weight_mask]
+	} else {
+		edge_weight_vec <- vec_mat
+	}
+	edge_weight_vec <- edge_weight_vec[!is.na(edge_weight_vec) & edge_weight_vec != 0]
+	if (length(edge_weight_vec) > 0) {
+		min_edge_weight <- min(edge_weight_vec)
+		max_edge_weight <- max(edge_weight_vec)
+		median_edge_weight <- median(edge_weight_vec)
+		mean_edge_weight <- mean(edge_weight_vec)
+		sd_edge_weight <- sd(edge_weight_vec)
 	} else {
 		min_edge_weight <- max_edge_weight <- median_edge_weight <- NA
 		mean_edge_weight <- sd_edge_weight <- NA
 	}
 
 	# graph-level summary measures
-	is_symm <- if (length(obj_attrs$symmetric) > 1) obj_attrs$symmetric[1] else obj_attrs$symmetric
 	raw_nonzero <- sum(vec_bin_mat)
 	# symmetric square: dedupe off-diagonal double-counts, keep diagonal once
 	if (is_symm && n_row == n_col) {
@@ -112,31 +121,46 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
 		}
 		density <- num_edges / max(max_possible, 1)
 	} else if (is_symm && n_row == n_col) {
-		# symmetric with diag included: off-diagonal density
-		max_possible <- n_row * (n_row - 1) / 2
-		off_diag_edges <- off_diag_nonzero / 2
-		density <- off_diag_edges / max(max_possible, 1)
+		# symmetric with diag included: self-loops count as potential edges
+		max_possible <- n_row * (n_row + 1) / 2
+		density <- num_edges / max(max_possible, 1)
 	} else {
 		density <- mean(vec_bin_mat)
 	}
 
 	# competition measures - vectorized
-	row_sums <- row_means * n_col
-	col_sums <- col_means * n_row
-	row_props <- row_sums / sum(row_sums)
-	col_props <- col_sums / sum(col_sums)
-	competition_row <- sum(row_props^2)
-	competition_col <- sum(col_props^2)
+	share_mat <- if (is_weighted) abs(mat) else mat
+	row_sums <- rowSums(share_mat, na.rm = TRUE)
+	col_sums <- colSums(share_mat, na.rm = TRUE)
+	row_total <- sum(row_sums)
+	col_total <- sum(col_sums)
+	row_props <- if (row_total > 0) row_sums / row_total else rep(NA_real_, length(row_sums))
+	col_props <- if (col_total > 0) col_sums / col_total else rep(NA_real_, length(col_sums))
+	competition_row <- if (row_total > 0) sum(row_props^2) else NA_real_
+	competition_col <- if (col_total > 0) sum(col_props^2) else NA_real_
 
 	# standard deviations
 	sd_of_row_means <- sd(row_means, na.rm = TRUE)
 	sd_of_col_means <- sd(col_means, na.rm = TRUE)
 
+	safe_cor <- function(x, y) {
+		complete <- stats::complete.cases(x, y)
+		if (sum(complete) < 2) {
+			return(NA_real_)
+		}
+		x <- x[complete]
+		y <- y[complete]
+		if (sd(x) == 0 || sd(y) == 0) {
+			return(NA_real_)
+		}
+		cor(x, y)
+	}
+
 	# conditional calculations based on network type
 	if (obj_attrs$mode == "unipartite" && !is_symm) {
-		covar_of_row_col_means <- cor(row_means, col_means, use = "pairwise.complete.obs")
+		covar_of_row_col_means <- safe_cor(row_means, col_means)
 		# correlation-based reciprocity
-		reciprocity <- cor(vec_mat, c(t(mat)), use = "pairwise.complete.obs")
+		reciprocity <- safe_cor(vec_mat, c(t(mat)))
 		# traditional mutual dyad proportion
 		bin_mat <- (mat != 0 & !is.na(mat)) * 1
 		diag(bin_mat) <- 0
@@ -147,9 +171,15 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
 		covar_of_row_col_means <- reciprocity <- mutual <- NA
 	}
 
-	# build igraph for transitivity; .quiet_na keeps the NA->0 alert local
+	# build igraph for transitivity. missingness is reported separately via
+	# prop_edges_missing / prop_unknown_edges, so keep this internal conversion quiet.
 	if (!is.null(netify_obj)) {
-		g <- netify_to_igraph(netify_obj, .quiet_na = TRUE)
+		g <- netify_to_igraph(
+			netify_obj,
+			add_nodal_attribs = FALSE,
+			add_dyad_attribs = FALSE,
+			.quiet_na = TRUE
+		)
 	} else {
 		# wrap bare matrix as a temporary netify for conversion
 		temp_netify <- mat
@@ -157,9 +187,17 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
 		attr(temp_netify, "netify_type") <- "cross_sec"
 		attr(temp_netify, "symmetric") <- is_symm
 		attr(temp_netify, "mode") <- obj_attrs$mode
-		g <- netify_to_igraph(temp_netify, .quiet_na = TRUE)
+		g <- netify_to_igraph(
+			temp_netify,
+			add_nodal_attribs = FALSE,
+			add_dyad_attribs = FALSE,
+			.quiet_na = TRUE
+		)
 	}
 	transitivity <- igraph::transitivity(g)
+	if (is.nan(transitivity)) {
+		transitivity <- NA_real_
+	}
 
 	# build output vector
 	out <- c(
@@ -224,18 +262,18 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
 	return(out)
 }
 
-#' Calculate actor-level statistics for a single netlet
+#' calculate actor-level statistics for a single netlet
 #'
-#' `actor_stats_for_netlet` calculates various actor-level statistics for a single netlet (network slice) within a netify object. This function is designed to be used internally by the `summary_actor` function to process each netlet separately.
+#' `actor_stats_for_netlet` calculates various actor-level statistics for a single netlet (network slice) within a netify object. this function is designed to be used internally by the `summary_actor` function to process each netlet separately.
 #'
-#' @param mat A matrix representing a single netlet (network slice) from a netify object.
-#' @param obj_attrs A list of attributes associated with the netify object, including information about the network type, mode, and other properties.
-#' @param invert_weights_for_igraph Logical; if TRUE, the weights of the edges are inverted before being used in the calculation of closeness or betweenness centrality. This is because igraph treats edge weights as distances. Inverting weights can be crucial when higher weights should imply stronger (or more valuable) connections rather than longer distances. Default is TRUE.
-#' @param other_stats A named list of functions that take a matrix and return additional actor-level statistics to be included in the output. Each function should accept a matrix as input and return a vector or single value per actor. This allows for the inclusion of custom metrics in the summary output.
+#' @param mat a matrix representing a single netlet (network slice) from a netify object.
+#' @param obj_attrs a list of attributes associated with the netify object, including information about the network type, mode, and other properties.
+#' @param invert_weights_for_igraph logical; if TRUE, the weights of the edges are inverted before being used in the calculation of closeness or betweenness centrality. this is because igraph treats edge weights as distances. inverting weights can be crucial when higher weights should imply stronger (or more valuable) connections rather than longer distances. default is TRUE.
+#' @param other_stats a named list of functions that take a matrix and return additional actor-level statistics to be included in the output. each function should accept a matrix as input and return a vector or single value per actor. this allows for the inclusion of custom metrics in the summary output.
 #'
-#' @return A data frame containing the calculated actor-level statistics for the given netlet. The specific statistics included depend on the network type and attributes.
+#' @return a data frame containing the calculated actor-level statistics for the given netlet. the specific statistics included depend on the network type and attributes.
 #'
-#' @details This function is not meant to be called directly by users but is instead used internally by the `summary_actor` function to process each netlet separately. It calculates a wide range of actor-level statistics based on the input matrix and the attributes of the netify object.
+#' @details this function is not meant to be called directly by users but is instead used internally by the `summary_actor` function to process each netlet separately. it calculates a wide range of actor-level statistics based on the input matrix and the attributes of the netify object.
 #'
 #' @keywords internal
 #' @noRd
@@ -254,38 +292,69 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
 	# fast path skips igraph centralities entirely
 	g <- NULL
 	g_wgts <- NULL
+	g_strength_wgts <- NULL
 	if (!fast) {
-		g <- netify_to_igraph(mat, .quiet_na = TRUE)
+		g <- netify_to_igraph(
+			mat,
+			add_nodal_attribs = FALSE,
+			add_dyad_attribs = FALSE,
+			.quiet_na = TRUE
+		)
 
 		if (is_weighted) {
-			g_wgts <- igraph::E(g)$weight
-			if (length(g_wgts) > 0) {
+			raw_wgts <- igraph::E(g)$weight
+			if (length(raw_wgts) > 0) {
+				g_strength_wgts <- raw_wgts
 				# shift to keep weights positive
-				if (any(g_wgts < 0)) {
-					min_wgt <- min(g_wgts)
-					g_wgts <- g_wgts - min_wgt + 1
+				if (any(g_strength_wgts < 0)) {
+					min_wgt <- min(g_strength_wgts)
+					g_strength_wgts <- g_strength_wgts - min_wgt + 1
 				}
+				g_strength_wgts[g_strength_wgts <= 0] <- .Machine$double.eps
+				g_wgts <- g_strength_wgts
 				# invert weights when they represent strength rather than distance
 				if (invert_weights_for_igraph) {
 					g_wgts <- 1 / g_wgts
 					tiny <- .Machine$double.eps
 					g_wgts[is.infinite(g_wgts) | is.nan(g_wgts)] <- tiny
 					g_wgts[g_wgts <= 0] <- tiny
-				} else {
-					g_wgts[g_wgts <= 0] <- .Machine$double.eps
 				}
 			}
 		}
 	}
 
 	# calculate statistics based on network type
+	prop_from_counts <- function(counts, possible) {
+		out <- rep(NA_real_, length(counts))
+		ok <- possible > 0
+		out[ok] <- counts[ok] / possible[ok]
+		out
+	}
+	edge_values_by_margin <- function(x, margin) {
+		apply(x, margin, function(vals) {
+			vals <- vals[!is.na(vals) & vals != 0]
+			vals
+		}, simplify = FALSE)
+	}
+	moment_by_margin <- function(x, margin, fun) {
+		vapply(edge_values_by_margin(x, margin), function(vals) {
+			if (length(vals) == 0) return(NA_real_)
+			fun(vals)
+		}, numeric(1))
+	}
+	share_from_mass <- function(x) {
+		total <- sum(x, na.rm = TRUE)
+		if (total > 0) x / total else rep(NA_real_, length(x))
+	}
+
 	if (is_symmetric) {
 		# common calculations for symmetric networks
 		degree <- rowSums(bin_mat, na.rm = TRUE)
-		prop_ties <- rowMeans(bin_mat, na.rm = TRUE)
+		possible_ties <- rowSums(!is.na(mat))
+		prop_ties <- prop_from_counts(degree, possible_ties)
 
 		# network share and igraph stats
-		network_share <- degree / sum(degree, na.rm = TRUE)
+		network_share <- share_from_mass(degree)
 
 		# fast path skips igraph centralities
 		if (fast) {
@@ -293,16 +362,17 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
 		} else {
 			closeness <- igraph::closeness(g, normalized = TRUE, weights = g_wgts)
 			betweenness <- igraph::betweenness(g, normalized = TRUE, weights = g_wgts)
-			eigen_vector <- igraph::eigen_centrality(g)$vector
+			eigen_vector <- igraph::eigen_centrality(g, weights = g_strength_wgts)$vector
 		}
 
 		if (is_weighted) {
 			# additional weighted statistics
 			strength_sum <- rowSums(mat, na.rm = TRUE)
-			strength_avg <- rowMeans(mat, na.rm = TRUE)
-			strength_std <- apply(mat, 1, sd, na.rm = TRUE)
-			strength_median <- apply(mat, 1, median, na.rm = TRUE)
-			network_share <- strength_sum / sum(strength_sum, na.rm = TRUE)
+			strength_avg <- moment_by_margin(mat, 1, mean)
+			strength_std <- moment_by_margin(mat, 1, stats::sd)
+			strength_median <- moment_by_margin(mat, 1, stats::median)
+			strength_mass <- rowSums(abs(mat), na.rm = TRUE)
+			network_share <- share_from_mass(strength_mass)
 
 			if (fast) {
 				out <- data.frame(
@@ -350,13 +420,15 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
 		# asymmetric networks - calculate base statistics
 		degree_out <- rowSums(bin_mat, na.rm = TRUE)
 		degree_in <- colSums(bin_mat, na.rm = TRUE)
-		prop_ties_out <- rowMeans(bin_mat, na.rm = TRUE)
-		prop_ties_in <- colMeans(bin_mat, na.rm = TRUE)
+		possible_out <- rowSums(!is.na(mat))
+		possible_in <- colSums(!is.na(mat))
+		prop_ties_out <- prop_from_counts(degree_out, possible_out)
+		prop_ties_in <- prop_from_counts(degree_in, possible_in)
 
 		# totals
 		if (!is_bipartite) {
 			degree_total <- degree_in + degree_out
-			prop_ties_total <- sum(degree_total > 0, na.rm = TRUE) / length(degree_total)
+			prop_ties_total <- prop_from_counts(degree_total, possible_in + possible_out)
 		} else {
 			# bipartite: row-then-col order matches igraph vertex order
 			degree_total <- c(degree_out, degree_in)
@@ -372,7 +444,7 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
 			closeness_out <- igraph::closeness(g, mode = "out", normalized = TRUE, weights = g_wgts)
 			closeness_all <- igraph::closeness(g, mode = "all", normalized = TRUE, weights = g_wgts)
 			betweenness <- igraph::betweenness(g, normalized = TRUE, weights = g_wgts)
-			hits <- igraph::hits_scores(g)
+			hits <- igraph::hits_scores(g, weights = g_strength_wgts)
 			authority_score <- hits$authority
 			hub_score <- hits$hub
 		}
@@ -381,36 +453,52 @@ actor_stats_for_netlet <- function(mat, obj_attrs, invert_weights_for_igraph = T
 			# additional weighted statistics for asymmetric networks
 			strength_sum_out <- rowSums(mat, na.rm = TRUE)
 			strength_sum_in <- colSums(mat, na.rm = TRUE)
-			strength_avg_out <- rowMeans(mat, na.rm = TRUE)
-			strength_avg_in <- colMeans(mat, na.rm = TRUE)
-			strength_median_out <- apply(mat, 1, median, na.rm = TRUE)
-			strength_median_in <- apply(mat, 2, median, na.rm = TRUE)
-			strength_std_out <- apply(mat, 1, sd, na.rm = TRUE)
-			strength_std_in <- apply(mat, 2, sd, na.rm = TRUE)
+			strength_mass_out <- rowSums(abs(mat), na.rm = TRUE)
+			strength_mass_in <- colSums(abs(mat), na.rm = TRUE)
+			strength_avg_out <- moment_by_margin(mat, 1, mean)
+			strength_avg_in <- moment_by_margin(mat, 2, mean)
+			strength_median_out <- moment_by_margin(mat, 1, stats::median)
+			strength_median_in <- moment_by_margin(mat, 2, stats::median)
+			strength_std_out <- moment_by_margin(mat, 1, stats::sd)
+			strength_std_in <- moment_by_margin(mat, 2, stats::sd)
 
 			# calculate totals and network shares
 			if (!is_bipartite) {
 				strength_sum_total <- strength_sum_in + strength_sum_out
-				strength_avg_total <- (strength_avg_in + strength_avg_out) / 2
-				strength_median_total <- (strength_median_in + strength_median_out) / 2
-				strength_std_total <- (strength_std_in + strength_std_out) / 2
+				strength_mass_total <- strength_mass_in + strength_mass_out
+				strength_avg_total <- vapply(seq_along(strength_sum_total), function(i) {
+					vals <- c(mat[i, ], mat[, i])
+					vals <- vals[!is.na(vals) & vals != 0]
+					if (length(vals) == 0) NA_real_ else mean(vals)
+				}, numeric(1))
+				strength_median_total <- vapply(seq_along(strength_sum_total), function(i) {
+					vals <- c(mat[i, ], mat[, i])
+					vals <- vals[!is.na(vals) & vals != 0]
+					if (length(vals) == 0) NA_real_ else stats::median(vals)
+				}, numeric(1))
+				strength_std_total <- vapply(seq_along(strength_sum_total), function(i) {
+					vals <- c(mat[i, ], mat[, i])
+					vals <- vals[!is.na(vals) & vals != 0]
+					if (length(vals) == 0) NA_real_ else stats::sd(vals)
+				}, numeric(1))
 			} else {
 				# bipartite: row-then-col order matches igraph vertex order
 				strength_sum_total <- c(strength_sum_out, strength_sum_in)
+				strength_mass_total <- c(strength_mass_out, strength_mass_in)
 				strength_avg_total <- c(strength_avg_out, strength_avg_in)
 				strength_median_total <- c(strength_median_out, strength_median_in)
 				strength_std_total <- c(strength_std_out, strength_std_in)
 			}
 
-			network_share_in <- strength_sum_in / sum(strength_sum_in, na.rm = TRUE)
-			network_share_out <- strength_sum_out / sum(strength_sum_out, na.rm = TRUE)
-			network_share_total <- strength_sum_total / sum(strength_sum_total, na.rm = TRUE)
-		} else {
-			# binary network shares
-			network_share_in <- degree_in / sum(degree_in, na.rm = TRUE)
-			network_share_out <- degree_out / sum(degree_out, na.rm = TRUE)
-			network_share_total <- degree_total / sum(degree_total, na.rm = TRUE)
-		}
+			network_share_in <- share_from_mass(strength_mass_in)
+			network_share_out <- share_from_mass(strength_mass_out)
+			network_share_total <- share_from_mass(strength_mass_total)
+	} else {
+		# binary network shares
+		network_share_in <- share_from_mass(degree_in)
+		network_share_out <- share_from_mass(degree_out)
+		network_share_total <- share_from_mass(degree_total)
+	}
 
 		# build output data frame based on type
 		if (is_bipartite) {

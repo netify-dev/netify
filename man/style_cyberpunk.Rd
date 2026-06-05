@@ -2,16 +2,16 @@
 % Please edit documentation in R/plot_styles.R
 \name{style_cyberpunk}
 \alias{style_cyberpunk}
-\title{Cyberpunk-inspired network style}
+\title{cyberpunk-inspired network style}
 \usage{
 style_cyberpunk()
 }
 \value{
-List of plot arguments
+list of plot arguments
 }
 \description{
-A futuristic network style with neon colors on dark background
+a futuristic network style with neon colors on dark background
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

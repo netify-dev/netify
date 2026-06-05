@@ -1,83 +1,83 @@
 #' Generate edge layout coordinates for netify visualization
 #'
 #' `get_edge_layout` prepares edge data for network visualization by calculating
-#' start and end coordinates for line segments representing edges. This function
+#' start and end coordinates for line segments representing edges. this function
 #' maps edges from a netify object to their corresponding node positions as
 #' determined by a layout algorithm.
 #'
-#' @param netlet A netify object (class "netify") containing the network structure
+#' @param netlet a netify object (class "netify") containing the network structure
 #'   from which edges will be extracted.
-#' @param nodes_layout A data.frame or matrix containing node positions, or a list
-#'   of such objects for longitudinal networks. Each element must include columns:
+#' @param nodes_layout a data.frame or matrix containing node positions, or a list
+#'   of such objects for longitudinal networks. each element must include columns:
 #'   \itemize{
-#'     \item \strong{actor}: Character string identifying each node
-#'     \item \strong{x}: Numeric x-coordinate of the node position
-#'     \item \strong{y}: Numeric y-coordinate of the node position
+#'     \item \strong{actor}: character string identifying each node
+#'     \item \strong{x}: numeric x-coordinate of the node position
+#'     \item \strong{y}: numeric y-coordinate of the node position
 #'   }
 #'
-#'   For longitudinal networks, provide a named list where:
+#'   for longitudinal networks, provide a named list where:
 #'   \itemize{
-#'     \item Names correspond to time periods in the netify object
-#'     \item Each element follows the structure described above
-#'     \item Time period names must match those in the netify object
+#'     \item names correspond to time periods in the netify object
+#'     \item each element follows the structure described above
+#'     \item time period names must match those in the netify object
 #'   }
-#' @param ig_netlet An optional pre-converted igraph object. If provided, this
+#' @param ig_netlet an optional pre-converted igraph object. if provided, this
 #'   function will use it directly instead of converting the netify object again.
 #'
-#' @return Depending on the input netify object:
+#' @return depending on the input netify object:
 #'   \itemize{
-#'     \item \strong{Cross-sectional}: A list containing one data.frame with columns:
+#'     \item \strong{cross-sectional}: a list containing one data.frame with columns:
 #'       \itemize{
-#'         \item \code{from}: Source node name
-#'         \item \code{to}: Target node name
-#'         \item \code{x1}, \code{y1}: Coordinates of the source node
-#'         \item \code{x2}, \code{y2}: Coordinates of the target node
+#'         \item \code{from}: source node name
+#'         \item \code{to}: target node name
+#'         \item \code{x1}, \code{y1}: coordinates of the source node
+#'         \item \code{x2}, \code{y2}: coordinates of the target node
 #'       }
-#'     \item \strong{Longitudinal}: A named list of data.frames (one per time period)
+#'     \item \strong{longitudinal}: a named list of data.frames (one per time period)
 #'       with the same structure as above
 #'   }
 #'
-#'   The output maintains the same temporal structure as the input netify object.
+#'   the output maintains the same temporal structure as the input netify object.
 #'
 #' @details
-#' This function performs the following operations:
+#' this function performs the following operations:
 #'
-#' \strong{Edge extraction:}
+#' \strong{edge extraction:}
 #' \itemize{
-#'   \item Converts the netify object to igraph format internally
-#'   \item Extracts the edge list preserving edge directions
-#'   \item Handles both cross-sectional and longitudinal networks
+#'   \item converts the netify object to igraph format internally
+#'   \item extracts the edge list preserving edge directions
+#'   \item handles both cross-sectional and longitudinal networks
 #' }
 #'
-#' \strong{Coordinate mapping:}
+#' \strong{coordinate mapping:}
 #' \itemize{
-#'   \item Matches each edge endpoint to its corresponding node position
-#'   \item Creates a complete set of coordinates for drawing edges
-#'   \item Preserves the temporal structure for longitudinal networks
+#'   \item matches each edge endpoint to its corresponding node position
+#'   \item creates a complete set of coordinates for drawing edges
+#'   \item preserves the temporal structure for longitudinal networks
 #' }
 #'
-#' \strong{Use in visualization:}
+#' \strong{use in visualization:}
 #'
-#' This function is typically used as part of a visualization pipeline:
+#' this function is typically used as part of a visualization pipeline:
 #' \enumerate{
-#'   \item Create node layout using `get_node_layout()` or a custom layout algorithm
-#'   \item Generate edge coordinates using this function
-#'   \item Pass both to visualization functions for plotting
+#'   \item create node layout using `get_node_layout()` or a custom layout algorithm
+#'   \item generate edge coordinates using this function
+#'   \item pass both to visualization functions for plotting
 #' }
 #'
 #' @note
-#' The nodes_layout structure must exactly match the actors and time periods in
-#' the netify object. Missing actors in the layout will result in NA coordinates
+#' the nodes_layout structure must exactly match the actors and time periods in
+#' the netify object. missing actors in the layout will result in na coordinates
 #' for their associated edges.
 #'
-#' For longitudinal networks, ensure that the names of the nodes_layout list
+#' for longitudinal networks, ensure that the names of the nodes_layout list
 #' match the time period labels in the netify object (e.g., "2008", "2009").
 #'
-#' This function always returns a list structure for consistency, even for
+#' this function always returns a list structure for consistency, even for
 #' cross-sectional networks where the list contains only one element.
 #'
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export get_edge_layout
 
@@ -92,7 +92,8 @@ get_edge_layout <- function(
 	if (is.null(ig_netlet)) {
 		g <- netify_to_igraph(netlet,
 			add_nodal_attribs = FALSE,
-			add_dyad_attribs = FALSE
+			add_dyad_attribs = FALSE,
+			.quiet_na = TRUE
 		)
 	} else {
 		# use provided igraph object if avail
@@ -109,7 +110,7 @@ get_edge_layout <- function(
 		nodes_layout <- list(nodes_layout)
 	}
 
-	# vectorized approach for single time period
+	# vectorized path for single time period
 	if (length(g) == 1) {
 		g_slice <- g[[1]]
 		nodes <- nodes_layout[[1]]
@@ -117,7 +118,7 @@ get_edge_layout <- function(
 		# get all edges at once
 		edges <- igraph::as_edgelist(g_slice, names = TRUE)
 
-		# create lookup vectors for O(1) access
+		# create lookup vectors for o(1) access
 		node_x <- setNames(nodes$x, nodes$actor)
 		node_y <- setNames(nodes$y, nodes$actor)
 

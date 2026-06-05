@@ -1,70 +1,70 @@
 #' Convert igraph, network, or matrix objects to netify format
 #'
-#' Converts various network object types (igraph, network, matrices/arrays,
+#' converts various network object types (igraph, network, matrices/arrays,
 #' or lists of these) into netify objects (also available as `to_netify`).
-#' Automatically extracts adjacency
+#' automatically extracts adjacency
 #' matrices and any nodal/dyadic attributes from the input objects.
 #'
-#' @param net_obj An R object to convert: \code{igraph}, \code{network},
+#' @param net_obj an r object to convert: \code{igraph}, \code{network},
 #'   matrix, array, or a list of these objects.
-#' @param weight Optional. Name of the weight attribute in \code{net_obj} to be used
-#'   as the main edge weight in the netify object. Default is \code{NULL}. Important to specify
+#' @param weight optional. name of the weight attribute in \code{net_obj} to be used
+#'   as the main edge weight in the netify object. default is \code{NULL}. important to specify
 #'   for \code{igraph} and \code{network} objects as they do not have a default weight.
-#' @param ... Additional arguments passed to \code{new_netify}. Can include
+#' @param ... additional arguments passed to \code{new_netify}. can include
 #'   \code{nodal_data} or \code{dyad_data} to override extracted attributes.
 #'
-#' @return A netify object with:
+#' @return a netify object with:
 #'   \itemize{
-#'     \item Adjacency matrix or list of matrices
-#'     \item Nodal attributes (if present in the input)
-#'     \item Dyadic attributes (if present in the input)
-#'     \item Weight specification (if provided)
+#'     \item adjacency matrix or list of matrices
+#'     \item nodal attributes (if present in the input)
+#'     \item dyadic attributes (if present in the input)
+#'     \item weight specification (if provided)
 #'   }
 #'
 #' @details
-#' The function handles different input types:
+#' the function handles different input types:
 #' \itemize{
-#'   \item \strong{igraph}: Extracts adjacency matrix, vertex attributes as nodal data,
+#'   \item \strong{igraph}: extracts adjacency matrix, vertex attributes as nodal data,
 #'     and edge attributes as dyadic data
-#'   \item \strong{network}: Extracts adjacency matrix, vertex attributes as nodal data,
+#'   \item \strong{network}: extracts adjacency matrix, vertex attributes as nodal data,
 #'     and edge attributes as dyadic data
-#'   \item \strong{matrix}: Direct conversion, no attribute extraction
-#'   \item \strong{array}: Assumes 3D arrays represent longitudinal networks
-#'   \item \strong{list}: Must contain all objects of the same type (all igraph,
+#'   \item \strong{matrix}: direct conversion, no attribute extraction
+#'   \item \strong{array}: assumes 3d arrays represent longitudinal networks
+#'   \item \strong{list}: must contain all objects of the same type (all igraph,
 #'     all network, or all matrices)
 #' }
 #'
-#' For longitudinal data (lists or 3D arrays), the function creates a netify object
-#' with time-indexed components. Actor ordering is preserved from the input objects
+#' for longitudinal data (lists or 3d arrays), the function creates a netify object
+#' with time-indexed components. actor ordering is preserved from the input objects
 #' and made consistent across all components (adjacency, nodal, and dyadic data).
 #'
 #' @note
-#' When converting from igraph or network objects, specify the \code{weight} parameter
+#' when converting from igraph or network objects, specify the \code{weight} parameter
 #' to designate which edge attribute should be used as the primary edge weight in
 #' the netify object.
 #'
 #' @examples
 #' \dontrun{
-#' # From igraph
+#' # from igraph
 #' library(igraph)
 #' g <- sample_gnp(10, 0.3)
-#' E(g)$weight <- runif(ecount(g))
-#' V(g)$type <- sample(c("A", "B"), vcount(g), replace = TRUE)
+#' e(g)$weight <- runif(ecount(g))
+#' v(g)$type <- sample(c("a", "b"), vcount(g), replace = TRUE)
 #'
 #' net <- to_netify(g, weight = "weight")
 #'
-#' # From network
+#' # from network
 #' library(network)
 #' n <- network(rgraph(10, tprob = 0.3))
 #' set.vertex.attribute(n, "group", sample(1:2, 10, replace = TRUE))
 #'
 #' net <- to_netify(n)
 #'
-#' # From matrix
+#' # from matrix
 #' adj_mat <- matrix(rnorm(100), 10, 10)
 #' net <- to_netify(adj_mat)
 #'
-#' # From list of matrices (longitudinal)
+#' # from list of matrices (longitudinal)
 #' mat_list <- list(
 #'     "2001" = matrix(rnorm(100), 10, 10),
 #'     "2002" = matrix(rnorm(100), 10, 10)
@@ -72,7 +72,7 @@
 #' net <- to_netify(mat_list)
 #' }
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export to_netify
 
@@ -80,9 +80,7 @@ to_netify <- function(
 	net_obj,
 	weight = NULL,
 	...) {
-	# capture any relevant user specified args
-	# if user specified nodal_data or dyad_data,
-	# we will use those instead of the ones extracted from net_obj
+	# capture user-provided attribute data
 	other_args <- list(...)
 	user_ndata <- other_args$nodal_data
 	user_ddata <- other_args$dyad_data
@@ -105,29 +103,19 @@ to_netify <- function(
 				"i" = "Add at least one vertex before converting."
 			))
 		}
-		# auto-pick a numeric edge attr as weight if user did not name one,
-		# preferring a non-"weight" named column over the generic "weight"
 		if (is.null(weight)) {
-			ea <- igraph::edge_attr_names(net_obj)
-			named <- setdiff(ea, "weight")
-			for (nm in named) {
-				vals <- igraph::edge_attr(net_obj, nm)
-				if (!is.null(vals) && is.numeric(vals)) {
-					weight <- nm; break
-				}
-			}
-			if (is.null(weight) && "weight" %in% ea) weight <- "weight"
+			weight <- auto_select_igraph_weight(net_obj)
 		}
 		processed <- decompose_igraph(net_obj, weight = weight)
 		adj_data <- processed$adj_mat
 		nodal_data <- processed$ndata
 		dyad_data <- processed$ddata
 		weight <- processed$weight
-		# get symmetry directly from igraph
-		is_symmetric <- !igraph::is_directed(net_obj)
-		# absent self-loops -> NA the diagonal so the netify-side
-		# diag_to_NA detection matches the source convention
-		if (is.matrix(adj_data) && nrow(adj_data) == ncol(adj_data)) {
+	# read symmetry from igraph
+	is_symmetric <- !igraph::is_directed(net_obj)
+	# mark absent self-loops on unipartite graphs
+		if (is.matrix(adj_data) && nrow(adj_data) == ncol(adj_data) &&
+			!is_logical_bipartite_igraph(net_obj)) {
 			any_loop <- igraph::ecount(net_obj) > 0L &&
 				any(igraph::which_loop(net_obj))
 			if (!any_loop) {
@@ -137,25 +125,15 @@ to_netify <- function(
 
 		# single network object
 	} else if (inherits(net_obj, "network")) {
-		# auto-pick a numeric edge attribute as weight if user did not name one
 		if (is.null(weight)) {
-			ea <- network::list.edge.attributes(net_obj)
-			# skip system attributes
-			ea <- setdiff(ea, c("na"))
-			named <- setdiff(ea, "weight")
-			for (nm in named) {
-				vals <- network::get.edge.attribute(net_obj, nm)
-				if (!is.null(vals) && is.numeric(vals)) {
-					weight <- nm; break
-				}
-			}
-			if (is.null(weight) && "weight" %in% ea) weight <- "weight"
+			weight <- auto_select_network_weight(net_obj)
 		}
 		processed <- decompose_statnet(net_obj, weight = weight)
 		adj_data <- processed$adj_mat
 		nodal_data <- processed$ndata
 		dyad_data <- processed$ddata
 		weight <- processed$weight
+		dyad_data <- drop_statnet_auxiliary_edge_attrs(dyad_data, weight)
 		# get symmetry directly from network
 		is_symmetric <- !network::is.directed(net_obj)
 
@@ -169,10 +147,7 @@ to_netify <- function(
 		adj_data <- net_obj
 		is_longitudinal <- length(dim(net_obj)) == 3
 
-		# distinguish layers vs time periods when a user hands us a bare 3d
-		# array. netify treats the third dimension as a *time* index by
-		# default. for stacked layers (e.g. trade / alliance / conflict on
-		# the same actors) the user should route through `layer_netify()`.
+			# treat the third dimension of a bare 3d array as time
 		if (is_longitudinal) {
 			dn <- dimnames(net_obj)
 			third_names <- if (is.null(dn)) NULL else dn[[3]]
@@ -237,7 +212,7 @@ to_netify <- function(
 		dyad_data <- user_ddata
 	}
 
-	# ensure consistent actor ordering across all data components
+	# align actor order across data components
 	if (!is.null(nodal_data)) {
 		nodal_data <- align_nodal_data_order(
 			nodal_data,
@@ -267,17 +242,17 @@ to_netify <- function(
 	return(out)
 }
 
-#' Process a list of network objects
+#' process a list of network objects
 #'
-#' Handles the processing of lists containing igraph, network,
+#' handles the processing of lists containing igraph, network,
 #' or matrix objects.
 #'
-#' @param net_obj A list of network objects (igraph, network, or matrix)
-#' @param weight Optional weight attribute name
+#' @param net_obj a list of network objects (igraph, network, or matrix)
+#' @param weight optional weight attribute name
 #'
-#' @return A list containing processed components
+#' @return a list containing processed components
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -294,35 +269,31 @@ process_network_list <- function(net_obj, weight = NULL) {
 
 	# check list type and process
 	if (all(vapply(net_obj, inherits, logical(1), "igraph"))) {
-		# auto-pick numeric edge attr as weight if user did not name one
 		if (is.null(weight)) {
-			ea <- igraph::edge_attr_names(net_obj[[1]])
-			named <- setdiff(ea, "weight")
-			for (nm in named) {
-				vals <- igraph::edge_attr(net_obj[[1]], nm)
-				if (!is.null(vals) && is.numeric(vals)) {
-					weight <- nm; break
-				}
-			}
-			if (is.null(weight) && "weight" %in% ea) weight <- "weight"
+			weight <- auto_select_igraph_weight(net_obj[[1]])
 			result$weight <- weight
 		}
-		# process igraph list
+		# process igraph inputs
 		processed_list <- lapply(net_obj, decompose_igraph, weight = weight)
 		result$is_symmetric <- !igraph::is_directed(net_obj[[1]])
-		# NA-out diagonal on slices that have no self-loops
+		# mark absent self-loops on unipartite slices
 		any_loop_per_slice <- vapply(net_obj, function(g) {
 			igraph::ecount(g) > 0L && any(igraph::which_loop(g))
 		}, logical(1))
 		for (k in seq_along(processed_list)) {
 			m <- processed_list[[k]]$adj_mat
-			if (is.matrix(m) && nrow(m) == ncol(m) && !any_loop_per_slice[k]) {
+			if (is.matrix(m) && nrow(m) == ncol(m) && !any_loop_per_slice[k] &&
+				!is_logical_bipartite_igraph(net_obj[[k]])) {
 				diag(m) <- NA
 				processed_list[[k]]$adj_mat <- m
 			}
 		}
 	} else if (all(vapply(net_obj, inherits, logical(1), "network"))) {
-		# process network list
+		if (is.null(weight)) {
+			weight <- auto_select_network_weight(net_obj[[1]])
+			result$weight <- weight
+		}
+		# process network inputs
 		processed_list <- lapply(net_obj, decompose_statnet, weight = weight)
 		result$is_symmetric <- !network::is.directed(net_obj[[1]])
 	} else if (all(vapply(net_obj, is.matrix, logical(1)))) {
@@ -347,19 +318,102 @@ process_network_list <- function(net_obj, weight = NULL) {
 
 	# extract dyad data
 	result$dyad_data <- lapply(processed_list, `[[`, "ddata")
+	if (all(vapply(net_obj, inherits, logical(1), "network"))) {
+		result$dyad_data <- drop_statnet_auxiliary_edge_attrs(result$dyad_data, result$weight)
+	}
 
 	#
 	return(result)
 }
 
-#' Process nodal data for longitudinal networks
+#' auto-select a numeric igraph edge weight attribute
 #'
-#' @param processed_list List of processed network decompositions
-#' @param net_obj Original network object list (for time names)
+#' @keywords internal
+#' @noRd
+auto_select_igraph_weight <- function(grph) {
+	ea <- igraph::edge_attr_names(grph)
+	if ("weight" %in% ea) {
+		vals <- igraph::edge_attr(grph, "weight")
+		if (!is.null(vals) && is.numeric(vals)) {
+			return("weight")
+		}
+	}
+
+	for (nm in setdiff(ea, "weight")) {
+		vals <- igraph::edge_attr(grph, nm)
+		if (!is.null(vals) && is.numeric(vals)) {
+			return(nm)
+		}
+	}
+
+	NULL
+}
+
+#' auto-select a numeric network edge weight attribute
 #'
-#' @return A combined data frame of nodal data or NULL
+#' @keywords internal
+#' @noRd
+auto_select_network_weight <- function(ntwk) {
+	ea <- setdiff(network::list.edge.attributes(ntwk), c("na"))
+	if ("weight" %in% ea) {
+		vals <- network::get.edge.attribute(ntwk, "weight")
+		if (!is.null(vals) && is.numeric(vals)) {
+			return("weight")
+		}
+	}
+
+	for (nm in setdiff(ea, "weight")) {
+		vals <- network::get.edge.attribute(ntwk, nm)
+		if (!is.null(vals) && is.numeric(vals)) {
+			return(nm)
+		}
+	}
+
+	NULL
+}
+
+#' detect igraph bipartite inputs that decompose to a biadjacency matrix
 #'
-#' @author Shahryar Minhas
+#' @keywords internal
+#' @noRd
+is_logical_bipartite_igraph <- function(grph) {
+	if (!igraph::is_bipartite(grph)) {
+		return(FALSE)
+	}
+	vertex_types <- igraph::V(grph)$type
+	!is.null(vertex_types) && is.logical(vertex_types)
+}
+
+#' drop statnet system attributes from auxiliary dyad variables
+#'
+#' @keywords internal
+#' @noRd
+drop_statnet_auxiliary_edge_attrs <- function(edge_data, weight = NULL) {
+	drop_cols <- c("na", weight)
+	if (is.null(edge_data) || length(drop_cols) == 0L) {
+		return(edge_data)
+	}
+	drop_one <- function(df) {
+		if (is.null(df) || !is.data.frame(df)) return(df)
+		df[, setdiff(names(df), drop_cols), drop = FALSE]
+	}
+	if (is.data.frame(edge_data)) {
+		return(drop_one(edge_data))
+	}
+	if (is.list(edge_data)) {
+		return(lapply(edge_data, drop_one))
+	}
+	edge_data
+}
+
+#' process nodal data for longitudinal networks
+#'
+#' @param processed_list list of processed network decompositions
+#' @param net_obj original network object list (for time names)
+#'
+#' @return a combined data frame of nodal data or NULL
+#'
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -398,49 +452,53 @@ process_longitudinal_nodal_data <- function(processed_list, net_obj) {
 	}
 }
 
-#' Align nodal data actor order to match adjacency matrix order
+#' align nodal data actor order to match adjacency matrix order
 #'
-#' Ensure that actors in nodal_data appear in the same
+#' ensure that actors in nodal_data appear in the same
 #' order as they appear in the adjacency matrix row/column names.
 #'
-#' @param ndata A data frame containing nodal attributes with 'actor' column
-#' @param adj_data An adjacency matrix or list of adjacency matrices
-#' @param is_longitudinal Logical indicating whether the network is longitudinal
+#' @param ndata a data frame containing nodal attributes with 'actor' column
+#' @param adj_data an adjacency matrix or list of adjacency matrices
+#' @param is_longitudinal logical indicating whether the network is longitudinal
 #'
-#' @return A reordered data frame with actors matching adjacency matrix order
+#' @return a reordered data frame with actors matching adjacency matrix order
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
 align_nodal_data_order <- function(ndata, adj_data, is_longitudinal) {
-	# get reference actor order from adjacency matrix
-	first_mat <- if (is.list(adj_data)) {
-		adj_data[[1]]
-	} else {
-		adj_data
-	}
-	ref_actors <- rownames(first_mat)
-
-	# should always have names now, but keep fallback
-	if (is.null(ref_actors)) {
-		ref_actors <- paste0("a", seq_len(nrow(first_mat)))
-	}
-
 	if (is_longitudinal) {
-		# use split for better performance than repeated subsetting
+		if (!is.list(adj_data)) {
+			cli::cli_abort("Longitudinal nodal data alignment requires a list of adjacency matrices.")
+		}
+		time_labels <- names(adj_data) %||% as.character(seq_along(adj_data))
 		ndata_split <- split(ndata, ndata$time)
 
-		# reorder within each time period
-		ndata_ordered <- do.call(rbind, lapply(ndata_split, function(time_data) {
-			time_data[match(ref_actors, time_data$actor), ]
+		# reorder within each time period using that period's actor set
+		ndata_ordered <- do.call(rbind, lapply(seq_along(adj_data), function(i) {
+			ref_mat <- adj_data[[i]]
+			ref_actors <- rownames(ref_mat)
+			if (is.null(ref_actors)) {
+				ref_actors <- paste0("a", seq_len(nrow(ref_mat)))
+			}
+			time_data <- ndata_split[[as.character(time_labels[i])]]
+			if (is.null(time_data)) {
+				return(ndata[0, , drop = FALSE])
+			}
+			actor_idx <- match(ref_actors, time_data$actor)
+			actor_idx <- actor_idx[!is.na(actor_idx)]
+			time_data[actor_idx, , drop = FALSE]
 		}))
-
-		# reset row names
 		rownames(ndata_ordered) <- NULL
 	} else {
-		# cross-sectional: simple reordering
-		ndata_ordered <- ndata[match(ref_actors, ndata$actor), ]
+		ref_actors <- rownames(adj_data)
+		if (is.null(ref_actors)) {
+			ref_actors <- paste0("a", seq_len(nrow(adj_data)))
+		}
+		actor_idx <- match(ref_actors, ndata$actor)
+		actor_idx <- actor_idx[!is.na(actor_idx)]
+		ndata_ordered <- ndata[actor_idx, , drop = FALSE]
 		rownames(ndata_ordered) <- NULL
 	}
 
@@ -448,18 +506,18 @@ align_nodal_data_order <- function(ndata, adj_data, is_longitudinal) {
 	return(ndata_ordered)
 }
 
-#' Align dyad data matrix order to match adjacency matrix order
+#' align dyad data matrix order to match adjacency matrix order
 #'
-#' Ensures that row and column orders in dyad_data matrices
+#' ensures that row and column orders in dyad_data matrices
 #' match the order of actors in the adjacency matrix.
 #'
-#' @param ddata A nested list structure containing dyadic attribute matrices
-#' @param adj_data An adjacency matrix or list of adjacency matrices
-#' @param is_longitudinal Logical indicating whether the network is longitudinal
+#' @param ddata a nested list structure containing dyadic attribute matrices
+#' @param adj_data an adjacency matrix or list of adjacency matrices
+#' @param is_longitudinal logical indicating whether the network is longitudinal
 #'
-#' @return A reordered nested list with matrix dimensions matching adjacency matrix order
+#' @return a reordered nested list with matrix dimensions matching adjacency matrix order
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -486,7 +544,7 @@ align_dyad_data_order <- function(ddata, adj_data, is_longitudinal) {
 		ddata_ordered <- vector("list", length(ddata))
 		names(ddata_ordered) <- names(ddata)
 
-		# process each time period (should just be "1")
+			# process the cross-sectional dyad data
 		for (t in names(ddata)) {
 			ddata_ordered[[t]] <- align_single_time_dyad_data(
 				ddata[[t]],
@@ -499,24 +557,37 @@ align_dyad_data_order <- function(ddata, adj_data, is_longitudinal) {
 	return(ddata_ordered)
 }
 
-#' Align dyad data for a single time period
+#' align dyad data for a single time period
 #'
 #'
-#' @param time_data List of matrices for a single time period
-#' @param ref_mat Reference adjacency matrix for actor ordering
+#' @param time_data list of matrices for a single time period
+#' @param ref_mat reference adjacency matrix for actor ordering
 #'
-#' @return Aligned list of matrices
+#' @return aligned list of matrices
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
 align_single_time_dyad_data <- function(time_data, ref_mat) {
-	ref_actors <- rownames(ref_mat)
-	n_actors <- nrow(ref_mat)
+	ref_row_actors <- rownames(ref_mat)
+	ref_col_actors <- colnames(ref_mat)
+	n_rows <- nrow(ref_mat)
+	n_cols <- ncol(ref_mat)
 
-	if (is.null(ref_actors)) {
-		ref_actors <- paste0("a", seq_len(n_actors))
+	if (is.null(ref_row_actors)) {
+		ref_row_actors <- if (!is.null(ref_col_actors) && n_rows == n_cols) {
+			ref_col_actors
+		} else {
+			paste0("a", seq_len(n_rows))
+		}
+	}
+	if (is.null(ref_col_actors)) {
+		ref_col_actors <- if (n_rows == n_cols) {
+			ref_row_actors
+		} else {
+			paste0("c", seq_len(n_cols))
+		}
 	}
 
 	aligned_data <- vector("list", length(time_data))
@@ -538,13 +609,13 @@ align_single_time_dyad_data <- function(time_data, ref_mat) {
 			curr_cols <- as.character(seq_len(ncol(mat)))
 		}
 
-		# reorder to match reference actors
-		row_idx <- match(ref_actors, curr_rows)
-		col_idx <- match(ref_actors, curr_cols)
+		# reorder to match reference row and column actors independently
+		row_idx <- match(ref_row_actors, curr_rows)
+		col_idx <- match(ref_col_actors, curr_cols)
 
 		# create reordered matrix
 		mat_ordered <- mat[row_idx, col_idx, drop = FALSE]
-		dimnames(mat_ordered) <- list(ref_actors, ref_actors)
+		dimnames(mat_ordered) <- list(ref_row_actors, ref_col_actors)
 
 		aligned_data[[var]] <- mat_ordered
 	}
@@ -553,27 +624,27 @@ align_single_time_dyad_data <- function(time_data, ref_mat) {
 	return(aligned_data)
 }
 
-#' Convert edge data from igraph/network to new dyad_data format
+#' convert edge data from igraph/network to new dyad_data format
 #'
-#' Convert edge data extracted from igraph or network objects into
-#' standardized dyad_data format used by netify. The output format is a
+#' convert edge data extracted from igraph or network objects into
+#' standardized dyad_data format used by netify. the output format is a
 #' nested list structure: time periods -> variables -> matrices.
 #'
-#' @param edge_data A data frame (cross-sectional) or list of data frames (longitudinal)
+#' @param edge_data a data frame (cross-sectional) or list of data frames (longitudinal)
 #' containing edge attributes with 'from' and 'to' columns
-#' @param adj_data An adjacency matrix (cross-sectional) or list of adjacency matrices
+#' @param adj_data an adjacency matrix (cross-sectional) or list of adjacency matrices
 #' (longitudinal) providing dimensions and actor names
-#' @param is_longitudinal Logical indicating whether the network is longitudinal
-#' @param is_symmetric Logical indicating whether the network is symmetric/undirected
+#' @param is_longitudinal logical indicating whether the network is longitudinal
+#' @param is_symmetric logical indicating whether the network is symmetric/undirected
 #'
-#' @return A list with the following structure:
+#' @return a list with the following structure:
 #' \itemize{
-#'   \item For cross-sectional: list("1" = list(var1 = matrix, var2 = matrix, ...))
-#'   \item For longitudinal: list(time1 = list(var1 = matrix, ...), time2 = list(...), ...)
+#'   \item for cross-sectional: list("1" = list(var1 = matrix, var2 = matrix, ...))
+#'   \item for longitudinal: list(time1 = list(var1 = matrix, ...), time2 = list(...), ...)
 #' }
-#' Returns NULL if edge_data is NULL.
+#' returns NULL if edge_data is NULL.
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -627,16 +698,16 @@ convert_dyad_data_to_new_format <- function(
 	return(dyad_data_new)
 }
 
-#' Process edge data for a single time period
+#' process edge data for a single time period
 #'
 #'
-#' @param edge_df Edge data frame with 'from' and 'to' columns
-#' @param current_mat Adjacency matrix for dimensions and actor names
-#' @param is_symmetric Whether the network is symmetric/undirected
+#' @param edge_df edge data frame with 'from' and 'to' columns
+#' @param current_mat adjacency matrix for dimensions and actor names
+#' @param is_symmetric whether the network is symmetric/undirected
 #'
-#' @return List of matrices for each edge variable
+#' @return list of matrices for each edge variable
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -647,12 +718,25 @@ process_single_time_edge_data <- function(edge_df, current_mat, is_symmetric) {
 	}
 
 	# get dimensions and actor names
-	n_actors <- nrow(current_mat)
-	actor_names <- rownames(current_mat)
+	n_rows <- nrow(current_mat)
+	n_cols <- ncol(current_mat)
+	row_actor_names <- rownames(current_mat)
+	col_actor_names <- colnames(current_mat)
 
 	# if no actor names, create default ones
-	if (is.null(actor_names)) {
-		actor_names <- paste0("a", seq_len(n_actors))
+	if (is.null(row_actor_names)) {
+		row_actor_names <- if (!is.null(col_actor_names) && n_rows == n_cols) {
+			col_actor_names
+		} else {
+			paste0("a", seq_len(n_rows))
+		}
+	}
+	if (is.null(col_actor_names)) {
+		col_actor_names <- if (n_rows == n_cols) {
+			row_actor_names
+		} else {
+			paste0("c", seq_len(n_cols))
+		}
 	}
 
 	# get variable names (excluding from/to columns)
@@ -663,14 +747,19 @@ process_single_time_edge_data <- function(edge_df, current_mat, is_symmetric) {
 		return(list())
 	}
 
-	# create actor lookup for fast indexing
-	actor_lookup <- seq_len(n_actors)
-	names(actor_lookup) <- actor_names
+	# create actor lookups for fast indexing
+	row_actor_lookup <- seq_len(n_rows)
+	names(row_actor_lookup) <- row_actor_names
+	col_actor_lookup <- seq_len(n_cols)
+	names(col_actor_lookup) <- col_actor_names
 
 	# find valid edges
-	from_indices <- actor_lookup[as.character(edge_df$from)]
-	to_indices <- actor_lookup[as.character(edge_df$to)]
+	from_indices <- row_actor_lookup[as.character(edge_df$from)]
+	to_indices <- col_actor_lookup[as.character(edge_df$to)]
 	valid_edges <- which(!is.na(from_indices) & !is.na(to_indices))
+	symmetrize_edges <- isTRUE(is_symmetric) &&
+		n_rows == n_cols &&
+		identical(row_actor_names, col_actor_names)
 
 	# create result list
 	result <- vector("list", length(var_names))
@@ -685,40 +774,44 @@ process_single_time_edge_data <- function(edge_df, current_mat, is_symmetric) {
 		# create matrices for each variable
 		for (var in var_names) {
 			result[[var]] <- create_edge_matrix(
-				edge_df[[var]][valid_edges],
-				valid_from,
-				valid_to,
-				n_actors,
-				actor_names,
-				is_symmetric
-			)
+					edge_df[[var]][valid_edges],
+					valid_from,
+					valid_to,
+					n_rows,
+					n_cols,
+					row_actor_names,
+					col_actor_names,
+					symmetrize_edges
+				)
+			}
+		} else {
+			# no valid edges - create zero matrices
+			for (var in var_names) {
+				mat <- array(0, dim = c(n_rows, n_cols))
+				dimnames(mat) <- list(row_actor_names, col_actor_names)
+				result[[var]] <- mat
+			}
 		}
-	} else {
-		# no valid edges - create zero matrices
-		for (var in var_names) {
-			mat <- array(0, dim = c(n_actors, n_actors))
-			dimnames(mat) <- list(actor_names, actor_names)
-			result[[var]] <- mat
-		}
-	}
 
 	#
 	return(result)
 }
 
-#' Create edge attribute matrix
+#' create edge attribute matrix
 #'
 #'
-#' @param values Edge attribute values
-#' @param from_idx From indices
-#' @param to_idx To indices
-#' @param n_actors Number of actors
-#' @param actor_names Actor names for dimnames
-#' @param is_symmetric Whether to symmetrize the matrix
+#' @param values edge attribute values
+#' @param from_idx from indices
+#' @param to_idx to indices
+#' @param n_rows number of row actors
+#' @param n_cols number of column actors
+#' @param row_actor_names row actor names for dimnames
+#' @param col_actor_names column actor names for dimnames
+#' @param is_symmetric whether to symmetrize the matrix
 #'
-#' @return Matrix of edge attributes
+#' @return matrix of edge attributes
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -726,11 +819,13 @@ create_edge_matrix <- function(
 	values,
 	from_idx,
 	to_idx,
-	n_actors,
-	actor_names,
+	n_rows,
+	n_cols,
+	row_actor_names,
+	col_actor_names,
 	is_symmetric) {
 	# initialize matrix
-	mat <- array(0, dim = c(n_actors, n_actors))
+	mat <- array(0, dim = c(n_rows, n_cols))
 
 	# create index matrix
 	if (is_symmetric) {
@@ -747,35 +842,35 @@ create_edge_matrix <- function(
 	}
 
 	# add dimnames
-	dimnames(mat) <- list(actor_names, actor_names)
+	dimnames(mat) <- list(row_actor_names, col_actor_names)
 
 	#
 	return(mat)
 }
 
-#' Validate nodal data structure for netify objects
+#' validate nodal data structure for netify objects
 #'
-#' Validates that user-provided nodal data meets requirements for netify objects.
-#' Specifically, it checks for proper data frame structure,
+#' validates that user-provided nodal data meets requirements for netify objects.
+#' specifically, it checks for proper data frame structure,
 #' required columns, and consistency with the network's actors.
 #'
-#' @param ndata A data frame containing nodal attributes
-#' @param adj_data An adjacency matrix (cross-sectional) or list of adjacency
+#' @param ndata a data frame containing nodal attributes
+#' @param adj_data an adjacency matrix (cross-sectional) or list of adjacency
 #' matrices (longitudinal) to check actor consistency
-#' @param is_longitudinal Logical indicating whether the network is longitudinal
+#' @param is_longitudinal logical indicating whether the network is longitudinal
 #'
-#' @return NULL (invisibly). Function stops with error if validation fails.
+#' @return NULL (invisibly). function stops with error if validation fails.
 #'
 #' @details
-#' The function performs the following checks:
+#' the function performs the following checks:
 #' \itemize{
 #'   \item ndata must be a data.frame
 #'   \item ndata must contain an 'actor' column
-#'   \item For longitudinal networks, ndata must contain a 'time' column
-#'   \item Warns if actors in the network are missing from nodal_data
+#'   \item for longitudinal networks, ndata must contain a 'time' column
+#'   \item warns if actors in the network are missing from nodal_data
 #' }
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -813,35 +908,35 @@ validate_nodal_data <- function(ndata, adj_data, is_longitudinal) {
 	}
 }
 
-#' Validate dyad data structure for netify objects
+#' validate dyad data structure for netify objects
 #'
-#' Validate that user-provided dyad data meets the
-#' requirements for netify objects. It checks for proper nested list structure,
+#' validate that user-provided dyad data meets the
+#' requirements for netify objects. it checks for proper nested list structure,
 #' matrix dimensions, and consistency with the network's time periods.
 #'
-#' @param ddata A nested list structure containing dyadic attributes
-#' @param adj_data An adjacency matrix (cross-sectional) or list of adjacency
+#' @param ddata a nested list structure containing dyadic attributes
+#' @param adj_data an adjacency matrix (cross-sectional) or list of adjacency
 #' matrices (longitudinal) to check dimensions and time consistency
-#' @param is_longitudinal Logical indicating whether the network is longitudinal
+#' @param is_longitudinal logical indicating whether the network is longitudinal
 #'
-#' @return NULL (invisibly). Function stops with error if validation fails.
+#' @return NULL (invisibly). function stops with error if validation fails.
 #'
 #' @details
-#' The function validates the following structure:
+#' the function validates the following structure:
 #' \itemize{
 #'   \item ddata must be a list
-#'   \item Each time period must be a list of matrices
-#'   \item Each matrix must have dimensions matching the number of actors
-#'   \item Warns if expected time periods are missing from dyad_data
+#'   \item each time period must be a list of matrices
+#'   \item each matrix must have dimensions matching the number of actors
+#'   \item warns if expected time periods are missing from dyad_data
 #' }
 #'
-#' Expected structure:
+#' expected structure:
 #' \itemize{
-#'   \item Cross-sectional: list("1" = list(var1 = matrix, var2 = matrix, ...))
-#'   \item Longitudinal: list(time1 = list(var1 = matrix, ...), time2 = list(...), ...)
+#'   \item cross-sectional: list("1" = list(var1 = matrix, var2 = matrix, ...))
+#'   \item longitudinal: list(time1 = list(var1 = matrix, ...), time2 = list(...), ...)
 #' }
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -871,38 +966,41 @@ validate_dyad_data <- function(ddata, adj_data, is_longitudinal) {
 		t <- ddata_times[t_idx]
 		time_data <- ddata[[t]]
 
-		# get expected number of actors for this time period
-		if (t %in% expected_times) {
-			if (is_longitudinal) {
-				t_idx_adj <- which(expected_times == t)
-				n_actors <- nrow(adj_data[[t_idx_adj]])
+			# get expected number of actors for this time period
+			if (t %in% expected_times) {
+				if (is_longitudinal) {
+					t_idx_adj <- which(expected_times == t)
+					n_rows <- nrow(adj_data[[t_idx_adj]])
+					n_cols <- ncol(adj_data[[t_idx_adj]])
+				} else {
+					n_rows <- nrow(adj_data)
+					n_cols <- ncol(adj_data)
+				}
 			} else {
-				n_actors <- nrow(adj_data)
+				next # skip validation for unexpected time periods
 			}
-		} else {
-			next # skip validation for unexpected time periods
+
+			# validate time period structure
+			validate_single_time_dyad_data(time_data, t, n_rows, n_cols)
 		}
-
-		# validate time period structure
-		validate_single_time_dyad_data(time_data, t, n_actors)
 	}
-}
 
-#' Validate dyad data for a single time period
+#' validate dyad data for a single time period
 #'
-#' Validate the structure and dimensions of dyad data for a single time period.
+#' validate the structure and dimensions of dyad data for a single time period.
 #'
-#' @param time_data List of matrices for a single time period
-#' @param t Time period label
-#' @param n_actors Expected number of actors
+#' @param time_data list of matrices for a single time period
+#' @param t time period label
+#' @param n_rows expected number of row actors
+#' @param n_cols expected number of column actors
 #'
-#' @return NULL (invisibly). Stops with error if validation fails.
+#' @return NULL (invisibly). stops with error if validation fails.
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
-validate_single_time_dyad_data <- function(time_data, t, n_actors) {
+validate_single_time_dyad_data <- function(time_data, t, n_rows, n_cols) {
 	if (!is.list(time_data)) {
 		cli::cli_abort(
 			"Each time period in {.arg dyad_data} must be a list of matrices."
@@ -920,9 +1018,9 @@ validate_single_time_dyad_data <- function(time_data, t, n_actors) {
 		}
 
 		mat_dims <- dim(mat)
-		if (mat_dims[1] != n_actors || mat_dims[2] != n_actors) {
+		if (mat_dims[1] != n_rows || mat_dims[2] != n_cols) {
 			cli::cli_abort(
-				"dyad_data[['{t}']][['{var}']] has incorrect dimensions. Expected {n_actors}x{n_actors}, got {mat_dims[1]}x{mat_dims[2]}."
+				"dyad_data[['{t}']][['{var}']] has incorrect dimensions. Expected {n_rows}x{n_cols}, got {mat_dims[1]}x{mat_dims[2]}."
 			)
 		}
 	}

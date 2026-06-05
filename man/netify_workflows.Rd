@@ -2,14 +2,14 @@
 % Please edit documentation in R/netify_workflows.R
 \name{netify_workflows}
 \alias{netify_workflows}
-\title{Common netify workflows — index of patterns}
+\title{Common netify workflows -- index of patterns}
 \description{
-This is a documentation-only topic ("\code{?netify_workflows}") that
+this is a documentation-only topic ("\code{?netify_workflows}") that
 indexes the standard pipelines netify users actually run, with
-the function calls in order. New users opening \code{?netify} see the
+the function calls in order. new users opening \code{?netify} see the
 constructor; opening this topic sees the recipes.
 }
-\section{From a friendship edgelist}{
+\section{from a friendship edgelist}{
 
 \preformatted{
 library(netify)
@@ -18,7 +18,7 @@ symmetric = TRUE, nodal_data = people)
 summary(net)
 plot(net, node_color_by = "gender")
 }
-A ready-to-run worked example ships with the package:
+a ready-to-run worked example ships with the package:
 \preformatted{
 data(classroom_edges); data(classroom_nodes)
 net <- netify(classroom_edges, actor1 = "from", actor2 = "to",
@@ -28,26 +28,26 @@ plot(net, node_color_by = "gender", node_size_by = "gpa")
 }
 }
 
-\section{From a bipartite (two-mode) edgelist}{
+\section{from a bipartite (two-mode) edgelist}{
 
-A bipartite edgelist links \emph{two different kinds of things}
+a bipartite edgelist links \emph{two different kinds of things}
 (e.g. companies and jurisdictions, movies and actors, students and
-classes). Build with \code{mode = "bipartite"} and pass row-mode /
+classes). build with \code{mode = "bipartite"} and pass row-mode /
 col-mode covariates separately.
 \preformatted{
 net <- netify(filings, actor1 = "company", actor2 = "jurisdiction",
 mode = "bipartite", weight = "n_filings")
 net <- add_node_vars(net, company_meta,
-actor = "company", mode = "row",
+actor = "company",
 node_vars = c("industry", "hq"))
 net <- add_node_vars(net, jurisdiction_meta,
-actor = "jurisdiction", mode = "col",
+actor = "jurisdiction",
 node_vars = "tax_haven")
 plot(net, style = "heatmap")
 }
 }
 
-\section{From a longitudinal dyadic event dataset (ICEWS-style)}{
+\section{from a longitudinal dyadic event dataset (icews-style)}{
 
 \preformatted{
 net <- netify(icews, actor1 = "i", actor2 = "j", time = "year",
@@ -55,27 +55,26 @@ symmetric = FALSE, weight = "verbCoop")
 net <- add_node_vars(net, country_panel,
 actor = "actor", time = "year",
 node_vars = c("polity", "gdp_log"))
-summary(net, tidy = TRUE) |> ggplot(aes(time, value)) +
-geom_line() + facet_wrap(~ metric)
+s <- summary(net)
+plot(s)
 }
 }
 
-\section{Multilayer (one call per layer)}{
+\section{multilayer (one call per layer)}{
 
 \preformatted{
-# build as a single multilayer netify by splitting on `channel`
-ml <- netify(slack_long, actor1 = "from", actor2 = "to",
-time = "month", weight = "n_messages",
-layer = "channel")
-# or build per-layer + combine with layer_netify()
+# build one netify per layer, then combine with layer_netify()
+channels <- sort(unique(slack_long$channel))
 nets <- lapply(channels, function(ch) {
-netify(slack_long[slack_long$channel == ch, ], ...)
+  netify(slack_long[slack_long$channel == ch, ],
+         actor1 = "from", actor2 = "to",
+         time = "month", weight = "n_messages")
 })
 ml <- layer_netify(setNames(nets, channels))
 }
 }
 
-\section{To ERGM (\code{statnet})}{
+\section{to ergm (\code{statnet})}{
 
 \preformatted{
 ntwk <- to_statnet(net)
@@ -85,68 +84,69 @@ summary(fit)
 }
 }
 
-\section{To longitudinal ERGM (\verb{tergm 4.x})}{
+\section{to longitudinal ergm (\verb{tergm 4.x})}{
 
 \preformatted{
 nl <- to_statnet(longit_net) # network.list
 library(tergm)
-fit <- tergm(nl ~ Form(~ edges + nodematch("gender")) +
-Persist(~ edges + mutual),
-estimate = "CMLE", times = seq_along(nl))
+fit <- tergm(nl ~ form(~ edges + nodematch("gender")) +
+persist(~ edges + mutual),
+estimate = "cmle", times = seq_along(nl))
 }
 }
 
-\section{To AME (Gibbs / MCMC posterior)}{
+\section{to ame (gibbs / mcmc posterior)}{
 
 \preformatted{
 lm_in <- to_lame(net) # auto-picks family from binary/weighted
 library(lame)
 # copy-paste the printed `lm_in$ame_call`:
-fit <- lame::ame(Y = lm_in$Y, Xdyad = lm_in$Xdyad,
-Xrow = lm_in$Xrow, Xcol = lm_in$Xcol,
+fit <- lame::ame(y = lm_in$y, xdyad = lm_in$xdyad,
+xrow = lm_in$xrow, xcol = lm_in$xcol,
 family = "binary", nscan = 1000, burn = 500)
 }
 }
 
-\section{To AME (binary bipartite + ALS + bootstrap uncertainty)}{
+\section{to ame (binary bipartite + als + bootstrap uncertainty)}{
 
 \preformatted{
-# fast point estimate + parametric bootstrap CIs in one call
+# fast point estimate + parametric bootstrap cis in one call
 lm_in <- to_lame(net_bp, fit_method = "als", bootstrap = 200)
 library(lame)
-fit <- lame::ame_als(Y = lm_in$Y, mode = "bipartite",
-family = "binary", bootstrap = 200L)
-confint(fit) # bootstrap CIs
-from_lame_fit(fit, value = "prob") |> plot(style = "heatmap")
+fit <- lame::ame_als(y = lm_in$y, mode = "bipartite",
+family = "binary", bootstrap = 200l)
+confint(fit) # bootstrap cis
+pred <- from_lame_fit(fit, value = "prob")
+plot(pred, style = "heatmap")
 }
 }
 
-\section{Null-model hypothesis test}{
+\section{NULL-model hypothesis test}{
 
 \preformatted{
-# is observed transitivity surprising vs Erdős-Rényi at this density?
+# is observed transitivity surprising vs erdos-renyi at this density?
 compare_to_null(net,
 fn = function(n) c(transitivity = summary(n)$transitivity),
 n_sim = 200, model = "erdos_renyi", seed = 1)
 }
 }
 
-\section{Bootstrap any custom statistic}{
+\section{bootstrap any custom statistic}{
 
 \preformatted{
 my_stat <- function(net) {
-sa <- summary_actor(net, stats = "betweenness")
+sa <- summary_actor(net, stats = "all")
 c(max_betw = max(sa$betweenness, na.rm = TRUE))
 }
 bootstrap_netlet(net, fn = my_stat, n_boot = 200, seed = 1)
 }
 }
 
-\section{Very large N (~10K+ actors)}{
+\section{very large n (~10k+ actors)}{
 
-netify stores adjacencies densely, so an N x N matrix consumes
-8 * N^2 bytes (1.7 GB at N = 15K, 20 GB at N = 50K) per snapshot.
-The recipes below avoid the dense bottleneck where possible.
+netify stores adjacencies densely, so an n x n matrix consumes
+8 * n^2 bytes (1.7 gb at n = 15k, 20 gb at n = 50k) per snapshot.
+the recipes below avoid the dense bottleneck where possible.
 \preformatted{
 # 1. build directly from an edgelist data.frame -- skip any
 #    pre-built sparse / dense matrix intermediate.
@@ -154,13 +154,13 @@ net <- netify(edges, actor1 = "from", actor2 = "to",
               weight = "n", symmetric = FALSE)
 
 # 2. use the fast actor-summary path -- skips closeness /
-#    betweenness / eigen / HITS, which dominate wall-clock at
-#    large N. netify auto-promotes at N >= netify.fast_threshold
+#    betweenness / eigen / hits, which dominate wall-clock at
+#    large n. netify auto-promotes at n >= netify.fast_threshold
 #    (default 1500); tune via options(netify.fast_threshold = ...).
 sa <- summary_actor(net)            # auto-promotes
 
 # 3. for community detection / shortest paths / clustering, hand
-#    off to igraph. its C backend handles 50K+ nodes comfortably.
+#    off to igraph. its c backend handles 50k+ nodes comfortably.
 ig <- to_igraph(net)
 cl <- igraph::cluster_louvain(ig)
 
@@ -168,16 +168,16 @@ cl <- igraph::cluster_louvain(ig)
 #    spectral methods, irlba, glmnet), exit via to_igraph() and
 #    grab the sparse adjacency from there.
 ig <- to_igraph(net)
-M  <- igraph::as_adjacency_matrix(ig, sparse = TRUE)  # requires Matrix
+m  <- igraph::as_adjacency_matrix(ig, sparse = TRUE)  # requires matrix
 
 # 5. if you must accept a pre-built sparse matrix, density < 1%
-#    with N > 5,000 aborts to protect against accidental
+#    with n > 5,000 aborts to protect against accidental
 #    gigabyte allocations -- pass force_dense = TRUE to override.
 net <- netify(m_sparse, force_dense = TRUE)
 }
 }
 
-\section{Round-trip to / from other formats}{
+\section{round-trip to / from other formats}{
 
 \preformatted{
 # to igraph and back
@@ -189,11 +189,11 @@ edges <- unnetify(net, remove_zeros = TRUE)
 tb <- tibble::as_tibble(net) # same thing, tibble class
 
 # to base matrix
-M <- as.matrix(net) # strips netify class
+m <- as.matrix(net) # strips netify class
 }
 }
 
-\section{Stacking}{
+\section{stacking}{
 
 \preformatted{
 # combine two cross-sec into a 2-period longit
@@ -210,6 +210,6 @@ handoff to modeling packages; \code{\link[=bootstrap_netlet]{bootstrap_netlet()}
 \code{\link[=bind_netifies]{bind_netifies()}} for combining.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }
 \keyword{documentation}

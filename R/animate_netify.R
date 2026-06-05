@@ -1,24 +1,24 @@
 #' Animate a longitudinal netify object with gganimate
 #'
-#' Returns a ggplot built from the per-period `plot.netify()` output,
+#' returns a ggplot built from the per-period `plot.netify()` output,
 #' with `gganimate::transition_manual()` keyed on the time variable
-#' so the animation steps through each period. Requires the
+#' so the animation steps through each period. requires the
 #' `gganimate` package.
 #'
-#' For static facet plots, just call `plot(net)` on a longit netlet
-#' — that defaults to faceting by time. Use `animate_netify()` for
+#' for static facet plots, just call `plot(net)` on a longit netlet
+#' -- that defaults to faceting by time. use `animate_netify()` for
 #' single-panel transitions instead of grid faceting (better for
 #' presentations / videos where the eye can focus on one period at a
 #' time).
 #'
-#' @param netlet A longitudinal netify object (`longit_array` /
+#' @param netlet a longitudinal netify object (`longit_array` /
 #' `longit_list`).
-#' @param ... Additional arguments passed to `plot.netify()`
+#' @param ... additional arguments passed to `plot.netify()`
 #' (`node_color_by`, `node_size_by`, `style`, etc.).
-#' @param static_actor_positions Logical. If `TRUE` (default for
+#' @param static_actor_positions logical. if `TRUE` (default for
 #' animation since positions jumping around between periods is
 #' visually confusing), pin node positions across time.
-#' @return A `gganim` object. Render with `gganimate::animate(.)` or
+#' @return a `gganim` object. render with `gganimate::animate(.)` or
 #' `gganimate::anim_save("file.gif", .)`.
 #'
 #' @examples
@@ -28,7 +28,7 @@
 #' anim_save("trade_anim.gif", anim, fps = 4)
 #' }
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export animate_netify
 animate_netify <- function(netlet, ..., static_actor_positions = TRUE) {

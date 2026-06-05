@@ -1,38 +1,38 @@
 #' Visualize homophily analysis results
 #'
-#' Creates visualizations for homophily analysis results from \code{homophily()}.
-#' The function can create different types of plots including similarity distributions,
+#' creates visualizations for homophily analysis results from \code{homophily()}.
+#' the function can create different types of plots including similarity distributions,
 #' comparison plots across multiple attributes, and temporal evolution plots.
 #'
-#' @param homophily_results Data frame output from \code{homophily()} or a list
+#' @param homophily_results data frame output from \code{homophily()} or a list
 #'   of such data frames for comparison plots.
-#' @param netlet Optional. The netify object used in the analysis. Required for
+#' @param netlet optional. the netify object used in the analysis. required for
 #'   distribution plots to extract actual similarity data.
-#' @param type Character string specifying the plot type:
+#' @param type character string specifying the plot type:
 #'   \describe{
-#'     \item{"distribution"}{Shows similarity score distributions for connected vs
+#'     \item{"distribution"}{shows similarity score distributions for connected vs
 #'       unconnected pairs (requires netlet)}
-#'     \item{"comparison"}{Compares homophily across multiple attributes}
-#'     \item{"temporal"}{Shows homophily evolution over time (for longitudinal data)}
+#'     \item{"comparison"}{compares homophily across multiple attributes}
+#'     \item{"temporal"}{shows homophily evolution over time (for longitudinal data)}
 #'   }
-#' @param attribute Character string. For distribution plots, specifies which attribute
-#'   to visualize. Should match the attribute used in \code{homophily()}.
-#' @param method Character string. For distribution plots, the similarity method used.
-#'   Should match the method used in \code{homophily()}.
-#' @param sample_size Integer. For distribution plots with large networks, the number
-#'   of dyad pairs to sample for visualization. Default is NULL (use all pairs).
-#' @param colors Character vector of two colors for connected/unconnected or
-#'   significant/non-significant pairs. Default uses package theme colors.
-#' @param ... Additional arguments passed to ggplot2 functions.
+#' @param attribute character string. for distribution plots, specifies which attribute
+#'   to visualize. should match the attribute used in \code{homophily()}.
+#' @param method character string. for distribution plots, the similarity method used.
+#'   should match the method used in \code{homophily()}.
+#' @param sample_size integer. for distribution plots with large networks, the number
+#'   of dyad pairs to sample for visualization. default is NULL (use all pairs).
+#' @param colors character vector of two colors for connected/unconnected or
+#'   significant/non-significant pairs. default uses package theme colors.
+#' @param ... additional arguments passed to ggplot2 functions.
 #'
-#' @return A ggplot2 object that can be further customized.
+#' @return a ggplot2 object that can be further customized.
 #'
 #' @examples
 #' \dontrun{
-#' # Load example data
+#' # load example data
 #' data(icews)
 #'
-#' # Create a network with nodal attributes
+#' # create a network with nodal attributes
 #' ntwk <- netify(
 #'     icews,
 #'     actor1 = "i", actor2 = "j",
@@ -42,14 +42,14 @@
 #'     nodal_vars = "i_polity2"
 #' )
 #'
-#' # Run homophily analysis
+#' # run homophily analysis
 #' homophily_result <- homophily(
 #'     ntwk,
 #'     attribute = "i_polity2",
 #'     method = "correlation"
 #' )
 #'
-#' # Create distribution plot
+#' # create distribution plot
 #' plot_homophily(
 #'     homophily_result,
 #'     netlet = ntwk,
@@ -58,7 +58,7 @@
 #' )
 #' }
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @import ggplot2
 #' @importFrom rlang .data
@@ -106,20 +106,20 @@ plot_homophily <- function(
 	)
 }
 
-#' Create distribution plot for homophily analysis
+#' create distribution plot for homophily analysis
 #'
-#' Internal function to create distribution plots showing similarity scores
+#' internal function to create distribution plots showing similarity scores
 #' for connected vs unconnected pairs
 #'
-#' @param homophily_results Data frame from homophily
+#' @param homophily_results data frame from homophily
 #' @param netlet netify object
-#' @param attribute Character string of attribute name
-#' @param method Character string of similarity method
-#' @param sample_size Integer for sampling
-#' @param colors Character vector of colors
-#' @param ... Additional arguments
+#' @param attribute character string of attribute name
+#' @param method character string of similarity method
+#' @param sample_size integer for sampling
+#' @param colors character vector of colors
+#' @param ... additional arguments
 #'
-#' @return A ggplot2 object
+#' @return a ggplot2 object
 #'
 #' @keywords internal
 #' @importFrom rlang .data
@@ -288,16 +288,16 @@ plot_homophily_distribution <- function(
 	return(p)
 }
 
-#' Create comparison plot for homophily analysis
+#' create comparison plot for homophily analysis
 #'
-#' Internal function to create comparison plots showing homophily
+#' internal function to create comparison plots showing homophily
 #' across multiple attributes
 #'
-#' @param homophily_results Data frame or list of data frames
-#' @param colors Character vector of colors
-#' @param ... Additional arguments
+#' @param homophily_results data frame or list of data frames
+#' @param colors character vector of colors
+#' @param ... additional arguments
 #'
-#' @return A ggplot2 object
+#' @return a ggplot2 object
 #'
 #' @keywords internal
 #' @importFrom rlang .data
@@ -362,7 +362,7 @@ plot_homophily_comparison <- function(homophily_results, colors, ...) {
 		)
 	}
 
-	# add a col to indicate stat sig - always recalculate to ensure accuracy
+	# add significance labels
 	# first check if there's already a 'significant' column and remove it to avoid conflicts
 	if ("significant" %in% names(comparison_data)) {
 		comparison_data$significant <- NULL
@@ -374,7 +374,7 @@ plot_homophily_comparison <- function(homophily_results, colors, ...) {
 	} else if ("p.value" %in% names(comparison_data)) {
 		comparison_data$significant <- comparison_data$p.value < 0.05
 	} else {
-		# if no p-value column found, default to FALSE
+		# default to not significant without p-values
 		cli::cli_alert_warning("No p-value column found in homophily results. Setting all to non-significant.")
 		comparison_data$significant <- FALSE
 	}
@@ -445,16 +445,16 @@ plot_homophily_comparison <- function(homophily_results, colors, ...) {
 	return(p)
 }
 
-#' Create temporal plot for homophily analysis
+#' create temporal plot for homophily analysis
 #'
-#' Internal function to create temporal plots showing homophily
+#' internal function to create temporal plots showing homophily
 #' evolution over time
 #'
-#' @param homophily_results Data frame with multiple time periods
-#' @param colors Character vector of colors
-#' @param ... Additional arguments
+#' @param homophily_results data frame with multiple time periods
+#' @param colors character vector of colors
+#' @param ... additional arguments
 #'
-#' @return A ggplot2 object
+#' @return a ggplot2 object
 #'
 #' @keywords internal
 #' @importFrom rlang .data
@@ -510,7 +510,7 @@ plot_homophily_temporal <- function(homophily_results, colors, ...) {
 		# add titles and axis labels
 		labs(
 			title = "Temporal Evolution of Homophily Patterns",
-			subtitle = "How attribute-based connection preferences change over time",
+				subtitle = "How attribute-based connection patterns change over time",
 			x = "Time Period",
 			y = "Homophily Correlation",
 			color = "Attribute",
@@ -536,16 +536,16 @@ plot_homophily_temporal <- function(homophily_results, colors, ...) {
 	return(p)
 }
 
-#' Extract similarity data from netify object
+#' extract similarity data from netify object
 #'
-#' Internal function to extract similarity scores and connection status
+#' internal function to extract similarity scores and connection status
 #' from a netify object for visualization
 #'
-#' @param netlet A netify object
-#' @param attribute Character string of attribute name
-#' @param method Character string of similarity method
+#' @param netlet a netify object
+#' @param attribute character string of attribute name
+#' @param method character string of similarity method
 #'
-#' @return Data frame with similarity and connected columns
+#' @return data frame with similarity and connected columns
 #'
 #' @keywords internal
 #' @noRd
@@ -588,7 +588,7 @@ extract_similarity_data <- function(netlet, attribute, method) {
 		cli::cli_alert_info("Distribution plots for multilayer networks will use the first layer: {layers[1]}")
 		# extract first layer as matrix
 		net_matrix <- netlet[, , 1]
-		# ensure row/column names are preserved
+		# keep row and column names
 		if (is.null(rownames(net_matrix))) {
 			rownames(net_matrix) <- dimnames(netlet)[[1]]
 			colnames(net_matrix) <- dimnames(netlet)[[2]]
@@ -631,7 +631,7 @@ extract_similarity_data <- function(netlet, attribute, method) {
 	rownames(similarity_matrix) <- rownames(net_matrix)
 	colnames(similarity_matrix) <- colnames(net_matrix)
 
-	# turn the network into a binary matrix — non-zero counts as tie so
+	# turn the network into a binary matrix -- non-zero counts as tie so
 	# signed networks survive
 	binary_net <- (net_matrix != 0) & !is.na(net_matrix)
 
@@ -732,13 +732,13 @@ extract_similarity_data <- function(netlet, attribute, method) {
 	complete_idx <- which(complete.cases(similarity_data))
 	similarity_data <- similarity_data[complete_idx, ]
 
-	# final check: ensure we have some data to return
+	# require data to return
 	if (nrow(similarity_data) == 0) {
 		cli::cli_alert_danger("No valid similarity data remaining after filtering.")
 		return(NULL)
 	}
 
-	# ensure factor levels are properly set
+	# keep factor levels in plot order
 	similarity_data$connected <- droplevels(similarity_data$connected)
 
 	# one more check

@@ -28,7 +28,6 @@ test_that(
 			mode = "bipartite"
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), asym_weight_matrix)
 	}
 )
@@ -68,7 +67,6 @@ test_that(
 			mode = "bipartite"
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), asym_weight_matrix)
 	}
 )
@@ -104,7 +102,6 @@ test_that(
 			mode = "bipartite"
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), asym_non_weight_matrix)
 	}
 )
@@ -150,7 +147,32 @@ test_that(
 			mode = "bipartite"
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), asym_non_weight_matrix)
 	}
 )
+
+test_that("bipartite longit_array defaults to asymmetric matrix filling", {
+	df = data.frame(
+		i = c("r1", "r2", "r1"),
+		j = c("c1", "c1", "c2"),
+		t = c(1, 1, 1),
+		w = c(1, 7, 5),
+		stringsAsFactors = FALSE
+	)
+
+	net = netify(
+		df,
+		actor1 = "i", actor2 = "j", time = "t",
+		weight = "w", mode = "bipartite",
+		output_format = "longit_array"
+	)
+	expected = matrix(
+		c(1, 7, 5, 0),
+		nrow = 2,
+		dimnames = list(c("r1", "r2"), c("c1", "c2"))
+	)
+
+	expect_equal(get_raw(net)[, , "1"], expected)
+	expect_false(is_symmetric_netify(net))
+	expect_true(is_directed_netify(net))
+})

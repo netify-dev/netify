@@ -2,111 +2,111 @@
 #'
 #' `gg_params` organizes and formats aesthetic parameters for network visualization
 #' components (nodes, text labels, and edges) into a structure suitable for ggplot2.
-#' The function separates static (fixed) parameters from dynamic (data-mapped)
+#' the function separates static (fixed) parameters from dynamic (data-mapped)
 #' parameters, enabling flexible network visualization.
 #'
-#' @param plot_args A list containing visualization specifications. Can include both
+#' @param plot_args a list containing visualization specifications. can include both
 #'   static parameters (fixed values) and variable parameters (mapped to data columns)
-#'   for different network components. See Details for the full list of supported
+#'   for different network components. see details for the full list of supported
 #'   parameters.
 #'
-#' @return A list with five components, each containing static and variable aesthetic mappings:
+#' @return a list with five components, each containing static and variable aesthetic mappings:
 #'   \itemize{
-#'     \item \strong{point}: Node visualization parameters
+#'     \item \strong{point}: node visualization parameters
 #'       \itemize{
-#'         \item \code{static}: Named list of fixed aesthetic values
-#'         \item \code{var}: Named list of aesthetic mappings (as formulas)
+#'         \item \code{static}: named list of fixed aesthetic values
+#'         \item \code{var}: named list of aesthetic mappings (as formulas)
 #'       }
-#'     \item \strong{text}: Text label parameters
+#'     \item \strong{text}: text label parameters
 #'       \itemize{
-#'         \item \code{static}: Named list of fixed aesthetic values
-#'         \item \code{var}: Named list of aesthetic mappings (as formulas)
+#'         \item \code{static}: named list of fixed aesthetic values
+#'         \item \code{var}: named list of aesthetic mappings (as formulas)
 #'       }
-#'     \item \strong{label}: Box label parameters
+#'     \item \strong{label}: box label parameters
 #'       \itemize{
-#'         \item \code{static}: Named list of fixed aesthetic values
-#'         \item \code{var}: Named list of aesthetic mappings (as formulas)
+#'         \item \code{static}: named list of fixed aesthetic values
+#'         \item \code{var}: named list of aesthetic mappings (as formulas)
 #'       }
-#'     \item \strong{edge}: Straight edge parameters
+#'     \item \strong{edge}: straight edge parameters
 #'       \itemize{
-#'         \item \code{static}: Named list of fixed aesthetic values
-#'         \item \code{var}: Named list of aesthetic mappings (as formulas)
+#'         \item \code{static}: named list of fixed aesthetic values
+#'         \item \code{var}: named list of aesthetic mappings (as formulas)
 #'       }
-#'     \item \strong{curve}: Curved edge parameters
+#'     \item \strong{curve}: curved edge parameters
 #'       \itemize{
-#'         \item \code{static}: Named list of fixed aesthetic values including curvature
-#'         \item \code{var}: Named list of aesthetic mappings (as formulas)
+#'         \item \code{static}: named list of fixed aesthetic values including curvature
+#'         \item \code{var}: named list of aesthetic mappings (as formulas)
 #'       }
 #'   }
 #'
 #' @details
-#' The function processes aesthetic parameters for network visualization by:
+#' the function processes aesthetic parameters for network visualization by:
 #'
-#' \strong{Parameter organization:}
+#' \strong{parameter organization:}
 #'
-#' For each visual component (nodes, text, labels, edges), the function:
+#' for each visual component (nodes, text, labels, edges), the function:
 #' \enumerate{
-#'   \item Collects all relevant static parameters from plot_args
-#'   \item Checks for corresponding variable parameters (ending in "_var")
-#'   \item When a variable parameter exists, removes the static parameter to allow
+#'   \item collects all relevant static parameters from plot_args
+#'   \item checks for corresponding variable parameters (ending in "_var")
+#'   \item when a variable parameter exists, removes the static parameter to allow
 #'     dynamic mapping
-#'   \item Creates formula objects for variable mappings compatible with ggplot2's aes()
+#'   \item creates formula objects for variable mappings compatible with ggplot2's aes()
 #' }
 #'
-#' \strong{Supported parameters:}
+#' \strong{supported parameters:}
 #'
-#' \emph{Node (point) parameters:}
+#' \emph{node (point) parameters:}
 #' \itemize{
-#'   \item Static: \code{point_alpha}, \code{point_color}, \code{point_fill},
+#'   \item static: \code{point_alpha}, \code{point_color}, \code{point_fill},
 #'     \code{point_shape}, \code{point_size}, \code{point_stroke}
-#'   \item Variable: \code{point_alpha_var}, \code{point_color_var}, \code{point_fill_var},
+#'   \item variable: \code{point_alpha_var}, \code{point_color_var}, \code{point_fill_var},
 #'     \code{point_shape_var}, \code{point_size_var}, \code{point_stroke_var}
 #' }
 #'
-#' \emph{Text parameters:}
+#' \emph{text parameters:}
 #' \itemize{
-#'   \item Static: \code{text_alpha}, \code{text_color}, \code{text_size},
+#'   \item static: \code{text_alpha}, \code{text_color}, \code{text_size},
 #'     \code{text_family}, \code{text_fontface}, \code{text_angle}, \code{check_overlap}
-#'   \item Variable: \code{text_alpha_var}, \code{text_color_var}, \code{text_size_var}
+#'   \item variable: \code{text_alpha_var}, \code{text_color_var}, \code{text_size_var}
 #' }
 #'
-#' \emph{Label parameters:}
+#' \emph{label parameters:}
 #' \itemize{
-#'   \item Static: \code{label_alpha}, \code{label_color}, \code{label_fill},
+#'   \item static: \code{label_alpha}, \code{label_color}, \code{label_fill},
 #'     \code{label_size}, \code{label_family}, \code{label_fontface}, \code{label_angle},
 #'     \code{label_hjust}, \code{label_vjust}, \code{label_lineheight}, \code{check_overlap}
-#'   \item Variable: \code{label_alpha_var}, \code{label_color_var}, \code{label_fill_var},
+#'   \item variable: \code{label_alpha_var}, \code{label_color_var}, \code{label_fill_var},
 #'     \code{label_size_var}
 #' }
 #'
-#' \emph{Edge parameters:}
+#' \emph{edge parameters:}
 #' \itemize{
-#'   \item Static: \code{edge_color}, \code{edge_linewidth}, \code{edge_linetype},
+#'   \item static: \code{edge_color}, \code{edge_linewidth}, \code{edge_linetype},
 #'     \code{edge_alpha}, \code{edge_arrow}, \code{edge_arrow_fill}, \code{edge_lineend},
 #'     \code{edge_linejoin}
-#'   \item Variable: \code{edge_alpha_var}, \code{edge_color_var}, \code{edge_linetype_var},
+#'   \item variable: \code{edge_alpha_var}, \code{edge_color_var}, \code{edge_linetype_var},
 #'     \code{edge_linewidth_var}
-#'   \item Curve-specific: \code{edge_curvature}, \code{edge_angle}, \code{edge_ncp}
+#'   \item curve-specific: \code{edge_curvature}, \code{edge_angle}, \code{edge_ncp}
 #' }
 #'
-#' \strong{Static vs. variable parameters:}
+#' \strong{static vs. variable parameters:}
 #'
-#' Static parameters apply a fixed aesthetic value to all elements. Variable parameters
+#' static parameters apply a fixed aesthetic value to all elements. variable parameters
 #' map aesthetics to data columns, allowing visual properties to vary based on data
-#' values. When both are specified for the same aesthetic, the variable parameter
+#' values. when both are specified for the same aesthetic, the variable parameter
 #' takes precedence.
 #'
 #' @note
-#' This function is primarily intended for internal use by netify plotting functions.
+#' this function is primarily intended for internal use by netify plotting functions.
 #'
-#' Variable parameters must reference column names that exist in the data frames
+#' variable parameters must reference column names that exist in the data frames
 #' used for plotting (typically the output from `decompose_netify()`).
 #'
-#' The returned formula objects use the tilde notation (e.g., \code{~column_name})
+#' the returned formula objects use the tilde notation (e.g., \code{~column_name})
 #' required by ggplot2's aes() function.
 #'
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -127,7 +127,7 @@ gg_params <- function(plot_args) {
 	# prepare a list to conditionally build the aes()
 	point_aes_list <- list(x = rlang::sym("x"), y = rlang::sym("y"))
 
-	# add conditional aesthetics based on non-NULL entries
+	# add conditional aesthetics based on non-null entries
 	if (!is.null(plot_args$point_alpha_var)) {
 		point_aes_list$alpha <- rlang::sym(plot_args$point_alpha_var)
 		if ("alpha" %in% names(point_static_params)) {
@@ -177,7 +177,7 @@ gg_params <- function(plot_args) {
 		family = plot_args$text_family,
 		fontface = plot_args$text_fontface,
 		angle = plot_args$text_angle,
-		# select_text intentionally leaves non-focal rows as NA in
+		# select_text intentionally leaves non-focal rows as na in
 		# name_text; drop them silently so ggplot does not warn
 		na.rm = TRUE
 	)
@@ -188,7 +188,7 @@ gg_params <- function(plot_args) {
 		label = rlang::sym("name_text")
 	)
 
-	# add conditional aesthetics based on non-NULL entries
+	# add conditional aesthetics based on non-null entries
 	if (!is.null(plot_args$text_alpha_var)) {
 		text_aes_list$alpha <- rlang::sym(plot_args$text_alpha_var)
 		if ("alpha" %in% names(text_static_params)) {
@@ -223,7 +223,7 @@ gg_params <- function(plot_args) {
 		hjust = plot_args$label_hjust,
 		vjust = plot_args$label_vjust,
 		lineheight = plot_args$label_lineheight,
-		# select_label intentionally leaves non-focal rows as NA in
+		# select_label intentionally leaves non-focal rows as na in
 		# name_label; drop them silently so ggplot does not warn
 		na.rm = TRUE
 	)
@@ -234,7 +234,7 @@ gg_params <- function(plot_args) {
 		label = rlang::sym("name_label")
 	)
 
-	# add conditional aesthetics based on non-NULL entries
+	# add conditional aesthetics based on non-null entries
 	if (!is.null(plot_args$label_alpha_var)) {
 		label_aes_list$alpha <- rlang::sym(plot_args$label_alpha_var)
 		if ("alpha" %in% names(label_static_params)) {
@@ -300,7 +300,7 @@ gg_params <- function(plot_args) {
 		segment.ncp = plot_args$text_repel_segment_ncp,
 		segment.square = plot_args$text_repel_segment_square,
 		segment.inflect = plot_args$text_repel_segment_inflect,
-		# select_text intentionally leaves non-focal rows as NA in
+		# select_text intentionally leaves non-focal rows as na in
 		# name_text; drop them silently so ggplot does not warn
 		na.rm = TRUE
 	)
@@ -369,7 +369,7 @@ gg_params <- function(plot_args) {
 		label.padding = plot_args$label_repel_label_padding,
 		label.r = plot_args$label_repel_label_r,
 		label.size = plot_args$label_repel_label_size,
-		# select_label intentionally leaves non-focal rows as NA in
+		# select_label intentionally leaves non-focal rows as na in
 		# name_label; drop them silently so ggplot does not warn
 		na.rm = TRUE
 	)
@@ -427,7 +427,7 @@ gg_params <- function(plot_args) {
 		xend = rlang::sym("x2"), yend = rlang::sym("y2")
 	)
 
-	# add conditional aesthetics based on non-NULL entries
+	# add conditional aesthetics based on non-null entries
 	if (!is.null(plot_args$edge_alpha_var)) {
 		edge_aes_list$alpha <- rlang::sym(plot_args$edge_alpha_var)
 		if ("alpha" %in% names(edge_static_params)) {

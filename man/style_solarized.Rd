@@ -2,17 +2,17 @@
 % Please edit documentation in R/plot_styles.R
 \name{style_solarized}
 \alias{style_solarized}
-\title{Solarized-inspired network style}
+\title{solarized-inspired network style}
 \usage{
 style_solarized()
 }
 \value{
-List of plot arguments
+list of plot arguments
 }
 \description{
-A network style based on the popular Solarized color scheme,
+a network style based on the popular solarized color scheme,
 optimized for reduced eye strain
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

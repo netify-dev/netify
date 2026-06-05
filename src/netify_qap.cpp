@@ -1,27 +1,39 @@
 // =====================================================================
-//  netify_qap.cpp   –   self‑contained C++ back‑end for compare_networks
-//      • calculate_wasserstein_cpp   (Wasserstein distance)
-//      • calculate_jaccard_cpp
-//      • calculate_hamming_cpp
-//      • calculate_edge_changes_cpp
-//      • calculate_spectral_distance_cpp
-//      • double_center_cpp
-//      • qap_correlation_cpp         (classic label permutation)
-//      • qap_degree_cpp              (degree‑preserving, binary only)
-//      • qap_freeman_lane_cpp        (Freeman–Lane MRQAP)
-//      • qap_dsp_cpp                 (Double‑Semi‑Partial MRQAP)
+//  netify_qap.cpp - self-contained C++ back-end for compare_networks
+//      - calculate_wasserstein_cpp   (Wasserstein distance)
+//      - calculate_jaccard_cpp
+//      - calculate_hamming_cpp
+//      - calculate_edge_changes_cpp
+//      - calculate_spectral_distance_cpp
+//      - double_center_cpp
+//      - qap_correlation_cpp         (classic label permutation)
+//      - qap_degree_cpp              (degree-preserving, binary only)
 // =====================================================================
 
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include <algorithm>
+#include <limits>
 #include <numeric>
-#include <random>
 #include <unordered_set>
 
 using namespace Rcpp;
 
 // [[Rcpp::depends(RcppEigen)]]
+
+inline int r_unif_index(int n) {
+    if (n <= 0) stop("sample size must be positive");
+
+    int idx = static_cast<int>(R::unif_rand() * n);
+    return idx >= n ? n - 1 : idx;
+}
+
+inline void r_shuffle_int(std::vector<int>& x) {
+    for (int i = static_cast<int>(x.size()) - 1; i > 0; --i) {
+        int j = r_unif_index(i + 1);
+        std::swap(x[i], x[j]);
+    }
+}
 
 // ------------------------------------------------------------------
 //   wasserstein distance calculation
@@ -103,6 +115,8 @@ inline double fast_cor(
     ){
 
     const size_t n = x.size();
+    if (n == 0 || y.size() != n) return NA_REAL;
+
     double sx=0, sy=0, sxx=0, syy=0, sxy=0;
     
     // calculate sums and sum of squares in one go
@@ -126,27 +140,6 @@ inline double fast_cor(
     
     // return correlation coefficient
     return cov / std::sqrt(vx*vy);
-}
-
-// calculate ols residuals of y regressed on x (simple bivariate)
-// modifies y in-place to contain residuals
-inline void ols_residuals(
-    std::vector<double>& y,
-    const std::vector<double>& x
-    ){
-    double sxx=0, sxy=0;
-    
-    // calculate sum of squares and cross-product
-    for (size_t i=0;i<y.size();++i){ 
-        sxx += x[i]*x[i]; 
-        sxy += x[i]*y[i]; 
-    }
-    
-    // calculate beta coefficient (slope)
-    double beta = (sxx==0) ? 0 : sxy/sxx;
-    
-    // subtract y hats from y to get resids
-    for (size_t i=0;i<y.size();++i) y[i] -= beta*x[i];
 }
 
 // ------------------------------------------------------------------
@@ -180,10 +173,12 @@ double calculate_jaccard_cpp(
     
     // iterate through all matrix positions
     for (int i=0;i<n;++i) for (int j=0;j<m;++j) {
-        // check if edge exists in mat1 (not na and above threshold)
-        const bool e1 = !NumericMatrix::is_na(mat1(i,j)) && mat1(i,j)>threshold1;
-        // check if edge exists in mat2 (not na and above threshold)
-        const bool e2 = !NumericMatrix::is_na(mat2(i,j)) && mat2(i,j)>threshold2;
+        if (NumericMatrix::is_na(mat1(i,j)) || NumericMatrix::is_na(mat2(i,j)))
+            continue;
+
+        // check if edge exists in mat1 and mat2
+        const bool e1 = mat1(i,j)>threshold1;
+        const bool e2 = mat2(i,j)>threshold2;
         
         // count union (edge in either matrix)
         if (e1 || e2) ++uni;
@@ -230,15 +225,15 @@ double calculate_hamming_cpp(
         const bool na1 = NumericMatrix::is_na(mat1(i,j));
         const bool na2 = NumericMatrix::is_na(mat2(i,j));
         
-        // skip if both are na
-        if (na1 && na2) continue;
+        // skip if either side is missing; unknown dyads are not treated as zeros
+        if (na1 || na2) continue;
         
         // count total valid comparisons
         ++tot;
         
         // check edge existence based on thresholds
-        const bool e1 = !na1 && mat1(i,j)>threshold1;
-        const bool e2 = !na2 && mat2(i,j)>threshold2;
+        const bool e1 = mat1(i,j)>threshold1;
+        const bool e2 = mat2(i,j)>threshold2;
         
         // count differences
         if (e1 != e2) ++diff;
@@ -280,9 +275,12 @@ List calculate_edge_changes_cpp(
 
     // iterate through all matrix positions
     for (int i=0;i<n;++i) for (int j=0;j<m;++j) {
+        if (NumericMatrix::is_na(mat1(i,j)) || NumericMatrix::is_na(mat2(i,j)))
+            continue;
+
         // check edge existence in both matrices
-        const bool e1 = !NumericMatrix::is_na(mat1(i,j)) && mat1(i,j)>threshold1;
-        const bool e2 = !NumericMatrix::is_na(mat2(i,j)) && mat2(i,j)>threshold2;
+        const bool e1 = mat1(i,j)>threshold1;
+        const bool e2 = mat2(i,j)>threshold2;
 
         if (e1 && e2) {
             // edge exists in both - maintained
@@ -335,6 +333,8 @@ double calculate_spectral_distance_cpp(
     // ensure square matrices of equal size
     if (n!=mat1.ncol() || n!=mat2.nrow() || n!=mat2.ncol())
         stop("Square matrices of equal size required");
+    if (n == 0)
+        stop("Non-empty square matrices required");
 
     // map r matrices to eigen matrices
     Eigen::Map<Eigen::MatrixXd> A(mat1.begin(), n, n);
@@ -344,23 +344,25 @@ double calculate_spectral_distance_cpp(
     Eigen::MatrixXd L1 = Eigen::MatrixXd::Zero(n,n);
     Eigen::MatrixXd L2 = Eigen::MatrixXd::Zero(n,n);
 
-    // construct laplacian matrices
-    // laplacian = degree matrix - adjacency matrix
+    // construct Laplacian matrices. Directed inputs are symmetrized by
+    // averaging reciprocal cells so SelfAdjointEigenSolver receives a
+    // symmetric matrix, matching the R helper and documentation.
     for (int i=0;i<n;++i) {
         double deg1=0, deg2=0;
 
         // calculate degree and set off-diagonal elements
         for (int j=0;j<n;++j) {
-            // for mat1 — use ISNA to properly detect R NA values
-            if (!ISNA(A(i,j)) && !ISNAN(A(i,j))) {
-                deg1 += std::abs(A(i,j));  // sum absolute values for degree
-                L1(i,j) = -A(i,j);          // negative adjacency for off-diagonal
-            }
-            // for mat2
-            if (!ISNA(B(i,j)) && !ISNAN(B(i,j))) {
-                deg2 += std::abs(B(i,j));  // sum absolute values for degree
-                L2(i,j) = -B(i,j);          // negative adjacency for off-diagonal
-            }
+            const double a_ij = (ISNA(A(i,j)) || ISNAN(A(i,j))) ? 0.0 : A(i,j);
+            const double a_ji = (ISNA(A(j,i)) || ISNAN(A(j,i))) ? 0.0 : A(j,i);
+            const double b_ij = (ISNA(B(i,j)) || ISNAN(B(i,j))) ? 0.0 : B(i,j);
+            const double b_ji = (ISNA(B(j,i)) || ISNAN(B(j,i))) ? 0.0 : B(j,i);
+            const double a_sym = 0.5 * (a_ij + a_ji);
+            const double b_sym = 0.5 * (b_ij + b_ji);
+
+            deg1 += std::abs(a_sym);
+            deg2 += std::abs(b_sym);
+            L1(i,j) = -a_sym;
+            L2(i,j) = -b_sym;
         }
         // set diagonal to degree
         L1(i,i)=deg1; 
@@ -402,33 +404,39 @@ NumericMatrix double_center_cpp(
     const NumericMatrix& A
     ){
 
-    const int n = A.nrow();
-    NumericVector rMeans(n), cMeans(n);
+    const int nr = A.nrow();
+    const int nc = A.ncol();
+    NumericVector rMeans(nr), cMeans(nc);
+    std::vector<int> rCounts(nr, 0), cCounts(nc, 0);
     double grand=0; 
     int cnt=0;
 
     // calculate row means, column means, and grand mean
-    for (int i=0;i<n;++i) for (int j=0;j<n;++j)
+    for (int i=0;i<nr;++i) for (int j=0;j<nc;++j)
         if (!NumericMatrix::is_na(A(i,j))) {
             rMeans[i]+=A(i,j);  // sum for row i
             cMeans[j]+=A(i,j);  // sum for column j
             grand+=A(i,j);      // sum for grand mean
+            ++rCounts[i];
+            ++cCounts[j];
             ++cnt;              // count non-na elements
         }
     
+    if (cnt == 0) return NumericMatrix(clone(A));
+
     // convert sums to means
     grand/=cnt;
-    for (int i=0;i<n;++i){ 
-        rMeans[i]/=n; 
-        cMeans[i]/=n; 
-    }
+    for (int i=0;i<nr;++i)
+        if (rCounts[i] > 0) rMeans[i]/=rCounts[i];
+    for (int j=0;j<nc;++j)
+        if (cCounts[j] > 0) cMeans[j]/=cCounts[j];
 
     // create output matrix as copy of input
     NumericMatrix out(clone(A));
     
     // apply double centering formula
     // centered_ij = a_ij - row_mean_i - col_mean_j + grand_mean
-    for (int i=0;i<n;++i) for (int j=0;j<n;++j)
+    for (int i=0;i<nr;++i) for (int j=0;j<nc;++j)
         if (!NumericMatrix::is_na(A(i,j)))
             out(i,j)=A(i,j)-rMeans[i]-cMeans[j]+grand;
 
@@ -463,46 +471,70 @@ List qap_correlation_cpp(
     // ensure square matrices of equal size
     if (n!=mat1.ncol() || n!=mat2.nrow() || n!=mat2.ncol())
         stop("Square matrices of equal size required");
+    if (n_permutations <= 0)
+        stop("n_permutations must be positive");
+    (void) seed;
 
-    // extract valid (non-na) pairs from both matrices
+    // extract fixed non-missing positions in mat2; each permutation then
+    // applies pairwise-complete handling against the permuted mat1 mask.
     std::vector<int> ii, jj;        // row and column indices
     std::vector<double> v1, v2;     // values from mat1 and mat2
     
     for (int i=0;i<n;++i) for (int j=0;j<n;++j)
-        if (!NumericMatrix::is_na(mat1(i,j)) && !NumericMatrix::is_na(mat2(i,j))){
+        if (!NumericMatrix::is_na(mat2(i,j))){
             ii.push_back(i); 
             jj.push_back(j);
-            v1.push_back(mat1(i,j)); 
-            v2.push_back(mat2(i,j));
+            if (!NumericMatrix::is_na(mat1(i,j))){
+                v1.push_back(mat1(i,j));
+                v2.push_back(mat2(i,j));
+            }
         }
     
     // calculate observed correlation
     const double obs_cor = fast_cor(v1,v2);
+    if (NumericVector::is_na(obs_cor)) {
+        return List::create(_["correlation"]=NA_REAL,
+                            _["p_value"]=NA_REAL);
+    }
 
-    // setup random number generator
-    std::mt19937 rng( (seed>=0)? seed : std::random_device{}() );
-    
     // create permutation vector [0,1,2,...,n-1]
     std::vector<int> perm(n); 
     std::iota(perm.begin(),perm.end(),0);
     
-    int ge=0;  // count permutations with |cor| >= |observed|
+    int ge=0;     // count valid permutations with |cor| >= |observed|
+    int valid=0;  // count permutations with a defined correlation
+    std::vector<double> perm_v1, perm_v2;
+    perm_v1.reserve(ii.size());
+    perm_v2.reserve(ii.size());
 
     // permutation test loop
     for (int r=0;r<n_permutations;++r) {
         // randomly shuffle node labels
-        std::shuffle(perm.begin(), perm.end(), rng);
+        r_shuffle_int(perm);
         
-        // extract values from mat1 using permuted indices
-        for (size_t k=0;k<v1.size();++k)
-            v1[k] = mat1( perm[ii[k]], perm[jj[k]] );
+        perm_v1.clear();
+        perm_v2.clear();
+        for (size_t k=0;k<ii.size();++k) {
+            double perm_val = mat1(perm[ii[k]], perm[jj[k]]);
+            if (!NumericMatrix::is_na(perm_val)) {
+                perm_v1.push_back(perm_val);
+                perm_v2.push_back(mat2(ii[k], jj[k]));
+            }
+        }
         
         // check if absolute correlation is as extreme as observed
-        if (std::abs(fast_cor(v1,v2)) >= std::abs(obs_cor)) ++ge;
+        double perm_cor = fast_cor(perm_v1,perm_v2);
+        if (!NumericVector::is_na(perm_cor)) {
+            ++valid;
+            if (std::abs(perm_cor) >= std::abs(obs_cor)) ++ge;
+        }
     }
 
+    const double p_value = valid == 0 ? NA_REAL : double(ge + 1)/(valid + 1);
+
     return List::create(_["correlation"]=obs_cor,
-                        _["p_value"]=double(ge)/n_permutations);
+                        _["p_value"]=p_value,
+                        _["n_valid_permutations"]=valid);
 }
 
 // ------------------------------------------------------------------
@@ -514,22 +546,21 @@ List qap_correlation_cpp(
 inline void one_edge_swap(
     std::vector<std::pair<int,int>>& edges,
     std::vector<char>& bit,
-    std::mt19937& rng,
+    const std::vector<char>& allowed,
     int n
     ){
 
-    std::uniform_int_distribution<> U(0, edges.size()-1);
     int tries=0;
 
-    // scale max attempts with density — dense networks need more tries
+    // scale max attempts with density; dense networks need more tries
     // for sparse networks 100 is plenty, for dense networks we may need more
     const int max_tries = 100;
 
     // try up to max_tries times to find valid swap
     while (tries<max_tries) {
         // randomly select two edges
-        auto& e1 = edges[ U(rng) ];
-        auto& e2 = edges[ U(rng) ];
+        auto& e1 = edges[ r_unif_index(static_cast<int>(edges.size())) ];
+        auto& e2 = edges[ r_unif_index(static_cast<int>(edges.size())) ];
         
         // skip if same edge selected twice
         if (e1==e2){ ++tries; continue; }
@@ -544,8 +575,8 @@ inline void one_edge_swap(
         long long ad = 1LL*a*n + d;
         long long cb = 1LL*c*n + b;
         
-        // skip if new edges already exist
-        if (bit[ad] || bit[cb]){ ++tries; continue; }
+        // skip if new edges already exist or would move into an unknown dyad
+        if (!allowed[ad] || !allowed[cb] || bit[ad] || bit[cb]){ ++tries; continue; }
 
         // perform the swap
         bit[1LL*a*n + b]=0;  // remove (a,b)
@@ -556,6 +587,72 @@ inline void one_edge_swap(
         // update edge list
         e1.second=d; 
         e2.second=b;
+        return;
+    }
+}
+
+inline long long edge_key(int a, int b, int n) {
+    return 1LL * a * n + b;
+}
+
+inline void set_undirected_edge(std::vector<char>& bit, int a, int b, int n, char value) {
+    bit[edge_key(a, b, n)] = value;
+    bit[edge_key(b, a, n)] = value;
+}
+
+// perform one undirected edge swap while preserving degrees
+inline void one_undirected_edge_swap(
+    std::vector<std::pair<int,int>>& edges,
+    std::vector<char>& bit,
+    const std::vector<char>& allowed,
+    int n
+    ){
+
+    const int max_tries = 100;
+    int tries=0;
+
+    while (tries<max_tries) {
+        auto& e1 = edges[ r_unif_index(static_cast<int>(edges.size())) ];
+        auto& e2 = edges[ r_unif_index(static_cast<int>(edges.size())) ];
+
+        if (e1==e2){ ++tries; continue; }
+
+        int a=e1.first, b=e1.second, c=e2.first, d=e2.second;
+        if (a==c || a==d || b==c || b==d){ ++tries; continue; }
+
+        bool first_pattern = R::unif_rand() < 0.5;
+        int u1 = first_pattern ? a : a;
+        int v1 = first_pattern ? c : d;
+        int u2 = first_pattern ? b : b;
+        int v2 = first_pattern ? d : c;
+
+        if (u1==v1 || u2==v2){ ++tries; continue; }
+        long long key1 = edge_key(u1, v1, n);
+        long long key1_rev = edge_key(v1, u1, n);
+        long long key2 = edge_key(u2, v2, n);
+        long long key2_rev = edge_key(v2, u2, n);
+
+        if (!allowed[key1] || !allowed[key1_rev] ||
+            !allowed[key2] || !allowed[key2_rev] ||
+            bit[key1] || bit[key2]){
+            ++tries; continue;
+        }
+
+        set_undirected_edge(bit, a, b, n, 0);
+        set_undirected_edge(bit, c, d, n, 0);
+        set_undirected_edge(bit, u1, v1, n, 1);
+        set_undirected_edge(bit, u2, v2, n, 1);
+
+        if (u1 < v1) {
+            e1.first = u1; e1.second = v1;
+        } else {
+            e1.first = v1; e1.second = u1;
+        }
+        if (u2 < v2) {
+            e2.first = u2; e2.second = v2;
+        } else {
+            e2.first = v2; e2.second = u2;
+        }
         return;
     }
 }
@@ -586,6 +683,11 @@ List qap_degree_cpp(
     // ensure square matrices of equal size
     if (n!=mat1.ncol() || n!=mat2.nrow() || n!=mat2.ncol())
         stop("Square matrices of equal size required");
+    if (n_permutations <= 0)
+        stop("n_permutations must be positive");
+    if (swaps_factor <= 0)
+        stop("swaps_factor must be positive");
+    (void) seed;
 
     // verify mat1 is binary
     for (int i=0;i<n;++i) for (int j=0;j<n;++j)
@@ -593,20 +695,46 @@ List qap_degree_cpp(
             !(mat1(i,j)==0.0 || mat1(i,j)==1.0))
             stop("degree_preserving QAP expects binary mat1.");
 
+    bool symmetric_mat1 = true;
+    for (int i=0;i<n;++i) for (int j=i+1;j<n;++j) {
+        const bool na_ij = NumericMatrix::is_na(mat1(i,j));
+        const bool na_ji = NumericMatrix::is_na(mat1(j,i));
+        if (na_ij != na_ji) {
+            symmetric_mat1 = false;
+        } else if (!na_ij && mat1(i,j) != mat1(j,i)) {
+            symmetric_mat1 = false;
+        }
+    }
+
     // build edge list and bitset representation
     std::vector<std::pair<int,int>> edges;
     edges.reserve(n*n/4);
     std::vector<char> bit(n*n, 0);  // flat array for fast access
-    
+    std::vector<char> allowed(n*n, 0);
+
     for (int i=0;i<n;++i) for (int j=0;j<n;++j)
-        if (!NumericMatrix::is_na(mat1(i,j)) && mat1(i,j)==1.0){
-            edges.emplace_back(i,j);
-            bit[1LL*i*n+j]=1;
+        if (i != j && !NumericMatrix::is_na(mat1(i,j)))
+            allowed[1LL*i*n+j]=1;
+
+    if (symmetric_mat1) {
+        for (int i=0;i<n;++i) for (int j=i+1;j<n;++j)
+            if (!NumericMatrix::is_na(mat1(i,j)) && mat1(i,j)==1.0){
+                edges.emplace_back(i,j);
+                set_undirected_edge(bit, i, j, n, 1);
+            }
+    } else {
+        for (int i=0;i<n;++i) for (int j=0;j<n;++j)
+            if (!NumericMatrix::is_na(mat1(i,j)) && mat1(i,j)==1.0){
+                edges.emplace_back(i,j);
+                bit[1LL*i*n+j]=1;
         }
+    }
     
     if (edges.empty()) stop("mat1 has no ones.");
 
     // determine number of swaps per permutation
+    if (edges.size() > static_cast<size_t>(std::numeric_limits<int>::max() / swaps_factor))
+        stop("swaps_factor is too large for the number of edges.");
     const int SWAPS = swaps_factor * edges.size();
 
     // find valid comparison positions
@@ -626,129 +754,38 @@ List qap_degree_cpp(
         v1[k] = bit[ 1LL*ii[k]*n + jj[k] ];
     
     const double obs_cor = fast_cor(v1,v2);
+    if (NumericVector::is_na(obs_cor)) {
+        return List::create(_["correlation"]=NA_REAL,
+                            _["p_value"]=NA_REAL);
+    }
 
-    // setup random number generator
-    std::mt19937 rng( (seed>=0)? seed : std::random_device{}() );
     int ge=0;
+    int valid=0;
 
     // permutation test loop
     for (int r=0;r<n_permutations;++r) {
         // perform many edge swaps to randomize while preserving degrees
-        for(int s=0;s<SWAPS;++s)
-            one_edge_swap(edges, bit, rng, n);
+        for(int s=0;s<SWAPS;++s) {
+            if (symmetric_mat1) {
+                one_undirected_edge_swap(edges, bit, allowed, n);
+            } else {
+                one_edge_swap(edges, bit, allowed, n);
+            }
+        }
 
         // extract permuted values
         for (size_t k=0;k<ii.size();++k)
             v1[k] = bit[ 1LL*ii[k]*n + jj[k] ];
         
         // check if correlation is as extreme
-        if (std::abs(fast_cor(v1,v2)) >= std::abs(obs_cor)) ++ge;
+        double perm_cor = fast_cor(v1,v2);
+        if (!NumericVector::is_na(perm_cor)) {
+            ++valid;
+            if (std::abs(perm_cor) >= std::abs(obs_cor)) ++ge;
+        }
     }
 
     return List::create(_["correlation"]=obs_cor,
-                        _["p_value"]=double(ge)/n_permutations);
-}
-
-// ------------------------------------------------------------------
-//   8. freeman-lane mrqap
-// ------------------------------------------------------------------
-
-//' Freeman-Lane MRQAP test
-//'
-//' @param mat1 Dependent matrix
-//' @param mat2 Independent matrix
-//' @param n_permutations Number of permutations
-//' @param seed Random seed (-1 for random)
-//' @return List with correlation and p-value
-//' @author Shahryar Minhas
-//'
-//' @keywords internal
-//' @noRd
-// [[Rcpp::export]]
-List qap_freeman_lane_cpp(
-    const NumericMatrix& mat1,
-    const NumericMatrix& mat2,
-    int n_permutations,
-    int seed = -1
-    ){
-
-    const int n = mat1.nrow();
-    std::vector<double> y,x;
-    NumericMatrix Yres(n,n);  // residual matrix
-
-    // extract valid pairs
-    for (int i=0;i<n;++i) for (int j=0;j<n;++j)
-        if (!NumericMatrix::is_na(mat1(i,j)) && !NumericMatrix::is_na(mat2(i,j))){
-            y.push_back(mat1(i,j)); 
-            x.push_back(mat2(i,j));
-        }
-    
-    // calculate residuals of y regressed on x
-    ols_residuals(y,x);
-
-    // fill residual matrix
-    size_t k=0;
-    // iterate through matrix and fill with residuals or na
-    for (int i=0;i<n;++i) for (int j=0;j<n;++j)
-        Yres(i,j) = (!NumericMatrix::is_na(mat1(i,j)) && !NumericMatrix::is_na(mat2(i,j)))
-                        ? y[k++] : NA_REAL;
-
-    // perform qap on residuals vs original x
-    return qap_correlation_cpp(Yres, mat2, n_permutations, seed);
-}
-
-// ------------------------------------------------------------------
-//   9. double semi-partial mrqap
-// ------------------------------------------------------------------
-
-//' Double Semi-Partial MRQAP test
-//'
-//' @param mat1 First matrix
-//' @param mat2 Second matrix
-//' @param n_permutations Number of permutations
-//' @param seed Random seed (-1 for random)
-//' @return List with correlation and p-value
-//' @author Shahryar Minhas
-//'
-//' @keywords internal
-//' @noRd
-// [[Rcpp::export]]
-List qap_dsp_cpp(
-    const NumericMatrix& mat1,
-    const NumericMatrix& mat2,
-    int n_permutations,
-    int seed = -1
-    ){
-
-    const int n = mat1.nrow();
-    std::vector<double> y,x;
-
-    // extract valid pairs
-    for (int i=0;i<n;++i) for (int j=0;j<n;++j)
-        if (!NumericMatrix::is_na(mat1(i,j)) && !NumericMatrix::is_na(mat2(i,j))){
-            y.push_back(mat1(i,j)); 
-            x.push_back(mat2(i,j));
-        }
-    
-    // double semi-partialing process
-    ols_residuals(y,x);       // remove x effect from y
-    ols_residuals(x,y);       // remove y (now residual) effect from x
-
-    // create residual matrices
-    NumericMatrix Yres(n,n), Xres(n,n);
-    size_t k=0;
-    
-    // fill both residual matrices
-    for (int i=0;i<n;++i) for (int j=0;j<n;++j)
-        if (!NumericMatrix::is_na(mat1(i,j)) && !NumericMatrix::is_na(mat2(i,j))){
-            Yres(i,j)=y[k]; 
-            Xres(i,j)=x[k]; 
-            ++k;
-        } else { 
-            Yres(i,j)=NA_REAL; 
-            Xres(i,j)=NA_REAL; 
-        }
-
-    // perform qap on both residual matrices
-    return qap_correlation_cpp(Yres, Xres, n_permutations, seed);
+                        _["p_value"]=valid == 0 ? NA_REAL : double(ge + 1)/(valid + 1),
+                        _["n_valid_permutations"]=valid);
 }

@@ -1,5 +1,6 @@
 ---
 title: "Ego Networks"
+description: "Build and compare ego-centered networks around focal actors."
 author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -13,26 +14,16 @@ vignette: >
 knitr::opts_chunk$set(
     collapse = TRUE,
     comment = "#>",
-    warning = FALSE,
     message = FALSE,
     fig.width = 7,
     fig.height = 5
 )
 
-# This vignette requires dplyr.
-# Exit gracefully with an actionable message if it is missing.
-if (!requireNamespace("dplyr", quietly = TRUE)) {
-    message(
-        "This vignette requires: dplyr\n",
-        "Install with: install.packages('dplyr')"
-    )
-    knitr::knit_exit()
-}
 ```
 
 This vignette shows how `netify` handles ego networks—the network surrounding a specific actor and their immediate connections.
 
-## What Are Ego Networks?
+## what are ego networks?
 
 An **ego network** focuses on one actor (the "ego") and includes:
 
@@ -42,7 +33,7 @@ An **ego network** focuses on one actor (the "ego") and includes:
 
 Think of it as zooming in on one node and asking: "Who are their connections, and how are those connections related to each other?"
 
-## Examples
+## examples
 
 Pakistan's diplomatic neighborhood includes not just major powers (US, China) but regional rivals (India) and neighbors (Afghanistan). The connections *between* these alters matter—does Pakistan broker between disconnected partners or navigate a densely connected region?
 
@@ -50,13 +41,13 @@ A senator's ego network reveals their coalition partners, but also whether those
 
 An activist organization's ego network shows both allies and the broader movement structure—are they bridging disconnected groups or embedded in a tight cluster?
 
-## Why Ego Networks Matter
+## why ego networks matter
 
 Ego networks let you apply network thinking without needing complete network data. You can study:
 
 - How actors manage competing relationships
 - Whether similar actors cluster together (homophily)
-- How an actor's position affects their influence
+- How an actor's position changes across relationships
 - Whether an actor brokers between otherwise disconnected groups
 
 ```{r}
@@ -65,7 +56,7 @@ library(dplyr)
 library(ggplot2)
 ```
 
-## Getting Started: Extract an Ego Network
+## getting started: extract an ego network
 
 We'll use data from the Integrated Crisis Early Warning System (ICEWS) to demonstrate:
 
@@ -83,7 +74,7 @@ netlet <- netify(
 )
 ```
 
-### Extract Your First Ego Network
+### extract your first ego network
 
 The `ego_netify()` function makes extraction straightforward:
 
@@ -93,19 +84,20 @@ pakistan_ego_net <- ego_netify(
     ego = "Pakistan"
     )
 
-pakistan_ego_net
+print(pakistan_ego_net)
+head(summary(pakistan_ego_net)[, c("net", "num_actors", "density", "num_edges")])
 ```
 
-## Key Features
+## key features
 
-### 1. Network Statistics
+### 1. network statistics
 
 ```{r}
 ngbd_summ <- summary(pakistan_ego_net)
 head(ngbd_summ)
 ```
 
-Pakistan's network shows remarkably high density (0.78-0.89)—most countries that interact with Pakistan also interact with each other. The network size fluctuates between 28-49 actors across years, but that high density persists. This isn't a hub-and-spoke pattern where Pakistan connects otherwise isolated actors; it's a dense web where multilateral dynamics likely matter.
+Pakistan's network shows high density (0.79-0.97)—most countries that interact with Pakistan also interact with each other. The network size fluctuates between 24-49 actors across years, but that high density persists. This isn't a hub-and-spoke pattern where Pakistan connects otherwise isolated actors; it's a dense web where multilateral dynamics likely matter.
 
 ```{r}
 plot_graph_stats(ngbd_summ) +
@@ -117,9 +109,9 @@ plot_graph_stats(ngbd_summ) +
     )
 ```
 
-Notice the consistently high transitivity (~0.85-0.94). Pakistan's partners tend to cooperate with each other, creating a tightly clustered neighborhood rather than structural holes Pakistan could exploit.
+Notice the consistently high transitivity (~0.84-0.97). Pakistan's partners tend to cooperate with each other, creating a tightly clustered neighborhood rather than structural holes Pakistan could exploit.
 
-### 2. Actor-Level Analysis
+### 2. actor-level analysis
 
 ```{r}
 ngbd_actor_summ <- summary_actor(pakistan_ego_net)
@@ -141,9 +133,9 @@ plot_actor_stats(ngbd_actor_summ,
     )
 ```
 
-The diverging trajectories are striking. China's rising centrality measures across the board reflect its growing influence in Pakistan's neighborhood, while the US shows more variable engagement despite maintaining presence.
+The diverging trajectories are striking. China's rising centrality measures show growing connectedness in Pakistan's neighborhood, while the US shows more variable engagement despite maintaining presence.
 
-### 3. Visualization
+### 3. visualization
 
 By default, `plot()` highlights the ego:
 
@@ -151,7 +143,7 @@ By default, `plot()` highlights the ego:
 plot(pakistan_ego_net)
 ```
 
-### 4. Advanced Visualization
+### 4. advanced visualization
 
 For clearer visualization of alter-alter relationships, remove the ego's edges—we already know everyone connects to Pakistan:
 
@@ -191,9 +183,9 @@ plot(pakistan_no_ego_edges,
 
 The visualization reveals how Pakistan's partners form a dense web of relationships among themselves, with major powers like the US and China occupying central positions.
 
-## Comparing Ego Networks
+## comparing ego networks
 
-### 5. Compare Across Actors
+### 5. compare across actors
 
 One strength of ego network analysis is systematic comparison:
 
@@ -223,7 +215,7 @@ ggplot(comparison_df,
 
 Pakistan and India maintain the highest density—their partners are highly interconnected. The US shows lower density, suggesting more of a hub-and-spoke pattern. Russia's volatile pattern may reflect shifting alliances during this period.
 
-### 6. Test for Homophily
+### 6. test for homophily
 
 Do birds of a feather flock together? Let's test if similar regime types cluster:
 
@@ -239,9 +231,9 @@ plot_homophily(pakistan_homophily, type = "temporal") +
          subtitle = "Testing regime type homophily over time")
 ```
 
-The results show weak and fluctuating homophily—regime type doesn't consistently predict cooperation patterns in Pakistan's neighborhood. Geopolitics seems to override ideological alignment.
+The results show weak and fluctuating homophily: regime type is not consistently associated with cooperation patterns in Pakistan's neighborhood. Geopolitics appears more central than ideological alignment in this example.
 
-### 7. Control Neighborhood Boundaries
+### 7. control neighborhood boundaries
 
 Sometimes you want to focus on only the strongest relationships:
 
@@ -262,7 +254,7 @@ tibble(
   knitr::kable()
 ```
 
-### 8. Different Relationship Types
+### 8. different relationship types
 
 Networks of cooperation and conflict often follow different logics:
 
@@ -274,7 +266,7 @@ conflict_net <- netify(
     weight = "verbConf"
 )
 
-# cooperation vs conflict ego networks for Pakistan
+# cooperation vs conflict ego networks for pakistan
 pak_coop_ego <- ego_netify(netlet, ego = "Pakistan")
 pak_conf_ego <- ego_netify(conflict_net, ego = "Pakistan")
 
@@ -296,9 +288,9 @@ comparison <- tibble(
 knitr::kable(comparison)
 ```
 
-Pakistan's conflict network is smaller but still substantial. The lower density in conflict (0.62 vs 0.88) suggests conflicts are more bilateral while cooperation tends to be multilateral.
+Pakistan's conflict network is smaller but still substantial. The lower average density in conflict (about 0.65 vs 0.90) suggests conflicts are more bilateral while cooperation tends to be multilateral.
 
-### 9. Track Network Evolution
+### 9. track network evolution
 
 How stable are relationships over time?
 
@@ -322,9 +314,9 @@ tibble(
   knitr::kable()
 ```
 
-A stability ratio of 0.614 indicates moderate turnover—about 40% of relationships don't persist year-to-year.
+A stability ratio of 0.416 indicates moderate turnover -- about 58% of relationships don't persist year-to-year.
 
-### 10. Compare Network Structures: Rising vs Established Powers
+### 10. compare network structures: rising vs established powers
 
 How do the US and China structure their diplomatic neighborhoods differently?
 
@@ -414,35 +406,35 @@ The very high correlation (0.991) but moderate Jaccard similarity (0.645) tells 
 Finally, who's in these networks?
 
 ```{r}
-# Compare node composition
+# compare node composition
 node_comp <- compare_networks(
     list("US" = us_ego, "China" = china_ego),
     what = "nodes"
 )
 
-# The 75% overlap reflects shared major partners
-# but the US's 24 unique partners vs China's 8 shows its broader global reach
+# the 75% overlap reflects shared major partners
+# but the us's 24 unique partners vs china's 8 shows its broader global reach
 knitr::kable(node_comp$summary)
 ```
 
 ## tl;dr
 
 ```r
-# Extract ego network
+# extract ego network
 ego_net <- ego_netify(netlet, ego = "Actor Name")
 
-# Basic analysis
-summary(ego_net)                    # Network-level stats
-summary_actor(ego_net)              # Actor-level stats
-plot(ego_net)                       # Visualize
-plot(remove_ego_edges(ego_net))     # Focus on alter-alter ties
+# basic analysis
+summary(ego_net)                    # network-level stats
+summary_actor(ego_net)              # actor-level stats
+plot(ego_net)                       # visualize
+plot(remove_ego_edges(ego_net))     # focus on alter-alter ties
 
-# Advanced analysis
-homophily(ego_net, attribute = "democracy")     # Test homophily
-compare_networks(ego_net, what = "edges")       # Temporal comparison
-compare_networks(list(ego1, ego2), what = "edges")  # Cross-sectional comparison
+# advanced analysis
+homophily(ego_net, attribute = "democracy")     # test homophily
+compare_networks(ego_net, what = "edges")       # temporal comparison
+compare_networks(list(ego1, ego2), what = "edges")  # cross-sectional comparison
 ```
 
-## References
+## references
 
 Boschee, E., Lautenschlager, J., O'Brien, S., Shellman, S., Starz, J., & Ward, M. (2015). ICEWS Coded Event Data. Harvard Dataverse. DOI 10.7910/DVN/28075.

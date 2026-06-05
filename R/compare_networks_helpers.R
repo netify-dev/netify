@@ -1,26 +1,51 @@
 # helper functions for compare_networks
 # this file contains internal functions used by compare_networks()
 
-#' Compare Edge Patterns Between Networks
+#' compare edge patterns between networks
 #'
-#' `compare_edges` performs pairwise comparisons of edge patterns between networks using multiple similarity metrics including correlation, Jaccard similarity, Hamming distance, and QAP tests.
+#' `compare_edges` performs pairwise comparisons of edge patterns between networks using multiple similarity metrics including correlation, jaccard similarity, hamming distance, and qap tests.
 #'
-#' @param nets_list A list of netify objects to compare.
-#' @param method Character string specifying comparison method(s): "correlation", "jaccard", "hamming", "qap", or "all".
-#' @param test Logical; whether to perform significance testing using QAP.
-#' @param n_permutations Integer; number of permutations for QAP test.
-#' @param include_diagonal Logical; whether to include diagonal values in comparison.
-#' @param edge_threshold Numeric or function; threshold for determining edge presence in weighted networks.
-#' @param return_details Logical; whether to return detailed comparison matrices.
-#' @param spectral_rank Integer; number of eigenvalues to use for spectral distance (0 = all).
+#' @param nets_list a list of netify objects to compare.
+#' @param method character string specifying comparison method(s): "correlation", "jaccard", "hamming", "qap", or "all".
+#' @param test logical; whether to perform significance testing using qap.
+#' @param n_permutations integer; number of permutations for qap test.
+#' @param include_diagonal logical; whether to include diagonal values in comparison.
+#' @param edge_threshold numeric or function; threshold for determining edge presence in weighted networks.
+#' @param return_details logical; whether to return detailed comparison matrices.
+#' @param spectral_rank integer; number of eigenvalues to use for spectral distance (0 = all).
 #'
-#' @return A list containing comparison results including summary statistics, edge changes, and optionally detailed matrices.
+#' @return a list containing comparison results including summary statistics, edge changes, and optionally detailed matrices.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @importFrom stats var p.adjust
 #' @keywords internal
 #' @noRd
+
+align_bipartite_matrices <- function(mats) {
+	normalise_dimnames <- function(mat, idx) {
+		if (is.null(rownames(mat))) {
+			rownames(mat) <- paste0("r", seq_len(nrow(mat)))
+		}
+		if (is.null(colnames(mat))) {
+			colnames(mat) <- paste0("c", seq_len(ncol(mat)))
+		}
+		mat
+	}
+	mats <- Map(normalise_dimnames, mats, seq_along(mats))
+	row_actors <- sort(unique(unlist(lapply(mats, rownames), use.names = FALSE)))
+	col_actors <- sort(unique(unlist(lapply(mats, colnames), use.names = FALSE)))
+
+	lapply(mats, function(mat) {
+		aligned <- matrix(0,
+			nrow = length(row_actors),
+			ncol = length(col_actors),
+			dimnames = list(row_actors, col_actors)
+		)
+		aligned[rownames(mat), colnames(mat)] <- mat
+		aligned
+	})
+}
 
 compare_edges <- function(
 	nets_list, method, test, n_permutations,
@@ -40,6 +65,13 @@ compare_edges <- function(
 	if (adaptive_stop) {
 		warning("Adaptive stopping is not yet implemented. Using fixed n_permutations.")
 		adaptive_stop <- FALSE
+	}
+	qap_requested <- method %in% c("qap", "all") && isTRUE(test)
+	if (qap_requested && correlation_type != "pearson") {
+		cli::cli_abort(c(
+			"x" = "QAP significance testing currently uses Pearson edge correlation.",
+			"i" = "Use {.code correlation_type = 'pearson'} with {.code method = 'qap'} or {.code method = 'all'}."
+		))
 	}
 	
 	# check binary requirement for degree_preserving
@@ -67,6 +99,7 @@ compare_edges <- function(
 	hamming_mat <- matrix(NA, n_nets, n_nets, dimnames = list(net_names, net_names))
 	qap_mat <- matrix(NA, n_nets, n_nets, dimnames = list(net_names, net_names))
 	qap_pval_mat <- matrix(NA, n_nets, n_nets, dimnames = list(net_names, net_names))
+	qap_valid_perm_mat <- matrix(NA_integer_, n_nets, n_nets, dimnames = list(net_names, net_names))
 	spectral_mat <- matrix(NA, n_nets, n_nets, dimnames = list(net_names, net_names))
 
 	# track edge changes between networks
@@ -100,17 +133,37 @@ compare_edges <- function(
 	qap_fun <- switch(permutation_type,
 					  classic = qap_correlation_cpp,
 					  degree_preserving = function(A, B, ...) qap_degree_cpp(A, B, ..., swaps_factor = 10),
-					  freedman_lane = qap_freeman_lane_cpp,
-					  dsp_mrqap = qap_dsp_cpp,
 					  stop("Unknown permutation_type"))
 
-	# pre-compute all actors for alignment efficiency
-	all_actors <- get_all_actors(nets_list)
-
 	# always pre-align all matrices to avoid redundant work in the loop
-	# this is O(k * V^2) instead of O(k^2 * V^2)
+	# use one pass per network pair
 	mats <- lapply(nets_list, extract_matrix)
-	aligned_list <- batch_align_matrices_cpp(mats, all_actors, include_diagonal)
+	if (any(vapply(mats, function(mat) any(!is.na(mat) & !is.finite(mat)), logical(1)))) {
+		cli::cli_abort("{.fn compare_networks} requires finite edge weights or {.val NA}.")
+	}
+	net_modes <- vapply(nets_list, function(net) attr(net, "mode") %||% "unipartite", character(1))
+	if (any(net_modes == "bipartite")) {
+		if (!all(net_modes == "bipartite")) {
+			cli::cli_abort("Edge comparison requires all inputs to share the same {.arg mode}.")
+		}
+		if (method %in% c("qap", "all") && isTRUE(test)) {
+			cli::cli_abort(c(
+				"x" = "QAP edge comparison is not implemented for bipartite networks.",
+				"i" = "Use {.code method = 'correlation'}, {.code 'jaccard'}, or {.code 'hamming'} for bipartite edge comparisons."
+			))
+		}
+		if (method %in% c("spectral", "all")) {
+			cli::cli_abort(c(
+				"x" = "Spectral edge comparison requires square unipartite matrices.",
+				"i" = "Use {.code method = 'correlation'}, {.code 'jaccard'}, or {.code 'hamming'} for bipartite edge comparisons."
+			))
+		}
+		aligned_list <- align_bipartite_matrices(mats)
+	} else {
+		# pre-compute all actors for square unipartite alignment
+		all_actors <- get_all_actors(nets_list)
+		aligned_list <- batch_align_matrices_cpp(mats, all_actors, include_diagonal)
+	}
 	
 	# calculate custom statistics if provided
 	custom_stats_list <- NULL
@@ -121,26 +174,20 @@ compare_edges <- function(
 			
 			# apply each custom function
 			for (stat_name in names(other_stats)) {
-				tryCatch({
-					# call the custom function with the matrix
-					custom_result <- other_stats[[stat_name]](mat)
-					
-					# ensure result is named vector
-					if (is.null(names(custom_result))) {
-						names(custom_result) <- paste0(stat_name, "_", seq_along(custom_result))
-					} else {
-						# prefix names with stat name if not already
-						if (!all(grepl(paste0("^", stat_name), names(custom_result)))) {
-							names(custom_result) <- paste0(stat_name, "_", names(custom_result))
-						}
+				# call the custom function with the matrix
+				custom_result <- other_stats[[stat_name]](mat)
+
+				# require named results
+				if (is.null(names(custom_result))) {
+					names(custom_result) <- paste0(stat_name, "_", seq_along(custom_result))
+				} else {
+					# prefix names with stat name if not already
+					if (!all(grepl(paste0("^", stat_name), names(custom_result)))) {
+						names(custom_result) <- paste0(stat_name, "_", names(custom_result))
 					}
-					
-					stats_result[[stat_name]] <- custom_result
-				}, error = function(e) {
-					warning(sprintf("Error in custom stat function '%s' for network %d: %s",
-									stat_name, i, e$message))
-					stats_result[[stat_name]] <- NA
-				})
+				}
+
+				stats_result[[stat_name]] <- custom_result
 			}
 			
 			unlist(stats_result)
@@ -185,7 +232,8 @@ compare_edges <- function(
 				# flatten matrices and calc correlation
 				vec1 <- as.vector(mat1)
 				vec2 <- as.vector(mat2)
-				complete <- !is.na(vec1) & !is.na(vec2)
+				complete <- !is.na(vec1) & !is.na(vec2) &
+					is.finite(vec1) & is.finite(vec2)
 				if (sum(complete) >= 3) {
 					# check if both are binary
 					is_binary1 <- all(vec1[complete] %in% c(0, 1))
@@ -238,9 +286,15 @@ compare_edges <- function(
 
 			if (method %in% c("qap", "all") && test) {
 				qap_result <- qap_fun(mat1, mat2, n_permutations,
-									  seed = if(is.null(seed_used)) -1 else seed_used)
+								  seed = if(is.null(seed_used)) -1 else seed_used)
 				qap_mat[i, j] <- qap_mat[j, i] <- qap_result$correlation
 				qap_pval_mat[i, j] <- qap_pval_mat[j, i] <- qap_result$p_value
+				n_valid <- if ("n_valid_permutations" %in% names(qap_result)) {
+					qap_result$n_valid_permutations
+				} else {
+					n_permutations
+				}
+				qap_valid_perm_mat[i, j] <- qap_valid_perm_mat[j, i] <- as.integer(n_valid)
 			}
 
 			if (method %in% c("spectral", "all")) {
@@ -248,7 +302,7 @@ compare_edges <- function(
 					calculate_spectral_distance_cpp(mat1, mat2, spectral_rank)
 			}
 
-			# track what edges changed between these two networks
+			# track edge changes for this pair
 			edge_key <- paste(net_names[i], net_names[j], sep = "_vs_")
 			edge_changes[[edge_key]] <- calculate_edge_changes_cpp(mat1, mat2, threshold1, threshold2)
 		}
@@ -261,12 +315,12 @@ compare_edges <- function(
 	diag(spectral_mat) <- 0
 	if (test) {
 		diag(qap_mat) <- 1
-		diag(qap_pval_mat) <- 0
+		diag(qap_pval_mat) <- NA_real_
 		
 		# store raw p-values before adjustment
 		qap_pval_mat_raw <- qap_pval_mat
 		
-		# apply multiple test correction if requested
+		# adjust qap p-values if requested
 		if (p_adjust != "none" && n_nets > 2) {
 			flat <- qap_pval_mat[lower.tri(qap_pval_mat)]
 			adjusted <- p.adjust(flat, method = p_adjust)
@@ -311,14 +365,23 @@ compare_edges <- function(
 		}
 	}
 
-	# add significance tests if requested and QAP was actually performed
+	# add significance tests if requested and qap was actually performed
 	if (test && method %in% c("qap", "all")) {
 		# add n_permutations as attribute to qap_pvalues
 		attr(qap_pval_mat, "n_perm") <- n_permutations
+		attr(qap_valid_perm_mat, "n_perm") <- n_permutations
+		valid_counts <- qap_valid_perm_mat[lower.tri(qap_valid_perm_mat)]
+		if (any(!is.na(valid_counts) & valid_counts < n_permutations)) {
+			cli::cli_warn(c(
+				"!" = "Some QAP permutations were not usable after missing-dyad filtering.",
+				"i" = "Inspect {.field significance_tests$qap_valid_permutations} for effective permutation counts."
+			))
+		}
 		
 		results$significance_tests <- list(
 			qap_correlations = qap_mat,
-			qap_pvalues = qap_pval_mat
+			qap_pvalues = qap_pval_mat,
+			qap_valid_permutations = qap_valid_perm_mat
 		)
 		
 		# store raw p-values if adjustment was applied
@@ -330,7 +393,7 @@ compare_edges <- function(
 
 	# add detailed matrices if user wants them
 	if (return_details) {
-		# always return full matrices but ensure they're properly named
+		# return named full matrices
 		results$details <- list(
 			correlation_matrix = correlation_mat,
 			jaccard_matrix = jaccard_mat,
@@ -342,16 +405,16 @@ compare_edges <- function(
 	return(results)
 }
 
-#' Compare Structural Properties Between Networks
+#' compare structural properties between networks
 #'
 #' `compare_structure` calculates and compares network-level structural properties such as density, reciprocity, transitivity, and mean degree across networks.
 #'
-#' @param nets_list A list of netify objects to compare.
-#' @param test Logical; whether to perform significance testing (currently not implemented).
+#' @param nets_list a list of netify objects to compare.
+#' @param test logical; whether to perform significance testing (currently not implemented).
 #'
-#' @return A list containing structural properties for each network and percent changes if comparing two networks.
+#' @return a list containing structural properties for each network and percent changes if comparing two networks.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -409,7 +472,7 @@ compare_structure <- function(nets_list, test, other_stats = NULL) {
 			}
 		}
 		
-		# ensure network name is first column
+		# keep network name first
 		col_order <- c("network", setdiff(names(props), "network"))
 		props <- props[, col_order, drop = FALSE]
 		
@@ -485,16 +548,16 @@ compare_structure <- function(nets_list, test, other_stats = NULL) {
 	return(results)
 }
 
-#' Compare Node Composition Between Networks
+#' compare node composition between networks
 #'
-#' `compare_nodes` tracks which actors are present in each network and calculates node overlap statistics including Jaccard similarity of node sets.
+#' `compare_nodes` tracks which actors are present in each network and calculates node overlap statistics including jaccard similarity of node sets.
 #'
-#' @param nets_list A list of netify objects to compare.
-#' @param return_details Logical; whether to return detailed node sets and overlap matrices.
+#' @param nets_list a list of netify objects to compare.
+#' @param return_details logical; whether to return detailed node sets and overlap matrices.
 #'
-#' @return A list containing node composition summary and changes between networks.
+#' @return a list containing node composition summary and changes between networks.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -534,7 +597,7 @@ compare_nodes <- function(nets_list, return_details = FALSE, other_stats = NULL)
 			jaccard_node_mat[i, j] <- jaccard_node_mat[j, i] <-
 				if (total > 0) common / total else 0
 
-			# track what changed
+			# track edge changes
 			node_key <- paste(net_names[i], net_names[j], sep = "_vs_")
 			node_changes[[node_key]] <- list(
 				added = setdiff(nodes2, nodes1),
@@ -560,26 +623,20 @@ compare_nodes <- function(nets_list, return_details = FALSE, other_stats = NULL)
 			
 			# apply each custom function
 			for (stat_name in names(other_stats)) {
-				tryCatch({
-					# call the custom function with the netify object
-					custom_result <- other_stats[[stat_name]](net)
-					
-					# ensure result is named vector
-					if (is.null(names(custom_result))) {
-						names(custom_result) <- paste0(stat_name, "_", seq_along(custom_result))
-					} else {
-						# prefix names with stat name if not already
-						if (!all(grepl(paste0("^", stat_name), names(custom_result)))) {
-							names(custom_result) <- paste0(stat_name, "_", names(custom_result))
-						}
+				# call the custom function with the netify object
+				custom_result <- other_stats[[stat_name]](net)
+
+				# require named results
+				if (is.null(names(custom_result))) {
+					names(custom_result) <- paste0(stat_name, "_", seq_along(custom_result))
+				} else {
+					# prefix names with stat name if not already
+					if (!all(grepl(paste0("^", stat_name), names(custom_result)))) {
+						names(custom_result) <- paste0(stat_name, "_", names(custom_result))
 					}
-					
-					stats_result[[stat_name]] <- custom_result
-				}, error = function(e) {
-					warning(sprintf("Error in custom stat function '%s' for network %s: %s",
-									stat_name, net_names[i], e$message))
-					stats_result[[stat_name]] <- NA
-				})
+				}
+
+				stats_result[[stat_name]] <- custom_result
 			}
 			
 			unlist(stats_result)
@@ -601,10 +658,10 @@ compare_nodes <- function(nets_list, return_details = FALSE, other_stats = NULL)
 		)
 	} else {
 		# summary for multiple networks
-		# calculate mean Jaccard excluding self-comparisons
+		# calculate mean jaccard excluding self-comparisons
 		mean_jaccard_vec <- numeric(n_nets)
 		for (i in 1:n_nets) {
-			# get Jaccard values for network i, excluding diagonal
+			# get jaccard values for network i, excluding diagonal
 			jaccard_values <- jaccard_node_mat[i, -i]
 			mean_jaccard_vec[i] <- mean(jaccard_values, na.rm = TRUE)
 		}
@@ -652,19 +709,19 @@ compare_nodes <- function(nets_list, return_details = FALSE, other_stats = NULL)
 	return(results)
 }
 
-#' Compare Nodal Attribute Distributions Between Networks
+#' compare nodal attribute distributions between networks
 #'
 #' `compare_attributes` compares the distributions of nodal attributes across networks using correlation for continuous attributes and total variation distance for categorical attributes.
 #'
-#' @param nets_list A list of netify objects to compare.
-#' @param test Logical; whether to perform KS tests for continuous attributes.
-#' @param n_permutations Integer; number of permutations for significance testing (currently unused).
-#' @param return_details Logical; whether to return detailed attribute values and test matrices.
-#' @param attr_metric Character string specifying method for continuous attribute comparison.
+#' @param nets_list a list of netify objects to compare.
+#' @param test logical; whether to perform ks tests for continuous attributes.
+#' @param n_permutations integer; number of permutations for significance testing (currently unused).
+#' @param return_details logical; whether to return detailed attribute values and test matrices.
+#' @param attr_metric character string specifying method for continuous attribute comparison.
 #'
-#' @return A list containing attribute similarity comparisons across networks.
+#' @return a list containing attribute similarity comparisons across networks.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -741,26 +798,20 @@ compare_attributes <- function(
 			
 			# apply each custom function
 			for (stat_name in names(other_stats)) {
-				tryCatch({
-					# call the custom function with the netify object
-					custom_result <- other_stats[[stat_name]](net)
-					
-					# ensure result is named vector
-					if (is.null(names(custom_result))) {
-						names(custom_result) <- paste0(stat_name, "_", seq_along(custom_result))
-					} else {
-						# prefix names with stat name if not already
-						if (!all(grepl(paste0("^", stat_name), names(custom_result)))) {
-							names(custom_result) <- paste0(stat_name, "_", names(custom_result))
-						}
+				# call the custom function with the netify object
+				custom_result <- other_stats[[stat_name]](net)
+
+				# require named results
+				if (is.null(names(custom_result))) {
+					names(custom_result) <- paste0(stat_name, "_", seq_along(custom_result))
+				} else {
+					# prefix names with stat name if not already
+					if (!all(grepl(paste0("^", stat_name), names(custom_result)))) {
+						names(custom_result) <- paste0(stat_name, "_", names(custom_result))
 					}
-					
-					stats_result[[stat_name]] <- custom_result
-				}, error = function(e) {
-					warning(sprintf("Error in custom stat function '%s' for network %s: %s",
-									stat_name, net_names[i], e$message))
-					stats_result[[stat_name]] <- NA
-				})
+				}
+
+				stats_result[[stat_name]] <- custom_result
 			}
 			
 			unlist(stats_result)
@@ -798,15 +849,15 @@ compare_attributes <- function(
 	return(results)
 }
 
-#' Extract Network List from Netify Object
+#' extract network list from netify object
 #'
 #' `extract_network_list` converts different netify object types (cross-sectional, longitudinal array, or longitudinal list) into a standardized list format for comparison.
 #'
-#' @param net A netify object of any type.
+#' @param net a netify object of any type.
 #'
-#' @return A list of netify objects, one for each time period or layer.
+#' @return a list of netify objects, one for each time period or layer.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -888,7 +939,7 @@ extract_network_list <- function(net) {
 				attr(time_list, "netify_type") <- "longit_list"
 				attr(time_list, "symmetric") <- if (length(attrs$symmetric) > 1) attrs$symmetric[l] else attrs$symmetric
 				attr(time_list, "mode") <- attrs$mode
-				# for multilayer, weight should be specific to this layer
+				# store the layer-specific weight name
 				if (is.character(attrs[["weight"]]) && length(attrs[["weight"]]) > 1) {
 					attr(time_list, "weight") <- attrs[["weight"]][l]
 					attr(time_list, "detail_weight") <- paste("Weights from `", attrs[["weight"]][l], "`", sep = "")
@@ -967,9 +1018,9 @@ extract_network_list <- function(net) {
 			return(per_period)
 		}
 	} else if (attrs$netify_type == "longit_array") {
-		# check if multilayer (4D array)
+		# check if multilayer (4d array)
 		if (has_layers && length(dim(net)) == 4) {
-			# multilayer longitudinal array [actors × actors × layers × time]
+			# multilayer longitudinal array [actors x actors x layers x time]
 			dims <- dim(net)
 			layer_names <- attrs$layers
 			time_names <- dimnames(net)[[4]]
@@ -982,7 +1033,7 @@ extract_network_list <- function(net) {
 			names(layer_list) <- layer_names
 
 			for (l in seq_len(dims[3])) {
-				# extract 3D array for this layer [actors × actors × time]
+				# extract 3d array for this layer [actors x actors x time]
 				layer_array <- net[, , l, ]
 
 				# set proper dimensions
@@ -1038,7 +1089,7 @@ extract_network_list <- function(net) {
 
 			return(layer_list)
 		} else {
-			# regular longitudinal array (3D)
+			# regular longitudinal array (3d)
 			dims <- dim(net)
 			time_names <- dimnames(net)[[3]]
 			if (is.null(time_names)) {
@@ -1082,13 +1133,13 @@ extract_network_list <- function(net) {
 					attr(mat, "detail_weight") <- attrs$detail_weight
 					attr(mat, "actor_time_uniform") <- attrs$actor_time_uniform %||% TRUE
 					attr(mat, "loops") <- attrs$loops %||% FALSE
-					# for single time slices, layers should be NULL or a single TRUE value
+						# mark this matrix as a single layer
 					attr(mat, "layers") <- TRUE
 					class(mat) <- "netify"
 					mat
 				})
 			} else {
-				# regular approach for denser networks
+				# standard path for denser networks
 				net_list <- vector("list", dims[3])
 				for (t in 1:dims[3]) {
 					# extract time slice and preserve as matrix
@@ -1105,7 +1156,7 @@ extract_network_list <- function(net) {
 					attr(time_slice, "detail_weight") <- attrs$detail_weight
 					attr(time_slice, "actor_time_uniform") <- attrs$actor_time_uniform %||% TRUE
 					attr(time_slice, "loops") <- attrs$loops %||% FALSE
-					# for single time slices, layers should be NULL or a single TRUE value
+						# mark this matrix as a single layer
 					attr(time_slice, "layers") <- TRUE
 					class(time_slice) <- "netify"
 
@@ -1117,9 +1168,9 @@ extract_network_list <- function(net) {
 			return(net_list)
 		}
 	} else if (attrs$netify_type == "cross_sec") {
-		# check if multilayer (3D array)
+		# check if multilayer (3d array)
 		if (has_layers && length(dim(net)) == 3) {
-			# multilayer cross-sectional [actors × actors × layers]
+			# multilayer cross-sectional [actors x actors x layers]
 			dims <- dim(net)
 			layer_names <- attrs$layers
 
@@ -1135,7 +1186,7 @@ extract_network_list <- function(net) {
 				attr(layer_slice, "netify_type") <- "cross_sec"
 				attr(layer_slice, "symmetric") <- if (length(attrs$symmetric) > 1) attrs$symmetric[l] else attrs$symmetric
 				attr(layer_slice, "mode") <- attrs$mode
-				# for multilayer, weight should be specific to this layer
+				# store the layer-specific weight name
 				if (is.character(attrs[["weight"]]) && length(attrs[["weight"]]) > 1) {
 					attr(layer_slice, "weight") <- attrs[["weight"]][l]
 					attr(layer_slice, "detail_weight") <- paste("Weights from `", attrs[["weight"]][l], "`", sep = "")
@@ -1185,20 +1236,20 @@ extract_network_list <- function(net) {
 	}
 }
 
-#' Prepare Networks for By-Group Comparison
+#' prepare networks for by-group comparison
 #'
 #' `prepare_by_group_networks` subsets a network based on a nodal attribute
-#' to produce one sub-network per group value. Each sub-network keeps only
+#' to produce one sub-network per group value. each sub-network keeps only
 #' the actors that share the same attribute value, so downstream
 #' `compare_networks` calls can ask how within-group ties differ from one
 #' group to another.
 #'
-#' @param net A netify object containing nodal attributes.
-#' @param by Character string specifying the nodal attribute to group by.
+#' @param net a netify object containing nodal attributes.
+#' @param by character string specifying the nodal attribute to group by.
 #'
-#' @return Named list of netify objects, one per non-NA group value.
+#' @return named list of netify objects, one per non-na group value.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -1232,7 +1283,7 @@ prepare_by_group_networks <- function(net, by) {
 		)
 	}
 
-	# build actor -> group map; drop NAs so empty/unknown buckets do not
+	# build actor -> group map; drop nas so empty/unknown buckets do not
 	# silently degrade the comparison
 	actor_col <- if ("actor" %in% names(lookup_df)) "actor" else names(lookup_df)[1]
 	keep <- !is.na(lookup_df[[by]])
@@ -1266,12 +1317,17 @@ prepare_by_group_networks <- function(net, by) {
 	}
 
 	# build one sub-network per group
+	dropped_groups <- character(0)
 	nets_list <- lapply(groups, function(g) {
 		members <- actors[grp_vals == g]
-		if (length(members) < 2L) return(NULL)
+		if (length(members) < 2L) {
+			dropped_groups <<- c(dropped_groups, g)
+			return(NULL)
+		}
 		tryCatch(
 			subset_netify(netlet = net, actors = members),
 			error = function(e) {
+				dropped_groups <<- c(dropped_groups, g)
 				cli::cli_warn("Skipping group {.val {g}}: {e$message}")
 				NULL
 			}
@@ -1281,6 +1337,12 @@ prepare_by_group_networks <- function(net, by) {
 
 	# drop unusable groups
 	nets_list <- Filter(Negate(is.null), nets_list)
+	if (length(dropped_groups) > 0L) {
+		cli::cli_warn(c(
+			"!" = "Dropped {length(unique(dropped_groups))} group{?s} that could not form a network: {paste(unique(dropped_groups), collapse = ', ')}",
+			"i" = "Each compared group needs at least 2 actors after subsetting."
+		))
+	}
 	if (length(nets_list) < 2L) {
 		cli::cli_abort(c(
 			"x" = "After subsetting, fewer than 2 groups have enough actors to compare."
@@ -1290,17 +1352,17 @@ prepare_by_group_networks <- function(net, by) {
 	return(nets_list)
 }
 
-#' Analyze Network Comparisons by Group
+#' analyze network comparisons by group
 #'
 #' `analyze_by_group` performs additional analysis on comparison results when networks are grouped by nodal attributes (currently not fully implemented).
 #'
-#' @param results A netify_comparison object from compare_networks.
-#' @param nets_list The original list of networks being compared.
-#' @param by Character string specifying the grouping attribute.
+#' @param results a netify_comparison object from compare_networks.
+#' @param nets_list the original list of networks being compared.
+#' @param by character string specifying the grouping attribute.
 #'
-#' @return A list containing by-group analysis results (currently returns placeholder).
+#' @return a list containing by-group analysis results (currently returns placeholder).
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -1330,20 +1392,20 @@ analyze_by_group <- function(results, nets_list, by) {
 	if (!is.null(sim_mat)) out$similarity_matrix <- sim_mat
 	out
 }
-#' Create Edge Comparison Summary
+#' create edge comparison summary
 #'
 #' `create_edge_summary` formats the results of edge comparisons into a summary data frame, handling both pairwise and multiple network comparisons.
 #'
-#' @param correlation_mat Matrix of correlation coefficients between networks.
-#' @param jaccard_mat Matrix of Jaccard similarities between networks.
-#' @param hamming_mat Matrix of Hamming distances between networks.
-#' @param qap_mat Matrix of QAP correlations between networks.
-#' @param qap_pval_mat Matrix of QAP p-values between networks.
-#' @param method Character string specifying which metrics to include in summary.
+#' @param correlation_mat matrix of correlation coefficients between networks.
+#' @param jaccard_mat matrix of jaccard similarities between networks.
+#' @param hamming_mat matrix of hamming distances between networks.
+#' @param qap_mat matrix of qap correlations between networks.
+#' @param qap_pval_mat matrix of qap p-values between networks.
+#' @param method character string specifying which metrics to include in summary.
 #'
-#' @return A data frame summarizing the comparison results.
+#' @return a data frame summarizing the comparison results.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -1428,7 +1490,7 @@ create_edge_summary <- function(
 
 		# include qap row when qap was the requested method (or "all").
 		# without this branch, method="qap" with >2 networks produced an
-		# empty $summary frame and an empty "Edge Comparison Summary"
+		# empty $summary frame and an empty "edge comparison summary"
 		# table in print.netify_comparison.
 		if (method %in% c("qap", "all") && !is.null(qap_mat) && !all(is.na(qap_mat))) {
 			qaps <- qap_mat[lower.tri(qap_mat)]
@@ -1460,20 +1522,20 @@ create_edge_summary <- function(
 	return(summary_df)
 }
 
-#' Compare Single Attribute Between Networks
+#' compare single attribute between networks
 #'
 #' `compare_single_attribute` compares the distribution of a specific nodal attribute across networks using appropriate similarity measures and statistical tests.
 #'
-#' @param nets_list A list of netify objects to compare.
-#' @param attrs_list List of nodal attribute data frames from each network.
-#' @param attribute Character string specifying which attribute to compare.
-#' @param test Logical; whether to perform statistical testing.
-#' @param n_permutations Integer; number of permutations (currently unused).
-#' @param attr_metric Character string specifying method for continuous comparison.
+#' @param nets_list a list of netify objects to compare.
+#' @param attrs_list list of nodal attribute data frames from each network.
+#' @param attribute character string specifying which attribute to compare.
+#' @param test logical; whether to perform statistical testing.
+#' @param n_permutations integer; number of permutations (currently unused).
+#' @param attr_metric character string specifying method for continuous comparison.
 #'
-#' @return A list containing similarity comparisons and optional test results.
+#' @return a list containing similarity comparisons and optional test results.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @importFrom stats ks.test
 #'
@@ -1498,8 +1560,12 @@ compare_single_attribute <- function(
 			attr_vals <- attrs_list[[i]][[attribute]]
 			actors <- attrs_list[[i]]$actor
 
-			# remove missing values
-			complete <- !is.na(attr_vals)
+			# remove missing/non-finite numeric values
+			complete <- if (is.numeric(attr_vals)) {
+				!is.na(attr_vals) & is.finite(attr_vals)
+			} else {
+				!is.na(attr_vals)
+			}
 			attr_vals <- attr_vals[complete]
 			actors <- actors[complete]
 
@@ -1521,8 +1587,8 @@ compare_single_attribute <- function(
 				vals1 <- attr_values_list[[i]]$values
 				vals2 <- attr_values_list[[j]]$values
 
-				if (is.numeric(vals1) && is.numeric(vals2)) {
-					# for numeric attributes, use KS test
+					if (is.numeric(vals1) && is.numeric(vals2)) {
+						# compare numeric attribute distributions
 					if (test && length(vals1) > 1 && length(vals2) > 1) {
 						ks_result <- ks.test(vals1, vals2)
 						ks_test_mat[i, j] <- ks_test_mat[j, i] <- ks_result$p.value
@@ -1551,8 +1617,7 @@ compare_single_attribute <- function(
 	diag(comparison_mat) <- 1
 	if (test) diag(ks_test_mat) <- 1
 
-	# one row per pair, richer than scalar mean/sd so longitudinal
-	# users can see how each successive period compares
+		# keep one row for each pairwise comparison
 	pair_rows <- list()
 	for (i in 1:(n_nets - 1)) {
 		for (j in (i + 1):n_nets) {
@@ -1585,16 +1650,16 @@ compare_single_attribute <- function(
 	))
 }
 
-#' Compare Continuous Distributions
+#' compare continuous distributions
 #'
 #' `compare_distributions` calculates similarity between two continuous distributions by correlating their empirical cumulative distribution functions.
 #'
-#' @param vals1 Numeric vector of values from first distribution.
-#' @param vals2 Numeric vector of values from second distribution.
+#' @param vals1 numeric vector of values from first distribution.
+#' @param vals2 numeric vector of values from second distribution.
 #'
-#' @return Numeric correlation coefficient between the two ECDFs.
+#' @return numeric correlation coefficient between the two ecdfs.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @importFrom stats ecdf cor
 #'
@@ -1604,22 +1669,22 @@ compare_single_attribute <- function(
 compare_distributions <- function(vals1, vals2) {
 	# correlate the empirical cdfs of the two value vectors
 
-	# check for empty or all-NA values first
+	# check for empty or all-na values first
 	if (length(vals1) == 0 || all(is.na(vals1)) ||
 		length(vals2) == 0 || all(is.na(vals2))) {
 		return(NA)
 	}
 
-	# remove NAs
+	# remove nas
 	vals1 <- vals1[!is.na(vals1)]
 	vals2 <- vals2[!is.na(vals2)]
 
-	# check again after removing NAs
+	# check again after removing nas
 	if (length(vals1) == 0 || length(vals2) == 0) {
 		return(NA)
 	}
 
-	# create empirical CDFs
+	# create empirical cdfs
 	all_vals <- sort(unique(c(vals1, vals2)))
 
 	# handle case where all values are identical
@@ -1634,9 +1699,9 @@ compare_distributions <- function(vals1, vals2) {
 	cdf1 <- ecdf1(all_vals)
 	cdf2 <- ecdf2(all_vals)
 
-	# return correlation of CDFs; guard against zero-variance ramps
+	# return correlation of cdfs; guard against zero-variance ramps
 	# (e.g., a constant covariate within each period) which would otherwise
-	# produce a `cor` zero-sd warning and NA result
+	# produce a `cor` zero-sd warning and na result
 	if (length(all_vals) > 1) {
 		if (stats::sd(cdf1) == 0 || stats::sd(cdf2) == 0) {
 			# both constant -> identical step functions -> perfect similarity
@@ -1652,16 +1717,16 @@ compare_distributions <- function(vals1, vals2) {
 	}
 }
 
-#' Compare Categorical Distributions
+#' compare categorical distributions
 #'
 #' `compare_categorical_distributions` calculates similarity between two categorical distributions using total variation distance.
 #'
-#' @param vals1 Vector of categorical values from first distribution.
-#' @param vals2 Vector of categorical values from second distribution.
+#' @param vals1 vector of categorical values from first distribution.
+#' @param vals2 vector of categorical values from second distribution.
 #'
-#' @return Numeric similarity score (1 - total variation distance).
+#' @return numeric similarity score (1 - total variation distance).
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -1695,31 +1760,31 @@ compare_categorical_distributions <- function(vals1, vals2) {
 }
 
 
-#' Calculate Spectral Distance Between Networks
+#' calculate spectral distance between networks
 #'
-#' Computes the spectral distance between two networks based on their eigenvalue
-#' spectra. The spectral distance quantifies how different two graphs are by
+#' computes the spectral distance between two networks based on their eigenvalue
+#' spectra. the spectral distance quantifies how different two graphs are by
 #' comparing their eigenvalues.
 #'
-#' @param mat1 First adjacency matrix
-#' @param mat2 Second adjacency matrix
-#' @param laplacian Logical; whether to use Laplacian eigenvalues (default TRUE)
+#' @param mat1 first adjacency matrix
+#' @param mat2 second adjacency matrix
+#' @param laplacian logical; whether to use laplacian eigenvalues (default TRUE)
 #'   instead of adjacency matrix eigenvalues
 #'
-#' @return Numeric spectral distance between 0 and sqrt(2*n) where n is the
-#'   number of nodes. Lower values indicate more similar networks.
+#' @return numeric spectral distance between 0 and sqrt(2*n) where n is the
+#'   number of nodes. lower values indicate more similar networks.
 #'
 #' @details
-#' The spectral distance is calculated as:
-#' \deqn{d_{spectral}(G_1, G_2) = \sqrt{\sum_{i=1}^n (\lambda_i^{(1)} - \lambda_i^{(2)})^2}}
+#' the spectral distance is calculated as:
+#' \deqn{d_{spectral}(g_1, g_2) = \sqrt{\sum_{i=1}^n (\lambda_i^{(1)} - \lambda_i^{(2)})^2}}
 #'
 #' where \eqn{\lambda_i^{(1)}} and \eqn{\lambda_i^{(2)}} are the sorted eigenvalues
-#' of the two networks' Laplacian (or adjacency) matrices.
+#' of the two networks' laplacian (or adjacency) matrices.
 #'
-#' For directed networks, we symmetrize by averaging with the transpose.
-#' Missing values are replaced with zeros.
+#' for directed networks, we symmetrize by averaging with the transpose.
+#' missing values are replaced with zeros.
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -1728,7 +1793,7 @@ calculate_spectral_distance <- function(mat1, mat2, laplacian = TRUE) {
 	mat1[is.na(mat1)] <- 0
 	mat2[is.na(mat2)] <- 0
 
-	# ensure matrices are same size
+	# require matching dimensions
 	n1 <- nrow(mat1)
 	n2 <- nrow(mat2)
 
@@ -1783,17 +1848,17 @@ calculate_spectral_distance <- function(mat1, mat2, laplacian = TRUE) {
 }
 
 
-#' Build a tidy long-format per-pair comparison frame
+#' build a tidy long-format per-pair comparison frame
 #'
 #' `build_comparisons_frame` reshapes the comparison artifacts into one row
-#' per (net_i, net_j, metric). Handles the cross-network, multilayer, and
+#' per (net_i, net_j, metric). handles the cross-network, multilayer, and
 #' longitudinal cases by reading from `$summary`, `$edge_changes`, and
 #' `$significance_tests` matrices when available.
 #'
-#' @param results The partially-built `netify_comparison` list.
-#' @param nets_list The list of netify objects being compared.
+#' @param results the partially-built `netify_comparison` list.
+#' @param nets_list the list of netify objects being compared.
 #'
-#' @return A data frame with columns `net_i`, `net_j`, `metric`, `value`,
+#' @return a data frame with columns `net_i`, `net_j`, `metric`, `value`,
 #'   `p_value`, or NULL if nothing usable is available.
 #'
 #' @keywords internal
@@ -1833,7 +1898,7 @@ build_comparisons_frame <- function(results, nets_list) {
 		if (length(rows) > 0L) return(do.call(rbind, rows))
 	}
 
-	# longitudinal path: $summary is aggregated (mean/sd/min/max). Use the
+	# longitudinal path: $summary is aggregated (mean/sd/min/max). use the
 	# per-pair qap matrix in $significance_tests, plus weight_correlation
 	# and edge_change tallies from $edge_changes
 	rows <- list()

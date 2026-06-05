@@ -1,62 +1,62 @@
 #' Visualize actor-level network statistics
 #'
 #' `plot_actor_stats` creates visualizations of actor-level statistics from
-#' `summary_actor()` output. The function automatically adapts to the data
+#' `summary_actor()` output. the function automatically adapts to the data
 #' structure (cross-sectional/longitudinal, single/multilayer) and offers two
 #' main visualization approaches: distribution across actors or tracking specific
 #' actors.
 #'
-#' @param summary_df A data frame from `summary_actor()` containing actor-level
-#'   statistics. Must include an "actor" column. May include "time" column for
+#' @param summary_df a data frame from `summary_actor()` containing actor-level
+#'   statistics. must include an "actor" column. may include "time" column for
 #'   longitudinal data and "layer" column for multilayer networks.
-#' @param longitudinal Logical indicating whether to treat data as longitudinal.
-#'   If NULL (default), automatically detected based on presence of "time" column.
-#'   Set to FALSE if only one unique time point exists.
-#' @param multilayer Logical indicating whether to treat data as multilayer.
-#'   If NULL (default), automatically detected based on presence of "layer" column.
-#'   Set to FALSE if only one unique layer exists.
-#' @param across_actor Logical. If TRUE (default), visualizes distribution of
-#'   statistics across all actors. If FALSE, focuses on tracking specific actors.
-#'   When TRUE with `specific_actors` provided, shows distribution for only those
+#' @param longitudinal logical indicating whether to treat data as longitudinal.
+#'   if NULL (default), automatically detected based on presence of "time" column.
+#'   set to FALSE if only one unique time point exists.
+#' @param multilayer logical indicating whether to treat data as multilayer.
+#'   if NULL (default), automatically detected based on presence of "layer" column.
+#'   set to FALSE if only one unique layer exists.
+#' @param across_actor logical. if TRUE (default), visualizes distribution of
+#'   statistics across all actors. if FALSE, focuses on tracking specific actors.
+#'   when TRUE with `specific_actors` provided, shows distribution for only those
 #'   actors.
-#' @param specific_stats Character vector of statistic names to plot. If NULL
-#'   (default), plots all available statistics. Must match column names in
+#' @param specific_stats character vector of statistic names to plot. if NULL
+#'   (default), plots all available statistics. must match column names in
 #'   `summary_df`.
-#' @param specific_actors Character vector of actor names to highlight or focus on.
-#'   If NULL (default) with `across_actor = FALSE`, includes all actors (with
-#'   warning if > 25 actors). Must match values in the "actor" column.
+#' @param specific_actors character vector of actor names to highlight or focus on.
+#'   if NULL (default) with `across_actor = FALSE`, includes all actors (with
+#'   warning if > 25 actors). must match values in the "actor" column.
 #'
-#' @return A ggplot object that can be further customized or saved. The plot type
+#' @return a ggplot object that can be further customized or saved. the plot type
 #'   depends on the data structure and parameters:
 #'   \itemize{
-#'     \item \strong{Cross-sectional, across actors}: Density plots with rug plots
-#'     \item \strong{Cross-sectional, specific actors}: Beeswarm plots
-#'     \item \strong{Longitudinal, across actors}: Ridge density plots over time
-#'     \item \strong{Longitudinal, specific actors}: Line plots over time
+#'     \item \strong{cross-sectional, across actors}: density plots with rug plots
+#'     \item \strong{cross-sectional, specific actors}: beeswarm plots
+#'     \item \strong{longitudinal, across actors}: ridge density plots over time
+#'     \item \strong{longitudinal, specific actors}: line plots over time
 #'   }
 #'
-#'   All plots are faceted by statistic and, when applicable, by layer.
+#'   all plots are faceted by statistic and, when applicable, by layer.
 #'
 #' @details
-#' \strong{Visualization logic:}
+#' \strong{visualization logic:}
 #'
-#' The function chooses appropriate visualizations based on data structure:
+#' the function chooses appropriate visualizations based on data structure:
 #' \itemize{
-#'   \item \strong{Distribution plots} (`across_actor = TRUE`): Show how statistics
+#'   \item \strong{distribution plots} (`across_actor = TRUE`): show how statistics
 #'     are distributed across the actor population
-#'   \item \strong{Actor-specific plots} (`across_actor = FALSE`): Track individual
+#'   \item \strong{actor-specific plots} (`across_actor = FALSE`): track individual
 #'     actors, with specified actors highlighted in color while others appear in gray
 #' }
 #'
 #'
-#' All plots use `theme_stat_netify()` for consistent styling across netify
+#' all plots use `theme_stat_netify()` for consistent styling across netify
 #' visualizations.
 #'
-#' For multilayer longitudinal data with `across_actor = FALSE`, consider using
+#' for multilayer longitudinal data with `across_actor = FALSE`, consider using
 #' `specific_stats` to avoid overcrowded facets.
 #'
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export plot_actor_stats
 
@@ -144,18 +144,13 @@ plot_actor_stats <- function(
 	####
 
 	####
-	# org data
-	ggdata <- melt_df(summary_df, id = ids)
-	####
-
-	####
 	# across actor case
 	if (across_actor) {
 		####
 		# if across actor and specific actors provided then
 		# subset data by those actors
 		if (!is.null(specific_actors)) {
-			# warning about behavior when across_actor is TRUE and specific actors are provided
+			# warning about behavior when across_actor is true and specific actors are provided
 			cli::cli_alert_warning(
 				"Note: When specific actors are provided and `across_actor` is set to TRUE, the data will be subsetted to only include the specified actors."
 			)
@@ -163,6 +158,11 @@ plot_actor_stats <- function(
 			# subset
 			summary_df <- summary_df[summary_df$actor %in% specific_actors, ]
 		}
+		####
+
+		####
+		# org data after any actor filtering
+		ggdata <- melt_df(summary_df, id = ids)
 		####
 
 		####
@@ -232,6 +232,11 @@ plot_actor_stats <- function(
 	# specific actor case
 	if (!across_actor) {
 		####
+		# org data
+		ggdata <- melt_df(summary_df, id = ids)
+		####
+
+		####
 		# get actor count
 		if (is.null(specific_actors)) {
 			n_actors <- length(unique(summary_df$actor))
@@ -251,7 +256,7 @@ plot_actor_stats <- function(
 			)
 		}
 
-		# throw error if there are more than 657 actors because R only has 657 colors
+		# throw error if there are more than 657 actors because r only has 657 colors
 		if (n_actors > 657) {
 			cli::cli_abort(
 				"The `summary_df` you have provided has more than 657 actors, please subset to fewer actors using the `specific_actors` argument of this function."
@@ -263,6 +268,8 @@ plot_actor_stats <- function(
 		# get complete vector of actors
 		acts <- unique(summary_df$actor)
 		n_tot <- length(acts)
+		restore_rng <- save_rng_state()
+		on.exit(restore_rng(), add = TRUE)
 
 		# modify colors to highlight selected actors
 		set.seed(6886)

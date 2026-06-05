@@ -7,17 +7,17 @@
 theme_publication_netify_ts(base_size = 12)
 }
 \arguments{
-\item{base_size}{Base font size. Default 12.}
+\item{base_size}{base font size. default 12.}
 }
 \value{
-A ggplot2 theme object.
+a ggplot2 theme object.
 }
 \description{
-Companion to \code{theme_publication_netify()} for plots that keep their
-axes — actor-stat time series, similarity heatmaps, mixing matrices,
-etc. Same typographic settings (italic legend titles, bold strip text,
+companion to \code{theme_publication_netify()} for plots that keep their
+axes -- actor-stat time series, similarity heatmaps, mixing matrices,
+etc. same typographic settings (italic legend titles, bold strip text,
 larger base font) but axes and gridlines are retained.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

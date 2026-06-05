@@ -2,24 +2,24 @@
 % Please edit documentation in R/plot_helpers.R
 \name{ggplot_add.netify_label_repel}
 \alias{ggplot_add.netify_label_repel}
-\title{Add netify_label_repel to ggplot}
+\title{add netify_label_repel to ggplot}
 \usage{
 \method{ggplot_add}{netify_label_repel}(object, plot, ...)
 }
 \arguments{
-\item{object}{A netify_label_repel object created by \code{\link{netify_label_repel}}}
+\item{object}{a netify_label_repel object created by \code{\link{netify_label_repel}}}
 
-\item{plot}{A ggplot object to which the label_repel layer will be added}
+\item{plot}{a ggplot object to which the label_repel layer will be added}
 
-\item{...}{Additional arguments passed by ggplot2 (used internally)}
+\item{...}{additional arguments passed by ggplot2 (used internally)}
 }
 \value{
-A ggplot object with the label_repel layer added
+a ggplot object with the label_repel layer added
 }
 \description{
-S3 method to add netify_label_repel objects to ggplot objects. This method is called
+s3 method to add netify_label_repel objects to ggplot objects. this method is called
 automatically when using the + operator with a netify_label_repel object.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

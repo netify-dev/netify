@@ -4,7 +4,6 @@ set.seed(6886)
 test_that(
 	"add_dyad_vars: no time ID, asymmetric dyad vars",
 	{
-		# create fake dyad data for cross-sectional case
 		fake_dyads = expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
 		fake_dyads$var1 = rnorm(nrow(fake_dyads))
 		fake_dyads$var2 = rnorm(nrow(fake_dyads))
@@ -15,7 +14,7 @@ test_that(
 		fake_dyads$actor2 = as.character(fake_dyads$actor2)
 		fake_dyads = fake_dyads[fake_dyads$actor1 != fake_dyads$actor2, ]
 
-		# convert to conflictNet object
+		# convert to conflictnet object
 		a_matrix = get_adjacency(
 			fake_dyads,
 			actor1 = "actor1", actor2 = "actor2", symmetric = TRUE,
@@ -31,8 +30,8 @@ test_that(
 			c(FALSE, FALSE, FALSE, FALSE)
 		)
 
-		# manually convert dyadic variables into NEW list of matrices format
-		# initialize with 0s to match get_matrix behavior when missing_to_zero=TRUE
+		# manually convert dyadic variables into new list of matrices format
+		# initialize with 0s to match get_matrix behavior when missing_to_zero=true
 		manual_list = list(
 			"1" = list(
 				var1 = matrix(0, nrow = 3, ncol = 3, dimnames = list(letters[1:3], letters[1:3])),
@@ -72,7 +71,6 @@ test_that(
 			return(v_dat$var)
 		}
 
-		# create fake dyad data for cross-sectional case
 		fake_dyads = expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
 		fake_dyads$actor1 = as.character(fake_dyads$actor1)
 		fake_dyads$actor2 = as.character(fake_dyads$actor2)
@@ -83,7 +81,7 @@ test_that(
 		fake_dyads = fake_dyads[fake_dyads$actor1 != fake_dyads$actor2, ]
 		fake_dyads$year = 2312
 
-		# convert to conflictNet object
+		# convert to conflictnet object
 		a_matrix = get_adjacency(
 			fake_dyads,
 			actor1 = "actor1", actor2 = "actor2", symmetric = TRUE,
@@ -99,8 +97,8 @@ test_that(
 			c(TRUE, TRUE, TRUE, TRUE)
 		)
 
-		# manually convert dyadic variables into NEW list of matrices format
-		# initialize with 0s to match get_matrix behavior when missing_to_zero=TRUE
+		# manually convert dyadic variables into new list of matrices format
+		# initialize with 0s to match get_matrix behavior when missing_to_zero=true
 		manual_list = list(
 			"1" = list(
 				var1 = matrix(0, nrow = 3, ncol = 3, dimnames = list(letters[1:3], letters[1:3])),
@@ -131,7 +129,6 @@ test_that(
 test_that(
 	"add_dyad_vars: supplied time ID, asymmetric dyad vars",
 	{
-		# create fake dyad data for longitudinal case
 		fake_dyads = expand.grid(
 			actor1 = letters[1:3], actor2 = letters[1:3]
 		)
@@ -149,7 +146,7 @@ test_that(
 		fake_dyads$actor2 = as.character(fake_dyads$actor2)
 		fake_dyads = fake_dyads[fake_dyads$actor1 != fake_dyads$actor2, ]
 
-		# convert to conflictNet object
+		# convert to conflictnet object
 		a_matrix = get_adjacency_list(
 			fake_dyads,
 			actor1 = "actor1", actor2 = "actor2", time = "time",
@@ -166,10 +163,10 @@ test_that(
 			c(FALSE, FALSE, FALSE, FALSE)
 		)
 
-		# manually convert dyadic variables into NEW list of matrices format
+		# manually convert dyadic variables into new list of matrices format
 		manual_list = lapply(unique(fake_dyads$time), function(time_pd) {
 			# create list of individual matrices for this time period
-			# initialize with 0s to match get_matrix behavior when missing_to_zero=TRUE
+			# initialize with 0s to match get_matrix behavior when missing_to_zero=true
 			time_matrices = list(
 				var1 = matrix(0, nrow = 3, ncol = 3, dimnames = list(letters[1:3], letters[1:3])),
 				var2 = matrix(0, nrow = 3, ncol = 3, dimnames = list(letters[1:3], letters[1:3])),
@@ -214,7 +211,6 @@ test_that(
 			return(v_dat$var)
 		}
 
-		# create fake dyad data for longitudinal case
 		fake_dyads = expand.grid(
 			actor1 = letters[1:3], actor2 = letters[1:3]
 		)
@@ -232,7 +228,7 @@ test_that(
 		fake_dyads$actor2 = as.character(fake_dyads$actor2)
 		fake_dyads = fake_dyads[fake_dyads$actor1 != fake_dyads$actor2, ]
 
-		# convert to conflictNet object
+		# convert to conflictnet object
 		a_matrix = get_adjacency_list(
 			fake_dyads,
 			actor1 = "actor1", actor2 = "actor2", time = "time",
@@ -249,10 +245,10 @@ test_that(
 			c(TRUE, TRUE, TRUE, TRUE)
 		)
 
-		# manually convert dyadic variables into NEW list of matrices format
+		# manually convert dyadic variables into new list of matrices format
 		manual_list = lapply(unique(fake_dyads$time), function(time_pd) {
 			# create list of individual matrices for this time period
-			# initialize with 0s to match get_matrix behavior when missing_to_zero=TRUE
+			# initialize with 0s to match get_matrix behavior when missing_to_zero=true
 			time_matrices = list(
 				var1 = matrix(0, nrow = 3, ncol = 3, dimnames = list(letters[1:3], letters[1:3])),
 				var2 = matrix(0, nrow = 3, ncol = 3, dimnames = list(letters[1:3], letters[1:3])),
@@ -288,7 +284,6 @@ test_that(
 test_that(
 	"add_dyad_vars: mixed variable types",
 	{
-		# create fake dyad data with different types
 		fake_dyads = expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
 		fake_dyads$actor1 = as.character(fake_dyads$actor1)
 		fake_dyads$actor2 = as.character(fake_dyads$actor2)
@@ -343,7 +338,7 @@ test_that(
 		# create new data with different values
 		fake_dyads$var1 = (1:nrow(fake_dyads)) * 100
 
-		# add again with replace_existing = TRUE
+		# add again with replace_existing = true
 		a_matrix = add_dyad_vars(a_matrix, fake_dyads, "actor1", "actor2", NULL, "var1", FALSE,
 			replace_existing = TRUE
 		)
@@ -463,7 +458,6 @@ test_that(
 		fake_dyads = fake_dyads[fake_dyads$actor1 != fake_dyads$actor2, ]
 		fake_dyads$var1 = rnorm(nrow(fake_dyads))
 
-		# this should run efficiently
 		start_time = Sys.time()
 
 		a_matrix = get_adjacency(
@@ -476,7 +470,6 @@ test_that(
 
 		end_time = Sys.time()
 
-		# should complete quickly and have correct structure
 		expect_lt(as.numeric(end_time - start_time), 5) # less than 5 seconds
 		expect_equal(dim(attr(a_matrix, "dyad_data")[["1"]][["var1"]]), c(100, 100))
 	}
@@ -499,14 +492,12 @@ test_that(
 			symmetric = FALSE, weight = NULL, diag_to_NA = FALSE
 		)
 
-		# don't specify dyad_vars - should auto-detect
 		a_matrix = add_dyad_vars(a_matrix, fake_dyads, "actor1", "actor2", NULL,
 			dyad_vars = NULL, dyad_vars_symmetric = NULL
 		)
 
 		dyad_data = attr(a_matrix, "dyad_data")
 
-		# should include var1, var2, extra_col but not actor1, actor2
 		expect_true("var1" %in% names(dyad_data[["1"]]))
 		expect_true("var2" %in% names(dyad_data[["1"]]))
 		expect_true("extra_col" %in% names(dyad_data[["1"]]))

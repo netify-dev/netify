@@ -1,96 +1,97 @@
 #' Analyze homophily in network data
 #'
-#' Tests whether connected actors have similar attributes (homophily). Calculates
+#' tests whether connected actors have similar attributes (homophily). calculates
 #' the correlation between attribute similarity and tie presence, with support for
 #' multiple similarity metrics and significance testing.
 #'
-#' @param netlet A netify object containing network data.
-#' @param attribute Character string specifying the nodal attribute to analyze.
-#' @param method Character string specifying the similarity metric:
+#' @param netlet a netify object containing network data.
+#' @param attribute character string specifying the nodal attribute to analyze.
+#' @param method character string specifying the similarity metric:
 #'   \describe{
-#'     \item{"correlation"}{Negative absolute difference for continuous data (default)}
-#'     \item{"euclidean"}{Negative euclidean distance for continuous data}
-#'     \item{"manhattan"}{Negative Manhattan/city-block distance for continuous data}
-#'     \item{"cosine"}{Cosine similarity for continuous data}
-#'     \item{"categorical"}{Binary similarity (0/1) for categorical data}
-#'     \item{"jaccard"}{Jaccard similarity for binary/presence-absence data}
-#'     \item{"hamming"}{Negative Hamming distance for categorical data}
+#'     \item{"correlation"}{negative absolute difference for continuous data (default)}
+#'     \item{"euclidean"}{negative euclidean distance for continuous data}
+#'     \item{"manhattan"}{negative manhattan/city-block distance for continuous data}
+#'     \item{"cosine"}{cosine similarity for continuous data}
+#'     \item{"categorical"}{binary similarity (0/1) for categorical data}
+#'     \item{"jaccard"}{jaccard similarity for binary/presence-absence data}
+#'     \item{"hamming"}{negative hamming distance for categorical data}
 #'   }
-#' @param threshold Numeric value or function to determine tie presence in weighted networks.
-#'   If numeric, edges with weights > threshold are considered ties. If a function,
-#'   it should take the network matrix and return a logical matrix. Default is 0
-#'   (any positive weight is a tie). Common values: 0 (default), mean(weights),
-#'   median(weights), or quantile-based thresholds. For pre-binarized networks,
+#' @param threshold numeric value or function to determine tie presence in weighted networks.
+#'   if numeric, edges with weights > threshold are considered ties. if a function,
+#'   it should take the network matrix and return a logical matrix. default is 0
+#'   (any positive weight is a tie). common values: 0 (default), mean(weights),
+#'   median(weights), or quantile-based thresholds. for pre-binarized networks,
 #'   consider using \code{mutate_weights()} first.
-#' @param signed_handling Character. Strategy for signed (negative-weight) edges:
+#' @param signed_handling character. strategy for signed (negative-weight) edges:
 #'   \describe{
-#'     \item{\code{"abs"}}{(default) Take absolute values before thresholding so
-#'       any tie magnitude — positive or negative — can become a connection.}
-#'     \item{\code{"drop_negative"}}{Set negative weights to zero before
+#'     \item{\code{"abs"}}{(default) take absolute values before thresholding so
+#'       any tie magnitude -- positive or negative -- can become a connection.}
+#'     \item{\code{"drop_negative"}}{set negative weights to zero before
 #'       thresholding (positive ties only).}
-#'     \item{\code{"preserve_sign"}}{Treat any non-zero entry (positive or
+#'     \item{\code{"preserve_sign"}}{treat any non-zero entry (positive or
 #'       negative) as a connection; \code{threshold} is ignored for sign decisions.}
 #'   }
-#'   Ignored when the network has no negative weights.
-#' @param significance_test Logical. Whether to perform permutation test. Default TRUE.
-#' @param n_permutations Number of permutations for significance testing. Default 1000.
-#' @param alpha Significance level for confidence intervals. Default 0.05.
-#' @param other_stats Named list of custom functions for additional statistics.
-#' @param ... Additional arguments passed to custom functions.
+#'   ignored when the network has no negative weights.
+#' @param significance_test logical. whether to perform a dyad-level
+#'   permutation test. default TRUE.
+#' @param n_permutations number of permutations for significance testing. default 1000.
+#' @param alpha significance level for confidence intervals. default 0.05.
+#' @param other_stats named list of custom functions for additional statistics.
+#' @param ... additional arguments passed to custom functions.
 #'
-#' @return Data frame with homophily statistics per network/time period:
+#' @return data frame with homophily statistics per network/time period:
 #'   \describe{
-#'     \item{\code{net}}{Network/time identifier}
-#'     \item{\code{layer}}{Layer name}
-#'     \item{\code{attribute}}{Analyzed attribute name}
-#'     \item{\code{method}}{Similarity method used}
-#'     \item{\code{threshold_value}}{Threshold used for determining ties (NA for binary networks)}
-#'     \item{\code{homophily_correlation}}{Correlation between similarity and tie presence (binary: tie/no tie)}
-#'     \item{\code{mean_similarity_connected}}{Mean similarity among connected pairs (weight > threshold)}
-#'     \item{\code{mean_similarity_unconnected}}{Mean similarity among unconnected pairs (weight <= threshold or missing)}
-#'     \item{\code{similarity_difference}}{Difference between connected and unconnected mean similarities}
-#'     \item{\code{p_value}}{Permutation test p-value}
-#'     \item{\code{ci_lower}, \code{ci_upper}}{Confidence interval bounds}
-#'     \item{\code{n_connected_pairs}}{Number of connected pairs}
-#'     \item{\code{n_unconnected_pairs}}{Number of unconnected pairs}
+#'     \item{\code{net}}{network/time identifier}
+#'     \item{\code{layer}}{layer name}
+#'     \item{\code{attribute}}{analyzed attribute name}
+#'     \item{\code{method}}{similarity method used}
+#'     \item{\code{threshold_value}}{threshold used for determining ties (na for binary networks)}
+#'     \item{\code{homophily_correlation}}{correlation between similarity and tie presence (binary: tie/no tie)}
+#'     \item{\code{mean_similarity_connected}}{mean similarity among connected pairs (weight > threshold)}
+#'     \item{\code{mean_similarity_unconnected}}{mean similarity among unconnected pairs (weight <= threshold or missing)}
+#'     \item{\code{similarity_difference}}{difference between connected and unconnected mean similarities}
+#'     \item{\code{p_value}}{permutation test p-value}
+#'     \item{\code{ci_lower}, \code{ci_upper}}{confidence interval bounds}
+#'     \item{\code{n_connected_pairs}}{number of connected pairs}
+#'     \item{\code{n_unconnected_pairs}}{number of unconnected pairs}
 #'   }
 #'
 #' @details
-#' \strong{Auto-promotion to \code{categorical}:}
+#' \strong{auto-promotion to \code{categorical}:}
 #'
-#' If you leave \code{method} at its default and pass a \code{character},
+#' if you leave \code{method} at its default and pass a \code{character},
 #' \code{factor}, or \code{logical} attribute, \code{homophily()} will
 #' switch to \code{method = "categorical"} automatically and inform you
-#' once per attribute. This avoids the C++-level error that would
+#' once per attribute. this avoids the c++-level error that would
 #' otherwise come from feeding non-numeric data to the correlation-based
-#' similarity routine. Pass \code{method = "categorical"} (or any other
+#' similarity routine. pass \code{method = "categorical"} (or any other
 #' explicit choice) to silence the message.
 #'
-#' \strong{Similarity Metrics:}
+#' \strong{similarity metrics:}
 #'
-#' For continuous attributes:
+#' for continuous attributes:
 #' \itemize{
-#'   \item \code{correlation}: Based on absolute difference, good general purpose metric
-#'   \item \code{euclidean}: Similar to correlation for single attributes
-#'   \item \code{manhattan}: Less sensitive to outliers than euclidean
-#'   \item \code{cosine}: Useful for normalized data or when sign matters
+#'   \item \code{correlation}: based on absolute difference, good general purpose metric
+#'   \item \code{euclidean}: similar to correlation for single attributes
+#'   \item \code{manhattan}: less sensitive to outliers than euclidean
+#'   \item \code{cosine}: useful for normalized data or when sign matters
 #' }
 #'
-#' For categorical/binary attributes:
+#' for categorical/binary attributes:
 #' \itemize{
-#'   \item \code{categorical}: Simple matching (1 if same, 0 if different)
-#'   \item \code{jaccard}: For binary data, emphasizes shared presence over shared absence
-#'   \item \code{hamming}: Counts positions where values differ (negated for similarity)
+#'   \item \code{categorical}: simple matching (1 if same, 0 if different)
+#'   \item \code{jaccard}: for binary data, emphasizes shared presence over shared absence
+#'   \item \code{hamming}: counts positions where values differ (negated for similarity)
 #' }
 #'
-#' \strong{Threshold Parameter:}
+#' \strong{threshold parameter:}
 #'
-#' For weighted networks, the \code{threshold} parameter determines what edge weights
-#' constitute a "connection". You can specify:
+#' for weighted networks, the \code{threshold} parameter determines what edge weights
+#' constitute a "connection". you can specify:
 #' \itemize{
-#'   \item A numeric value: edges with weight > threshold are ties
-#'   \item A function: should take a matrix and return a single numeric threshold
-#'   \item Common threshold functions:
+#'   \item a numeric value: edges with weight > threshold are ties
+#'   \item a function: should take a matrix and return a single numeric threshold
+#'   \item common threshold functions:
 #'     \itemize{
 #'       \item \code{function(x) mean(x, na.rm = TRUE)} - mean weight
 #'       \item \code{function(x) median(x, na.rm = TRUE)} - median weight
@@ -98,8 +99,17 @@
 #'     }
 #' }
 #'
-#' For more complex binarization needs (e.g., different thresholds by time period),
+#' for more complex binarization needs (e.g., different thresholds by time period),
 #' consider using \code{mutate_weights()} to pre-process your network.
+#'
+#' \strong{permutation test:}
+#'
+#' when \code{significance_test = TRUE}, \code{homophily()} holds the tie
+#' indicators fixed and permutes the dyad-level similarity values to form an
+#' exploratory reference distribution. the resulting p-value and confidence
+#' interval summarize how unusual the observed dyad-level association is under
+#' that exchangeability assumption. they are not a node-label permutation test
+#' and should not be read as a causal estimate of tie formation.
 #'
 #' @examples
 #' # quick homophily check on the bundled classroom friendship data
@@ -115,31 +125,31 @@
 #' homophily(net, attribute = "gender", method = "categorical")
 #'
 #' \dontrun{
-#' # Basic homophily analysis with default threshold (> 0)
+#' # basic homophily analysis with default threshold (> 0)
 #' homophily_default <- homophily(net, attribute = "group")
 #'
-#' # Using different similarity metrics for continuous data
+#' # using different similarity metrics for continuous data
 #' homophily_manhattan <- homophily(
 #'     net,
 #'     attribute = "age",
-#'     method = "manhattan" # Less sensitive to outliers
+#'     method = "manhattan" # less sensitive to outliers
 #' )
 #'
-#' # For binary attributes (e.g., gender, membership)
+#' # for binary attributes (e.g., gender, membership)
 #' homophily_jaccard <- homophily(
 #'     net,
 #'     attribute = "member",
-#'     method = "jaccard" # Better for binary data than correlation
+#'     method = "jaccard" # better for binary data than correlation
 #' )
 #'
-#' # For categorical attributes
+#' # for categorical attributes
 #' homophily_categorical <- homophily(
 #'     net,
 #'     attribute = "department",
 #'     method = "categorical"
 #' )
 #'
-#' # Combining method and threshold
+#' # combining method and threshold
 #' homophily_combined <- homophily(
 #'     net,
 #'     attribute = "score",
@@ -148,7 +158,7 @@
 #' )
 #' }
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export homophily
 
@@ -185,7 +195,7 @@ homophily <- function(
 		cli::cli_abort(msg)
 	}
 	checkmate::assert_string(attribute)
-	# track whether user supplied method explicitly (for auto-categorical)
+	# track whether the caller supplied method
 	method_was_default <- missing(method)
 	checkmate::assert_choice(method, c(
 		"correlation", "euclidean", "manhattan",
@@ -205,6 +215,12 @@ homophily <- function(
 	layers <- obj_attrs$layers
 	nodal_data <- obj_attrs$nodal_data
 	netify_type <- obj_attrs$netify_type
+	if (identical(obj_attrs$mode, "bipartite")) {
+		cli::cli_abort(c(
+			"x" = "{.fn homophily} currently supports one-mode/unipartite netify objects only.",
+			"i" = "For bipartite data, analyze row-mode and column-mode attributes separately after projecting or use a two-mode mixing workflow."
+		))
+	}
 
 	# handle is_binary which might be a vector for multilayer networks
 	is_binary <- obj_attrs$is_binary %||% FALSE
@@ -276,7 +292,7 @@ homophily <- function(
 		netlet_list <- switch(netify_type,
 			"cross_sec" = list("1" = netlet),
 			"longit_array" = {
-				# check if this is multilayer longitudinal (4D) or single layer (3D)
+				# check if this is multilayer longitudinal (4d) or single layer (3d)
 				if (length(dim(netlet)) == 4) {
 					# multilayer longit: extract time periods from 4th dimension
 					time_names <- dimnames(netlet)[[4]]
@@ -310,10 +326,10 @@ homophily <- function(
 			# extract specific layer for multilayer networks
 			if (length(layers) > 1) {
 				if (netify_type == "cross_sec") {
-					# for cross-sec multilayer: 3D array [actors, actors, layers]
+					# for cross-sec multilayer: 3d array [actors, actors, layers]
 					net_matrix <- netlet[, , layer_index]
 				} else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
-					# for longit multilayer: 4D array [actors, actors, layers, time]
+					# for longit multilayer: 4d array [actors, actors, layers, time]
 					net_matrix <- net_matrix[, , layer_index]
 				}
 			}
@@ -352,19 +368,24 @@ homophily <- function(
 			}
 			node_attrs <- node_attrs[attr_indices]
 
-			# track missing values
-			n_missing_attrs <- sum(is.na(node_attrs))
+			# track attribute values that cannot be analyzed
+			attr_valid <- !is.na(node_attrs)
+			if (is.numeric(node_attrs)) {
+				attr_valid <- attr_valid & is.finite(node_attrs)
+			}
+			n_missing_attrs <- sum(!attr_valid)
 			n_total_actors <- length(node_attrs)
 
-			# remove actors with missing attributes
-			complete_cases <- !is.na(node_attrs)
+			# remove actors with missing or non-finite attributes
+			complete_cases <- attr_valid
 			if (sum(complete_cases) < 2) {
 				cli::cli_warn("Insufficient non-missing attribute data for time {time_id}")
 				return(NULL)
 			}
 
-			net_matrix <- net_matrix[complete_cases, complete_cases]
-			node_attrs <- node_attrs[complete_cases]
+				net_matrix <- net_matrix[complete_cases, complete_cases]
+				node_attrs <- node_attrs[complete_cases]
+				n_analyzed_actors <- length(node_attrs)
 
 			# calculate similarity matrix
 			similarity_matrix <- calculate_similarity_matrix(node_attrs, method)
@@ -377,11 +398,11 @@ homophily <- function(
 				layer_is_binary <- is_binary
 			}
 
-			if (layer_is_binary) {
-				# for binary networks, threshold is not applicable
-				threshold_value <- NA
-				binary_net <- net_matrix
-			} else {
+				if (layer_is_binary) {
+					# for binary networks, threshold is not applicable
+					threshold_value <- NA
+					binary_net <- binary_matrix_preserve_na(net_matrix)
+				} else {
 				# reshape signed weights per signed_handling before thresholding
 				net_matrix_t <- net_matrix
 				finite_w <- net_matrix_t[is.finite(net_matrix_t)]
@@ -410,18 +431,28 @@ homophily <- function(
 				}
 
 				# binarize on threshold; preserve_sign treats any non-zero as connected
+				observed_dyads <- !is.na(net_matrix_t)
+				binary_net <- matrix(NA,
+					nrow = nrow(net_matrix_t), ncol = ncol(net_matrix_t),
+					dimnames = dimnames(net_matrix_t))
 				if (has_negative && signed_handling == "preserve_sign") {
-					binary_net <- (net_matrix_t != 0) & !is.na(net_matrix_t)
+					binary_net[observed_dyads] <- net_matrix_t[observed_dyads] != 0
 				} else {
-					binary_net <- (net_matrix_t > threshold_value) & !is.na(net_matrix_t)
+					binary_net[observed_dyads] <- net_matrix_t[observed_dyads] > threshold_value
 				}
 			}
 
-			# calculate homophily statistics with the binary network
-			homophily_stats <- calculate_homophily_stats(
-				similarity_matrix, binary_net, significance_test,
-				n_permutations, alpha
-			)
+				layer_symmetric <- obj_attrs$symmetric %||% FALSE
+				if (length(layer_symmetric) > 1) {
+					layer_symmetric <- layer_symmetric[layer_index]
+				}
+				directed_dyads <- !isTRUE(layer_symmetric)
+
+				# calculate homophily statistics with the binary network
+				homophily_stats <- calculate_homophily_stats(
+					similarity_matrix, binary_net, significance_test,
+					n_permutations, alpha, directed = directed_dyads
+				)
 
 			# add custom statistics if provided
 			if (!is.null(other_stats)) {
@@ -447,12 +478,16 @@ homophily <- function(
 				stringsAsFactors = FALSE
 			)
 
-			# add missing data info
-			result_df$n_missing <- n_missing_attrs
-			result_df$n_pairs <- n_total_actors * (n_total_actors - 1) / 2
+					# add missing data info
+					result_df$n_missing <- n_missing_attrs
+						result_df$n_pairs <- if (directed_dyads) {
+							n_analyzed_actors * (n_analyzed_actors - 1)
+						} else {
+							n_analyzed_actors * (n_analyzed_actors - 1) / 2
+						}
 
-			result_df
-		})
+				result_df
+			})
 
 		# combine results for this layer
 		valid_results <- time_results[!sapply(time_results, is.null)]
@@ -464,12 +499,12 @@ homophily <- function(
 	})
 
 	# combine results across layers
-	# filter out NULL results
+	# filter out null results
 	results <- results[!sapply(results, is.null)]
 
 	if (length(results) == 0) {
 		cli::cli_warn("No valid results obtained from homophily analysis")
-		# return empty data frame with expected structure instead of NULL
+		# return an empty result frame
 		return(data.frame(
 			net = character(0),
 			layer = character(0),
@@ -495,43 +530,43 @@ homophily <- function(
 	return(final_results)
 }
 
-#' Calculate similarity matrix between node attributes
+#' calculate similarity matrix between node attributes
 #'
-#' Internal function that computes pairwise similarity scores between node attributes
-#' using various similarity metrics. Used by \code{homophily} to create
+#' internal function that computes pairwise similarity scores between node attributes
+#' using various similarity metrics. used by \code{homophily} to create
 #' similarity matrices for homophily analysis.
 #'
-#' @param attributes Numeric or character vector of node attributes. Length should
+#' @param attributes numeric or character vector of node attributes. length should
 #'   match the number of nodes in the network.
-#' @param method Character string specifying the similarity metric:
+#' @param method character string specifying the similarity metric:
 #'   \describe{
-#'     \item{"correlation"}{Negative absolute difference. For continuous attributes,
-#'       returns -|x_i - x_j|. Higher values indicate greater similarity.}
-#'     \item{"euclidean"}{Negative Euclidean distance. Returns -sqrt((x_i - x_j)^2).
-#'       Equivalent to correlation method for univariate attributes.}
-#'     \item{"categorical"}{Binary similarity for categorical variables. Returns 1
+#'     \item{"correlation"}{negative absolute difference. for continuous attributes,
+#'       returns -|x_i - x_j|. higher values indicate greater similarity.}
+#'     \item{"euclidean"}{negative euclidean distance. returns -sqrt((x_i - x_j)^2).
+#'       equivalent to correlation method for univariate attributes.}
+#'     \item{"categorical"}{binary similarity for categorical variables. returns 1
 #'       if attributes match, 0 otherwise.}
-#'     \item{"cosine"}{Cosine similarity treating each attribute as a 1D vector.
-#'       Returns (x_i * x_j) / (|x_i| * |x_j|). Ranges from -1 to 1.}
+#'     \item{"cosine"}{cosine similarity treating each attribute as a 1d vector.
+#'       returns (x_i * x_j) / (|x_i| * |x_j|). ranges from -1 to 1.}
 #'   }
 #'
-#' @return Square numeric matrix of dimension n x n where n is the length of
-#'   attributes. Diagonal elements are set to 0. For correlation and euclidean
+#' @return square numeric matrix of dimension n x n where n is the length of
+#'   attributes. diagonal elements are set to 0. for correlation and euclidean
 #'   methods, values are non-positive with 0 indicating perfect similarity.
-#'   For categorical method, values are 0 or 1. For cosine method, values
+#'   for categorical method, values are 0 or 1. for cosine method, values
 #'   range from -1 to 1.
 #'
 #' @details
-#' The function handles each similarity metric differently:
+#' the function handles each similarity metric differently:
 #' \itemize{
-#'   \item Correlation and Euclidean methods are designed for continuous attributes
-#'   \item Categorical method should be used for discrete/factor attributes
-#'   \item Cosine similarity treats attributes as vectors, useful for normalized data
+#'   \item correlation and euclidean methods are designed for continuous attributes
+#'   \item categorical method should be used for discrete/factor attributes
+#'   \item cosine similarity treats attributes as vectors, useful for normalized data
 #' }
 #'
-#' Missing values in attributes will propagate to the similarity matrix.
+#' missing values in attributes will propagate to the similarity matrix.
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -541,7 +576,7 @@ calculate_similarity_matrix <- function(attributes, method) {
 		attributes <- as.numeric(as.factor(attributes))
 	}
 
-	# ensure attributes is numeric
+	# require numeric attributes
 	if (!is.numeric(attributes)) {
 		stop("Attributes must be numeric or convertible to numeric")
 	}
@@ -550,71 +585,86 @@ calculate_similarity_matrix <- function(attributes, method) {
 	calculate_similarity_matrix_cpp(attributes, method)
 }
 
-#' Calculate homophily statistics with significance testing
+#' calculate homophily statistics with significance testing
 #'
-#' Internal function that computes homophily correlation and related statistics
-#' from similarity and network matrices. Performs permutation-based significance
+#' internal function that computes homophily correlation and related statistics
+#' from similarity and network matrices. performs permutation-based significance
 #' testing and bootstrap confidence intervals.
 #'
-#' @param similarity_matrix Square numeric matrix of pairwise node similarities
+#' @param similarity_matrix square numeric matrix of pairwise node similarities
 #'   as produced by \code{calculate_similarity_matrix}.
-#' @param net_matrix Square network adjacency matrix. Can be binary or weighted;
+#' @param net_matrix square network adjacency matrix. can be binary or weighted;
 #'   will be converted to binary for analysis (positive values become 1).
-#' @param significance_test Logical. Whether to perform permutation test for
+#' @param significance_test logical. whether to perform permutation test for
 #'   significance and compute confidence intervals.
-#' @param n_permutations Integer. Number of permutations for significance testing
+#' @param n_permutations integer. number of permutations for significance testing
 #'   and bootstrap confidence intervals.
-#' @param alpha Numeric between 0 and 1. Significance level for confidence intervals.
-#'   Default 0.05 gives 95% confidence intervals.
+#' @param alpha numeric between 0 and 1. significance level for confidence intervals.
+#'   default 0.05 gives 95% confidence intervals.
 #'
-#' @return Named list containing:
+#' @return named list containing:
 #'   \describe{
-#'     \item{homophily_correlation}{Pearson correlation between similarity scores
-#'       and tie presence. Positive values indicate homophily.}
-#'     \item{mean_similarity_connected}{Mean similarity among connected dyads.}
-#'     \item{mean_similarity_unconnected}{Mean similarity among unconnected dyads.}
-#'     \item{similarity_difference}{Difference between mean similarities
+#'     \item{homophily_correlation}{pearson correlation between similarity scores
+#'       and tie presence. positive values indicate homophily.}
+#'     \item{mean_similarity_connected}{mean similarity among connected dyads.}
+#'     \item{mean_similarity_unconnected}{mean similarity among unconnected dyads.}
+#'     \item{similarity_difference}{difference between mean similarities
 #'       (connected - unconnected).}
-#'     \item{p_value}{Two-tailed p-value from permutation test. NA if test not performed.}
-#'     \item{ci_lower}{Lower bound of bootstrap confidence interval.}
-#'     \item{ci_upper}{Upper bound of bootstrap confidence interval.}
-#'     \item{n_connected_pairs}{Number of connected dyad pairs analyzed.}
-#'     \item{n_unconnected_pairs}{Number of unconnected dyad pairs analyzed.}
+#'     \item{p_value}{two-tailed p-value from permutation test. na if test not performed.}
+#'     \item{ci_lower}{lower bound of bootstrap confidence interval.}
+#'     \item{ci_upper}{upper bound of bootstrap confidence interval.}
+#'     \item{n_connected_pairs}{number of connected dyad pairs analyzed.}
+#'     \item{n_unconnected_pairs}{number of unconnected dyad pairs analyzed.}
 #'   }
 #'
 #' @details
-#' The function:
+#' the function:
 #' \enumerate{
-#'   \item Converts the network to binary (tie/no tie)
-#'   \item Extracts upper triangle to avoid counting dyads twice
-#'   \item Calculates correlation between similarity and tie presence
-#'   \item If requested, performs permutation test by shuffling similarities
-#'   \item Computes bootstrap confidence intervals by resampling dyad pairs
+#'   \item converts the network to binary (tie/no tie)
+#'   \item extracts upper triangle for undirected networks and all ordered
+#'     off-diagonal dyads for directed networks
+#'   \item calculates correlation between similarity and tie presence
+#'   \item if requested, performs permutation test by shuffling similarities
+#'   \item computes bootstrap confidence intervals by resampling dyad pairs
 #' }
 #'
-#' Diagonal elements (self-ties) are excluded from analysis. Missing values
+#' diagonal elements (self-ties) are excluded from analysis. missing values
 #' in either matrix are removed pairwise.
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
 calculate_homophily_stats <- function(
 	similarity_matrix, net_matrix,
-	significance_test, n_permutations, alpha) {
+	significance_test, n_permutations, alpha, directed = FALSE) {
 	# convert network to logical matrix; non-zero counts as a tie
-	binary_net <- (net_matrix != 0) & !is.na(net_matrix)
+	binary_net <- binary_matrix_preserve_na(net_matrix)
 
-	# ensure diagonals are NA for the cpp function
+	# mark diagonals for the cpp function
 	diag(similarity_matrix) <- NA
 	diag(binary_net) <- NA
 
 	# call the cpp version
 	calculate_homophily_stats_cpp(
 		similarity_matrix,
-		binary_net,
-		significance_test,
-		n_permutations,
-		alpha
+			binary_net,
+			significance_test,
+			n_permutations,
+			alpha,
+			directed
 	)
+}
+
+#' convert a matrix to logical tie indicators while preserving unknown dyads
+#'
+#' @keywords internal
+#' @noRd
+binary_matrix_preserve_na <- function(net_matrix) {
+	binary_net <- matrix(NA,
+		nrow = nrow(net_matrix), ncol = ncol(net_matrix),
+		dimnames = dimnames(net_matrix))
+	observed_dyads <- !is.na(net_matrix)
+	binary_net[observed_dyads] <- net_matrix[observed_dyads] != 0
+	binary_net
 }

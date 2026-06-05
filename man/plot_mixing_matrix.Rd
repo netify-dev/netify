@@ -22,50 +22,50 @@ plot_mixing_matrix(
 )
 }
 \arguments{
-\item{mixing_results}{Output from \code{mixing_matrix()} containing mixing matrices
+\item{mixing_results}{output from \code{mixing_matrix()} containing mixing matrices
 and summary statistics.}
 
-\item{which_matrix}{Integer or character. Which matrix to plot if multiple are present.
-Default is 1 (first matrix).}
+\item{which_matrix}{integer or character. which matrix to plot if multiple are present.
+default is 1 (first matrix).}
 
-\item{show_values}{Logical. Whether to display values in each tile. Default TRUE.}
+\item{show_values}{logical. whether to display values in each tile. default TRUE.}
 
-\item{value_digits}{Integer. Number of decimal places for displayed values. Default 2.}
+\item{value_digits}{integer. number of decimal places for displayed values. default 2.}
 
-\item{color_scale}{Character vector of three colors for low, mid, and high values.
-Default uses a diverging color scale.}
+\item{color_scale}{character vector of three colors for low, mid, and high values.
+default uses a diverging color scale.}
 
-\item{midpoint}{Numeric. The midpoint for the diverging color scale. Default NULL
+\item{midpoint}{numeric. the midpoint for the diverging color scale. default NULL
 automatically calculates based on data range.}
 
-\item{text_size}{Numeric. Size of value labels in tiles. Default 4.}
+\item{text_size}{numeric. size of value labels in tiles. default 4.}
 
-\item{text_color}{Character. Color of text labels. Default "black".}
+\item{text_color}{character. color of text labels. default "black".}
 
-\item{text_color_threshold}{Numeric. If provided, values above this threshold (0-1 scale)
-will use white text, values below will use black text. Default NULL uses text_color for all.}
+\item{text_color_threshold}{numeric. if provided, values above this threshold (0-1 scale)
+will use white text, values below will use black text. default NULL uses text_color for all.}
 
-\item{tile_border_color}{Character. Color of tile borders. Default "white".}
+\item{tile_border_color}{character. color of tile borders. default "white".}
 
-\item{tile_border_size}{Numeric. Width of tile borders. Default 0.5.}
+\item{tile_border_size}{numeric. width of tile borders. default 0.5.}
 
-\item{reorder_categories}{Logical. Whether to reorder categories by similarity. Default FALSE.}
+\item{reorder_categories}{logical. whether to reorder categories by similarity. default FALSE.}
 
-\item{diagonal_emphasis}{Logical. Whether to emphasize diagonal cells (within-group mixing).
-Default TRUE.}
+\item{diagonal_emphasis}{logical. whether to emphasize diagonal cells (within-group mixing).
+default TRUE.}
 
-\item{...}{Additional arguments passed to ggplot2 functions.}
+\item{...}{additional arguments passed to ggplot2 functions.}
 }
 \value{
-A ggplot2 object that can be further customized.
+a ggplot2 object that can be further customized.
 }
 \description{
-Creates heatmap visualizations for attribute mixing matrices from \code{mixing_matrix()}.
-The function creates a tile plot showing how different attribute categories interact in the network.
+creates heatmap visualizations for attribute mixing matrices from \code{mixing_matrix()}.
+the function creates a tile plot showing how different attribute categories interact in the network.
 }
 \examples{
 \dontrun{
-# Create a network with categorical attributes
+# create a network with categorical attributes
 data(icews)
 icews_10 <- icews[icews$year == 2010, ]
 net <- netify(
@@ -75,17 +75,17 @@ net <- netify(
     weight = "verbCoop"
 )
 
-# Run mixing matrix analysis
+# run mixing matrix analysis
 mixing_result <- mixing_matrix(
     net,
     attribute = "i_polity2_cat"
 )
 
-# Create visualization
+# create visualization
 plot_mixing_matrix(mixing_result)
 }
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

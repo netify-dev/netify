@@ -1,18 +1,18 @@
 #' Melt methods for netify objects
 #'
-#' Convert netify matrices/arrays to long format data frames.
-#' These methods provide a consistent interface for melting different
-#' types of netify objects while leveraging C++ for performance.
+#' convert netify matrices/arrays to long format data frames.
+#' these methods provide a consistent interface for melting different
+#' types of netify objects while leveraging c++ for performance.
 #'
-#' @param data An object to be melted (e.g., a netify object)
-#' @param ... Additional arguments passed to methods
+#' @param data an object to be melted (e.g., a netify object)
+#' @param ... additional arguments passed to methods
 #'
-#' @return See method-specific documentation (e.g., \code{\link{melt.netify}})
+#' @return see method-specific documentation (e.g., \code{\link{melt.netify}})
 #'
 #' @name melt
 #' @rdname melt
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 melt <- function(data, ...) {
@@ -22,31 +22,31 @@ melt <- function(data, ...) {
 #' @rdname melt
 #' @method melt netify
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
-#' @param data A netify object
-#' @param ... Additional arguments (see details)
-#' @param remove_diagonal Logical. Remove diagonal elements (default: TRUE)
-#' @param remove_zeros Logical. Remove zero values (default: TRUE)
-#' @param na.rm Logical. Remove NA values (default: TRUE)
-#' @param value.name Character. Name for value column (default: "value")
-#' @return Data frame with columns: `Var1`, `Var2`, `value` (and optionally
-#'   `time` / `layer`). The `Var1` / `Var2` names are inherited from base R's
+#' @param data a netify object
+#' @param ... additional arguments (see details)
+#' @param remove_diagonal logical. remove diagonal elements (default: TRUE)
+#' @param remove_zeros logical. remove zero values (default: TRUE)
+#' @param na.rm logical. remove na values (default: TRUE)
+#' @param value.name character. name for value column (default: "value")
+#' @return data frame with columns: `var1`, `var2`, `value` (and optionally
+#'   `time` / `layer`). the `var1` / `var2` names are inherited from base r's
 #'   `as.data.frame.table` / `reshape2::melt` heritage and are used by internal
 #'   helpers (`decompose_helpers`, `plot_homophily`, etc.); rename them yourself
 #'   downstream if you need snake_case (e.g.
-#'   `rlang::set_names(out, c("from", "to", "value", ...))`). For a fully
+#'   `rlang::set_names(out, c("from", "to", "value", ...))`). for a fully
 #'   snake_case, dyad-attribute-merged edge frame, use [unnetify()] or
 #'   [as_tibble.netify()] instead.
 #' @details
-#' The melt method converts netify objects from their matrix representation to
-#' a long format data frame suitable for analysis and visualization. The output
+#' the melt method converts netify objects from their matrix representation to
+#' a long format data frame suitable for analysis and visualization. the output
 #' format depends on the type of netify object:
 #' \itemize{
-#'   \item Cross-sectional: Returns columns `Var1`, `Var2`, `value`
-#'   \item Longitudinal: Returns columns `Var1`, `Var2`, `time`, `value`
-#'   \item Multilayer: Returns columns `Var1`, `Var2`, `layer`, `value` (and `time` if longitudinal)
+#'   \item cross-sectional: returns columns `var1`, `var2`, `value`
+#'   \item longitudinal: returns columns `var1`, `var2`, `time`, `value`
+#'   \item multilayer: returns columns `var1`, `var2`, `layer`, `value` (and `time` if longitudinal)
 #' }
 melt.netify <- function(data, ...,
 						remove_diagonal = TRUE,
@@ -65,17 +65,17 @@ melt.netify <- function(data, ...,
 			value.name = value.name
 		))
 	} else if (netify_type == "longit_array") {
-		# 3D array case
+		# 3d array case
 		return(melt_array(data,
 			remove_diagonal = remove_diagonal,
 			remove_zeros = remove_zeros,
 			na.rm = na.rm,
 			value.name = value.name
 		))
-	} else if (netify_type == "longit_list") {
-		# list of matrices case
-		results <- lapply(seq_along(data), function(i) {
-			df <- melt_matrix(data[[i]],
+		} else if (netify_type == "longit_list") {
+			# list of matrices case
+			results <- lapply(seq_along(data), function(i) {
+				df <- melt_matrix(data[[i]],
 				remove_diagonal = remove_diagonal,
 				remove_zeros = remove_zeros,
 				na.rm = na.rm,
@@ -85,13 +85,19 @@ melt.netify <- function(data, ...,
 				df$time <- names(data)[i]
 			}
 			df
-		})
+			})
 
-		# combine results
-		result <- do.call(rbind, results[sapply(results, nrow) > 0])
-		rownames(result) <- NULL
-		return(result)
-	} else if (netify_type == "multilayer") {
+			# combine results
+			nonempty <- results[sapply(results, nrow) > 0]
+			if (length(nonempty) == 0L) {
+				result <- results[[1]][0, , drop = FALSE]
+				result$time <- character(0)
+				return(result[, c("Var1", "Var2", "time", value.name), drop = FALSE])
+			}
+			result <- do.call(rbind, nonempty)
+			rownames(result) <- NULL
+			return(result)
+		} else if (netify_type == "multilayer") {
 		# multilayer case
 		layer_names <- names(data)
 		results <- lapply(seq_along(data), function(i) {
@@ -107,25 +113,31 @@ melt.netify <- function(data, ...,
 			df
 		})
 
-		# combine results
-		result <- do.call(rbind, results[sapply(results, nrow) > 0])
-		rownames(result) <- NULL
-		return(result)
+			# combine results
+			nonempty <- results[sapply(results, nrow) > 0]
+			if (length(nonempty) == 0L) {
+				result <- results[[1]][0, , drop = FALSE]
+				result$layer <- character(0)
+				return(result)
+			}
+			result <- do.call(rbind, nonempty)
+			rownames(result) <- NULL
+			return(result)
 	}
 
 	stop("Unknown netify type: ", netify_type)
 }
 
-#' Melt array to long format
+#' melt array to long format
 #'
-#' Internal function to melt 3D arrays
+#' internal function to melt 3d arrays
 #'
-#' @param arr 3D array
-#' @param remove_diagonal Remove diagonal elements
-#' @param remove_zeros Remove zero values
-#' @param na.rm Remove NA values
-#' @param value.name Name for value column
-#' @return Data frame with row, col, time, and value columns
+#' @param arr 3d array
+#' @param remove_diagonal remove diagonal elements
+#' @param remove_zeros remove zero values
+#' @param na.rm remove na values
+#' @param value.name name for value column
+#' @return data frame with row, col, time, and value columns
 #'
 #' @keywords internal
 #' @noRd
@@ -149,7 +161,13 @@ melt_array <- function(arr, remove_diagonal = TRUE, remove_zeros = TRUE,
 	})
 
 	# combine
-	result <- do.call(rbind, results[sapply(results, nrow) > 0])
+	nonempty <- results[sapply(results, nrow) > 0]
+	if (length(nonempty) == 0L) {
+		result <- results[[1]][0, , drop = FALSE]
+		result$L1 <- character(0)
+		return(result[, c("Var1", "Var2", "L1", value.name), drop = FALSE])
+	}
+	result <- do.call(rbind, nonempty)
 	rownames(result) <- NULL
 
 	# reorder columns
@@ -158,7 +176,7 @@ melt_array <- function(arr, remove_diagonal = TRUE, remove_zeros = TRUE,
 	result[c(other_cols[1:2], L1_col, other_cols[3:length(other_cols)])]
 }
 
-#' Legacy function names for backwards compatibility
+#' legacy function names for backwards compatibility
 #' @keywords internal
 #' @noRd
 melt_matrix_base <- function(mat) {
@@ -169,7 +187,7 @@ melt_matrix_base <- function(mat) {
 #' @noRd
 melt_matrix_sparse <- function(mat, remove_zeros = TRUE, remove_diagonal = TRUE) {
 	result <- melt_matrix(mat, remove_diagonal = remove_diagonal, remove_zeros = remove_zeros, na.rm = TRUE)
-	# ensure consistent column names
+	# keep column names consistent
 	names(result)[names(result) == "row"] <- "Var1"
 	names(result)[names(result) == "col"] <- "Var2"
 	return(result)
@@ -197,7 +215,17 @@ melt_list_sparse <- function(lst, remove_zeros = TRUE, remove_diagonal = TRUE) {
 	})
 
 	# combine results
-	result <- do.call(rbind, results[sapply(results, nrow) > 0])
+	nonempty <- results[sapply(results, nrow) > 0]
+	if (length(nonempty) == 0L) {
+		return(data.frame(
+			Var1 = character(),
+			Var2 = character(),
+			L1 = character(),
+			value = numeric(),
+			stringsAsFactors = FALSE
+		))
+	}
+	result <- do.call(rbind, nonempty)
 	rownames(result) <- NULL
 
 	# reorder columns
@@ -206,7 +234,7 @@ melt_list_sparse <- function(lst, remove_zeros = TRUE, remove_diagonal = TRUE) {
 	result[c(other_cols[1:2], time_col, other_cols[3:length(other_cols)])]
 }
 
-#' Melt variable time list
+#' melt variable time list
 #' @keywords internal
 #' @noRd
 melt_var_time_list <- function(var_time_list) {
@@ -277,7 +305,7 @@ melt_var_time_list <- function(var_time_list) {
 	}
 }
 
-#' Melt character matrix
+#' melt character matrix
 #' @keywords internal
 #' @noRd
 melt_matrix_character <- function(mat, remove_diagonal = TRUE) {
@@ -315,14 +343,14 @@ melt_matrix_character <- function(mat, remove_diagonal = TRUE) {
 		result <- result[diag_idx, ]
 	}
 
-	# remove rows with NA values
+	# remove rows with na values
 	result <- result[!is.na(result$value), ]
 
 	rownames(result) <- NULL
 	return(result)
 }
 
-#' Melt data frame for plotting
+#' melt data frame for plotting
 #' @keywords internal
 #' @noRd
 melt_df <- function(data, id) {

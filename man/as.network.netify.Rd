@@ -7,22 +7,22 @@
 as.network.netify(x, ...)
 }
 \arguments{
-\item{x}{A netify object.}
+\item{x}{a netify object.}
 
-\item{...}{Extra arguments forwarded to \code{\link{netify_to_statnet}}
+\item{...}{extra arguments forwarded to \code{\link{netify_to_statnet}}
 (e.g. \code{add_nodal_attribs}, \code{add_dyad_attribs}).}
 }
 \value{
-A statnet \code{network} object or list of network objects, as
+a statnet \code{network} object or list of network objects, as
 produced by \code{netify_to_statnet}.
 }
 \description{
-S3 method that lets statnet's \code{\link[network]{as.network}} generic
-dispatch on netify objects. Equivalent to \code{netify_to_statnet(x, ...)}.
-Registered against the \pkg{network} namespace in \code{.onLoad}, so the
+s3 method that lets statnet's \code{\link[network]{as.network}} generic
+dispatch on netify objects. equivalent to \code{netify_to_statnet(x, ...)}.
+registered against the \pkg{network} namespace in \code{.onload}, so the
 dispatch works regardless of whether \pkg{network} is attached before or
 after \pkg{netify}.
 }
 \author{
-Shahryar Minhas
+shahryar minhas
 }

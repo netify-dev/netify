@@ -2,17 +2,17 @@
 % Please edit documentation in R/plot_styles.R
 \name{style_bipartite_network}
 \alias{style_bipartite_network}
-\title{Preset style for bipartite networks}
+\title{preset style for bipartite networks}
 \usage{
 style_bipartite_network()
 }
 \value{
-List of plot arguments
+list of plot arguments
 }
 \description{
-A complete visual style optimized for displaying bipartite networks
+a complete visual style optimized for displaying bipartite networks
 with two distinct node sets
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

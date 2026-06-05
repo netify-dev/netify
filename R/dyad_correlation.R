@@ -1,57 +1,61 @@
 #' Analyze correlations between dyadic attributes and network ties
 #'
-#' Examines relationships between dyadic (pairwise) attributes and network
-#' connections. Calculates correlations between dyadic variables and edge
+#' examines relationships between dyadic (pairwise) attributes and network
+#' connections. calculates correlations between dyadic variables and edge
 #' weights/presence, with support for multiple correlation methods and
 #' significance testing.
 #'
-#' @param netlet A netify object containing network data.
-#' @param dyad_vars Character vector of dyadic attribute names to analyze.
-#'   If NULL, analyzes all available dyadic variables.
-#' @param edge_vars Character vector of edge variables to correlate with.
-#'   If NULL, uses the main network matrix.
-#' @param method Character string specifying correlation method:
+#' @param netlet a netify object containing network data.
+#' @param dyad_vars character vector of dyadic attribute names to analyze.
+#'   if NULL, analyzes all available dyadic variables.
+#' @param edge_vars character vector of edge variables to correlate with.
+#'   if NULL, uses the main network matrix.
+#' @param method character string specifying correlation method:
 #'   \describe{
-#'     \item{"pearson"}{Pearson product-moment correlation (default)}
-#'     \item{"spearman"}{Spearman rank correlation}
-#'     \item{"kendall"}{Kendall's tau correlation}
+#'     \item{"pearson"}{pearson product-moment correlation (default)}
+#'     \item{"spearman"}{spearman rank correlation}
+#'     \item{"kendall"}{kendall's tau correlation}
 #'   }
-#' @param binary_network Logical. Whether to convert ties to binary before
-#'   correlation. Default FALSE.
-#' @param remove_diagonal Logical. Whether to exclude diagonal elements. Default TRUE.
-#' @param significance_test Logical. Whether to calculate P-values and confidence
-#'   intervals. Default TRUE.
-#' @param alpha Significance level for confidence intervals. Default 0.05.
-#' @param partial_correlations Logical. Whether to calculate partial correlations
-#'   controlling for other dyadic variables. Default FALSE.
-#' @param other_stats Named list of custom functions for additional statistics.
-#' @param ... Additional arguments passed to custom functions.
+#' @param binary_network logical. whether to convert ties to binary before
+#'   correlation. default FALSE.
+#' @param remove_diagonal logical. whether to exclude diagonal elements. default TRUE.
+#' @param significance_test logical. whether to calculate ordinary correlation
+#'   p-values and confidence intervals on the dyad vectors. default TRUE.
+#' @param alpha significance level for confidence intervals. default 0.05.
+#' @param partial_correlations logical. whether to calculate partial correlations
+#'   controlling for other dyadic variables. default FALSE.
+#' @param other_stats named list of custom functions for additional statistics.
+#' @param ... additional arguments passed to custom functions.
 #'
-#' @return Data frame with one row per dyadic variable per network/time period:
+#' @return data frame with one row per dyadic variable per network/time period:
 #'   \describe{
-#'     \item{\code{net}}{Network/time identifier}
-#'     \item{\code{layer}}{Layer name}
-#'     \item{\code{dyad_var}}{Name of dyadic variable}
-#'     \item{\code{edge_var}}{Name of edge variable}
-#'     \item{\code{correlation}}{Correlation coefficient}
-#'     \item{\code{p_value}}{P-value for correlation significance}
-#'     \item{\code{ci_lower}, \code{ci_upper}}{Confidence interval bounds}
-#'     \item{\code{n_pairs}}{Number of dyad pairs included}
-#'     \item{\code{method}}{Correlation method used}
-#'     \item{\code{mean_dyad_var}}{Mean value of dyadic variable}
-#'     \item{\code{sd_dyad_var}}{Standard deviation of dyadic variable}
-#'     \item{\code{mean_edge_var}}{Mean value of edge variable}
-#'     \item{\code{sd_edge_var}}{Standard deviation of edge variable}
+#'     \item{\code{net}}{network/time identifier}
+#'     \item{\code{layer}}{layer name}
+#'     \item{\code{dyad_var}}{name of dyadic variable}
+#'     \item{\code{edge_var}}{name of edge variable}
+#'     \item{\code{correlation}}{correlation coefficient}
+#'     \item{\code{p_value}}{p-value for correlation significance}
+#'     \item{\code{ci_lower}, \code{ci_upper}}{confidence interval bounds}
+#'     \item{\code{n_pairs}}{number of dyad pairs included}
+#'     \item{\code{method}}{correlation method used}
+#'     \item{\code{mean_dyad_var}}{mean value of dyadic variable}
+#'     \item{\code{sd_dyad_var}}{standard deviation of dyadic variable}
+#'     \item{\code{mean_edge_var}}{mean value of edge variable}
+#'     \item{\code{sd_edge_var}}{standard deviation of edge variable}
 #'   }
 #'
 #' @details
-#' Extracts dyadic variables from dyad_data attribute and correlates them with
-#' network ties. For longitudinal networks, correlations are calculated separately
-#' for each time period. Dyadic variables should be stored as matrices with rows
-#' and columns corresponding to network actors. Missing values are handled using
+#' extracts dyadic variables from dyad_data attribute and correlates them with
+#' network ties. for longitudinal networks, correlations are calculated separately
+#' for each time period. dyadic variables should be stored as matrices with rows
+#' and columns corresponding to network actors. missing values are handled using
 #' pairwise complete observations.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' the reported p-values and confidence intervals are the standard tests from
+#' \code{stats::cor.test()} applied to the dyad vectors. they are useful as
+#' descriptive screens, but they do not model network dependence among dyads.
+#'
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export dyad_correlation
 
@@ -76,6 +80,9 @@ dyad_correlation <- function(
 	checkmate::assert_logical(remove_diagonal, len = 1)
 	checkmate::assert_logical(significance_test, len = 1)
 	checkmate::assert_number(alpha, lower = 0, upper = 1)
+	if (alpha <= 0 || alpha >= 1) {
+		cli::cli_abort("{.arg alpha} must be in (0, 1).")
+	}
 	checkmate::assert_logical(partial_correlations, len = 1)
 
 	# extract object attributes
@@ -118,7 +125,7 @@ dyad_correlation <- function(
 		netlet_list <- switch(netify_type,
 			"cross_sec" = list("1" = netlet),
 			"longit_array" = {
-				# check if this is multilayer longitudinal (4D) or single layer (3D)
+				# check if this is multilayer longitudinal (4d) or single layer (3d)
 				if (length(dim(netlet)) == 4) {
 					# multilayer longitudinal: extract time periods from 4th dimension
 					time_names <- dimnames(netlet)[[4]]
@@ -153,10 +160,10 @@ dyad_correlation <- function(
 			# extract specific layer for multilayer networks
 			if (length(layers) > 1) {
 				if (netify_type == "cross_sec") {
-					# for cross-sectional multilayer: 3D array [actors, actors, layers]
+					# for cross-sectional multilayer: 3d array [actors, actors, layers]
 					net_matrix <- netlet[, , layer_index]
 				} else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
-					# for longitudinal multilayer: 4D array [actors, actors, layers, time]
+					# for longitudinal multilayer: 4d array [actors, actors, layers, time]
 					net_matrix <- net_matrix[, , layer_index]
 				}
 			}
@@ -189,11 +196,14 @@ dyad_correlation <- function(
 					next
 				}
 
-				# convert to binary if requested — non-zero counts as edge so
+				# convert to binary if requested -- non-zero counts as edge so
 				# signed weights are not silently dropped
 				if (binary_network) {
-					edge_matrix <- (edge_matrix != 0) & !is.na(edge_matrix)
-					edge_matrix <- as.numeric(edge_matrix)
+					binary_edge_matrix <- ifelse(is.na(edge_matrix), NA_real_,
+						as.numeric(edge_matrix != 0))
+					dim(binary_edge_matrix) <- dim(edge_matrix)
+					dimnames(binary_edge_matrix) <- dimnames(edge_matrix)
+					edge_matrix <- binary_edge_matrix
 				}
 
 				# process each dyadic variable
@@ -204,19 +214,24 @@ dyad_correlation <- function(
 
 					dyad_matrix <- time_dyad_data[[dyad_var]]
 
-					# ensure matrices have same dimensions
+					# require matching dimensions
 					if (!identical(dim(dyad_matrix), dim(edge_matrix))) {
 						cli::cli_warn("Dimension mismatch between dyadic variable {dyad_var} and edge variable {edge_var} for time {time_id}")
 						next
 					}
 
 					# calculate correlations
-					corr_result <- calculate_dyadic_correlation(
-						dyad_matrix, edge_matrix, method, remove_diagonal,
-						significance_test, alpha, partial_correlations,
-						if (partial_correlations) time_dyad_data else NULL,
-						dyad_var
-					)
+						layer_symmetric <- obj_attrs$symmetric %||% FALSE
+						if (length(layer_symmetric) > 1) {
+							layer_symmetric <- layer_symmetric[layer_index]
+						}
+							corr_result <- calculate_dyadic_correlation(
+								dyad_matrix, edge_matrix, method, remove_diagonal,
+								significance_test, alpha, partial_correlations,
+								if (partial_correlations) time_dyad_data else NULL,
+								dyad_var, is_symmetric = isTRUE(layer_symmetric),
+								is_bipartite = identical(obj_attrs$mode, "bipartite")
+							)
 
 					# add custom statistics if provided
 					if (!is.null(other_stats)) {
@@ -279,13 +294,20 @@ dyad_correlation <- function(
 
 # helper function to calculate dyadic correlations
 calculate_dyadic_correlation <- function(dyad_matrix, edge_matrix, method,
-										 remove_diagonal, significance_test, alpha,
-										 partial_correlations, all_dyad_data,
-										 current_var) {
+									 remove_diagonal, significance_test, alpha,
+									 partial_correlations, all_dyad_data,
+									 current_var, is_symmetric = FALSE,
+									 is_bipartite = FALSE) {
 	# remove diagonal if requested
-	if (remove_diagonal) {
+	if (remove_diagonal && !isTRUE(is_bipartite)) {
 		diag(dyad_matrix) <- NA
 		diag(edge_matrix) <- NA
+	}
+
+	if (!isTRUE(is_bipartite) && isTRUE(is_symmetric) &&
+		nrow(dyad_matrix) == ncol(dyad_matrix)) {
+		dyad_matrix[lower.tri(dyad_matrix)] <- NA
+		edge_matrix[lower.tri(edge_matrix)] <- NA
 	}
 
 	# extract vectors for correlation
@@ -314,16 +336,19 @@ calculate_dyadic_correlation <- function(dyad_matrix, edge_matrix, method,
 	# calculate basic correlation
 	if (partial_correlations && !is.null(all_dyad_data) && length(all_dyad_data) > 1) {
 		# calculate partial correlation
-		cor_result <- calculate_partial_correlation(
-			dyad_vec, edge_vec, dyad_matrix, all_dyad_data, current_var,
-			remove_diagonal, method
-		)
+				cor_result <- calculate_partial_correlation(
+					dyad_vec, edge_vec, dyad_matrix, all_dyad_data, current_var,
+					remove_diagonal && !isTRUE(is_bipartite), method, alpha,
+					significance_test, is_symmetric && !isTRUE(is_bipartite),
+					complete_cases
+				)
 	} else {
 		# calculate simple correlation; warn on failure so cor.test errors
-		# (zero variance, too few points, etc.) do not silently become NA
+		# (zero variance, too few points, etc.) do not silently become na
 		cor_result <- tryCatch(
 			{
-				cor_test <- stats::cor.test(dyad_vec, edge_vec, method = method)
+				cor_test <- stats::cor.test(dyad_vec, edge_vec, method = method,
+					conf.level = 1 - alpha)
 				list(
 					correlation = cor_test$estimate,
 					p_value = if (significance_test) cor_test$p.value else NA,
@@ -361,18 +386,22 @@ calculate_dyadic_correlation <- function(dyad_matrix, edge_matrix, method,
 # helper function to calculate partial correlations
 calculate_partial_correlation <- function(dyad_vec, edge_vec, dyad_matrix,
 										  all_dyad_data, current_var,
-										  remove_diagonal, method) {
+										  remove_diagonal, method, alpha,
+										  significance_test = TRUE,
+										  is_symmetric = FALSE,
+										  dyad_complete_cases = NULL) {
 	# get other dyadic variables for partial correlation
 	other_vars <- setdiff(names(all_dyad_data), current_var)
 
 	if (length(other_vars) == 0) {
 		# fall back to simple correlation if no other variables
-		cor_test <- stats::cor.test(dyad_vec, edge_vec, method = method)
+		cor_test <- stats::cor.test(dyad_vec, edge_vec, method = method,
+			conf.level = 1 - alpha)
 		return(list(
 			correlation = cor_test$estimate,
-			p_value = cor_test$p.value,
-			ci_lower = if (!is.null(cor_test$conf.int)) cor_test$conf.int[1] else NA,
-			ci_upper = if (!is.null(cor_test$conf.int)) cor_test$conf.int[2] else NA
+			p_value = if (significance_test) cor_test$p.value else NA,
+			ci_lower = if (significance_test && !is.null(cor_test$conf.int)) cor_test$conf.int[1] else NA,
+			ci_upper = if (significance_test && !is.null(cor_test$conf.int)) cor_test$conf.int[2] else NA
 		))
 	}
 
@@ -382,8 +411,15 @@ calculate_partial_correlation <- function(dyad_vec, edge_vec, dyad_matrix,
 		if (remove_diagonal) {
 			diag(control_matrix) <- NA
 		}
-		as.vector(control_matrix)
-	})
+			if (isTRUE(is_symmetric) && nrow(control_matrix) == ncol(control_matrix)) {
+				control_matrix[lower.tri(control_matrix)] <- NA
+			}
+			control_vec <- as.vector(control_matrix)
+			if (!is.null(dyad_complete_cases)) {
+				control_vec <- control_vec[dyad_complete_cases]
+			}
+			control_vec
+		})
 
 	# combine all vectors
 	all_vectors <- do.call(cbind, c(list(dyad_vec, edge_vec), control_matrices))
@@ -393,7 +429,7 @@ calculate_partial_correlation <- function(dyad_vec, edge_vec, dyad_matrix,
 	complete_cases <- complete.cases(all_vectors)
 	all_vectors <- all_vectors[complete_cases, , drop = FALSE]
 
-	if (nrow(all_vectors) < (ncol(all_vectors) + 5)) { # Need enough observations
+	if (nrow(all_vectors) < (ncol(all_vectors) + 5)) { # need enough observations
 		return(list(
 			correlation = NA,
 			p_value = NA,
@@ -402,9 +438,7 @@ calculate_partial_correlation <- function(dyad_vec, edge_vec, dyad_matrix,
 		))
 	}
 
-	# calculate partial correlation using linear regression approach;
-	# surface unexpected failures so collinearity/degenerate input gets
-	# noticed instead of silently NA-ing
+	# fit residual models for partial correlation
 	tryCatch(
 		{
 			# regress target variable on control variables
@@ -420,13 +454,55 @@ calculate_partial_correlation <- function(dyad_vec, edge_vec, dyad_matrix,
 			}
 
 			# correlate residuals
-			cor_test <- stats::cor.test(target_residuals, outcome_residuals, method = method)
+			correlation <- suppressWarnings(stats::cor(
+				target_residuals, outcome_residuals, method = method
+			))
+			if (!is.finite(correlation)) {
+				return(list(
+					correlation = NA,
+					p_value = NA,
+					ci_lower = NA,
+					ci_upper = NA
+				))
+			}
+
+			p_value <- NA_real_
+			ci_lower <- NA_real_
+			ci_upper <- NA_real_
+			if (significance_test) {
+				if (method == "pearson") {
+					n_controls <- ncol(all_vectors) - 2L
+					df <- length(target_residuals) - n_controls - 2L
+					if (df > 0 && abs(correlation) < 1) {
+						t_stat <- correlation * sqrt(df / (1 - correlation^2))
+						p_value <- 2 * stats::pt(abs(t_stat), df = df, lower.tail = FALSE)
+					} else if (df > 0 && abs(correlation) == 1) {
+						p_value <- 0
+					}
+					ci_df <- length(target_residuals) - n_controls - 3L
+					if (ci_df > 0 && abs(correlation) < 1) {
+						z <- atanh(correlation)
+						se <- 1 / sqrt(ci_df)
+						crit <- stats::qnorm(1 - alpha / 2)
+						ci_lower <- tanh(z - crit * se)
+						ci_upper <- tanh(z + crit * se)
+					}
+				} else {
+					cor_test <- stats::cor.test(target_residuals, outcome_residuals,
+						method = method, conf.level = 1 - alpha)
+					p_value <- cor_test$p.value
+					if (!is.null(cor_test$conf.int)) {
+						ci_lower <- cor_test$conf.int[1]
+						ci_upper <- cor_test$conf.int[2]
+					}
+				}
+			}
 
 			list(
-				correlation = cor_test$estimate,
-				p_value = cor_test$p.value,
-				ci_lower = if (!is.null(cor_test$conf.int)) cor_test$conf.int[1] else NA,
-				ci_upper = if (!is.null(cor_test$conf.int)) cor_test$conf.int[2] else NA
+				correlation = correlation,
+				p_value = p_value,
+				ci_lower = ci_lower,
+				ci_upper = ci_upper
 			)
 		},
 		error = function(e) {

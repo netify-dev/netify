@@ -3,7 +3,7 @@
 #' @param netlet_list list of netlet objects
 #' @param layer_labels character vector of layer labels
 #' @return character vector of layer labels
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -41,18 +41,18 @@ set_layer_labels <- function(netlet_list, layer_labels) {
 	return(layer_labels)
 }
 
-#' Cycle through elements of a netlet object and make sure
+#' cycle through elements of a netlet object and make sure
 #' that they are identical before we try to merge into
 #' a multilayer netify object
 #'
 #' @param a_list list object to check
 #' @param elems character vector with names of elements to check
 #' @param msg character vector of length two warning user
-#' if elements are found to be not identical. First part of
+#' if elements are found to be not identical. first part of
 #' vector is the preamble before the element name and
 #' second part is what should come after the element name.
 #' @return NULL
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -74,7 +74,7 @@ check_layer_compatible <- function(a_list, elems, msg) {
 	}
 }
 
-#' Helper function for layer_netify to extract attributes
+#' helper function for layer_netify to extract attributes
 #' from listed netlet objects
 #'
 #' @param a_list named list object
@@ -82,7 +82,7 @@ check_layer_compatible <- function(a_list, elems, msg) {
 #' @param list_format logical, if TRUE return list of attributes
 #' @param get_unique logical, if TRUE return unique values of attribute
 #' @return attribute values
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -104,15 +104,16 @@ get_attribs <- function(
 	}
 }
 
-#' Reduce and combine multiple nodal attributes of netify objects
-#' into a single nodal attribute. Mainly for use within the
+#' reduce and combine multiple nodal attributes of netify objects
+#' into a single nodal attribute. mainly for use within the
 #' layer_netify function
 #'
 #' @param attribs_list list of attributes from each netlet
 #' @param msrmnts_list list of msrmnts from each netlet
 #' @param netlet_type character string of netlet type
+#' @param layer_labels character vector of layer labels
 #' @return nodal attribute data.frame
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -144,11 +145,10 @@ reduce_combine_nodal_attr <- function(
 		}
 
 		if (!n_id_check) {
-			cli::cli_alert_warning(
-				"Warning: Nodal data id columns are not identical across netlets,
-				nodal data will not be merged from netlets, you can readd nodal
-				attributes manually using the `add_nodal_data` function."
-			)
+			cli::cli_warn(c(
+				"!" = "Nodal data id columns are not identical across netlets; nodal data will not be merged.",
+				"i" = "Re-add nodal attributes manually with {.fn add_node_vars}."
+			))
 			return(NULL)
 		}
 
@@ -172,21 +172,21 @@ reduce_combine_nodal_attr <- function(
 	}
 }
 
-#' Reduce and combine multiple dyadic attributes of netify objects
-#' into a single dyadic attribute. Mainly for use within the
+#' reduce and combine multiple dyadic attributes of netify objects
+#' into a single dyadic attribute. mainly for use within the
 #' layer_netify function
 #'
 #' @param attribs_list list of attributes from each netlet
 #' @param msrmnts_list list of msrmnts from each netlet
 #' @param netlet_type character string of netlet type
 #' @return dyad attribute data.frame
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
 
 reduce_combine_dyad_attr <- function(
-	attribs_list, msrmnts_list, netlet_type) {
+	attribs_list, msrmnts_list, netlet_type, layer_labels = NULL) {
 	# extract dyad data from each netlet into list
 	dyad_data_list <- lapply(attribs_list, `[[`, "dyad_data")
 
@@ -195,6 +195,10 @@ reduce_combine_dyad_attr <- function(
 		is.null(x) || is.null(x[[1]])
 	}, logical(1))
 	dyad_data_list <- dyad_data_list[!null_check]
+	layer_labels <- layer_labels[!null_check]
+	if (is.null(layer_labels) || length(layer_labels) != length(dyad_data_list)) {
+		layer_labels <- paste0("layer", seq_along(dyad_data_list))
+	}
 
 	# if only one element left then just
 	# return that one dyad data element
@@ -206,6 +210,12 @@ reduce_combine_dyad_attr <- function(
 	if (length(dyad_data_list) > 1) {
 		# get a list of the vars across the netlets
 		dvars <- get_attribs(msrmnts_list, "dvars", get_unique = TRUE)
+		layer_dvars <- lapply(dyad_data_list, function(dd) {
+			unique(unlist(lapply(dd, names), use.names = FALSE))
+		})
+		colliding_dvars <- names(table(unlist(layer_dvars, use.names = FALSE))[
+			table(unlist(layer_dvars, use.names = FALSE)) > 1L
+		])
 
 		# check that id row/col and time periods are identical across netlets
 		t_check <- identical_recursive(lapply(dyad_data_list, names))
@@ -252,14 +262,20 @@ reduce_combine_dyad_attr <- function(
 				combined_vars <- list()
 
 				# iterate through each netlet's dyad data for this time period
-				for (netlet_dyad_data in dyad_data_list) {
+				for (dd_idx in seq_along(dyad_data_list)) {
+					netlet_dyad_data <- dyad_data_list[[dd_idx]]
 					time_period_data <- netlet_dyad_data[[tt]]
 
 					if (!is.null(time_period_data) && length(time_period_data) > 0) {
 						# direct assignment
 						for (var_name in names(time_period_data)) {
 							if (var_name %in% dvars) {
-								combined_vars[[var_name]] <- time_period_data[[var_name]]
+								out_name <- if (var_name %in% colliding_dvars) {
+									paste(layer_labels[dd_idx], var_name, sep = "_")
+								} else {
+									var_name
+								}
+								combined_vars[[out_name]] <- time_period_data[[var_name]]
 							}
 						}
 					}

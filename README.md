@@ -10,93 +10,17 @@ We built netify while doing our own network research in social science. It handl
 
 ## Installation
 
-You have two options for installing `netify`.
-
-### 🔧 Option 1: Install from GitHub (requires build tools)
-
-> ⚠️ Requires R build tools:
->
-> * macOS: Xcode Command Line Tools
-> * Windows: Rtools
-> * Linux: build-essential and related packages
+Install the package from CRAN after release:
 
 ```r
-# Install from GitHub
-# install.packages("devtools")
+install.packages("netify")
+```
+
+Install the development version from GitHub:
+
+```r
+install.packages("devtools")
 devtools::install_github("netify-dev/netify", dependencies = TRUE)
-```
-
-### 🛠 Option 2: Pre-built binaries (no compilation needed)
-
-If you're on **macOS** or **Windows** and want to avoid installing developer tools (like compilers, Xcode, or Rtools), you can use our pre-built binaries from the [Releases page](https://github.com/netify-dev/netify/releases):
-
-#### ✅ Steps:
-
-1. Go to: [https://github.com/netify-dev/netify/releases](https://github.com/netify-dev/netify/releases)
-2. Click on the latest release (e.g., **v1.5**)
-3. Download the file that matches your system
-
-#### 📦 First, install dependencies (if needed):
-
-```r
-# Install required packages if you don't already have them
-deps <- c("Rcpp", "stats", "rlang", "cli", "checkmate", "igraph", 
-          "ggplot2", "scales", "ggnewscale", "ggridges", 
-          "ggbeeswarm", "patchwork", "RColorBrewer", "ggrepel")
-
-# Check which packages are not installed
-missing_deps <- deps[!deps %in% installed.packages()[,"Package"]]
-
-# Install missing packages
-if(length(missing_deps) > 0) {
-  install.packages(missing_deps, repos='https://cloud.r-project.org/')
-}
-```
-
-#### 🖥 macOS users:
-
-There are several macOS builds — choose the one that fits your system:
-
-| File              | For...                                                                      |
-| ----------------- | --------------------------------------------------------------------------- |
-| `macos-arm64.tgz` | Macs with Apple Silicon (M1, M2, M3 chips) running recent macOS             |
-| `macos-intel.tgz` | Macs with Intel chips                                                       |
-| `macos-asan.tgz`  | Developer/debug version (for advanced users only; includes sanitizer flags) |
-
-Most users can choose based on chip type:
-
-```r
-# Example: Apple Silicon (M1/M2/M3)
-install.packages(
-  "~/Downloads/netify_1.5-macos-arm64.tgz", 
-  repos = NULL, type = "mac.binary")
-
-# Example: Intel Mac
-install.packages(
-  "~/Downloads/netify_1.5-macos-intel.tgz", 
-  repos = NULL, type = "mac.binary")
-```
-
-#### 🪟 Windows users:
-
-Download the `.zip` file named `netify_1.5-windows.zip` and install:
-
-```r
-install.packages(
-  "C:/path/to/netify_1.5-windows.zip", 
-  repos = NULL)
-```
-
-Be sure to replace the file path with where you saved the download.
-
-#### 🐧 Linux users:
-
-You can use the precompiled `.tgz` file, or install from source (see Option 1). Example:
-
-```r
-install.packages(
-  "~/Downloads/netify_1.5-linux.tgz", 
-  repos = NULL, type = "source")
 ```
 
 ## Quick Start
@@ -123,16 +47,16 @@ print(icews_conflict)
 ```
 
 ```
-✔ Hello, you have created network data, yay!
+✔ Network data created.
 • Unipartite
 • Asymmetric
 • Weights from `matlConf`
 • Longitudinal: 13 Periods
 • # Unique Actors: 152
 Network Summary Statistics (averaged across time):
-          dens miss  mean recip trans
-matlConf 0.113    0 1.471 0.594 0.387
-• Nodal Features: None
+          dens miss   mean recip trans
+matlConf 0.113    0 12.997 0.594 0.387
+• Nodal Features: i_polity2, i_log_gdp, i_region
 • Dyad Features: None
 ```
 
@@ -145,9 +69,9 @@ plot(icews_conflict)
 
 ![Basic ICEWS conflict network plot](man/figures/icews_plot.png)
 
-### More involved visualization
+### Add node color
 
-netify's plotting system is highly customizable. Here's how you can create a more sophisticated visualization:
+You can map node attributes to plot aesthetics:
 
 ```r
 # Create democracy indicator
@@ -185,8 +109,8 @@ plot(
   node_size_label = 'Log(GDP)',
   node_shape_label = ''
   ) +
-  theme(legend.position = 'right') + 
-  scale_color_brewer(palette = 'Set1')
+  ggplot2::theme(legend.position = 'right') +
+  ggplot2::scale_color_brewer(palette = 'Set1')
 ```
 
 ![Advanced ICEWS network plot with node colors, sizes, and shapes](man/figures/icews_advanced_plot.png)
@@ -260,7 +184,7 @@ This returns a data frame with network statistics for each time period:
 | Test homophily | `homophily()` | `homophily(net, attribute="democracy", method="correlation")` |
 | Create mixing matrix | `mixing_matrix()` | `mixing_matrix(net, attribute="regime_type", normalized=TRUE)` |
 | Test dyadic correlations | `dyad_correlation()` | `dyad_correlation(net, dyad_vars="geographic_distance")` |
-| Comprehensive attribute analysis | `attribute_report()` | `attribute_report(net, node_vars=c("region", "democracy"), dyad_vars="distance")` |
+| Attribute report | `attribute_report()` | `attribute_report(net, node_vars=c("region", "democracy"), dyad_vars="distance")` |
 | Compare networks | `compare_networks()` | `compare_networks(list(net1, net2), method="all")` |
 | Plot network | `plot()` | `plot(net)` |
 | Convert to igraph | `to_igraph()` | `g <- to_igraph(net)` |
@@ -286,20 +210,19 @@ For 10K+ actor / weekly-slice workflows, prefer edgelist inputs, set `stats = "f
 
 ## When you might need something else
 
-netify handles a lot, but there's an awesome world of network packages out there! If you need to venture beyond our walls, we've built bridges to get you there:
+netify covers common network data workflows and provides converters for specialized packages when you need methods outside its scope:
 
-- **Fancy statistical models**: Use `to_amen()` for latent factor models or `to_statnet()` for ERGMs
-- **Graph algorithms we don't have (yet!)**: Convert with `to_igraph()` to access igraph's vast toolkit
-- **Roll your own analysis**: Use `unnetify()` to get back to a data frame and do your own thing
+- **Statistical models**: Use `to_amen()` for latent factor models or `to_statnet()` for ERGMs
+- **Graph algorithms**: Convert with `to_igraph()` to use igraph methods
+- **Custom analysis**: Use `unnetify()` to return to a data frame
 
-We play well with others! 🤝
+These converters let you move between netify and other network-analysis tools without rebuilding the data by hand.
 
 ## Getting help
 
-- Browse vignettes for detailed guides: `browseVignettes("netify")`
+- Browse installed vignettes with `browseVignettes("netify")`; additional workflow articles are on the package website.
 - Check function documentation: `?netify`, `?plot.netify`, etc.
 - Report bugs: [GitHub Issues](https://github.com/netify-dev/netify/issues)
-- Ask questions: [GitHub Discussions](https://github.com/netify-dev/netify/discussions)
 
 ## Citation
 
@@ -324,10 +247,10 @@ This work is supported by National Science Foundation Awards #2017162 and #20171
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+GPL-3
 
 ---
 
 <p align="center">
-  Made with ❤️ for the network analysis community
+  Made for the network analysis community
 </p>

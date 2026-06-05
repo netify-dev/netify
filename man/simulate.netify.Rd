@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulate.netify.R
 \name{simulate.netify}
 \alias{simulate.netify}
-\title{Simulate null-model networks from a netify object}
+\title{Simulate NULL-model networks from a netify object}
 \usage{
 \method{simulate}{netify}(
   object,
@@ -13,41 +13,42 @@
 )
 }
 \arguments{
-\item{object}{A netify object (cross-sectional or per-period; for
+\item{object}{a netify object (cross-sectional or per-period; for
 longitudinal input each period is simulated independently).}
 
-\item{nsim}{Integer. Number of simulated draws to return.}
+\item{nsim}{integer. number of simulated draws to return.}
 
-\item{seed}{Optional integer. Local RNG seed; the user's global
-\code{set.seed()} stream is left untouched.}
+\item{seed}{optional integer. if supplied, sets a local rng seed and
+restores the user's global \code{set.seed()} stream afterward. if \code{NULL},
+simulation uses and advances the current rng stream normally.}
 
-\item{model}{Character. One of:
+\item{model}{character. one of:
 \describe{
-\item{\code{"erdos_renyi"}}{Independent Bernoulli edges matched
+\item{\code{"erdos_renyi"}}{independent bernoulli edges matched
 to the observed density (and directedness).}
-\item{\code{"configuration"}}{Configuration-model rewire that
+\item{\code{"configuration"}}{configuration-model rewire that
 preserves the observed degree sequence (in/out for directed
-inputs). Uses \code{igraph::sample_degseq()}.}
-\item{\code{"dyad_permutation"}}{Permute dyads (Snijders-Borgatti
-vertex relabel + symmetric reshuffle). Preserves density and,
+inputs). uses \code{igraph::sample_degseq()}.}
+\item{\code{"dyad_permutation"}}{permute dyads (snijders-borgatti
+vertex relabel + symmetric reshuffle). preserves density and,
 conditional on permutation symmetry, degree distribution
 shape.}
 }}
 
-\item{...}{Passed to the underlying model implementation.}
+\item{...}{passed to the underlying model implementation.}
 }
 \value{
-A list of length \code{nsim} of netify objects with the same
+a list of length \code{nsim} of netify objects with the same
 class / mode / symmetry as the input.
 }
 \description{
-Generates \code{nsim} new netify objects from one of three standard
-null models, holding the actor set fixed (and, where applicable,
-the observed density / degree sequence). Useful for sanity-checking
+generates \code{nsim} new netify objects from one of three standard
+NULL models, holding the actor set fixed (and, where applicable,
+the observed density / degree sequence). useful for sanity-checking
 whether an observed network statistic (transitivity, modularity,
 etc.) is surprising relative to a chance benchmark, without
-reaching for \code{statnet::ergm} for a simple null.
+reaching for \code{statnet::ergm} for a simple NULL.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

@@ -7,31 +7,31 @@
 as_tibble.netify_comparison(x, ...)
 }
 \arguments{
-\item{x}{A \code{netify_comparison} object from \code{\link[=compare_networks]{compare_networks()}}.}
+\item{x}{a \code{netify_comparison} object from \code{\link[=compare_networks]{compare_networks()}}.}
 
-\item{...}{Currently unused.}
+\item{...}{currently unused.}
 }
 \value{
-A tibble of pairwise comparisons (one row per
-(\code{net_i}, \code{net_j}, \code{metric}) triple). If the comparison object
+a tibble of pairwise comparisons (one row per
+(\code{net_i}, \code{net_j}, \code{metric}) triple). if the comparison object
 has no \verb{$comparisons} slot (e.g., a single-network input), an
 empty tibble is returned with a one-shot inform.
 }
 \description{
-S3 method for \code{tibble::as_tibble()} that returns the
-\verb{$comparisons} data frame directly. The raw \code{netify_comparison}
+s3 method for \code{tibble::as_tibble()} that returns the
+\verb{$comparisons} data frame directly. the raw \code{netify_comparison}
 object is a list with mixed scalar / nested fields, which
-\code{tibble::as_tibble()} cannot coerce cleanly. The per-pair
+\code{tibble::as_tibble()} cannot coerce cleanly. the per-pair
 comparison table is almost always what tidyverse users want
 downstream (filter / arrange / pivot / join with metadata).
 }
 \details{
-Registered against the \code{tibble::as_tibble} generic via \code{.onLoad},
+registered against the \code{tibble::as_tibble} generic via \code{.onload},
 so \code{tibble} is not a hard dependency.
 }
 \seealso{
 \code{\link[=compare_networks]{compare_networks()}}, \code{\link[=as_tibble.netify]{as_tibble.netify()}}.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

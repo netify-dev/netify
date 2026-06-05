@@ -1,95 +1,95 @@
 #' Create a netify list from longitudinal dyadic data
 #'
 #' `get_adjacency_list` converts longitudinal dyadic data into a list of adjacency
-#' matrices of class "netify". This function creates a list structure where each
+#' matrices of class "netify". this function creates a list structure where each
 #' element is a network matrix for a specific time period, allowing for
 #' time-varying actor composition.
 #'
-#' @param dyad_data A data.frame containing longitudinal dyadic observations. Will
+#' @param dyad_data a data.frame containing longitudinal dyadic observations. will
 #'   be coerced to data.frame if a tibble or data.table is provided.
-#' @param actor1 Character string specifying the column name for the first actor
+#' @param actor1 character string specifying the column name for the first actor
 #'   in each dyad.
-#' @param actor2 Character string specifying the column name for the second actor
+#' @param actor2 character string specifying the column name for the second actor
 #'   in each dyad.
-#' @param time Character string specifying the column name for time periods.
-#' @param symmetric Logical. If TRUE (default), treats the network as undirected
-#'   (i.e., edges have no direction). If FALSE, treats the network as directed.
-#' @param mode Character string specifying network structure. Options are:
+#' @param time character string specifying the column name for time periods.
+#' @param symmetric logical. if TRUE (default), treats the network as undirected
+#'   (i.e., edges have no direction). if FALSE, treats the network as directed.
+#' @param mode character string specifying network structure. options are:
 #'   \itemize{
-#'     \item \code{"unipartite"}: One set of actors (default)
-#'     \item \code{"bipartite"}: Two distinct sets of actors
+#'     \item \code{"unipartite"}: one set of actors (default)
+#'     \item \code{"bipartite"}: two distinct sets of actors
 #'   }
-#' @param weight Character string specifying the column name containing edge weights.
-#'   If NULL (default), edges are treated as unweighted (binary).
-#' @param sum_dyads Logical. If TRUE, sums weight values when multiple edges exist
-#'   between the same actor pair in the same time period. If FALSE (default), uses
+#' @param weight character string specifying the column name containing edge weights.
+#'   if NULL (default), edges are treated as unweighted (binary).
+#' @param sum_dyads logical. if TRUE, sums weight values when multiple edges exist
+#'   between the same actor pair in the same time period. if FALSE (default), uses
 #'   the last observed value.
-#' @param actor_time_uniform Logical indicating how to handle actor composition:
+#' @param actor_time_uniform logical indicating how to handle actor composition:
 #'   \itemize{
-#'     \item \code{TRUE}: Assumes all actors exist across the entire time range
-#'     \item \code{FALSE}: Determines actor existence from the data - actors exist
+#'     \item \code{TRUE}: assumes all actors exist across the entire time range
+#'     \item \code{FALSE}: determines actor existence from the data - actors exist
 #'       from their first observed interaction to their last
 #'   }
-#' @param actor_pds Optional data.frame specifying when actors enter and exit the
-#'   network. Must contain columns 'actor', 'min_time', and 'max_time'. Can be
-#'   created using `get_actor_time_info()`. If provided, overrides actor_time_uniform.
-#' @param diag_to_NA Logical. If TRUE (default), sets diagonal values (self-loops)
-#'   to NA. Automatically set to FALSE for bipartite networks.
-#' @param missing_to_zero Logical. If TRUE (default), treats missing edges as zeros.
-#'   If FALSE, missing edges remain as NA.
-#' @param nodelist Character vector of actor names to include in the network.
-#'   If provided, ensures all listed actors appear in the network even if they
-#'   have no edges (isolates). Useful when working with edgelists that only
+#' @param actor_pds optional data.frame specifying when actors enter and exit the
+#'   network. must contain columns 'actor', 'min_time', and 'max_time'. can be
+#'   created using `get_actor_time_info()`. if provided, overrides actor_time_uniform.
+#' @param diag_to_NA logical. if TRUE (default), sets diagonal values (self-loops)
+#'   to na. automatically set to FALSE for bipartite networks.
+#' @param missing_to_zero logical. if TRUE (default), treats missing edges as zeros.
+#'   if FALSE, missing edges remain as na.
+#' @param nodelist character vector of actor names to include in the network.
+#'   if provided, ensures all listed actors appear in the network even if they
+#'   have no edges (isolates). useful when working with edgelists that only
 #'   contain active dyads.
 #'
-#' @return A list of class "netify" (a netify list) with:
+#' @return a list of class "netify" (a netify list) with:
 #'   \itemize{
-#'     \item \strong{Elements}: Named list where each element is a netify matrix
+#'     \item \strong{elements}: named list where each element is a netify matrix
 #'       for one time period
-#'     \item \strong{Names}: Character representation of time periods
-#'     \item \strong{Class}: "netify" - this is a full netify object compatible
+#'     \item \strong{names}: character representation of time periods
+#'     \item \strong{class}: "netify" - this is a full netify object compatible
 #'       with all netify functions
-#'     \item \strong{Attributes}: Extensive metadata including network properties,
+#'     \item \strong{attributes}: extensive metadata including network properties,
 #'       actor composition information, and processing parameters
 #'   }
 #'
-#'   Each matrix in the list may have different dimensions if actor composition
-#'   varies over time. The returned object can be used with all netify functions
+#'   each matrix in the list may have different dimensions if actor composition
+#'   varies over time. the returned object can be used with all netify functions
 #'   such as `summary()`, `plot()`, `to_igraph()`, etc.
 #'
 #' @details
-#' \strong{Note on usage:}
+#' \strong{note on usage:}
 #'
-#' While this function is exported and available for direct use, the primary and
+#' while this function is exported and available for direct use, the primary and
 #' recommended way to create netify objects from longitudinal dyadic data is through
-#' the `netify()` function. The `netify()` function:
+#' the `netify()` function. the `netify()` function:
 #' \itemize{
-#'   \item Automatically chooses between array and list representations based on
+#'   \item automatically chooses between array and list representations based on
 #'     your data
-#'   \item Provides more comprehensive data validation
-#'   \item Can incorporate nodal and dyadic attributes during creation
-#'   \item Offers a unified interface for all types of network data
+#'   \item validates inputs before constructing matrices
+#'   \item can incorporate nodal and dyadic attributes during creation
+#'   \item offers a unified interface for all types of network data
 #' }
 #'
-#' Use `get_adjacency_list()` directly only when you specifically need a list
+#' use `get_adjacency_list()` directly only when you specifically need a list
 #' structure or require low-level control over the creation process.
 #'
-#' \strong{Actor composition handling:}
+#' \strong{actor composition handling:}
 #'
-#' This function is particularly useful when actors enter and exit the network
-#' over time. Unlike `get_adjacency_array()`, which requires constant actor
+#' this function is particularly useful when actors enter and exit the network
+#' over time. unlike `get_adjacency_array()`, which requires constant actor
 #' composition, this function can handle:
 #' \itemize{
-#'   \item New actors appearing in later time periods
-#'   \item Actors exiting and no longer appearing in the data
-#'   \item Different sets of actors active in each time period
+#'   \item new actors appearing in later time periods
+#'   \item actors exiting and no longer appearing in the data
+#'   \item different sets of actors active in each time period
 #' }
 #'
 #' @examples
-#' # Load example data
+#' # load example data
 #' data(icews)
 #'
-#' # Create a netify list with constant actor composition
+#' # create a netify list with constant actor composition
 #' icews_list <- get_adjacency_list(
 #'     dyad_data = icews,
 #'     actor1 = "i",
@@ -100,18 +100,18 @@
 #'     weight = "verbConf"
 #' )
 #'
-#' # Verify it's a netify object
+#' # verify it's a netify object
 #' class(icews_list) # "netify"
 #'
-#' # Check structure
-#' length(icews_list) # Number of time periods
-#' names(icews_list) # Time period labels
+#' # check structure
+#' length(icews_list) # number of time periods
+#' names(icews_list) # time period labels
 #'
-#' # Access specific time period
+#' # access specific time period
 #' icews_2010 <- icews_list[["2010"]]
 #' dim(icews_2010)
 #'
-#' @author Cassy Dorff, Ha Eun Choi, Shahryar Minhas
+#' @author cassy dorff, ha eun choi, shahryar minhas
 #'
 #' @export get_adjacency_list
 #'
@@ -128,8 +128,7 @@ get_adjacency_list <- function(
 	# create weight string for storage as attribute in netify object
 	weight_label <- weight_string_label(weight, sum_dyads)
 
-	# bipartite forces diag_to_NA=FALSE and asymmetric; preserve user choice
-	user_symmetric <- symmetric
+	# bipartite forces diag_to_NA=false and asymmetric in stored metadata
 	if (mode == "bipartite") {
 		diag_to_NA <- FALSE
 		symmetric <- FALSE
@@ -137,6 +136,7 @@ get_adjacency_list <- function(
 
 	# check if user supplied actor_pds
 	user_actor_pds <- !is.null(actor_pds)
+	actor_pds_attr <- NULL
 
 	# convert time to numeric and get labels
 	time_info <- convert_time_to_numeric(dyad_data[[time]], time)
@@ -167,19 +167,16 @@ get_adjacency_list <- function(
 	
 	# incorporate nodelist if provided
 	if (!is.null(nodelist)) {
-		# convert to character to ensure consistency
-		nodelist <- as.character(nodelist)
-		
 		# add nodelist actors to the actor sets
 		if (mode == "unipartite") {
+			nodelist <- as.character(nodelist)
 			actors_from_data <- unique_vector(a1_all, a2_all)
 			all_actors <- unique_vector(actors_from_data, nodelist)
 			a1_all <- a2_all <- all_actors
 		} else {
-			# for bipartite, inform user about assignment
-			cli::cli_alert_info("For bipartite networks, nodelist should contain all actors. Assigning to both row and column actors.")
-			a1_all <- unique_vector(a1_all, nodelist)
-			a2_all <- unique_vector(a2_all, nodelist)
+			bp_nodes <- normalize_bipartite_nodelist(nodelist, a1_all, a2_all)
+			a1_all <- bp_nodes$rows
+			a2_all <- bp_nodes$cols
 		}
 	}
 
@@ -202,7 +199,12 @@ get_adjacency_list <- function(
 			# add nodelist actors absent from actor_pds
 			if (!is.null(nodelist)) {
 				existing_actors <- actor_pds$actor
-				missing_actors <- setdiff(nodelist, existing_actors)
+				nodelist_actors <- if (mode == "bipartite") {
+					unique_vector(a1_all, a2_all)
+				} else {
+					as.character(nodelist)
+				}
+				missing_actors <- setdiff(nodelist_actors, existing_actors)
 				
 				if (length(missing_actors) > 0) {
 					# add missing actors with full time range
@@ -220,6 +222,7 @@ get_adjacency_list <- function(
 				}
 			}
 		}
+		actor_pds_attr <- actor_pds
 	} else {
 		# make sure actor_pds is a data.frame
 		actor_pds <- df_check(actor_pds)
@@ -233,6 +236,42 @@ get_adjacency_list <- function(
 
 		# rename columns consistently
 		names(actor_pds) <- c("actor", "min_time", "max_time")
+		actor_pds_attr <- actor_pds
+
+		normalise_actor_pds_bound <- function(x, bound_name) {
+			if (time_info$original_class %in% c("numeric", "integer")) {
+				out <- suppressWarnings(as.numeric(x))
+				if (anyNA(out) || any(!is.finite(out))) {
+					cli::cli_abort("{.arg actor_pds${bound_name}} must use numeric time values for numeric {.arg time}.")
+				}
+				return(out)
+			}
+
+			labels <- as.character(time_info$time_labels)
+			out <- match(as.character(x), labels)
+			missing <- is.na(out)
+			if (any(missing)) {
+				idx <- suppressWarnings(as.integer(as.character(x[missing])))
+				valid_idx <- !is.na(idx) & idx >= 1L & idx <= length(labels)
+				out[which(missing)[valid_idx]] <- idx[valid_idx]
+			}
+			if (anyNA(out)) {
+				bad <- unique(as.character(x[is.na(out)]))
+				cli::cli_abort(c(
+					"x" = "{.arg actor_pds${bound_name}} contains time value{?s} not present in {.arg time}: {.val {bad}}.",
+					"i" = "Use labels from the data's time column or integer positions in the netlet time order."
+				))
+			}
+			as.numeric(out)
+		}
+
+		# work internally on the numeric scale used by dyad_data, while keeping
+		# the user-facing actor_pds labels for the stored netlet attribute.
+		actor_pds$min_time <- normalise_actor_pds_bound(actor_pds$min_time, "min_time")
+		actor_pds$max_time <- normalise_actor_pds_bound(actor_pds$max_time, "max_time")
+		if (any(actor_pds$min_time > actor_pds$max_time)) {
+			cli::cli_abort("{.arg actor_pds$min_time} must not occur after {.arg actor_pds$max_time}.")
+		}
 
 		# expand to every integer period between min and max
 		ap_min <- min(actor_pds$min_time, na.rm = TRUE)
@@ -243,7 +282,11 @@ get_adjacency_list <- function(
 			actor_pds$min_time,
 			actor_pds$max_time
 		))
-		time_pds <- char(time_pds_num)
+		time_pds <- if (time_info$original_class %in% c("numeric", "integer")) {
+			char(time_pds_num)
+		} else {
+			time_info$time_labels[match(time_pds_num, seq_along(time_info$time_labels))]
+		}
 
 		# get actors present in data
 		actors_in_data <- unique_vector(a1_all, a2_all)
@@ -302,7 +345,7 @@ get_adjacency_list <- function(
 		dyad_data <- aggregate_dyad(dyad_data, actor1, actor2, time, weight, symmetric, missing_to_zero)
 	}
 
-	# drop zero-weight rows but keep NaN/NA so they propagate as missing
+	# drop zero-weight rows but keep nan/na so they propagate as missing
 	if (missing_to_zero) {
 		w_vec <- dyad_data[, weight]
 		nan_rows <- is.nan(w_vec)
@@ -366,8 +409,9 @@ get_adjacency_list <- function(
 			mat_col_indices <- integer(0)
 		}
 
-		# create logical value that is TRUE if weight is just 0/1
-		is_binary <- length(value) == 0 || all(value %in% c(0, 1))
+		# create logical value that is true if observed weights are just 0/1
+		value_observed <- value[!is.na(value)]
+		is_binary <- length(value_observed) == 0 || all(value_observed %in% c(0, 1))
 
 		# build adjacency matrix
 		adj_mat <- get_matrix(
@@ -383,7 +427,7 @@ get_adjacency_list <- function(
 			diag_to_NA = diag_to_NA && mode == "unipartite"
 		)
 
-		# if user left weight NULL and set sum_dyads to FALSE
+		# if user left weight null and set sum_dyads to false
 		weight_attr <- if (!sum_dyads && is.null(w_orig)) NULL else weight
 		layer_label <- if (is.null(weight_attr)) "weight1" else weight_attr
 
@@ -396,7 +440,7 @@ get_adjacency_list <- function(
 			weight = weight_attr,
 			detail_weight = weight_label,
 			is_binary = is_binary,
-			symmetric = user_symmetric,
+			symmetric = symmetric,
 			mode = mode,
 			layers = layer_label,
 			diag_to_NA = diag_to_NA,
@@ -413,7 +457,7 @@ get_adjacency_list <- function(
 	weight_final <- if (!sum_dyads && is.null(w_orig)) NULL else weight
 	layer_label_final <- if (is.null(weight_final)) "weight1" else weight_final
 
-	# if user supplied actor_pds then set actor_time_uniform to FALSE
+	# if user supplied actor_pds then set actor_time_uniform to false
 	if (user_actor_pds) actor_time_uniform <- FALSE
 
 	# get info on binary weights using vectorized operation
@@ -422,13 +466,13 @@ get_adjacency_list <- function(
 	# add attributes to list
 	class(adj_out) <- "netify"
 	attributes(adj_out) <- c(attributes(adj_out), list(
-		netify_type = "longit_list",
-		actor_time_uniform = actor_time_uniform,
-		actor_pds = actor_pds,
+			netify_type = "longit_list",
+			actor_time_uniform = actor_time_uniform,
+			actor_pds = actor_pds_attr %||% actor_pds,
 		weight = weight_final,
 		detail_weight = weight_label,
 		is_binary = all(bin_check),
-		symmetric = user_symmetric,
+			symmetric = symmetric,
 		mode = mode,
 		layers = layer_label_final,
 		diag_to_NA = diag_to_NA,

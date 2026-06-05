@@ -1,5 +1,6 @@
 ---
 title: "Manual Plotting with ggplot2"
+description: "Customize netify plot data directly with ggplot2 layers and scales."
 author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -16,15 +17,11 @@ knitr::opts_chunk$set(
     echo = TRUE
 )
 
-# the advanced sections of this vignette use dplyr (Suggests).
-# ggnewscale is in Imports so it is always available.
-# core workflow (data prep + basic ggplot) always runs.
-has_adv_pkgs <- requireNamespace("dplyr", quietly = TRUE)
 ```
 
 ## tl;dr
 
-`plot.netify()` handles 90% of cases out of the box. This vignette is for the other 10% — when you want full control over geometry, layout, or combinations of color scales that the built-in path doesn't expose. We cover extracting node and edge data, layering them with `ggplot2`, highlighting a single actor, layering multiple color scales, applying a ggplot theme, and exporting with `ggsave()`. Have fun!
+`plot.netify()` handles 90% of cases out of the box. This vignette is for the other 10% — when you want full control over geometry, layout, or combinations of color scales that the built-in path doesn't expose. We cover extracting node and edge data, layering them with `ggplot2`, highlighting a single actor, layering multiple color scales, applying a ggplot theme, and exporting with `ggsave()`.
 
 This vignette provides an overview of how to create customizable plots using `ggplot2` while still using `netify` to prepare the data.
 
@@ -33,24 +30,13 @@ Let's load the necessary libraries.
 ```{r}
 library(netify)
 library(ggplot2)
-```
-
-The advanced sections also use `dplyr` (for data manipulation) and `ggnewscale` (for multiple color legends). If `dplyr` is not installed, the core plotting workflow still runs; only the advanced edge-information section will be skipped.
-
-```{r, echo=FALSE}
-if (!has_adv_pkgs) {
-    message(
-        "Skipping advanced sections: install dplyr to run them.\n",
-        "install.packages('dplyr')"
-    )
-}
-```
-
-```{r, eval=has_adv_pkgs}
+library(dplyr)
 library(ggnewscale)
 ```
 
-## Preparing data
+The advanced sections also use `dplyr` (for data manipulation) and `ggnewscale` (for multiple color legends).
+
+## preparing data
 
 First let's create a `netlet` object from some dyadic data (ICEWS data) using the `netify` package.
 
@@ -103,7 +89,7 @@ netlet
 
 This is a longitudinal, weighted network with nodal and dyadic attributes. In a few more steps we will show how to highlight these attributes in the plot.
 
-## Quick start: just `plot(net)`
+## quick start: just `plot(net)`
 
 Before reaching for `ggplot2` directly, remember that the fastest path to a network plot is the built-in `plot()` method. It picks a layout, draws edges, points, and (for small networks) auto-repelling labels, and returns a `ggplot` object you can keep customizing with `+` layers. Add `theme_publication_netify()` to apply the netify theme:
 
@@ -115,7 +101,7 @@ plot(netlet) + theme_publication_netify()
 
 That single call is usually enough for a first look. The rest of this vignette shows what to do when you want **finer control** over the underlying data and layers — for example, swapping the layout algorithm, adding edge-level information that the default plot doesn't expose, or combining multiple color scales with `ggnewscale`.
 
-## Going manual: extract the plot data frames
+## going manual: extract the plot data frames
 
 When you need that finer control, use `net_plot_data` to create a data frame for `ggplot2`. `net_plot_data` extracts and sets up node and edge data from a `netify` object according to specified plotting arguments. It returns a list of different components but the most important one for users is the `net_dfs` element. This element contains two objects: `edge_data` and `nodal_data`. These are data frames that can be passed to `ggplot2`.
 
@@ -139,7 +125,7 @@ head(net_dfs$nodal_data)
 
 The `x` and `y` in `nodal_data` and the `x1`, `y1`, `x2`, and `y2` in `edge_data` are the coordinates of the nodes and edges, respectively. These are the coordinates that will be used to plot the network.
 
-## Creating a plot
+## creating a plot
 
 Now that we have the data, we can create a plot using `ggplot2`. We'll use `geom_segment` and `geom_point` (or `geom_label`, `geom_text`, and the `ggrepel` equivalents) to plot the edges and nodes, respectively.
 
@@ -176,12 +162,12 @@ ggplot() +
 
 Note `scale_color_viridis_c(option = "cividis")` — a colorblind-safe perceptually-uniform palette. For continuous variables this is almost always a better default than a hand-picked two-color gradient.
 
-### Changing the layout
+### changing the layout
 
 By default layouts for node positions are drawn from the `layout_nicely` algorithm in the `igraph` package. Users can specify other layouts as, for example, say that you wanted to use the `mds` algorithm instead:
 
 ```{r}
-# create a df using mds instead
+# build layout data with mds
 set.seed(6886)
 plot_data_mds <- net_plot_data(
     netlet,
@@ -194,7 +180,7 @@ plot_data_mds <- net_plot_data(
 lapply(plot_data_mds$net_dfs, head)
 ```
 
-### Highlighting a single actor
+### highlighting a single actor
 
 A common task: label or visually pop one specific actor in the plot. With the built-in `plot.netify()` you can do this directly via `highlight = "United States"` plus `select_text` / `select_text_display`:
 
@@ -242,14 +228,12 @@ ggplot() +
 ```
 
 
-### Add Edge Information
+### add edge information
 
 So far, we have focused on using color to convey information about nodal attributes in the network (population size and polity score). Now, let's add more edge information to the plot. For example, we can include information about the `matlConf` dyadic attribute. Imagine we want to highlight edges of verbal cooperation that occur at the same time as when higher than average levels of material conflict occur in the network. First, let's create the variable in the edge data.
 
-```{r, eval=has_adv_pkgs}
-library(dplyr)
-
-# create high_matlConf variable
+```{r}
+# create high_matlconf variable
 net_dfs$edge_data <- net_dfs$edge_data |>
     group_by(time) |>
     mutate(
@@ -264,7 +248,7 @@ head(net_dfs$edge_data)
 
 Now that we have the new variable in the data.frame, we can plot by it but note that we now need a color aesthetic for both points and segments, even though `ggplot2` only supports one legend by aesthetic by default. We can get around this by using the `new_scale_color` function from the `ggnewscale` package.
 
-```{r, fig.width=9, fig.height=8, eval=has_adv_pkgs}
+```{r, fig.width=9, fig.height=8}
 # color line segments by this new variable
 ggplot() +
     geom_segment(
@@ -302,7 +286,7 @@ ggplot() +
     theme(legend.position = "right")
 ```
 
-## Saving and exporting figures
+## saving and exporting figures
 
 Once a plot is laid out the way you want, export it with `ggsave()`. The function writes whatever ggplot was last printed (or whichever ggplot object you pass via `plot=`) to disk. A vector format (PDF or SVG) holds up at any size; for the web a PNG at 300 dpi is fine.
 
@@ -315,7 +299,7 @@ p <- plot(netlet, time_filter = "2010") + theme_publication_netify()
 ggsave("icews_2010.png", plot = p, width = 7, height = 6, dpi = 300)
 ```
 
-### Colorblind-safe palette guidance
+### colorblind-safe palette guidance
 
 A quick reference for picking colors that survive both colorblindness and grayscale printing:
 
@@ -323,7 +307,7 @@ A quick reference for picking colors that survive both colorblindness and graysc
 - **Categorical variables (≤8 levels)** — use ColorBrewer's `Set2`, `Dark2`, or `Paired`. Pass `palette = "Set2"` to `scale_color_brewer()`, or `node_color_palette = "Set2"` to `plot.netify()`.
 - **Two-class highlights** — pair a strong color with neutral grey, as in the United States highlight example above (`#0A3161` vs `grey70`).
 
-## References
+## references
 
 - Boschee, Elizabeth; Lautenschlager, Jennifer; O'Brien, Sean; Shellman, Steve; Starz, James; Ward, Michael, 2015, ``ICEWS Coded Event Data'', doi:10.7910/DVN/28075 , Harvard Dataverse.
 

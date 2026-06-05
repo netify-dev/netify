@@ -7,11 +7,11 @@
 theme_stat_netify()
 }
 \value{
-A customized theme object for netify stat plots.
+a customized theme object for netify stat plots.
 }
 \description{
-This function returns a customized theme for netify stat plots.
+this function returns a customized theme for netify stat plots.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

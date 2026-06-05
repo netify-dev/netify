@@ -1,72 +1,72 @@
 #' Extract actor time range information
 #'
 #' `get_actor_time_info` returns a per-actor data.frame of entry and exit times.
-#' It dispatches on the first argument:
+#' it dispatches on the first argument:
 #'
 #' \itemize{
-#'   \item If `x` is a **netify object**, it returns the stored `actor_pds`
+#'   \item if `x` is a **netify object**, it returns the stored `actor_pds`
 #'     attribute directly (one row per actor with `min_time` / `max_time`).
-#'     This is the open-cohort roster the netlet was built with — and the
+#'     this is the open-cohort roster the netlet was built with -- and the
 #'     roster every per-period statistic (density, degree, homophily) is
 #'     computed against.
-#'   \item If `x` is a **data.frame** of dyadic observations, it computes the
-#'     entry / exit times from the data. Entry is defined as the first time
+#'   \item if `x` is a **data.frame** of dyadic observations, it computes the
+#'     entry / exit times from the data. entry is defined as the first time
 #'     period in which an actor appears in any interaction (as either sender
-#'     or receiver), and exit as the last time period. Use this form to
+#'     or receiver), and exit as the last time period. use this form to
 #'     prepare the `actor_pds` argument to `netify()`.
 #' }
 #'
-#' @param x A netify object, or a data.frame of dyadic observations.
-#' @param actor1 Character string specifying the column name for the first
+#' @param x a netify object, or a data.frame of dyadic observations.
+#' @param actor1 character string specifying the column name for the first
 #'   actor in each dyad (data.frame method only).
-#' @param actor2 Character string specifying the column name for the second
+#' @param actor2 character string specifying the column name for the second
 #'   actor in each dyad (data.frame method only).
-#' @param time Character string specifying the column name for time periods
+#' @param time character string specifying the column name for time periods
 #'   (data.frame method only).
-#' @param ... Unused; reserved for future methods.
+#' @param ... unused; reserved for future methods.
 #'
-#' @return A data.frame with three columns:
+#' @return a data.frame with three columns:
 #'   \itemize{
-#'     \item \strong{actor}: Character vector of unique actor identifiers.
-#'     \item \strong{min_time}: Earliest time period the actor is in the
+#'     \item \strong{actor}: character vector of unique actor identifiers.
+#'     \item \strong{min_time}: earliest time period the actor is in the
 #'       network (entry point).
-#'     \item \strong{max_time}: Latest time period the actor is in the
+#'     \item \strong{max_time}: latest time period the actor is in the
 #'       network (exit point).
 #'   }
 #'
-#'   For the netify method, this is a verbatim copy of `attr(x, "actor_pds")`.
-#'   For the data.frame method, actors are ordered as they appear in the
+#'   for the netify method, this is a verbatim copy of `attr(x, "actor_pds")`.
+#'   for the data.frame method, actors are ordered as they appear in the
 #'   aggregation, not alphabetically or by time.
 #'
 #' @details
-#' \strong{Use cases:}
+#' \strong{use cases:}
 #'
 #' \itemize{
-#'   \item On a **dyad data.frame**: build the `actor_pds` argument to
+#'   \item on a **dyad data.frame**: build the `actor_pds` argument to
 #'     `netify(..., actor_time_uniform = FALSE, actor_pds = ...)` for
 #'     open-cohort panels (panel surveys with attrition, contact-tracing
 #'     chains, organizational membership over time, etc.).
-#'   \item On a **netify object**: inspect the entry / exit roster the netlet
-#'     is currently using — useful when debugging density denominators,
+#'   \item on a **netify object**: inspect the entry / exit roster the netlet
+#'     is currently using -- useful when debugging density denominators,
 #'     writing custom exporters, or verifying that an open-cohort netlet
 #'     has the actor windows you expect.
 #' }
 #'
-#' \strong{Assumptions (data.frame method):}
+#' \strong{assumptions (data.frame method):}
 #' \itemize{
-#'   \item An actor is considered "present" in any time period where they
+#'   \item an actor is considered "present" in any time period where they
 #'     appear in the data, regardless of role (sender/receiver).
-#'   \item Missing values in time are ignored when calculating min/max.
-#'   \item Actors must appear in at least one non-missing time period.
+#'   \item missing values in time are ignored when calculating min/max.
+#'   \item actors must appear in at least one non-missing time period.
 #' }
 #'
 #' @note
-#' The data.frame method assumes that presence in the data indicates network
-#' participation. If actors can be temporarily absent from the network while
-#' still being considered members, this method will not capture such gaps —
+#' the data.frame method assumes that presence in the data indicates network
+#' participation. if actors can be temporarily absent from the network while
+#' still being considered members, this method will not capture such gaps --
 #' supply an explicit `actor_pds` roster to `netify()` instead.
 #'
-#' @author Shahryar Minhas, Ha Eun Choi
+#' @author shahryar minhas, ha eun choi
 #'
 #' @examples
 #' # data.frame input: derive the roster
@@ -92,7 +92,7 @@ get_actor_time_info <- function(x, ...) {
 
 #' @rdname get_actor_time_info
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 get_actor_time_info.netify <- function(x, ...) {
@@ -107,7 +107,7 @@ get_actor_time_info.netify <- function(x, ...) {
 
 #' @rdname get_actor_time_info
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 get_actor_time_info.data.frame <- function(x, actor1, actor2, time, ...) {
@@ -124,34 +124,44 @@ get_actor_time_info.data.frame <- function(x, actor1, actor2, time, ...) {
 	# convert to dyadic data.frame
 	dyad_data <- data.frame(x, stringsAsFactors = FALSE)
 
-	# restructure data into a nodal format so that we can more easily
-	# calculate min and max time points from the data
-	a1 <- dyad_data[, c(actor1, time)]
-	a2 <- dyad_data[, c(actor2, time)]
-	names(a2) <- names(a1)
-	nodal <- matrix(NA,
-		nrow = (nrow(a1) + nrow(a2)), ncol = 2,
-		dimnames = list(NULL, c(actor1, time))
-	)
-	nodal[1:nrow(a1), ] <- as.matrix(a1)
-	nodal[(nrow(a1) + 1):nrow(nodal), ] <- as.matrix(a2)
-	rm(a1, a2)
+	time_values <- dyad_data[[time]]
+	if (is.factor(time_values)) {
+		time_values <- as.character(time_values)
+	}
 
-	# get time stats by actor
-	actor_year <- tapply(
-		nodal[, time], nodal[, actor1], function(z) {
-			c(num(min(z, na.rm = TRUE)), num(max(z, na.rm = TRUE)))
-		}
+	# restructure data into a nodal format while preserving the time class
+	a1 <- data.frame(
+		actor = as.character(dyad_data[[actor1]]),
+		time = time_values,
+		stringsAsFactors = FALSE
 	)
-	rm(nodal)
+	a2 <- data.frame(
+		actor = as.character(dyad_data[[actor2]]),
+		time = time_values,
+		stringsAsFactors = FALSE
+	)
+	nodal <- rbind(a1, a2)
+	nodal <- nodal[!is.na(nodal$time), , drop = FALSE]
+	if (nrow(nodal) == 0L) {
+		cli::cli_abort("Actors must appear in at least one non-missing time period.")
+	}
 
-	#
-	actor_info <- do.call("rbind", actor_year)
-	actor_info <- data.frame(actor_info, stringsAsFactors = FALSE)
-	actor_info$actor <- rownames(actor_info)
+	actor_order <- unique(nodal$actor)
+	actor_time <- split(
+		nodal$time,
+		factor(nodal$actor, levels = actor_order),
+		drop = TRUE
+	)
+	min_time <- do.call(c, lapply(actor_time, min, na.rm = TRUE))
+	max_time <- do.call(c, lapply(actor_time, max, na.rm = TRUE))
+
+	actor_info <- data.frame(
+		actor = names(actor_time),
+		min_time = min_time,
+		max_time = max_time,
+		stringsAsFactors = FALSE
+	)
 	rownames(actor_info) <- NULL
-	names(actor_info) <- c("min_time", "max_time", "actor")
-	actor_info <- actor_info[, c("actor", "min_time", "max_time")]
 
 	#
 	return(actor_info)
@@ -159,7 +169,7 @@ get_actor_time_info.data.frame <- function(x, actor1, actor2, time, ...) {
 
 #' @rdname get_actor_time_info
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 get_actor_time_info.default <- function(x, actor1, actor2, time, ...) {
@@ -178,40 +188,41 @@ get_actor_time_info.default <- function(x, actor1, actor2, time, ...) {
 
 #' actor_pds_to_frame
 #'
-#' This function converts the actor_pds attribute of netify
+#' this function converts the actor_pds attribute of netify
 #' objects into a data.frame at the unit of observation level
 #' @param netlet_actor_pds actor pds attributes from netify object
 #' @return a data.frame object with actor pd info in a actor-time format
-#' @author Colin Henry, Shahryar Minhas
+#' @author colin henry, shahryar minhas
 #' @keywords internal
 #' @noRd
 
 actor_pds_to_frame <- function(netlet_actor_pds, time_labels = NULL) {
+	if (is.null(netlet_actor_pds) || nrow(netlet_actor_pds) == 0L) {
+		return(data.frame(
+			actor = character(),
+			time = character(),
+			stringsAsFactors = FALSE
+		))
+	}
+	if (!is.null(time_labels)) {
+		time_labels <- as.character(time_labels)
+	}
+
 	# iterate through actor rows
 	frame <- lapply(1:nrow(netlet_actor_pds), function(ii) {
 		# get time range
-		time_range <- netlet_actor_pds$min_time[ii]:netlet_actor_pds$max_time[ii]
+		time_range <- actor_time_range(
+			netlet_actor_pds$min_time[ii],
+			netlet_actor_pds$max_time[ii],
+			time_labels
+		)
 
 		# create frame for all pds actor existed
 		ii_frame <- expand.grid(netlet_actor_pds$actor[ii], time_range)
 		ii_frame <- data.frame(ii_frame, stringsAsFactors = FALSE)
 		names(ii_frame) <- c("actor", "time")
 		ii_frame$actor <- char(ii_frame$actor)
-		
-		# convert numeric time to labels if provided
-		if (!is.null(time_labels)) {
-			# map time_range to time_labels (actual values vs indices)
-			if (max(time_range) > length(time_labels)) {
-				time_label_nums <- as.numeric(time_labels)
-				if (!any(is.na(time_label_nums))) {
-					ii_frame$time <- as.character(time_range)
-				} else {
-					ii_frame$time <- as.character(time_labels[match(time_range, sort(unique(c(netlet_actor_pds$min_time, netlet_actor_pds$max_time))))])
-				}
-			} else {
-				ii_frame$time <- as.character(time_labels[ii_frame$time])
-			}
-		}
+		ii_frame$time <- as.character(ii_frame$time)
 		
 		return(ii_frame)
 	})
@@ -221,13 +232,54 @@ actor_pds_to_frame <- function(netlet_actor_pds, time_labels = NULL) {
 	return(frame)
 }
 
-#' Derive actor periods attribute from netlet
+actor_time_range <- function(min_time, max_time, time_labels = NULL) {
+	if (!is.null(time_labels)) {
+		min_label <- as.character(min_time)
+		max_label <- as.character(max_time)
+		start <- match(min_label, time_labels)
+		end <- match(max_label, time_labels)
+		if (is.na(start) || is.na(end)) {
+			min_idx <- suppressWarnings(as.integer(min_time))
+			max_idx <- suppressWarnings(as.integer(max_time))
+			if (!is.na(min_idx) && !is.na(max_idx) &&
+				min_idx >= 1L && max_idx <= length(time_labels)) {
+				start <- min_idx
+				end <- max_idx
+			} else {
+				cli::cli_abort(c(
+					"x" = "Actor period bounds are not in the netlet time labels.",
+					"i" = "Check {.arg actor_pds} or rebuild the netlet with matching time labels."
+				))
+			}
+		}
+		if (start > end) {
+			cli::cli_abort("Actor period minimum must not occur after its maximum.")
+		}
+		return(time_labels[seq.int(start, end)])
+	}
+
+	if (is.numeric(min_time) || is.integer(min_time)) {
+		return(seq.int(as.integer(min_time), as.integer(max_time)))
+	}
+	if (inherits(min_time, "Date")) {
+		return(seq(min_time, max_time, by = "day"))
+	}
+	if (identical(as.character(min_time), as.character(max_time))) {
+		return(as.character(min_time))
+	}
+	cli::cli_abort(c(
+		"x" = "Cannot infer intermediate actor periods from non-numeric bounds without time labels.",
+		"i" = "Pass {.arg time_labels} or supply one row per observed actor-period."
+	))
+}
+
+#' derive actor periods attribute from netlet
 #'
 #' @param netlet multilayer netlet object
 #' @return data.frame formatted in the same way as the
 #' actor_pds attribute
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd

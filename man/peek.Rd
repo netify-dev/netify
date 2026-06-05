@@ -4,130 +4,141 @@
 \alias{peek}
 \title{Preview subsets of network data from netify objects}
 \usage{
-peek(netlet, actors = NULL, from = 3, to = 3, time = 1, layers = NULL)
+peek(
+  netlet,
+  actors = NULL,
+  from = 3,
+  to = 3,
+  time = 1,
+  layers = NULL,
+  drop_dimensions = TRUE
+)
 }
 \arguments{
-\item{netlet}{A netify object to preview. Can be cross-sectional, longitudinal
+\item{netlet}{a netify object to preview. can be cross-sectional, longitudinal
 (array or list format), and/or multilayer.}
 
-\item{actors}{Character vector of actor names or numeric indices to subset.
-Selects these actors as both senders and receivers (extracts subgraph among
-these actors). Overridden by \code{from} and \code{to} if specified.}
+\item{actors}{character vector of actor names or numeric indices to subset.
+selects these actors as both senders and receivers (extracts subgraph among
+these actors). overridden by \code{from} and \code{to} if specified.}
 
-\item{from}{Specifies which actors to display as senders of ties (row actors
-in the adjacency matrix). Can be:
+\item{from}{specifies which actors to display as senders of ties (row actors
+in the adjacency matrix). can be:
 \itemize{
-\item \strong{Single number}: Shows the first n actors (e.g., \code{from = 5}
+\item \strong{single number}: shows the first n actors (e.g., \code{from = 5}
 displays actors 1-5)
-\item \strong{Numeric vector}: Shows specific positions (e.g., \code{from = c(1,3,5)}
+\item \strong{numeric vector}: shows specific positions (e.g., \code{from = c(1,3,5)}
 displays the 1st, 3rd, and 5th actors)
-\item \strong{Character vector}: Shows named actors (e.g., \code{from = c("USA", "China")}
+\item \strong{character vector}: shows named actors (e.g., \code{from = c("usa", "china")}
 displays these specific countries)
-\item \strong{NULL}: Shows all row actors (default is 3)
+\item \strong{NULL}: shows all row actors (default is 3)
 }
-In bipartite networks, from represents actors in the first mode.}
+in bipartite networks, from represents actors in the first mode.}
 
-\item{to}{Specifies which actors to display as receivers of ties (column actors
-in the adjacency matrix). Accepts the same input types as \code{from}. In
-bipartite networks, columns represent actors in the second mode. Default is 3.}
+\item{to}{specifies which actors to display as receivers of ties (column actors
+in the adjacency matrix). accepts the same input types as \code{from}. in
+bipartite networks, columns represent actors in the second mode. default is 3.}
 
-\item{time}{For longitudinal networks, specifies which time periods to display. Can be:
+\item{time}{for longitudinal networks, specifies which time periods to display. can be:
 \itemize{
-\item \strong{Single number}: Shows the nth time period (e.g., \code{time = 1}
+\item \strong{single number}: shows the nth time period (e.g., \code{time = 1}
 shows the first time period)
-\item \strong{Numeric vector}: Shows specific time indices (e.g., \code{time = c(1,5,10)})
-\item \strong{Character vector}: Shows named time periods (e.g., \code{time = c("2002", "2006")}
+\item \strong{numeric vector}: shows specific time indices (e.g., \code{time = c(1,5,10)})
+\item \strong{character vector}: shows named time periods (e.g., \code{time = c("2002", "2006")}
 displays these specific years)
-\item \strong{NULL}: Shows all time periods
+\item \strong{NULL}: shows all time periods
 }
-Default is 1 (first time period only). Ignored for cross-sectional networks.}
+default is 1 (first time period only). ignored for cross-sectional networks.}
 
-\item{layers}{For multilayer networks, specifies which layer(s) to display. Must be
+\item{layers}{for multilayer networks, specifies which layer(s) to display. must be
 a character vector matching layer names in the netify object (e.g.,
-\code{layers = c("trade", "alliance")}). For single-layer networks, this
-parameter is ignored. Default is NULL (shows all layers).}
+\code{layers = c("trade", "alliance")}). for single-layer networks, this
+parameter is ignored. default is NULL (shows all layers).}
+
+\item{drop_dimensions}{logical. whether to drop singleton array dimensions in
+the returned preview. default TRUE.}
 }
 \value{
-Returns a subset of the raw network data (without netify attributes):
+returns a subset of the raw network data (without netify attributes):
 
 \describe{
-\item{\strong{Cross-sectional networks}}{
+\item{\strong{cross-sectional networks}}{
 \itemize{
-\item Single layer: Returns a matrix with selected rows and columns
-\item Multilayer: Returns a 3D array (rows × columns × layers)
+\item single layer: returns a matrix with selected rows and columns
+\item multilayer: returns a 3d array (rows x columns x layers)
 }
 }
-\item{\strong{Longitudinal networks}}{
+\item{\strong{longitudinal networks}}{
 \itemize{
-\item Array format: Returns an array with dimensions depending on selection
-\item List format: Returns a list of matrices, one per selected time period
+\item array format: returns an array with dimensions depending on selection
+\item list format: returns a list of matrices, one per selected time period
 }
 }
 }
 
-All returned objects preserve dimension names (actor names, time labels, layer
-names) for easy interpretation. Single dimensions are automatically dropped.
+all returned objects preserve dimension names (actor names, time labels, layer
+names) for easy interpretation. single dimensions are automatically dropped.
 }
 \description{
 \code{peek} provides a
 convenient way to inspect portions of network data stored in netify objects.
-Rather than displaying entire networks (which can be overwhelming for large
+rather than displaying entire networks (which can be overwhelming for large
 datasets), this function allows you to examine specific actors, time periods,
 or layers for data exploration, verification, and debugging.
 }
 \details{
-\strong{Purpose and Design}
+\strong{purpose and design}
 
-\code{peek} is designed as a lightweight data exploration tool. Unlike
+\code{peek} is designed as a lightweight data exploration tool. unlike
 \code{\link{subset_netify}}, which creates new netify objects with all attributes
 preserved, \code{peek} returns only the raw network data for quick inspection.
-This makes it ideal for:
+this makes it ideal for:
 \itemize{
-\item Verifying data structure and content
-\item Checking specific relationships
-\item Debugging data issues
-\item Quick visual inspection of network patterns
+\item verifying data structure and content
+\item checking specific relationships
+\item debugging data issues
+\item quick visual inspection of network patterns
 }
 
-\strong{Understanding Network Directions}
+\strong{understanding network directions}
 
-In directed networks:
+in directed networks:
 \itemize{
-\item \strong{From} represents actors sending ties (out-ties)
-\item \strong{To} represents actors receiving ties (in-ties)
-\item Cell \code{[i,j]} contains the tie from actor i to actor j
+\item \strong{from} represents actors sending ties (out-ties)
+\item \strong{to} represents actors receiving ties (in-ties)
+\item cell \code{[i,j]} contains the tie from actor i to actor j
 }
 
-For example, if cell \code{["USA", "China"]} = 5, this means USA sends a tie of
-strength 5 to China.
+for example, if cell \code{["usa", "china"]} = 5, this means usa sends a tie of
+strength 5 to china.
 
-\strong{Smart Selection Behavior}
+\strong{smart selection behavior}
 
-The function includes several convenience features:
+the function includes several convenience features:
 \itemize{
-\item Single numbers are expanded to ranges (e.g., \code{from = 5} becomes first 5 actors)
-\item Out-of-bounds indices are silently ignored (no errors during exploration)
-\item Character names are matched to actor labels
-\item Dimension reduction: if only one time period or layer is selected, that
+\item single numbers are expanded to ranges (e.g., \code{from = 5} becomes first 5 actors)
+\item out-of-bounds indices are silently ignored (no errors during exploration)
+\item character names are matched to actor labels
+\item dimension reduction: if only one time period or layer is selected, that
 dimension is dropped from the output
 }
 }
 \note{
-\strong{Important distinctions:}
+\strong{important distinctions:}
 \itemize{
-\item Use \code{peek} for quick data inspection (returns raw matrices)
-\item Use \code{\link{subset_netify}} to create new netify objects with attributes
-\item Use \code{\link{get_raw}} to extract all raw data from a netify object
+\item use \code{peek} for quick data inspection (returns raw matrices)
+\item use \code{\link{subset_netify}} to create new netify objects with attributes
+\item use \code{\link{get_raw}} to extract all raw data from a netify object
 }
 
-When multiple layers are present and no layer selection is specified, all layers
+when multiple layers are present and no layer selection is specified, all layers
 are returned with a warning message to remind you about the multilayer structure.
 }
 \examples{
-# Load example data
+# load example data
 data(icews)
 
-# Example 1: Basic usage with cross-sectional network
+# example 1: basic usage with cross-sectional network
 icews_10 <- icews[icews$year == 2010, ]
 net <- netify(
     icews_10,
@@ -135,56 +146,56 @@ net <- netify(
     weight = "verbCoop"
 )
 
-# Default: see first 3 actors (both sending and receiving)
+# default: see first 3 actors (both sending and receiving)
 peek(net)
 
-# See first 5 senders and first 5 receivers
+# see first 5 senders and first 5 receivers
 peek(net, from = 5, to = 5)
 
-# Example 2: Specific actors by name
-# See ties from US and China to Russia, India, and Brazil
+# example 2: specific actors by name
+# see ties from us and china to russia, india, and brazil
 peek(net,
-    from = c("United States", "China"),
-    to = c("Russia", "India", "Brazil")
+    from = c("united states", "china"),
+    to = c("russia", "india", "brazil")
 )
 
-# Use actors parameter to see subgraph
+# use actors parameter to see subgraph
 peek(net,
-    actors = c("United States", "China", "Russia")
+    actors = c("united states", "china", "russia")
 )
 
-# Example 3: Longitudinal network
+# example 3: longitudinal network
 net_longit <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
     weight = "matlConf"
 )
 
-# See first 5 actors in specific years
+# see first 5 actors in specific years
 peek(net_longit,
     from = 5, to = 5,
     time = c("2002", "2006", "2010")
 )
 
-# See all actors in year 2010
+# see all actors in year 2010
 peek(net_longit,
     from = NULL, to = NULL,
     time = "2010"
 )
 
-# Example 4: Using numeric indices
-# See specific positions in the network
+# example 4: using numeric indices
+# see specific positions in the network
 peek(net,
     from = c(1, 3, 5, 7), # 1st, 3rd, 5th, 7th senders
     to = 1:10
 ) # first 10 receivers
 
-# Example 5: Quick inspection patterns
-# See who USA interacts with
-peek(net, from = "United States", to = 10) # USA's ties to first 10 countries
-peek(net, from = 10, to = "United States") # First 10 countries' ties to USA
+# example 5: quick inspection patterns
+# see who usa interacts with
+peek(net, from = "united states", to = 10) # usa's ties to first 10 countries
+peek(net, from = 10, to = "united states") # first 10 countries' ties to usa
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

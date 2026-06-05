@@ -1,11 +1,11 @@
 #' theme_netify function
 #'
-#' This function returns a customized theme for netify plots.
-#' It is based on the `theme_minimal` function from the `ggplot2` package.
-#' It removes axis text and titles from the plot.
+#' this function returns a customized theme for netify plots.
+#' it is based on the `theme_minimal` function from the `ggplot2` package.
+#' it removes axis text and titles from the plot.
 #'
-#' @return A customized theme object for netify plots.
-#' @author Cassy Dorff, Shahryar Minhas
+#' @return a customized theme object for netify plots.
+#' @author cassy dorff, shahryar minhas
 #' @import ggplot2
 #' @export theme_netify
 #'
@@ -28,10 +28,10 @@ theme_netify <- function() {
 
 #' theme_stat_netify function
 #'
-#' This function returns a customized theme for netify stat plots.
+#' this function returns a customized theme for netify stat plots.
 #'
-#' @return A customized theme object for netify stat plots.
-#' @author Cassy Dorff, Shahryar Minhas
+#' @return a customized theme object for netify stat plots.
+#' @author cassy dorff, shahryar minhas
 #' @import ggplot2
 #' @export theme_stat_netify
 #'
@@ -51,17 +51,17 @@ theme_stat_netify <- function() {
 
 #' ggplot theme for netify network plots
 #'
-#' A ggplot theme with a larger base font, italicized legend titles, and
-#' (by default) stripped axes / panel chrome — the right default for a
-#' force-directed network layout. Drop on top of any `plot.netify()` output.
+#' a ggplot theme with a larger base font, italicized legend titles, and
+#' (by default) stripped axes / panel chrome -- the right default for a
+#' force-directed network layout. drop on top of any `plot.netify()` output.
 #'
-#' @param base_size Base font size, passed to `theme_minimal()`. Default 12.
-#' @param for_network Logical. When `TRUE` (default) removes axis text /
+#' @param base_size base font size, passed to `theme_minimal()`. default 12.
+#' @param for_network logical. when `TRUE` (default) removes axis text /
 #'   titles / ticks / panel border, which is the right behavior for a
-#'   force-directed network layout. Set `FALSE` if you want to keep axes
+#'   force-directed network layout. set `FALSE` if you want to keep axes
 #'   on (e.g. for a heatmap or actor-stat plot).
-#' @return A ggplot2 theme object.
-#' @author Cassy Dorff, Shahryar Minhas
+#' @return a ggplot2 theme object.
+#' @author cassy dorff, shahryar minhas
 #' @import ggplot2
 #' @export theme_publication_netify
 #'
@@ -97,14 +97,14 @@ theme_publication_netify <- function(base_size = 12, for_network = TRUE) {
 
 #' ggplot theme for netify time-series / stat plots
 #'
-#' Companion to `theme_publication_netify()` for plots that keep their
-#' axes — actor-stat time series, similarity heatmaps, mixing matrices,
-#' etc. Same typographic settings (italic legend titles, bold strip text,
+#' companion to `theme_publication_netify()` for plots that keep their
+#' axes -- actor-stat time series, similarity heatmaps, mixing matrices,
+#' etc. same typographic settings (italic legend titles, bold strip text,
 #' larger base font) but axes and gridlines are retained.
 #'
-#' @param base_size Base font size. Default 12.
-#' @return A ggplot2 theme object.
-#' @author Cassy Dorff, Shahryar Minhas
+#' @param base_size base font size. default 12.
+#' @return a ggplot2 theme object.
+#' @author cassy dorff, shahryar minhas
 #' @import ggplot2
 #' @export theme_publication_netify_ts
 #'
@@ -127,17 +127,17 @@ theme_publication_netify_ts <- function(base_size = 12) {
 		)
 }
 
-#' Get smart defaults based on network properties
+#' get smart defaults based on network properties
 #'
-#' Automatically adjusts plotting defaults based on network characteristics
+#' automatically adjusts plotting defaults based on network characteristics
 #' such as size, density, and structure.
 #'
-#' @param netlet A netify object
-#' @param msrmnts Measurement data associated with the netlet
-#' @param plot_args Existing plot arguments to merge with
-#' @return Updated plot_args with smart defaults applied
+#' @param netlet a netify object
+#' @param msrmnts measurement data associated with the netlet
+#' @param plot_args existing plot arguments to merge with
+#' @return updated plot_args with smart defaults applied
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -241,14 +241,14 @@ get_smart_defaults <- function(netlet, msrmnts = NULL, plot_args = list()) {
 	return(plot_args)
 }
 
-#' Apply color palettes based on variable type and mapping
+#' apply color palettes based on variable type and mapping
 #'
-#' Automatically selects appropriate ColorBrewer palettes based on
+#' automatically selects appropriate colorbrewer palettes based on
 #' whether variables are continuous or categorical
 #'
-#' @param plot_args Plot arguments
-#' @param net_dfs Network data frames from decompose_netify
-#' @return Updated plot_args with color palette specifications
+#' @param plot_args plot arguments
+#' @param net_dfs network data frames from decompose_netify
+#' @return updated plot_args with color palette specifications
 #'
 #' @keywords internal
 #' @noRd
@@ -260,8 +260,8 @@ apply_smart_palettes <- function(plot_args, net_dfs) {
 		if (var_name %in% names(net_dfs$nodal_data)) {
 			var_data <- net_dfs$nodal_data[[var_name]]
 
-			# determine if categorical or continuous
-			if (is.numeric(var_data) && length(unique(var_data)) > 10) {
+			# numeric variables use continuous scales; convert to factor for categories
+			if (is.numeric(var_data)) {
 				# continuous - use sequential palette
 				if (is.null(plot_args$node_color_palette)) {
 					plot_args$node_color_palette <- "Blues"
@@ -289,7 +289,7 @@ apply_smart_palettes <- function(plot_args, net_dfs) {
 		if (var_name %in% names(net_dfs$nodal_data)) {
 			var_data <- net_dfs$nodal_data[[var_name]]
 
-			if (is.numeric(var_data) && length(unique(var_data)) > 10) {
+			if (is.numeric(var_data)) {
 				# continuous
 				if (is.null(plot_args$node_fill_palette)) {
 					plot_args$node_fill_palette <- "Oranges"
@@ -315,7 +315,7 @@ apply_smart_palettes <- function(plot_args, net_dfs) {
 		if (var_name %in% names(net_dfs$edge_data)) {
 			var_data <- net_dfs$edge_data[[var_name]]
 
-			if (is.numeric(var_data) && length(unique(var_data)) > 10) {
+			if (is.numeric(var_data)) {
 				# continuous - use diverging palette for edges
 				if (is.null(plot_args$edge_color_palette)) {
 					plot_args$edge_color_palette <- "RdBu"

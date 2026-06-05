@@ -38,22 +38,22 @@ n_periods(x)
 n_layers(x)
 }
 \arguments{
-\item{x}{A netify object.}
+\item{x}{a netify object.}
 }
 \value{
 \code{is_binary()} returns a single logical: \code{TRUE} when every
 off-diagonal cell of the underlying adjacency is \code{0}, \code{1}, or
-\code{NA}. Reads the cached \code{"is_binary"} attribute when available
+\code{na}. reads the cached \code{"is_binary"} attribute when available
 and falls back to probing the raw matrix / array / list.
 
 \code{nodal_data()} returns the nodal-attribute data.frame
 stored on the netify object (the \code{"nodal_data"} attribute), or
-\code{NULL} if no nodal attributes have been attached. Convenience
+\code{NULL} if no nodal attributes have been attached. convenience
 wrapper so users do not have to remember the \code{attr()} call.
 
-\code{is_bipartite()} returns a single logical. If \code{igraph} is
+\code{is_bipartite()} returns a single logical. if \code{igraph} is
 loaded after \code{netify}, the bare \code{is_bipartite()} may be masked by
-\code{igraph::is_bipartite()} (which doesn't accept a netify). Use
+\code{igraph::is_bipartite()} (which doesn't accept a netify). use
 \code{is_bipartite_netify()} (alias) or call as \code{netify::is_bipartite()}
 to avoid the collision.
 
@@ -61,8 +61,8 @@ to avoid the collision.
 won't collide with \code{igraph::is_bipartite()} when both packages are
 attached.
 
-\code{is_directed_netify()} returns a single logical. Convenience
-alias for \code{!isTRUE(attr(x, "symmetric"))} that won't collide with
+\code{is_directed_netify()} returns a single logical. convenience
+alias for \code{!istrue(attr(x, "symmetric"))} that won't collide with
 \code{igraph::is_directed()}.
 
 \code{is_longitudinal()} returns a single logical.
@@ -82,11 +82,11 @@ cross-sectional).
 \code{n_layers()} returns a single integer (1 for single-layer).
 }
 \description{
-These mirror the natural shape questions a user would ask: is
+these mirror the natural shape questions a user would ask: is
 this object bipartite? longitudinal? multilayer? how many actors
-does it have? They share a roxygen page with the small
+does it have? they share a roxygen page with the small
 attribute-accessor helpers \code{is_binary()} and \code{nodal_data()}.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

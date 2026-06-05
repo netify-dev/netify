@@ -2,22 +2,22 @@
 % Please edit documentation in R/plot_helpers.R
 \name{print.netify_plot_components}
 \alias{print.netify_plot_components}
-\title{Print netify plot components}
+\title{print netify plot components}
 \usage{
 \method{print}{netify_plot_components}(x, ...)
 }
 \arguments{
-\item{x}{A netify_plot_components object returned from
+\item{x}{a netify_plot_components object returned from
 \code{plot(..., return_components = TRUE)}}
 
-\item{...}{Additional arguments (currently unused)}
+\item{...}{additional arguments (currently unused)}
 }
 \value{
-Invisibly returns the input object
+invisibly returns the input object
 }
 \description{
-Prints a summary of the components available in a netify_plot_components object.
-This helps users understand what layers and elements are available for manual
+prints a summary of the components available in a netify_plot_components object.
+this helps users understand what layers and elements are available for manual
 plot construction.
 }
 \examples{
@@ -31,5 +31,5 @@ print(comp)
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

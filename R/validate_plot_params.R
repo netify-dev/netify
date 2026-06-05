@@ -1,10 +1,10 @@
 #' Validate plot parameters and warn about common mistakes
 #'
-#' This function checks the parameter names passed through ... in plot.netify
+#' this function checks the parameter names passed through ... in plot.netify
 #' and warns users about potential typos or deprecated parameter names.
 #'
-#' @param plot_args List of all plot arguments
-#' @param ... Additional arguments passed to plot.netify
+#' @param plot_args list of all plot arguments
+#' @param ... additional arguments passed to plot.netify
 #'
 #' @return NULL (function is called for side effects - warnings)
 #'
@@ -43,31 +43,32 @@ validate_plot_params <- function(plot_args, ...) {
 		"edge_alpha_manual", "edge_alpha_label", "edge_color_manual", "edge_color_label",
 		"edge_linewidth_manual", "edge_linewidth_label", "edge_linetype_label",
 		"mutate_weight",
-		# node/Point aesthetics - constant
+		# node/point aesthetics - constant
 		"node_alpha", "point_alpha", "node_color", "point_color", "node_fill", "point_fill",
 		"node_shape", "point_shape", "node_size", "point_size", "node_stroke", "point_stroke",
-		# node/Point aesthetics - variable mappings (_by and legacy _var)
+		# node/point aesthetics - variable mappings (_by and legacy _var)
 		"node_alpha_by", "point_alpha_by", "node_alpha_var", "point_alpha_var",
 		"node_color_by", "point_color_by", "node_color_var", "point_color_var",
 		"node_fill_by", "point_fill_by", "node_fill_var", "point_fill_var",
 		"node_shape_by", "point_shape_by", "node_shape_var", "point_shape_var",
 		"node_size_by", "point_size_by", "node_size_var", "point_size_var",
 		"node_stroke_by", "point_stroke_by", "node_stroke_var", "point_stroke_var",
-		# node/Point aesthetics - manual scales and labels
+		# node/point aesthetics - manual scales and labels
 		"node_color_manual", "point_color_manual", "node_color_label", "point_color_label",
 		"node_fill_manual", "point_fill_manual", "node_fill_label", "point_fill_label",
 		"node_shape_manual", "point_shape_manual", "node_shape_label", "point_shape_label",
 		"node_size_manual", "point_size_manual", "node_size_label", "point_size_label",
 		"node_alpha_label", "point_alpha_label", "node_stroke_label", "point_stroke_label",
 		"point_size_guide",
-		# node/Point - grouping
+		# node/point - grouping
 		"node_group", "point_group", "node_group_by", "point_group_by",
 		# text aesthetics - constant
 		"text_alpha", "text_angle", "text_color", "text_family", "text_fill",
 		"text_fontface", "text_hjust", "text_vjust", "text_lineheight", "text_size",
 		# text aesthetics - variable and labels
-		"text_alpha_var", "text_alpha_label", "text_color_var", "text_color_label",
-		"text_size_var", "text_size_label",
+		"text_alpha_by", "text_alpha_var", "text_alpha_label",
+		"text_color_by", "text_color_var", "text_color_label",
+		"text_size_by", "text_size_var", "text_size_label",
 		# text selection
 		"select_text", "select_text_display",
 		# label aesthetics - constant
@@ -150,7 +151,7 @@ validate_plot_params <- function(plot_args, ...) {
 		"label_repel" = "add_label_repel",
 		"repel_text" = "add_text_repel",
 		"repel_label" = "add_label_repel",
-		# bare ggplot-style aesthetics — beginners try these first
+		# bare ggplot-style aesthetics -- beginners try these first
 		"color" = "node_color",
 		"colour" = "node_color",
 		"fill" = "node_fill",
@@ -184,7 +185,7 @@ validate_plot_params <- function(plot_args, ...) {
 			min_distance <- min(distances)
 			
 			# if the distance is small, suggest the alternative
-			if (min_distance <= 3) {  # Levenshtein distance threshold
+			if (min_distance <= 3) {  # levenshtein distance threshold
 				cli::cli_warn(c(
 					"!" = "Unknown parameter '{param_name}' in plot.netify().",
 					"i" = "Did you mean '{closest_match}'?",

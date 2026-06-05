@@ -7,32 +7,32 @@
 \method{plot}{netify_comparison}(x, ...)
 }
 \arguments{
-\item{x}{A \code{netify_comparison} object returned by
+\item{x}{a \code{netify_comparison} object returned by
 \code{compare_networks()}.}
 
-\item{...}{Additional arguments:
+\item{...}{additional arguments:
 \describe{
-\item{\code{metric}}{Which matrix to render. Default: auto-pick the
-primary metric for the comparison's method. Pass
+\item{\code{metric}}{which matrix to render. default: auto-pick the
+primary metric for the comparison's method. pass
 \code{"correlation"} / \code{"jaccard"} / \code{"hamming"} /
 \code{"qap"} / \code{"spectral"} to override.}
-\item{\code{show_values}}{Logical. Overlay numeric values on each
-tile. Default \code{TRUE} when n <= 6, else \code{FALSE}.}
-\item{\code{palette}}{Two-color gradient endpoints. Default
+\item{\code{show_values}}{logical. overlay numeric values on each
+tile. default \code{TRUE} when n <= 6, else \code{FALSE}.}
+\item{\code{palette}}{two-color gradient endpoints. default
 \code{c("#f0f0f0", "#1f78b4")} for correlation-like metrics.}
 }}
 }
 \value{
-A \code{ggplot} object.
+a \code{ggplot} object.
 }
 \description{
-Renders a pairwise similarity heatmap from the matrix output of
-\code{compare_networks()}. Picks an appropriate matrix based on the
+renders a pairwise similarity heatmap from the matrix output of
+\code{compare_networks()}. picks an appropriate matrix based on the
 \code{method} the comparison was run with (correlation / qap / jaccard /
-hamming / spectral). For QAP comparisons, the lower triangle shows
-QAP correlations and (optionally) the upper triangle shows
-p-values, so a single plot communicates both effect and inference.
+hamming / spectral). for qap comparisons, the plot renders the qap
+correlation matrix. p-values remain available in
+\code{x$significance_tests$qap_pvalues}.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

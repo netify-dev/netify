@@ -1,5 +1,32 @@
 set.seed(6886)
 
+melt_test_matrix = function(mat, remove_zeros = FALSE, remove_diagonal = FALSE, na_rm = FALSE) {
+	out = as.data.frame(as.table(mat), stringsAsFactors = FALSE)
+	names(out) = c("Var1", "Var2", "value")
+	if (remove_diagonal) {
+		out = out[out$Var1 != out$Var2, ]
+	}
+	if (remove_zeros) {
+		out = out[!is.na(out$value) & out$value != 0, ]
+	} else if (na_rm) {
+		out = out[!is.na(out$value), ]
+	}
+	rownames(out) = NULL
+	out
+}
+
+melt_matrix_base = function(mat) {
+	melt_test_matrix(mat)
+}
+
+melt_matrix_sparse = function(mat, remove_zeros = TRUE, remove_diagonal = TRUE) {
+	melt_test_matrix(mat,
+		remove_zeros = remove_zeros,
+		remove_diagonal = remove_diagonal,
+		na_rm = TRUE
+	)
+}
+
 test_that("netify_to_igraph: unweighted cross-sec, asymmetric", {
 	# use igraph example to generate some data
 	adjm = matrix(
@@ -25,6 +52,17 @@ test_that("netify_to_igraph: unweighted cross-sec, asymmetric", {
 
 	# compare
 	expect_identical(ng[, ], g1[, ])
+})
+
+test_that("to_igraph warns when non-diagonal NAs are replaced", {
+	mat = matrix(c(NA, 1, NA, NA), 2, 2,
+		dimnames = list(c("a", "b"), c("a", "b")))
+	net = new_netify(mat, symmetric = FALSE, diag_to_NA = TRUE, missing_to_zero = FALSE)
+
+	expect_warning(
+		to_igraph(net),
+		"Replacing 1 non-diagonal NA value with 0"
+	)
 })
 
 test_that("netify_to_igraph: weighted cross-sec, asymmetric", {
@@ -184,7 +222,6 @@ test_that("netify_to_igraph, bipartite: weighted cross-sec, asymmetric", {
 test_that(
 	"netify_to_igraph: weighted cross-sec, dyad and nodal attribs",
 	{
-		# create fake dyad data for cross-sectional case
 		fake_dyads = expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
 		fake_dyads$weight = rnorm(nrow(fake_dyads))
 		fake_dyads$var2 = rnorm(nrow(fake_dyads))
@@ -195,7 +232,6 @@ test_that(
 		fake_dyads$actor2 = as.character(fake_dyads$actor2)
 		fake_dyads = fake_dyads[fake_dyads$actor1 != fake_dyads$actor2, ]
 
-		# create fake node data for cross-sectional case
 		fake_nodes = data.frame(actor1 = letters[1:3], var1 = rnorm(3), var2 = rnorm(3))
 
 		# convert to netify object
@@ -207,12 +243,12 @@ test_that(
 		)
 
 		# add dyad variables in fake data as a dyadic attribute
-		a_matrix = add_dyad_vars(
-			a_matrix, fake_dyads,
-			"actor1", "actor2", NULL,
-			c("var2", "var3", "var4"),
-			c(FALSE, FALSE, FALSE, FALSE)
-		)
+			a_matrix = add_dyad_vars(
+				a_matrix, fake_dyads,
+				"actor1", "actor2", NULL,
+				c("var2", "var3", "var4"),
+				c(FALSE, FALSE, FALSE)
+			)
 		# add node variables in fake data
 		a_matrix = add_node_vars(
 			a_matrix, fake_nodes,
@@ -266,7 +302,6 @@ test_that(
 test_that(
 	"netify_to_igraph: unweighted cross-sec, dyad and nodal attribs",
 	{
-		# create fake dyad data for cross-sectional case
 		fake_dyads = expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
 		fake_dyads$var1 = rnorm(nrow(fake_dyads))
 		fake_dyads$var2 = rnorm(nrow(fake_dyads))
@@ -279,7 +314,6 @@ test_that(
 		fake_dyads$dv = rbinom(nrow(fake_dyads), 1, 0.6)
 		fake_dyads = fake_dyads[fake_dyads$dv == 1, ]
 
-		# create fake node data for cross-sectional case
 		fake_nodes = data.frame(actor1 = letters[1:3], var1 = rnorm(3), var2 = rnorm(3))
 
 		# convert to netify object
@@ -356,7 +390,6 @@ test_that(
 test_that(
 	"netify_to_igraph, bipartite: weighted cross-sec, dyad and nodal attribs",
 	{
-		# create fake dyad data for cross-sectional case
 		ar = letters[1:3]
 		nr = length(ar)
 		ac = letters[22:26]
@@ -371,7 +404,6 @@ test_that(
 		fake_dyads$actor2 = as.character(fake_dyads$actor2)
 		fake_dyads = fake_dyads[fake_dyads$actor1 != fake_dyads$actor2, ]
 
-		# create fake node data for cross-sectional case
 		actors = c(ar, ac)
 		nactors = nr + nc
 		fake_nodes = data.frame(

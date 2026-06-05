@@ -7,29 +7,29 @@
 animate_netify(netlet, ..., static_actor_positions = TRUE)
 }
 \arguments{
-\item{netlet}{A longitudinal netify object (\code{longit_array} /
+\item{netlet}{a longitudinal netify object (\code{longit_array} /
 \code{longit_list}).}
 
-\item{...}{Additional arguments passed to \code{plot.netify()}
+\item{...}{additional arguments passed to \code{plot.netify()}
 (\code{node_color_by}, \code{node_size_by}, \code{style}, etc.).}
 
-\item{static_actor_positions}{Logical. If \code{TRUE} (default for
+\item{static_actor_positions}{logical. if \code{TRUE} (default for
 animation since positions jumping around between periods is
 visually confusing), pin node positions across time.}
 }
 \value{
-A \code{gganim} object. Render with \code{gganimate::animate(.)} or
+a \code{gganim} object. render with \code{gganimate::animate(.)} or
 \code{gganimate::anim_save("file.gif", .)}.
 }
 \description{
-Returns a ggplot built from the per-period \code{plot.netify()} output,
+returns a ggplot built from the per-period \code{plot.netify()} output,
 with \code{gganimate::transition_manual()} keyed on the time variable
-so the animation steps through each period. Requires the
+so the animation steps through each period. requires the
 \code{gganimate} package.
 }
 \details{
-For static facet plots, just call \code{plot(net)} on a longit netlet
-— that defaults to faceting by time. Use \code{animate_netify()} for
+for static facet plots, just call \code{plot(net)} on a longit netlet
+-- that defaults to faceting by time. use \code{animate_netify()} for
 single-panel transitions instead of grid faceting (better for
 presentations / videos where the eye can focus on one period at a
 time).
@@ -43,5 +43,5 @@ anim_save("trade_anim.gif", anim, fps = 4)
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

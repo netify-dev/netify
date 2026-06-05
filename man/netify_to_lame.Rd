@@ -24,104 +24,103 @@ to_lame(
 )
 }
 \arguments{
-\item{netlet}{A netify object.}
+\item{netlet}{a netify object.}
 
-\item{lame}{Logical. As in \code{\link{netify_to_amen}}: pass
-\code{TRUE} when actor composition varies over time. Default \code{FALSE}.}
+\item{lame}{logical. as in \code{\link{netify_to_amen}}: pass
+\code{TRUE} when actor composition varies over time. default \code{FALSE}.}
 
-\item{family}{Optional character. AME family to use. If \code{NULL}
+\item{family}{optional character. ame family to use. if \code{NULL}
 (default), inferred from the netify: \code{"binary"} for binary
 networks, \code{"normal"} for weighted, with a once-per-session info
 message naming the choice.}
 
-\item{pad}{Logical. When \code{lame = TRUE} and the per-period list
+\item{pad}{logical. when \code{lame = TRUE} and the per-period list
 is returned (the function never actually pads in place; it
 always returns a list), controls whether the once-per-session
-info message points users at the \code{lame::list_to_array()} +
-\code{lame::lame()} snippet baked into \code{nl$ame_call}. Default
+info message points users at the padding + \code{lame::lame()} snippet
+baked into \code{nl$ame_call}. default
 \code{TRUE} (emit the message); set \code{FALSE} to silence it.}
 
-\item{fit_method}{One of \code{"gibbs"} (default — MCMC posterior via
+\item{fit_method}{one of \code{"gibbs"} (default -- mcmc posterior via
 \code{lame::ame()} / \code{lame::lame()}) or \code{"als"} (fast alternating-
-least-squares point estimate via \code{lame::ame_als()}). For
-bipartite + binary networks where MCMC is slow, ALS with
+least-squares point estimate via \code{lame::ame_als()}). for
+bipartite + binary networks where mcmc is slow, als with
 \code{bootstrap > 0} gives a fast point estimate plus parametric/block
-bootstrap uncertainty intervals in a single call. The choice
-only affects the generated \code{ame_call} snippet — the \code{Y}/\code{Xdyad}/
-\code{Xrow}/\code{Xcol} payload is identical.}
+bootstrap uncertainty intervals in a single call. the choice
+only affects the generated \code{ame_call} snippet -- the \code{y}/\code{xdyad}/
+\code{xrow}/\code{xcol} payload is identical.}
 
-\item{bootstrap}{Integer. Number of bootstrap replicates for ALS
-uncertainty intervals. Ignored when \code{fit_method = "gibbs"} (MCMC
-draws ARE the uncertainty representation there). Default \code{0}
-(no bootstrap). Pass \code{200} for a reasonable interval estimate.}
+\item{bootstrap}{integer. number of bootstrap replicates for als
+uncertainty intervals. ignored when \code{fit_method = "gibbs"} (mcmc
+draws are the uncertainty representation there). default \code{0}
+(no bootstrap). pass \code{200} for a reasonable interval estimate.}
 }
 \value{
-A list with the same shape as \code{\link{netify_to_amen}}
+a list with the same shape as \code{\link{netify_to_amen}}
 output, plus two helpful extras:
 \describe{
-\item{\code{mode}}{Character: \code{"unipartite"} or \code{"bipartite"}. Pass
+\item{\code{mode}}{character: \code{"unipartite"} or \code{"bipartite"}. pass
 this directly to \code{lame::ame(mode = .)}.}
-\item{\code{family}}{Character: the suggested family (\code{"binary"} or
-\code{"normal"}). Pass to \code{lame::ame(family = .)}.}
-\item{\code{ame_call}}{Character: a literal \code{lame::ame()} call
+\item{\code{family}}{character: the suggested family (\code{"binary"} or
+\code{"normal"}). pass to \code{lame::ame(family = .)}.}
+\item{\code{ame_call}}{character: a literal \code{lame::ame()} call
 string the user can copy-paste.}
 }
 }
 \description{
 \code{netify_to_lame()} (also available as \code{to_lame()}) is a thin
-specialization of \verb{\link{netify_to_amen}} for the sibling \code{lame}
-package, which is not on CRAN. Install from GitHub:
-\code{remotes::install_github("netify-dev/lame")}.
-\code{lame::ame()} accepts the same
-\code{Y} / \code{Xdyad} / \code{Xrow} / \code{Xcol} skeleton as \code{amen::ame()} but adds
+specialization of \verb{\link{netify_to_amen}} for the optional \code{lame}
+workflow. \code{lame::ame()} accepts the same
+\code{y} / \code{xdyad} / \code{xrow} / \code{xcol} skeleton as \code{amen::ame()} but adds
 two things netify users care about:
 }
 \details{
 \itemize{
-\item rectangular \code{Y} for \strong{bipartite} networks via
-\code{mode = "bipartite"} — the standard \code{amen::ame()} rejects this.
-\item ragged longitudinal panels via \code{lame::list_to_array()} →
-\verb{lame::ame_rep_*} — \code{amen} requires constant actor composition.
+\item rectangular \code{y} for \strong{bipartite} networks via
+\code{mode = "bipartite"} -- the standard \code{amen::ame()} rejects this.
+\item ragged longitudinal panels via a generated padding snippet --
+\code{amen} requires constant actor composition.
 }
 
-This function wraps \verb{\link{netify_to_amen}} and:
+this function wraps \verb{\link{netify_to_amen}} and:
 \enumerate{
 \item picks a \code{family} default appropriate to the netify
 (\code{"binary"} for binary nets, \code{"normal"} for weighted),
 \item suggests the correct \code{mode} argument for \code{lame::ame()}
 (\code{"unipartite"} / \code{"bipartite"}),
 \item for \code{lame = TRUE} longitudinal output, emits a copy-paste
-\code{lame::list_to_array()} + \code{lame::lame()} snippet in the
-returned \code{ame_call} slot. The function itself does \strong{not}
-pad the list — run the snippet (or the literal call) to do
+padding + \code{lame::lame()} snippet in the
+returned \code{ame_call} slot. the function itself does \strong{not}
+pad the list -- run the snippet (or the literal call) to do
 that step yourself.
 }
 
-\strong{Bipartite + binary: the case \code{to_amen()} cannot fit.}
-For a bipartite weighted-binary netify (e.g., person × event
+\strong{bipartite + binary: the case \code{to_amen()} cannot fit.}
+for a bipartite weighted-binary netify (e.g., person x event
 attendance, 0/1), this is the exact pipeline:
 \preformatted{
 bp <- netify(df, actor1 = "person", actor2 = "event",
 mode = "bipartite", weight = "attended")
 nl <- to_lame(bp) # auto-detects binary
 fit <- lame::ame(
-Y = nl$Y, Xrow = nl$Xrow, Xcol = nl$Xcol,
+y = nl$y, xrow = nl$xrow, xcol = nl$xcol,
 mode = nl$mode, family = nl$family,
 nscan = 1000, burn = 500
 )
-# uncertainty: posterior intervals are in fit$BETA / fit$VC
+# uncertainty: posterior intervals are in fit$beta / fit$vc
 }
 
-\strong{Ragged longitudinal panels.} When \code{lame = TRUE} and
+\strong{ragged longitudinal panels.} when \code{lame = TRUE} and
 actors enter / exit the network, this function:
 \enumerate{
 \item builds the per-period list via \code{netify_to_amen(lame=TRUE)},
-\item bakes a \code{lame::list_to_array(actors = U, Y = nl$Y, ...)}
-pad-then-fit snippet into \code{nl$ame_call} that the user runs
-to materialize the 3D \verb{[n, n, T]} array and fit \code{lame::lame()}.
+\item bakes a pad-then-fit snippet into \code{nl$ame_call} that the
+user runs to materialize the 3d \verb{[n, n, t]} array and fit
+\code{lame::lame()}. unipartite snippets use \code{lame::list_to_array()};
+bipartite snippets pad rectangular row-by-column arrays directly.
 }
-The returned \code{Y} / \code{Xdyad} / \code{Xrow} / \code{Xcol} are always the
-per-period list — \code{pad} only controls whether the once-per-
+the returned \code{y} / \code{xdyad} / \code{xrow} / \code{xcol} are always the
+per-period list -- \code{pad} only controls whether the once-per-
 session info message reminding the user of the snippet fires.
 }
 \seealso{
@@ -130,7 +129,7 @@ session info message reminding the user of the snippet fires.
 \code{\link{netify_to_igraph}}.
 }
 \author{
-Shahryar Minhas
+shahryar minhas
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

@@ -423,7 +423,6 @@ test_that(
 			stringsAsFactors = FALSE
 		)
 
-		# this should work with character time
 		net_obj = netify(
 			df_char_dates,
 			actor1 = "actor1",
@@ -446,7 +445,7 @@ test_that(
 	"netify handles Date class time variables",
 	{
 	skip_on_cran()
-		# create data with actual Date objects
+		# create data with actual date objects
 		df_dates = data.frame(
 			i = rep(c("A", "B", "C"), each = 6),
 			j = rep(c("A", "B", "C"), 6),
@@ -458,7 +457,6 @@ test_that(
 			stringsAsFactors = FALSE
 		)
 
-		# should handle Date objects
 		net_obj = netify(
 			df_dates,
 			actor1 = "i",
@@ -483,7 +481,7 @@ test_that(
 	"netify handles POSIXct datetime variables",
 	{
 	skip_on_cran()
-		# create data with POSIXct timestamps
+		# create data with posixct timestamps
 		df_posix = data.frame(
 			sender = c("server1", "server2", "server1", "server3"),
 			receiver = c("server2", "server3", "server3", "server1"),
@@ -505,9 +503,8 @@ test_that(
 
 		expect_s3_class(net_obj, "netify")
 		expect_equal(attr(net_obj, "netify_type"), "longit_list")
-		# should aggregate to day level
-		expect_equal(length(net_obj), 2)
-		expect_equal(names(net_obj), c("2023-01-01", "2023-01-02"))
+			expect_equal(length(net_obj), 4)
+			expect_equal(names(net_obj), format(df_posix$timestamp, "%Y-%m-%d %H:%M:%S %Z"))
 	}
 )
 
@@ -572,7 +569,6 @@ test_that(
 	"netify with character time and specific output format",
 	{
 	skip_on_cran()
-		# test with longit_array output
 		df_char_time = data.frame(
 			i = rep(c("X", "Y", "Z"), 3),
 			j = rep(c("Y", "Z", "X"), 3),

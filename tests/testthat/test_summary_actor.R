@@ -11,7 +11,6 @@ test_that("summary_actor works for cross-sectional networks", {
 		weight = "verbCoop"
 	)
 
-	# test basic summary
 	actor_stats = summary_actor(net)
 
 	expect_s3_class(actor_stats, "data.frame")
@@ -41,7 +40,6 @@ test_that("summary_actor works for longitudinal networks", {
 		weight = "matlConf"
 	)
 
-	# test summary
 	actor_stats = summary_actor(net_longit)
 
 	expect_s3_class(actor_stats, "data.frame")
@@ -126,6 +124,41 @@ test_that("summary_actor works for weighted networks", {
 	expect_true(all(c("strength_median_in", "strength_median_out", "strength_median_total") %in% names(actor_stats)))
 })
 
+test_that("summary_actor uses possible ties and realized ties in weighted summaries", {
+	mat = matrix(0, 3, 3, dimnames = list(letters[1:3], letters[1:3]))
+	diag(mat) = NA
+	mat["a", "b"] = 2
+	mat["b", "c"] = 4
+
+	net = new_netify(
+		mat,
+		symmetric = FALSE,
+		weight = "w",
+		is_binary = FALSE,
+		diag_to_NA = TRUE,
+		missing_to_zero = TRUE
+	)
+	actor_stats = summary_actor(net, stats = "fast")
+	a_row = actor_stats[actor_stats$actor == "a", ]
+	c_row = actor_stats[actor_stats$actor == "c", ]
+
+	expect_equal(a_row$degree_out, 1)
+	expect_equal(a_row$prop_ties_out, 1 / 2)
+	expect_equal(a_row$strength_avg_out, 2)
+	expect_equal(a_row$strength_avg_total, 2)
+	expect_true(is.na(c_row$strength_avg_out))
+})
+
+test_that("summary_actor preserves dotted actor and time labels", {
+	mat = matrix(c(0, 1, 0, 0), 2, 2,
+		dimnames = list(c("a.1", "b.2"), c("a.1", "b.2")))
+	net = new_netify(list("wave.1" = mat), symmetric = FALSE)
+	actor_stats = summary_actor(net, stats = "fast")
+
+	expect_setequal(actor_stats$actor, c("a.1", "b.2"))
+	expect_equal(unique(actor_stats$time), "wave.1")
+})
+
 test_that("summary_actor works for multilayer networks", {
 	skip_on_cran()
 	# create multilayer network
@@ -145,13 +178,11 @@ test_that("summary_actor works for multilayer networks", {
 	expect_true("layer" %in% names(actor_stats))
 	expect_equal(sort(unique(actor_stats$layer)), c("material", "verbal"))
 
-	# each actor should appear in each layer
 	n_actors = length(unique(actor_stats$actor))
 	expect_equal(nrow(actor_stats), n_actors * 2) # 2 layers
 })
 
 test_that("summary_actor handles custom statistics correctly", {
-	# create test network
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 	net = netify(
@@ -203,7 +234,6 @@ test_that("summary_actor handles bipartite networks", {
 	expect_true(all(all_actors %in% actor_stats$actor))
 	expect_equal(nrow(actor_stats), 8) # 5 + 3 actors
 
-	# bipartite networks should be treated as directed
 	expect_true("degree_total" %in% names(actor_stats))
 })
 
@@ -262,10 +292,10 @@ test_that("summary_actor produces consistent output structure", {
 
 test_that("summary_actor weight inversion produces different centrality values", {
 	# create a network where shortest paths differ based on weight interpretation
-	# path 1: A -> B -> E (weights: 1 + 1 = 2)
-	# path 2: A -> C -> D -> E (weights: 10 + 10 + 10 = 30)
-	# when weights are distances: Path 1 is shorter (2 < 30)
-	# when weights are inverted (strengths): Path 2 is "shorter" (1/10 + 1/10 + 1/10 = 0.3 < 1/1 + 1/1 = 2)
+	# path 1: a -> b -> e (weights: 1 + 1 = 2)
+	# path 2: a -> c -> d -> e (weights: 10 + 10 + 10 = 30)
+	# when weights are distances: path 1 is shorter (2 < 30)
+	# when weights are inverted (strengths): path 2 is "shorter" (1/10 + 1/10 + 1/10 = 0.3 < 1/1 + 1/1 = 2)
 
 	test_data = data.frame(
 		actor1 = c("A", "A", "B", "C", "D"),
@@ -287,17 +317,14 @@ test_that("summary_actor weight inversion produces different centrality values",
 	# get stats without inversion (weights as distances)
 	stats_not_inverted = summary_actor(net, invert_weights_for_igraph = FALSE)
 
-	# extract values for node B (which is on the short direct path)
+	# extract values for node b (which is on the short direct path)
 	b_inverted = stats_inverted[stats_inverted$actor == "B", ]
 	b_not_inverted = stats_not_inverted[stats_not_inverted$actor == "B", ]
 
-	# extract values for node C (which is on the long indirect path)
+	# extract values for node c (which is on the long indirect path)
 	c_inverted = stats_inverted[stats_inverted$actor == "C", ]
 	c_not_inverted = stats_not_inverted[stats_not_inverted$actor == "C", ]
 
-	# betweenness centrality should differ
-	# when weights are distances (not inverted): B should have higher betweenness (on shortest path)
-	# when weights are strengths (inverted): C should have higher betweenness
 	expect_true(
 		b_not_inverted$betweenness != b_inverted$betweenness ||
 			c_not_inverted$betweenness != c_inverted$betweenness,
@@ -305,10 +332,9 @@ test_that("summary_actor weight inversion produces different centrality values",
 	)
 })
 
-# alternative test with a guaranteed difference
 test_that("summary_actor weight inversion affects closeness centrality", {
 	# create a star network with different weight patterns
-	# center node A connects to all others
+	# center node a connects to all others
 	# weights vary significantly
 	test_data = data.frame(
 		actor1 = c("A", "A", "A", "A"),
@@ -328,11 +354,10 @@ test_that("summary_actor weight inversion affects closeness centrality", {
 	stats_inv = summary_actor(net, invert_weights_for_igraph = TRUE)
 	stats_no_inv = summary_actor(net, invert_weights_for_igraph = FALSE)
 
-	# look at closeness for the center node A
+	# look at closeness for the center node a
 	a_inv = stats_inv[stats_inv$actor == "A", ]
 	a_no_inv = stats_no_inv[stats_no_inv$actor == "A", ]
 
-	# closeness should definitely differ for node A
 	expect_false(
 		isTRUE(all.equal(a_inv$closeness, a_no_inv$closeness)),
 		info = "Closeness centrality should differ for central node with weight inversion"

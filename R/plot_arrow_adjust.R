@@ -1,18 +1,18 @@
 #' Adjust edge endpoints to stop at node boundaries
 #'
-#' This function adjusts the endpoints of edges so that arrows stop at node
-#' boundaries rather than pointing to node centers. It handles both straight
+#' this function adjusts the endpoints of edges so that arrows stop at node
+#' boundaries rather than pointing to node centers. it handles both straight
 #' and curved edges.
 #'
-#' @param edge_data Data frame with edge coordinates (x1, y1, x2, y2, from, to)
-#' @param node_data Data frame with node positions (x, y, name) and sizes
-#' @param node_size Either a single numeric value or column name for node sizes
-#' @param size_scale Scaling factor to convert ggplot2 size units to coordinate units
-#' @param arrow_gap Additional gap between arrow tip and node boundary (0-1)
-#' @param curved Logical indicating whether edges are curved
-#' @param curvature Curvature amount if edges are curved
+#' @param edge_data data frame with edge coordinates (x1, y1, x2, y2, from, to)
+#' @param node_data data frame with node positions (x, y, name) and sizes
+#' @param node_size either a single numeric value or column name for node sizes
+#' @param size_scale scaling factor to convert ggplot2 size units to coordinate units
+#' @param arrow_gap additional gap between arrow tip and node boundary (0-1)
+#' @param curved logical indicating whether edges are curved
+#' @param curvature curvature amount if edges are curved
 #'
-#' @return Updated edge_data with adjusted endpoints
+#' @return updated edge_data with adjusted endpoints
 #'
 #' @keywords internal
 #' @noRd
@@ -77,14 +77,14 @@ adjust_edge_endpoints <- function(edge_data, node_data, node_size = 1.5,
 }
 
 
-#' Adjust straight edge endpoints
+#' adjust straight edge endpoints
 #'
-#' @param edge_data Edge data frame
-#' @param node_x Named vector of node x positions
-#' @param node_y Named vector of node y positions
-#' @param node_radii Named vector of node radii in coordinate units
+#' @param edge_data edge data frame
+#' @param node_x named vector of node x positions
+#' @param node_y named vector of node y positions
+#' @param node_radii named vector of node radii in coordinate units
 #'
-#' @return Updated edge_data
+#' @return updated edge_data
 #' @keywords internal
 #' @noRd
 
@@ -131,15 +131,15 @@ adjust_straight_edges <- function(edge_data, node_x, node_y, node_radii) {
 	return(edge_data)
 }
 
-#' Adjust curved edge endpoints
+#' adjust curved edge endpoints
 #'
-#' @param edge_data Edge data frame
-#' @param node_x Named vector of node x positions
-#' @param node_y Named vector of node y positions
-#' @param node_radii Named vector of node radii
-#' @param curvature Curvature parameter
+#' @param edge_data edge data frame
+#' @param node_x named vector of node x positions
+#' @param node_y named vector of node y positions
+#' @param node_radii named vector of node radii
+#' @param curvature curvature parameter
 #'
-#' @return Updated edge_data
+#' @return updated edge_data
 #' @keywords internal
 #' @noRd
 
@@ -180,7 +180,7 @@ adjust_curved_edges <- function(edge_data, node_x, node_y, node_radii, curvature
 		# skip processing if the tangent length is zero
 		if (td == 0) next
 
-		# normalize the tangent vector (to ensure consistent direction)
+		# normalize the tangent vector
 		tx <- tx / td
 		ty <- ty / td
 
@@ -196,15 +196,15 @@ adjust_curved_edges <- function(edge_data, node_x, node_y, node_radii, curvature
 	return(edge_data)
 }
 
-#' Calculate appropriate size scale factor
+#' calculate appropriate size scale factor
 #'
-#' Estimates the scale factor needed to convert ggplot2 size units to
+#' estimates the scale factor needed to convert ggplot2 size units to
 #' coordinate units based on the plot's coordinate range.
 #'
-#' @param node_data Data frame with x and y coordinates
-#' @param base_scale Base scale factor (default 0.015)
+#' @param node_data data frame with x and y coordinates
+#' @param base_scale base scale factor (default 0.015)
 #'
-#' @return Adjusted scale factor
+#' @return adjusted scale factor
 #' @keywords internal
 #' @noRd
 

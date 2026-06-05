@@ -1,34 +1,34 @@
 #' Visualize attribute mixing matrix results
 #'
-#' Creates heatmap visualizations for attribute mixing matrices from \code{mixing_matrix()}.
-#' The function creates a tile plot showing how different attribute categories interact in the network.
+#' creates heatmap visualizations for attribute mixing matrices from \code{mixing_matrix()}.
+#' the function creates a tile plot showing how different attribute categories interact in the network.
 #'
-#' @param mixing_results Output from \code{mixing_matrix()} containing mixing matrices
+#' @param mixing_results output from \code{mixing_matrix()} containing mixing matrices
 #'   and summary statistics.
-#' @param which_matrix Integer or character. Which matrix to plot if multiple are present.
-#'   Default is 1 (first matrix).
-#' @param show_values Logical. Whether to display values in each tile. Default TRUE.
-#' @param value_digits Integer. Number of decimal places for displayed values. Default 2.
-#' @param color_scale Character vector of three colors for low, mid, and high values.
-#'   Default uses a diverging color scale.
-#' @param midpoint Numeric. The midpoint for the diverging color scale. Default NULL
+#' @param which_matrix integer or character. which matrix to plot if multiple are present.
+#'   default is 1 (first matrix).
+#' @param show_values logical. whether to display values in each tile. default TRUE.
+#' @param value_digits integer. number of decimal places for displayed values. default 2.
+#' @param color_scale character vector of three colors for low, mid, and high values.
+#'   default uses a diverging color scale.
+#' @param midpoint numeric. the midpoint for the diverging color scale. default NULL
 #'   automatically calculates based on data range.
-#' @param text_size Numeric. Size of value labels in tiles. Default 4.
-#' @param text_color Character. Color of text labels. Default "black".
-#' @param text_color_threshold Numeric. If provided, values above this threshold (0-1 scale)
-#'   will use white text, values below will use black text. Default NULL uses text_color for all.
-#' @param tile_border_color Character. Color of tile borders. Default "white".
-#' @param tile_border_size Numeric. Width of tile borders. Default 0.5.
-#' @param reorder_categories Logical. Whether to reorder categories by similarity. Default FALSE.
-#' @param diagonal_emphasis Logical. Whether to emphasize diagonal cells (within-group mixing).
-#'   Default TRUE.
-#' @param ... Additional arguments passed to ggplot2 functions.
+#' @param text_size numeric. size of value labels in tiles. default 4.
+#' @param text_color character. color of text labels. default "black".
+#' @param text_color_threshold numeric. if provided, values above this threshold (0-1 scale)
+#'   will use white text, values below will use black text. default NULL uses text_color for all.
+#' @param tile_border_color character. color of tile borders. default "white".
+#' @param tile_border_size numeric. width of tile borders. default 0.5.
+#' @param reorder_categories logical. whether to reorder categories by similarity. default FALSE.
+#' @param diagonal_emphasis logical. whether to emphasize diagonal cells (within-group mixing).
+#'   default TRUE.
+#' @param ... additional arguments passed to ggplot2 functions.
 #'
-#' @return A ggplot2 object that can be further customized.
+#' @return a ggplot2 object that can be further customized.
 #'
 #' @examples
 #' \dontrun{
-#' # Create a network with categorical attributes
+#' # create a network with categorical attributes
 #' data(icews)
 #' icews_10 <- icews[icews$year == 2010, ]
 #' net <- netify(
@@ -38,13 +38,13 @@
 #'     weight = "verbCoop"
 #' )
 #'
-#' # Run mixing matrix analysis
+#' # run mixing matrix analysis
 #' mixing_result <- mixing_matrix(
 #'     net,
 #'     attribute = "i_polity2_cat"
 #' )
 #'
-#' # Create visualization
+#' # create visualization
 #' plot_mixing_matrix(mixing_result)
 #' }
 #'
@@ -52,7 +52,7 @@
 #' @importFrom rlang .data
 #' @importFrom stats median hclust dist as.dist
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export plot_mixing_matrix
 
@@ -71,7 +71,7 @@ plot_mixing_matrix <- function(
 	reorder_categories = FALSE,
 	diagonal_emphasis = TRUE,
 	...) {
-	# validate the input to ensure it is a list and contains the required "mixing_matrices" element
+	# validate mixing matrix input
 	if (!is.list(mixing_results) || !"mixing_matrices" %in% names(mixing_results)) {
 		cli::cli_abort(
 			c(
@@ -123,7 +123,7 @@ plot_mixing_matrix <- function(
 			df_long$to <- factor(df_long$to, levels = category_order)
 		}
 	} else {
-		# ensure factor levels match the original order of rows and columns
+		# keep row and column order
 		df_long$from <- factor(df_long$from, levels = rownames(matrix_data))
 		df_long$to <- factor(df_long$to, levels = colnames(matrix_data))
 	}
@@ -270,22 +270,22 @@ plot_mixing_matrix <- function(
 	return(p)
 }
 
-#' Create a multi-panel mixing matrix visualization
+#' create a multi-panel mixing matrix visualization
 #'
-#' Creates a faceted plot showing multiple mixing matrices, useful for comparing
+#' creates a faceted plot showing multiple mixing matrices, useful for comparing
 #' patterns across time periods or network layers.
 #'
-#' @param mixing_results Output from \code{mixing_matrix()} with multiple matrices
-#' @param matrices_to_plot Integer vector. Which matrices to include. Default NULL plots all.
-#' @param ncol Integer. Number of columns in facet layout. Default NULL auto-calculates.
-#' @param shared_scale Logical. Whether to use the same color scale across panels. Default TRUE.
-#' @param ... Additional arguments passed to plot_mixing_matrix for each panel
+#' @param mixing_results output from \code{mixing_matrix()} with multiple matrices
+#' @param matrices_to_plot integer vector. which matrices to include. default NULL plots all.
+#' @param ncol integer. number of columns in facet layout. default NULL auto-calculates.
+#' @param shared_scale logical. whether to use the same color scale across panels. default TRUE.
+#' @param ... additional arguments passed to plot_mixing_matrix for each panel
 #'
-#' @return A ggplot2 object with faceted mixing matrices
+#' @return a ggplot2 object with faceted mixing matrices
 #'
 #' @examples
 #' \dontrun{
-#' # Create temporal network
+#' # create temporal network
 #' data(icews)
 #' net_temporal <- netify(
 #'     icews,
@@ -295,19 +295,19 @@ plot_mixing_matrix <- function(
 #'     weight = "verbCoop"
 #' )
 #'
-#' # Run mixing matrix analysis across time
+#' # run mixing matrix analysis across time
 #' mixing_temporal <- mixing_matrix(
 #'     net_temporal,
 #'     attribute = "i_polity2_cat"
 #' )
 #'
-#' # Create faceted visualization
+#' # create faceted visualization
 #' plot_mixing_matrix_facet(mixing_temporal, ncol = 2)
 #' }
 #'
 #' @import ggplot2
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export plot_mixing_matrix_facet
 
@@ -357,7 +357,7 @@ plot_mixing_matrix_facet <- function(
 			as.vector(mixing_results$mixing_matrices[[i]])
 		}), use.names = FALSE)
 
-		# remove any NA values from the extracted values
+		# remove any na values from the extracted values
 		all_values <- all_values[!is.na(all_values)]
 
 		# calculate the range and median of the values if there are any

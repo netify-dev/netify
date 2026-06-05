@@ -12,100 +12,114 @@ summary_actor(
 )
 }
 \arguments{
-\item{netlet}{A netify object containing network data}
+\item{netlet}{a netify object containing network data}
 
-\item{invert_weights_for_igraph}{Logical. If TRUE (default), inverts edge weights
+\item{invert_weights_for_igraph}{logical. if TRUE (default), inverts edge weights
 when calculating closeness and betweenness centrality, as igraph interprets
-weights as distances. Set to FALSE if your weights already represent distances.}
+weights as distances. set to FALSE if your weights already represent distances.}
 
-\item{other_stats}{Optional named list of custom functions to calculate additional
-actor-level statistics. Each function should accept a matrix and return a
+\item{other_stats}{optional named list of custom functions to calculate additional
+actor-level statistics. each function should accept a matrix and return a
 vector with one value per actor.}
 
-\item{stats}{One of \code{"all"} (default) or \code{"fast"}. The \code{"fast"} path
+\item{stats}{one of \code{"all"} (default) or \code{"fast"}. the \code{"fast"} path
 returns only degree- and strength-style columns and skips closeness,
-betweenness, eigenvector, and HITS. When the user does not pass
+betweenness, eigenvector, and hits. when the user does not pass
 \code{stats} explicitly, the default auto-promotes to \code{"fast"} once the
 number of actors reaches
-\code{getOption("netify.fast_threshold", 1500L)}; passing
+\verb{getoption("netify.fast_threshold", 1500l)}; passing
 \code{stats = "all"} explicitly always honors that request.}
 }
 \value{
-A data frame with actor-level statistics. Columns always include:
+a data frame with actor-level statistics. columns always include:
 \describe{
-\item{\code{actor}}{Actor name/identifier}
-\item{\code{time}}{Time period (for longitudinal networks)}
-\item{\code{layer}}{Layer name (for multilayer networks)}
+\item{\code{actor}}{actor name/identifier}
+\item{\code{time}}{time period (for longitudinal networks)}
+\item{\code{layer}}{layer name (for multilayer networks)}
 }
 
-Additional columns depend on network type:
+additional columns depend on network type:
 
-\strong{For undirected networks:}
+\strong{for undirected networks:}
 \describe{
-\item{\code{degree}}{Number of connections. Calculated as \eqn{d_i = \sum_{j=1}^{n} a_{ij}}, where \eqn{a_{ij}} is the adjacency matrix element.}
-\item{\code{prop_ties}}{Proportion of possible ties realized. Calculated as \eqn{p_i = \frac{d_i}{n-1}}, where \eqn{d_i} is the degree and \eqn{n} is the total number of actors.}
-\item{\code{net_share}}{Actor's share of total network connections. Calculated as \eqn{s_i = \frac{d_i}{\sum_{j=1}^{n} d_j}}.}
-\item{\code{closeness}}{Closeness centrality. Calculated as \eqn{C_i = \frac{1}{\sum_{j} d(i, j)}}, where \eqn{d(i, j)} is the shortest path distance to every other actor \eqn{j}.}
-\item{\code{betweenness}}{Betweenness centrality. Calculated as \eqn{B_i = \sum_{s \neq i \neq t} \frac{\sigma_{st}(i)}{\sigma_{st}}}, where \eqn{\sigma_{st}} is the total number of shortest paths from node \eqn{s} to node \eqn{t} and \eqn{\sigma_{st}(i)} is the number of those paths that pass through \eqn{i}.}
-\item{\code{eigen_centrality}}{Eigenvector centrality, based on the principal eigenvector of the adjacency matrix.}
+\item{\code{degree}}{number of realized non-zero connections. for weighted
+networks, degree remains a count; use strength columns for sums and moments
+of edge weights.}
+\item{\code{prop_ties}}{proportion of possible ties realized. calculated as \eqn{p_i = \frac{d_i}{n-1}}, where \eqn{d_i} is the degree and \eqn{n} is the total number of actors.}
+\item{\code{network_share}}{actor's share of total network connections.
+for unweighted networks this is based on degree; for weighted networks
+this is based on absolute realized tie mass, so signed networks do not
+produce negative shares.}
+\item{\code{closeness}}{closeness centrality. calculated as \eqn{c_i = \frac{1}{\sum_{j} d(i, j)}}, where \eqn{d(i, j)} is the shortest path distance to every other actor \eqn{j}.}
+\item{\code{betweenness}}{betweenness centrality. calculated as \eqn{b_i = \sum_{s \neq i \neq t} \frac{\sigma_{st}(i)}{\sigma_{st}}}, where \eqn{\sigma_{st}} is the total number of shortest paths from node \eqn{s} to node \eqn{t} and \eqn{\sigma_{st}(i)} is the number of those paths that pass through \eqn{i}.}
+\item{\code{eigen_vector}}{eigenvector centrality, based on the principal eigenvector of the adjacency matrix.}
 }
 
-\strong{For directed networks:}
+\strong{for directed networks:}
 \describe{
-\item{\code{in_degree}, \code{out_degree}}{Incoming and outgoing connections. \eqn{d_i^{in} = \sum_{j=1}^{n} a_{ji}} and \eqn{d_i^{out} = \sum_{j=1}^{n} a_{ij}}.}
-\item{\code{in_prop_ties}, \code{out_prop_ties}}{Proportion of possible in/out ties}
-\item{\code{total_degree}}{Sum of in and out degree}
-\item{\code{in_closeness}, \code{out_closeness}}{Directed closeness centrality}
-\item{\code{betweenness}}{Betweenness centrality}
-\item{\code{authority}, \code{hub}}{Authority and hub scores (asymmetric only)}
+\item{\code{degree_in}, \code{degree_out}}{incoming and outgoing realized
+non-zero connection counts. for weighted networks, degree columns remain
+counts and strength columns summarize edge weights.}
+\item{\code{prop_ties_in}, \code{prop_ties_out}, \code{prop_ties_total}}{proportion of possible in, out, and total ties.}
+\item{\code{network_share_in}, \code{network_share_out}, \code{network_share_total}}{actor's share of incoming, outgoing, and total network connections. for weighted networks these shares use absolute realized tie mass.}
+\item{\code{degree_total}}{sum of in and out degree}
+\item{\code{closeness_in}, \code{closeness_out}, \code{closeness_all}}{directed closeness centrality}
+\item{\code{betweenness}}{betweenness centrality}
+\item{\code{authority_score}, \code{hub_score}}{authority and hub scores (asymmetric only)}
 }
 
-\strong{For weighted networks, additional columns:}
+\strong{for weighted networks, additional columns:}
 \describe{
-\item{\code{strength_sum}}{Sum of edge weights. For undirected: \eqn{s_i^{sum} = \sum_{j=1}^{n} w_{ij}}. For directed: separate in/out sums.}
-\item{\code{strength_avg}}{Average edge weight. Calculated as \eqn{s_i^{avg} = \frac{s_i^{sum}}{d_i}}.}
-\item{\code{strength_sd}}{Standard deviation of edge weights. Calculated as \eqn{s_i^{sd} = \sqrt{\frac{1}{d_i} \sum_{j=1}^{n} (w_{ij} - s_i^{avg})^2}}.}
-\item{\code{strength_median}}{Median edge weight}
+\item{\code{strength_sum}}{sum of edge weights. directed networks return \code{strength_sum_in}, \code{strength_sum_out}, and \code{strength_sum_total}.}
+\item{\code{strength_avg}}{average weight among realized non-zero ties. directed networks return \code{strength_avg_in}, \code{strength_avg_out}, and \code{strength_avg_total}.}
+\item{\code{strength_std}}{standard deviation of weights among realized non-zero ties. directed networks return \code{strength_std_in}, \code{strength_std_out}, and \code{strength_std_total}.}
+\item{\code{strength_median}}{median weight among realized non-zero ties. directed networks return \code{strength_median_in}, \code{strength_median_out}, and \code{strength_median_total}.}
 }
 }
 \description{
-Computes comprehensive actor-level statistics for netify objects, including
-degree, strength, centrality measures, and custom metrics. Handles different
+computes actor-level statistics for netify objects, including degree,
+strength, centrality measures, and custom metrics. handles different
 network types (directed/undirected, weighted/unweighted) appropriately.
 }
 \details{
-The function automatically adapts calculations based on network properties:
+the function automatically adapts calculations based on network properties:
 
-\strong{Centrality Measures:}
+\strong{centrality measures:}
 \itemize{
-\item \strong{Degree}: Count of direct connections. For directed networks,
+\item \strong{degree}: count of direct connections. for directed networks,
 calculated separately for incoming (in-degree) and outgoing (out-degree) ties.
-\item \strong{Closeness}: Measures how quickly an actor can reach all others.
-Based on the inverse of the sum of shortest path distances.
-\item \strong{Betweenness}: Measures how often an actor lies on shortest paths
+\item \strong{closeness}: measures how quickly an actor can reach all others.
+based on the inverse of the sum of shortest path distances.
+\item \strong{betweenness}: measures how often an actor lies on shortest paths
 between other actors, indicating brokerage potential.
-\item \strong{Eigenvector}: Measures importance based on connections to other
-important actors. Computed using the principal eigenvector of the adjacency matrix.
-\item \strong{Authority/Hub}: For directed networks only. Authority scores measure
-importance as targets of ties from important sources. Hub scores measure
+\item \strong{eigenvector}: measures importance based on connections to other
+important actors. computed using the principal eigenvector of the adjacency matrix.
+\item \strong{authority/hub}: for directed networks only. authority scores measure
+importance as targets of ties from important sources. hub scores measure
 importance as sources of ties to important targets.
 }
 
-\strong{Weight Handling:}
+\strong{weight handling:}
 
-By default, the function assumes larger weights indicate stronger relationships.
-When calculating closeness and betweenness centrality, weights are inverted
-(1/weight) because igraph treats edge weights as distances. For distance-based
-networks where larger values already represent distances or weaker relationships,
-set \code{invert_weights_for_igraph = FALSE}.
+by default, the function assumes larger weights indicate stronger relationships.
+when calculating closeness and betweenness centrality, weights are shifted to a
+positive scale when needed and inverted (1/weight) because igraph treats edge
+weights as distances. for distance-based networks where larger values already
+represent distances or weaker relationships, set
+\code{invert_weights_for_igraph = FALSE}. eigenvector, authority, and hub scores
+use the positive shifted strength scale without distance inversion.
+strength summaries are calculated over realized non-zero ties. observed zero
+non-ties and missing dyads are excluded from strength averages, standard
+deviations, and medians; negative signed ties remain part of the realized-tie
+distribution.
 
-\strong{Custom Statistics:}
+\strong{custom statistics:}
 
-Add custom metrics using the \code{other_stats} parameter. Each function receives
+add custom metrics using the \code{other_stats} parameter. each function receives
 the adjacency matrix and should return a vector with one value per actor:
 
 \preformatted{
-# Example: Maximum tie weight for each actor
+# example: maximum tie weight for each actor
 max_out <- function(mat) apply(mat, 1, max, na.rm = TRUE)
 max_in <- function(mat) apply(mat, 2, max, na.rm = TRUE)
 
@@ -113,46 +127,47 @@ stats <- summary_actor(net,
   other_stats = list(max_out = max_out, max_in = max_in))
 }
 
-\strong{Mathematical Formulations:}
+\strong{mathematical formulations:}
 
-For symmetric unweighted networks:
+for symmetric unweighted networks:
 \itemize{
-\item Degree: \eqn{d_i = \sum_{j=1}^{n} a_{ij}}
-\item Proportion of ties: \eqn{p_i = \frac{d_i}{n-1}}
-\item Network share: \eqn{s_i = \frac{d_i}{\sum_{j=1}^{n} d_j}}
-\item Closeness: \eqn{C_i = \frac{1}{\sum_{j} d(i, j)}}
-\item Betweenness: \eqn{B_i = \sum_{s \neq i \neq t} \frac{\sigma_{st}(i)}{\sigma_{st}}}
+\item degree: \eqn{d_i = \sum_{j=1}^{n} a_{ij}}
+\item proportion of ties: \eqn{p_i = \frac{d_i}{n-1}}
+\item network share: \eqn{s_i = \frac{d_i}{\sum_{j=1}^{n} d_j}}
+\item closeness: \eqn{c_i = \frac{1}{\sum_{j} d(i, j)}}
+\item betweenness: \eqn{b_i = \sum_{s \neq i \neq t} \frac{\sigma_{st}(i)}{\sigma_{st}}}
 }
 
-For symmetric weighted networks, additional measures:
+for symmetric weighted networks, additional measures:
 \itemize{
-\item Strength sum: \eqn{s_i^{sum} = \sum_{j=1}^{n} w_{ij}}
-\item Strength average: \eqn{s_i^{avg} = \frac{s_i^{sum}}{d_i}}
-\item Strength standard deviation: \eqn{s_i^{sd} = \sqrt{\frac{1}{d_i} \sum_{j=1}^{n} (w_{ij} - s_i^{avg})^2}}
+\item strength sum: \eqn{s_i^{sum} = \sum_{j=1}^{n} w_{ij}}
+\item strength average: mean of the actor's realized non-zero tie weights
+\item strength standard deviation: standard deviation of the actor's realized
+non-zero tie weights
 }
 
-For asymmetric networks, statistics are calculated separately for rows (out)
+for asymmetric networks, statistics are calculated separately for rows (out)
 and columns (in), with totals where applicable.
 }
 \note{
-For longitudinal networks, statistics are calculated separately for each time
-period. For multilayer networks, statistics are calculated separately for each
+for longitudinal networks, statistics are calculated separately for each time
+period. for multilayer networks, statistics are calculated separately for each
 layer unless layers have been aggregated beforehand.
 
-Missing values (NA) in the network are excluded from calculations. Isolates
-(actors with no connections) receive appropriate values (0 for degree, NA for
+missing values (na) in the network are excluded from calculations. isolates
+(actors with no connections) receive appropriate values (0 for degree, na for
 some centrality measures).
 
-The function handles both cross-sectional and longitudinal data structures,
-as well as single-layer and multilayer networks. For ego networks created
+the function handles both cross-sectional and longitudinal data structures,
+as well as single-layer and multilayer networks. for ego networks created
 with netify, the function appropriately handles the ego-alter structure.
 }
 \examples{
 \donttest{
-# Load example data
+# load example data
 data(icews)
 
-# Basic usage with directed network
+# basic usage with directed network
 net <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
@@ -160,11 +175,11 @@ net <- netify(
     weight = "verbCoop"
 )
 
-# Get actor statistics
+# get actor statistics
 actor_stats <- summary_actor(net)
 head(actor_stats)
 
-# Add custom statistics
+# add custom statistics
 max_out <- function(mat) apply(mat, 1, max, na.rm = TRUE)
 max_in <- function(mat) apply(mat, 2, max, na.rm = TRUE)
 
@@ -180,5 +195,5 @@ head(actor_stats_custom)
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

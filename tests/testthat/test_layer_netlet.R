@@ -1,4 +1,5 @@
 set.seed(6886)
+skip_on_cran()
 
 # load relevant datasets from package
 data(icews)
@@ -90,7 +91,6 @@ icews_matlCoop_attrs = netify(
 	dyad_vars = c("verbCoop", "matlConf")
 )
 
-# test basic functionality for cross-sectional networks
 test_that(
 	"layer_netify: cross-sectional basic functionality",
 	{
@@ -159,7 +159,7 @@ test_that(
 		expect_type(multi_net_l, "list")
 		expect_s3_class(multi_net_l, "netify")
 
-		# check each time period is now 3D
+		# check each time period is now 3d
 		first_period = multi_net_l[[1]]
 		expect_equal(length(dim(first_period)), 3)
 		expect_equal(dim(first_period)[3], 2)
@@ -208,7 +208,7 @@ test_that(
 			layer_labels = c("Verbal", "Material")
 		)
 
-		# check it's a 4D array
+		# check it's a 4d array
 		expect_equal(length(dim(multi_net_a)), 4)
 		expect_equal(dim(multi_net_a)[3], 2) # 2 layers
 		expect_equal(dim(multi_net_a)[4], 13) # 13 time periods
@@ -227,12 +227,10 @@ test_that(
 	"layer_netify: automatic layer labeling",
 	{
 	skip_on_cran()
-		# test with unnamed list (should generate layer1, layer2, etc.)
 		unnamed_list = list(icews_verbCoop_10, icews_matlCoop_10)
 		multi_net = layer_netify(unnamed_list)
 		expect_equal(attr(multi_net, "layers"), c("layer1", "layer2"))
 
-		# test with explicit NULL layer_labels
 		multi_net2 = layer_netify(
 			netlet_list = list(icews_verbCoop_10, icews_matlCoop_10),
 			layer_labels = NULL
@@ -307,13 +305,12 @@ test_that(
 		expect_equal(dim(subset_multi)[3], 2)
 		expect_equal(attr(subset_multi, "layers"), c("verbCoop", "matlCoop"))
 
-		# subset to single layer (should become regular 2D)
 		single_layer = subset_netify(
 			multi_net,
 			layers = "verbCoop"
 		)
 
-		# check it's now 2D
+		# check it's now 2d
 		expect_equal(length(dim(single_layer)), 2)
 		expect_equal(attr(single_layer, "layers"), "verbCoop")
 	}
@@ -349,7 +346,6 @@ test_that(
 	"layer_netify: handles named lists correctly",
 	{
 	skip_on_cran()
-		# test with named list (should work)
 		named_list = list(
 			verbal = icews_verbCoop_10,
 			material = icews_matlCoop_10
@@ -377,4 +373,3 @@ test_that(
 		expect_equal(attr(multi_net_mixed, "layers"), c("verbal", "layer2", "conflict"))
 	}
 )
-

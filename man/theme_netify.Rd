@@ -7,13 +7,13 @@
 theme_netify()
 }
 \value{
-A customized theme object for netify plots.
+a customized theme object for netify plots.
 }
 \description{
-This function returns a customized theme for netify plots.
-It is based on the \code{theme_minimal} function from the \code{ggplot2} package.
-It removes axis text and titles from the plot.
+this function returns a customized theme for netify plots.
+it is based on the \code{theme_minimal} function from the \code{ggplot2} package.
+it removes axis text and titles from the plot.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

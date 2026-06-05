@@ -24,7 +24,6 @@ test_that(
 			diag_to_NA = FALSE
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), asym_weight_matrix)
 	}
 )
@@ -64,7 +63,6 @@ test_that(
 			diag_to_NA = FALSE
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), asym_weight_matrix)
 	}
 )
@@ -94,7 +92,6 @@ test_that(
 			diag_to_NA = FALSE
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), asym_non_weight_matrix)
 	}
 )
@@ -136,7 +133,6 @@ test_that(
 			diag_to_NA = FALSE
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), asym_non_weight_matrix)
 	}
 )
@@ -173,7 +169,6 @@ test_that(
 			diag_to_NA = FALSE
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), sym_weight_matrix)
 	}
 )
@@ -243,7 +238,6 @@ test_that(
 			diag_to_NA = FALSE
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), sym_weight_matrix)
 	}
 )
@@ -276,7 +270,6 @@ test_that(
 			diag_to_NA = FALSE
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), sym_non_weight_matrix)
 	}
 )
@@ -312,7 +305,6 @@ test_that(
 			diag_to_NA = FALSE
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), sym_non_weight_matrix * 2)
 	}
 )

@@ -2,7 +2,7 @@
 % Please edit documentation in R/attribute_report.R
 \name{attribute_report}
 \alias{attribute_report}
-\title{Comprehensive summary of network-attribute relationships}
+\title{Summary of network-attribute relationships}
 \usage{
 attribute_report(
   netlet,
@@ -20,60 +20,59 @@ attribute_report(
 )
 }
 \arguments{
-\item{netlet}{A netify object containing network data.}
+\item{netlet}{a netify object containing network data.}
 
-\item{node_vars}{Character vector of nodal attributes to analyze. If NULL,
+\item{node_vars}{character vector of nodal attributes to analyze. if NULL,
 analyzes all available nodal variables except actor and time.}
 
-\item{dyad_vars}{Character vector of dyadic attributes to analyze. If NULL,
+\item{dyad_vars}{character vector of dyadic attributes to analyze. if NULL,
 analyzes all available dyadic variables.}
 
-\item{include_centrality}{Logical. Whether to calculate attribute-centrality
-relationships. Default TRUE.}
+\item{include_centrality}{logical. whether to calculate attribute-centrality
+relationships. default TRUE.}
 
-\item{include_homophily}{Logical. Whether to perform homophily analysis. Default TRUE.}
+\item{include_homophily}{logical. whether to perform homophily analysis. default TRUE.}
 
-\item{include_mixing}{Logical. Whether to create mixing matrices for categorical
-attributes. Default TRUE.}
+\item{include_mixing}{logical. whether to create mixing matrices for categorical
+attributes. default TRUE.}
 
-\item{include_dyadic_correlations}{Logical. Whether to calculate dyadic correlations.
-Default TRUE.}
+\item{include_dyadic_correlations}{logical. whether to calculate dyadic correlations.
+default TRUE.}
 
-\item{centrality_measures}{Character vector of centrality measures to calculate.
-Options: "degree", "betweenness", "closeness", "eigenvector". Default c("degree", "betweenness").}
+\item{centrality_measures}{character vector of centrality measures to calculate.
+options: "degree", "betweenness", "closeness", "eigenvector". default c("degree", "betweenness").}
 
-\item{categorical_threshold}{Maximum number of unique values for categorical
-treatment. Default 10.}
+\item{categorical_threshold}{maximum number of unique values for categorical
+treatment. default 10.}
 
-\item{significance_test}{Logical. Whether to perform significance tests. Default TRUE.}
+\item{significance_test}{logical. whether to perform significance tests. default TRUE.}
 
-\item{other_stats}{Named list of custom functions for additional statistics.}
+\item{other_stats}{named list of custom functions for additional statistics.}
 
-\item{...}{Additional arguments passed to component functions.}
+\item{...}{additional arguments passed to component functions.}
 }
 \value{
-List containing:
+list containing:
 \describe{
-\item{\code{homophily_analysis}}{Results from homophily analysis for nodal attributes}
-\item{\code{mixing_analysis}}{Results from mixing matrix analysis for categorical attributes}
-\item{\code{dyadic_correlations}}{Results from dyadic correlation analysis}
-\item{\code{centrality_correlations}}{Correlations between nodal attributes and centrality}
-\item{\code{attribute_summaries}}{Descriptive statistics for attributes}
-\item{\code{overall_summary}}{High-level summary of key findings}
+\item{\code{homophily_analysis}}{results from homophily analysis for nodal attributes}
+\item{\code{mixing_analysis}}{results from mixing matrix analysis for categorical attributes}
+\item{\code{dyadic_correlations}}{results from dyadic correlation analysis}
+\item{\code{centrality_correlations}}{correlations between nodal attributes and centrality}
+\item{\code{attribute_summaries}}{descriptive statistics for attributes}
+\item{\code{overall_summary}}{brief summary of key findings}
 }
 }
 \description{
-Provides comprehensive analysis of how nodal and dyadic attributes relate to
-network structure. Combines multiple analytical approaches including homophily
-analysis, mixing patterns, dyadic correlations, and network position-based
-attribute summaries.
+summarizes how nodal and dyadic attributes relate to network structure.
+combines homophily analysis, mixing patterns, dyadic correlations, and
+network position-based attribute summaries.
 }
 \details{
-Serves as comprehensive wrapper around exploratory analysis functions.
-Automatically determines appropriate analysis methods based on attribute types.
-For large networks or many attributes, consider setting some components to FALSE
-for faster computation. Centrality measures use igraph functions.
+wraps the exploratory analysis functions and chooses methods based on
+attribute types.
+for large networks or many attributes, consider setting some components to FALSE
+for faster computation. centrality measures use igraph functions.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

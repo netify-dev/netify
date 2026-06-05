@@ -16,52 +16,52 @@ mixing_matrix(
 )
 }
 \arguments{
-\item{netlet}{A netify object containing network data.}
+\item{netlet}{a netify object containing network data.}
 
-\item{attribute}{Character string specifying the nodal attribute to analyze.}
+\item{attribute}{character string specifying the nodal attribute to analyze.}
 
-\item{row_attribute}{Optional different attribute for matrix rows. If NULL, uses
+\item{row_attribute}{optional different attribute for matrix rows. if NULL, uses
 the same attribute for both dimensions.}
 
-\item{normalized}{Logical. Whether to return proportions instead of raw counts.
-Default TRUE.}
+\item{normalized}{logical. whether to return proportions instead of raw counts.
+default TRUE.}
 
-\item{by_row}{Logical. If TRUE and normalized=TRUE, normalizes by row. Default FALSE.}
+\item{by_row}{logical. if TRUE and normalized=TRUE, normalizes by row. default FALSE.}
 
-\item{include_weights}{Logical. Whether to use edge weights. Default FALSE.}
+\item{include_weights}{logical. whether to use edge weights. default FALSE.}
 
-\item{other_stats}{Named list of custom functions for additional statistics.}
+\item{other_stats}{named list of custom functions for additional statistics.}
 
-\item{...}{Additional arguments passed to custom functions.}
+\item{...}{additional arguments passed to custom functions.}
 }
 \value{
-List containing:
+list containing:
 \describe{
-\item{\code{mixing_matrices}}{Named list of mixing matrices per time/layer}
-\item{\code{summary_stats}}{Data frame with mixing statistics:}
+\item{\code{mixing_matrices}}{named list of mixing matrices per time/layer}
+\item{\code{summary_stats}}{data frame with mixing statistics:}
 \describe{
-\item{\code{net}}{Network/time identifier}
-\item{\code{layer}}{Layer name}
-\item{\code{attribute}}{Name of analyzed attribute(s)}
-\item{\code{assortativity}}{Assortativity coefficient (-1 to 1)}
-\item{\code{diagonal_proportion}}{Proportion of within-group ties}
-\item{\code{entropy}}{Shannon entropy of mixing pattern}
-\item{\code{modularity}}{Modularity based on attribute groups}
-\item{\code{n_groups}}{Number of attribute categories}
-\item{\code{total_ties}}{Total number of ties analyzed}
+\item{\code{net}}{network/time identifier}
+\item{\code{layer}}{layer name}
+\item{\code{attribute}}{name of analyzed attribute(s)}
+\item{\code{assortativity}}{assortativity coefficient (-1 to 1)}
+\item{\code{diagonal_proportion}}{proportion of within-group ties}
+\item{\code{entropy}}{shannon entropy of mixing pattern}
+\item{\code{modularity}}{modularity based on attribute groups}
+\item{\code{n_groups}}{number of attribute categories}
+\item{\code{total_ties}}{total number of ties analyzed}
 }
 }
 }
 \description{
-Creates cross-tabulation matrices showing how connections are distributed across
-different attribute values. This reveals mixing patterns and assortativity in
+creates cross-tabulation matrices showing how connections are distributed across
+different attribute values. this reveals mixing patterns and assortativity in
 networks by examining the frequency of ties between actors with different
 attribute combinations.
 }
 \details{
-Mixing matrix elements represent ties between actors with attribute
-values i and j. For undirected networks, matrices are symmetrized.
-Assortativity ranges from -1 (disassortative) to 1 (assortative).
+mixing matrix elements represent ties between actors with attribute
+values i and j. for undirected networks, matrices are symmetrized.
+assortativity ranges from -1 (disassortative) to 1 (assortative).
 }
 \examples{
 # who tends to befriend whom, by gender, in the bundled classroom data
@@ -79,5 +79,5 @@ mm$summary_stats
 
 }
 \author{
-Casy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

@@ -28,15 +28,15 @@ netify(
 )
 }
 \arguments{
-\item{input}{data object to netify. Can be:
+\item{input}{data object to netify. can be:
 \itemize{
-\item A data.frame (or tibble/data.table) with dyadic data
-\item A matrix representing an adjacency matrix
-\item A 3D array representing longitudinal networks
-\item A list of matrices representing longitudinal networks
-\item An igraph object
-\item A network object (from the network package)
-\item A list of igraph or network objects
+\item a data.frame (or tibble/data.table) with dyadic data
+\item a matrix representing an adjacency matrix
+\item a 3d array representing longitudinal networks
+\item a list of matrices representing longitudinal networks
+\item an igraph object
+\item a network object (from the network package)
+\item a list of igraph or network objects
 }}
 
 \item{actor1}{character: name of the actor 1 variable in the data (required
@@ -45,19 +45,19 @@ for data.frame inputs)}
 \item{actor2}{character: name of the actor 2 variable in the data (required
 for data.frame inputs)}
 
-\item{time}{character: name of the time variable in the data. Can contain
-numeric, Date, POSIXct/POSIXlt, or character values. Non-numeric types
+\item{time}{character: name of the time variable in the data. can contain
+numeric, date, posixct/posixlt, or character values. non-numeric types
 will be converted to numeric indices while preserving original labels.
-If no time is provided then a cross-sectional network will be created.}
+if no time is provided then a cross-sectional network will be created.}
 
 \item{symmetric}{logical: whether ties are symmetric, default is TRUE.
-For matrix, array, list, igraph, or network inputs this default is
+for matrix, array, list, igraph, or network inputs this default is
 ignored unless explicitly set by the caller; symmetry is instead
-detected from the input itself. The default applies for data.frame
+detected from the input itself. the default applies for data.frame
 inputs.}
 
 \item{mode}{character: whether the network is unipartite or bipartite,
-default is unipartite. As with \code{symmetric}, this default applies to
+default is unipartite. as with \code{symmetric}, this default applies to
 data.frame inputs and is auto-detected for matrix / array / list /
 igraph / network inputs unless explicitly set.}
 
@@ -75,28 +75,28 @@ FALSE means that actors come in and out of the observed data and
 their "existence" should be determined by the data, meaning that
 their first year of existence will be determined by the time point
 of their first event and their last year of existence by the
-time point of their last event. Outputted netify object will be
+time point of their last event. outputted netify object will be
 in a list format.}
 
 \item{actor_pds}{a data.frame indicating start and end time point for every
 actor, this can be created using \code{get_actor_time_info}, unless provided this will
 estimated for the user based on their choice of \code{actor_time_uniform}}
 
-\item{diag_to_NA}{logical: whether diagonals should be set to NA,
-default is TRUE. For matrix / array / list inputs, the default is
+\item{diag_to_NA}{logical: whether diagonals should be set to na,
+default is TRUE. for matrix / array / list inputs, the default is
 ignored unless explicitly set: instead, \code{diag_to_NA} is auto-detected
 by inspecting whether the diagonal of the supplied matrix is already
-\code{NA}. Pass an explicit value to override the auto-detection.}
+\code{na}. pass an explicit value to override the auto-detection.}
 
 \item{missing_to_zero}{logical: whether missing values should be set to
-zero, default is TRUE. As with \code{diag_to_NA}, this is auto-detected
+zero, default is TRUE. as with \code{diag_to_NA}, this is auto-detected
 for matrix / array / list inputs based on whether the supplied data
-already contains off-diagonal \code{NA}s.}
+already contains off-diagonal \code{na}s.}
 
 \item{output_format}{character: "cross_sec", "longit_array", or
-"longit_list". If not specified and time is NULL then output_format
+"longit_list". if not specified and time is NULL then output_format
 will be "cross_sec" and if time is specified then output_format
-will default to "longit_list". Only applies to data.frame inputs.}
+will default to "longit_list". only applies to data.frame inputs.}
 
 \item{nodal_vars}{character vector: names of the nodal variables in the input
 that should be added as attributes to the netify object (for data.frame inputs)}
@@ -108,18 +108,21 @@ that should be added as attributes to the netify object (for data.frame inputs)}
 to use the same choice as the symmetric argument}
 
 \item{input_type}{character: force specific input type interpretation.
-Options are "auto" (default), "dyad_df", or "netify_obj". Use "dyad_df"
+options are "auto" (default), "dyad_df", or "netify_obj". use "dyad_df"
 to force data.frame interpretation or "netify_obj" to force matrix/array/
 igraph/network interpretation.}
 
-\item{nodelist}{character vector: optional list of all actors (nodes) that should
-be included in the network. This ensures isolates (nodes with no edges) are
-properly represented. Particularly useful when working with edgelists that
-only contain active dyads.}
+\item{nodelist}{optional list of all actors (nodes) that should be included
+in the network. for unipartite networks, pass a character vector. for
+bipartite networks, pass partition-aware input such as
+\code{list(row = row_actors, col = col_actors)} or a data frame with
+actor and mode columns. a flat vector can include only actors already
+observed in a bipartite row or column mode because new isolates cannot be
+assigned to a partition from their names alone.}
 
-\item{force_dense}{logical: when a \code{Matrix::sparseMatrix} input would
-densify to a large allocation (N > 5000 and density < 1\%), \code{netify()}
-aborts with a guidance message. Set \code{force_dense = TRUE} to override
+\item{force_dense}{logical: when a \code{matrix::sparsematrix} input would
+densify to a large allocation (n > 5000 and density < 1\%), \code{netify()}
+aborts with a guidance message. set \code{force_dense = TRUE} to override
 the guard and proceed with densification.}
 
 \item{...}{additional arguments passed to \code{to_netify} when processing network objects}
@@ -128,17 +131,17 @@ the guard and proceed with densification.}
 a netify object
 }
 \description{
-This function takes in various types of network data (dyadic datasets, matrices,
+this function takes in various types of network data (dyadic datasets, matrices,
 arrays, lists, igraph objects, or network objects) and outputs a netify object.
 }
 \examples{
 
-# load example directed event data from ICEWS
+# load example directed event data from icews
 # this data comes in the form of a dyadic
 # dataframe where all dyad pairs are listed
 data(icews)
 
-# From a data.frame: generate a longitudional, directed and weighted network
+# from a data.frame: generate a longitudinal, directed and weighted network
 # where the weights are matlConf
 icews_matlConf <- netify(
     input = icews,
@@ -146,11 +149,11 @@ icews_matlConf <- netify(
     symmetric = FALSE, weight = "matlConf"
 )
 
-# From a matrix
+# from a matrix
 adj_matrix <- matrix(rbinom(100, 1, 0.3), 10, 10)
 net_from_matrix <- netify(adj_matrix)
 
-# From an igraph object
+# from an igraph object
 \dontrun{
 library(igraph)
 g <- sample_gnp(10, 0.3)
@@ -160,12 +163,12 @@ net_from_igraph <- netify(g)
 }
 \seealso{
 \code{\link{netify_workflows}} for an overview of the
-Create / Explore / Advance pipeline and how \code{netify()} fits
+create / explore / model workflow and how \code{netify()} fits
 into it; \code{\link{add_node_vars}}, \code{\link{add_dyad_vars}}
 for attaching attributes after construction; and
 \code{\link{classroom_edges}} / \code{\link{classroom_nodes}}
 for a small worked example.
 }
 \author{
-Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+ha eun choi, cassy dorff, colin henry, shahryar minhas
 }

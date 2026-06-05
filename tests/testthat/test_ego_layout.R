@@ -78,11 +78,9 @@ test_that("get_ego_layout works for radial layout with grouping", {
 	alter_df = merge(alter_df, nodal_attrs, by = "actor")
 	alter_df$angle = atan2(alter_df$y, alter_df$x)
 	
-	# group1 alters should have similar angles
 	group1_angles = alter_df$angle[alter_df$group == "group1"]
 	expect_true(max(group1_angles) - min(group1_angles) < pi)  # within same half-circle
 	
-	# group2 alters should have similar angles
 	group2_angles = alter_df$angle[alter_df$group == "group2"]
 	expect_true(max(group2_angles) - min(group2_angles) < pi)  # within same half-circle
 })
@@ -151,7 +149,6 @@ test_that("get_ego_layout works with weight_to_distance", {
 	medium_dist = sqrt(sum(layout_df[layout_df$actor == "medium", c("x", "y")]^2))
 	far_dist = sqrt(sum(layout_df[layout_df$actor == "far", c("x", "y")]^2))
 	
-	# higher weights should result in smaller distances
 	expect_true(close_dist < medium_dist)
 	expect_true(medium_dist < far_dist)
 })
@@ -185,7 +182,6 @@ test_that("get_ego_layout works for longitudinal ego networks", {
 		expect_s3_class(layout_t, "data.frame")
 		expect_equal(colnames(layout_t), c("index", "actor", "x", "y"))
 		
-		# ego should be at center
 		ego_row = layout_t[layout_t$actor == "ego", ]
 		expect_equal(ego_row$x, 0)
 		expect_equal(ego_row$y, 0)
@@ -205,13 +201,11 @@ test_that("get_node_layout redirects to get_ego_layout for ego networks", {
 	# call get_node_layout with ego-specific layout
 	layout = get_node_layout(ego_net, layout = "radial")
 	
-	# should return ego layout structure
 	layout_df = layout[[1]]
 	ego_row = layout_df[layout_df$actor == "ego", ]
 	expect_equal(ego_row$x, 0)
 	expect_equal(ego_row$y, 0)
 	
-	# test with ego parameters
 	nodal_attrs = data.frame(
 		actor = c("ego", "A", "B", "C"),
 		group = c("center", "g1", "g1", "g2"),
@@ -245,5 +239,5 @@ test_that("get_ego_layout handles edge cases", {
 	
 	# missing grouping variable
 	layout3 = get_ego_layout(ego_net, layout = "radial", group_by = "nonexistent")
-	expect_equal(nrow(layout3[[1]]), 2)  # should still work without grouping
+		expect_equal(nrow(layout3[[1]]), 2)  # works without grouping
 })

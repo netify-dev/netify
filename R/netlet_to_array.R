@@ -1,11 +1,11 @@
 #' Convert list of dependent variable(s) into an array
 #'
-#' Mainly for use in going from a list netlet to an array netlet
+#' mainly for use in going from a list netlet to an array netlet
 #' for bridging netlet objects to analysis with packages that
 #' expect matrix/array inputs
 #'
 #' @param netlet netify object
-#' @return An array object of dimensions nr x nc x t,
+#' @return an array object of dimensions nr x nc x t,
 #' where nr is the number of row actors, nc is the number
 #' of column actors, and t is the number of time periods.
 #'
@@ -80,14 +80,14 @@ longit_dv_to_arr <- function(netlet) {
 	}
 }
 
-#' Convert list of dyadic arrays into an array
+#' convert list of dyadic arrays into an array
 #'
-#' Mainly for use in going from a list netlet to an array netlet
+#' mainly for use in going from a list netlet to an array netlet
 #' for bridging netlet objects to analysis with packages that
 #' expect matrix/array inputs
 #'
 #' @param netlet netify object
-#' @return An array object of dimensions nr x nc x pn x t,
+#' @return an array object of dimensions nr x nc x pn x t,
 #' where nr is the number of row actors, nc is the number
 #' of column actors, pn is the number of dyadic variables,
 #' and t is the number of time periods.
@@ -104,7 +104,7 @@ longit_dyad_to_arr <- function(netlet) {
 	# pull out object to collapse into an array
 	array_list <- attr(netlet, "dyad_data")
 
-	# if no dyad data, return NULL
+	# if no dyad data, return null
 	if (is.null(array_list)) {
 		return(NULL)
 	}
@@ -138,7 +138,7 @@ longit_dyad_to_arr <- function(netlet) {
 					identical(colnames(var_matrix), target_cols)) {
 					time_array[, , i] <- var_matrix
 				} else {
-					# use direct indexing instead of match when possible
+					# use direct indexing when possible
 					time_array[rownames(var_matrix), colnames(var_matrix), i] <- var_matrix
 				}
 			}
@@ -243,20 +243,20 @@ longit_dyad_to_arr <- function(netlet) {
 	}
 }
 
-#' Convert nodal attribute of netlet into an array
+#' convert nodal attribute of netlet into an array
 #'
-#' Mainly for use in going from a list netlet to an array netlet
+#' mainly for use in going from a list netlet to an array netlet
 #' for bridging netlet objects to analysis with packages that
 #' expect matrix/array inputs
 #'
 #' @param netlet netify object
 #' @return a list object of length two, one for the row actors and
-#' another for the column actors. Each element in the list is an
+#' another for the column actors. each element in the list is an
 #' array of dimensions n x pn x t, where n is the number of actors,
 #' pn is the number of nodal variables, and t is the number of time
-#' periods. The rownames of the array are the actors, and the
+#' periods. the rownames of the array are the actors, and the
 #' colnames are the nodal variables.
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -265,7 +265,7 @@ longit_nodal_to_arr <- function(netlet) {
 	# make sure it's a netify object
 	netify_check(netlet)
 
-	# if nodal data not present return NULL
+	# if nodal data not present return null
 	nodal_df <- attr(netlet, "nodal_data")
 	if (is.null(nodal_df)) {
 		return(NULL)

@@ -1,29 +1,29 @@
 #' Print method for netify objects
 #'
-#' Displays a formatted summary of a netify object, including network type,
+#' displays a formatted summary of a netify object, including network type,
 #' dimensions, summary statistics, and available attributes.
 #'
-#' @param x A netify object
-#' @param ... Additional parameters (not used)
+#' @param x a netify object
+#' @param ... additional parameters (not used)
 #'
-#' @return Invisibly returns the input netify object. Called for its side effect
+#' @return invisibly returns the input netify object. called for its side effect
 #'   of printing network information to the console.
 #'
 #' @details
-#' The print method displays:
+#' the print method displays:
 #' \itemize{
-#'   \item Network type (unipartite/bipartite, symmetric/asymmetric)
-#'   \item Edge weight specification
-#'   \item Temporal structure (cross-sectional or number of time periods)
-#'   \item Actor counts (total unique actors, or separate row/column counts for bipartite)
-#'   \item Summary statistics (density, reciprocity, transitivity, etc.)
-#'   \item Available nodal and dyadic attributes
+#'   \item network type (unipartite/bipartite, symmetric/asymmetric)
+#'   \item edge weight specification
+#'   \item temporal structure (cross-sectional or number of time periods)
+#'   \item actor counts (total unique actors, or separate row/column counts for bipartite)
+#'   \item summary statistics (density, reciprocity, transitivity, etc.)
+#'   \item available nodal and dyadic attributes
 #' }
 #'
-#' For longitudinal networks, summary statistics are averaged across time periods.
-#' For multilayer networks, statistics are shown separately for each layer.
+#' for longitudinal networks, summary statistics are averaged across time periods.
+#' for multilayer networks, statistics are shown separately for each layer.
 #'
-#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+#' @author ha eun choi, cassy dorff, colin henry, shahryar minhas
 #'
 #' @importFrom utils capture.output
 #'
@@ -42,7 +42,7 @@ print.netify <- function(x, ...) {
 	msrmnts <- netify_measurements(netlet)
 
 	# pull out some ego info if it's there,
-	# assume FALSE
+	# assume false
 	ego_netlet <- FALSE
 	ego_longit <- FALSE
 	include_ego <- FALSE
@@ -171,7 +171,9 @@ print.netify <- function(x, ...) {
 			slice <- data.frame(slice)
 			names(slice) <- to_keep_clean
 		} else {
-			slice <- data.frame(t(colMeans(slice, na.rm = TRUE)))
+			slice <- data.frame(t(vapply(slice, function(x) {
+				if (all(is.na(x))) NA_real_ else mean(x, na.rm = TRUE)
+			}, numeric(1))))
 			names(slice) <- to_keep_clean
 		}
 		slice <- round(slice, 3)
@@ -221,8 +223,8 @@ print.netify <- function(x, ...) {
 	# intro message
 	if (ego_netlet) {
 		intro <- paste0(
-			"Hello, you have created a neighborhood network for ego(s) (",
-			ego_vec, "), yay!"
+			"Neighborhood network created for ego(s) (",
+			ego_vec, ")."
 		)
 		stat_msg <- "Neighborhood Network Summary Statistics:"
 		if (obj_attrs$netify_type == "longit_list" & ego_longit) {
@@ -231,7 +233,7 @@ print.netify <- function(x, ...) {
 			)
 		}
 	} else {
-		intro <- "Hello, you have created network data, yay!"
+		intro <- "Network data created."
 		stat_msg <- "Network Summary Statistics:"
 		if (n_time > 1) {
 			stat_msg <- paste0(

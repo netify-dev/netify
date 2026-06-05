@@ -2,85 +2,84 @@
 % Please edit documentation in R/aggregate_dyad.R
 \name{gen_symm_id}
 \alias{gen_symm_id}
-\title{Generate symmetric identifiers for dyadic data}
+\title{generate symmetric identifiers for dyadic data}
 \usage{
 gen_symm_id(dyad_data, actor1, actor2, time = NULL)
 }
 \arguments{
-\item{dyad_data}{A data.frame containing dyadic data with at least two columns
-representing actors in each dyad. Will be coerced to data.frame if a tibble
+\item{dyad_data}{a data.frame containing dyadic data with at least two columns
+representing actors in each dyad. will be coerced to data.frame if a tibble
 or data.table is provided.}
 
-\item{actor1}{Character string specifying the column name for the first actor
+\item{actor1}{character string specifying the column name for the first actor
 in each dyad.}
 
-\item{actor2}{Character string specifying the column name for the second actor
+\item{actor2}{character string specifying the column name for the second actor
 in each dyad.}
 
-\item{time}{Character string specifying the column name for time periods. If
-provided, the time value will be appended to the symmetric ID to create
-unique identifiers for each time period. Set to NULL (default) for
+\item{time}{character string specifying the column name for time periods. if
+provided, the time value will be appended to the symmetric id to create
+unique identifiers for each time period. set to NULL (default) for
 cross-sectional data.}
 }
 \value{
-A character vector of symmetric identifiers with the same length as
-the number of rows in dyad_data. Each ID is formatted as:
+a character vector of symmetric identifiers with the same length as
+the number of rows in dyad_data. each id is formatted as:
 \itemize{
-\item \strong{Without time}: "actor1_actor2" (alphabetically sorted)
-\item \strong{With time}: "actor1_actor2_time" (actors alphabetically sorted)
+\item \strong{without time}: a length-prefixed key for the alphabetically sorted actor pair
+\item \strong{with time}: the same key with the time value appended
 }
 }
 \description{
 \code{gen_symm_id} creates symmetric identifiers for dyadic data, ensuring that
-each unique pair of actors receives the same ID regardless of order. This is
+each unique pair of actors receives the same id regardless of order. this is
 particularly useful for undirected network data where the relationship between
-actors A and B is identical to the relationship between B and A.
+actors a and b is identical to the relationship between b and a.
 }
 \details{
-The function ensures symmetry by alphabetically sorting actor names before
-creating the identifier. This guarantees that:
+the function ensures symmetry by alphabetically sorting actor names before
+creating the identifier. this guarantees that:
 \itemize{
-\item The dyad "USA-China" receives the same ID as "China-USA"
-\item The dyad "Brazil-Argentina" receives the same ID as "Argentina-Brazil"
-\item Actor pairs are consistently ordered regardless of input order
+\item the dyad "usa-china" receives the same id as "china-usa"
+\item the dyad "brazil-argentina" receives the same id as "argentina-brazil"
+\item actor pairs are consistently ordered regardless of input order
 }
 
-When a time column is specified, it's appended to the symmetric ID to maintain
-unique identifiers across different time periods. This allows for proper
+when a time column is specified, it's appended to the symmetric id to maintain
+unique identifiers across different time periods. this allows for proper
 aggregation of longitudinal dyadic data while preserving temporal variation.
 }
 \note{
-All actor values are converted to character strings before creating IDs to
+all actor values are converted to character strings before creating ids to
 ensure consistent sorting behavior across different data types.
 
-The underscore character ("_") is used as a separator in the IDs. If your
-actor names contain underscores, the IDs will still be unique but may be
-harder to parse visually.
+ids are intended as opaque keys. do not parse them to recover actor names;
+keep the original actor columns when those values are needed downstream.
 
-This function is primarily used internally by \code{aggregate_dyad} for efficient
+this function is primarily used internally by \code{aggregate_dyad} for efficient
 symmetric aggregation, but can be used independently for creating symmetric
 dyad identifiers.
 }
 \examples{
-# Create example dyadic data
+# create example dyadic data
 trade_df <- data.frame(
-    from = c("USA", "China", "Russia", "USA", "Brazil", "Argentina"),
-    to = c("China", "USA", "USA", "Russia", "Argentina", "Brazil"),
+    from = c("usa", "china", "russia", "usa", "brazil", "argentina"),
+    to = c("china", "usa", "usa", "russia", "argentina", "brazil"),
     trade_value = c(100, 100, 50, 75, 30, 25),
     year = c(2020, 2020, 2021, 2021, 2021, 2021)
 )
 
-# Generate symmetric IDs without time
+# generate symmetric ids without time
 trade_df$symm_id <- gen_symm_id(trade_df, "from", "to")
 print(trade_df[, c("from", "to", "symm_id")])
-# Note: USA-China and China-USA both get "China_USA"
+# note: usa-china and china-usa both get "china_usa"
 
-# Generate symmetric IDs with time
+# generate symmetric ids with time
 trade_df$symm_id_time <- gen_symm_id(trade_df, "from", "to", "year")
 print(trade_df[, c("from", "to", "year", "symm_id_time")])
-# Note: USA-China in 2020 gets "China_USA_2020"
+# note: usa-china in 2020 gets "china_usa_2020"
 
-# Use for aggregation of undirected relationships
+# use for aggregation of undirected relationships
 trade_df$total_trade <- ave(
     trade_df$trade_value,
     trade_df$symm_id_time,
@@ -88,12 +87,12 @@ trade_df$total_trade <- ave(
 )
 print(unique(trade_df[, c("symm_id_time", "total_trade")]))
 
-# Example with longitudinal data
+# example with longitudinal data
 library(netify)
 data(icews)
 icews_sample <- icews[1:100, ]
 
-# Create symmetric IDs for conflict events
+# create symmetric ids for conflict events
 icews_sample$symm_dyad <- gen_symm_id(
     icews_sample,
     actor1 = "i",
@@ -101,11 +100,11 @@ icews_sample$symm_dyad <- gen_symm_id(
     time = "year"
 )
 
-# Check that symmetric pairs get same ID
-icews_sample[icews_sample$i == "United States" & icews_sample$j == "Israel", "symm_dyad"]
-icews_sample[icews_sample$i == "Israel" & icews_sample$j == "United States", "symm_dyad"]
+# check that symmetric pairs get same id
+icews_sample[icews_sample$i == "united states" & icews_sample$j == "israel", "symm_dyad"]
+icews_sample[icews_sample$i == "israel" & icews_sample$j == "united states", "symm_dyad"]
 
 }
 \author{
-Shahryar Minhas
+shahryar minhas
 }

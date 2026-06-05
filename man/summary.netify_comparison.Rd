@@ -2,21 +2,21 @@
 % Please edit documentation in R/compare_networks_print.R
 \name{summary.netify_comparison}
 \alias{summary.netify_comparison}
-\title{Summary method for netify_comparison objects}
+\title{summary method for netify_comparison objects}
 \usage{
 \method{summary}{netify_comparison}(object, ...)
 }
 \arguments{
-\item{object}{A netify_comparison object from compare_networks()}
+\item{object}{a netify_comparison object from compare_networks()}
 
-\item{...}{Additional arguments (currently unused)}
+\item{...}{additional arguments (currently unused)}
 }
 \value{
-A summary data frame or list depending on comparison type
+a summary data frame or list depending on comparison type
 }
 \description{
-Provides a concise summary of network comparison results.
+provides a concise summary of network comparison results.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

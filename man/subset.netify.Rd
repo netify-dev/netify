@@ -15,88 +15,88 @@
 )
 }
 \arguments{
-\item{x}{A netify object to subset}
+\item{x}{a netify object to subset}
 
-\item{actors}{Character vector of actor names or numeric indices to subset.
-Extracts the subgraph among these actors (includes ties both from and to
-these actors). Default is NULL, which includes all actors.}
+\item{actors}{character vector of actor names or numeric indices to subset.
+extracts the subgraph among these actors (includes ties both from and to
+these actors). default is NULL, which includes all actors.}
 
-\item{time}{Time periods to subset. Can be:
+\item{time}{time periods to subset. can be:
 \itemize{
-\item Numeric vector: used as indices to the time dimension
-\item Character vector: matched against time dimension labels
+\item numeric vector: used as indices to the time dimension
+\item character vector: matched against time dimension labels
 \item NULL: includes all time periods (default)
 }}
 
-\item{layers}{Character vector of layer names to subset from multilayer networks.
-For single-layer networks, this is ignored. For multilayer networks, at least
+\item{layers}{character vector of layer names to subset from multilayer networks.
+for single-layer networks, this is ignored. for multilayer networks, at least
 one layer must be specified.}
 
-\item{from}{Character vector of actor names or numeric indices for actors sending
-ties (row actors). Overrides \code{actors}. Set to NULL to include all
-sending actors. In bipartite networks, this refers to actors in the first mode.}
+\item{from}{character vector of actor names or numeric indices for actors sending
+ties (row actors). overrides \code{actors}. set to NULL to include all
+sending actors. in bipartite networks, this refers to actors in the first mode.}
 
-\item{to}{Character vector of actor names or numeric indices for actors receiving
-ties (column actors). Overrides \code{actors}. Set to NULL to include all
-receiving actors. In bipartite networks, this refers to actors in the second mode.}
+\item{to}{character vector of actor names or numeric indices for actors receiving
+ties (column actors). overrides \code{actors}. set to NULL to include all
+receiving actors. in bipartite networks, this refers to actors in the second mode.}
 
-\item{...}{Additional arguments (currently unused)}
+\item{...}{additional arguments (currently unused)}
 }
 \value{
-A netify object containing the requested subset with:
+a netify object containing the requested subset with:
 \itemize{
-\item Subsetted adjacency matrix/matrices
-\item Corresponding nodal attributes (filtered to included actors/times)
-\item Corresponding dyadic attributes (filtered to included actor pairs/times)
-\item Updated netify attributes reflecting the new dimensions
+\item subsetted adjacency matrix/matrices
+\item corresponding nodal attributes (filtered to included actors/times)
+\item corresponding dyadic attributes (filtered to included actor pairs/times)
+\item updated netify attributes reflecting the new dimensions
 }
 
-The returned object's structure depends on the subset:
+the returned object's structure depends on the subset:
 \itemize{
-\item If one time period is selected from longitudinal data, returns cross-sectional
-\item If one layer is selected from multilayer data, returns single-layer
-\item Otherwise, maintains the original structure type
+\item if one time period is selected from longitudinal data, returns cross-sectional
+\item if one layer is selected from multilayer data, returns single-layer
+\item otherwise, maintains the original structure type
 }
 }
 \description{
-Extracts a subset of a netify object based on specified actors, time periods,
+extracts a subset of a netify object based on specified actors, time periods,
 and/or layers while preserving all netify attributes and structure.
 }
 \details{
-This function is a netify-aware wrapper around the \code{\link{peek}} function,
-which handles the raw data extraction. While \code{peek} returns raw matrices/arrays,
+this function is a netify-aware wrapper around the \code{\link{peek}} function,
+which handles the raw data extraction. while \code{peek} returns raw matrices/arrays,
 \code{subset} additionally:
 \itemize{
-\item Preserves and updates all netify attributes
-\item Filters nodal and dyadic attribute data to match the subset
-\item Adjusts the netify type when dimensions change (e.g., longitudinal to cross-sectional)
-\item Maintains consistency between network data and attributes
+\item preserves and updates all netify attributes
+\item filters nodal and dyadic attribute data to match the subset
+\item adjusts the netify type when dimensions change (e.g., longitudinal to cross-sectional)
+\item maintains consistency between network data and attributes
 }
 
-The \code{from} and \code{to} parameters allow precise control over which ties
+the \code{from} and \code{to} parameters allow precise control over which ties
 to include:
 \itemize{
-\item Use \code{actors} to get all ties among a set of actors (subgraph extraction)
-\item Use \code{from} to get all ties sent by specific actors
-\item Use \code{to} to get all ties received by specific actors
-\item Use both \code{from} and \code{to} to get ties between specific sets of actors
+\item use \code{actors} to get all ties among a set of actors (subgraph extraction)
+\item use \code{from} to get all ties sent by specific actors
+\item use \code{to} to get all ties received by specific actors
+\item use both \code{from} and \code{to} to get ties between specific sets of actors
 }
 
-For bipartite networks, \code{from} refers to actors in the first mode (e.g.,
+for bipartite networks, \code{from} refers to actors in the first mode (e.g.,
 people) and \code{to} refers to actors in the second mode (e.g., organizations).
 }
 \note{
-When subsetting longitudinal data to a single time period, the function automatically
-converts the result to a cross-sectional netify object. Similarly, subsetting
+when subsetting longitudinal data to a single time period, the function automatically
+converts the result to a cross-sectional netify object. similarly, subsetting
 multilayer data to a single layer produces a single-layer object.
 }
 \examples{
 
 \donttest{
-# load example directed event data from ICEWS
+# load example directed event data from icews
 data(icews)
 
-# generate a longitudional netify object
+# generate a longitudinal netify object
 # with both dyadic and nodal attributes
 icews_matlConf <- netify(
     icews,
@@ -107,12 +107,12 @@ icews_matlConf <- netify(
     dyad_vars_symmetric = c(FALSE, FALSE, FALSE)
 )
 
-# subset to a few countries using S3 method
+# subset to a few countries using s3 method
 icews_subset <- subset(
     icews_matlConf,
     actors = c(
-        "United States", "United Kingdom",
-        "Russian Federation", "China"
+        "united states", "united kingdom",
+        "russian federation", "china"
     )
 )
 
@@ -120,8 +120,8 @@ icews_subset <- subset(
 icews_subset_2 <- subset(
     icews_matlConf,
     actors = c(
-        "United States", "United Kingdom",
-        "Russian Federation", "China"
+        "united states", "united kingdom",
+        "russian federation", "china"
     ),
     time = c("2010", "2011")
 )
@@ -130,8 +130,8 @@ icews_subset_2 <- subset(
 icews_subset_3 <- subset_netify(
     netlet = icews_matlConf,
     actors = c(
-        "United States", "United Kingdom",
-        "Russian Federation", "China"
+        "united states", "united kingdom",
+        "russian federation", "china"
     ),
     time = c("2010", "2011")
 )
@@ -139,5 +139,5 @@ icews_subset_3 <- subset_netify(
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

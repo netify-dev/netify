@@ -2,21 +2,21 @@
 % Please edit documentation in R/plot_helpers.R
 \name{netify_label_repel}
 \alias{netify_label_repel}
-\title{Extract label_repel layer from netify plot components}
+\title{extract label_repel layer from netify plot components}
 \usage{
 netify_label_repel(comp)
 }
 \arguments{
-\item{comp}{A netify_plot_components object returned from
+\item{comp}{a netify_plot_components object returned from
 \code{plot(..., return_components = TRUE)}}
 }
 \value{
-A custom object of class "netify_label_repel" that can be added to a ggplot
-object using the + operator. The object contains the label_repel layer with all
+a custom object of class "netify_label_repel" that can be added to a ggplot
+object using the + operator. the object contains the label_repel layer with all
 its aesthetic mappings and data.
 }
 \description{
-Extracts the label_repel layer from a netify plot components object. Label repel
+extracts the label_repel layer from a netify plot components object. label repel
 annotations display actor names with background boxes and automatic repositioning
 to avoid overlaps, providing optimal readability in dense networks.
 }
@@ -40,5 +40,5 @@ ggplot() +
 \code{\link{assemble_netify_plot}}
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

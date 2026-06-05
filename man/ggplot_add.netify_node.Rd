@@ -2,24 +2,24 @@
 % Please edit documentation in R/plot_helpers.R
 \name{ggplot_add.netify_node}
 \alias{ggplot_add.netify_node}
-\title{Add netify_node to ggplot}
+\title{add netify_node to ggplot}
 \usage{
 \method{ggplot_add}{netify_node}(object, plot, ...)
 }
 \arguments{
-\item{object}{A netify_node object created by \code{\link{netify_node}}}
+\item{object}{a netify_node object created by \code{\link{netify_node}}}
 
-\item{plot}{A ggplot object to which the node layer will be added}
+\item{plot}{a ggplot object to which the node layer will be added}
 
-\item{...}{Additional arguments passed by ggplot2 (used internally)}
+\item{...}{additional arguments passed by ggplot2 (used internally)}
 }
 \value{
-A ggplot object with the node layer added
+a ggplot object with the node layer added
 }
 \description{
-S3 method to add netify_node objects to ggplot objects. This method is called
+s3 method to add netify_node objects to ggplot objects. this method is called
 automatically when using the + operator with a netify_node object.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

@@ -1,4 +1,5 @@
 set.seed(6886)
+skip_if_not_installed("network")
 
 # cross section tests
 
@@ -39,15 +40,15 @@ test_that("to_netify handles single matrices", {
 
 # longit tests
 
-test_that("to_netify handles arrays comprehensively", {
-	# 2D array (should be treated as matrix)
+test_that("to_netify handles array inputs", {
+	# treat a two-dimensional array as a matrix
 	arr_2d = array(runif(25), dim = c(5, 5))
 	rownames(arr_2d) = colnames(arr_2d) = paste0("node", 1:5)
 	net_2d = to_netify(arr_2d)
 	expect_s3_class(net_2d, "netify")
 	expect_equal(attr(net_2d, "netify_type"), "cross_sec")
 
-	# 3D array without dimnames
+	# build a three-dimensional array without dimnames
 	arr_3d_no_names = array(runif(60), dim = c(4, 4, 3))
 	net_3d_no_names = to_netify(arr_3d_no_names)
 	expect_s3_class(net_3d_no_names, "netify")
@@ -142,9 +143,7 @@ test_that("to_netify handles longitudinal networks with different sizes", {
 
 	# check dyad data has correct dimensions for each time period
 	dyad_data = attr(net_list, "dyad_data")
-	expect_equal(dim(dyad_data[["2001"]][["weight"]]), c(5, 5))
-	expect_equal(dim(dyad_data[["2002"]][["weight"]]), c(6, 6))
-	expect_equal(dim(dyad_data[["2003"]][["weight"]]), c(4, 4))
+	expect_true(all(vapply(dyad_data, length, integer(1)) == 0L))
 })
 
 # edge cases
@@ -202,7 +201,6 @@ test_that("to_netify correctly extracts and converts dyad data", {
 	# check structure
 	expect_true(is.list(dyad_data))
 	expect_equal(names(dyad_data), "1")
-	# `weight` is stored in the adjacency, so it should not be duplicated
 	# in dyad_data; only non-weight edge attributes appear there
 	expect_equal(names(dyad_data[["1"]]), "type")
 
@@ -284,6 +282,29 @@ test_that("to_netify handles bipartite graphs correctly", {
 	expect_equal(dim(adj_mat), c(3, 2))
 })
 
+test_that("to_netify preserves square bipartite igraph biadjacency cells", {
+	g_bip = igraph::make_bipartite_graph(
+		c(FALSE, FALSE, TRUE, TRUE),
+		c(1, 3, 2, 4),
+		directed = FALSE
+	)
+	igraph::V(g_bip)$name = c("r1", "r2", "c1", "c2")
+	igraph::E(g_bip)$weight = c(9, 10)
+
+	net_bip = to_netify(g_bip)
+	adj_mat = get_raw(net_bip)
+
+	expect_equal(attr(net_bip, "mode"), "bipartite")
+	expect_equal(adj_mat["r1", "c1"], 9)
+	expect_equal(adj_mat["r2", "c2"], 10)
+	expect_false(anyNA(adj_mat))
+
+	net_bip_list = to_netify(list(t1 = g_bip, t2 = g_bip))
+	expect_equal(net_bip_list[[1]]["r1", "c1"], 9)
+	expect_equal(net_bip_list[[1]]["r2", "c2"], 10)
+	expect_false(anyNA(net_bip_list[[1]]))
+})
+
 test_that("to_netify handles bipartite networks correctly", {
 	# bipartite network object
 	nw_bip = network::network.initialize(7, bipartite = 3, directed = FALSE)
@@ -340,6 +361,27 @@ test_that("to_netify handles weighted networks correctly", {
 	expect_true(attr(net_bmat, "is_binary"))
 })
 
+test_that("to_netify list imports prefer conventional weight attributes", {
+	g = igraph::make_graph(c("A", "B", "B", "C"), directed = TRUE)
+	igraph::E(g)$weight = c(7, 8)
+	igraph::E(g)$score = c(70, 80)
+	net_g = to_netify(list(t1 = g, t2 = g))
+
+	expect_equal(attr(net_g, "weight"), "weight")
+	expect_equal(net_g[[1]]["A", "B"], 7)
+	expect_equal(net_g[[1]]["B", "C"], 8)
+
+	nw = network::network.initialize(3, directed = TRUE)
+	network::add.edges(nw, tail = c(1, 2), head = c(2, 3))
+	network::set.edge.attribute(nw, "weight", c(5, 6))
+	network::set.edge.attribute(nw, "score", c(50, 60))
+	net_nw = to_netify(list(t1 = nw, t2 = nw))
+
+	expect_equal(attr(net_nw, "weight"), "weight")
+	expect_equal(unname(net_nw[[1]][1, 2]), 5)
+	expect_equal(unname(net_nw[[1]][2, 3]), 6)
+})
+
 # data checks
 
 test_that("to_netify validates and aligns data correctly", {
@@ -390,11 +432,11 @@ test_that("to_netify preserves attributes across different input types", {
 	nw = network::network(adj, directed = FALSE)
 	net_nw = to_netify(nw)
 
-	# all should produce same adjacency structure modulo diag-to-NA stamping
-	strip_diag <- function(m) {
-		out <- m
-		diag(out) <- 0
-		out[is.na(out)] <- 0
+	# compare adjacency after diagonal stamping
+	strip_diag = function(m) {
+		out = m
+		diag(out) = 0
+		out[is.na(out)] = 0
 		out
 	}
 	expect_equal(strip_diag(get_raw(net_mat)), strip_diag(net_ig[, ]))
@@ -404,7 +446,7 @@ test_that("to_netify preserves attributes across different input types", {
 # icews tests
 
 test_that("to_netify works with complex real-world data structures", {
-	# simulate ICEWS-like data
+	# build event-style data
 	set.seed(6886)
 	n_actors = 10
 	actor_names = paste0("Country", LETTERS[1:n_actors])

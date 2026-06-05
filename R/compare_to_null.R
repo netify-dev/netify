@@ -1,58 +1,60 @@
-#' Test an observed network statistic against a null distribution
+#' Test an observed network statistic against a NULL distribution
 #'
-#' Simulates `n_sim` networks from a null model (default Erdős-Rényi
+#' simulates `n_sim` networks from a NULL model (default erdos-renyi
 #' at the observed density), applies the user-supplied statistic to
-#' each, and reports how the observed statistic compares — point
-#' estimate, percentile of the null distribution, and two-sided
-#' permutation p-value.
+#' each, and reports how the observed statistic compares -- point
+#' estimate, percentile of the NULL distribution, and two-sided monte carlo
+#' p-value against the selected NULL model.
 #'
-#' Combines `simulate.netify()` + a vectorized `fn` loop into the
+#' combines `simulate.netify()` + a vectorized `fn` loop into the
 #' single-call entry users actually want: "is my observed transitivity
 #' surprising vs. a random graph?"
 #'
-#' @param netlet The observed netify object.
-#' @param fn Function. Takes a **netify object** (not an igraph or
+#' @param netlet the observed netify object.
+#' @param fn function. takes a **netify object** (not an igraph or
 #' matrix) and returns a single numeric value or a named numeric
-#' vector. Called once on the observed netlet and `n_sim` times on the
-#' simulated draws. Wrap igraph helpers with `to_igraph()` inside
+#' vector. called once on the observed netlet and `n_sim` times on the
+#' simulated draws. wrap igraph helpers with `to_igraph()` inside
 #' `fn`, e.g. `fn = function(net) igraph::transitivity(to_igraph(net))`.
-#' @param n_sim Integer. Number of null-model draws (default `200`).
-#' @param model Character. Null-model family; passed to
-#' `simulate.netify()`. One of `"erdos_renyi"` (default),
+#' @param n_sim integer. number of NULL-model draws (default `200`).
+#' @param model character. NULL-model family; passed to
+#' `simulate.netify()`. one of `"erdos_renyi"` (default),
 #' `"configuration"`, `"dyad_permutation"`.
 #'
-#' **Picking a null model.** For ERGM-trained users:
+#' **picking a NULL model.** for ergm-trained users:
 #' \describe{
-#' \item{`erdos_renyi`}{Random graph at observed density. Use when
-#' the null hypothesis is "no structure beyond density."}
-#' \item{`configuration`}{Random graph preserving the observed
-#' degree sequence. Use when you want to ask "is my observed
-#' structure surprising *given* the degree distribution?" — already
+#' \item{`erdos_renyi`}{random graph at observed density. use when
+#' the NULL hypothesis is "no structure beyond density."}
+#' \item{`configuration`}{random graph preserving the observed
+#' degree sequence. use when you want to ask "is my observed
+#' structure surprising *given* the degree distribution?" -- already
 #' conditions on degree.}
-#' \item{`dyad_permutation`}{Vertex-label permutation. Preserves the
+#' \item{`dyad_permutation`}{vertex-label permutation. preserves the
 #' full degree distribution and weight values; use when comparing
 #' attribute-aware structure (homophily, mixing) against actor
 #' relabelings.}
 #' }
-#' For weighted netlets, the simulator draws weights from the
-#' empirical non-zero weight distribution so observed-vs-null stats
-#' are computed on comparable scales (`dyad_permutation` is exact —
+#' for weighted netlets, the simulator draws weights from the
+#' empirical non-zero weight distribution so observed-vs-NULL stats
+#' are computed on comparable scales (`dyad_permutation` is exact --
 #' it preserves weights via relabel).
-#' @param alpha Numeric in (0, 1). Two-sided alpha for the percentile
-#' CI of the null distribution (default `0.05` → 95%).
-#' @param seed Optional integer. Local RNG seed (does not leak into
-#' the user's global stream).
-#' @param verbose Logical. Progress ticker every 50 draws.
+#' @param alpha numeric in (0, 1). two-sided alpha for the percentile
+#' ci of the NULL distribution (default `0.05` -> 95%).
+#' @param seed optional integer. if supplied, sets a local rng seed and
+#' restores the user's global stream afterward. if `NULL`, NULL draws use
+#' and advance the current rng stream normally.
+#' @param verbose logical. progress ticker every 50 draws.
 #'
-#' @return A `data.frame` (also class `"netify_null_test"`) with one
+#' @return a `data.frame` (also class `"netify_null_test"`) with one
 #' row per stat and columns:
 #' \describe{
-#' \item{`metric`}{Name of the statistic.}
-#' \item{`observed`}{Observed value on `netlet`.}
-#' \item{`null_mean`, `null_sd`}{Moments of the null distribution.}
-#' \item{`null_lower`, `null_upper`}{Percentile CI bounds.}
-#' \item{`p_value`}{Two-sided permutation p-value.}
-#' \item{`extreme`}{Logical: is observed outside `[null_lower, null_upper]`?}
+#' \item{`metric`}{name of the statistic.}
+#' \item{`observed`}{observed value on `netlet`.}
+#' \item{`n_valid`}{number of non-`na` simulated draws used for that metric.}
+#' \item{`null_mean`, `null_sd`}{moments of the NULL distribution.}
+#' \item{`null_lower`, `null_upper`}{percentile ci bounds.}
+#' \item{`p_value`}{two-sided monte carlo p-value using the simulated NULL draws.}
+#' \item{`extreme`}{logical: is observed outside `[null_lower, null_upper]`?}
 #' }
 #'
 #' @examples
@@ -61,16 +63,16 @@
 #' net <- netify(icews[icews$year == 2010, ],
 #' actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "verbCoop")
 #' my_stat <- function(net) {
-#' s = suppressMessages(summary(net))
+#' s = suppressmessages(summary(net))
 #' c(transitivity = s$transitivity, reciprocity = s$reciprocity)
 #' }
 #' compare_to_null(net, my_stat, n_sim = 200, seed = 1)
 #' }
 #'
-#' @section Parallel execution:
-#' `compare_to_null` runs serially. At `n_sim > 50` with large N, the
+#' @section parallel execution:
+#' `compare_to_null` runs serially. at `n_sim > 50` with large n, the
 #' per-draw `fn()` cost (igraph community detection, full
-#' `summary_actor`) dominates wall-clock. There is no built-in
+#' `summary_actor`) dominates wall-clock. there is no built-in
 #' `parallel =` argument; drive the loop manually with
 #' `future.apply::future_lapply()`:
 #' \preformatted{
@@ -79,16 +81,16 @@
 #' sims <- simulate(net, nsim = n_sim, model = "erdos_renyi", seed = 1)
 #' null_draws <- future_lapply(sims, fn, future.seed = TRUE)
 #' }
-#' Summarize `null_draws` as `compare_to_null` does internally
-#' (`rowMeans`, quantiles, two-sided p). For 15K-node weekly
+#' summarize `null_draws` as `compare_to_null` does internally
+#' (`rowmeans`, quantiles, two-sided p). for 15k-node weekly
 #' snapshots with `n_sim = 500`, a 4-core `multisession` plan cuts
 #' wall-clock by roughly 3.5x.
 #'
-#' @seealso [simulate.netify()] for the null-model engine,
-#' [bootstrap_netlet()] for sampling-variation CIs around the
+#' @seealso [simulate.netify()] for the NULL-model engine,
+#' [bootstrap_netlet()] for sampling-variation cis around the
 #' observed stat itself.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export compare_to_null
 compare_to_null <- function(netlet, fn, n_sim = 200L,
@@ -99,7 +101,8 @@ compare_to_null <- function(netlet, fn, n_sim = 200L,
 	if (!is.function(fn)) {
 		cli::cli_abort("{.arg fn} must be a function.")
 	}
-	if (!is.numeric(n_sim) || length(n_sim) != 1L || n_sim < 2) {
+	if (!is.numeric(n_sim) || length(n_sim) != 1L ||
+		is.na(n_sim) || !is.finite(n_sim) || n_sim < 2 || n_sim != floor(n_sim)) {
 		cli::cli_abort("{.arg n_sim} must be a single integer >= 2.")
 	}
 	n_sim <- as.integer(n_sim)
@@ -112,7 +115,29 @@ compare_to_null <- function(netlet, fn, n_sim = 200L,
 	if (!is.numeric(obs)) {
 		cli::cli_abort("{.arg fn} must return numeric on the observed netlet; got {.cls {class(obs)[1]}}.")
 	}
+	if (length(obs) == 0L) {
+		cli::cli_abort("{.arg fn} must return at least one numeric value.")
+	}
+	if (any(!is.finite(obs))) {
+		cli::cli_abort("{.arg fn} must return finite numeric values on the observed netlet.")
+	}
 	metric_names <- names(obs) %||% paste0("v", seq_along(obs))
+	has_named_metrics <- !is.null(names(obs))
+	if (has_named_metrics && (anyNA(metric_names) || any(metric_names == "") || anyDuplicated(metric_names))) {
+		cli::cli_abort("{.arg fn} must return unique, non-empty names when returning a named vector.")
+	}
+	align_stat_vector <- function(val) {
+		if (!is.numeric(val) || length(val) != length(metric_names) || any(!is.finite(val))) return(NULL)
+		if (has_named_metrics) {
+			val_names <- names(val)
+			if (is.null(val_names) || anyNA(val_names) || any(val_names == "") ||
+				anyDuplicated(val_names) || !setequal(val_names, metric_names)) {
+				return(NULL)
+			}
+			return(as.numeric(val[metric_names]))
+		}
+		as.numeric(val)
+	}
 
 	# null model draws
 	sims <- simulate(netlet, nsim = n_sim, seed = seed, model = model)
@@ -127,7 +152,16 @@ compare_to_null <- function(netlet, fn, n_sim = 200L,
 		if (is.null(val) || length(val) != length(obs) || !is.numeric(val)) {
 			n_fail <- n_fail + 1L
 		} else {
-			null_draws[b, ] <- val
+			aligned_val <- align_stat_vector(val)
+			if (is.null(aligned_val)) {
+				n_fail <- n_fail + 1L
+			} else {
+			if (any(!is.finite(aligned_val))) {
+				n_fail <- n_fail + 1L
+			} else {
+				null_draws[b, ] <- aligned_val
+			}
+		}
 		}
 		if (verbose && b %% 50L == 0L) {
 			cli::cli_alert_info("null draw {b}/{n_sim}")
@@ -140,7 +174,22 @@ compare_to_null <- function(netlet, fn, n_sim = 200L,
 		if (!is.null(first_err)) {
 			msg <- c(msg, "i" = "First error: {conditionMessage(first_err)}")
 		}
-		cli::cli_inform(msg)
+		cli::cli_warn(msg)
+	}
+	valid_counts <- colSums(is.finite(null_draws))
+	if (any(valid_counts == 0L)) {
+		empty_metrics <- metric_names[valid_counts == 0L]
+		cli::cli_abort(c(
+			"x" = "No valid null draws were available for metric{?s} {.val {empty_metrics}}.",
+			"i" = "Check that {.arg fn} works on simulated netlets for model {.val {model}}."
+		))
+	}
+	if (any(valid_counts < n_sim)) {
+		low_metrics <- metric_names[valid_counts < n_sim]
+		cli::cli_warn(c(
+			"!" = "Some null draws returned {.val NA} for metric{?s} {.val {low_metrics}}.",
+			"i" = "Use the {.field n_valid} column to see the effective null distribution size for each metric."
+		))
 	}
 
 	low_q  <- alpha / 2
@@ -148,18 +197,21 @@ compare_to_null <- function(netlet, fn, n_sim = 200L,
 	out <- data.frame(
 		metric     = metric_names,
 		observed   = as.numeric(obs),
+		n_valid    = as.integer(valid_counts),
 		null_mean  = vapply(seq_along(obs), function(j) mean(null_draws[, j], na.rm = TRUE), numeric(1)),
 		null_sd    = vapply(seq_along(obs), function(j) stats::sd(null_draws[, j], na.rm = TRUE), numeric(1)),
 		null_lower = vapply(seq_along(obs), function(j) stats::quantile(null_draws[, j], low_q,  na.rm = TRUE), numeric(1)),
 		null_upper = vapply(seq_along(obs), function(j) stats::quantile(null_draws[, j], high_q, na.rm = TRUE), numeric(1)),
 		stringsAsFactors = FALSE
 	)
-	# two-sided permutation p-value clamped to [0, 1]
+	# two-sided permutation p-value with plus-one finite-simulation correction
 	out$p_value <- vapply(seq_along(obs), function(j) {
 		v <- null_draws[, j]
-		v <- v[!is.na(v)]
+		v <- v[is.finite(v)]
 		if (length(v) == 0) return(NA_real_)
-		min(1, 2 * min(mean(v >= obs[j]), mean(v <= obs[j])))
+		upper <- (sum(v >= obs[j]) + 1) / (length(v) + 1)
+		lower <- (sum(v <= obs[j]) + 1) / (length(v) + 1)
+		min(1, 2 * min(upper, lower))
 	}, numeric(1))
 	out$extreme <- !is.na(out$null_lower) &
 		(out$observed < out$null_lower | out$observed > out$null_upper)

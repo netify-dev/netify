@@ -295,34 +295,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// qap_freeman_lane_cpp
-List qap_freeman_lane_cpp(const NumericMatrix& mat1, const NumericMatrix& mat2, int n_permutations, int seed);
-RcppExport SEXP _netify_qap_freeman_lane_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP n_permutationsSEXP, SEXP seedSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type mat1(mat1SEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type mat2(mat2SEXP);
-    Rcpp::traits::input_parameter< int >::type n_permutations(n_permutationsSEXP);
-    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(qap_freeman_lane_cpp(mat1, mat2, n_permutations, seed));
-    return rcpp_result_gen;
-END_RCPP
-}
-// qap_dsp_cpp
-List qap_dsp_cpp(const NumericMatrix& mat1, const NumericMatrix& mat2, int n_permutations, int seed);
-RcppExport SEXP _netify_qap_dsp_cpp(SEXP mat1SEXP, SEXP mat2SEXP, SEXP n_permutationsSEXP, SEXP seedSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type mat1(mat1SEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type mat2(mat2SEXP);
-    Rcpp::traits::input_parameter< int >::type n_permutations(n_permutationsSEXP);
-    Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(qap_dsp_cpp(mat1, mat2, n_permutations, seed));
-    return rcpp_result_gen;
-END_RCPP
-}
 // calculate_similarity_matrix_cpp
 NumericMatrix calculate_similarity_matrix_cpp(NumericVector attributes, std::string method);
 RcppExport SEXP _netify_calculate_similarity_matrix_cpp(SEXP attributesSEXP, SEXP methodSEXP) {
@@ -348,8 +320,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // calculate_homophily_stats_cpp
-List calculate_homophily_stats_cpp(NumericMatrix similarity_matrix, LogicalMatrix net_matrix, bool significance_test, int n_permutations, double alpha);
-RcppExport SEXP _netify_calculate_homophily_stats_cpp(SEXP similarity_matrixSEXP, SEXP net_matrixSEXP, SEXP significance_testSEXP, SEXP n_permutationsSEXP, SEXP alphaSEXP) {
+List calculate_homophily_stats_cpp(NumericMatrix similarity_matrix, LogicalMatrix net_matrix, bool significance_test, int n_permutations, double alpha, bool directed);
+RcppExport SEXP _netify_calculate_homophily_stats_cpp(SEXP similarity_matrixSEXP, SEXP net_matrixSEXP, SEXP significance_testSEXP, SEXP n_permutationsSEXP, SEXP alphaSEXP, SEXP directedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -358,7 +330,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type significance_test(significance_testSEXP);
     Rcpp::traits::input_parameter< int >::type n_permutations(n_permutationsSEXP);
     Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(calculate_homophily_stats_cpp(similarity_matrix, net_matrix, significance_test, n_permutations, alpha));
+    Rcpp::traits::input_parameter< bool >::type directed(directedSEXP);
+    rcpp_result_gen = Rcpp::wrap(calculate_homophily_stats_cpp(similarity_matrix, net_matrix, significance_test, n_permutations, alpha, directed));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -383,11 +356,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_netify_double_center_cpp", (DL_FUNC) &_netify_double_center_cpp, 1},
     {"_netify_qap_correlation_cpp", (DL_FUNC) &_netify_qap_correlation_cpp, 4},
     {"_netify_qap_degree_cpp", (DL_FUNC) &_netify_qap_degree_cpp, 5},
-    {"_netify_qap_freeman_lane_cpp", (DL_FUNC) &_netify_qap_freeman_lane_cpp, 4},
-    {"_netify_qap_dsp_cpp", (DL_FUNC) &_netify_qap_dsp_cpp, 4},
     {"_netify_calculate_similarity_matrix_cpp", (DL_FUNC) &_netify_calculate_similarity_matrix_cpp, 2},
     {"_netify_correlation_cpp", (DL_FUNC) &_netify_correlation_cpp, 2},
-    {"_netify_calculate_homophily_stats_cpp", (DL_FUNC) &_netify_calculate_homophily_stats_cpp, 5},
+    {"_netify_calculate_homophily_stats_cpp", (DL_FUNC) &_netify_calculate_homophily_stats_cpp, 6},
     {NULL, NULL, 0}
 };
 

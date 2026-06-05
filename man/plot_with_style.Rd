@@ -7,18 +7,18 @@
 plot_with_style(netlet, style_fun, ...)
 }
 \arguments{
-\item{netlet}{A netify object}
+\item{netlet}{a netify object}
 
-\item{style_fun}{A style function (e.g., style_budapest)}
+\item{style_fun}{a style function (e.g., style_rose)}
 
-\item{...}{Additional plot parameters}
+\item{...}{additional plot parameters}
 }
 \value{
-A ggplot object
+a ggplot object
 }
 \description{
-Helper function to properly apply styles to netify plots
+helper function to properly apply styles to netify plots
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

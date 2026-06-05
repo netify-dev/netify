@@ -11,7 +11,6 @@ test_that("summary.netify works for cross-sectional networks", {
 		weight = "verbCoop"
 	)
 
-	# test basic summary
 	summ = summary(net)
 
 	expect_s3_class(summ, "data.frame")
@@ -36,7 +35,6 @@ test_that("summary.netify works for longitudinal networks", {
 		weight = "matlConf"
 	)
 
-	# test summary
 	summ = summary(net_longit)
 
 	expect_s3_class(summ, "data.frame")
@@ -109,7 +107,6 @@ test_that("summary.netify works for multilayer networks", {
 })
 
 test_that("summary.netify handles custom statistics correctly", {
-	# create test network
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 	net = netify(
@@ -169,7 +166,6 @@ test_that("summary.netify handles bipartite networks", {
 	expect_true("num_col_actors" %in% names(summ))
 	expect_false("num_actors" %in% names(summ))
 
-	# bipartite networks should not include reciprocity or transitivity
 	expect_false("reciprocity" %in% names(summ))
 	expect_false("mutual" %in% names(summ))
 	expect_false("transitivity" %in% names(summ))
@@ -180,7 +176,7 @@ test_that("summary.netify handles missing data correctly", {
 	# create network with missing values
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
-	# introduce some NAs
+	# introduce some nas
 	icews_10$verbCoop[sample(nrow(icews_10), 100)] = NA
 
 	net_missing = netify(
@@ -190,11 +186,55 @@ test_that("summary.netify handles missing data correctly", {
 		missing_to_zero = FALSE
 	)
 
-	summ = summary(net_missing)
+	expect_warning({
+		summ = summary(net_missing)
+	}, NA)
 
 	expect_true("prop_edges_missing" %in% names(summ))
 	expect_true(summ$prop_edges_missing > 0)
-	expect_false(is.na(summ$density)) # should handle NAs gracefully
+		expect_false(is.na(summ$density)) # density is finite
+})
+
+test_that("summary.netify reports weighted edge stats over realized ties", {
+	mat = matrix(0, 3, 3, dimnames = list(letters[1:3], letters[1:3]))
+	diag(mat) = NA
+	mat["a", "b"] = 2
+	mat["b", "c"] = 4
+
+	net = new_netify(
+		mat,
+		symmetric = FALSE,
+		weight = "w",
+		is_binary = FALSE,
+		diag_to_NA = TRUE,
+		missing_to_zero = TRUE
+	)
+	summ = summary(net)
+
+	expect_equal(summ$num_edges, 2)
+	expect_equal(summ$density, 2 / 6)
+	expect_equal(summ$mean_edge_weight, 3)
+	expect_equal(summ$median_edge_weight, 3)
+})
+
+test_that("print.netify does not show NaN for all-missing averaged statistics", {
+	mat1 = matrix(c(
+		NA, 1, NA,
+		NA, NA, 0,
+		NA, NA, NA
+	), 3, 3, byrow = TRUE, dimnames = list(letters[1:3], letters[1:3]))
+	mat2 = matrix(c(
+		NA, 0, NA,
+		NA, NA, 1,
+		NA, NA, NA
+	), 3, 3, byrow = TRUE, dimnames = list(letters[1:3], letters[1:3]))
+	net = new_netify(list(t1 = mat1, t2 = mat2),
+		symmetric = FALSE, missing_to_zero = FALSE, diag_to_NA = TRUE)
+
+	summ = summary(net)
+	expect_false(any(is.nan(summ$transitivity)))
+	out = capture.output(print(net))
+	expect_false(any(grepl("NaN", out, fixed = TRUE)))
 })
 
 test_that("summary.netify handles ego networks", {
@@ -219,4 +259,3 @@ test_that("summary.netify handles ego networks", {
 	expect_true("net" %in% names(summ))
 	expect_true(all(grepl("United States", summ$layer)))
 })
-

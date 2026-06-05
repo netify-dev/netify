@@ -1,5 +1,4 @@
 test_that("pivot_dyad_to_network works for cross-sectional networks", {
-	# create test data
 	test_data = data.frame(
 		i = c("A", "A", "B", "B", "C", "C"),
 		j = c("B", "C", "A", "C", "A", "B"),
@@ -15,7 +14,7 @@ test_that("pivot_dyad_to_network works for cross-sectional networks", {
 		weight = "trade"
 	)
 
-	# add FDI as dyadic variable
+	# add fdi as dyadic variable
 	net = add_dyad_vars(
 		net,
 		test_data,
@@ -24,14 +23,13 @@ test_that("pivot_dyad_to_network works for cross-sectional networks", {
 		dyad_vars_symmetric = FALSE
 	)
 
-	# test basic pivot
 	net_pivoted = pivot_dyad_to_network(
 		net,
 		dyad_var = "fdi",
 		network_var_name = "trade"
 	)
 
-	# check that FDI is now the network
+	# check that fdi is now the network
 	expect_equal(attr(net_pivoted, "weight"), "fdi")
 	expect_equal(net_pivoted["A", "B"], 10)
 	expect_equal(net_pivoted["B", "C"], 30)
@@ -41,7 +39,7 @@ test_that("pivot_dyad_to_network works for cross-sectional networks", {
 	expect_equal(trade_matrix["A", "B"], 100)
 	expect_equal(trade_matrix["B", "C"], 300)
 
-	# check that FDI is removed from dyad_data
+	# check that fdi is removed from dyad_data
 	expect_null(attr(net_pivoted, "dyad_data")[["1"]][["fdi"]])
 })
 
@@ -73,14 +71,14 @@ test_that("pivot_dyad_to_network detects symmetry correctly", {
 	)
 
 	# test auto-detection of asymmetric variable
-	net_asym <- expect_message(
+	net_asym = expect_message(
 		pivot_dyad_to_network(net, dyad_var = "dyad_asym"),
 		"Auto-detected symmetry"
 	)
 	expect_false(attr(net_asym, "symmetric"))
 
 	# test auto-detection of symmetric variable
-	net_sym <- expect_message(
+	net_sym = expect_message(
 		pivot_dyad_to_network(net, dyad_var = "dyad_sym"),
 		"Auto-detected symmetry"
 	)
@@ -106,7 +104,7 @@ test_that("pivot_dyad_to_network works for longitudinal arrays", {
 		output_format = "longit_array"
 	)
 
-	# add FDI as dyadic variable
+	# add fdi as dyadic variable
 	net = add_dyad_vars(
 		net,
 		test_data,
@@ -115,7 +113,7 @@ test_that("pivot_dyad_to_network works for longitudinal arrays", {
 		dyad_vars_symmetric = FALSE
 	)
 
-	# pivot to FDI
+	# pivot to fdi
 	net_pivoted = pivot_dyad_to_network(
 		net,
 		dyad_var = "fdi",
@@ -157,7 +155,7 @@ test_that("pivot_dyad_to_network works for longitudinal lists", {
 		actor_time_uniform = FALSE
 	)
 
-	# add FDI as dyadic variable
+	# add fdi as dyadic variable
 	net = add_dyad_vars(
 		net,
 		test_data,
@@ -166,7 +164,7 @@ test_that("pivot_dyad_to_network works for longitudinal lists", {
 		dyad_vars_symmetric = FALSE
 	)
 
-	# pivot to FDI
+	# pivot to fdi
 	net_pivoted = pivot_dyad_to_network(
 		net,
 		dyad_var = "fdi",
@@ -177,7 +175,7 @@ test_that("pivot_dyad_to_network works for longitudinal lists", {
 	expect_equal(net_pivoted[["2020"]]["A", "B"], 10)
 	expect_equal(net_pivoted[["2020"]]["B", "C"], 30)
 
-	# check 2021 values (with new actor D)
+	# check 2021 values (with new actor d)
 	expect_equal(net_pivoted[["2021"]]["A", "D"], 40)
 	expect_equal(net_pivoted[["2021"]]["C", "A"], 50)
 
@@ -204,7 +202,7 @@ test_that("pivot_dyad_to_network handles bipartite networks", {
 		weight = "trade"
 	)
 
-	# add FDI as dyadic variable
+	# add fdi as dyadic variable
 	net = add_dyad_vars(
 		net,
 		test_data,
@@ -213,8 +211,7 @@ test_that("pivot_dyad_to_network handles bipartite networks", {
 		dyad_vars_symmetric = FALSE
 	)
 
-	# try to pivot with symmetric=TRUE (should warn and set to FALSE)
-	net_pivoted <- expect_warning(
+	net_pivoted = expect_warning(
 		pivot_dyad_to_network(
 			net,
 			dyad_var = "fdi",
@@ -229,7 +226,6 @@ test_that("pivot_dyad_to_network handles bipartite networks", {
 })
 
 test_that("pivot_dyad_to_network handles missing dyadic variables correctly", {
-	# create test data
 	test_data = data.frame(
 		i = c("A", "A", "B"),
 		j = c("B", "C", "C"),
@@ -243,7 +239,6 @@ test_that("pivot_dyad_to_network handles missing dyadic variables correctly", {
 		weight = "trade"
 	)
 
-	# test error when no dyadic variables exist
 	expect_error(
 		pivot_dyad_to_network(net, dyad_var = "fdi"),
 		"No dyadic variables found"
@@ -257,7 +252,6 @@ test_that("pivot_dyad_to_network handles missing dyadic variables correctly", {
 		dyad_vars = "investment"
 	)
 
-	# test error when requested variable doesn't exist
 	expect_error(
 		pivot_dyad_to_network(net, dyad_var = "fdi"),
 		"Dyadic variable 'fdi' not found"
@@ -265,7 +259,6 @@ test_that("pivot_dyad_to_network handles missing dyadic variables correctly", {
 })
 
 test_that("pivot_dyad_to_network preserves all attributes correctly", {
-	# create test data with nodal attributes
 	test_data = data.frame(
 		i = c("A", "A", "B", "B", "C", "C"),
 		j = c("B", "C", "A", "C", "A", "B"),
@@ -317,7 +310,7 @@ test_that("pivot_dyad_to_network preserves all attributes correctly", {
 		dyad_vars_symmetric = TRUE
 	)
 
-	# pivot to FDI
+	# pivot to fdi
 	net_pivoted = pivot_dyad_to_network(
 		net,
 		dyad_var = "fdi",
@@ -334,12 +327,11 @@ test_that("pivot_dyad_to_network preserves all attributes correctly", {
 		attr(net, "dyad_data")[["1"]][["alliance"]]
 	)
 
-	# check that FDI is removed from dyad_data
+	# check that fdi is removed from dyad_data
 	expect_null(attr(net_pivoted, "dyad_data")[["1"]][["fdi"]])
 })
 
 test_that("pivot_dyad_to_network handles custom attribute settings", {
-	# create test data
 	test_data = data.frame(
 		i = c("A", "A", "B"),
 		j = c("B", "C", "C"),
@@ -356,7 +348,7 @@ test_that("pivot_dyad_to_network handles custom attribute settings", {
 		missing_to_zero = FALSE
 	)
 
-	# add FDI
+	# add fdi
 	net = add_dyad_vars(
 		net,
 		test_data,
@@ -364,7 +356,6 @@ test_that("pivot_dyad_to_network handles custom attribute settings", {
 		dyad_vars = "fdi"
 	)
 
-	# test with custom settings
 	net_pivoted = pivot_dyad_to_network(
 		net,
 		dyad_var = "fdi",

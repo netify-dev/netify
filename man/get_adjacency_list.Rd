@@ -21,110 +21,110 @@ get_adjacency_list(
 )
 }
 \arguments{
-\item{dyad_data}{A data.frame containing longitudinal dyadic observations. Will
+\item{dyad_data}{a data.frame containing longitudinal dyadic observations. will
 be coerced to data.frame if a tibble or data.table is provided.}
 
-\item{actor1}{Character string specifying the column name for the first actor
+\item{actor1}{character string specifying the column name for the first actor
 in each dyad.}
 
-\item{actor2}{Character string specifying the column name for the second actor
+\item{actor2}{character string specifying the column name for the second actor
 in each dyad.}
 
-\item{time}{Character string specifying the column name for time periods.}
+\item{time}{character string specifying the column name for time periods.}
 
-\item{symmetric}{Logical. If TRUE (default), treats the network as undirected
-(i.e., edges have no direction). If FALSE, treats the network as directed.}
+\item{symmetric}{logical. if TRUE (default), treats the network as undirected
+(i.e., edges have no direction). if FALSE, treats the network as directed.}
 
-\item{mode}{Character string specifying network structure. Options are:
+\item{mode}{character string specifying network structure. options are:
 \itemize{
-\item \code{"unipartite"}: One set of actors (default)
-\item \code{"bipartite"}: Two distinct sets of actors
+\item \code{"unipartite"}: one set of actors (default)
+\item \code{"bipartite"}: two distinct sets of actors
 }}
 
-\item{weight}{Character string specifying the column name containing edge weights.
-If NULL (default), edges are treated as unweighted (binary).}
+\item{weight}{character string specifying the column name containing edge weights.
+if NULL (default), edges are treated as unweighted (binary).}
 
-\item{sum_dyads}{Logical. If TRUE, sums weight values when multiple edges exist
-between the same actor pair in the same time period. If FALSE (default), uses
+\item{sum_dyads}{logical. if TRUE, sums weight values when multiple edges exist
+between the same actor pair in the same time period. if FALSE (default), uses
 the last observed value.}
 
-\item{actor_time_uniform}{Logical indicating how to handle actor composition:
+\item{actor_time_uniform}{logical indicating how to handle actor composition:
 \itemize{
-\item \code{TRUE}: Assumes all actors exist across the entire time range
-\item \code{FALSE}: Determines actor existence from the data - actors exist
+\item \code{TRUE}: assumes all actors exist across the entire time range
+\item \code{FALSE}: determines actor existence from the data - actors exist
 from their first observed interaction to their last
 }}
 
-\item{actor_pds}{Optional data.frame specifying when actors enter and exit the
-network. Must contain columns 'actor', 'min_time', and 'max_time'. Can be
-created using \code{get_actor_time_info()}. If provided, overrides actor_time_uniform.}
+\item{actor_pds}{optional data.frame specifying when actors enter and exit the
+network. must contain columns 'actor', 'min_time', and 'max_time'. can be
+created using \code{get_actor_time_info()}. if provided, overrides actor_time_uniform.}
 
-\item{diag_to_NA}{Logical. If TRUE (default), sets diagonal values (self-loops)
-to NA. Automatically set to FALSE for bipartite networks.}
+\item{diag_to_NA}{logical. if TRUE (default), sets diagonal values (self-loops)
+to na. automatically set to FALSE for bipartite networks.}
 
-\item{missing_to_zero}{Logical. If TRUE (default), treats missing edges as zeros.
-If FALSE, missing edges remain as NA.}
+\item{missing_to_zero}{logical. if TRUE (default), treats missing edges as zeros.
+if FALSE, missing edges remain as na.}
 
-\item{nodelist}{Character vector of actor names to include in the network.
-If provided, ensures all listed actors appear in the network even if they
-have no edges (isolates). Useful when working with edgelists that only
+\item{nodelist}{character vector of actor names to include in the network.
+if provided, ensures all listed actors appear in the network even if they
+have no edges (isolates). useful when working with edgelists that only
 contain active dyads.}
 }
 \value{
-A list of class "netify" (a netify list) with:
+a list of class "netify" (a netify list) with:
 \itemize{
-\item \strong{Elements}: Named list where each element is a netify matrix
+\item \strong{elements}: named list where each element is a netify matrix
 for one time period
-\item \strong{Names}: Character representation of time periods
-\item \strong{Class}: "netify" - this is a full netify object compatible
+\item \strong{names}: character representation of time periods
+\item \strong{class}: "netify" - this is a full netify object compatible
 with all netify functions
-\item \strong{Attributes}: Extensive metadata including network properties,
+\item \strong{attributes}: extensive metadata including network properties,
 actor composition information, and processing parameters
 }
 
-Each matrix in the list may have different dimensions if actor composition
-varies over time. The returned object can be used with all netify functions
+each matrix in the list may have different dimensions if actor composition
+varies over time. the returned object can be used with all netify functions
 such as \code{summary()}, \code{plot()}, \code{to_igraph()}, etc.
 }
 \description{
 \code{get_adjacency_list} converts longitudinal dyadic data into a list of adjacency
-matrices of class "netify". This function creates a list structure where each
+matrices of class "netify". this function creates a list structure where each
 element is a network matrix for a specific time period, allowing for
 time-varying actor composition.
 }
 \details{
-\strong{Note on usage:}
+\strong{note on usage:}
 
-While this function is exported and available for direct use, the primary and
+while this function is exported and available for direct use, the primary and
 recommended way to create netify objects from longitudinal dyadic data is through
-the \code{netify()} function. The \code{netify()} function:
+the \code{netify()} function. the \code{netify()} function:
 \itemize{
-\item Automatically chooses between array and list representations based on
+\item automatically chooses between array and list representations based on
 your data
-\item Provides more comprehensive data validation
-\item Can incorporate nodal and dyadic attributes during creation
-\item Offers a unified interface for all types of network data
+\item validates inputs before constructing matrices
+\item can incorporate nodal and dyadic attributes during creation
+\item offers a unified interface for all types of network data
 }
 
-Use \code{get_adjacency_list()} directly only when you specifically need a list
+use \code{get_adjacency_list()} directly only when you specifically need a list
 structure or require low-level control over the creation process.
 
-\strong{Actor composition handling:}
+\strong{actor composition handling:}
 
-This function is particularly useful when actors enter and exit the network
-over time. Unlike \code{get_adjacency_array()}, which requires constant actor
+this function is particularly useful when actors enter and exit the network
+over time. unlike \code{get_adjacency_array()}, which requires constant actor
 composition, this function can handle:
 \itemize{
-\item New actors appearing in later time periods
-\item Actors exiting and no longer appearing in the data
-\item Different sets of actors active in each time period
+\item new actors appearing in later time periods
+\item actors exiting and no longer appearing in the data
+\item different sets of actors active in each time period
 }
 }
 \examples{
-# Load example data
+# load example data
 data(icews)
 
-# Create a netify list with constant actor composition
+# create a netify list with constant actor composition
 icews_list <- get_adjacency_list(
     dyad_data = icews,
     actor1 = "i",
@@ -135,18 +135,18 @@ icews_list <- get_adjacency_list(
     weight = "verbConf"
 )
 
-# Verify it's a netify object
+# verify it's a netify object
 class(icews_list) # "netify"
 
-# Check structure
-length(icews_list) # Number of time periods
-names(icews_list) # Time period labels
+# check structure
+length(icews_list) # number of time periods
+names(icews_list) # time period labels
 
-# Access specific time period
+# access specific time period
 icews_2010 <- icews_list[["2010"]]
 dim(icews_2010)
 
 }
 \author{
-Cassy Dorff, Ha Eun Choi, Shahryar Minhas
+cassy dorff, ha eun choi, shahryar minhas
 }

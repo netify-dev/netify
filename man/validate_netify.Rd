@@ -7,14 +7,14 @@
 validate_netify(netlet, verbose = TRUE)
 }
 \arguments{
-\item{netlet}{A netify object.}
+\item{netlet}{a netify object.}
 
-\item{verbose}{Logical. If \code{TRUE} (default), print a per-check
+\item{verbose}{logical. if \code{TRUE} (default), print a per-check
 status banner; otherwise return silently.}
 }
 \value{
-Invisibly returns a list with one logical per check (\code{TRUE}
-= passed). The function \code{cli::cli_abort()}s on any failure unless
+invisibly returns a list with one logical per check (\code{TRUE}
+= passed). the function \code{cli::cli_abort()}s on any failure unless
 \code{verbose = TRUE}, in which case failures are reported per-check
 and the function returns invisibly with the full failure list.
 }
@@ -23,7 +23,7 @@ and the function returns invisibly with the full failure list.
 goes further: it verifies that the netify's internal pieces still
 agree with each other after any user-side surgery (e.g., manually
 edited \code{attr(., "nodal_data")}, \code{subset()} followed by an attribute
-overwrite, etc.). Use this when you've hand-modified a netlet and
+overwrite, etc.). use this when you've hand-modified a netlet and
 want to confirm it's still well-formed before passing to
 \code{to_statnet()} / \code{to_amen()} / \code{plot()}.
 }
@@ -37,5 +37,5 @@ validate_netify(net)
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

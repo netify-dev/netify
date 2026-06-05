@@ -5,16 +5,17 @@
 \alias{mexico}
 \title{Event data slice from UCDP on Mexico}
 \format{
-A data frame with dyadic event observations.
+a data frame with dyadic event observations.
 }
 \source{
-\href{https://ucdp.uu.se/}{ucdp}
+ucdp georeferenced event dataset, version 23.1.
+\url{https://ucdp.uu.se/downloads/}
 }
 \usage{
 data(mexico)
 }
 \description{
-Event data from UCDP for Mexico
+event data from ucdp for mexico
 }
 \examples{
 data(mexico)
@@ -22,10 +23,16 @@ mexico[1:3, ]
 
 }
 \references{
-add UCDP reference
-(\href{https://ucdp.uu.se/}{ucdp})
+davies, s., pettersson, t., and oberg, m. (2023).
+organized violence 1989-2022, and the return of conflict between states.
+journal of peace research, 60(4), 691-708.
+\doi{10.1177/00223433231185169}.
+
+sundberg, r. and melander, e. (2013). introducing the ucdp
+georeferenced event dataset. journal of peace research, 50(4), 523-532.
+\doi{10.1177/0022343313484347}.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }
 \keyword{datasets}

@@ -24,79 +24,79 @@ add_vertex_attributes(
 )
 }
 \arguments{
-\item{netlet}{A netify object (class "netify") to which nodal variables will be added.}
+\item{netlet}{a netify object (class "netify") to which nodal variables will be added.}
 
-\item{node_data}{A data.frame object containing the nodal variables to add. For
-cross-sectional networks, must have one row per unique actor. For longitudinal
-networks, must have one row per actor-time combination. Will be coerced to
+\item{node_data}{a data.frame object containing the nodal variables to add. for
+cross-sectional networks, must have one row per unique actor. for longitudinal
+networks, must have one row per actor-time combination. will be coerced to
 data.frame if a tibble or data.table is provided.}
 
-\item{actor}{Character string specifying the column name in node_data that uniquely
-identifies each actor. This should contain the same actor identifiers used in
+\item{actor}{character string specifying the column name in node_data that uniquely
+identifies each actor. this should contain the same actor identifiers used in
 the original netify object.}
 
-\item{time}{Character string specifying the column name in node_data for time periods.
-Required for longitudinal netify objects. Should match the time specification
-used when creating the netify object. Set to NULL for cross-sectional networks.}
+\item{time}{character string specifying the column name in node_data for time periods.
+required for longitudinal netify objects. should match the time specification
+used when creating the netify object. set to NULL for cross-sectional networks.}
 
-\item{node_vars}{Character vector of column names from node_data to add as nodal
-variables. If NULL (default), all columns except actor and time will be added.}
+\item{node_vars}{character vector of column names from node_data to add as nodal
+variables. if NULL (default), all columns except actor and time will be added.}
 
-\item{replace_existing}{Logical scalar. If TRUE, existing nodal variables with the
-same names will be replaced. If FALSE (default), attempting to add variables
+\item{replace_existing}{logical scalar. if TRUE, existing nodal variables with the
+same names will be replaced. if FALSE (default), attempting to add variables
 that already exist will result in an error.}
 }
 \value{
-A netify object (class "netify") with the additional nodal variables stored in the
-'nodal_data' attribute as a data.frame. The structure includes:
+a netify object (class "netify") with the additional nodal variables stored in the
+'nodal_data' attribute as a data.frame. the structure includes:
 \itemize{
-\item \strong{actor}: Column with actor identifiers
-\item \strong{time}: Column with time periods (longitudinal only)
-\item \strong{nodal variables}: Columns for each variable specified in node_vars
+\item \strong{actor}: column with actor identifiers
+\item \strong{time}: column with time periods (longitudinal only)
+\item \strong{nodal variables}: columns for each variable specified in node_vars
 }
 }
 \description{
 \code{add_node_vars} (also available as \code{add_vertex_attributes})
 merges nodal (vertex-level) variables from a data.frame into an
-existing netify object. This function allows you to incrementally build up
+existing netify object. this function allows you to incrementally build up
 the nodal attributes of your network after initial creation, which is useful
 when actor-level variables come from different sources or need different
 preprocessing.
 }
 \details{
-Nodal variables are stored as a data.frame where each row represents an actor
-(cross-sectional) or an actor-time combination (longitudinal). This format
+nodal variables are stored as a data.frame where each row represents an actor
+(cross-sectional) or an actor-time combination (longitudinal). this format
 allows for efficient storage and easy manipulation of actor-level attributes.
 
-The function automatically handles merging based on actor identifiers, ensuring
-that nodal attributes are properly aligned with the network structure. For
+the function automatically handles merging based on actor identifiers, ensuring
+that nodal attributes are properly aligned with the network structure. for
 longitudinal networks, the function matches both actor and time dimensions.
 
-Missing actors in the node_data will result in NA values for those actors'
-attributes in the netify object. Similarly, if node_data contains actors not
+missing actors in the node_data will result in na values for those actors'
+attributes in the netify object. similarly, if node_data contains actors not
 present in the network, those rows will be ignored.
 }
 \note{
-The input \code{node_data} must be a \code{data.frame} or an object that can be coerced
-into a \code{data.frame} (e.g., a \code{tibble} or \code{data.table}). Inputs such as matrices
+the input \code{node_data} must be a \code{data.frame} or an object that can be coerced
+into a \code{data.frame} (e.g., a \code{tibble} or \code{data.table}). inputs such as matrices
 or arrays are not supported.
 
-For longitudinal networks, ensure that node_data contains entries for all
-actor-time combinations you wish to have attributes for. Missing combinations
-will result in NA values for those actors at those time points.
+for longitudinal networks, ensure that node_data contains entries for all
+actor-time combinations you wish to have attributes for. missing combinations
+will result in na values for those actors at those time points.
 
-When working with large networks, the nodal data storage is more memory-efficient
+when working with large networks, the nodal data storage is more memory-efficient
 than dyadic data, as it scales linearly with the number of actors rather than
 quadratically.
 }
 \examples{
-# Load example data
+# load example data
 data(icews)
 
-# Cross-sectional example
+# cross-sectional example
 icews_10 <- icews[icews$year == 2010, ]
 
-# Create initial netify object
+# create initial netify object
 verbCoop_net <- netify(
     icews_10, # data.frame input
     actor1 = "i", actor2 = "j",
@@ -104,29 +104,29 @@ verbCoop_net <- netify(
     weight = "verbCoop"
 )
 
-# Prepare nodal data - one row per unique actor
+# prepare nodal data - one row per unique actor
 nvars <- c("i_polity2", "i_gdp", "i_log_gdp", "i_pop", "i_log_pop")
-nodeData <- unique(icews_10[, c("i", nvars)])
-class(nodeData) # "data.frame"
-nrow(nodeData) # Number of unique actors
-head(nodeData)
+nodedata <- unique(icews_10[, c("i", nvars)])
+class(nodedata) # "data.frame"
+nrow(nodedata) # number of unique actors
+head(nodedata)
 
-# Add nodal variables
+# add nodal variables
 verbCoop_net <- add_node_vars(
     netlet = verbCoop_net, # netify object
-    node_data = nodeData, # data.frame with actor attributes
+    node_data = nodedata, # data.frame with actor attributes
     actor = "i", # column identifying actors
     node_vars = nvars # variables to add
 )
 
-# Access nodal data (returns data.frame)
+# access nodal data (returns data.frame)
 node_data_stored <- attr(verbCoop_net, "nodal_data")
 class(node_data_stored) # "data.frame"
 head(node_data_stored)
 names(node_data_stored) # "actor" plus variable names
 
 \donttest{
-# Longitudinal example
+# longitudinal example
 verbCoop_longit_net <- netify(
     icews, # data.frame input
     actor1 = "i", actor2 = "j", time = "year",
@@ -134,13 +134,13 @@ verbCoop_longit_net <- netify(
     weight = "verbCoop"
 )
 
-# Prepare longitudinal nodal data - one row per actor-time combination
-nodeData_longit <- unique(icews[, c("i", "year", nvars)])
+# prepare longitudinal nodal data - one row per actor-time combination
+nodedata_longit <- unique(icews[, c("i", "year", nvars)])
 
-# Add nodal variables with time dimension
+# add nodal variables with time dimension
 verbCoop_longit_net <- add_node_vars(
     netlet = verbCoop_longit_net, # netify object
-    node_data = nodeData_longit, # data.frame with longitudinal data
+    node_data = nodedata_longit, # data.frame with longitudinal data
     actor = "i", # column identifying actors
     time = "year", # column identifying time
     node_vars = nvars # variables to add
@@ -148,8 +148,8 @@ verbCoop_longit_net <- add_node_vars(
 }
 
 \donttest{
-# Add variables from external source
-# Suppose you have additional actor data
+# add variables from external source
+# suppose you have additional actor data
 external_data <- data.frame(
     i = unique(icews_10$i),
     democracy_score = runif(length(unique(icews_10$i)), 0, 10),
@@ -166,7 +166,7 @@ verbCoop_net <- add_node_vars(
 
 }
 \author{
-Colin Henry, Shahryar Minhas
+colin henry, shahryar minhas
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

@@ -1,7 +1,22 @@
 #include <Rcpp.h>
 #include <algorithm>
-#include <random>
 using namespace Rcpp;
+
+inline int r_unif_index(int n) {
+    if (n <= 0) stop("sample size must be positive");
+
+    int idx = static_cast<int>(R::unif_rand() * n);
+    return idx >= n ? n - 1 : idx;
+}
+
+inline void r_shuffle_numeric(NumericVector& x) {
+    for (int i = x.size() - 1; i > 0; --i) {
+        int j = r_unif_index(i + 1);
+        double tmp = x[i];
+        x[i] = x[j];
+        x[j] = tmp;
+    }
+}
 
 //' Calculate similarity matrix between node attributes
 //'
@@ -169,19 +184,28 @@ double correlation_cpp(NumericVector x, NumericVector y) {
 //' @noRd
 // [[Rcpp::export]]
 List calculate_homophily_stats_cpp(NumericMatrix similarity_matrix, 
-                                  LogicalMatrix net_matrix,
-                                  bool significance_test,
-                                  int n_permutations,
-                                  double alpha) {
+                                   LogicalMatrix net_matrix,
+                                   bool significance_test,
+                                   int n_permutations,
+                                   double alpha,
+                                   bool directed) {
     
     int n = similarity_matrix.nrow();
+    if (similarity_matrix.ncol() != n ||
+        net_matrix.nrow() != n ||
+        net_matrix.ncol() != n) {
+        stop("similarity_matrix and net_matrix must be square matrices of equal size");
+    }
     
-    // extract upper triangle
+    // extract dyads: upper triangle for undirected networks, all ordered
+    // off-diagonal pairs for directed networks
     std::vector<double> similarities;
     std::vector<int> ties;
     
     for (int i = 0; i < n; i++) {
-        for (int j = i + 1; j < n; j++) {
+        int j_start = directed ? 0 : i + 1;
+        for (int j = j_start; j < n; j++) {
+            if (i == j) continue;
             if (!NumericMatrix::is_na(similarity_matrix(i, j)) && 
                 !LogicalMatrix::is_na(net_matrix(i, j))) {
                 similarities.push_back(similarity_matrix(i, j));
@@ -191,6 +215,9 @@ List calculate_homophily_stats_cpp(NumericMatrix similarity_matrix,
     }
     
     int n_pairs = similarities.size();
+    if (significance_test && n_permutations <= 0) {
+        stop("n_permutations must be positive");
+    }
     if (n_pairs == 0) {
         return List::create(
             Named("homophily_correlation") = NA_REAL,
@@ -235,18 +262,13 @@ List calculate_homophily_stats_cpp(NumericMatrix similarity_matrix,
     double ci_upper = NA_REAL;
     
     if (significance_test && !NumericVector::is_na(homophily_cor)) {
-        // create random number generator
-        std::random_device rd;
-        std::mt19937 rng(rd());
-        
-        // permutation test
+        // run the permutation test
         NumericVector null_cors(n_permutations);
         
         for (int i = 0; i < n_permutations; i++) {
             // shuffle similarities
             NumericVector perm_sim = clone(sim_vec);
-            // use std::shuffle instead of std::random_shuffle
-            std::shuffle(perm_sim.begin(), perm_sim.end(), rng);
+            r_shuffle_numeric(perm_sim);
             null_cors[i] = correlation_cpp(perm_sim, ties_vec);
         }
         
@@ -261,12 +283,10 @@ List calculate_homophily_stats_cpp(NumericMatrix similarity_matrix,
                 }
             }
         }
-        p_value = valid_count > 0 ? (double)extreme_count / valid_count : NA_REAL;
+        p_value = valid_count > 0 ? (double)(extreme_count + 1) / (valid_count + 1) : NA_REAL;
         
-        // bootstrap CIs
+        // bootstrap confidence intervals
         NumericVector boot_cors(n_permutations);
-        // create uniform distribution for sampling
-        std::uniform_int_distribution<int> uniform_dist(0, n_pairs - 1);
         
         for (int i = 0; i < n_permutations; i++) {
             // resample with replacement
@@ -274,7 +294,7 @@ List calculate_homophily_stats_cpp(NumericMatrix similarity_matrix,
             NumericVector boot_ties(n_pairs);
             
             for (int j = 0; j < n_pairs; j++) {
-                int idx = uniform_dist(rng);
+                int idx = r_unif_index(n_pairs);
                 boot_sim[j] = sim_vec[idx];
                 boot_ties[j] = ties_vec[idx];
             }

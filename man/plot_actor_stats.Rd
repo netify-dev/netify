@@ -14,67 +14,67 @@ plot_actor_stats(
 )
 }
 \arguments{
-\item{summary_df}{A data frame from \code{summary_actor()} containing actor-level
-statistics. Must include an "actor" column. May include "time" column for
+\item{summary_df}{a data frame from \code{summary_actor()} containing actor-level
+statistics. must include an "actor" column. may include "time" column for
 longitudinal data and "layer" column for multilayer networks.}
 
-\item{longitudinal}{Logical indicating whether to treat data as longitudinal.
-If NULL (default), automatically detected based on presence of "time" column.
-Set to FALSE if only one unique time point exists.}
+\item{longitudinal}{logical indicating whether to treat data as longitudinal.
+if NULL (default), automatically detected based on presence of "time" column.
+set to FALSE if only one unique time point exists.}
 
-\item{multilayer}{Logical indicating whether to treat data as multilayer.
-If NULL (default), automatically detected based on presence of "layer" column.
-Set to FALSE if only one unique layer exists.}
+\item{multilayer}{logical indicating whether to treat data as multilayer.
+if NULL (default), automatically detected based on presence of "layer" column.
+set to FALSE if only one unique layer exists.}
 
-\item{across_actor}{Logical. If TRUE (default), visualizes distribution of
-statistics across all actors. If FALSE, focuses on tracking specific actors.
-When TRUE with \code{specific_actors} provided, shows distribution for only those
+\item{across_actor}{logical. if TRUE (default), visualizes distribution of
+statistics across all actors. if FALSE, focuses on tracking specific actors.
+when TRUE with \code{specific_actors} provided, shows distribution for only those
 actors.}
 
-\item{specific_stats}{Character vector of statistic names to plot. If NULL
-(default), plots all available statistics. Must match column names in
+\item{specific_stats}{character vector of statistic names to plot. if NULL
+(default), plots all available statistics. must match column names in
 \code{summary_df}.}
 
-\item{specific_actors}{Character vector of actor names to highlight or focus on.
-If NULL (default) with \code{across_actor = FALSE}, includes all actors (with
-warning if > 25 actors). Must match values in the "actor" column.}
+\item{specific_actors}{character vector of actor names to highlight or focus on.
+if NULL (default) with \code{across_actor = FALSE}, includes all actors (with
+warning if > 25 actors). must match values in the "actor" column.}
 }
 \value{
-A ggplot object that can be further customized or saved. The plot type
+a ggplot object that can be further customized or saved. the plot type
 depends on the data structure and parameters:
 \itemize{
-\item \strong{Cross-sectional, across actors}: Density plots with rug plots
-\item \strong{Cross-sectional, specific actors}: Beeswarm plots
-\item \strong{Longitudinal, across actors}: Ridge density plots over time
-\item \strong{Longitudinal, specific actors}: Line plots over time
+\item \strong{cross-sectional, across actors}: density plots with rug plots
+\item \strong{cross-sectional, specific actors}: beeswarm plots
+\item \strong{longitudinal, across actors}: ridge density plots over time
+\item \strong{longitudinal, specific actors}: line plots over time
 }
 
-All plots are faceted by statistic and, when applicable, by layer.
+all plots are faceted by statistic and, when applicable, by layer.
 }
 \description{
 \code{plot_actor_stats} creates visualizations of actor-level statistics from
-\code{summary_actor()} output. The function automatically adapts to the data
+\code{summary_actor()} output. the function automatically adapts to the data
 structure (cross-sectional/longitudinal, single/multilayer) and offers two
 main visualization approaches: distribution across actors or tracking specific
 actors.
 }
 \details{
-\strong{Visualization logic:}
+\strong{visualization logic:}
 
-The function chooses appropriate visualizations based on data structure:
+the function chooses appropriate visualizations based on data structure:
 \itemize{
-\item \strong{Distribution plots} (\code{across_actor = TRUE}): Show how statistics
+\item \strong{distribution plots} (\code{across_actor = TRUE}): show how statistics
 are distributed across the actor population
-\item \strong{Actor-specific plots} (\code{across_actor = FALSE}): Track individual
+\item \strong{actor-specific plots} (\code{across_actor = FALSE}): track individual
 actors, with specified actors highlighted in color while others appear in gray
 }
 
-All plots use \code{theme_stat_netify()} for consistent styling across netify
+all plots use \code{theme_stat_netify()} for consistent styling across netify
 visualizations.
 
-For multilayer longitudinal data with \code{across_actor = FALSE}, consider using
+for multilayer longitudinal data with \code{across_actor = FALSE}, consider using
 \code{specific_stats} to avoid overcrowded facets.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

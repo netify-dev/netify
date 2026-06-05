@@ -1,31 +1,31 @@
 #' Plot method for `netify_comparison` objects
 #'
-#' Renders a pairwise similarity heatmap from the matrix output of
-#' `compare_networks()`. Picks an appropriate matrix based on the
+#' renders a pairwise similarity heatmap from the matrix output of
+#' `compare_networks()`. picks an appropriate matrix based on the
 #' `method` the comparison was run with (correlation / qap / jaccard /
-#' hamming / spectral). For QAP comparisons, the lower triangle shows
-#' QAP correlations and (optionally) the upper triangle shows
-#' p-values, so a single plot communicates both effect and inference.
+#' hamming / spectral). for qap comparisons, the plot renders the qap
+#' correlation matrix. p-values remain available in
+#' \code{x$significance_tests$qap_pvalues}.
 #'
-#' @param x A `netify_comparison` object returned by
+#' @param x a `netify_comparison` object returned by
 #' `compare_networks()`.
-#' @param ... Additional arguments:
+#' @param ... additional arguments:
 #' \describe{
-#' \item{`metric`}{Which matrix to render. Default: auto-pick the
-#' primary metric for the comparison's method. Pass
+#' \item{`metric`}{which matrix to render. default: auto-pick the
+#' primary metric for the comparison's method. pass
 #' \code{"correlation"} / \code{"jaccard"} / \code{"hamming"} /
 #' \code{"qap"} / \code{"spectral"} to override.}
-#' \item{`show_values`}{Logical. Overlay numeric values on each
-#' tile. Default `TRUE` when n <= 6, else `FALSE`.}
-#' \item{`palette`}{Two-color gradient endpoints. Default
+#' \item{`show_values`}{logical. overlay numeric values on each
+#' tile. default `TRUE` when n <= 6, else `FALSE`.}
+#' \item{`palette`}{two-color gradient endpoints. default
 #' `c("#f0f0f0", "#1f78b4")` for correlation-like metrics.}
 #' }
 #'
-#' @return A `ggplot` object.
+#' @return a `ggplot` object.
 #'
 #' @method plot netify_comparison
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 plot.netify_comparison <- function(x, ...) {

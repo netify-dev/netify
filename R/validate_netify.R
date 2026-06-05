@@ -4,15 +4,15 @@
 #' goes further: it verifies that the netify's internal pieces still
 #' agree with each other after any user-side surgery (e.g., manually
 #' edited `attr(., "nodal_data")`, `subset()` followed by an attribute
-#' overwrite, etc.). Use this when you've hand-modified a netlet and
+#' overwrite, etc.). use this when you've hand-modified a netlet and
 #' want to confirm it's still well-formed before passing to
 #' `to_statnet()` / `to_amen()` / `plot()`.
 #'
-#' @param netlet A netify object.
-#' @param verbose Logical. If `TRUE` (default), print a per-check
+#' @param netlet a netify object.
+#' @param verbose logical. if `TRUE` (default), print a per-check
 #' status banner; otherwise return silently.
-#' @return Invisibly returns a list with one logical per check (`TRUE`
-#' = passed). The function `cli::cli_abort()`s on any failure unless
+#' @return invisibly returns a list with one logical per check (`TRUE`
+#' = passed). the function `cli::cli_abort()`s on any failure unless
 #' `verbose = TRUE`, in which case failures are reported per-check
 #' and the function returns invisibly with the full failure list.
 #'
@@ -24,7 +24,7 @@
 #' validate_netify(net)
 #' }
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export validate_netify
 validate_netify <- function(netlet, verbose = TRUE) {
@@ -41,7 +41,7 @@ validate_netify <- function(netlet, verbose = TRUE) {
 		length(obj_attrs$mode) == 1L &&
 		isTRUE(obj_attrs$mode %in% c("unipartite", "bipartite"))
 
-	# symmetric attribute is logical and non-NA
+	# symmetric attribute is logical and non-na
 	sym_attr <- obj_attrs$symmetric
 	checks$symmetric_type <- is.logical(sym_attr) &&
 		length(sym_attr) >= 1L &&
@@ -55,7 +55,7 @@ validate_netify <- function(netlet, verbose = TRUE) {
 	nlayers <- length(obj_attrs$layers)
 	if (!is.null(raw)) {
 		ml_dim <- if (is.array(raw)) {
-			# 3D cross-sec is [r,c,layer]; 4D longit is [r,c,layer,t]
+			# 3d cross-sec is [r,c,layer]; 4d longit is [r,c,layer,t]
 			d <- dim(raw)
 			if (length(d) == 2) 1L
 			else if (length(d) == 3 && obj_attrs$netify_type == "cross_sec") d[3]

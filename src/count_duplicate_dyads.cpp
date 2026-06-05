@@ -1,7 +1,33 @@
 #include <Rcpp.h>
 #include <unordered_map>
 #include <string>
+#include <cmath>
+#include <limits>
+#include <sstream>
+#include <iomanip>
 using namespace Rcpp;
+
+inline bool invalid_time_value(double value) {
+    return NumericVector::is_na(value) ||
+        !std::isfinite(value);
+}
+
+inline bool invalid_index_time_value(double value) {
+    return invalid_time_value(value) ||
+        value < std::numeric_limits<int>::min() ||
+        value > std::numeric_limits<int>::max() ||
+        std::floor(value) != value;
+}
+
+inline std::string encode_field(const std::string& value) {
+    return std::to_string(value.size()) + ":" + value;
+}
+
+inline std::string encode_time(double value) {
+    std::ostringstream out;
+    out << std::setprecision(17) << value;
+    return out.str();
+}
 
 //' Determine number of duplicate dyad-time obs
 //'
@@ -21,6 +47,10 @@ int count_duplicate_dyads(
   ){
 
     int n = actor1.size();
+    if (actor2.size() != n || time.size() != n) {
+        stop("actor and time vectors must have equal length");
+    }
+    if (n == 0) return 0;
     
     // Use unordered_map for O(1) average lookup
     // For 100-200 actors, we might have up to 40k possible dyads
@@ -35,13 +65,18 @@ int count_duplicate_dyads(
     dyadKey.reserve(50);  // Most actor names + time won't exceed this
     
     for (int i = 0; i < n; ++i) {
-        // Clear and build key efficiently
+        if (invalid_time_value(time[i])) {
+            stop("time values must be non-missing and finite");
+        }
+
+        // clear and build key efficiently. length-prefix fields so actor
+        // names containing separators cannot collide.
         dyadKey.clear();
-        dyadKey.append(actor1[i]);
-        dyadKey.push_back('_');
-        dyadKey.append(actor2[i]);
-        dyadKey.push_back('_');
-        dyadKey.append(std::to_string(static_cast<int>(time[i])));
+        dyadKey.append(encode_field(std::string(actor1[i])));
+        dyadKey.push_back('|');
+        dyadKey.append(encode_field(std::string(actor2[i])));
+        dyadKey.push_back('|');
+        dyadKey.append(encode_field(encode_time(time[i])));
         
         // Increment and check in one operation
         if (++dyadCounts[dyadKey] == 2) {
@@ -71,6 +106,10 @@ int count_duplicate_dyads_indexed(
   ){
     
     int n = actor1.size();
+    if (actor2.size() != n || time.size() != n) {
+        stop("actor and time vectors must have equal length");
+    }
+    if (n == 0) return 0;
     
     // For small actor sets, create actor-to-index mapping
     std::unordered_map<std::string, int> actorIndex;
@@ -78,6 +117,13 @@ int count_duplicate_dyads_indexed(
     
     // First pass: build actor index
     for (int i = 0; i < n; ++i) {
+        if (invalid_time_value(time[i])) {
+            stop("time values must be non-missing and finite");
+        }
+        if (invalid_index_time_value(time[i])) {
+            return count_duplicate_dyads(actor1, actor2, time);
+        }
+
         std::string a1(actor1[i]);
         std::string a2(actor2[i]);
         
@@ -101,14 +147,23 @@ int count_duplicate_dyads_indexed(
     dyadCounts.reserve(n / 2);
 
     // Find time range for safe key encoding
-    int t_min = static_cast<int>(time[0]);
-    int t_max = t_min;
-    for (int i = 1; i < n; ++i) {
+    bool have_time = false;
+    int t_min = 0;
+    int t_max = 0;
+    for (int i = 0; i < n; ++i) {
+        if (invalid_index_time_value(time[i])) continue;
+
         int t = static_cast<int>(time[i]);
+        if (!have_time) {
+            t_min = t;
+            t_max = t;
+            have_time = true;
+        }
         if (t < t_min) t_min = t;
         if (t > t_max) t_max = t;
     }
-    long long t_range = static_cast<long long>(t_max - t_min) + 1;
+    if (!have_time) return 0;
+    long long t_range = static_cast<long long>(t_max) - static_cast<long long>(t_min) + 1;
     long long n_actors = static_cast<long long>(nextIndex);
 
     // If key space would overflow, fall back to string method
@@ -120,6 +175,8 @@ int count_duplicate_dyads_indexed(
     int repeats = 0;
 
     for (int i = 0; i < n; ++i) {
+        if (invalid_index_time_value(time[i])) continue;
+
         int idx1 = actorIndex[std::string(actor1[i])];
         int idx2 = actorIndex[std::string(actor2[i])];
         long long t_offset = static_cast<long long>(static_cast<int>(time[i]) - t_min);

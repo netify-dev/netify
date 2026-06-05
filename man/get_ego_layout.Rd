@@ -16,126 +16,126 @@ get_ego_layout(
 )
 }
 \arguments{
-\item{netlet}{A netify object (class "netify") that is an ego network, created
-using \code{\link{ego_netify}}. The object must have ego_netify = TRUE attribute.}
+\item{netlet}{a netify object (class "netify") that is an ego network, created
+using \code{\link{ego_netify}}. the object must have ego_netify = TRUE attribute.}
 
-\item{layout}{Character string specifying the ego-centric layout algorithm. Options:
+\item{layout}{character string specifying the ego-centric layout algorithm. options:
 \itemize{
-\item \code{"radial"}: Places ego at center with alters arranged in a circle
-around it. Distance from center can encode relationship strength.
-\item \code{"concentric"}: Places ego at center with alters in concentric
+\item \code{"radial"}: places ego at center with alters arranged in a circle
+around it. distance from center can encode relationship strength.
+\item \code{"concentric"}: places ego at center with alters in concentric
 circles based on a grouping variable or relationship strength.
-\item \code{"star"}: Simple star layout with ego at center and alters
+\item \code{"star"}: simple star layout with ego at center and alters
 equally spaced around it (default).
 }}
 
-\item{group_by}{Character string specifying a nodal attribute to use for grouping
-alters in the layout. For "radial" layout, groups are arranged in sectors.
-For "concentric" layout, groups determine which ring alters appear in.
-If NULL (default), no grouping is applied.}
+\item{group_by}{character string specifying a nodal attribute to use for grouping
+alters in the layout. for "radial" layout, groups are arranged in sectors.
+for "concentric" layout, groups determine which ring alters appear in.
+if NULL (default), no grouping is applied.}
 
-\item{order_by}{Character string specifying a nodal attribute to use for ordering
-alters within their groups or around the ego. Common options include network
-statistics like "degree_total" or custom attributes. If NULL (default),
+\item{order_by}{character string specifying a nodal attribute to use for ordering
+alters within their groups or around the ego. common options include network
+statistics like "degree_total" or custom attributes. if NULL (default),
 alters are arranged alphabetically.}
 
-\item{weight_to_distance}{Logical. If TRUE and the network is weighted, use edge
-weights to determine distance from ego (higher weights = closer). For "radial"
-layout only. Default is FALSE.}
+\item{weight_to_distance}{logical. if TRUE and the network is weighted, use edge
+weights to determine distance from ego (higher weights = closer). for "radial"
+layout only. default is FALSE.}
 
-\item{ring_gap}{Numeric value between 0 and 1 specifying the gap between
-concentric rings as a proportion of the total radius. Only used for
-"concentric" layout. Default is 0.3.}
+\item{ring_gap}{numeric value between 0 and 1 specifying the gap between
+concentric rings as a proportion of the total radius. only used for
+"concentric" layout. default is 0.3.}
 
-\item{ego_size}{Numeric value specifying the relative size of the central area
-reserved for the ego. Larger values create more space between ego and alters.
-Default is 0.1.}
+\item{ego_size}{numeric value specifying the relative size of the central area
+reserved for the ego. larger values create more space between ego and alters.
+default is 0.1.}
 
-\item{seed}{Integer for random number generation to ensure reproducible layouts
-when there are ties in ordering. Default is 6886.}
+\item{seed}{integer for random number generation to ensure reproducible layouts
+when there are ties in ordering. default is 6886.}
 }
 \value{
-A list of data frames (one per time period) where each data frame contains:
+a list of data frames (one per time period) where each data frame contains:
 \itemize{
-\item \strong{index}: Integer node index
-\item \strong{actor}: Character string with actor name
-\item \strong{x}: Numeric x-coordinate for node position
-\item \strong{y}: Numeric y-coordinate for node position
+\item \strong{index}: integer node index
+\item \strong{actor}: character string with actor name
+\item \strong{x}: numeric x-coordinate for node position
+\item \strong{y}: numeric y-coordinate for node position
 }
 
-For cross-sectional networks, returns a list with one element. For longitudinal
+for cross-sectional networks, returns a list with one element. for longitudinal
 networks, returns a named list with time periods as names.
 }
 \description{
 \code{get_ego_layout} computes node positions for ego network visualization using
-ego-centric layout algorithms. These layouts place the ego at the center and
+ego-centric layout algorithms. these layouts place the ego at the center and
 arrange alters around it (radially, by concentric ring, etc.) so that the
 ego's relationships are organized around the focal node.
 }
 \details{
-This function provides specialized layouts for ego networks that emphasize the
+this function provides specialized layouts for ego networks that emphasize the
 ego-alter structure:
 
-\strong{Layout algorithms:}
+\strong{layout algorithms:}
 \itemize{
-\item \strong{Radial}: Places the ego at the origin and arranges alters in
-a circle around it. If grouping is specified, alters are arranged in sectors
-with related nodes near each other. If weight_to_distance is TRUE, alters
+\item \strong{radial}: places the ego at the origin and arranges alters in
+a circle around it. if grouping is specified, alters are arranged in sectors
+with related nodes near each other. if weight_to_distance is TRUE, alters
 with stronger ties to ego are placed closer to the center.
-\item \strong{Concentric}: Places the ego at the origin and arranges alters
-in concentric circles. The ring assignment can be based on a grouping
+\item \strong{concentric}: places the ego at the origin and arranges alters
+in concentric circles. the ring assignment can be based on a grouping
 variable (categorical) or a continuous variable (discretized into rings).
-\item \strong{Star}: A simple star layout that places ego at center and
-distributes alters evenly around a single circle. This is equivalent to
+\item \strong{star}: a simple star layout that places ego at center and
+distributes alters evenly around a single circle. this is equivalent to
 the radial layout without grouping or weighting.
 }
 
-\strong{Visual encoding:}
+\strong{visual encoding:}
 
-The layouts allow encoding of network properties through spatial arrangement:
+the layouts allow encoding of network properties through spatial arrangement:
 \itemize{
-\item \strong{Distance from ego}: Can represent tie strength, frequency of
+\item \strong{distance from ego}: can represent tie strength, frequency of
 interaction, or other dyadic measures
-\item \strong{Angular position}: Can group similar alters together (e.g.,
+\item \strong{angular position}: can group similar alters together (e.g.,
 family, friends, colleagues)
-\item \strong{Ring assignment}: Can represent categories, levels of importance,
+\item \strong{ring assignment}: can represent categories, levels of importance,
 or discretized continuous variables
 }
 
-\strong{Longitudinal networks:}
+\strong{longitudinal networks:}
 
-For longitudinal ego networks, the function maintains consistent angular positions
+for longitudinal ego networks, the function maintains consistent angular positions
 for alters across time periods when possible, making it easier to track changes
 in the ego's network over time.
 }
 \note{
-This function is designed specifically for ego networks created with
-\code{\link{ego_netify}}. For general network layouts, use
+this function is designed specifically for ego networks created with
+\code{\link{ego_netify}}. for general network layouts, use
 \code{\link{get_node_layout}}.
 
-The function will issue a warning if used on non-ego networks but will
+the function will issue a warning if used on non-ego networks but will
 attempt to proceed by treating the first node as the ego.
 }
 \examples{
 \dontrun{
-# Create an ego network
-ego_net <- ego_netify(my_network, ego = "Alice")
+# create an ego network
+ego_net <- ego_netify(my_network, ego = "alice")
 
-# Get radial layout with alters grouped by attribute
-layout_radial <- get_ego_layout(ego_net, 
+# get radial layout with alters grouped by attribute
+layout_radial <- get_ego_layout(ego_net,
                                layout = "radial",
                                group_by = "department")
 
-# Get concentric layout with rings based on degree
+# get concentric layout with rings based on degree
 layout_circles <- get_ego_layout(ego_net,
-                                layout = "concentric", 
+                                layout = "concentric",
                                 group_by = "degree_total")
 
-# Use with plot
+# use with plot
 plot(ego_net, point_layout = layout_radial)
 }
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

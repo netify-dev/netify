@@ -19,69 +19,73 @@ dyad_correlation(
 )
 }
 \arguments{
-\item{netlet}{A netify object containing network data.}
+\item{netlet}{a netify object containing network data.}
 
-\item{dyad_vars}{Character vector of dyadic attribute names to analyze.
-If NULL, analyzes all available dyadic variables.}
+\item{dyad_vars}{character vector of dyadic attribute names to analyze.
+if NULL, analyzes all available dyadic variables.}
 
-\item{edge_vars}{Character vector of edge variables to correlate with.
-If NULL, uses the main network matrix.}
+\item{edge_vars}{character vector of edge variables to correlate with.
+if NULL, uses the main network matrix.}
 
-\item{method}{Character string specifying correlation method:
+\item{method}{character string specifying correlation method:
 \describe{
-\item{"pearson"}{Pearson product-moment correlation (default)}
-\item{"spearman"}{Spearman rank correlation}
-\item{"kendall"}{Kendall's tau correlation}
+\item{"pearson"}{pearson product-moment correlation (default)}
+\item{"spearman"}{spearman rank correlation}
+\item{"kendall"}{kendall's tau correlation}
 }}
 
-\item{binary_network}{Logical. Whether to convert ties to binary before
-correlation. Default FALSE.}
+\item{binary_network}{logical. whether to convert ties to binary before
+correlation. default FALSE.}
 
-\item{remove_diagonal}{Logical. Whether to exclude diagonal elements. Default TRUE.}
+\item{remove_diagonal}{logical. whether to exclude diagonal elements. default TRUE.}
 
-\item{significance_test}{Logical. Whether to calculate P-values and confidence
-intervals. Default TRUE.}
+\item{significance_test}{logical. whether to calculate ordinary correlation
+p-values and confidence intervals on the dyad vectors. default TRUE.}
 
-\item{alpha}{Significance level for confidence intervals. Default 0.05.}
+\item{alpha}{significance level for confidence intervals. default 0.05.}
 
-\item{partial_correlations}{Logical. Whether to calculate partial correlations
-controlling for other dyadic variables. Default FALSE.}
+\item{partial_correlations}{logical. whether to calculate partial correlations
+controlling for other dyadic variables. default FALSE.}
 
-\item{other_stats}{Named list of custom functions for additional statistics.}
+\item{other_stats}{named list of custom functions for additional statistics.}
 
-\item{...}{Additional arguments passed to custom functions.}
+\item{...}{additional arguments passed to custom functions.}
 }
 \value{
-Data frame with one row per dyadic variable per network/time period:
+data frame with one row per dyadic variable per network/time period:
 \describe{
-\item{\code{net}}{Network/time identifier}
-\item{\code{layer}}{Layer name}
-\item{\code{dyad_var}}{Name of dyadic variable}
-\item{\code{edge_var}}{Name of edge variable}
-\item{\code{correlation}}{Correlation coefficient}
-\item{\code{p_value}}{P-value for correlation significance}
-\item{\code{ci_lower}, \code{ci_upper}}{Confidence interval bounds}
-\item{\code{n_pairs}}{Number of dyad pairs included}
-\item{\code{method}}{Correlation method used}
-\item{\code{mean_dyad_var}}{Mean value of dyadic variable}
-\item{\code{sd_dyad_var}}{Standard deviation of dyadic variable}
-\item{\code{mean_edge_var}}{Mean value of edge variable}
-\item{\code{sd_edge_var}}{Standard deviation of edge variable}
+\item{\code{net}}{network/time identifier}
+\item{\code{layer}}{layer name}
+\item{\code{dyad_var}}{name of dyadic variable}
+\item{\code{edge_var}}{name of edge variable}
+\item{\code{correlation}}{correlation coefficient}
+\item{\code{p_value}}{p-value for correlation significance}
+\item{\code{ci_lower}, \code{ci_upper}}{confidence interval bounds}
+\item{\code{n_pairs}}{number of dyad pairs included}
+\item{\code{method}}{correlation method used}
+\item{\code{mean_dyad_var}}{mean value of dyadic variable}
+\item{\code{sd_dyad_var}}{standard deviation of dyadic variable}
+\item{\code{mean_edge_var}}{mean value of edge variable}
+\item{\code{sd_edge_var}}{standard deviation of edge variable}
 }
 }
 \description{
-Examines relationships between dyadic (pairwise) attributes and network
-connections. Calculates correlations between dyadic variables and edge
+examines relationships between dyadic (pairwise) attributes and network
+connections. calculates correlations between dyadic variables and edge
 weights/presence, with support for multiple correlation methods and
 significance testing.
 }
 \details{
-Extracts dyadic variables from dyad_data attribute and correlates them with
-network ties. For longitudinal networks, correlations are calculated separately
-for each time period. Dyadic variables should be stored as matrices with rows
-and columns corresponding to network actors. Missing values are handled using
+extracts dyadic variables from dyad_data attribute and correlates them with
+network ties. for longitudinal networks, correlations are calculated separately
+for each time period. dyadic variables should be stored as matrices with rows
+and columns corresponding to network actors. missing values are handled using
 pairwise complete observations.
+
+the reported p-values and confidence intervals are the standard tests from
+\code{stats::cor.test()} applied to the dyad vectors. they are useful as
+descriptive screens, but they do not model network dependence among dyads.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

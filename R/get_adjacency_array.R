@@ -2,73 +2,73 @@
 #'
 #' `get_adjacency_array` converts longitudinal dyadic data into a three-dimensional
 #' netify array where the first two dimensions represent actors and the third
-#' dimension represents time periods. This function creates an array of class
+#' dimension represents time periods. this function creates an array of class
 #' "netify" and should only be used when actor composition remains constant
 #' across all time periods.
 #'
-#' @param dyad_data A data.frame containing longitudinal dyadic observations. Will
+#' @param dyad_data a data.frame containing longitudinal dyadic observations. will
 #'   be coerced to data.frame if a tibble or data.table is provided.
-#' @param actor1 Character string specifying the column name for the first actor
+#' @param actor1 character string specifying the column name for the first actor
 #'   in each dyad.
-#' @param actor2 Character string specifying the column name for the second actor
+#' @param actor2 character string specifying the column name for the second actor
 #'   in each dyad.
-#' @param time Character string specifying the column name for time periods.
-#' @param symmetric Logical. If TRUE (default), treats the network as undirected
-#'   (i.e., edges have no direction). If FALSE, treats the network as directed.
-#' @param mode Character string specifying network structure. Options are:
+#' @param time character string specifying the column name for time periods.
+#' @param symmetric logical. if TRUE (default), treats the network as undirected
+#'   (i.e., edges have no direction). if FALSE, treats the network as directed.
+#' @param mode character string specifying network structure. options are:
 #'   \itemize{
-#'     \item \code{"unipartite"}: One set of actors (default)
-#'     \item \code{"bipartite"}: Two distinct sets of actors
+#'     \item \code{"unipartite"}: one set of actors (default)
+#'     \item \code{"bipartite"}: two distinct sets of actors
 #'   }
-#' @param weight Character string specifying the column name containing edge weights.
-#'   If NULL (default), edges are treated as unweighted (binary).
-#' @param sum_dyads Logical. If TRUE, sums weight values when multiple edges exist
-#'   between the same actor pair in the same time period. If FALSE (default), uses
+#' @param weight character string specifying the column name containing edge weights.
+#'   if NULL (default), edges are treated as unweighted (binary).
+#' @param sum_dyads logical. if TRUE, sums weight values when multiple edges exist
+#'   between the same actor pair in the same time period. if FALSE (default), uses
 #'   the last observed value.
-#' @param diag_to_NA Logical. If TRUE (default), sets diagonal values (self-loops)
-#'   to NA. Automatically set to FALSE for bipartite networks.
-#' @param missing_to_zero Logical. If TRUE (default), treats missing edges as zeros.
-#'   If FALSE, missing edges remain as NA.
-#' @param nodelist Character vector of actor names to include in the network.
-#'   If provided, ensures all listed actors appear in the network even if they
-#'   have no edges (isolates). Useful when working with edgelists that only
+#' @param diag_to_NA logical. if TRUE (default), sets diagonal values (self-loops)
+#'   to na. automatically set to FALSE for bipartite networks.
+#' @param missing_to_zero logical. if TRUE (default), treats missing edges as zeros.
+#'   if FALSE, missing edges remain as na.
+#' @param nodelist character vector of actor names to include in the network.
+#'   if provided, ensures all listed actors appear in the network even if they
+#'   have no edges (isolates). useful when working with edgelists that only
 #'   contain active dyads.
 #'
-#' @return A three-dimensional array of class "netify" (a netify array) with:
+#' @return a three-dimensional array of class "netify" (a netify array) with:
 #'   \itemize{
-#'     \item \strong{Dimensions}: \code{[n_actors × n_actors × n_time]} for unipartite
-#'       networks or \code{[n_actors1 × n_actors2 × n_time]} for bipartite networks
-#'     \item \strong{Class}: "netify" - this is a full netify object compatible
+#'     \item \strong{dimensions}: \code{[n_actors x n_actors x n_time]} for unipartite
+#'       networks or \code{[n_actors1 x n_actors2 x n_time]} for bipartite networks
+#'     \item \strong{class}: "netify" - this is a full netify object compatible
 #'       with all netify functions
-#'     \item \strong{Attributes}: Extensive metadata including network properties,
+#'     \item \strong{attributes}: extensive metadata including network properties,
 #'       actor information, and processing parameters
 #'   }
 #'
-#'   The returned object is a netify array that can be used with all netify
+#'   the returned object is a netify array that can be used with all netify
 #'   functions such as `summary()`, `plot()`, `to_igraph()`, etc.
 #'
 #' @details
-#' \strong{Note on usage:}
+#' \strong{note on usage:}
 #'
-#' While this function is exported and available for direct use, the primary and
+#' while this function is exported and available for direct use, the primary and
 #' recommended way to create netify arrays from longitudinal dyadic data is through
-#' the `netify()` function. The `netify()` function:
+#' the `netify()` function. the `netify()` function:
 #' \itemize{
-#'   \item Automatically determines whether to create an array or list structure
-#'   \item Handles time-varying actor composition
-#'   \item Provides more comprehensive data validation
-#'   \item Offers a unified interface for all types of network data
+#'   \item automatically determines whether to create an array or list structure
+#'   \item handles time-varying actor composition
+#'   \item validates inputs before constructing arrays
+#'   \item offers a unified interface for all types of network data
 #' }
 #'
-#' Use `get_adjacency_array()` directly only when you specifically need low-level
+#' use `get_adjacency_array()` directly only when you specifically need low-level
 #' control over array creation and are certain your actors remain constant across
 #' time.
 #'
 #' @examples
-#' # Load example data
+#' # load example data
 #' data(icews)
 #'
-#' # Create a netify array (longitudinal directed network)
+#' # create a netify array (longitudinal directed network)
 #' # with material conflict as edge weights
 #' icews_array <- get_adjacency_array(
 #'     dyad_data = icews,
@@ -79,16 +79,16 @@
 #'     weight = "matlConf"
 #' )
 #'
-#' # Verify it's a netify object
+#' # verify it's a netify object
 #' class(icews_array) # "netify"
 #'
-#' # Check dimensions
+#' # check dimensions
 #' dim(icews_array) # [n_actors, n_actors, n_years]
 #'
-#' # Access specific time period
+#' # access specific time period
 #' icews_2010 <- icews_array[, , "2010"]
 #'
-#' @author Cassy Dorff, Ha Eun Choi, Shahryar Minhas
+#' @author cassy dorff, ha eun choi, shahryar minhas
 #'
 #' @export get_adjacency_array
 
@@ -102,8 +102,7 @@ get_adjacency_array <- function(
 	# create weight string for storage as attribute in netify object
 	weight_label <- weight_string_label(weight, sum_dyads)
 
-	# bipartite forces diag_to_NA=FALSE and asymmetric; preserve user choice
-	user_symmetric <- symmetric
+	# bipartite forces diag_to_NA=false and asymmetric
 	if (mode == "bipartite") {
 		diag_to_NA <- FALSE
 		symmetric <- FALSE
@@ -139,19 +138,15 @@ get_adjacency_array <- function(
 	
 	# incorporate nodelist if provided
 	if (!is.null(nodelist)) {
-		# convert to character to ensure consistency
-		nodelist <- as.character(nodelist)
-		
 		# add any missing actors from nodelist
 		if (mode == "unipartite") {
+			nodelist <- as.character(nodelist)
 			actors <- unique_vector(actors, nodelist)
 			actors_rows <- actors_cols <- actors
 		} else {
-			# for bipartite, assume nodelist contains all actors
-			# user should specify which are row/col actors
-			cli::cli_alert_info("For bipartite networks, nodelist should contain all actors. Assigning to both row and column actors.")
-			actors_rows <- unique_vector(actors_rows, nodelist)
-			actors_cols <- unique_vector(actors_cols, nodelist)
+			bp_nodes <- normalize_bipartite_nodelist(nodelist, actors_rows, actors_cols)
+			actors_rows <- bp_nodes$rows
+			actors_cols <- bp_nodes$cols
 			actors <- unique_vector(actors_rows, actors_cols)
 		}
 	} else if (mode == "unipartite") {
@@ -178,7 +173,7 @@ get_adjacency_array <- function(
 		dyad_data <- aggregate_dyad(dyad_data, actor1, actor2, time, weight, symmetric, missing_to_zero)
 	}
 
-	# drop zero-weight rows but keep NaN/NA so they propagate as missing
+	# drop zero-weight rows but keep nan/na so they propagate as missing
 	if (missing_to_zero) {
 		w_vec <- dyad_data[, weight]
 		nan_rows <- is.nan(w_vec)
@@ -233,8 +228,9 @@ get_adjacency_array <- function(
 			mat_col_indices <- integer(0)
 		}
 
-		# create logical value that is TRUE if weight is just 0/1
-		is_binary <- length(value) == 0 || all(value %in% c(0, 1))
+		# create logical value that is true if observed weights are just 0/1
+		value_observed <- value[!is.na(value)]
+		is_binary <- length(value_observed) == 0 || all(value_observed %in% c(0, 1))
 		bin_check[t_idx] <- is_binary
 
 		# build adjacency matrix
@@ -243,19 +239,19 @@ get_adjacency_array <- function(
 			n_cols = length(actors_cols),
 			actors_rows = actors_rows,
 			actors_cols = actors_cols,
-			matRowIndices = mat_row_indices,
-			matColIndices = mat_col_indices,
-			value = value,
-			symmetric = user_symmetric,
-			missing_to_zero = missing_to_zero,
-			diag_to_NA = diag_to_NA && mode == "unipartite"
-		)
+				matRowIndices = mat_row_indices,
+				matColIndices = mat_col_indices,
+				value = value,
+				symmetric = symmetric,
+				missing_to_zero = missing_to_zero,
+				diag_to_NA = diag_to_NA && mode == "unipartite"
+			)
 
 		# insert into array
 		adj_out[, , as.character(time_pd)] <- adj_mat
 	}
 
-	# record weight as NULL when no weight supplied and sum_dyads is FALSE
+	# record weight as null when no weight supplied and sum_dyads is false
 	if (!sum_dyads && is.null(w_orig)) {
 		weight <- NULL
 	}
@@ -274,10 +270,10 @@ get_adjacency_array <- function(
 		actor_time_uniform = TRUE,
 		actor_pds = actor_pds,
 		weight = weight,
-		detail_weight = weight_label,
-		is_binary = all(bin_check),
-		symmetric = user_symmetric,
-		mode = mode,
+			detail_weight = weight_label,
+			is_binary = all(bin_check),
+			symmetric = symmetric,
+			mode = mode,
 		layers = layer_label,
 		diag_to_NA = diag_to_NA,
 		missing_to_zero = missing_to_zero,

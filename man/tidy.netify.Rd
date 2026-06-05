@@ -7,29 +7,29 @@
 tidy.netify(x, remove_zeros = TRUE, ...)
 }
 \arguments{
-\item{x}{A netify object.}
+\item{x}{a netify object.}
 
-\item{remove_zeros}{Logical. Drop zero-weight edges? Default \code{TRUE}
+\item{remove_zeros}{logical. drop zero-weight edges? default \code{TRUE}
 (matches the typical broom expectation that the returned frame is
 actually-observed observations).}
 
-\item{...}{Additional arguments passed to \code{\link[=unnetify]{unnetify()}}.}
+\item{...}{additional arguments passed to \code{\link[=unnetify]{unnetify()}}.}
 }
 \value{
-A tibble (or data.frame if \code{tibble} isn't installed) with one
-row per (non-zero) edge. Columns include \code{from}, \code{to}, optional \code{time}
+a tibble (or data.frame if \code{tibble} isn't installed) with one
+row per (non-zero) edge. columns include \code{from}, \code{to}, optional \code{time}
 (longitudinal), the edge weight column, dyadic covariates, and nodal
-covariates merged in with \verb{_from} / \verb{_to} suffixes. Zero-edge inputs
+covariates merged in with \verb{_from} / \verb{_to} suffixes. zero-edge inputs
 return a 0-row tibble with the schema preserved.
 }
 \description{
-\code{tidy.netify} is an S3 method for the \code{tidy()} generic from the
-\pkg{broom} package. It returns one row per edge with all attached
-nodal and dyadic attributes — equivalent to
+\code{tidy.netify} is an s3 method for the \code{tidy()} generic from the
+broom package. it returns one row per edge with all attached
+nodal and dyadic attributes -- equivalent to
 \code{unnetify(x, remove_zeros = TRUE)} but exposed under the broom
 convention so the netify object plays nicely with broom-style
 workflows. (broom is not a hard dependency; this method is registered
-as an S3 method on \code{tidy} and only triggers when the generic is
+as an s3 method on \code{tidy} and only triggers when the generic is
 available, e.g., when the user has \code{library(broom)} loaded.)
 }
 \examples{
@@ -46,5 +46,5 @@ head(td)
 for one-row-per-network summary statistics.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

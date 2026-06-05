@@ -2,21 +2,21 @@
 % Please edit documentation in R/netify_constructors.R
 \name{is_netify}
 \alias{is_netify}
-\title{Is this object a netify object?}
+\title{is this object a netify object?}
 \usage{
 is_netify(x)
 }
 \arguments{
-\item{x}{An R object}
+\item{x}{an r object}
 }
 \value{
-Logical constant, \code{TRUE} if argument \code{x} is a netify
+logical constant, \code{TRUE} if argument \code{x} is a netify
 object
 }
 \description{
-Is this object a netify object?
+is this object a netify object?
 }
 \author{
-Colin Henry
+colin henry
 }
 \keyword{netify}

@@ -2,19 +2,19 @@
 % Please edit documentation in R/plot_styles.R
 \name{style_random}
 \alias{style_random}
-\title{Apply random network style}
+\title{apply random network style}
 \usage{
 style_random(seed = NULL)
 }
 \arguments{
-\item{seed}{Optional seed for reproducibility}
+\item{seed}{optional seed for reproducibility}
 }
 \value{
-A style list that can be passed to plot()
+a style list that can be passed to plot()
 }
 \description{
-Randomly selects and returns one of the available network styles
+randomly selects and returns one of the available network styles
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

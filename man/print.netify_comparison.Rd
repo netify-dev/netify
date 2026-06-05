@@ -7,22 +7,22 @@
 \method{print}{netify_comparison}(x, ..., n = 20)
 }
 \arguments{
-\item{x}{A netify_comparison object from compare_networks()}
+\item{x}{a netify_comparison object from compare_networks()}
 
-\item{...}{Additional arguments (currently unused)}
+\item{...}{additional arguments (currently unused)}
 
-\item{n}{Maximum number of rows to print for summary tables (default 20)}
+\item{n}{maximum number of rows to print for summary tables (default 20)}
 }
 \value{
-Invisibly returns the input object
+invisibly returns the input object
 }
 \description{
-Provides a clear, formatted output for network comparison results.
-Handles different comparison types (temporal, cross-network, multilayer)
+provides a clear, formatted output for network comparison results.
+handles different comparison types (temporal, cross-network, multilayer)
 with appropriate formatting.
 }
 \examples{
-# Compare two networks
+# compare two networks
 data(icews)
 net1 <- netify(icews[icews$year == 2010,], actor1 = "i", actor2 = "j")
 net2 <- netify(icews[icews$year == 2011,], actor1 = "i", actor2 = "j")
@@ -31,5 +31,5 @@ print(comp)
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

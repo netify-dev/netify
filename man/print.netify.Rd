@@ -7,32 +7,32 @@
 \method{print}{netify}(x, ...)
 }
 \arguments{
-\item{x}{A netify object}
+\item{x}{a netify object}
 
-\item{...}{Additional parameters (not used)}
+\item{...}{additional parameters (not used)}
 }
 \value{
-Invisibly returns the input netify object. Called for its side effect
+invisibly returns the input netify object. called for its side effect
 of printing network information to the console.
 }
 \description{
-Displays a formatted summary of a netify object, including network type,
+displays a formatted summary of a netify object, including network type,
 dimensions, summary statistics, and available attributes.
 }
 \details{
-The print method displays:
+the print method displays:
 \itemize{
-\item Network type (unipartite/bipartite, symmetric/asymmetric)
-\item Edge weight specification
-\item Temporal structure (cross-sectional or number of time periods)
-\item Actor counts (total unique actors, or separate row/column counts for bipartite)
-\item Summary statistics (density, reciprocity, transitivity, etc.)
-\item Available nodal and dyadic attributes
+\item network type (unipartite/bipartite, symmetric/asymmetric)
+\item edge weight specification
+\item temporal structure (cross-sectional or number of time periods)
+\item actor counts (total unique actors, or separate row/column counts for bipartite)
+\item summary statistics (density, reciprocity, transitivity, etc.)
+\item available nodal and dyadic attributes
 }
 
-For longitudinal networks, summary statistics are averaged across time periods.
-For multilayer networks, statistics are shown separately for each layer.
+for longitudinal networks, summary statistics are averaged across time periods.
+for multilayer networks, statistics are shown separately for each layer.
 }
 \author{
-Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+ha eun choi, cassy dorff, colin henry, shahryar minhas
 }

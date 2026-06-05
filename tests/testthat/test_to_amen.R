@@ -16,17 +16,17 @@ test_that("to_amen, unipartite cross-sec returns correct shapes", {
 	)
 	out = to_amen(net)
 
-	# Y is n x n
+	# y is n x n
 	expect_true(is.matrix(out$Y))
 	expect_equal(dim(out$Y)[1], dim(out$Y)[2])
 	expect_equal(rownames(out$Y), colnames(out$Y))
 
-	# Xrow, Xcol agree for unipartite networks
+	# xrow, xcol agree for unipartite networks
 	expect_identical(out$Xrow, out$Xcol)
 	expect_equal(nrow(out$Xrow), nrow(out$Y))
 	expect_equal(ncol(out$Xrow), 2L)
 
-	# Xdyad is n x n x p
+	# xdyad is n x n x p
 	expect_equal(length(dim(out$Xdyad)), 3L)
 	expect_equal(dim(out$Xdyad)[1], dim(out$Y)[1])
 	expect_equal(dim(out$Xdyad)[3], 1L)
@@ -57,20 +57,20 @@ test_that("to_amen, bipartite cross-sec separates Xrow / Xcol correctly", {
 
 	out = to_amen(net)
 
-	# Y has bipartite shape
+	# y has bipartite shape
 	expect_equal(dim(out$Y), c(length(rows), length(cols)))
 
-	# Xrow only contains row actors
+	# xrow only contains row actors
 	expect_equal(dim(out$Xrow), c(length(rows), 2L))
 	expect_identical(rownames(out$Xrow), rows)
 	expect_false(anyNA(out$Xrow))
 
-	# Xcol only contains col actors
+	# xcol only contains col actors
 	expect_equal(dim(out$Xcol), c(length(cols), 2L))
 	expect_identical(rownames(out$Xcol), cols)
 	expect_false(anyNA(out$Xcol))
 
-	# Xrow != Xcol for bipartite
+	# xrow != xcol for bipartite
 	expect_false(identical(out$Xrow, out$Xcol))
 
 	# values come from the right mode
@@ -79,6 +79,26 @@ test_that("to_amen, bipartite cross-sec separates Xrow / Xcol correctly", {
 		unname(out$Xcol[, "attr_x"]),
 		node_df$attr_x[(length(rows) + 1):nrow(node_df)]
 	)
+})
+
+test_that("to_amen preserves cross-sec nodal variables named time or layer", {
+	actors = c("a", "b", "c")
+	mat = matrix(c(0, 1, 2, 3, 0, 4, 5, 6, 0), 3, 3,
+		dimnames = list(actors, actors))
+	net = new_netify(mat, symmetric = FALSE)
+	node_df = data.frame(
+		actor = actors,
+		time = c(10, 20, 30),
+		layer = c(1, 2, 3),
+		score = c(4, 5, 6)
+	)
+	net = add_node_vars(net, node_df, actor = "actor")
+
+	expect_equal(measurements(net)$nvars, c("time", "layer", "score"))
+	out = to_amen(net)
+	expect_equal(colnames(out$Xrow), c("time", "layer", "score"))
+	expect_equal(unname(out$Xrow[, "time"]), node_df$time)
+	expect_equal(unname(out$Xrow[, "layer"]), node_df$layer)
 })
 
 test_that("to_amen, bipartite cross-sec without nodal data still works", {
@@ -100,7 +120,7 @@ test_that("to_amen, bipartite cross-sec without nodal data still works", {
 })
 
 # ---------------------------------------------------------------------------
-# bipartite, longitudinal (longit_list, lame = TRUE)
+# bipartite, longitudinal (longit_list, lame = true)
 # ---------------------------------------------------------------------------
 
 test_that("to_amen(lame=TRUE) bipartite longit_list builds Xrow / Xcol separately", {
@@ -139,7 +159,7 @@ test_that("to_amen(lame=TRUE) bipartite longit_list builds Xrow / Xcol separatel
 })
 
 # ---------------------------------------------------------------------------
-# bipartite, longitudinal (longit_list, lame = FALSE — array output)
+# bipartite, longitudinal (longit_list, lame = false -- array output)
 # ---------------------------------------------------------------------------
 
 test_that("to_amen(lame=FALSE) bipartite longit_list builds correct arrays", {
@@ -202,6 +222,32 @@ test_that("to_amen(lame=FALSE) bipartite longit_array builds correct arrays", {
 	expect_equal(dim(out$Y), c(length(rows), length(cols), length(years)))
 	expect_equal(dim(out$Xrow), c(length(rows), 1L, length(years)))
 	expect_equal(dim(out$Xcol), c(length(cols), 1L, length(years)))
+})
+
+test_that("to_amen ignores time metadata after subsetting longitudinal to cross-sec", {
+	actors = c("a", "b", "c")
+	df = expand.grid(i = actors, j = actors, year = 1:2, stringsAsFactors = FALSE)
+	df = df[df$i != df$j, ]
+	df$y = seq_len(nrow(df))
+
+	node_df = expand.grid(actor = actors, year = 1:2, stringsAsFactors = FALSE)
+	node_df$score = seq_len(nrow(node_df))
+
+	net = netify(
+		df, actor1 = "i", actor2 = "j", time = "year",
+		weight = "y", symmetric = FALSE
+	)
+	net = add_node_vars(net, node_df, actor = "actor", time = "year")
+
+	one_period = subset_netify(net, time = "1")
+	expect_equal(attr(one_period, "netify_type"), "cross_sec")
+	expect_false("time" %in% names(attr(one_period, "nodal_data")))
+	expect_equal(measurements(one_period)$nvars, "score")
+
+	out = to_amen(one_period)
+	expect_equal(ncol(out$Xrow), 1L)
+	expect_equal(colnames(out$Xrow), "score")
+	expect_identical(out$Xrow, out$Xcol)
 })
 
 # ---------------------------------------------------------------------------

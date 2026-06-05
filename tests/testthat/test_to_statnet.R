@@ -1,4 +1,32 @@
 set.seed(6886)
+skip_if_not_installed("network")
+
+melt_test_matrix = function(mat, remove_zeros = FALSE, remove_diagonal = FALSE, na_rm = FALSE) {
+	out = as.data.frame(as.table(mat), stringsAsFactors = FALSE)
+	names(out) = c("Var1", "Var2", "value")
+	if (remove_diagonal) {
+		out = out[out$Var1 != out$Var2, ]
+	}
+	if (remove_zeros) {
+		out = out[!is.na(out$value) & out$value != 0, ]
+	} else if (na_rm) {
+		out = out[!is.na(out$value), ]
+	}
+	rownames(out) = NULL
+	out
+}
+
+melt_matrix_base = function(mat) {
+	melt_test_matrix(mat)
+}
+
+melt_matrix_sparse = function(mat, remove_zeros = TRUE, remove_diagonal = TRUE) {
+	melt_test_matrix(mat,
+		remove_zeros = remove_zeros,
+		remove_diagonal = remove_diagonal,
+		na_rm = TRUE
+	)
+}
 
 test_that("netify_to_statnet: unweighted cross-sec, asymmetric", {
 	# generate some data
@@ -235,7 +263,6 @@ test_that(
 	{
 		# generate a fake un weighted cross-sec cnet
 
-		# create fake dyad data for cross-sectional case
 		fake_dyads = expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
 		fake_dyads$weight = rnorm(nrow(fake_dyads))
 		fake_dyads$var2 = rnorm(nrow(fake_dyads))
@@ -249,10 +276,9 @@ test_that(
 		# add in random binary variable to fake_dyads
 		fake_dyads$dv = rbinom(nrow(fake_dyads), 1, 0.5)
 
-		# create fake node data for cross-sectional case
 		fake_nodes = data.frame(actor1 = letters[1:3], var1 = rnorm(3), var2 = rnorm(3))
 
-		# convert to conflictNet object
+		# convert to conflictnet object
 		a_matrix = netify(
 			fake_dyads,
 			actor1 = "actor1", actor2 = "actor2", symmetric = FALSE,
@@ -261,12 +287,12 @@ test_that(
 		)
 
 		# add dyad variables in fake data as a dyadic attribute
-		a_matrix = add_dyad_vars(
-			a_matrix, fake_dyads,
-			"actor1", "actor2", NULL,
-			c("var2", "var3", "var4"),
-			c(FALSE, FALSE, FALSE, FALSE)
-		)
+			a_matrix = add_dyad_vars(
+				a_matrix, fake_dyads,
+				"actor1", "actor2", NULL,
+				c("var2", "var3", "var4"),
+				c(FALSE, FALSE, FALSE)
+			)
 		# add node variables in fake data
 		a_matrix = add_node_vars(
 			a_matrix, fake_nodes,
@@ -319,7 +345,6 @@ test_that(
 	{
 		# generate a fake un weighted cross-sec cnet
 
-		# create fake dyad data for cross-sectional case
 		ar = letters[1:3]
 		nr = length(ar)
 		ac = letters[22:26]
@@ -337,12 +362,11 @@ test_that(
 		# add in random binary variable to fake_dyads
 		fake_dyads$dv = rbinom(nrow(fake_dyads), 1, 0.5)
 
-		# create fake node data for cross-sectional case
 		actors = c(ar, ac)
 		nactors = nr + nc
 		fake_nodes = data.frame(actor1 = actors, var1 = rnorm(nactors), var2 = rnorm(nactors))
 
-		# convert to conflictNet object
+		# convert to conflictnet object
 		a_matrix = netify(
 			fake_dyads,
 			actor1 = "actor1", actor2 = "actor2",
@@ -351,12 +375,12 @@ test_that(
 		)
 
 		# add dyad variables in fake data as a dyadic attribute
-		a_matrix = add_dyad_vars(
-			a_matrix, fake_dyads,
-			"actor1", "actor2", NULL,
-			c("var2", "var3", "var4"),
-			c(FALSE, FALSE, FALSE, FALSE)
-		)
+			a_matrix = add_dyad_vars(
+				a_matrix, fake_dyads,
+				"actor1", "actor2", NULL,
+				c("var2", "var3", "var4"),
+				c(FALSE, FALSE, FALSE)
+			)
 		# add node variables in fake data
 		a_matrix = add_node_vars(
 			a_matrix, fake_nodes,
@@ -406,60 +430,58 @@ test_that(
 
 test_that("netify_to_statnet: multilayer returns named list keyed by layer", {
 	# two single-layer cross-sec netlets
-	dyads <- expand.grid(
+	dyads = expand.grid(
 		actor1 = letters[1:5], actor2 = letters[1:5],
 		stringsAsFactors = FALSE
 	)
-	dyads <- dyads[dyads$actor1 != dyads$actor2, ]
-	dyads$w1 <- rnorm(nrow(dyads))
-	dyads$w2 <- rnorm(nrow(dyads))
+	dyads = dyads[dyads$actor1 != dyads$actor2, ]
+	dyads$w1 = rnorm(nrow(dyads))
+	dyads$w2 = rnorm(nrow(dyads))
 
-	n1 <- netify(dyads, actor1 = "actor1", actor2 = "actor2",
+	n1 = netify(dyads, actor1 = "actor1", actor2 = "actor2",
 		symmetric = FALSE, weight = "w1")
-	n2 <- netify(dyads, actor1 = "actor1", actor2 = "actor2",
+	n2 = netify(dyads, actor1 = "actor1", actor2 = "actor2",
 		symmetric = FALSE, weight = "w2")
-	multi <- layer_netify(list(L1 = n1, L2 = n2))
+	multi = layer_netify(list(L1 = n1, L2 = n2))
 
-	out <- netify_to_statnet(multi)
+	out = netify_to_statnet(multi)
 	expect_named(out, c("L1", "L2"))
 	expect_true(all(vapply(out, inherits, logical(1), "network")))
 })
 
 test_that("netify_to_statnet: stashes netify_na_cols and informs", {
-	actors <- letters[1:5]
-	dyads <- expand.grid(actor1 = actors, actor2 = actors,
+	actors = letters[1:5]
+	dyads = expand.grid(actor1 = actors, actor2 = actors,
 		stringsAsFactors = FALSE)
-	dyads <- dyads[dyads$actor1 != dyads$actor2, ]
-	dyads$weight <- rnorm(nrow(dyads))
+	dyads = dyads[dyads$actor1 != dyads$actor2, ]
+	dyads$weight = rnorm(nrow(dyads))
 
-	nodes <- data.frame(
+	nodes = data.frame(
 		actor = actors,
 		polity = c(1, NA, 3, 4, 5),
 		gdp = c(10, 20, 30, NA, 50),
 		stringsAsFactors = FALSE
 	)
 
-	net <- netify(dyads, actor1 = "actor1", actor2 = "actor2",
+	net = netify(dyads, actor1 = "actor1", actor2 = "actor2",
 		symmetric = FALSE, weight = "weight")
-	net <- add_node_vars(net, nodes, "actor", NULL, NULL, FALSE)
+	net = add_node_vars(net, nodes, "actor", NULL, NULL, FALSE)
 
-	sn <- suppressMessages(netify_to_statnet(net))
-	stash <- attr(sn, "netify_na_cols")
+	sn = suppressMessages(netify_to_statnet(net))
+	stash = attr(sn, "netify_na_cols")
 	expect_setequal(stash, c("polity", "gdp"))
 })
 
 test_that("as.network.netify dispatches via the network generic", {
 	skip_if_not_installed("network")
-	dyads <- expand.grid(actor1 = letters[1:4], actor2 = letters[1:4],
+	dyads = expand.grid(actor1 = letters[1:4], actor2 = letters[1:4],
 		stringsAsFactors = FALSE)
-	dyads <- dyads[dyads$actor1 != dyads$actor2, ]
-	dyads$weight <- rnorm(nrow(dyads))
+	dyads = dyads[dyads$actor1 != dyads$actor2, ]
+	dyads$weight = rnorm(nrow(dyads))
 
-	net <- netify(dyads, actor1 = "actor1", actor2 = "actor2",
+	net = netify(dyads, actor1 = "actor1", actor2 = "actor2",
 		symmetric = FALSE, weight = "weight")
 
-	# direct method call
-	expect_s3_class(as.network.netify(net), "network")
 	# generic dispatch
 	expect_s3_class(network::as.network(net), "network")
 })

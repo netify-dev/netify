@@ -1,44 +1,44 @@
 #' Create attribute mixing matrices for network data
 #'
-#' Creates cross-tabulation matrices showing how connections are distributed across
-#' different attribute values. This reveals mixing patterns and assortativity in
+#' creates cross-tabulation matrices showing how connections are distributed across
+#' different attribute values. this reveals mixing patterns and assortativity in
 #' networks by examining the frequency of ties between actors with different
 #' attribute combinations.
 #'
-#' @param netlet A netify object containing network data.
-#' @param attribute Character string specifying the nodal attribute to analyze.
-#' @param row_attribute Optional different attribute for matrix rows. If NULL, uses
+#' @param netlet a netify object containing network data.
+#' @param attribute character string specifying the nodal attribute to analyze.
+#' @param row_attribute optional different attribute for matrix rows. if NULL, uses
 #'   the same attribute for both dimensions.
-#' @param normalized Logical. Whether to return proportions instead of raw counts.
-#'   Default TRUE.
-#' @param by_row Logical. If TRUE and normalized=TRUE, normalizes by row. Default FALSE.
-#' @param include_weights Logical. Whether to use edge weights. Default FALSE.
-#' @param other_stats Named list of custom functions for additional statistics.
-#' @param ... Additional arguments passed to custom functions.
+#' @param normalized logical. whether to return proportions instead of raw counts.
+#'   default TRUE.
+#' @param by_row logical. if TRUE and normalized=TRUE, normalizes by row. default FALSE.
+#' @param include_weights logical. whether to use edge weights. default FALSE.
+#' @param other_stats named list of custom functions for additional statistics.
+#' @param ... additional arguments passed to custom functions.
 #'
-#' @return List containing:
+#' @return list containing:
 #'   \describe{
-#'     \item{\code{mixing_matrices}}{Named list of mixing matrices per time/layer}
-#'     \item{\code{summary_stats}}{Data frame with mixing statistics:}
+#'     \item{\code{mixing_matrices}}{named list of mixing matrices per time/layer}
+#'     \item{\code{summary_stats}}{data frame with mixing statistics:}
 #'     \describe{
-#'       \item{\code{net}}{Network/time identifier}
-#'       \item{\code{layer}}{Layer name}
-#'       \item{\code{attribute}}{Name of analyzed attribute(s)}
-#'       \item{\code{assortativity}}{Assortativity coefficient (-1 to 1)}
-#'       \item{\code{diagonal_proportion}}{Proportion of within-group ties}
-#'       \item{\code{entropy}}{Shannon entropy of mixing pattern}
-#'       \item{\code{modularity}}{Modularity based on attribute groups}
-#'       \item{\code{n_groups}}{Number of attribute categories}
-#'       \item{\code{total_ties}}{Total number of ties analyzed}
+#'       \item{\code{net}}{network/time identifier}
+#'       \item{\code{layer}}{layer name}
+#'       \item{\code{attribute}}{name of analyzed attribute(s)}
+#'       \item{\code{assortativity}}{assortativity coefficient (-1 to 1)}
+#'       \item{\code{diagonal_proportion}}{proportion of within-group ties}
+#'       \item{\code{entropy}}{shannon entropy of mixing pattern}
+#'       \item{\code{modularity}}{modularity based on attribute groups}
+#'       \item{\code{n_groups}}{number of attribute categories}
+#'       \item{\code{total_ties}}{total number of ties analyzed}
 #'     }
 #'   }
 #'
 #' @details
-#' Mixing matrix elements represent ties between actors with attribute
-#' values i and j. For undirected networks, matrices are symmetrized.
-#' Assortativity ranges from -1 (disassortative) to 1 (assortative).
+#' mixing matrix elements represent ties between actors with attribute
+#' values i and j. for undirected networks, matrices are symmetrized.
+#' assortativity ranges from -1 (disassortative) to 1 (assortative).
 #'
-#' @author Casy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @examples
 #' # who tends to befriend whom, by gender, in the bundled classroom data
@@ -92,6 +92,16 @@ mixing_matrix <- function(
 	checkmate::assert_logical(normalized, len = 1)
 	checkmate::assert_logical(by_row, len = 1)
 	checkmate::assert_logical(include_weights, len = 1)
+	if (!is.null(other_stats)) {
+		if (!is.list(other_stats) || is.null(names(other_stats)) ||
+			anyNA(names(other_stats)) || any(names(other_stats) == "") ||
+			anyDuplicated(names(other_stats))) {
+			cli::cli_abort("other_stats must be a named list of functions with unique, non-empty names.")
+		}
+		if (!all(vapply(other_stats, is.function, logical(1)))) {
+			cli::cli_abort("All elements of other_stats must be functions.")
+		}
+	}
 
 	# extract object attributes
 	obj_attrs <- attributes(netlet)
@@ -152,7 +162,7 @@ mixing_matrix <- function(
 		netlet_list <- switch(netify_type,
 			"cross_sec" = list("1" = netlet),
 			"longit_array" = {
-				# check if this is multilayer longitudinal (4D) or single layer (3D)
+				# check if this is multilayer longitudinal (4d) or single layer (3d)
 				if (length(dim(netlet)) == 4) {
 					# multilayer longitudinal: extract time periods from 4th dimension
 					time_names <- dimnames(netlet)[[4]]
@@ -186,10 +196,10 @@ mixing_matrix <- function(
 			# extract specific layer for multilayer networks
 			if (length(layers) > 1) {
 				if (netify_type == "cross_sec") {
-					# for cross-sectional multilayer: 3D array [actors, actors, layers]
+					# for cross-sectional multilayer: 3d array [actors, actors, layers]
 					net_matrix <- netlet[, , layer_index]
 				} else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
-					# for longitudinal multilayer: 4D array [actors, actors, layers, time]
+					# for longitudinal multilayer: 4d array [actors, actors, layers, time]
 					net_matrix <- net_matrix[, , layer_index]
 				}
 			}
@@ -264,12 +274,7 @@ mixing_matrix <- function(
 			# add custom statistics if provided
 			if (!is.null(other_stats)) {
 				custom_stats <- lapply(other_stats, function(f) {
-					tryCatch(f(mixing_result$matrix, ...),
-						error = function(e) {
-							cli::cli_warn("Error in custom statistic: {e$message}")
-							NA
-						}
-					)
+					f(mixing_result$matrix, ...)
 				})
 				summary_stats <- c(summary_stats, unlist(custom_stats))
 			}
@@ -291,8 +296,23 @@ mixing_matrix <- function(
 	}
 
 	# combine summary statistics
-	summary_df <- do.call(rbind, summary_data)
-	rownames(summary_df) <- NULL
+	if (length(summary_data) == 0L) {
+		summary_df <- data.frame(
+			net = character(),
+			layer = character(),
+			attribute = character(),
+			assortativity = numeric(),
+			diagonal_proportion = numeric(),
+			entropy = numeric(),
+			modularity = numeric(),
+			n_groups = integer(),
+			total_ties = numeric(),
+			stringsAsFactors = FALSE
+		)
+	} else {
+		summary_df <- do.call(rbind, summary_data)
+		rownames(summary_df) <- NULL
+	}
 
 	return(list(
 		mixing_matrices = mixing_matrices,
@@ -393,8 +413,10 @@ calculate_mixing_stats <- function(mixing_matrix, raw_matrix, row_attrs, col_att
 		n_groups <- max(n_row_groups, n_col_groups)
 	}
 
-	# shannon entropy of mixing pattern
-	probs <- as.vector(mixing_matrix)
+	# shannon entropy of mixing pattern; compute from probabilities even
+	# when the user-facing matrix is raw counts.
+	prob_matrix <- if (total_ties > 0) raw_matrix / total_ties else raw_matrix
+	probs <- as.vector(prob_matrix)
 	probs <- probs[probs > 0] # remove zeros for log calculation
 	entropy <- ifelse(length(probs) > 1, -sum(probs * log(probs)), 0)
 

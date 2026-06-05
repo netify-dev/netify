@@ -2,22 +2,22 @@
 % Please edit documentation in R/plot_helpers.R
 \name{netify_node}
 \alias{netify_node}
-\title{Extract nodes layer from netify plot components}
+\title{extract nodes layer from netify plot components}
 \usage{
 netify_node(comp)
 }
 \arguments{
-\item{comp}{A netify_plot_components object returned from
+\item{comp}{a netify_plot_components object returned from
 \code{plot(..., return_components = TRUE)}}
 }
 \value{
-A custom object of class "netify_node" that can be added to a ggplot
-object using the + operator. The object contains the node layer with all
+a custom object of class "netify_node" that can be added to a ggplot
+object using the + operator. the object contains the node layer with all
 its aesthetic mappings and data.
 }
 \description{
-Extracts the node (point) layer from a netify plot components object, allowing
-for manual plot construction and customization. Nodes represent actors in the
+extracts the node (point) layer from a netify plot components object, allowing
+for manual plot construction and customization. nodes represent actors in the
 network and can have various aesthetic mappings like size, color, and shape.
 }
 \examples{
@@ -40,5 +40,5 @@ ggplot() +
 \code{\link{assemble_netify_plot}}
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

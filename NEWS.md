@@ -1,7 +1,7 @@
 # netify 1.5
 
 * New worked example dataset (`classroom_edges`, `classroom_nodes`) and a
-  matching short-form vignette (`foundations_lite`) for quick onboarding.
+  matching short-form vignette (`quickstart_inference`) for quick onboarding.
 * Index of common pipelines available at `?netify_workflows`, covering
   unipartite, bipartite, longitudinal, and multilayer setups, plus
   handoff to `statnet`, `amen`, `lame`, `dbn`, and `igraph`.

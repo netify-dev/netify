@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_mixing_matrix.R
 \name{plot_mixing_matrix_facet}
 \alias{plot_mixing_matrix_facet}
-\title{Create a multi-panel mixing matrix visualization}
+\title{create a multi-panel mixing matrix visualization}
 \usage{
 plot_mixing_matrix_facet(
   mixing_results,
@@ -13,26 +13,26 @@ plot_mixing_matrix_facet(
 )
 }
 \arguments{
-\item{mixing_results}{Output from \code{mixing_matrix()} with multiple matrices}
+\item{mixing_results}{output from \code{mixing_matrix()} with multiple matrices}
 
-\item{matrices_to_plot}{Integer vector. Which matrices to include. Default NULL plots all.}
+\item{matrices_to_plot}{integer vector. which matrices to include. default NULL plots all.}
 
-\item{ncol}{Integer. Number of columns in facet layout. Default NULL auto-calculates.}
+\item{ncol}{integer. number of columns in facet layout. default NULL auto-calculates.}
 
-\item{shared_scale}{Logical. Whether to use the same color scale across panels. Default TRUE.}
+\item{shared_scale}{logical. whether to use the same color scale across panels. default TRUE.}
 
-\item{...}{Additional arguments passed to plot_mixing_matrix for each panel}
+\item{...}{additional arguments passed to plot_mixing_matrix for each panel}
 }
 \value{
-A ggplot2 object with faceted mixing matrices
+a ggplot2 object with faceted mixing matrices
 }
 \description{
-Creates a faceted plot showing multiple mixing matrices, useful for comparing
+creates a faceted plot showing multiple mixing matrices, useful for comparing
 patterns across time periods or network layers.
 }
 \examples{
 \dontrun{
-# Create temporal network
+# create temporal network
 data(icews)
 net_temporal <- netify(
     icews,
@@ -42,17 +42,17 @@ net_temporal <- netify(
     weight = "verbCoop"
 )
 
-# Run mixing matrix analysis across time
+# run mixing matrix analysis across time
 mixing_temporal <- mixing_matrix(
     net_temporal,
     attribute = "i_polity2_cat"
 )
 
-# Create faceted visualization
+# create faceted visualization
 plot_mixing_matrix_facet(mixing_temporal, ncol = 2)
 }
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

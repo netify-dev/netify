@@ -2,24 +2,24 @@
 % Please edit documentation in R/plot_helpers.R
 \name{ggplot_add.netify_scale_reset}
 \alias{ggplot_add.netify_scale_reset}
-\title{Add scale resets to ggplot}
+\title{add scale resets to ggplot}
 \usage{
 \method{ggplot_add}{netify_scale_reset}(object, plot, ...)
 }
 \arguments{
-\item{object}{A netify_scale_reset object created by \code{\link{reset_scales}}}
+\item{object}{a netify_scale_reset object created by \code{\link{reset_scales}}}
 
-\item{plot}{A ggplot object to which scale resets will be added}
+\item{plot}{a ggplot object to which scale resets will be added}
 
-\item{...}{Additional arguments passed by ggplot2 (used internally)}
+\item{...}{additional arguments passed by ggplot2 (used internally)}
 }
 \value{
-A ggplot object with scale resets applied
+a ggplot object with scale resets applied
 }
 \description{
-S3 method to add scale reset objects to ggplot objects. This method resets
+s3 method to add scale reset objects to ggplot objects. this method resets
 color, fill, alpha, and size scales using the ggnewscale package.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

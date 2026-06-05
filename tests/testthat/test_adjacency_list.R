@@ -36,7 +36,6 @@ test_that(
 			diag_to_NA = FALSE, missing_to_zero = TRUE
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), result)
 	}
 )
@@ -83,7 +82,6 @@ test_that(
 			diag_to_NA = FALSE, missing_to_zero = TRUE
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), result)
 	}
 )
@@ -99,7 +97,7 @@ test_that(
 		long_asym_non_weight_df = long_asym_non_weight_df[long_asym_non_weight_df$value > 0, ]
 
 		# create matrix
-		# long_asym_non_weight_mat <- matrix(0, nrow=3, ncol=3, dimnames=list(letters[1:3],letters[1:3]))
+		# long_asym_non_weight_mat = matrix(0, nrow=3, ncol=3, dimnames=list(letters[1:3],letters[1:3]))
 
 		# create an empty list object to store matrices
 		result = list()
@@ -114,7 +112,7 @@ test_that(
 				}
 			}
 			# modify the example_matrix to make it non-weighted
-			# long_asym_non_weight_mat <- 1*(long_asym_non_weight_mat!=0)
+			# long_asym_non_weight_mat = 1*(long_asym_non_weight_mat!=0)
 			result[[i]] = long_asym_non_weight_mat
 		}
 		names(result) = times
@@ -128,7 +126,6 @@ test_that(
 			diag_to_NA = FALSE, missing_to_zero = TRUE
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), result)
 	}
 )
@@ -171,7 +168,6 @@ test_that(
 			diag_to_NA = FALSE, missing_to_zero = TRUE
 		)
 
-		# the test
 		expect_identical(get_raw(a_matrix), result)
 	}
 )

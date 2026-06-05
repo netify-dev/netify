@@ -13,6 +13,9 @@ navbar:
       - search
       - github
   components:
+    intro:
+      text: Get started
+      href: articles/quickstart_inference.html
     resources:
       text: Resources
       href: articles/resources.html
@@ -22,7 +25,7 @@ articles:
     navbar: ~
     contents:
     - foundations
-    - foundations_lite
+    - quickstart_inference
     - event_data
     - ego_networks
     - manual_plotting
@@ -101,6 +104,7 @@ reference:
     contents:
     - plot.netify
     - plot.netify_comparison
+    - plot.summary.netify
     - plot.summary_actor
     - plot_actor_stats
     - plot_graph_stats
@@ -119,27 +123,27 @@ reference:
     desc: "Pre-built visual style presets"
     contents:
     - style_random
-    - style_budapest
-    - style_economist
-    - style_538
+    - style_rose
+    - style_red_blue
+    - style_orange_teal
     - style_solarized
-    - style_stata
-    - style_nature
+    - style_navy_maroon
+    - style_scientific_blue
     - style_cyberpunk
     - style_tufte
     - style_pastel
     - style_retro80s
     - style_dark2
+    - style_crimson_silver
+    - style_green_gold
+    - style_slate_silver
+    - style_bronze_block
+    - style_lime_magenta
+    - style_black_yellow
+    - style_sunburst
+    - style_racing_blue
     - style_bipartite_network
     - style_temporal_network
-    - style_witcher_feline
-    - style_witcher_griffin
-    - style_witcher_wolven
-    - style_witcher_ursine
-    - style_witcher_manticore
-    - style_witcher_viper
-    - style_pokemon_pikachu
-    - style_secretariat
 
   - title: "Plot Components"
     desc: "Low-level plot building blocks"

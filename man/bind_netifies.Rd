@@ -11,55 +11,60 @@ bind_netifies(
 )
 }
 \arguments{
-\item{...}{Two or more netify objects, or a single list of netify
+\item{...}{two or more netify objects, or a single list of netify
 objects.}
 
-\item{names}{Optional character vector to name the resulting
-periods. If \code{NULL}, periods are auto-named from the inputs'
+\item{names}{optional character vector to name the resulting
+periods. if \code{NULL}, periods are auto-named from the inputs'
 existing period labels (with deduplication if collisions).}
 
-\item{align_actors}{One of \code{"none"} (default), \code{"union"}, or
-\code{"intersection"}. Controls how per-period actor sets are
+\item{align_actors}{one of \code{"none"} (default), \code{"union"}, or
+\code{"intersection"}. controls how per-period actor sets are
 reconciled when inputs differ:
 \itemize{
 \item \code{"none"}: keep each period's actor set as supplied; resulting
 \code{longit_list} periods may have different dimensions (matches
 prior behavior).
 \item \code{"union"}: take the union of actor sets across all inputs and
-pad each period with NA rows/columns for actors not originally
+pad each period with na rows/columns for actors not originally
 present.
 \item \code{"intersection"}: take the intersection of actor sets across
 all inputs and subset each period to only those actors.
 }}
 }
 \value{
-A \code{longit_list} netify object.
+a \code{longit_list} netify object.
 }
 \description{
 \code{bind_netifies()} concatenates two or more netify objects along
-the time axis (for combining cross-sec → longit, or stacking
-two longit panels into a longer one). All inputs must share the
+the time axis (for combining cross-sec -> longit, or stacking
+two longit panels into a longer one). all inputs must share the
 same mode (\code{unipartite} / \code{bipartite}), symmetry, layers, and
-(for cross-sec inputs) the same actor set. Actor sets across
-periods may differ — the result is a \code{longit_list}.
+(for cross-sec inputs) the same actor set. actor sets across
+periods may differ -- the result is a \code{longit_list}.
 }
 \details{
-For combining different \emph{layers} of the same time slice, use
+for combining different \emph{layers} of the same time slice, use
 \code{layer_netify()}.
 
-This is \strong{not} the same as \code{layer_netify()}:
+this is \strong{not} the same as \code{layer_netify()}:
 \itemize{
-\item \code{bind_netifies()} joins along TIME.
-\item \code{layer_netify()} joins along RELATION (layer).
+\item \code{bind_netifies()} joins along time.
+\item \code{layer_netify()} joins along relation (layer).
 }
 
-Nodal and dyadic attributes are concatenated per-period; if two
+nodal and dyadic attributes are concatenated per-period; if two
 inputs supply conflicting values for the same (actor, time), the
 later input wins (with a one-shot inform).
 
-When downstream models (e.g., \code{tergm} CMLE) require uniform
+when downstream models (e.g., \code{tergm} cmle) require uniform
 actor composition across periods, use \code{align_actors = "union"}
 or \code{"intersection"}.
+
+multilayer inputs are supported when each input has the same layer labels.
+the result is a longitudinal list whose per-period elements keep the layer
+dimension, so \code{as.matrix(x, time = ..., layer = ...)},
+\code{unnetify()}, and \code{decompose_netify()} can still address layers.
 }
 \examples{
 \dontrun{
@@ -76,5 +81,5 @@ summary(combined)
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

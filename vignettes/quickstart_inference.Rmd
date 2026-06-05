@@ -1,10 +1,11 @@
 ---
 title: "Quickstart to Inference"
+description: "Build, explore, test, and export a netify network."
 author: "Cassy Dorff and Shahryar Minhas"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Foundations (lite)}
+  %\VignetteIndexEntry{Quickstart to Inference}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -19,23 +20,23 @@ knitr::opts_chunk$set(
 )
 ```
 
-This is a minimal end-to-end tour of `netify` that uses **only the data bundled with the package** — no `peacesciencer`, no `countrycode`, no external downloads. If you want the full IR-data walkthrough with covariates from outside sources, see the **Foundations** vignette.
+This is a minimal end-to-end tour of `netify` that uses **only the data bundled with the package** -- no `peacesciencer`, no `countrycode`, no external downloads. If you want the full IR-data walkthrough with covariates from outside sources, see the [Foundations article](https://netify-dev.github.io/netify/articles/foundations.html) on the project site.
 
 We'll cover the four things `netify` is for:
 
-1. **Build** a network object from dyadic data 🛠
-2. **Explore** it with summary statistics and a quick plot 🔎
-3. **Test** a couple of basic inferential questions 📊
-4. **Bridge** out to other packages when you want to model 🔁
+1. **Build** a network object from dyadic data
+2. **Explore** it with summary statistics and a quick plot
+3. **Test** a couple of basic inferential questions
+4. **Bridge** out to other packages when you want to model
 
 ```{r}
 library(netify)
 library(ggplot2)
 ```
 
-## 1. Build 🛠
+## 1. build
 
-The bundled `icews` dataset has ICEWS event-data slices for 152 countries from 2002 to 2014 with the four "quad" variables (verbal/material × cooperation/conflict) plus a handful of nodal covariates.
+The bundled `icews` dataset has ICEWS event-data slices for 152 countries from 2002 to 2014 with the four "quad" variables (verbal/material by cooperation/conflict) plus a handful of nodal covariates.
 
 ```{r}
 data(icews)
@@ -57,7 +58,7 @@ verb_coop <- netify(
 print(verb_coop)
 ```
 
-The `print()` summary tells you the network is unipartite, directed, longitudinal (13 periods), 152 actors, with nodal and dyadic features attached. The numeric table shows density, missingness, mean edge weight, mutual-dyad proportion, and transitivity averaged across time.
+The `print()` summary tells you the network is unipartite, directed, longitudinal (13 periods), 152 actors, with nodal and dyadic features attached. The numeric table shows density, missingness, mean edge weight, reciprocity, and transitivity averaged across time.
 
 A quick glossary, since several of these terms appear before they're defined elsewhere:
 
@@ -68,7 +69,7 @@ A quick glossary, since several of these terms appear before they're defined els
 - **mutual-dyad proportion (`mutual`)**: among ordered pairs where at least one tie exists, the share where both `i -> j` and `j -> i` are present.
 - **reciprocity**: correlation between the adjacency matrix `A` and its transpose `A^T`; behaves like `mutual` for binary networks but generalizes to weighted ones.
 
-## 2. Explore 🔎
+## 2. explore
 
 `summary()` returns one row per time period with graph-level statistics:
 
@@ -79,11 +80,11 @@ head(gs[, c("net", "num_actors", "density", "reciprocity", "mutual", "transitivi
 
 Note both `reciprocity` (the correlation between $A$ and $A^T$, useful for weighted networks) and `mutual` (the classic mutual-dyad proportion). Use whichever fits your audience.
 
-Actor-level stats — degree, prop_ties, centrality, strength — come from `summary_actor()`. Quick definitions of what shows up in the columns:
+Actor-level stats -- degree, prop_ties, centrality, strength -- come from `summary_actor()`. Quick definitions of what shows up in the columns:
 
 - **degree_in / degree_out / degree_total**: count of incoming, outgoing, or total ties for an actor.
 - **prop_ties_***: those degree counts divided by the number of possible partners.
-- **strength**: sum / average / sd of the *weights* of an actor's ties (parallel to degree but weight-aware).
+- **strength**: sum / average / sd of the *weights* on realized non-zero ties (parallel to degree but weight-aware).
 - **betweenness**: how often an actor sits on the shortest path between two others -- a broker score.
 - **closeness**: how short the actor's average distance is to everyone else.
 - **authority_score / hub_score** (HITS): authorities are nodes that many hubs point to; hubs are nodes that point to many authorities. Useful in directed networks (e.g., who's getting cited vs. who's doing the citing).
@@ -94,7 +95,7 @@ head(as_[, c("actor", "time", "degree_in", "degree_out",
              "betweenness", "authority_score", "hub_score")])
 ```
 
-Plot it. The default uses `auto_format = TRUE` and adapts to network size — for 152 actors over 13 years it'll suppress text labels and tone down edge alpha automatically:
+Plot it. The default uses `auto_format = TRUE` and adapts to network size -- for 152 actors over 13 years it'll suppress text labels and tone down edge alpha automatically:
 
 ```{r, fig.width = 7, fig.height = 5}
 plot(verb_coop,
@@ -104,15 +105,15 @@ plot(verb_coop,
   theme(legend.position = "bottom")
 ```
 
-## 3. Test (basic inferential) 📊
+## 3. test (basic inferential)
 
-A common first question is *homophily*: do similar countries cooperate more? Test it:
+A common first question is *homophily*: do similar countries cooperate more? The call below computes the descriptive homophily statistic quickly. Set `significance_test = TRUE` when you want the permutation p-value and interval.
 
 ```{r}
 hom <- homophily(verb_coop,
                  attribute = "i_polity2",
                  method = "correlation",
-                 significance_test = TRUE)
+                 significance_test = FALSE)
 head(hom)
 ```
 
@@ -142,23 +143,22 @@ by_region <- compare_networks(
 by_region$by_group$n_actors_per_group
 ```
 
-## 4. Bridge 🔁
+## 4. bridge
 
 netify intentionally stops at descriptives + basic inference. For statistical models, hand off to a downstream package:
 
 | Want to fit... | Use this | netify exporter |
 |---|---|---|
-| Latent factor / AME | [amen](https://github.com/pdhoff/amen) | `to_amen(netlet)` |
-| Longitudinal AME (varying actors) | [netify-dev/lame](https://github.com/netify-dev/lame) | `to_amen(netlet, lame = TRUE)` |
-| Multilayer dynamic bilinear | [netify-dev/dbn](https://github.com/netify-dev/dbn) | `to_dbn(netlet)` |
-| Social relations model | [netify-dev/srm](https://github.com/netify-dev/srm) | `to_amen(netlet)` |
-| ERGM | [ergm/statnet](https://statnet.org/) | `to_statnet(netlet)` |
+| Latent factor / AME | [amen](https://CRAN.R-project.org/package=amen) | `to_amen(netlet)` |
+| ERGM | `vignette("pipeline_netify_ergm", package = "netify")` | `to_statnet(netlet)` |
 | Community detection / graph algorithms | [igraph](https://igraph.org/r/) | `to_igraph(netlet)` |
-| Roll your own dyadic regression | — | `unnetify(netlet)` for a long data frame |
+| Roll your own dyadic regression | base R or modeling packages | `unnetify(netlet)` for a long data frame |
+
+Additional project-site articles cover optional workflows, including latent-factor and multilayer modeling handoffs.
 
 Example: convert to igraph and use a function netify doesn't expose:
 
-```{r, eval = requireNamespace("igraph", quietly = TRUE)}
+```{r}
 ig <- to_igraph(verb_coop)             # list of igraph objects, one per year
 ig_2010 <- ig[["2010"]]
 length(igraph::cluster_walktrap(ig_2010))
@@ -183,18 +183,18 @@ compare_networks(net)             # how do periods/layers/groups differ?
 to_amen(net)  # or to_dbn / to_statnet / to_igraph when you're ready to model
 ```
 
-For the long version with peacesciencer data and a full IR walkthrough, see `vignette("foundations", package = "netify")`. Have fun!
+For the long version with peacesciencer data and a full IR walkthrough, see the [Foundations article](https://netify-dev.github.io/netify/articles/foundations.html) on the project site.
 
-## A note for non-time use cases
+## a note for non-time use cases
 
-Most of netify's docs talk about "longitudinal" networks because that's the bread-and-butter use case in social science. But the underlying `longit_list` structure (a list of matrices, each with its own actor set) works for **any per-slice partition**, not just time. Common non-time examples:
+Most of netify's docs talk about "longitudinal" networks because that is the common social-science use case. The underlying `longit_list` structure is more general: it is a list of matrices, each with its own actor set. Common non-time examples:
 
 - **Per-subject networks**: brain connectivity matrices, one per fMRI subject
 - **Per-replicate networks**: synthetic networks drawn from a generative process
 - **Per-condition networks**: networks observed under different experimental conditions
 - **Per-document networks**: term co-occurrence networks, one per document
 
-For these, build a list of matrices (one per partition) and use either `new_netify(list_of_matrices)` or `netify(df, ..., time = "partition_id")`. All of netify's per-period operations — `summary()`, `summary_actor()`, faceted `plot()`, `subset(time = ...)` — work identically; the variable name just happens to be `time`. If the "time" framing gets confusing in your context, alias it locally:
+For these, build a list of matrices (one per partition) and use either `new_netify(list_of_matrices)` or `netify(df, ..., time = "partition_id")`. The same per-period operations still apply: `summary()`, `summary_actor()`, faceted `plot()`, and `subset(time = ...)`. The column is called `time`, but it can hold a subject, replicate, condition, or other slice id. If that framing gets confusing in your context, alias it locally:
 
 ```r
 # build a per-subject network library

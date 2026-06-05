@@ -2,13 +2,13 @@
 
 #' df_check
 #'
-#' Checks to make sure a data.frame is inputted and
+#' checks to make sure a data.frame is inputted and
 #' if a `tibble` or `data.table` data.frame is inputted then it is
-#' converted to a base R data.frame object
+#' converted to a base r data.frame object
 #' @param df user inputted object to check
 #' @param msg msg to user if df check fails
 #' @return data.frame object
-#' @author Ha Eun Choi, Shahryar Minhas
+#' @author ha eun choi, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -38,7 +38,7 @@ df_check <- function(
 
 #' logical_check
 #'
-#' Checks to make sure user has correctly inputted logicals
+#' checks to make sure user has correctly inputted logicals
 #' for select inputs
 #' @param sum_dyads user supplied input
 #' @param symmetric user supplied input
@@ -47,7 +47,7 @@ df_check <- function(
 #' @param actor_time_uniform optional user supplied input
 #' @return returns a NULL object but stops the process
 #' if there is an error detected
-#' @author Ha Eun Choi, Shahryar Minhas
+#' @author ha eun choi, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -56,26 +56,19 @@ logical_check <- function(
 	sum_dyads, symmetric,
 	diag_to_NA, missing_to_zero,
 	actor_time_uniform = NULL) {
-	if (!is.logical(sum_dyads)) {
-		cli::cli_abort("check data type. {.arg sum_dyads} is not a logical.")
+	assert_flag_arg <- function(x, arg) {
+		if (!is.logical(x) || length(x) != 1L || is.na(x)) {
+			cli::cli_abort("{.arg {arg}} must be TRUE or FALSE.")
+		}
 	}
 
-	if (!is.logical(symmetric)) {
-		cli::cli_abort("check data type. {.arg symmetric} is not a logical.")
-	}
-
-	if (!is.logical(diag_to_NA)) {
-		cli::cli_abort("check data type. {.arg diag_to_NA} is not a logical.")
-	}
-
-	if (!is.logical(missing_to_zero)) {
-		cli::cli_abort("check data type. {.arg missing_to_zero} is not a logical.")
-	}
+	assert_flag_arg(sum_dyads, "sum_dyads")
+	assert_flag_arg(symmetric, "symmetric")
+	assert_flag_arg(diag_to_NA, "diag_to_NA")
+	assert_flag_arg(missing_to_zero, "missing_to_zero")
 
 	if (!is.null(actor_time_uniform)) {
-		if (!is.logical(actor_time_uniform)) {
-			cli::cli_abort("check data type. {.arg actor_time_uniform} is not a logical.")
-		}
+		assert_flag_arg(actor_time_uniform, "actor_time_uniform")
 	}
 
 	return(invisible(NULL))
@@ -83,8 +76,8 @@ logical_check <- function(
 
 #' actor_check
 #'
-#' Checks to make sure that the actor fields
-#' are populated and that they do not contain NAs
+#' checks to make sure that the actor fields
+#' are populated and that they do not contain nas
 #' or non-character values
 #' @param actor1 user inputted object denoting
 #' actor1 variable in data.frame
@@ -94,7 +87,7 @@ logical_check <- function(
 #' values are located
 #' @return returns a NULL object but stops the process
 #' if there is an error detected
-#' @author Ha Eun Choi, Shahryar Minhas
+#' @author ha eun choi, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -162,7 +155,7 @@ actor_check <- function(actor1, actor2, dyad_data) {
 
 #' weight_check
 #'
-#' Checks to make sure that the weight field
+#' checks to make sure that the weight field
 #' is populated correctly
 #' @param weight user inputted object for weight
 #' and NULL by default
@@ -170,7 +163,7 @@ actor_check <- function(actor1, actor2, dyad_data) {
 #' values are located
 #' @return returns a NULL object but stops the process
 #' if there is an error detected
-#' @author Ha Eun Choi, Shahryar Minhas
+#' @author ha eun choi, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -201,7 +194,7 @@ weight_check <- function(weight, dyad_data) {
 			))
 		}
 
-		# warn once about Inf weights propagating to summaries
+		# warn once about infinite weights
 		if (is.numeric(w_col) && any(is.infinite(w_col))) {
 			n_inf <- sum(is.infinite(w_col))
 			cli::cli_inform(c(
@@ -213,7 +206,7 @@ weight_check <- function(weight, dyad_data) {
 			)
 		}
 
-		# warn once about NaN weights being treated as NA
+		# warn once about nan weights
 		if (is.numeric(w_col) && any(is.nan(w_col))) {
 			n_nan <- sum(is.nan(w_col))
 			cli::cli_inform(c(
@@ -232,36 +225,36 @@ weight_check <- function(weight, dyad_data) {
 
 #' weight_string_label
 #'
-#' Create attribute label of for weight
+#' create attribute label of for weight
 #' based on user inputs to netify
 #'
 #' @param weight user input for weight
 #' @param sum_dyads logical user input for sum_dyads
 #' @return character string
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
 
 weight_string_label <- function(weight, sum_dyads) {
-	# weight NULL & sum_dyads FALSE
+	# binary ties
 	if (is.null(weight) & !sum_dyads) {
 		weight_string <- "Binary Weights"
 	}
 
-	# weight NULL & sum_dyads TRUE
+	# summed binary ties
 	if (is.null(weight) & sum_dyads) {
 		weight_string <- "Sum of Binary Weights"
 	}
 
-	# weight not NULL & sum_dyads FALSE
+	# observed weights
 	if (!is.null(weight) & !sum_dyads) {
 		weight_string <- paste0(
 			"Weights from `", weight, "`"
 		)
 	}
 
-	# weight not NULL & sum_dyads TRUE
+	# summed observed weights
 	if (!is.null(weight) & sum_dyads) {
 		weight_string <- paste0(
 			"Sum of Weights from `", weight, "`"
@@ -274,7 +267,7 @@ weight_string_label <- function(weight, sum_dyads) {
 
 #' time_check
 #'
-#' Checks to make sure that the time field
+#' checks to make sure that the time field
 #' is populated correctly
 #' @param time user inputted object for weight
 #' and NULL by default
@@ -282,7 +275,7 @@ weight_string_label <- function(weight, sum_dyads) {
 #' values are located
 #' @return returns a NULL object but stops the process
 #' if there is an error detected
-#' @author Ha Eun Choi, Shahryar Minhas
+#' @author ha eun choi, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -301,11 +294,17 @@ time_check <- function(time, dyad_data) {
 	#
 	time_data <- dyad_data[[time]]
 
-	# numeric, Date, POSIXct, POSIXlt, and character
+	# supported time classes
 	if (!inherits(time_data, c("numeric", "integer", "Date", "POSIXct", "POSIXlt", "character"))) {
 		cli::cli_abort(
 			"Time variable must be numeric, Date, POSIXct, POSIXlt, or character. Found class: {class(time_data)[1]}"
 		)
+	}
+	if (anyNA(time_data)) {
+		cli::cli_abort("{.arg time} variable {.val {time}} contains missing values. Remove or impute missing time values before creating a longitudinal netify object.")
+	}
+	if (is.numeric(time_data) && any(!is.finite(time_data))) {
+		cli::cli_abort("{.arg time} variable {.val {time}} must contain finite numeric values.")
 	}
 
 	# if charac, check if it can be reasonably sorted
@@ -323,19 +322,18 @@ time_check <- function(time, dyad_data) {
 
 # repeat_dyads_check
 #
-#' Check whether dyadic observations are repeating in the data.frame object
+#' check whether dyadic observations are repeating in the data.frame object
 #'
-#' This function checks for repeating dyadic observations in a data.frame,
-#' possibly considering a time dimension. It leverages fast C++ code for improved
-#' performance.
+#' this function checks for repeating dyadic observations in a data.frame,
+#' possibly considering a time dimension. it uses c++ code for speed.
 #'
-#' @param dyad_data A data.frame containing the dyadic data.
-#' @param actor1 Character string specifying the column name for actor1.
-#' @param actor2 Character string specifying the column name for actor2.
-#' @param time Optional character string specifying the column name for time.
-#'             If not provided, dyads are considered without regard to time.
-#' @return An integer count of the number of repeating dyads in the data.frame.
-#' @author Shahryar Minhas
+#' @param dyad_data a data.frame containing the dyadic data.
+#' @param actor1 character string specifying the column name for actor1.
+#' @param actor2 character string specifying the column name for actor2.
+#' @param time optional character string specifying the column name for time.
+#'             if not provided, dyads are considered without regard to time.
+#' @return an integer count of the number of repeating dyads in the data.frame.
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -345,7 +343,7 @@ repeat_dyads_check <- function(dyad_data, actor1, actor2, time = NULL) {
 	if (!is.null(time)) {
 		time_vec <- dyad_data[[time]]
 	} else {
-		time_vec <- rep(1, nrow(dyad_data)) # Default time vector if none provided
+		time_vec <- rep(1, nrow(dyad_data)) # default time vector if none provided
 	}
 
 	#
@@ -362,12 +360,12 @@ repeat_dyads_check <- function(dyad_data, actor1, actor2, time = NULL) {
 
 #' edge_value_check
 #'
-#' Warns user about how edge values in adjacency matrices will be determined
+#' warns user about how edge values in adjacency matrices will be determined
 #' @param weight user inputted weight value
 #' @param sum_dyads user inputted sum_dyads logical
 #' @param time logical indicating whether inputted data is longitudinal
 #' @return returns a NULL object but provides warnings to users
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -419,7 +417,7 @@ edge_value_check <- function(weight, sum_dyads, time = FALSE) {
 
 #' add_var_time_check
 #'
-#' Stops the process if the user tries to add time to a
+#' stops the process if the user tries to add time to a
 #' non-longitudinal dataset and vice versa
 #'
 #' @param netlet user inputted netlet object
@@ -427,7 +425,7 @@ edge_value_check <- function(weight, sum_dyads, time = FALSE) {
 #' @return returns a NULL object but stops the process
 #' if there is an error detected
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -445,9 +443,9 @@ add_var_time_check <- function(netlet, time) {
 }
 
 
-#' Validate actor data for network creation
+#' validate actor data for network creation
 #'
-#' This function validates that actor columns contain valid data and
+#' this function validates that actor columns contain valid data and
 #' performs mode-specific checks (e.g., bipartite actor distinctness)
 #'
 #' @param dyad_data a data frame containing dyadic data
@@ -457,7 +455,7 @@ add_var_time_check <- function(netlet, time) {
 #'
 #' @return invisible(TRUE) if validation passes, otherwise throws error
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -503,7 +501,7 @@ actor_mode_check <- function(dyad_data, actor1, actor2, mode) {
 	invisible(TRUE)
 }
 
-#' Validate bipartite network actor requirements
+#' validate bipartite network actor requirements
 #'
 #' @param actors_1 character vector of unique actor1 values
 #' @param actors_2 character vector of unique actor2 values
@@ -511,7 +509,7 @@ actor_mode_check <- function(dyad_data, actor1, actor2, mode) {
 #' @return invisible(TRUE) if validation passes, otherwise throws error or warning
 #'
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -541,21 +539,21 @@ bipartite_actor_check <- function(actors_1, actors_2) {
 	invisible(TRUE)
 }
 
-#' Validate unipartite network actor requirements
+#' validate unipartite network actor requirements
 #'
 #' @param actors_1 character vector of unique actor1 values
 #' @param actors_2 character vector of unique actor2 values
 #'
 #' @return invisible(TRUE) if validation passes, otherwise throws error or warning
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
 
 unipartite_actor_check <- function(actors_1, actors_2) {
 	# for unipartite networks, we might want to check other things
-	# for now, just ensure we have some actors
+	# require at least one actor
 	all_actors <- unique(c(actors_1, actors_2))
 
 	if (length(all_actors) < 4) {

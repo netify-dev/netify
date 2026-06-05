@@ -1,7 +1,7 @@
 set.seed(6886)
+skip_if_not_installed("network")
 
 
-# helper function to create test data
 create_test_data = function() {
 	# cross-sectional data
 	cs_data = data.frame(
@@ -91,7 +91,7 @@ test_that("decompose_netify works for cross-sectional networks", {
 	# check edge data structure
 	expect_true(all(c("from", "to", "time", "weight") %in%
 		names(decomposed$edge_data)))
-	expect_equal(as.character(decomposed$edge_data$time[1]), "1") # cross-sectional should have time = "1"
+		expect_equal(as.character(decomposed$edge_data$time[1]), "1") # cross-sectional time label
 	expect_equal(nrow(decomposed$edge_data), 5) # 5 edges
 
 	# check if dyad_attr was preserved
@@ -109,7 +109,6 @@ test_that("decompose_netify works for cross-sectional networks", {
 
 # tests for decompose_igraph
 test_that("decompose_igraph: unweighted cross-sec, asymmetric", {
-	# generate test data using same approach as netify_to_igraph tests
 	adjm = matrix(
 		as.numeric(sample(0:1, 100, replace = TRUE, prob = c(0.5, .5))),
 		ncol = 10
@@ -132,7 +131,6 @@ test_that("decompose_igraph: unweighted cross-sec, asymmetric", {
 })
 
 test_that("decompose_igraph: weighted cross-sec, asymmetric", {
-	# generate test data
 	adjm = matrix(rnorm(10^2), ncol = 10)
 	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 	g1 = igraph::graph_from_adjacency_matrix(adjm, weighted = TRUE)
@@ -152,7 +150,6 @@ test_that("decompose_igraph: weighted cross-sec, asymmetric", {
 })
 
 test_that("decompose_igraph: weighted cross-sec with dyad and nodal attribs", {
-	# create fake data matching netify_to_igraph test style
 	fake_dyads = expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
 	fake_dyads$weight = rnorm(nrow(fake_dyads))
 	fake_dyads$var2 = rnorm(nrow(fake_dyads))
@@ -178,7 +175,6 @@ test_that("decompose_igraph: weighted cross-sec with dyad and nodal attribs", {
 	expect_true(!is.null(decomposed$ndata))
 	expect_true(all(c("var1", "var2", "actor") %in% names(decomposed$ndata)))
 	expect_equal(nrow(decomposed$ndata), 3)
-	# actor should be the leading column
 	expect_equal(names(decomposed$ndata)[1], "actor")
 
 	# check edge data: the chosen weight (`weight`) is folded into the
@@ -207,7 +203,6 @@ test_that("decompose_igraph: bipartite networks", {
 	# decompose
 	decomposed = decompose_igraph(g)
 
-	# check adjacency matrix dimensions (should be rectangular for bipartite)
 	expect_equal(dim(decomposed$adj_mat), c(5, 10))
 	expect_equal(rownames(decomposed$adj_mat), letters[1:5])
 	expect_equal(colnames(decomposed$adj_mat), letters[17:26])
@@ -220,7 +215,6 @@ test_that("decompose_igraph: bipartite networks", {
 
 # tests for decompose_statnet
 test_that("decompose_statnet: unweighted cross-sec, asymmetric", {
-	# generate test data matching netify_to_statnet test style
 	adjm = matrix(
 		as.numeric(sample(0:1, 100, replace = TRUE, prob = c(0.5, .5))),
 		ncol = 10
@@ -247,7 +241,6 @@ test_that("decompose_statnet: unweighted cross-sec, asymmetric", {
 })
 
 test_that("decompose_statnet: weighted cross-sec, asymmetric", {
-	# generate test data
 	adjm = matrix(rnorm(10^2), ncol = 10)
 	rownames(adjm) = colnames(adjm) = letters[1:nrow(adjm)]
 
@@ -276,7 +269,6 @@ test_that("decompose_statnet: weighted cross-sec, asymmetric", {
 })
 
 test_that("decompose_statnet: weighted cross-sec with dyad and nodal attribs", {
-	# create test data
 	fake_dyads = expand.grid(actor1 = letters[1:3], actor2 = letters[1:3])
 	fake_dyads$weight = rnorm(nrow(fake_dyads))
 	fake_dyads$var2 = rnorm(nrow(fake_dyads))

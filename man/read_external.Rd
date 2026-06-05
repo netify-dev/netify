@@ -14,22 +14,22 @@ read_pajek(file, ...)
 read_gml(file, ...)
 }
 \arguments{
-\item{file}{Path to the input file.}
+\item{file}{path to the input file.}
 
-\item{...}{Passed to \code{netify(igraph_obj, ...)} — typically
+\item{...}{passed to \code{netify(igraph_obj, ...)} -- typically
 \verb{symmetric=}, \verb{mode=}, or \verb{weight=} overrides.}
 }
 \value{
-A netify object.
+a netify object.
 }
 \description{
-Thin wrappers around \code{igraph::read_graph()} for the formats users
+thin wrappers around \code{igraph::read_graph()} for the formats users
 coming from gephi / pajek / networkx most often hand over (graphml,
-pajek \code{.net}, gml). Each reader loads the file via igraph and
+pajek \code{.net}, gml). each reader loads the file via igraph and
 immediately runs \code{netify()} on the result so the user gets a
 netify back in one call, with edge weights auto-detected and
 directedness preserved.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

@@ -1,24 +1,24 @@
 #' Tidy a netify object into a long edge data frame
 #'
-#' `tidy.netify` is an S3 method for the `tidy()` generic from the
-#' \pkg{broom} package. It returns one row per edge with all attached
-#' nodal and dyadic attributes — equivalent to
+#' `tidy.netify` is an s3 method for the `tidy()` generic from the
+#' broom package. it returns one row per edge with all attached
+#' nodal and dyadic attributes -- equivalent to
 #' `unnetify(x, remove_zeros = TRUE)` but exposed under the broom
 #' convention so the netify object plays nicely with broom-style
 #' workflows. (broom is not a hard dependency; this method is registered
-#' as an S3 method on `tidy` and only triggers when the generic is
+#' as an s3 method on `tidy` and only triggers when the generic is
 #' available, e.g., when the user has `library(broom)` loaded.)
 #'
-#' @param x A netify object.
-#' @param remove_zeros Logical. Drop zero-weight edges? Default `TRUE`
+#' @param x a netify object.
+#' @param remove_zeros logical. drop zero-weight edges? default `TRUE`
 #' (matches the typical broom expectation that the returned frame is
 #' actually-observed observations).
-#' @param ... Additional arguments passed to [unnetify()].
+#' @param ... additional arguments passed to [unnetify()].
 #'
-#' @return A tibble (or data.frame if `tibble` isn't installed) with one
-#' row per (non-zero) edge. Columns include `from`, `to`, optional `time`
+#' @return a tibble (or data.frame if `tibble` isn't installed) with one
+#' row per (non-zero) edge. columns include `from`, `to`, optional `time`
 #' (longitudinal), the edge weight column, dyadic covariates, and nodal
-#' covariates merged in with `_from` / `_to` suffixes. Zero-edge inputs
+#' covariates merged in with `_from` / `_to` suffixes. zero-edge inputs
 #' return a 0-row tibble with the schema preserved.
 #'
 #' @seealso [unnetify()] for the underlying converter, and `glance.netify`
@@ -32,7 +32,7 @@
 #' td <- tidy.netify(net)
 #' head(td)
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 tidy.netify <- function(x, remove_zeros = TRUE, ...) {
@@ -47,20 +47,20 @@ tidy.netify <- function(x, remove_zeros = TRUE, ...) {
 	}
 }
 
-#' One-row-per-network summary of a netify object (broom style)
+#' one-row-per-network summary of a netify object (broom style)
 #'
-#' `glance.netify` is an S3 method for the `glance()` generic from the
-#' \pkg{broom} package. It returns the graph-level statistics produced
-#' by [summary.netify()] — one row per network / time period / layer —
+#' `glance.netify` is an s3 method for the `glance()` generic from the
+#' broom package. it returns the graph-level statistics produced
+#' by [summary.netify()] -- one row per network / time period / layer --
 #' so the netify object plays nicely with broom-style workflows. (broom
-#' is not a hard dependency; this method is registered as an S3 method
+#' is not a hard dependency; this method is registered as an s3 method
 #' on `glance` and only triggers when the generic is available.)
 #'
-#' @param x A netify object.
-#' @param ... Additional arguments passed to [summary.netify()] (e.g.,
+#' @param x a netify object.
+#' @param ... additional arguments passed to [summary.netify()] (e.g.,
 #' `other_stats = list(my_stat = my_fn)`).
 #'
-#' @return A tibble (or data.frame if `tibble` isn't installed): one row
+#' @return a tibble (or data.frame if `tibble` isn't installed): one row
 #' per (network, time, layer) combination with density, reciprocity,
 #' mutual, transitivity, edge counts, etc.
 #'
@@ -74,7 +74,7 @@ tidy.netify <- function(x, remove_zeros = TRUE, ...) {
 #' symmetric = FALSE, weight = "verbCoop")
 #' glance.netify(net)
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 glance.netify <- function(x, ...) {

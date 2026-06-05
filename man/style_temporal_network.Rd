@@ -2,16 +2,16 @@
 % Please edit documentation in R/plot_styles.R
 \name{style_temporal_network}
 \alias{style_temporal_network}
-\title{Preset style for temporal/longitudinal networks}
+\title{preset style for temporal/longitudinal networks}
 \usage{
 style_temporal_network()
 }
 \value{
-List of plot arguments
+list of plot arguments
 }
 \description{
-A complete visual style optimized for displaying networks over time
+a complete visual style optimized for displaying networks over time
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

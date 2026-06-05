@@ -20,74 +20,74 @@ to_igraph(
 )
 }
 \arguments{
-\item{netlet}{A netify object containing network data. Single-layer
+\item{netlet}{a netify object containing network data. single-layer
 networks return a single igraph (or a list of igraphs for longitudinal
 input); multilayer networks return a named list keyed by layer, with
 each element itself an igraph or list of igraphs.}
 
-\item{add_nodal_attribs}{Logical. If TRUE (default), includes nodal attributes
-from the netify object as vertex attributes in the igraph object. Set to
+\item{add_nodal_attribs}{logical. if TRUE (default), includes nodal attributes
+from the netify object as vertex attributes in the igraph object. set to
 FALSE to create a network with structure only.}
 
-\item{add_dyad_attribs}{Logical. If TRUE (default), includes dyadic attributes
-from the netify object as edge attributes in the igraph object. Set to
+\item{add_dyad_attribs}{logical. if TRUE (default), includes dyadic attributes
+from the netify object as edge attributes in the igraph object. set to
 FALSE to exclude edge covariates.}
 
-\item{.quiet_na}{Logical. Internal flag to suppress the
-one-shot NA-to-zero cli alert when called from inside netify's
-own summary path. Default \code{FALSE}; do not set in user code.}
+\item{.quiet_na}{logical. internal flag to suppress the
+one-shot na-to-zero cli alert when called from inside netify's
+own summary path. default \code{FALSE}; do not set in user code.}
 }
 \value{
-An igraph object or list of igraph objects:
+an igraph object or list of igraph objects:
 \describe{
-\item{Cross-sectional networks}{Returns a single igraph object}
-\item{Longitudinal networks}{Returns a named list of igraph objects,
+\item{cross-sectional networks}{returns a single igraph object}
+\item{longitudinal networks}{returns a named list of igraph objects,
 with names corresponding to time periods}
-\item{Multilayer networks}{Returns a named list keyed by layer; each
+\item{multilayer networks}{returns a named list keyed by layer; each
 element is itself an igraph or (for longitudinal) a list of igraphs}
 }
 
-The resulting igraph object(s) will have:
+the resulting igraph object(s) will have:
 \itemize{
-\item Vertices named according to actors in the netify object
-\item Edge weights from the netify weight variable (if present)
-\item Vertex attributes for each nodal variable (if add_nodal_attribs = TRUE)
-\item Edge attributes for each dyadic variable (if add_dyad_attribs = TRUE)
+\item vertices named according to actors in the netify object
+\item edge weights from the netify weight variable (if present)
+\item vertex attributes for each nodal variable (if add_nodal_attribs = TRUE)
+\item edge attributes for each dyadic variable (if add_dyad_attribs = TRUE)
 }
 }
 \description{
-Transforms netify network objects into igraph objects (also available as \code{netify_to_igraph}),
+transforms netify network objects into igraph objects (also available as \code{netify_to_igraph}),
 preserving network structure and optionally including nodal and dyadic attributes as vertex
 and edge attributes.
 }
 \details{
-The conversion process handles different netify structures:
+the conversion process handles different netify structures:
 \itemize{
-\item \strong{Cross-sectional}: Direct conversion to a single igraph object
-\item \strong{Longitudinal arrays}: Internally converted to list format, then
+\item \strong{cross-sectional}: direct conversion to a single igraph object
+\item \strong{longitudinal arrays}: internally converted to list format, then
 each time slice becomes a separate igraph object
-\item \strong{Longitudinal lists}: Each time period converted to separate igraph object
+\item \strong{longitudinal lists}: each time period converted to separate igraph object
 }
 
-For directed networks, the resulting igraph object will be directed. For
-undirected networks, the igraph object will be undirected. Edge weights in
+for directed networks, the resulting igraph object will be directed. for
+undirected networks, the igraph object will be undirected. edge weights in
 the netify object become edge weights in igraph.
 
-When longitudinal data includes actors that appear or disappear over time,
+when longitudinal data includes actors that appear or disappear over time,
 each time period's igraph object will contain only the actors present in
 that period.
 }
 \note{
-This function requires the igraph package to be installed.
+this function requires the igraph package to be installed.
 }
 \examples{
-# Load example data
+# load example data
 data(icews)
 
-# Example 1: Cross-sectional network with attributes
+# example 1: cross-sectional network with attributes
 icews_10 <- icews[icews$year == 2010, ]
 
-# Create netify object with attributes
+# create netify object with attributes
 dvars <- c("matlCoop", "verbConf", "matlConf")
 nvars <- c("i_polity2", "i_log_gdp", "i_log_pop")
 
@@ -101,22 +101,22 @@ verbCoop_net <- netify(
     nodal_vars = nvars
 )
 
-# Convert to igraph
+# convert to igraph
 ig <- netify_to_igraph(verbCoop_net)
 
-# Examine the result
+# examine the result
 ig
 igraph::vcount(ig) # number of vertices
 igraph::ecount(ig) # number of edges
 igraph::vertex_attr_names(ig) # nodal attributes
 igraph::edge_attr_names(ig) # edge attributes
 
-# Access specific attributes
+# access specific attributes
 igraph::V(ig)$i_polity2 # polity scores
 igraph::E(ig)$matlCoop # material cooperation
 
 \donttest{
-# Example 2: Longitudinal network
+# example 2: longitudinal network
 verbCoop_longit <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
@@ -127,32 +127,32 @@ verbCoop_longit <- netify(
     nodal_vars = nvars
 )
 
-# Convert to list of igraph objects
+# convert to list of igraph objects
 ig_list <- netify_to_igraph(verbCoop_longit)
 
-# Examine structure
+# examine structure
 length(ig_list) # number of time periods
 names(ig_list) # time period labels
 
-# Access specific time period
+# access specific time period
 ig_2002 <- ig_list[["2002"]]
 ig_2002
 }
 
-# Example 3: Convert without attributes
+# example 3: convert without attributes
 ig_structure_only <- netify_to_igraph(
     verbCoop_net,
     add_nodal_attribs = FALSE,
     add_dyad_attribs = FALSE
 )
 
-# Only network structure, no attributes
+# only network structure, no attributes
 igraph::vertex_attr_names(ig_structure_only) # only "name"
 igraph::edge_attr_names(ig_structure_only) # only "weight" (if present)
 
 }
 \author{
-Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+ha eun choi, cassy dorff, colin henry, shahryar minhas
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

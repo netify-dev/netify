@@ -29,7 +29,6 @@ test_that("multilayer functions handle binary networks correctly", {
 		layer_labels = c("Binary1", "Binary2")
 	)
 
-	# is_binary should be a vector
 	expect_equal(length(attr(multi, "is_binary")), 2)
 	expect_true(all(attr(multi, "is_binary")))
 
@@ -63,7 +62,6 @@ test_that("multilayer functions handle mixed binary/weighted networks", {
 		layer_labels = c("Binary", "Weighted")
 	)
 
-	# is_binary should reflect the mixed nature
 	wb = attr(multi, "is_binary")
 	expect_equal(length(wb), 2)
 	expect_true(wb[1]) # first is binary
@@ -74,7 +72,7 @@ test_that("multilayer functions handle mixed binary/weighted networks", {
 	expect_s3_class(result, "data.frame")
 	expect_equal(nrow(result), 2)
 
-	# check that threshold is NA for binary layer
+	# check that threshold is na for binary layer
 	expect_true(is.na(result[result$layer == "Binary", "threshold_value"]))
 	expect_false(is.na(result[result$layer == "Weighted", "threshold_value"]))
 })

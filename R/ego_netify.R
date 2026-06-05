@@ -1,78 +1,78 @@
 #' Create ego network from a netify object
 #'
 #' `ego_netify` extracts an ego network from a
-#' netify object. An ego network consists of a focal node (ego) and its immediate
-#' neighbors (alters). For weighted networks, users can define neighborhoods using
-#' edge weight thresholds. The function returns a netify object representing the
+#' netify object. an ego network consists of a focal node (ego) and its immediate
+#' neighbors (alters). for weighted networks, users can define neighborhoods using
+#' edge weight thresholds. the function returns a netify object representing the
 #' ego network.
 #'
-#' @param netlet A netify object (class "netify") from which to extract the ego network.
-#' @param ego Character string specifying the name of the ego for whom to
-#'   create the ego network. Must match an actor name in the netify object.
-#' @param threshold Numeric value or vector specifying the threshold for including
-#'   alters in the ego network based on edge weights. For longitudinal networks,
+#' @param netlet a netify object (class "netify") from which to extract the ego network.
+#' @param ego character string specifying the name of the ego for whom to
+#'   create the ego network. must match an actor name in the netify object.
+#' @param threshold numeric value or vector specifying the threshold for including
+#'   alters in the ego network based on edge weights. for longitudinal networks,
 #'   can be a vector with length equal to the number of time periods to apply
-#'   different thresholds over time. If NULL (default), uses 0 for unweighted
+#'   different thresholds over time. if NULL (default), uses 0 for unweighted
 #'   networks and the mean edge weight for weighted networks.
-#' @param ngbd_direction Character string specifying which neighbors to include
-#'   for directed networks. Options are:
+#' @param ngbd_direction character string specifying which neighbors to include
+#'   for directed networks. options are:
 #'   \itemize{
-#'     \item \code{"out"}: Include alters that ego has outgoing ties to
-#'     \item \code{"in"}: Include alters that ego has incoming ties from
-#'     \item \code{"any"}: Include alters with any tie to/from ego (default)
+#'     \item \code{"out"}: include alters that ego has outgoing ties to
+#'     \item \code{"in"}: include alters that ego has incoming ties from
+#'     \item \code{"any"}: include alters with any tie to/from ego (default)
 #'   }
-#' @param include_ego Logical. If TRUE (default), the ego node is included in
-#'   the ego network. If FALSE, only alters are included.
+#' @param include_ego logical. if TRUE (default), the ego node is included in
+#'   the ego network. if FALSE, only alters are included.
 #'
-#' @return A netify object representing the ego network. For longitudinal networks,
+#' @return a netify object representing the ego network. for longitudinal networks,
 #'   returns a list of netify objects with one ego network per time period.
 #'
-#'   Each returned netify object includes additional attributes:
+#'   each returned netify object includes additional attributes:
 #'   \itemize{
 #'     \item \code{ego_netify}: TRUE (indicator that this is an ego network)
-#'     \item \code{ego_id}: Identifier of the ego
-#'     \item \code{threshold}: Threshold value(s) used
-#'     \item \code{ngbd_direction}: Direction specification used
-#'     \item \code{include_ego}: Whether ego was included
+#'     \item \code{ego_id}: identifier of the ego
+#'     \item \code{threshold}: threshold value(s) used
+#'     \item \code{ngbd_direction}: direction specification used
+#'     \item \code{include_ego}: whether ego was included
 #'   }
 #'
 #' @details
-#' The function extracts an ego network by identifying all nodes connected to the
+#' the function extracts an ego network by identifying all nodes connected to the
 #' specified ego based on the given criteria:
 #'
-#' \strong{Neighborhood definition:}
+#' \strong{neighborhood definition:}
 #' \itemize{
-#'   \item For unweighted networks: All nodes with edges to/from ego (threshold = 0)
-#'   \item For weighted networks: All nodes with edge weights exceeding the threshold
-#'   \item Direction matters only for directed networks (controlled by ngbd_direction)
+#'   \item for unweighted networks: all nodes with edges to/from ego (threshold = 0)
+#'   \item for weighted networks: all nodes with edge weights exceeding the threshold
+#'   \item direction matters only for directed networks (controlled by ngbd_direction)
 #' }
 #'
-#' \strong{Threshold behavior:}
+#' \strong{threshold behavior:}
 #' \itemize{
-#'   \item If not specified, defaults to 0 for unweighted networks
-#'   \item If not specified for weighted networks, uses the mean edge weight
-#'   \item For longitudinal networks, can vary by time period if a vector is provided
-#'   \item Edges with weights > threshold are included (not ≥)
+#'   \item if not specified, defaults to 0 for unweighted networks
+#'   \item if not specified for weighted networks, uses the mean edge weight
+#'   \item for longitudinal networks, can vary by time period if a vector is provided
+#'   \item edges with weights > threshold are included (not >=)
 #' }
 #'
-#' \strong{Output structure:}
+#' \strong{output structure:}
 #'
-#' The function preserves all attributes from the original netify object, including
+#' the function preserves all attributes from the original netify object, including
 #' nodal and dyadic variables, but subsets them to include only ego and its neighbors.
-#' For longitudinal networks, ego networks may vary in composition across time periods
+#' for longitudinal networks, ego networks may vary in composition across time periods
 #' as relationships change.
 #'
-#' \strong{Limitations:}
+#' \strong{limitations:}
 #' \itemize{
-#'   \item Currently does not support multilayer networks
-#'   \item Currently does not support bipartite networks
+#'   \item currently does not support multilayer networks
+#'   \item currently does not support bipartite networks
 #' }
 #'
 #' @note
-#' To create ego networks for multiple egos, use \code{lapply} or a loop to call
+#' to create ego networks for multiple egos, use \code{lapply} or a loop to call
 #' this function for each ego separately.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @examples
 #' # cross-sectional ego network from the bundled classroom data
@@ -95,7 +95,7 @@
 #'     actor1 = "i", actor2 = "j", time = "year",
 #'     weight = "verbCoop"
 #' )
-#' pakistan_ego <- ego_netify(netlet, ego = "Pakistan")
+#' pakistan_ego <- ego_netify(netlet, ego = "pakistan")
 #' summary(pakistan_ego)
 #' }
 #'

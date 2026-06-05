@@ -54,7 +54,6 @@ test_that(
 			node_vars = c("var1", "var2", "var3")
 		)
 
-		# the test
 		expect_identical(attributes(add_nodal_result)$nodal_data, result)
 	}
 )
@@ -134,7 +133,6 @@ test_that(
 			node_vars = c("var1", "var2", "var3")
 		)
 
-		# the test
 		expect_identical(attributes(add_nodal_result)$nodal_data, node_result)
 	}
 )

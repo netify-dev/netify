@@ -2,16 +2,16 @@
 % Please edit documentation in R/plot_styles.R
 \name{list_network_styles}
 \alias{list_network_styles}
-\title{List available network styles}
+\title{list available network styles}
 \usage{
 list_network_styles()
 }
 \value{
-A data frame with style names and descriptions
+a data frame with style names and descriptions
 }
 \description{
-Shows all available preset network styles with descriptions
+shows all available preset network styles with descriptions
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

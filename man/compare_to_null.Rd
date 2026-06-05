@@ -2,7 +2,7 @@
 % Please edit documentation in R/compare_to_null.R
 \name{compare_to_null}
 \alias{compare_to_null}
-\title{Test an observed network statistic against a null distribution}
+\title{Test an observed network statistic against a NULL distribution}
 \usage{
 compare_to_null(
   netlet,
@@ -15,75 +15,77 @@ compare_to_null(
 )
 }
 \arguments{
-\item{netlet}{The observed netify object.}
+\item{netlet}{the observed netify object.}
 
-\item{fn}{Function. Takes a \strong{netify object} (not an igraph or
+\item{fn}{function. takes a \strong{netify object} (not an igraph or
 matrix) and returns a single numeric value or a named numeric
-vector. Called once on the observed netlet and \code{n_sim} times on the
-simulated draws. Wrap igraph helpers with \code{to_igraph()} inside
+vector. called once on the observed netlet and \code{n_sim} times on the
+simulated draws. wrap igraph helpers with \code{to_igraph()} inside
 \code{fn}, e.g. \code{fn = function(net) igraph::transitivity(to_igraph(net))}.}
 
-\item{n_sim}{Integer. Number of null-model draws (default \code{200}).}
+\item{n_sim}{integer. number of NULL-model draws (default \code{200}).}
 
-\item{model}{Character. Null-model family; passed to
-\code{simulate.netify()}. One of \code{"erdos_renyi"} (default),
+\item{model}{character. NULL-model family; passed to
+\code{simulate.netify()}. one of \code{"erdos_renyi"} (default),
 \code{"configuration"}, \code{"dyad_permutation"}.
 
-\strong{Picking a null model.} For ERGM-trained users:
+\strong{picking a NULL model.} for ergm-trained users:
 \describe{
-\item{\code{erdos_renyi}}{Random graph at observed density. Use when
-the null hypothesis is "no structure beyond density."}
-\item{\code{configuration}}{Random graph preserving the observed
-degree sequence. Use when you want to ask "is my observed
-structure surprising \emph{given} the degree distribution?" — already
+\item{\code{erdos_renyi}}{random graph at observed density. use when
+the NULL hypothesis is "no structure beyond density."}
+\item{\code{configuration}}{random graph preserving the observed
+degree sequence. use when you want to ask "is my observed
+structure surprising \emph{given} the degree distribution?" -- already
 conditions on degree.}
-\item{\code{dyad_permutation}}{Vertex-label permutation. Preserves the
+\item{\code{dyad_permutation}}{vertex-label permutation. preserves the
 full degree distribution and weight values; use when comparing
 attribute-aware structure (homophily, mixing) against actor
 relabelings.}
 }
-For weighted netlets, the simulator draws weights from the
-empirical non-zero weight distribution so observed-vs-null stats
-are computed on comparable scales (\code{dyad_permutation} is exact —
+for weighted netlets, the simulator draws weights from the
+empirical non-zero weight distribution so observed-vs-NULL stats
+are computed on comparable scales (\code{dyad_permutation} is exact --
 it preserves weights via relabel).}
 
-\item{alpha}{Numeric in (0, 1). Two-sided alpha for the percentile
-CI of the null distribution (default \code{0.05} → 95\%).}
+\item{alpha}{numeric in (0, 1). two-sided alpha for the percentile
+ci of the NULL distribution (default \code{0.05} -> 95\%).}
 
-\item{seed}{Optional integer. Local RNG seed (does not leak into
-the user's global stream).}
+\item{seed}{optional integer. if supplied, sets a local rng seed and
+restores the user's global stream afterward. if \code{NULL}, NULL draws use
+and advance the current rng stream normally.}
 
-\item{verbose}{Logical. Progress ticker every 50 draws.}
+\item{verbose}{logical. progress ticker every 50 draws.}
 }
 \value{
-A \code{data.frame} (also class \code{"netify_null_test"}) with one
+a \code{data.frame} (also class \code{"netify_null_test"}) with one
 row per stat and columns:
 \describe{
-\item{\code{metric}}{Name of the statistic.}
-\item{\code{observed}}{Observed value on \code{netlet}.}
-\item{\code{null_mean}, \code{null_sd}}{Moments of the null distribution.}
-\item{\code{null_lower}, \code{null_upper}}{Percentile CI bounds.}
-\item{\code{p_value}}{Two-sided permutation p-value.}
-\item{\code{extreme}}{Logical: is observed outside \verb{[null_lower, null_upper]}?}
+\item{\code{metric}}{name of the statistic.}
+\item{\code{observed}}{observed value on \code{netlet}.}
+\item{\code{n_valid}}{number of non-\code{na} simulated draws used for that metric.}
+\item{\code{null_mean}, \code{null_sd}}{moments of the NULL distribution.}
+\item{\code{null_lower}, \code{null_upper}}{percentile ci bounds.}
+\item{\code{p_value}}{two-sided monte carlo p-value using the simulated NULL draws.}
+\item{\code{extreme}}{logical: is observed outside \verb{[null_lower, null_upper]}?}
 }
 }
 \description{
-Simulates \code{n_sim} networks from a null model (default Erdős-Rényi
+simulates \code{n_sim} networks from a NULL model (default erdos-renyi
 at the observed density), applies the user-supplied statistic to
-each, and reports how the observed statistic compares — point
-estimate, percentile of the null distribution, and two-sided
-permutation p-value.
+each, and reports how the observed statistic compares -- point
+estimate, percentile of the NULL distribution, and two-sided monte carlo
+p-value against the selected NULL model.
 }
 \details{
-Combines \code{simulate.netify()} + a vectorized \code{fn} loop into the
+combines \code{simulate.netify()} + a vectorized \code{fn} loop into the
 single-call entry users actually want: "is my observed transitivity
 surprising vs. a random graph?"
 }
-\section{Parallel execution}{
+\section{parallel execution}{
 
-\code{compare_to_null} runs serially. At \code{n_sim > 50} with large N, the
+\code{compare_to_null} runs serially. at \code{n_sim > 50} with large n, the
 per-draw \code{fn()} cost (igraph community detection, full
-\code{summary_actor}) dominates wall-clock. There is no built-in
+\code{summary_actor}) dominates wall-clock. there is no built-in
 \verb{parallel =} argument; drive the loop manually with
 \code{future.apply::future_lapply()}:
 \preformatted{
@@ -92,8 +94,8 @@ plan(multisession)
 sims <- simulate(net, nsim = n_sim, model = "erdos_renyi", seed = 1)
 null_draws <- future_lapply(sims, fn, future.seed = TRUE)
 }
-Summarize \code{null_draws} as \code{compare_to_null} does internally
-(\code{rowMeans}, quantiles, two-sided p). For 15K-node weekly
+summarize \code{null_draws} as \code{compare_to_null} does internally
+(\code{rowmeans}, quantiles, two-sided p). for 15k-node weekly
 snapshots with \code{n_sim = 500}, a 4-core \code{multisession} plan cuts
 wall-clock by roughly 3.5x.
 }
@@ -104,7 +106,7 @@ data(icews)
 net <- netify(icews[icews$year == 2010, ],
 actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "verbCoop")
 my_stat <- function(net) {
-s = suppressMessages(summary(net))
+s = suppressmessages(summary(net))
 c(transitivity = s$transitivity, reciprocity = s$reciprocity)
 }
 compare_to_null(net, my_stat, n_sim = 200, seed = 1)
@@ -112,10 +114,10 @@ compare_to_null(net, my_stat, n_sim = 200, seed = 1)
 
 }
 \seealso{
-\code{\link[=simulate.netify]{simulate.netify()}} for the null-model engine,
-\code{\link[=bootstrap_netlet]{bootstrap_netlet()}} for sampling-variation CIs around the
+\code{\link[=simulate.netify]{simulate.netify()}} for the NULL-model engine,
+\code{\link[=bootstrap_netlet]{bootstrap_netlet()}} for sampling-variation cis around the
 observed stat itself.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

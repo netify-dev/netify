@@ -1,6 +1,16 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
+inline void check_index_lengths(
+    IntegerVector matRowIndices,
+    IntegerVector matColIndices,
+    int n_values
+){
+    if (matRowIndices.size() != n_values || matColIndices.size() != n_values) {
+        stop("row indices, column indices, and values must have equal length");
+    }
+}
+
 //' This function fills in an adjacency matrix based on actors and data
 //'
 //' @param n_rows integer specifying number of row actors
@@ -31,7 +41,7 @@ NumericMatrix get_matrix(
     bool missing_to_zero = true,
     bool diag_to_NA = true
 ){
-    // initialize matrix — Rcpp NumericMatrix constructor zero-fills by default,
+    // initialize matrix; Rcpp NumericMatrix constructor zero-fills by default,
     // so we only need explicit fill for NA case
     NumericMatrix m(n_rows, n_cols);
 
@@ -47,6 +57,7 @@ NumericMatrix get_matrix(
 
     // fill in based on data values
     int n_values = value.size();
+    check_index_lengths(matRowIndices, matColIndices, n_values);
     for(int i = 0; i < n_values; i++){
         // Check for valid indices first
         if(IntegerVector::is_na(matRowIndices[i]) || IntegerVector::is_na(matColIndices[i])) {
@@ -127,6 +138,7 @@ IntegerMatrix get_matrix_integer(
 
     // fill in based on data values
     int n_values = value.size();
+    check_index_lengths(matRowIndices, matColIndices, n_values);
     for(int i = 0; i < n_values; i++){
         // Check for valid indices first
         if(IntegerVector::is_na(matRowIndices[i]) || IntegerVector::is_na(matColIndices[i])) {
@@ -206,6 +218,7 @@ LogicalMatrix get_matrix_logical(
 
     // fill in based on data values
     int n_values = value.size();
+    check_index_lengths(matRowIndices, matColIndices, n_values);
     for(int i = 0; i < n_values; i++){
         // Check for valid indices first
         if(IntegerVector::is_na(matRowIndices[i]) || IntegerVector::is_na(matColIndices[i])) {
@@ -214,7 +227,7 @@ LogicalMatrix get_matrix_logical(
         
         int a1i = matRowIndices[i] - 1;  // Convert to 0-based indexing
         int a2i = matColIndices[i] - 1;  // Convert to 0-based indexing
-        bool vi = value[i];
+        int vi = value[i];
 
         // Bounds checking to prevent segfaults
         if(a1i >= 0 && a1i < n_rows && a2i >= 0 && a2i < n_cols) {
@@ -285,6 +298,7 @@ CharacterMatrix get_matrix_character(
 
     // fill in based on data values
     int n_values = value.size();
+    check_index_lengths(matRowIndices, matColIndices, n_values);
     for(int i = 0; i < n_values; i++){
         // Check for valid indices first
         if(IntegerVector::is_na(matRowIndices[i]) || IntegerVector::is_na(matColIndices[i])) {
@@ -364,14 +378,13 @@ List get_matrix_batch(
         int n_rows = n_rows_vec[mat_idx];
         int n_cols = n_cols_vec[mat_idx];
         
-        // Handle empty matrices
-        if(n_rows <= 0 || n_cols <= 0) {
-            NumericMatrix m(std::max(1, n_rows), std::max(1, n_cols));
-            if(missing_to_zero) {
-                std::fill(m.begin(), m.end(), 0.0);
-            } else {
-                std::fill(m.begin(), m.end(), NumericVector::get_na());
-            }
+        if(n_rows < 0 || n_cols < 0) {
+            stop("Matrix dimensions must be non-negative for matrix %d", mat_idx + 1);
+        }
+
+        // Preserve true empty matrices instead of creating phantom rows/columns.
+        if(n_rows == 0 || n_cols == 0) {
+            NumericMatrix m(n_rows, n_cols);
             result[mat_idx] = m;
             continue;
         }

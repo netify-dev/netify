@@ -1,28 +1,31 @@
-# Matrix utility functions for netify
+# matrix utility functions for netify
 #
-# Internal file: shared matrix manipulation utilities used across the
-# netify package. The only user-facing export is `as.matrix.netify`,
+# internal file: shared matrix manipulation utilities used across the
+# netify package. the only user-facing export is `as.matrix.netify`,
 # documented below; the remaining helpers are internal (`@noRd`).
 
-#' Coerce a netify object to a plain matrix
+#' coerce a netify object to a plain matrix
 #'
-#' Strips the netify class and netify-specific attributes so the result
-#' is a clean numeric matrix carrying only `dim` and `dimnames`. For
+#' strips the netify class and netify-specific attributes so the result
+#' is a clean numeric matrix carrying only `dim` and `dimnames`. for
 #' longitudinal netify objects, `time` selects which slice to return;
-#' it defaults to the first time period and emits a hint. Round-trips
+#' it defaults to the first time period and emits a hint. round-trips
 #' (`net |> as.matrix() |> netify()`) recover a fresh cross-sectional
 #' netify object, but structural attributes (symmetric / diag_to_NA /
 #' weight) are re-detected from the matrix on the way back in rather
-#' than copied across, so a directed matrix or one with a non-NA
+#' than copied across, so a directed matrix or one with a non-na
 #' diagonal will be flagged accordingly.
 #'
-#' @param x A netify object.
-#' @param time For longitudinal netify objects, either the integer index
-#'   or character label of the time slice to extract. Defaults to the
+#' @param x a netify object.
+#' @param time for longitudinal netify objects, either the integer index
+#'   or character label of the time slice to extract. defaults to the
 #'   first slice and emits a hint when used implicitly.
-#' @param ... Additional args (ignored).
+#' @param layer for multilayer netify objects, either the integer index
+#'   or character label of the layer to extract. defaults to the first
+#'   layer and emits a hint when used implicitly.
+#' @param ... additional args (ignored).
 #'
-#' @return A plain numeric matrix with `dim` and `dimnames` only (no
+#' @return a plain numeric matrix with `dim` and `dimnames` only (no
 #'   `netify` class, no netify metadata attributes).
 #'
 #' @seealso \code{\link{get_adjacency}} for the data.frame-input
@@ -38,23 +41,69 @@
 #' dim(m)
 #' class(m)
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
-as.matrix.netify <- function(x, time = NULL, ...) {
+as.matrix.netify <- function(x, time = NULL, layer = NULL, ...) {
 	nt <- attr(x, "netify_type")
 	if (is.null(nt) || nt == "cross_sec") {
-		mat <- unclass(x)
+		raw <- unclass(x)
+		if (length(dim(raw)) == 3L) {
+			dn3 <- dimnames(raw)[[3]]
+			if (is.null(layer)) {
+				layer <- 1L
+				cli::cli_alert_info(
+					"{.fn as.matrix.netify} returning layer {.val {dn3[layer] %||% layer}} (first layer). Pass {.arg layer} to choose another."
+				)
+			}
+			layer_idx <- if (is.character(layer)) match(layer, dn3) else as.integer(layer)
+			if (is.na(layer_idx) || layer_idx < 1L || layer_idx > dim(raw)[3]) {
+				cli::cli_abort("layer = {.val {layer}} is out of range for this netify object.")
+			}
+			mat <- raw[, , layer_idx, drop = TRUE]
+		} else {
+			mat <- raw
+		}
 		attributes(mat) <- list(
-			dim = dim(x),
-			dimnames = dimnames(x)
+			dim = dim(mat),
+			dimnames = dimnames(mat)
 		)
 		return(mat)
 	}
 
 	# longitudinal: select a slice
 	if (nt == "longit_array") {
-		dn3 <- dimnames(x)[[3]]
+		raw <- unclass(x)
+		raw_dims <- dim(raw)
+		if (length(raw_dims) == 4L) {
+			layer_names <- dimnames(raw)[[3]]
+			time_names <- dimnames(raw)[[4]]
+			if (is.null(layer)) {
+				layer <- 1L
+				cli::cli_alert_info(
+					"{.fn as.matrix.netify} returning layer {.val {layer_names[layer] %||% layer}} (first layer). Pass {.arg layer} to choose another."
+				)
+			}
+			if (is.null(time)) {
+				time <- 1L
+				cli::cli_alert_info(
+					"{.fn as.matrix.netify} returning time {.val {time_names[time] %||% time}} (first period). Pass {.arg time} to choose another."
+				)
+			}
+			layer_idx <- if (is.character(layer)) match(layer, layer_names) else as.integer(layer)
+			time_idx <- if (is.character(time)) match(time, time_names) else as.integer(time)
+			if (is.na(layer_idx) || layer_idx < 1L || layer_idx > raw_dims[3]) {
+				cli::cli_abort("layer = {.val {layer}} is out of range for this netify object.")
+			}
+			if (is.na(time_idx) || time_idx < 1L || time_idx > raw_dims[4]) {
+				cli::cli_abort("time = {.val {time}} is out of range for this netify object.")
+			}
+			mat <- raw[, , layer_idx, time_idx, drop = TRUE]
+			attributes(mat) <- list(dim = dim(mat), dimnames = dimnames(mat))
+			return(mat)
+		}
+
+		dn3 <- dimnames(raw)[[3]]
 		if (is.null(time)) {
 			time <- 1L
 			cli::cli_alert_info(
@@ -62,10 +111,10 @@ as.matrix.netify <- function(x, time = NULL, ...) {
 			)
 		}
 		idx <- if (is.character(time)) match(time, dn3) else as.integer(time)
-		if (is.na(idx) || idx < 1L || idx > dim(x)[3]) {
+		if (is.na(idx) || idx < 1L || idx > raw_dims[3]) {
 			cli::cli_abort("time = {.val {time}} is out of range for this netify object.")
 		}
-		mat <- unclass(x)[, , idx, drop = TRUE]
+		mat <- raw[, , idx, drop = TRUE]
 		attributes(mat) <- list(dim = dim(mat), dimnames = dimnames(mat))
 		return(mat)
 	}
@@ -81,22 +130,36 @@ as.matrix.netify <- function(x, time = NULL, ...) {
 		idx <- if (is.character(time)) match(time, nms) else as.integer(time)
 		if (is.na(idx) || idx < 1L || idx > length(unclass(x))) {
 			cli::cli_abort("time = {.val {time}} is out of range for this netify object.")
+			}
+			mat <- unclass(x)[[idx]]
+			if (length(dim(mat)) == 3L) {
+				layer_names <- dimnames(mat)[[3]]
+				if (is.null(layer)) {
+					layer <- 1L
+					cli::cli_alert_info(
+						"{.fn as.matrix.netify} returning layer {.val {layer_names[layer] %||% layer}} (first layer). Pass {.arg layer} to choose another."
+					)
+				}
+				layer_idx <- if (is.character(layer)) match(layer, layer_names) else as.integer(layer)
+				if (is.na(layer_idx) || layer_idx < 1L || layer_idx > dim(mat)[3]) {
+					cli::cli_abort("layer = {.val {layer}} is out of range for this netify object.")
+				}
+				mat <- mat[, , layer_idx, drop = TRUE]
+			}
+			attributes(mat) <- list(dim = dim(mat), dimnames = dimnames(mat))
+			return(mat)
 		}
-		mat <- unclass(x)[[idx]]
-		attributes(mat) <- list(dim = dim(mat), dimnames = dimnames(mat))
-		return(mat)
-	}
 
 	cli::cli_abort("Unknown netify_type {.val {nt}}.")
 }
 
-#' Extract matrix from netify object
+#' extract matrix from netify object
 #'
-#' Unified function to extract adjacency matrix from different types of netify objects
+#' unified function to extract adjacency matrix from different types of netify objects
 #'
-#' @param net A netify object (cross-sectional, longitudinal array, or longitudinal list)
-#' @param time_index For longitudinal data, which time period to extract (default: 1)
-#' @return Numeric matrix
+#' @param net a netify object (cross-sectional, longitudinal array, or longitudinal list)
+#' @param time_index for longitudinal data, which time period to extract (default: 1)
+#' @return numeric matrix
 #'
 #' @keywords internal
 #' @noRd
@@ -105,22 +168,34 @@ extract_matrix <- function(net, time_index = 1) {
 	netify_type <- attrs$netify_type
 
 	if (netify_type == "cross_sec") {
+		raw <- get_raw(net)
+		if (length(dim(raw)) == 3L) {
+			return(raw[, , 1L])
+		}
 		return(as.matrix(net))
 	} else if (netify_type == "longit_array") {
-		return(net[, , time_index])
+		raw <- get_raw(net)
+		if (length(dim(raw)) == 4L) {
+			return(raw[, , 1L, time_index])
+		}
+		return(raw[, , time_index])
 	} else if (netify_type == "longit_list") {
-		return(net[[time_index]])
+		mat <- net[[time_index]]
+		if (length(dim(mat)) == 3L) {
+			return(mat[, , 1L])
+		}
+		return(mat)
 	} else {
 		stop("Unknown netify type: ", netify_type)
 	}
 }
 
-#' Get all unique actors from networks
+#' get all unique actors from networks
 #'
-#' Extracts all unique actors from a list of networks or a single network
+#' extracts all unique actors from a list of networks or a single network
 #'
-#' @param nets Either a single netify object or a list of netify objects
-#' @return Character vector of sorted unique actors
+#' @param nets either a single netify object or a list of netify objects
+#' @return character vector of sorted unique actors
 #'
 #' @keywords internal
 #' @noRd
@@ -136,14 +211,14 @@ get_all_actors <- function(nets) {
 	}
 }
 
-#' Align matrices to common actors
+#' align matrices to common actors
 #'
-#' Ensures two or more matrices have the same dimensions and actor ordering
+#' ensures two or more matrices have the same dimensions and actor ordering
 #'
-#' @param ... Either two matrices or a list of matrices
-#' @param all_actors Optional character vector of actors to align to
-#' @param include_diagonal Whether to preserve diagonal values
-#' @return For two matrices: list with mat1 and mat2. For multiple: list of aligned matrices
+#' @param ... either two matrices or a list of matrices
+#' @param all_actors optional character vector of actors to align to
+#' @param include_diagonal whether to preserve diagonal values
+#' @return for two matrices: list with mat1 and mat2. for multiple: list of aligned matrices
 #'
 #' @keywords internal
 #' @noRd
@@ -168,24 +243,29 @@ align_matrices <- function(..., all_actors = NULL, include_diagonal = FALSE) {
 
 	if (length(mats) == 2) {
 		# use rcpp for two matrices
-		return(align_matrices_cpp(mats[[1]], mats[[2]], all_actors))
+		out <- align_matrices_cpp(mats[[1]], mats[[2]], all_actors)
+		if (!include_diagonal) {
+			diag(out$mat1) <- NA
+			diag(out$mat2) <- NA
+		}
+		return(out)
 	} else {
 		# use rcpp for multiple matrices
 		return(batch_align_matrices_cpp(mats, all_actors, include_diagonal))
 	}
 }
 
-#' Melt matrix to long format
+#' melt matrix to long format
 #'
-#' Converts matrix to data frame with row, col, value columns.
-#' Replaces multiple melt functions with single efficient implementation.
+#' converts matrix to data frame with row, col, value columns.
+#' replaces multiple melt functions with single efficient implementation.
 #'
-#' @param mat Matrix to melt
-#' @param remove_diagonal Remove diagonal elements (default: TRUE)
-#' @param remove_zeros Remove zero values (default: TRUE)
-#' @param na.rm Remove NA values (default: TRUE)
-#' @param value.name Name for value column (default: "value")
-#' @return Data frame with row, col, and value columns
+#' @param mat matrix to melt
+#' @param remove_diagonal remove diagonal elements (default: TRUE)
+#' @param remove_zeros remove zero values (default: TRUE)
+#' @param na.rm remove na values (default: TRUE)
+#' @param value.name name for value column (default: "value")
+#' @return data frame with row, col, and value columns
 #'
 #' @keywords internal
 #' @noRd
@@ -209,14 +289,14 @@ melt_matrix <- function(mat,
 	return(result)
 }
 
-#' Calculate correlation with proper handling of edge cases
+#' calculate correlation with proper handling of edge cases
 #'
-#' Wrapper around correlation_cpp that handles constant vectors and missing data
+#' wrapper around correlation_cpp that handles constant vectors and missing data
 #'
-#' @param x First numeric vector
-#' @param y Second numeric vector
-#' @param na.rm Remove NA values before calculation
-#' @return Correlation coefficient or NA if cannot be calculated
+#' @param x first numeric vector
+#' @param y second numeric vector
+#' @param na.rm remove na values before calculation
+#' @return correlation coefficient or na if cannot be calculated
 #'
 #' @importFrom stats var
 #' @keywords internal
@@ -245,13 +325,13 @@ safe_correlation <- function(x, y, na.rm = TRUE) {
 	return(correlation_cpp(x, y))
 }
 
-#' Ensure matrices have same dimensions
+#' ensure matrices have same dimensions
 #'
-#' Pads smaller matrix with zeros to match larger matrix dimensions
+#' pads smaller matrix with zeros to match larger matrix dimensions
 #'
-#' @param mat1 First matrix
-#' @param mat2 Second matrix
-#' @return List with two matrices of same dimensions
+#' @param mat1 first matrix
+#' @param mat2 second matrix
+#' @return list with two matrices of same dimensions
 #'
 #' @keywords internal
 #' @noRd

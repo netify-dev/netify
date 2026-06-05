@@ -7,300 +7,299 @@
 \method{plot}{netify}(x, auto_format = TRUE, ...)
 }
 \arguments{
-\item{x}{A 'netify' object containing network data to visualize.}
+\item{x}{a 'netify' object containing network data to visualize.}
 
-\item{auto_format}{Logical. If TRUE (default), automatically adjusts plot
+\item{auto_format}{logical. if TRUE (default), automatically adjusts plot
 parameters based on network characteristics such as size, density, and
-structure. This includes "intelligent" defaults for:
+structure. this includes "intelligent" defaults for:
 \itemize{
-\item Node size (smaller for larger networks)
-\item Edge transparency (lower for denser networks)
-\item Text labels (enabled for small networks)
-\item Curved edges (for small dense networks)
-\item Isolate removal (for large networks)
+\item node size (smaller for larger networks)
+\item edge transparency (lower for denser networks)
+\item text labels (enabled for small networks)
+\item curved edges (for small dense networks)
+\item isolate removal (for large networks)
 }
-Set to FALSE to disable all automatic formatting. Individual parameters
+set to FALSE to disable all automatic formatting. individual parameters
 can still be overridden even when auto_format is TRUE.}
 
-\item{...}{Additional arguments controlling plot appearance:}
+\item{...}{additional arguments controlling plot appearance:}
 }
 \value{
-A ggplot2 object that can be further customized with additional layers, scales,
-themes, etc. For longitudinal networks, includes facets for each time period.
+a ggplot2 object that can be further customized with additional layers, scales,
+themes, etc. for longitudinal networks, includes facets for each time period.
 
-If \code{return_components = TRUE}, returns a list of plot components that can
+if \code{return_components = TRUE}, returns a list of plot components that can
 be manually assembled or modified.
 }
 \description{
-Creates customizable network visualizations from netify objects using ggplot2.
-Supports cross-sectional and longitudinal networks with extensive options for
+creates customizable network visualizations from netify objects using ggplot2.
+supports cross-sectional and longitudinal networks with extensive options for
 mapping network attributes to visual properties.
 }
 \details{
-\strong{Naming Conventions:}
+\strong{naming conventions:}
 
-The function supports two naming styles for parameters:
+the function supports two naming styles for parameters:
 \itemize{
-\item \strong{Recommended}: Use \code{node_*} for node attributes and
+\item \strong{recommended}: use \code{node_*} for node attributes and
 \code{*_by} for variable mappings (e.g., \code{node_size_by = "degree"})
-\item \strong{Legacy}: Use \code{point_*} for nodes and \code{*_var} for
+\item \strong{legacy}: use \code{point_*} for nodes and \code{*_var} for
 variables (e.g., \code{point_size_var = "degree"})
 }
 
-\strong{Default Behaviors:}
+\strong{default behaviors:}
 \itemize{
-\item For weighted networks, edge transparency maps to weight by default
-\item For directed networks, arrows are added automatically
-\item For longitudinal networks, time periods are shown as facets
-\item Isolates are removed by default (set \code{remove_isolates = FALSE} to keep)
+\item for weighted networks, edge transparency maps to weight by default
+\item for directed networks, arrows are added automatically
+\item for longitudinal networks, time periods are shown as facets
+\item isolates are removed by default (set \code{remove_isolates = FALSE} to keep)
 }
 
-\strong{Customization Tips:}
+\strong{customization tips:}
 \itemize{
-\item Use \code{mutate_weight} to handle skewed weight distributions
-\item Combine fixed and variable aesthetics (e.g., fixed color with variable size)
-\item Add ggplot2 layers after the plot call for further customization
-\item Use \code{select_text} for selective labeling in dense networks
+\item use \code{mutate_weight} to handle skewed weight distributions
+\item combine fixed and variable aesthetics (e.g., fixed color with variable size)
+\item add ggplot2 layers after the plot call for further customization
+\item use \code{select_text} for selective labeling in dense networks
 }
 }
-\section{Layout Parameters}{
+\section{layout parameters}{
 
 \describe{
-\item{\code{layout}}{Character string specifying the igraph layout algorithm.
-Options include: \code{"nicely"} (default), \code{"fr"} (Fruchterman-Reingold),
-\code{"kk"} (Kamada-Kawai), \code{"circle"}, \code{"star"}, \code{"grid"},
+\item{\code{layout}}{character string specifying the igraph layout algorithm.
+options include: \code{"nicely"} (default), \code{"fr"} (fruchterman-reingold),
+\code{"kk"} (kamada-kawai), \code{"circle"}, \code{"star"}, \code{"grid"},
 \code{"tree"}, \code{"bipartite"} (for bipartite networks), \code{"randomly"},
-and others. For ego networks, additional options are available: \code{"radial"}
+and others. for ego networks, additional options are available: \code{"radial"}
 (ego-centric with optional grouping) and \code{"concentric"} (ego at center with
-alters in rings). See \code{\link{get_node_layout}} and \code{\link{get_ego_layout}}
+alters in rings). see \code{\link{get_node_layout}} and \code{\link{get_ego_layout}}
 for full details.}
-\item{\code{point_layout}}{Optional data.frame or list of data.frames containing
-pre-computed node positions with columns 'actor', 'x', and 'y'. Overrides
+\item{\code{point_layout}}{optional data.frame or list of data.frames containing
+pre-computed node positions with columns 'actor', 'x', and 'y'. overrides
 \code{layout} if provided.}
-\item{\code{static_actor_positions}}{Logical. For longitudinal networks, should
-node positions remain constant across time? Default is \code{FALSE}.}
-\item{\code{which_static}}{Integer. When \code{static_actor_positions = TRUE},
-which time period's layout to use as template? If \code{NULL} (default),
+\item{\code{static_actor_positions}}{logical. for longitudinal networks, should
+node positions remain constant across time? default is \code{FALSE}.}
+\item{\code{which_static}}{integer. when \code{static_actor_positions = TRUE},
+which time period's layout to use as template? if \code{NULL} (default),
 creates composite layout from all time periods.}
-\item{\code{seed}}{Integer for reproducible layouts. Default is 6886.}
+\item{\code{seed}}{integer for reproducible layouts. default is 6886.}
 }
 }
 
-\section{Display Control}{
+\section{display control}{
 
 \describe{
-\item{\code{add_edges}}{Logical. Display edges? Default is \code{TRUE}.}
-\item{\code{add_points}}{Logical. Display nodes as points? Default is \code{TRUE}.}
-\item{\code{add_text}}{Logical. Add text labels to nodes? Default is \code{FALSE}.}
-\item{\code{add_text_repel}}{Logical. Add text labels with automatic repositioning to avoid overlaps?
-Default is \code{FALSE}. When \code{TRUE}, overrides \code{add_text}. Uses ggrepel for positioning.}
-\item{\code{add_label}}{Logical. Add boxed labels to nodes? Default is \code{FALSE}.}
-\item{\code{add_label_repel}}{Logical. Add boxed labels with automatic repositioning to avoid overlaps?
-Default is \code{FALSE}. When \code{TRUE}, overrides \code{add_label}. Uses ggrepel for positioning.}
-\item{\code{remove_isolates}}{Logical. Remove unconnected nodes? Default is \code{TRUE}.}
-\item{\code{curve_edges}}{Logical. Use curved edges? Default is \code{FALSE}.}
-\item{\code{use_theme_netify}}{Logical. Apply netify theme? Default is \code{TRUE}.}
-\item{\code{facet_type}}{Character. For multilayer longitudinal networks, controls
-faceting style: \code{"grid"} (default) creates a 2D grid with time × layer,
+\item{\code{add_edges}}{logical. display edges? default is \code{TRUE}.}
+\item{\code{add_points}}{logical. display nodes as points? default is \code{TRUE}.}
+\item{\code{add_text}}{logical. add text labels to nodes? default is \code{FALSE}.}
+\item{\code{add_text_repel}}{logical. add text labels with automatic repositioning to avoid overlaps?
+default is \code{FALSE}. when \code{TRUE}, overrides \code{add_text}. uses ggrepel for positioning.}
+\item{\code{add_label}}{logical. add boxed labels to nodes? default is \code{FALSE}.}
+\item{\code{add_label_repel}}{logical. add boxed labels with automatic repositioning to avoid overlaps?
+default is \code{FALSE}. when \code{TRUE}, overrides \code{add_label}. uses ggrepel for positioning.}
+\item{\code{remove_isolates}}{logical. remove unconnected nodes? default is \code{TRUE}.}
+\item{\code{curve_edges}}{logical. use curved edges? default is \code{FALSE}.}
+\item{\code{use_theme_netify}}{logical. apply netify theme? default is \code{TRUE}.}
+\item{\code{facet_type}}{character. for multilayer longitudinal networks, controls
+faceting style: \code{"grid"} (default) creates a 2d grid with time x layer,
 \code{"wrap"} creates wrapped facets with combined time-layer labels.}
-\item{\code{facet_ncol}}{Integer. Number of columns for facet_wrap layouts. Only
+\item{\code{facet_ncol}}{integer. number of columns for facet_wrap layouts. only
 used when \code{facet_type = "wrap"} or for single-dimension faceting.}
-\item{\code{rescale_edge_weights}}{Logical. For multilayer networks, should edge weights
-be rescaled to a common 0-1 range across all layers? This is useful when layers have
-very different weight scales. Default is \code{FALSE}.}
+\item{\code{rescale_edge_weights}}{logical. for multilayer networks, should edge weights
+be rescaled to a common 0-1 range across all layers? this is useful when layers have
+very different weight scales. default is \code{FALSE}.}
 }
 }
 
-\section{Subsetting Parameters}{
+\section{subsetting parameters}{
 
 \describe{
-\item{\code{node_filter}}{An expression to filter nodes. The expression can reference any
-nodal attribute. For example: \code{node_filter = degree_total > 5} to show only nodes
-with total degree greater than 5. The expression is evaluated in the context of the
-nodal data, so any node-level variable can be used.}
-\item{\code{edge_filter}}{An expression to filter edges. The expression can reference any
-edge attribute (including 'weight' for weighted networks). For example:
-\code{edge_filter = weight > 0.5} to show only edges with weight greater than 0.5.
-The expression is evaluated in the context of the edge data, so any edge-level
-variable can be used.}
-\item{\code{time_filter}}{For longitudinal networks, a vector of time periods to include in the plot.
-Can be numeric indices or character labels matching the time dimension. If NULL
-(default), all time periods are plotted. For cross-sectional networks, this
+\item{\code{node_filter}}{a formula, quoted expression, or function to filter nodes.
+the expression can reference any nodal attribute. for example:
+\code{node_filter = ~ degree_total > 5} shows only nodes with total degree
+greater than 5.}
+\item{\code{edge_filter}}{a formula, quoted expression, or function to filter edges.
+the expression can reference any edge attribute, including 'weight' for weighted
+networks. for example: \code{edge_filter = ~ weight > 0.5} shows only edges
+with weight greater than 0.5.}
+\item{\code{time_filter}}{for longitudinal networks, a vector of time periods to include in the plot.
+can be numeric indices or character labels matching the time dimension. if NULL
+(default), all time periods are plotted. for cross-sectional networks, this
 parameter is ignored.}
 }
 }
 
-\section{Node Aesthetics}{
+\section{node aesthetics}{
 
 
-Fixed aesthetics (same for all nodes):
+fixed aesthetics (same for all nodes):
 \describe{
-\item{\code{node_size} or \code{point_size}}{Numeric. Size of all nodes.}
-\item{\code{node_color} or \code{point_color}}{Color of node borders.}
-\item{\code{node_fill} or \code{point_fill}}{Fill color of nodes (note that fill will only work with certain shapes).}
-\item{\code{node_shape} or \code{point_shape}}{Shape of nodes (see \code{?pch}).}
-\item{\code{node_alpha} or \code{point_alpha}}{Transparency (0-1).}
-\item{\code{node_stroke} or \code{point_stroke}}{Width of node borders.}
+\item{\code{node_size} or \code{point_size}}{numeric. size of all nodes.}
+\item{\code{node_color} or \code{point_color}}{color of node borders.}
+\item{\code{node_fill} or \code{point_fill}}{fill color of nodes (note that fill will only work with certain shapes).}
+\item{\code{node_shape} or \code{point_shape}}{shape of nodes (see \code{?pch}).}
+\item{\code{node_alpha} or \code{point_alpha}}{transparency (0-1).}
+\item{\code{node_stroke} or \code{point_stroke}}{width of node borders.}
 }
 
-Variable aesthetics (mapped to data):
+variable aesthetics (mapped to data):
 \describe{
-\item{\code{node_size_by} or \code{point_size_var}}{Column name for size mapping.}
-\item{\code{node_color_by} or \code{point_color_var}}{Column name for border color.}
-\item{\code{node_fill_by} or \code{point_fill_var}}{Column name for fill color (note that fill will only work with certain shapes).}
-\item{\code{node_shape_by} or \code{point_shape_var}}{Column name for shape.}
-\item{\code{node_alpha_by} or \code{point_alpha_var}}{Column name for transparency.}
+\item{\code{node_size_by} or \code{point_size_var}}{column name for size mapping.}
+\item{\code{node_color_by} or \code{point_color_var}}{column name for border color.}
+\item{\code{node_fill_by} or \code{point_fill_var}}{column name for fill color (note that fill will only work with certain shapes).}
+\item{\code{node_shape_by} or \code{point_shape_var}}{column name for shape.}
+\item{\code{node_alpha_by} or \code{point_alpha_var}}{column name for transparency.}
 }
 }
 
-\section{Edge Aesthetics}{
+\section{edge aesthetics}{
 
 
-Fixed aesthetics:
+fixed aesthetics:
 \describe{
-\item{\code{edge_color}}{Color for all edges. Default is "black".}
-\item{\code{edge_linewidth}}{Width for all edges. Default is 0.5.}
-\item{\code{edge_linetype}}{Line type (1=solid, 2=dashed, etc.).}
-\item{\code{edge_alpha}}{Transparency (0-1).}
-\item{\code{edge_curvature}}{Curvature amount when \code{curve_edges = TRUE}.}
-\item{\code{edge_arrow}}{Arrow specification for directed networks. Example:
+\item{\code{edge_color}}{color for all edges. default is "black".}
+\item{\code{edge_linewidth}}{width for all edges. default is 0.5.}
+\item{\code{edge_linetype}}{line type (1=solid, 2=dashed, etc.).}
+\item{\code{edge_alpha}}{transparency (0-1).}
+\item{\code{edge_curvature}}{curvature amount when \code{curve_edges = TRUE}.}
+\item{\code{edge_arrow}}{arrow specification for directed networks. example:
 \code{arrow(length = unit(0.2, "cm"))}.}
 }
 
-Variable aesthetics:
+variable aesthetics:
 \describe{
-\item{\code{edge_color_by} or \code{edge_color_var}}{Column name for color mapping.}
-\item{\code{edge_linewidth_by} or \code{edge_linewidth_var}}{Column name for width.}
-\item{\code{edge_linetype_by} or \code{edge_linetype_var}}{Column name for line type.}
-\item{\code{edge_alpha_by} or \code{edge_alpha_var}}{Column name for transparency.
-For weighted networks, defaults to the weight variable if not specified.}
+\item{\code{edge_color_by} or \code{edge_color_var}}{column name for color mapping.}
+\item{\code{edge_linewidth_by} or \code{edge_linewidth_var}}{column name for width.}
+\item{\code{edge_linetype_by} or \code{edge_linetype_var}}{column name for line type.}
+\item{\code{edge_alpha_by} or \code{edge_alpha_var}}{column name for transparency.
+for weighted networks, defaults to the weight variable if not specified.}
 }
 }
 
-\section{Text and Label Options}{
+\section{text and label options}{
 
 
-Selective labeling:
+selective labeling:
 \describe{
-\item{\code{select_text}}{Character vector of node names to show as text. When used,
+\item{\code{select_text}}{character vector of node names to show as text. when used,
 text labels will automatically use \code{geom_text_repel} to avoid overlaps.}
-\item{\code{select_text_display}}{Alternative text to display (same length as
+\item{\code{select_text_display}}{alternative text to display (same length as
 \code{select_text}).}
-\item{\code{select_label}}{Character vector of node names to show with boxes. When used,
+\item{\code{select_label}}{character vector of node names to show with boxes. when used,
 labels will automatically use \code{geom_label_repel} to avoid overlaps.}
-\item{\code{select_label_display}}{Alternative labels (same length as
+\item{\code{select_label_display}}{alternative labels (same length as
 \code{select_label}).}
 }
 
-Text aesthetics:
+text aesthetics:
 \describe{
-\item{\code{text_size}}{Fixed size for all text. Default is 3.88.}
-\item{\code{text_color}}{Fixed color for all text. Default is "black".}
-\item{\code{text_alpha}}{Fixed transparency for text.}
-\item{\code{text_size_by}}{Variable to map to text size.}
-\item{\code{text_color_by}}{Variable to map to text color.}
+\item{\code{text_size}}{fixed size for all text. default is 3.88.}
+\item{\code{text_color}}{fixed color for all text. default is "black".}
+\item{\code{text_alpha}}{fixed transparency for text.}
+\item{\code{text_size_by}}{variable to map to text size.}
+\item{\code{text_color_by}}{variable to map to text color.}
 }
 
-Label (boxed text) aesthetics have similar parameters with \code{label_} prefix.
+label (boxed text) aesthetics have similar parameters with \code{label_} prefix.
 
-Text repel parameters (when \code{add_text_repel = TRUE}):
+text repel parameters (when \code{add_text_repel = TRUE}):
 \describe{
-\item{\code{text_repel_force}}{Force of repulsion between overlapping text. Default is 1.}
-\item{\code{text_repel_max_overlaps}}{Maximum number of overlaps to tolerate. Default is 10.}
-\item{\code{text_repel_box_padding}}{Padding around text. Default is 0.25.}
-\item{\code{text_repel_point_padding}}{Padding around points. Default is 0.}
-\item{\code{text_repel_segment_color}}{Color of connecting segments. Default is "grey50".}
+\item{\code{text_repel_force}}{force of repulsion between overlapping text. default is 1.}
+\item{\code{text_repel_max_overlaps}}{maximum number of overlaps to tolerate. default is 10.}
+\item{\code{text_repel_box_padding}}{padding around text. default is 0.25.}
+\item{\code{text_repel_point_padding}}{padding around points. default is 0.}
+\item{\code{text_repel_segment_color}}{color of connecting segments. default is "grey50".}
 }
 
-Label repel parameters (when \code{add_label_repel = TRUE}):
+label repel parameters (when \code{add_label_repel = TRUE}):
 \describe{
-\item{Similar to text_repel but with \code{label_repel_} prefix}{}
-\item{\code{label_repel_label_padding}}{Padding around label boxes. Default is 0.25.}
-\item{\code{label_repel_label_r}}{Radius of label box corners. Default is 0.15.}
+\item{similar to text_repel but with \code{label_repel_} prefix}{}
+\item{\code{label_repel_label_padding}}{padding around label boxes. default is 0.25.}
+\item{\code{label_repel_label_r}}{radius of label box corners. default is 0.15.}
 }
 }
 
-\section{Scale Labels}{
+\section{scale labels}{
 
 
-Customize legend titles:
+customize legend titles:
 \describe{
-\item{\code{node_size_label} or \code{point_size_label}}{Legend title for size.}
-\item{\code{node_color_label} or \code{point_color_label}}{Legend title for color.}
-\item{\code{edge_alpha_label}}{Legend title for edge transparency.}
-\item{\code{edge_color_label}}{Legend title for edge color.}
+\item{\code{node_size_label} or \code{point_size_label}}{legend title for size.}
+\item{\code{node_color_label} or \code{point_color_label}}{legend title for color.}
+\item{\code{edge_alpha_label}}{legend title for edge transparency.}
+\item{\code{edge_color_label}}{legend title for edge color.}
 }
 }
 
-\section{Highlighting Parameters}{
+\section{highlighting parameters}{
 
 \describe{
-\item{\code{highlight}}{Character vector of node names to highlight with different colors.
-Non-highlighted nodes will be colored grey. Highlighted nodes can also be automatically
+\item{\code{highlight}}{character vector of node names to highlight with different colors.
+non-highlighted nodes will be colored grey. highlighted nodes can also be automatically
 enlarged if \code{highlight_size_increase} is greater than 1.}
-\item{\code{highlight_color}}{Named vector of colors for highlighted nodes. If NULL,
+\item{\code{highlight_color}}{named vector of colors for highlighted nodes. if NULL,
 uses default distinct colors (red, blue, green for up to 3 nodes, or a color palette
-for more). Names should match the values in the \code{highlight} parameter.
-Example: \code{c('USA' = 'blue', 'China' = 'red', 'Russia' = 'green')}.}
-\item{\code{highlight_label}}{Title for the highlight legend. Default is "Highlighted".}
-\item{\code{highlight_size_increase}}{Numeric factor(s) to increase size of highlighted nodes.
-Can be a single value (applied to all highlighted nodes) or a vector of length
+for more). names should match the values in the \code{highlight} parameter.
+example: \code{c('usa' = 'blue', 'china' = 'red', 'russia' = 'green')}.}
+\item{\code{highlight_label}}{title for the highlight legend. default is "highlighted".}
+\item{\code{highlight_size_increase}}{numeric factor(s) to increase size of highlighted nodes.
+can be a single value (applied to all highlighted nodes) or a vector of length
 \code{length(highlight) + 1} where each value corresponds to a highlighted node
-and the last value applies to "Other" nodes. Default is 1 (no size increase).
-Example: \code{c(3, 1, 1, 0.5)} for 3 highlighted
+and the last value applies to "other" nodes. default is 1 (no size increase).
+example: \code{c(3, 1, 1, 0.5)} for 3 highlighted
 nodes where the first is 3x larger, the next two are normal size, and all
 others are half size.}
-\item{\code{show_other_in_legend}}{Logical. Include "Other" category in legend? Default is FALSE.
-When FALSE, only highlighted nodes appear in the legend.}
+\item{\code{show_other_in_legend}}{logical. include "other" category in legend? default is FALSE.
+when FALSE, only highlighted nodes appear in the legend.}
 }
 }
 
-\section{Ego Layout Parameters}{
+\section{ego layout parameters}{
 
 
-For ego networks (created with \code{\link{ego_netify}}), additional layout options
+for ego networks (created with \code{\link{ego_netify}}), additional layout options
 control the ego-centric visualization:
 \describe{
-\item{\code{ego_group_by}}{Character string specifying a nodal attribute to use for
-grouping alters in ego layouts. For "radial" layout, creates sectors. For
+\item{\code{ego_group_by}}{character string specifying a nodal attribute to use for
+grouping alters in ego layouts. for "radial" layout, creates sectors. for
 "concentric" layout, determines ring assignment.}
-\item{\code{ego_order_by}}{Character string specifying a nodal attribute to use for
-ordering alters within groups or rings. Common options include "degree_total".}
-\item{\code{ego_weight_to_distance}}{Logical. For weighted networks with "radial"
-layout, should edge weights determine distance from ego? Higher weights place
-alters closer to ego. Default is \code{FALSE}.}
-\item{\code{ego_ring_gap}}{Numeric (0-1). Gap between concentric rings as proportion
-of radius. Only for "concentric" layout. Default is 0.3.}
-\item{\code{ego_size}}{Numeric. Relative size of central area reserved for ego.
-Larger values create more space between ego and alters. Default is 0.1.}
+\item{\code{ego_order_by}}{character string specifying a nodal attribute to use for
+ordering alters within groups or rings. common options include "degree_total".}
+\item{\code{ego_weight_to_distance}}{logical. for weighted networks with "radial"
+layout, should edge weights determine distance from ego? higher weights place
+alters closer to ego. default is \code{FALSE}.}
+\item{\code{ego_ring_gap}}{numeric (0-1). gap between concentric rings as proportion
+of radius. only for "concentric" layout. default is 0.3.}
+\item{\code{ego_size}}{numeric. relative size of central area reserved for ego.
+larger values create more space between ego and alters. default is 0.1.}
 }
 }
 
-\section{Special Parameters}{
+\section{special parameters}{
 
 \describe{
-\item{\code{mutate_weight}}{Function to transform edge weights before plotting.
-Example: \code{log1p} for log(x+1) transformation. Applied before mapping to
+\item{\code{mutate_weight}}{function to transform edge weights before plotting.
+example: \code{log1p} for log(x+1) transformation. applied before mapping to
 aesthetics.}
-\item{\code{return_components}}{Logical. Return plot components instead of
-assembled plot? Useful for manual customization. Default is \code{FALSE}.}
-\item{\code{style}}{Either a style function (e.g., \code{style_budapest})
+\item{\code{return_components}}{logical. return plot components instead of
+assembled plot? useful for manual customization. default is \code{FALSE}.}
+\item{\code{style}}{either a style function (e.g., \code{style_rose})
 that applies a complete visual style including colors, shapes, and layout
 preferences, or the string \code{"heatmap"} to render the adjacency
-matrix as a tile plot instead of a node-link diagram. When
+matrix as a tile plot instead of a node-link diagram. when
 \code{style = "heatmap"} and edge weights cross zero (signed network),
 the fill scale automatically uses a diverging palette centred at zero;
-otherwise a sequential viridis ramp is used. Optional \code{low},
+otherwise a sequential viridis ramp is used. optional \code{low},
 \code{mid}, and \code{high} arguments override the diverging palette
 endpoints.}
 }
 }
 
 \examples{
-# Load example data
+# load example data
 data(icews)
 
-# Basic cross-sectional network
+# basic cross-sectional network
 icews_10 <- icews[icews$year == 2010, ]
 net_10 <- netify(
     icews_10,
@@ -309,31 +308,31 @@ net_10 <- netify(
     weight = "verbCoop"
 )
 
-# Simple plot with auto-formatting (default)
+# simple plot with auto-formatting (default)
 plot(net_10)
 
-# Plot without auto-formatting for full control
+# plot without auto-formatting for full control
 plot(net_10, auto_format = FALSE)
 
 # add nodal stats to netlet
 net_10 <- add_node_vars(
     net_10,
     summary_actor(net_10),
-    "actor"
+    actor = "actor"
 )
 
-# Customized plot with new naming convention
+# customized plot with new naming convention
 plot(net_10,
     edge_color = "lightgrey",
-    node_size_by = "degree_total", # Instead of point_size_var
+    node_size_by = "degree_total", # maps degree to node size
     node_color = "steelblue",
-    edge_alpha_by = "verbCoop", # Instead of edge_alpha_var
-    node_size_label = "Degree",
-    edge_alpha_label = "Verbal Cooperation"
+    edge_alpha_by = "verbCoop", # maps edge weight to alpha
+    node_size_label = "degree",
+    edge_alpha_label = "verbal cooperation"
 )
 
 \donttest{
-# Longitudinal network example
+# longitudinal network example
 net_longit <- netify(
     icews,
     actor1 = "i", actor2 = "j",
@@ -343,7 +342,7 @@ net_longit <- netify(
     nodal_vars = c("i_polity2", "i_log_gdp")
 )
 
-# Add network statistics
+# add network statistics
 net_longit <- add_node_vars(
     net_longit,
     summary_actor(net_longit),
@@ -351,26 +350,26 @@ net_longit <- add_node_vars(
     time = "time"
 )
 
-# Plot with multiple aesthetics
+# plot with multiple aesthetics
 plot(net_longit,
-    # Edges
+    # edges
     edge_color = "grey70",
-    mutate_weight = log1p, # Transform weights
-    # Nodes
+    mutate_weight = log1p, # transform weights
+    # nodes
     node_size_by = "degree_total",
     node_color_by = "i_polity2",
-    # Labels
-    node_size_label = "Total Degree",
-    node_color_label = "Polity Score",
-    edge_alpha_label = "Log(Verbal Coop.)",
-    # Layout
-    static_actor_positions = TRUE # Keep positions constant
+    # labels
+    node_size_label = "total degree",
+    node_color_label = "polity score",
+    edge_alpha_label = "log(verbal coop.)",
+    # layout
+    static_actor_positions = TRUE # keep positions constant
 )
 
-# Selective labeling example
+# selective labeling example
 plot(net_10,
     node_size_by = "degree_total",
-    select_text = c("United States", "China", "Russian Federation"),
+    select_text = c("united states", "china", "russian federation"),
     text_size = 3,
     text_color = "darkred"
 )
@@ -378,19 +377,19 @@ plot(net_10,
 # choose alternative labels for selected text
 plot(net_10,
     node_size_by = "degree_total",
-    select_text = c("United States", "China", "Russian Federation"),
-    select_text_display = c("USA", "CHN", "RUS"),
+    select_text = c("united states", "china", "russian federation"),
+    select_text_display = c("usa", "chn", "rus"),
     text_size = 3,
     text_color = "darkred"
 )
 
-# Time subsetting example
+# time subsetting example
 plot(net_longit,
     time_filter = c("2010", "2011", "2012")
 )
 
-# Node subsetting example
-# democracies with high GDP
+# node subsetting example
+# democracies with high gdp
 plot(net_longit, node_filter = ~ i_polity2 > 6 & i_log_gdp > 25)
 
 # use return_components=TRUE
@@ -400,14 +399,14 @@ g10 <- plot(
     node_alpha = .8,
     arrow = ggplot2::arrow(length = ggplot2::unit(0.01, "inches")),
     node_size_by = "degree_total",
-    node_size_label = "Log(Degree)",
-    edge_alpha_label = "Log(Verbal Coop.)",
+    node_size_label = "log(degree)",
+    edge_alpha_label = "log(verbal coop.)",
     remove_isolates = TRUE,
     mutate_weight = log1p,
     return_components = TRUE
 )
 
-# Manually assemble with custom modifications
+# manually assemble with custom modifications
 # to scale aesthetics such as edges
 g10$base +
     netify_edge(g10) +
@@ -418,5 +417,5 @@ g10$base +
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

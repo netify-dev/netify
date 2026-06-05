@@ -15,23 +15,23 @@ check_dependency <- function(library_name) {
 }
 assert_dependency <- checkmate::makeAssertionFunction(check_dependency)
 
-#' Convert a sparseMatrix input to a dense base matrix with a size guard
+#' convert a sparsematrix input to a dense base matrix with a size guard
 #'
-#' netify stores adjacencies densely. Accepting a large, very sparse
-#' sparseMatrix and silently densifying can balloon RAM (e.g. N = 15K
-#' -> ~1.7 GB for the dense allocation, regardless of how sparse the
-#' source was). Bail out unless the caller opts in via
+#' netify stores adjacencies densely. accepting a large, very sparse
+#' sparsematrix and silently densifying can balloon ram (e.g. n = 15k
+#' -> ~1.7 gb for the dense allocation, regardless of how sparse the
+#' source was). bail out unless the caller opts in via
 #' `force_dense = TRUE`.
 #'
-#' @param x A Matrix-package sparse matrix (e.g. dgCMatrix).
-#' @param force_dense Logical; if TRUE skip the size/density guard.
+#' @param x a matrix-package sparse matrix (e.g. dgcmatrix).
+#' @param force_dense logical; if TRUE skip the size/density guard.
 #'
-#' @return A base R matrix.
+#' @return a base r matrix.
 #'
 #' @keywords internal
 #' @noRd
 densify_sparse_input <- function(x, force_dense = FALSE) {
-	# Matrix package must be present to interrogate sparse matrices
+	# matrix package must be present to interrogate sparse matrices
 	if (!requireNamespace("Matrix", quietly = TRUE)) {
 		cli::cli_abort(
 			"Sparse matrix input requires the {.pkg Matrix} package."
@@ -43,12 +43,12 @@ densify_sparse_input <- function(x, force_dense = FALSE) {
 	n_row <- dims[1]; n_col <- dims[2]
 	n_cells <- as.numeric(n_row) * as.numeric(n_col)
 
-	# density = nonzero / total cells. pattern matrices (ngCMatrix) have
-	# no @x slot, so guard the slot access and fall back to Matrix::nnzero
+	# density = nonzero / total cells. pattern matrices (ngcmatrix) have
+	# no @x slot, so guard the slot access and fall back to matrix::nnzero
 	nnz <- if (methods::.hasSlot(x, "x")) length(x@x) else Matrix::nnzero(x)
 	density <- nnz / max(n_cells, 1)
 
-	# guard against accidental gigabyte allocations: large N with very
+	# guard against accidental gigabyte allocations: large n with very
 	# sparse fill is almost certainly a mistake on the user's end
 	too_big <- max(n_row, n_col) > 5000L
 	too_sparse <- density < 0.01
@@ -63,9 +63,9 @@ densify_sparse_input <- function(x, force_dense = FALSE) {
 		)
 	}
 
-	# densify via Matrix dispatch (handles dgCMatrix, dgTMatrix, lgCMatrix, ...)
+	# densify via matrix dispatch (handles dgcmatrix, dgtmatrix, lgcmatrix, ...)
 	out <- as.matrix(x)
-	# preserve dimnames in case Matrix dropped them
+	# preserve dimnames in case matrix dropped them
 	if (is.null(dimnames(out)) && !is.null(dimnames(x))) {
 		dimnames(out) <- dimnames(x)
 	}
@@ -75,18 +75,18 @@ densify_sparse_input <- function(x, force_dense = FALSE) {
 #' NULL-coalescing operator
 #'
 #'
-#' @param x The primary value to check
-#' @param y The fallback value to use if x is NULL
+#' @param x the primary value to check
+#' @param y the fallback value to use if x is NULL
 #'
-#' @return Returns x if x is not NULL, otherwise returns y
+#' @return returns x if x is not NULL, otherwise returns y
 #'
 #' @examples
-#' # Not run (internal function):
+#' # not run (internal function):
 #' # x %||% y  # returns x if x is not NULL, otherwise y
 #' # NULL %||% "default"  # returns "default"
 #' # "value" %||% "default"  # returns "value"
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -100,10 +100,10 @@ densify_sparse_input <- function(x, force_dense = FALSE) {
 
 #' char
 #'
-#' Converts values into characters
+#' converts values into characters
 #' @param x vector
 #' @return character vector
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -114,10 +114,10 @@ char <- function(x) {
 
 #' num
 #'
-#' Converts values into character then numeric
+#' converts values into character then numeric
 #' @param x vector
 #' @return numeric vector
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -125,18 +125,18 @@ num <- function(x) {
 	as.numeric(char(x))
 }
 
-#' Convert various time formats to numeric
+#' convert various time formats to numeric
 #'
-#' Internal function to convert Date, POSIXct, character, etc. to numeric
+#' internal function to convert date, posixct, character, etc. to numeric
 #' values that can be used for creating networks
 #'
-#' @param time_data Vector of time values
-#' @param time_col Name of the time column (for error messages)
+#' @param time_data vector of time values
+#' @param time_col name of the time column (for error messages)
 #'
-#' @return A list with:
-#'   - numeric_time: Numeric version of the time variable
-#'   - time_labels: Character labels for the time periods
-#'   - original_class: The original class of the time data
+#' @return a list with:
+#'   - numeric_time: numeric version of the time variable
+#'   - time_labels: character labels for the time periods
+#'   - original_class: the original class of the time data
 #'
 #' @keywords internal
 #' @noRd
@@ -168,14 +168,16 @@ convert_time_to_numeric <- function(time_data, time_col = "time") {
 	}
 
 	if (inherits(time_data, c("POSIXct", "POSIXlt"))) {
-		# convert to date first (ignore time of day)
-		date_data <- as.Date(time_data)
-		unique_dates <- sort(unique(date_data))
-		time_mapping <- setNames(seq_along(unique_dates), char(unique_dates))
+		# preserve distinct timestamps rather than collapsing to calendar dates
+		time_posix <- as.POSIXct(time_data)
+		unique_times <- sort(unique(time_posix))
+		time_keys <- char(time_posix)
+		unique_keys <- char(unique_times)
+		time_mapping <- setNames(seq_along(unique_times), unique_keys)
 
 		return(list(
-			numeric_time = time_mapping[char(date_data)],
-			time_labels = char(unique_dates),
+			numeric_time = time_mapping[time_keys],
+			time_labels = format(unique_times, "%Y-%m-%d %H:%M:%S %Z"),
 			original_class = original_class
 		))
 	}
@@ -205,11 +207,11 @@ convert_time_to_numeric <- function(time_data, time_col = "time") {
 
 #' unique_vector
 #'
-#' Get unique vector from
+#' get unique vector from
 #' multiple vector inputs
 #' @param ... vector inputs
 #' @return numeric vector
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -219,17 +221,88 @@ unique_vector <- function(...) {
 	return(u_vec)
 }
 
+#' normalize_bipartite_nodelist
+#'
+#' parse partition-aware bipartite nodelists.
+#'
+#' @keywords internal
+#' @noRd
+normalize_bipartite_nodelist <- function(nodelist, row_actors, col_actors) {
+	row_actors <- as.character(row_actors)
+	col_actors <- as.character(col_actors)
+	parse_mode <- function(x) {
+		x <- tolower(as.character(x))
+		ifelse(x %in% c("row", "rows", "row_actor", "row_actors", "actor1",
+						"source", "sender", "from", "false", "0"),
+			"row",
+			ifelse(x %in% c("col", "cols", "column", "columns", "col_actor",
+							"col_actors", "actor2", "target", "receiver", "to",
+							"true", "1"),
+				"col", NA_character_))
+	}
+
+	if (is.data.frame(nodelist)) {
+		df <- as.data.frame(nodelist, stringsAsFactors = FALSE)
+		actor_col <- intersect(c("actor", "name", "node", "vertex"), names(df))[1]
+		mode_col <- intersect(c("mode", "type", "part", "partition", "bipartite_mode"), names(df))[1]
+		if (is.na(actor_col) || is.na(mode_col)) {
+			cli::cli_abort(c(
+				"x" = "Bipartite {.arg nodelist} data frames need actor and mode columns.",
+				"i" = "Use columns like {.code actor} and {.code mode}, with mode values {.val row} or {.val col}."
+			))
+		}
+		mode <- parse_mode(df[[mode_col]])
+		if (anyNA(mode)) {
+			cli::cli_abort("{.arg nodelist} has bipartite mode values that are not {.val row} or {.val col}.")
+		}
+		rows <- as.character(df[[actor_col]][mode == "row"])
+		cols <- as.character(df[[actor_col]][mode == "col"])
+		return(list(
+			rows = unique_vector(row_actors, rows),
+			cols = unique_vector(col_actors, cols)
+		))
+	}
+
+	if (is.list(nodelist)) {
+		row_nm <- intersect(c("row", "rows", "row_actors", "actor1", "sources", "senders"), names(nodelist))[1]
+		col_nm <- intersect(c("col", "cols", "columns", "col_actors", "actor2", "targets", "receivers"), names(nodelist))[1]
+		if (is.na(row_nm) || is.na(col_nm)) {
+			cli::cli_abort(c(
+				"x" = "Bipartite {.arg nodelist} lists need row and column entries.",
+				"i" = "Use {.code nodelist = list(row = row_actors, col = col_actors)}."
+			))
+		}
+		return(list(
+			rows = unique_vector(row_actors, as.character(unlist(nodelist[[row_nm]], use.names = FALSE))),
+			cols = unique_vector(col_actors, as.character(unlist(nodelist[[col_nm]], use.names = FALSE)))
+		))
+	}
+
+	flat <- as.character(nodelist)
+	unknown <- setdiff(flat, c(row_actors, col_actors))
+	if (length(unknown) > 0L) {
+		cli::cli_abort(c(
+			"x" = "A flat {.arg nodelist} cannot place bipartite isolate{?s} into row or column mode: {.val {unknown}}.",
+			"i" = "Use {.code nodelist = list(row = ..., col = ...)} or a data frame with actor/mode columns."
+		))
+	}
+	list(
+		rows = unique_vector(row_actors, intersect(flat, row_actors)),
+		cols = unique_vector(col_actors, intersect(flat, col_actors))
+	)
+}
+
 #' identical_recursive
 #'
-#' Recursively check if two or more objects are identical
+#' recursively check if two or more objects are identical
 #' @param ... objects to check
 #' @return logical indicating whether objects are identical
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
 identical_recursive <- function(...) {
-	# get objects to compare - use list() instead of c() to preserve structure
+	# keep comparison objects in a list
 	args <- list(...)
 
 	# if called with a single list argument, use that list
@@ -254,21 +327,21 @@ identical_recursive <- function(...) {
 		)
 	}
 
-	# return TRUE if all are identical
+	# return true if all are identical
 	return(all(ident_logic))
 }
 
-#' Break string into list of strings by some fixed character
+#' break string into list of strings by some fixed character
 #' and then extract the desired values around that fixed
 #' character
 #'
 #' @param string_to_split character: string to be split
 #' @param break_by character: character to break string by
 #' @param to_extract integer: index of the string to be extracted
-#' @param fixed If `TRUE` match exactly, otherwise use regular expressions
+#' @param fixed if `TRUE` match exactly, otherwise use regular expressions
 #' @return a character vector of the extracted strings
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -282,12 +355,12 @@ split_string <- function(string_to_split, break_by, to_extract, fixed = TRUE) {
 
 #' array_to_list
 #'
-#' This function converts a three dimensional array
+#' this function converts a three dimensional array
 #' into a list of matrices
 #' @param arr three dimensional array to list
-#' @param preserveAttr logical indicating whether to preserve attributes
+#' @param preserveattr logical indicating whether to preserve attributes
 #' @return list object
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -327,11 +400,11 @@ array_to_list <- function(arr, preserveAttr = TRUE) {
 
 #' list_to_array
 #'
-#' This function converts a list of matrices
+#' this function converts a list of matrices
 #' into a three dimensional array
 #' @param list_of_mats list object
 #' @return three dimensional array
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -360,14 +433,14 @@ list_to_array <- function(list_of_mats) {
 }
 
 
-#' Snapshot the global RNG and return a restorer
+#' snapshot the global rng and return a restorer
 #'
-#' Captures `.Random.seed` from the global environment (if set) so a
+#' captures `.random.seed` from the global environment (if set) so a
 #' caller-supplied `set.seed(...)` inside a function doesn't bleed into
-#' the user's random stream. Returns a zero-arg function that puts the
-#' RNG back exactly the way it was — even if no seed existed at entry.
+#' the user's random stream. returns a zero-arg function that puts the
+#' rng back exactly the way it was -- even if no seed existed at entry.
 #'
-#' @return A function that, when called, restores the global RNG state.
+#' @return a function that, when called, restores the global rng state.
 #' @keywords internal
 #' @noRd
 save_rng_state <- function() {

@@ -16,48 +16,48 @@ plot_homophily(
 )
 }
 \arguments{
-\item{homophily_results}{Data frame output from \code{homophily()} or a list
+\item{homophily_results}{data frame output from \code{homophily()} or a list
 of such data frames for comparison plots.}
 
-\item{netlet}{Optional. The netify object used in the analysis. Required for
+\item{netlet}{optional. the netify object used in the analysis. required for
 distribution plots to extract actual similarity data.}
 
-\item{type}{Character string specifying the plot type:
+\item{type}{character string specifying the plot type:
 \describe{
-\item{"distribution"}{Shows similarity score distributions for connected vs
+\item{"distribution"}{shows similarity score distributions for connected vs
 unconnected pairs (requires netlet)}
-\item{"comparison"}{Compares homophily across multiple attributes}
-\item{"temporal"}{Shows homophily evolution over time (for longitudinal data)}
+\item{"comparison"}{compares homophily across multiple attributes}
+\item{"temporal"}{shows homophily evolution over time (for longitudinal data)}
 }}
 
-\item{attribute}{Character string. For distribution plots, specifies which attribute
-to visualize. Should match the attribute used in \code{homophily()}.}
+\item{attribute}{character string. for distribution plots, specifies which attribute
+to visualize. should match the attribute used in \code{homophily()}.}
 
-\item{method}{Character string. For distribution plots, the similarity method used.
-Should match the method used in \code{homophily()}.}
+\item{method}{character string. for distribution plots, the similarity method used.
+should match the method used in \code{homophily()}.}
 
-\item{sample_size}{Integer. For distribution plots with large networks, the number
-of dyad pairs to sample for visualization. Default is NULL (use all pairs).}
+\item{sample_size}{integer. for distribution plots with large networks, the number
+of dyad pairs to sample for visualization. default is NULL (use all pairs).}
 
-\item{colors}{Character vector of two colors for connected/unconnected or
-significant/non-significant pairs. Default uses package theme colors.}
+\item{colors}{character vector of two colors for connected/unconnected or
+significant/non-significant pairs. default uses package theme colors.}
 
-\item{...}{Additional arguments passed to ggplot2 functions.}
+\item{...}{additional arguments passed to ggplot2 functions.}
 }
 \value{
-A ggplot2 object that can be further customized.
+a ggplot2 object that can be further customized.
 }
 \description{
-Creates visualizations for homophily analysis results from \code{homophily()}.
-The function can create different types of plots including similarity distributions,
+creates visualizations for homophily analysis results from \code{homophily()}.
+the function can create different types of plots including similarity distributions,
 comparison plots across multiple attributes, and temporal evolution plots.
 }
 \examples{
 \dontrun{
-# Load example data
+# load example data
 data(icews)
 
-# Create a network with nodal attributes
+# create a network with nodal attributes
 ntwk <- netify(
     icews,
     actor1 = "i", actor2 = "j",
@@ -67,14 +67,14 @@ ntwk <- netify(
     nodal_vars = "i_polity2"
 )
 
-# Run homophily analysis
+# run homophily analysis
 homophily_result <- homophily(
     ntwk,
     attribute = "i_polity2",
     method = "correlation"
 )
 
-# Create distribution plot
+# create distribution plot
 plot_homophily(
     homophily_result,
     netlet = ntwk,
@@ -85,5 +85,5 @@ plot_homophily(
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

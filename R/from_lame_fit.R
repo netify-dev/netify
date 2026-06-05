@@ -1,59 +1,59 @@
 #' Convert a fitted `lame`/`amen` AME object back into a netify
 #'
-#' Takes the posterior-mean (or point-estimate) prediction matrix
+#' takes the posterior-mean (or point-estimate) prediction matrix
 #' from a `lame::ame()` / `lame::ame_als()` / `amen::ame()` fit and
 #' wraps it as a netify so the predictions can be summarized, plotted,
 #' or compared to the observed netlet via `compare_networks()`.
 #'
-#' Useful for posterior-predictive checks: build the observed netlet,
-#' run an AME fit, then `from_lame_fit(fit) |> plot(style = "heatmap")`
+#' useful for posterior-predictive checks: build the observed netlet,
+#' run an ame fit, then `from_lame_fit(fit) |> plot(style = "heatmap")`
 #' to visualize the fitted intensity matrix.
 #'
-#' @param fit A fitted object from `lame::ame()`, `lame::ame_als()`,
-#' `lame::lame()`, or `amen::ame()`. Must expose a fitted-value
-#' matrix (e.g., `fit$EZ`, `fit$ZpostMean`, or `fitted(fit)`).
-#' For `value` in `"prob_lower"` / `"prob_upper"` / `"fitted_lower"`
+#' @param fit a fitted object from `lame::ame()`, `lame::ame_als()`,
+#' `lame::lame()`, or `amen::ame()`. must expose a fitted-value
+#' matrix (e.g., `fit$ez`, `fit$zpostmean`, or `fitted(fit)`).
+#' for `value` in `"prob_lower"` / `"prob_upper"` / `"fitted_lower"`
 #' / `"fitted_upper"` the fit must additionally expose a per-draw
-#' array of fitted values. The slots searched, in order, are:
-#' `fit$BOOT$EZ` and `fit$BOOT$Y_hat` (lame ALS parametric / block
-#' bootstrap), then `fit$EZ_draws`, `fit$EZps`, and `fit$Z_draws`
-#' (Gibbs posterior draws), with shape `[n, n, B]` or `[n, n, T, B]`.
-#' @param value One of `"fitted"` (default — posterior-mean linear
-#' predictor `EZ`/`ZpostMean`), `"residual"` (observed - fitted),
+#' array of fitted values. the slots searched, in order, are:
+#' `fit$boot$ez` and `fit$boot$y_hat` (lame als parametric / block
+#' bootstrap), then `fit$ez_draws`, `fit$ezps`, and `fit$z_draws`
+#' (gibbs posterior draws), with shape `[n, n, b]` or `[n, n, t, b]`.
+#' @param value one of `"fitted"` (default -- posterior-mean linear
+#' predictor `ez`/`zpostmean`), `"residual"` (observed - fitted),
 #' `"prob"` (logistic / probit -> probability scale, when the
 #' family supports it), or `"prob_lower"` / `"prob_upper"` /
 #' `"fitted_lower"` / `"fitted_upper"` (per-cell `alpha`/`1-alpha`
-#' quantiles across bootstrap or posterior draws). When `lame`
+#' quantiles across bootstrap or posterior draws). when `lame`
 #' exposes a `fitted()` method for the object, that's preferred.
-#' For `value = "prob"` with a binary family, link detection
+#' for `value = "prob"` with a binary family, link detection
 #' follows this priority:
 #' (1) any explicit `link` slot on the fit (or `fit$control$link`);
-#' (2) ALS class (any token containing "als") or
+#' (2) als class (any token containing "als") or
 #'   `fit$fit_method = "als"` -> probit, matching `lame::ame_als()`;
-#' (3) `lame` class -> logit, matching `lame::lame()` Gibbs default;
+#' (3) `lame` class -> logit, matching `lame::lame()` gibbs default;
 #' (4) `ame` / `amen` class (and no `fit_method = "logit"` override)
-#'   -> probit, matching `amen::ame()` Gibbs convention;
+#'   -> probit, matching `amen::ame()` gibbs convention;
 #' (5) otherwise logit fallback.
-#' @param symmetric Logical. Override the inferred symmetry; default
-#' reads from the fit's stored `mode`/`Y`.
-#' @param alpha Numeric in (0, 0.5). Tail probability for the
-#' `*_lower` / `*_upper` quantiles. Default `0.05` -> 90% interval
+#' @param symmetric logical. override the inferred symmetry; default
+#' reads from the fit's stored `mode`/`y`.
+#' @param alpha numeric in (0, 0.5). tail probability for the
+#' `*_lower` / `*_upper` quantiles. default `0.05` -> 90% interval
 #' (lower = 0.025, upper = 0.975 when interpreted as a two-sided
-#' CI; here we use lower = alpha/2, upper = 1 - alpha/2).
-#' @return A cross-sectional netify object whose underlying matrix is
+#' ci; here we use lower = alpha/2, upper = 1 - alpha/2).
+#' @return a cross-sectional netify object whose underlying matrix is
 #' the fitted-value (or residual) matrix at the same actor ordering.
 #'
 #' @examples
 #' \dontrun{
 #' lm_in <- to_lame(net, fit_method = "als", bootstrap = 200)
-#' fit <- lame::ame_als(Y = lm_in$Y, mode = "bipartite", family = "binary",
+#' fit <- lame::ame_als(y = lm_in$y, mode = "bipartite", family = "binary",
 #' bootstrap = 200)
 #' # round-trip predictions back into a netify for plotting
 #' pred_net <- from_lame_fit(fit, value = "prob")
 #' plot(pred_net, style = "heatmap")
 #' }
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export from_lame_fit
 from_lame_fit <- function(fit,
@@ -77,6 +77,7 @@ from_lame_fit <- function(fit,
 	}
 	# locate the fitted-value matrix
 	fitted_mat <- NULL
+	fitted_time_slice <- NULL
 	if (methods::existsMethod("fitted", class(fit)[1]) ||
 		!is.null(utils::getS3method("fitted", class(fit)[1], optional = TRUE))) {
 		fitted_mat <- tryCatch(stats::fitted(fit), error = function(e) NULL)
@@ -89,7 +90,7 @@ from_lame_fit <- function(fit,
 				fitted_mat <- cand
 				break
 			}
-			# longitudinal fits (lame::lame) store EZ as [n, n, T];
+			# longitudinal fits (lame::lame) store ez as [n, n, t];
 			# collapse to the first slice and let the user know.
 			if (is.array(cand) && length(dim(cand)) == 3L) {
 				cli::cli_inform(c(
@@ -97,10 +98,11 @@ from_lame_fit <- function(fit,
 				),
 				.frequency = "once",
 				.frequency_id = "from_lame_fit_longit_slice")
-				fitted_mat <- cand[, , 1L, drop = TRUE]
-				break
+					fitted_mat <- cand[, , 1L, drop = TRUE]
+					fitted_time_slice <- 1L
+					break
+				}
 			}
-		}
 	}
 	if (is.null(fitted_mat)) {
 		cli::cli_abort(c(
@@ -165,11 +167,14 @@ from_lame_fit <- function(fit,
 			value <- "fitted"
 		}
 	}
-	# residual = Y - fitted
+	# residual = y - fitted
 	if (value == "residual") {
 		Y <- fit$Y %||% fit$data$Y
 		if (is.null(Y)) {
 			cli::cli_abort("Cannot compute residuals: {.arg fit} doesn't store the observed Y.")
+		}
+		if (is.array(Y) && length(dim(Y)) == 3L && !is.null(fitted_time_slice)) {
+			Y <- Y[, , fitted_time_slice, drop = TRUE]
 		}
 		if (!identical(dim(Y), dim(fitted_mat))) {
 			cli::cli_abort("Y / fitted dimensions disagree: {dim(Y)} vs {dim(fitted_mat)}.")
@@ -237,10 +242,10 @@ from_lame_fit <- function(fit,
 		"fitted_upper"  = "fitted_value_upper"
 	)
 	suppressMessages(suppressWarnings(
-		new_netify(fitted_mat,
-			mode = mode_attr,
-			symmetric = symmetric,
-			weight = weight_name,
-			diag_to_NA = TRUE)
-	))
-}
+			new_netify(fitted_mat,
+				mode = mode_attr,
+				symmetric = symmetric,
+				weight = weight_name,
+				diag_to_NA = !identical(mode_attr, "bipartite"))
+		))
+	}

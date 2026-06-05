@@ -2,23 +2,23 @@
 % Please edit documentation in R/bind_netifies.R
 \name{merge.netify}
 \alias{merge.netify}
-\title{Merge method for netify objects (S3 alias for \code{bind_netifies})}
+\title{merge method for netify objects (s3 alias for \code{bind_netifies})}
 \usage{
 \method{merge}{netify}(x, y, ...)
 }
 \arguments{
 \item{x, y}{netify objects.}
 
-\item{...}{Additional netify objects, or a \verb{names =} argument.}
+\item{...}{additional netify objects, or a \verb{names =} argument.}
 }
 \value{
-A \code{longit_list} netify object.
+a \code{longit_list} netify object.
 }
 \description{
-Provides the base-R \code{merge()} generic dispatch for combining two
-netify objects along the time axis. For more than two inputs or
+provides the base-r \code{merge()} generic dispatch for combining two
+netify objects along the time axis. for more than two inputs or
 programmatic use, prefer \code{bind_netifies()} directly.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

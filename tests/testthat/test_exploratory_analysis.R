@@ -28,7 +28,7 @@ test_that("homophily works for cross-sectional networks", {
 	expect_equal(result_cat$attribute[1], "i_polity2")
 	expect_equal(result_cat$method[1], "correlation")
 
-	# test continuous homophily with GDP
+	# test continuous homophily with gdp
 	result_cont = homophily(net, attribute = "i_log_gdp", method = "correlation")
 
 	expect_s3_class(result_cont, "data.frame")
@@ -102,7 +102,7 @@ test_that("dyad_correlation works with dyadic attributes", {
 	expect_true(result$n_pairs[1] > 0)
 })
 
-test_that("attribute_report works with comprehensive analysis", {
+test_that("attribute_report returns requested analyses", {
 	skip_on_cran()
 	# create a simple cross-sectional network with both nodal and dyadic attributes
 	data(icews)
@@ -117,7 +117,7 @@ test_that("attribute_report works with comprehensive analysis", {
 		dyad_vars = c("matlCoop", "verbConf")
 	)
 
-	# test comprehensive analysis
+	# run selected attribute analyses
 	result = attribute_report(net,
 		node_vars = c("i_polity2", "i_log_gdp"),
 		dyad_vars = "matlCoop",
@@ -172,7 +172,7 @@ test_that("functions handle missing data gracefully", {
 	# test dyadic correlation with no dyadic data
 	expect_error(dyad_correlation(net, dyad_vars = "distance"))
 
-	# test comprehensive analysis with no attributes
+	# run with all report sections disabled
 	result = attribute_report(net,
 		include_homophily = FALSE,
 		include_mixing = FALSE,
@@ -198,7 +198,6 @@ test_that("functions work with different similarity methods", {
 		nodal_vars = c("i_log_gdp", "i_log_pop")
 	)
 
-	# test different similarity methods
 	methods = c("correlation", "euclidean", "cosine")
 	for (method in methods) {
 		result = homophily(net,
@@ -224,7 +223,6 @@ test_that("functions work with different correlation methods", {
 		dyad_vars = c("matlCoop", "verbConf", "matlConf")
 	)
 
-	# test different correlation methods
 	methods = c("pearson", "spearman", "kendall")
 	for (method in methods) {
 		result = suppressWarnings(dyad_correlation(
@@ -237,15 +235,13 @@ test_that("functions work with different correlation methods", {
 	}
 })
 
-# additional comprehensive tests for edge cases and robustness
+# edge cases for attribute summaries
 
 test_that("homophily handles edge cases correctly", {
 	skip_on_cran()
-	# create test network
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
-	# test with network containing isolated nodes
 	icews_sparse = icews_10[1:100, ]
 	net_sparse = netify(
 		icews_sparse,
@@ -262,7 +258,6 @@ test_that("homophily handles edge cases correctly", {
 		expect_true(!is.na(result$homophily_correlation[1]))
 	}
 
-	# test with binary network
 	net_binary = netify(
 		icews_10,
 		actor1 = "i", actor2 = "j",
@@ -274,7 +269,6 @@ test_that("homophily handles edge cases correctly", {
 	result_binary = homophily(net_binary, attribute = "i_log_gdp", method = "correlation")
 	expect_s3_class(result_binary, "data.frame")
 
-	# test with categorical method for categorical variable
 	icews_10$regime_type = cut(icews_10$i_polity2,
 		breaks = c(-Inf, -5, 5, Inf),
 		labels = c("Autocracy", "Anocracy", "Democracy")
@@ -318,7 +312,6 @@ test_that("homophily handles missing values appropriately", {
 
 test_that("mixing_matrix works with cross-dimensional analysis", {
 	skip_on_cran()
-	# create test network with multiple categorical attributes
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
@@ -354,7 +347,6 @@ test_that("mixing_matrix works with cross-dimensional analysis", {
 
 test_that("mixing_matrix normalization options work correctly", {
 	skip_on_cran()
-	# create test network
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
@@ -371,7 +363,6 @@ test_that("mixing_matrix normalization options work correctly", {
 		nodal_vars = "polity_cat"
 	)
 
-	# test different normalization options
 	result_raw = mixing_matrix(net, attribute = "polity_cat", normalized = FALSE)
 	result_norm = mixing_matrix(net, attribute = "polity_cat", normalized = TRUE)
 	result_row = mixing_matrix(net, attribute = "polity_cat", normalized = TRUE, by_row = TRUE)
@@ -389,7 +380,6 @@ test_that("mixing_matrix normalization options work correctly", {
 
 test_that("dyad_correlation handles multiple variables and methods", {
 	skip_on_cran()
-	# create test network with multiple dyadic variables
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
@@ -445,8 +435,64 @@ test_that("dyad_correlation works with symmetric and directed networks", {
 	expect_s3_class(result_dir, "data.frame")
 	expect_s3_class(result_sym, "data.frame")
 
-	# symmetric network should have fewer unique pairs
 	expect_true(result_sym$n_pairs[1] <= result_dir$n_pairs[1])
+})
+
+test_that("dyad_correlation deduplicates symmetric dyads and aligns partial controls", {
+	actors = c("a", "b", "c", "d")
+	mat = matrix(c(
+		NA, 1, 0, 1,
+		1, NA, 1, 0,
+		0, 1, NA, 1,
+		1, 0, 1, NA
+	), 4, 4, byrow = TRUE, dimnames = list(actors, actors))
+	x = matrix(seq_len(16), 4, 4, dimnames = list(actors, actors))
+	ctrl = x * 2
+	x["a", "b"] = NA
+	x["b", "a"] = NA
+
+	net = new_netify(
+		mat,
+		symmetric = TRUE,
+		weight = "w",
+		is_binary = FALSE,
+		diag_to_NA = TRUE,
+		missing_to_zero = FALSE
+	)
+	attr(net, "dyad_data") = list("1" = list(x = x, ctrl = ctrl))
+
+	result = dyad_correlation(
+		net,
+		dyad_vars = "x",
+		significance_test = FALSE,
+		partial_correlations = TRUE
+	)
+	expect_s3_class(result, "data.frame")
+	expect_equal(result$n_pairs[1], 5)
+})
+
+test_that("homophily on directed networks includes lower-triangle ties", {
+	actors = c("a", "b", "c")
+	mat = matrix(0, 3, 3, dimnames = list(actors, actors))
+	diag(mat) = NA
+	mat["b", "a"] = 1
+
+	net = new_netify(mat, symmetric = FALSE, diag_to_NA = TRUE)
+	nodes = data.frame(
+		actor = actors,
+		group = c(1, 1, 2),
+		stringsAsFactors = FALSE
+	)
+	net = add_node_vars(net, nodes, actor = "actor")
+
+	result = homophily(
+		net,
+		attribute = "group",
+		method = "categorical",
+		significance_test = FALSE
+	)
+	expect_equal(result$n_connected_pairs[1], 1)
+	expect_equal(result$n_pairs[1], 6)
 })
 
 test_that("attribute_report handles missing components gracefully", {
@@ -508,7 +554,6 @@ test_that("attribute_report centrality measures work correctly", {
 		nodal_vars = c("i_polity2", "i_log_gdp")
 	)
 
-	# test with specific centrality measures
 	result = attribute_report(net,
 		node_vars = "i_log_gdp",
 		include_centrality = TRUE,
@@ -547,7 +592,6 @@ test_that("homophily works with longitudinal networks", {
 	result = homophily(net_longit, attribute = "i_polity2", method = "correlation")
 
 	expect_s3_class(result, "data.frame")
-	# should have results for each time period
 	expect_true(nrow(result) >= length(years))
 })
 
@@ -612,7 +656,6 @@ test_that("functions handle weighted and unweighted networks differently", {
 	expect_s3_class(result_unweighted, "data.frame")
 })
 
-# test error handling
 test_that("functions provide informative errors", {
 	skip_on_cran()
 	data(icews)
@@ -707,7 +750,6 @@ test_that("homophily handles networks with single connected component", {
 
 	result = suppressWarnings(homophily(net, attribute = "component", method = "categorical"))
 	expect_s3_class(result, "data.frame")
-	# should show perfect homophily within components if data is sufficient
 	if (nrow(result) > 0) {
 		expect_equal(result$homophily_correlation[1], 1)
 	}
@@ -737,7 +779,6 @@ test_that("mixing_matrix handles highly skewed categorical distributions", {
 
 	expect_type(result, "list")
 	expect_true("mixing_matrices" %in% names(result))
-	# most ties should be between "Common" nodes
 	mix_mat = result$mixing_matrices[[1]]
 	if ("Common" %in% rownames(mix_mat)) {
 		expect_true(mix_mat["Common", "Common"] > sum(mix_mat) * 0.8)
@@ -764,7 +805,6 @@ test_that("dyad_correlation handles perfect collinearity", {
 	result = suppressWarnings(dyad_correlation(net, dyad_vars = c("dyad1", "dyad2")))
 
 	expect_s3_class(result, "data.frame")
-	# should detect perfect correlation
 	expect_equal(nrow(result), 2)
 })
 
@@ -776,7 +816,6 @@ test_that("attribute_report handles networks with only one actor", {
 	nodes = data.frame(actor = 1, attr = 1)
 	net = add_node_vars(net, nodes, actor = "actor")
 
-	# should handle gracefully without error
 	result = suppressWarnings(attribute_report(net, node_vars = "attr"))
 	expect_type(result, "list")
 })
@@ -816,25 +855,21 @@ test_that("homophily threshold parameter works correctly", {
 		nodal_vars = "i_polity2"
 	)
 
-	# test with numeric threshold
 	result1 = homophily(net, attribute = "i_polity2", threshold = 0.5)
 	expect_equal(result1$threshold_value[1], 0.5)
 
-	# test with function threshold
 	result2 = homophily(net,
 		attribute = "i_polity2",
 		threshold = function(x) median(x, na.rm = TRUE)
 	)
 	expect_true(is.numeric(result2$threshold_value[1]))
 
-	# test with mean threshold
 	result3 = homophily(net,
 		attribute = "i_polity2",
 		threshold = function(x) mean(x, na.rm = TRUE)
 	)
 	expect_true(is.numeric(result3$threshold_value[1]))
 
-	# different thresholds should give different results
 	expect_true(result1$n_connected_pairs[1] != result2$n_connected_pairs[1] ||
 		result2$n_connected_pairs[1] != result3$n_connected_pairs[1])
 })

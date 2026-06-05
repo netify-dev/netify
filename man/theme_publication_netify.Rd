@@ -7,21 +7,21 @@
 theme_publication_netify(base_size = 12, for_network = TRUE)
 }
 \arguments{
-\item{base_size}{Base font size, passed to \code{theme_minimal()}. Default 12.}
+\item{base_size}{base font size, passed to \code{theme_minimal()}. default 12.}
 
-\item{for_network}{Logical. When \code{TRUE} (default) removes axis text /
+\item{for_network}{logical. when \code{TRUE} (default) removes axis text /
 titles / ticks / panel border, which is the right behavior for a
-force-directed network layout. Set \code{FALSE} if you want to keep axes
+force-directed network layout. set \code{FALSE} if you want to keep axes
 on (e.g. for a heatmap or actor-stat plot).}
 }
 \value{
-A ggplot2 theme object.
+a ggplot2 theme object.
 }
 \description{
-A ggplot theme with a larger base font, italicized legend titles, and
-(by default) stripped axes / panel chrome — the right default for a
-force-directed network layout. Drop on top of any \code{plot.netify()} output.
+a ggplot theme with a larger base font, italicized legend titles, and
+(by default) stripped axes / panel chrome -- the right default for a
+force-directed network layout. drop on top of any \code{plot.netify()} output.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

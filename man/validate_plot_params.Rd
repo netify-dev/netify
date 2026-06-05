@@ -7,15 +7,15 @@
 validate_plot_params(plot_args, ...)
 }
 \arguments{
-\item{plot_args}{List of all plot arguments}
+\item{plot_args}{list of all plot arguments}
 
-\item{...}{Additional arguments passed to plot.netify}
+\item{...}{additional arguments passed to plot.netify}
 }
 \value{
 NULL (function is called for side effects - warnings)
 }
 \description{
-This function checks the parameter names passed through ... in plot.netify
+this function checks the parameter names passed through ... in plot.netify
 and warns users about potential typos or deprecated parameter names.
 }
 \keyword{internal}

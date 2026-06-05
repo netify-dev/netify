@@ -2,7 +2,7 @@
 % Please edit documentation in R/subset_netify.R
 \name{subset_netify}
 \alias{subset_netify}
-\title{Internal subset function for netify objects}
+\title{internal subset function for netify objects}
 \usage{
 subset_netify(
   netlet,
@@ -14,24 +14,24 @@ subset_netify(
 )
 }
 \arguments{
-\item{netlet}{A netify object to subset}
+\item{netlet}{a netify object to subset}
 
-\item{actors}{Character vector of actor names or numeric indices to subset}
+\item{actors}{character vector of actor names or numeric indices to subset}
 
-\item{time}{Time periods to subset}
+\item{time}{time periods to subset}
 
-\item{layers}{Character vector of layer names to subset from multilayer networks}
+\item{layers}{character vector of layer names to subset from multilayer networks}
 
-\item{from}{Character vector of actor names or numeric indices for actors sending ties}
+\item{from}{character vector of actor names or numeric indices for actors sending ties}
 
-\item{to}{Character vector of actor names or numeric indices for actors receiving ties}
+\item{to}{character vector of actor names or numeric indices for actors receiving ties}
 }
 \value{
-A netify object containing the requested subset
+a netify object containing the requested subset
 }
 \description{
-This is the internal workhorse function called by the S3 method \code{subset.netify}.
-Users should typically use \code{subset()} on netify objects rather than calling
+this is the internal workhorse function called by the s3 method \code{subset.netify}.
+users should typically use \code{subset()} on netify objects rather than calling
 this function directly.
 }
 \keyword{internal}

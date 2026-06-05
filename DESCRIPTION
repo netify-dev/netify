@@ -1,15 +1,18 @@
 Package: netify
-Title: Network Tools
+Title: Tools for Network Data Workflows
 Version: 1.5
 Authors@R: c(
   person("Ha Eun", "Choi", email = "choiha3@msu.edu", role = c("ctb")),
   person("Cassy", "Dorff", email = "cassy.dorff@vanderbilt.edu", role = c("aut")),
   person("Colin", "Henry", email = "colin.henry@vanderbilt.edu", role = c("ctb")),
-  person("Shahryar", "Minhas", email = "minhassh@msu.edu", role = c("aut", "cre"))
+  person("Shahryar", "Minhas", email = "minhassh@msu.edu", role = c("aut", "cre")),
+  person("Tosin", "Salau", email = "tosin.salau@msu.edu", role = c("ctb"))
   )
-Author: Cassy Dorff [aut], Shahryar Minhas [aut, cre]
-Maintainer: Shahryar Minhas <minhassh@msu.edu>
-Description: Provides functions for building, analyzing, and visualizing network data.
+Description: Builds, validates, analyzes, and visualizes network data from
+    dyadic, event, matrix, igraph, and network inputs. Supports
+    cross-sectional, longitudinal, bipartite, and multilayer networks, with
+    conversion helpers for common modeling workflows and plotting utilities
+    for exploratory analysis.
 Depends:
   R (>= 3.5.0)
 Imports:
@@ -26,6 +29,7 @@ Imports:
 LinkingTo:
   Rcpp,
   RcppEigen
+SystemRequirements: C++11
 Suggests:
     knitr,
     rmarkdown,
@@ -51,7 +55,7 @@ Suggests:
     generics,
     Matrix
 VignetteBuilder: knitr
-License: GPL-3 + file LICENSE
+License: GPL-3
 Encoding: UTF-8
 LazyData: false
 Roxygen: list(markdown = TRUE)

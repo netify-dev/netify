@@ -7,44 +7,44 @@
 binarize(netlet, threshold = 0, strict = FALSE, abs = FALSE, new_name = NULL)
 }
 \arguments{
-\item{netlet}{A weighted netify object.}
+\item{netlet}{a weighted netify object.}
 
-\item{threshold}{Numeric scalar (default \code{0} — any nonzero edge
-becomes 1) OR a function \code{f(x)} that takes the vector of edge
+\item{threshold}{numeric scalar (default \code{0} -- any nonzero edge
+becomes 1) or a function \code{f(x)} that takes the vector of edge
 weights and returns a single numeric threshold (e.g.,
 \code{function(x) median(x, na.rm = TRUE)} or
 \code{function(x) quantile(x, 0.75, na.rm = TRUE)}).}
 
-\item{strict}{Logical. If \code{TRUE}, edges with weight strictly
+\item{strict}{logical. if \code{TRUE}, edges with weight strictly
 greater than the threshold become 1; if \code{FALSE} (default), the
-threshold itself is included (>=). For \code{threshold = 0}, the
+threshold itself is included (>=). for \code{threshold = 0}, the
 default gives the "any nonzero edge counts" semantics that
 matches the rest of the package (signed-weight density,
 homophily-default-threshold, etc.).}
 
-\item{abs}{Logical. If \code{TRUE}, compare \verb{|x|} to the threshold so
+\item{abs}{logical. if \code{TRUE}, compare \verb{|x|} to the threshold so
 that negative-magnitude ties also count toward the binarization.
-Defaults to \code{FALSE}. When the network contains both positive and
+defaults to \code{FALSE}. when the network contains both positive and
 negative weights and \code{abs = FALSE}, \code{binarize()} informs once
 that negative ties will be dropped.}
 
-\item{new_name}{Optional character. New name for the binarized
+\item{new_name}{optional character. new name for the binarized
 weight column (default keeps the original name).}
 }
 \value{
-A binarized netify object with \code{is_binary = TRUE}.
+a binarized netify object with \code{is_binary = TRUE}.
 }
 \description{
-Thin wrapper around \code{mutate_weights()} for the very common case of
-"dichotomize the weighted network at a cut-point." Returns a new
+thin wrapper around \code{mutate_weights()} for the very common case of
+"dichotomize the weighted network at a cut-point." returns a new
 netify with edge values coerced to 0/1 based on the supplied
 threshold (or threshold function).
 }
 \details{
-NA cells (e.g., the diagonal under \code{diag_to_NA = TRUE})
-propagate as NA in the output rather than becoming 0. Use
+na cells (e.g., the diagonal under \code{diag_to_NA = TRUE})
+propagate as na in the output rather than becoming 0. use
 \code{na.rm = TRUE} when summing edges if you want them treated as 0.
-Structural zeros stay zero in every branch — a negative
+structural zeros stay zero in every branch -- a negative
 \code{threshold} will not promote empty cells to 1, regardless of
 \code{strict} or \code{abs}.
 }
@@ -53,7 +53,8 @@ Structural zeros stay zero in every branch — a negative
 data(icews)
 net <- netify(icews[icews$year == 2010, ],
 actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "verbCoop")
-# any-nonzero-edge dichotomization (#' bin0 <- binarize(net)
+# any-nonzero-edge dichotomization
+bin0 <- binarize(net)
 # 75th-percentile of nonzero weights
 bin75 <- binarize(net, threshold = function(x) {
 nz <- x[x > 0]
@@ -66,5 +67,5 @@ quantile(nz, 0.75, na.rm = TRUE)
 \code{\link[=mutate_weights]{mutate_weights()}} for arbitrary transformations.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

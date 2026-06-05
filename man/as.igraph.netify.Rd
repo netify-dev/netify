@@ -7,22 +7,22 @@
 as.igraph.netify(x, ...)
 }
 \arguments{
-\item{x}{A netify object.}
+\item{x}{a netify object.}
 
-\item{...}{Extra arguments forwarded to \code{\link{netify_to_igraph}}
+\item{...}{extra arguments forwarded to \code{\link{netify_to_igraph}}
 (e.g. \code{add_nodal_attribs}, \code{add_dyad_attribs}).}
 }
 \value{
-An igraph object, or a list of igraph objects (longitudinal /
+an igraph object, or a list of igraph objects (longitudinal /
 multilayer), as produced by \code{netify_to_igraph}.
 }
 \description{
-S3 method that lets igraph's \code{\link[igraph]{as.igraph}} generic
-dispatch on netify objects. Equivalent to \code{netify_to_igraph(x, ...)}.
-Registered against the \pkg{igraph} namespace in \code{.onLoad}, so the
+s3 method that lets igraph's \code{\link[igraph]{as.igraph}} generic
+dispatch on netify objects. equivalent to \code{netify_to_igraph(x, ...)}.
+registered against the \pkg{igraph} namespace in \code{.onload}, so the
 dispatch works regardless of whether \pkg{igraph} is attached before or
 after \pkg{netify}.
 }
 \author{
-Shahryar Minhas
+shahryar minhas
 }

@@ -1,13 +1,13 @@
 #' Apply style to netify plot
 #'
-#' Helper function to properly apply styles to netify plots
+#' helper function to properly apply styles to netify plots
 #'
-#' @param netlet A netify object
-#' @param style_fun A style function (e.g., style_budapest)
-#' @param ... Additional plot parameters
-#' @return A ggplot object
+#' @param netlet a netify object
+#' @param style_fun a style function (e.g., style_rose)
+#' @param ... additional plot parameters
+#' @return a ggplot object
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
@@ -21,14 +21,14 @@ plot_with_style <- function(netlet, style_fun, ...) {
 	do.call(plot, c(list(x = netlet), all_params))
 }
 
-#' Preset style for bipartite networks
+#' preset style for bipartite networks
 #'
-#' A complete visual style optimized for displaying bipartite networks
+#' a complete visual style optimized for displaying bipartite networks
 #' with two distinct node sets
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
@@ -55,13 +55,13 @@ style_bipartite_network <- function() {
 	)
 }
 
-#' Preset style for temporal/longitudinal networks
+#' preset style for temporal/longitudinal networks
 #'
-#' A complete visual style optimized for displaying networks over time
+#' a complete visual style optimized for displaying networks over time
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
@@ -88,18 +88,17 @@ style_temporal_network <- function() {
 	)
 }
 
-#' Wes Anderson-inspired network style (Grand Budapest Hotel)
+#' rose network style
 #'
-#' A network style inspired by the pastel color palette of
-#' Wes Anderson's Grand Budapest Hotel
+#' a network style with soft rose, purple, and gold colors.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
-style_budapest <- function() {
+style_rose <- function() {
 	list(
 		# soft pink edges
 		edge_color = "#F4B5BD",
@@ -125,20 +124,19 @@ style_budapest <- function() {
 	)
 }
 
-#' Economist-style network style
+#' red and blue network style
 #'
-#' A network style inspired by The Economist's distinctive
-#' visual style with red accents and clean lines
+#' a network style with red accents and clean lines.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
-style_economist <- function() {
+style_red_blue <- function() {
 	list(
-		# signature Economist red for edges
+		# red edges
 		edge_color = "#E3120B",
 		edge_alpha = 0.7,
 		edge_linewidth = 0.5,
@@ -163,18 +161,17 @@ style_economist <- function() {
 	)
 }
 
-#' FiveThirtyEight-inspired network style
+#' orange and teal network style
 #'
-#' A network style inspired by FiveThirtyEight's data visualization
-#' style with gray background and bright accents
+#' a network style with gray background and bright accents.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
-style_538 <- function() {
+style_orange_teal <- function() {
 	list(
 		# orange edges
 		edge_color = "#FC7634",
@@ -201,14 +198,14 @@ style_538 <- function() {
 	)
 }
 
-#' Solarized-inspired network style
+#' solarized-inspired network style
 #'
-#' A network style based on the popular Solarized color scheme,
+#' a network style based on the popular solarized color scheme,
 #' optimized for reduced eye strain
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
@@ -239,18 +236,17 @@ style_solarized <- function() {
 	)
 }
 
-#' Stata-inspired network style
+#' navy and maroon network style
 #'
-#' A network style that mimics Stata's default graph colors
-#' with navy blue and maroon
+#' a network style with navy blue and maroon colors.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
-style_stata <- function() {
+style_navy_maroon <- function() {
 	list(
 		# navy blue edges
 		edge_color = "#1A476F",
@@ -275,18 +271,17 @@ style_stata <- function() {
 	)
 }
 
-#' Nature journal-inspired network style
+#' scientific blue network style
 #'
-#' A network style inspired by Nature journal's clean scientific
-#' visualization style
+#' a network style with clean blue and orange colors.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
-style_nature <- function() {
+style_scientific_blue <- function() {
 	list(
 		# dark blue edges
 		edge_color = "#003F7F",
@@ -310,13 +305,13 @@ style_nature <- function() {
 	)
 }
 
-#' Cyberpunk-inspired network style
+#' cyberpunk-inspired network style
 #'
-#' A futuristic network style with neon colors on dark background
+#' a futuristic network style with neon colors on dark background
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
@@ -346,14 +341,14 @@ style_cyberpunk <- function() {
 	)
 }
 
-#' Minimal Tufte-inspired network style
+#' minimal tufte-inspired network style
 #'
-#' A minimalist network style inspired by Edward Tufte's
+#' a minimalist network style inspired by edward tufte's
 #' data visualization principles
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
@@ -383,13 +378,13 @@ style_tufte <- function() {
 	)
 }
 
-#' Pastel rainbow network style
+#' pastel rainbow network style
 #'
-#' A soft, cheerful network style using pastel colors
+#' a soft, cheerful network style using pastel colors
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
@@ -418,14 +413,14 @@ style_pastel <- function() {
 	)
 }
 
-#' Retro 80s-inspired network style
+#' retro 80s-inspired network style
 #'
-#' A network style channeling 1980s design aesthetics
+#' a network style channeling 1980s design aesthetics
 #' with bold colors and geometric shapes
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
@@ -454,14 +449,14 @@ style_retro80s <- function() {
 	)
 }
 
-#' ColorBrewer Dark2-based network style
+#' colorbrewer dark2-based network style
 #'
-#' A network style using ColorBrewer's Dark2 palette
+#' a network style using colorbrewer's dark2 palette
 #' for high contrast and accessibility
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
@@ -490,21 +485,19 @@ style_dark2 <- function() {
 	)
 }
 
-#' Witcher 3 Feline School network style
+#' crimson and silver network style
 #'
-#' A network style inspired by the Cat School armor from The Witcher 3.
-#' Light, agile, with emphasis on critical strikes - translates to sharp
-#' contrasts and sleek design.
+#' a network style with sharp contrasts and sleek design.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
-style_witcher_feline <- function() {
+style_crimson_silver <- function() {
 	list(
-		# sharp black edges like cat claws
+		# sharp black edges
 		edge_color = "#1C1C1C", # almost black
 		edge_alpha = 0.9,
 		edge_linewidth = 0.4, # thin and precise
@@ -516,7 +509,7 @@ style_witcher_feline <- function() {
 		point_size = 2,
 		point_shape = 23, # diamond - sharp and agile
 
-		# no curves - direct strikes
+		# straight edges
 		curve_edges = FALSE,
 
 		# precise text
@@ -526,32 +519,31 @@ style_witcher_feline <- function() {
 	)
 }
 
-#' Witcher 3 Griffin School network style
+#' green and gold network style
 #'
-#' A network style inspired by the Griffin School armor from The Witcher 3.
-#' Balanced between signs and swordplay - moderate, magical aesthetics.
+#' a network style with balanced green, gold, and blue colors.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
-style_witcher_griffin <- function() {
+style_green_gold <- function() {
 	list(
-		# magical blue edges
-		edge_color = "#4169E1", # royal blue (Aard sign)
+		# blue edges
+		edge_color = "#4169E1", # royal blue
 		edge_alpha = 0.7,
 		edge_linewidth = 0.8,
 
-		# green nodes with gold borders (magical balance)
+		# green nodes with gold borders
 		point_fill = "#228B22", # forest green
 		point_color = "#FFD700", # gold trim
 		point_stroke = 1.2,
 		point_size = 2.5,
 		point_shape = 21, # circle - balanced
 
-		# slight curves for magical flow
+		# slight curves
 		curve_edges = FALSE,
 		edge_curvature = 0.2,
 
@@ -562,21 +554,20 @@ style_witcher_griffin <- function() {
 	)
 }
 
-#' Witcher 3 Wolven School network style
+#' slate and silver network style
 #'
-#' A network style inspired by the Wolf School armor from The Witcher 3.
-#' The most balanced school - Geralt's home school at Kaer Morhen.
+#' a network style with steel gray and silver colors.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
-style_witcher_wolven <- function() {
+style_slate_silver <- function() {
 	list(
 		# steel gray edges
-		edge_color = "#708090", # slate gray (steel sword)
+		edge_color = "#708090", # slate gray
 		edge_alpha = 0.8,
 		edge_linewidth = 1,
 
@@ -594,32 +585,31 @@ style_witcher_wolven <- function() {
 		# clear text
 		text_color = "#2F4F4F",
 		text_size = 3,
-		text_fontface = 2, # bold like a wolf
+		text_fontface = 2, # bold
 
 		use_theme_netify = TRUE
 	)
 }
 
-#' Witcher 3 Ursine School network style
+#' bronze block network style
 #'
-#' A network style inspired by the Bear School armor from The Witcher 3.
-#' Heavy, tank-like armor - translates to bold, substantial visuals.
+#' a network style with bold, substantial visuals.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
-style_witcher_ursine <- function() {
+style_bronze_block <- function() {
 	list(
 		# heavy brown edges
-		edge_color = "#8B4513", # saddle brown (bear fur)
+		edge_color = "#8B4513", # saddle brown
 		edge_alpha = 0.9,
 		edge_linewidth = 2, # thick and heavy
 
 		# dark nodes with bronze borders
-		point_fill = "#2F2F2F", # almost black (bear)
+		point_fill = "#2F2F2F", # almost black
 		point_color = "#CD7F32", # bronze trim
 		point_stroke = 2,
 		point_size = 4, # large and imposing
@@ -637,25 +627,24 @@ style_witcher_ursine <- function() {
 	)
 }
 
-#' Witcher 3 Manticore School network style (bonus)
+#' lime and magenta network style
 #'
-#' A network style inspired by the Manticore School armor from The Witcher 3.
-#' Exotic, alchemical focus - poisonous and mysterious.
+#' a network style with bright green and magenta contrast.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
-style_witcher_manticore <- function() {
+style_lime_magenta <- function() {
 	list(
-		# poison green edges
-		edge_color = "#32CD32", # lime green (toxicity)
+		# lime green edges
+		edge_color = "#32CD32", # lime green
 		edge_alpha = 0.6,
 		edge_linewidth = 0.7,
 
-		# purple nodes with green borders (alchemical)
+		# purple nodes with green borders
 		point_fill = "#8B008B", # dark magenta
 		point_color = "#00FF00", # bright green
 		point_stroke = 1,
@@ -673,32 +662,31 @@ style_witcher_manticore <- function() {
 	)
 }
 
-#' Witcher 3 Viper School network style (bonus)
+#' black and yellow network style
 #'
-#' A network style inspired by the Viper School armor from The Witcher 3.
-#' Lethal, assassination-focused - stealth and poison.
+#' a network style with dark green, black, and yellow colors.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
-style_witcher_viper <- function() {
+style_black_yellow <- function() {
 	list(
-		# dark green edges (snake)
+		# dark green edges
 		edge_color = "#006400", # dark green
-		edge_alpha = 0.5, # stealthy
+		edge_alpha = 0.5,
 		edge_linewidth = 0.6,
 
-		# black nodes with yellow borders (snake pattern)
+		# black nodes with yellow borders
 		point_fill = "#000000", # black
-		point_color = "#FFFF00", # yellow (viper eyes)
+		point_color = "#FFFF00", # yellow
 		point_stroke = 0.8,
-		point_size = 1.8, # small and deadly
-		point_shape = 23, # diamond - fangs
+		point_size = 1.8,
+		point_shape = 23, # diamond
 
-		# sinuous curves
+		# curved edges
 		curve_edges = FALSE,
 		edge_curvature = 0.4,
 
@@ -709,18 +697,18 @@ style_witcher_viper <- function() {
 	)
 }
 
-#' Pokemon-style network style (Pikachu)
+#' sunburst network style
 #'
-#' A playful style inspired by Pikachu: energetic yellows, bold outlines, and lightning vibes
+#' a playful style with energetic yellows and bold outlines.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
-style_pokemon_pikachu <- function() {
+style_sunburst <- function() {
 	list(
-		edge_color = "#FFD700", # electric yellow
+		edge_color = "#FFD700", # yellow
 		edge_alpha = 0.8,
 		edge_linewidth = 1,
 		point_fill = "#FFFACD", # light yellow node fill
@@ -737,16 +725,16 @@ style_pokemon_pikachu <- function() {
 	)
 }
 
-#' Secretariat-style network style
+#' racing blue network style
 #'
-#' A powerful, sleek style inspired by Secretariat - clean lines, racing blues, and commanding contrast.
+#' a sleek style with clean lines, blue accents, and strong contrast.
 #'
-#' @return List of plot arguments
+#' @return list of plot arguments
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
-style_secretariat <- function() {
+style_racing_blue <- function() {
 	list(
 		edge_color = "#1F75FE", # racing blue
 		edge_alpha = 0.7,
@@ -755,7 +743,7 @@ style_secretariat <- function() {
 		point_color = "#1F75FE", # blue trim
 		point_stroke = 2,
 		point_size = 3.5,
-		point_shape = 22, # square - powerful base
+		point_shape = 22, # square marker
 
 		curve_edges = FALSE, # direct and fast
 
@@ -769,59 +757,59 @@ style_secretariat <- function() {
 
 
 
-#' List available network styles
+#' list available network styles
 #'
-#' Shows all available preset network styles with descriptions
+#' shows all available preset network styles with descriptions
 #'
-#' @return A data frame with style names and descriptions
+#' @return a data frame with style names and descriptions
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
 list_network_styles <- function() {
 	styles <- data.frame(
 		style = c(
-			"style_budapest",
-			"style_economist",
-			"style_538",
+			"style_rose",
+			"style_red_blue",
+			"style_orange_teal",
 			"style_solarized",
-			"style_stata",
-			"style_nature",
+			"style_navy_maroon",
+			"style_scientific_blue",
 			"style_cyberpunk",
 			"style_tufte",
 			"style_pastel",
 			"style_retro80s",
 			"style_dark2",
-			"style_witcher_feline",
-			"style_witcher_griffin",
-			"style_witcher_wolven",
-			"style_witcher_ursine",
-			"style_witcher_manticore",
-			"style_witcher_viper",
-			"style_pokemon_pikachu",
-			"style_secretariat"
+			"style_crimson_silver",
+			"style_green_gold",
+			"style_slate_silver",
+			"style_bronze_block",
+			"style_lime_magenta",
+			"style_black_yellow",
+			"style_sunburst",
+			"style_racing_blue"
 		),
 		description = c(
-			"Wes Anderson's Grand Budapest Hotel pastels",
-			"The Economist's signature red and blue",
-			"FiveThirtyEight's orange and teal on gray",
+			"Soft rose, purple, and gold",
+			"Red and blue accents on a clean background",
+			"Orange and teal on gray",
 			"Solarized color scheme for reduced eye strain",
-			"Stata's classic navy and maroon",
-			"Nature journal's scientific blue and orange",
+			"Classic navy and maroon",
+			"Scientific blue and orange",
 			"Neon cyberpunk with pink and cyan",
 			"Edward Tufte's minimalist approach",
 			"Soft pastel colors for a gentle look",
 			"Bold 1980s geometric style",
 			"ColorBrewer Dark2 for accessibility",
-			"Witcher Cat School - sharp and agile",
-			"Witcher Griffin School - magical balance",
-			"Witcher Wolf School - Geralt's balanced style",
-			"Witcher Bear School - heavy and imposing",
-			"Witcher Manticore School - alchemical and exotic",
-			"Witcher Viper School - stealthy assassin",
-			"Pokemon-inspired Pikachu style",
-			"Secretariat the Horse that ran fast"
+			"Crimson and silver with sharp contrast",
+			"Green, gold, and blue balance",
+			"Slate and silver contrast",
+			"Bronze and block shapes",
+			"Lime and magenta contrast",
+			"Black and yellow contrast",
+			"Bright yellow sunburst",
+			"Blue accents with strong contrast"
 		),
 		background = c(
 			"light",
@@ -850,23 +838,26 @@ list_network_styles <- function() {
 	styles
 }
 
-#' Apply random network style
+#' apply random network style
 #'
-#' Randomly selects and returns one of the available network styles
+#' randomly selects and returns one of the available network styles
 #'
-#' @param seed Optional seed for reproducibility
-#' @return A style list that can be passed to plot()
+#' @param seed optional seed for reproducibility
+#' @return a style list that can be passed to plot()
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
 style_random <- function(seed = NULL) {
+	restore_rng <- save_rng_state()
+	on.exit(restore_rng(), add = TRUE)
+
 	if (!is.null(seed)) set.seed(seed)
 
 	styles <- c(
-		"style_budapest", "style_economist", "style_538",
-		"style_solarized", "style_stata", "style_nature",
+		"style_rose", "style_red_blue", "style_orange_teal",
+		"style_solarized", "style_navy_maroon", "style_scientific_blue",
 		"style_cyberpunk", "style_tufte", "style_pastel",
 		"style_retro80s", "style_dark2"
 	)

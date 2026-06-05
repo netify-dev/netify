@@ -2,21 +2,21 @@
 % Please edit documentation in R/plot_helpers.R
 \name{netify_label}
 \alias{netify_label}
-\title{Extract label layer from netify plot components}
+\title{extract label layer from netify plot components}
 \usage{
 netify_label(comp)
 }
 \arguments{
-\item{comp}{A netify_plot_components object returned from
+\item{comp}{a netify_plot_components object returned from
 \code{plot(..., return_components = TRUE)}}
 }
 \value{
-A custom object of class "netify_label" that can be added to a ggplot
-object using the + operator. The object contains the label layer with all
+a custom object of class "netify_label" that can be added to a ggplot
+object using the + operator. the object contains the label layer with all
 its aesthetic mappings and data.
 }
 \description{
-Extracts the label layer from a netify plot components object. Labels display
+extracts the label layer from a netify plot components object. labels display
 actor names or other text annotations with background boxes, making them more
 visible against complex network backgrounds.
 }
@@ -40,5 +40,5 @@ ggplot() +
 \code{\link{assemble_netify_plot}}
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

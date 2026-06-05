@@ -15,14 +15,15 @@ These warnings originate from the RcppEigen/Eigen library headers, not from the 
 2. Modern C++ compilers (especially clang on macOS) are very aggressive about warning on unused variables
 3. These warnings cannot be easily suppressed without potentially hiding real issues in our own code
 
-## Suppressing the Warnings
+## Current Build Configuration
 
-The package includes Makevars files that attempt to suppress these specific warnings:
-- `src/Makevars`: For Unix-like systems (Linux, macOS)
-- `src/Makevars.win`: For Windows systems
-
-These files add the flags `-Wno-unused-but-set-variable` and `-Wno-unused-variable` to reduce warning noise during compilation.
+The package does not ship custom `Makevars` files. R selects the compiler
+standard and platform flags during installation. If Eigen warning output appears
+on a local compiler, it is usually inherited from the installed R toolchain and
+not from package-specific build flags.
 
 ## Note for Package Maintainers
 
-If you need to debug compilation issues, you can temporarily remove these warning suppressions by commenting out the PKG_CXXFLAGS line in the Makevars files.
+If you need to debug compilation issues, inspect the compiler output from
+`R CMD INSTALL` or `R CMD check` first. Avoid adding warning suppressions unless
+they are necessary for CRAN portability.

@@ -1,35 +1,35 @@
 #' Binarize a netify object at a threshold
 #'
-#' Thin wrapper around `mutate_weights()` for the very common case of
-#' "dichotomize the weighted network at a cut-point." Returns a new
+#' thin wrapper around `mutate_weights()` for the very common case of
+#' "dichotomize the weighted network at a cut-point." returns a new
 #' netify with edge values coerced to 0/1 based on the supplied
 #' threshold (or threshold function).
 #'
-#' @param netlet A weighted netify object.
-#' @param threshold Numeric scalar (default `0` — any nonzero edge
-#' becomes 1) OR a function `f(x)` that takes the vector of edge
+#' @param netlet a weighted netify object.
+#' @param threshold numeric scalar (default `0` -- any nonzero edge
+#' becomes 1) or a function `f(x)` that takes the vector of edge
 #' weights and returns a single numeric threshold (e.g.,
 #' `function(x) median(x, na.rm = TRUE)` or
 #' `function(x) quantile(x, 0.75, na.rm = TRUE)`).
-#' @param strict Logical. If `TRUE`, edges with weight strictly
+#' @param strict logical. if `TRUE`, edges with weight strictly
 #' greater than the threshold become 1; if `FALSE` (default), the
-#' threshold itself is included (>=). For `threshold = 0`, the
+#' threshold itself is included (>=). for `threshold = 0`, the
 #' default gives the "any nonzero edge counts" semantics that
 #' matches the rest of the package (signed-weight density,
 #' homophily-default-threshold, etc.).
-#' @param abs Logical. If `TRUE`, compare `|x|` to the threshold so
+#' @param abs logical. if `TRUE`, compare `|x|` to the threshold so
 #' that negative-magnitude ties also count toward the binarization.
-#' Defaults to `FALSE`. When the network contains both positive and
+#' defaults to `FALSE`. when the network contains both positive and
 #' negative weights and `abs = FALSE`, `binarize()` informs once
 #' that negative ties will be dropped.
-#' @param new_name Optional character. New name for the binarized
+#' @param new_name optional character. new name for the binarized
 #' weight column (default keeps the original name).
-#' @return A binarized netify object with `is_binary = TRUE`.
+#' @return a binarized netify object with `is_binary = TRUE`.
 #'
-#' @details NA cells (e.g., the diagonal under `diag_to_NA = TRUE`)
-#' propagate as NA in the output rather than becoming 0. Use
+#' @details na cells (e.g., the diagonal under `diag_to_NA = TRUE`)
+#' propagate as na in the output rather than becoming 0. use
 #' `na.rm = TRUE` when summing edges if you want them treated as 0.
-#' Structural zeros stay zero in every branch — a negative
+#' structural zeros stay zero in every branch -- a negative
 #' `threshold` will not promote empty cells to 1, regardless of
 #' `strict` or `abs`.
 #'
@@ -38,7 +38,8 @@
 #' data(icews)
 #' net <- netify(icews[icews$year == 2010, ],
 #' actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "verbCoop")
-#' # any-nonzero-edge dichotomization (#' bin0 <- binarize(net)
+#' # any-nonzero-edge dichotomization
+#' bin0 <- binarize(net)
 #' # 75th-percentile of nonzero weights
 #' bin75 <- binarize(net, threshold = function(x) {
 #' nz <- x[x > 0]
@@ -48,7 +49,7 @@
 #'
 #' @seealso [mutate_weights()] for arbitrary transformations.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export binarize
 binarize <- function(netlet, threshold = 0, strict = FALSE, abs = FALSE,

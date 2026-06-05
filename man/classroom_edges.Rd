@@ -3,26 +3,26 @@
 \docType{data}
 \name{classroom_edges}
 \alias{classroom_edges}
-\title{Synthetic high-school friendship edgelist}
+\title{synthetic high-school friendship edgelist}
 \format{
-A data frame with about 50 rows and 2 columns:
+a data frame with about 50 rows and 2 columns:
 \describe{
-\item{\code{from}}{Student identifier of one friend, character.}
-\item{\code{to}}{Student identifier of the other friend, character.}
+\item{\code{from}}{student identifier of one friend, character.}
+\item{\code{to}}{student identifier of the other friend, character.}
 }
 }
 \usage{
 data(classroom_edges)
 }
 \description{
-A small synthetic edgelist of reported friendships among 30
-students (see \code{\link{classroom_nodes}}). Ties are
+a small synthetic edgelist of reported friendships among 30
+students (see \code{\link{classroom_nodes}}). ties are
 \strong{undirected} -- each row records that two students named
 each other as friends.
 }
 \details{
-The edgelist is synthetic and contains one row per friendship
-(not two). When you build a netify object with
+the edgelist is synthetic and contains one row per friendship
+(not two). when you build a netify object with
 \code{symmetric = TRUE} (the default for undirected ties), the
 constructor automatically fills in both directions.
 }
@@ -31,7 +31,7 @@ data(classroom_edges)
 data(classroom_nodes)
 head(classroom_edges)
 
-# Build a friendship network with student attributes attached.
+# build a friendship network with student attributes attached.
 net <- netify(
     classroom_edges,
     actor1 = "from", actor2 = "to",
@@ -46,6 +46,6 @@ summary(net)
 \code{\link{netify_workflows}}.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }
 \keyword{datasets}

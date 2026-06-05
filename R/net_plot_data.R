@@ -1,111 +1,111 @@
 #' Prepare netify data for network visualization
 #'
 #' `net_plot_data` processes a netify object and generates all necessary components
-#' for network visualization. This function handles layout computation, aesthetic
+#' for network visualization. this function handles layout computation, aesthetic
 #' parameter organization, and data structuring for subsequent plotting with ggplot2
 #' or other visualization tools.
 #'
-#' @param netlet A netify object (class "netify") containing the network to be
-#'   visualized. Must be a single-layer network (multilayer networks not currently
-#'   supported).
-#' @param plot_args A list of plotting arguments controlling visualization appearance
-#'   and behavior. Can include:
+#' @param netlet a netify object (class "netify") containing the network to be
+#'   visualized. cross-sectional, longitudinal, and multilayer netify objects are
+#'   supported.
+#' @param plot_args a list of plotting arguments controlling visualization appearance
+#'   and behavior. can include:
 #'
-#'   \strong{Layout parameters:}
+#'   \strong{layout parameters:}
 #'   \itemize{
-#'     \item \code{point_layout}: Pre-computed node positions as a data.frame or list
-#'       of data.frames (for longitudinal networks). If provided, overrides layout
+#'     \item \code{point_layout}: pre-computed node positions as a data.frame or list
+#'       of data.frames (for longitudinal networks). if provided, overrides layout
 #'       algorithm selection
-#'     \item \code{layout}: Character string specifying the igraph layout algorithm.
-#'       Options: "nicely" (default), "fr" (Fruchterman-Reingold), "kk" (Kamada-Kawai),
-#'       "circle", "star", "grid", "tree", "bipartite", and others. See
+#'     \item \code{layout}: character string specifying the igraph layout algorithm.
+#'       options: "nicely" (default), "fr" (fruchterman-reingold), "kk" (kamada-kawai),
+#'       "circle", "star", "grid", "tree", "bipartite", and others. see
 #'       \code{\link{get_node_layout}} for full list
-#'     \item \code{static_actor_positions}: Logical. If TRUE, maintains consistent
+#'     \item \code{static_actor_positions}: logical. if TRUE, maintains consistent
 #'       node positions across time periods in longitudinal networks
-#'     \item \code{which_static}: Integer specifying which time period to use as
+#'     \item \code{which_static}: integer specifying which time period to use as
 #'       the template for static positions
-#'     \item \code{seed}: Integer for reproducible random layouts
+#'     \item \code{seed}: integer for reproducible random layouts
 #'   }
 #'
-#'   \strong{Display options:}
+#'   \strong{display options:}
 #'   \itemize{
-#'     \item \code{remove_isolates}: Logical. Remove unconnected nodes (default: TRUE)
-#'     \item \code{add_edges}: Logical. Include edges in visualization (default: TRUE)
-#'     \item \code{curve_edges}: Logical. Use curved edges instead of straight (default: FALSE)
-#'     \item \code{add_points}: Logical. Display nodes as points (default: TRUE)
-#'     \item \code{add_text}: Logical. Add text labels to nodes (default: FALSE)
-#'     \item \code{add_label}: Logical. Add boxed labels to nodes (default: FALSE)
+#'     \item \code{remove_isolates}: logical. remove unconnected nodes (default: TRUE)
+#'     \item \code{add_edges}: logical. include edges in visualization (default: TRUE)
+#'     \item \code{curve_edges}: logical. use curved edges instead of straight (default: FALSE)
+#'     \item \code{add_points}: logical. display nodes as points (default: TRUE)
+#'     \item \code{add_text}: logical. add text labels to nodes (default: FALSE)
+#'     \item \code{add_label}: logical. add boxed labels to nodes (default: FALSE)
 #'   }
 #'
-#'   \strong{Selective labeling:}
+#'   \strong{selective labeling:}
 #'   \itemize{
-#'     \item \code{select_text}: Character vector of node names to label with text
-#'     \item \code{select_label}: Character vector of node names to label with boxes
+#'     \item \code{select_text}: character vector of node names to label with text
+#'     \item \code{select_label}: character vector of node names to label with boxes
 #'   }
 #'
-#'   Additional aesthetic parameters are processed by \code{adjust_plot_args}
+#'   additional aesthetic parameters are processed by \code{adjust_plot_args}
 #'   and \code{gg_params}.
 #'
-#' @return A list with three components for creating network visualizations:
+#' @return a list with three components for creating network visualizations:
 #'   \itemize{
-#'     \item \strong{plot_args}: Processed plotting arguments with defaults applied
-#'       and parameters validated. Includes all layout and display settings
-#'     \item \strong{ggnet_params}: Organized aesthetic parameters for ggplot2 mapping.
-#'       Contains separate specifications for nodes, edges, text, and labels with both
+#'     \item \strong{plot_args}: processed plotting arguments with defaults applied
+#'       and parameters validated. includes all layout and display settings
+#'     \item \strong{ggnet_params}: organized aesthetic parameters for ggplot2 mapping.
+#'       contains separate specifications for nodes, edges, text, and labels with both
 #'       static and dynamic (data-mapped) aesthetics
-#'     \item \strong{net_dfs}: Data frames ready for plotting:
+#'     \item \strong{net_dfs}: data frames ready for plotting:
 #'       \itemize{
-#'         \item \code{nodal_data}: Node information including positions (x, y),
+#'         \item \code{nodal_data}: node information including positions (x, y),
 #'           attributes, and any additional variables
-#'         \item \code{edge_data}: Edge information including endpoint coordinates
+#'         \item \code{edge_data}: edge information including endpoint coordinates
 #'           (x1, y1, x2, y2) and edge attributes
 #'       }
 #'   }
 #'
 #' @details
-#' This function serves as the data preparation layer for netify visualization,
+#' this function serves as the data preparation layer for netify visualization,
 #' performing several operations:
 #'
-#' \strong{Data validation:}
+#' \strong{data validation:}
 #' \itemize{
-#'   \item Ensures the input is a valid netify object
-#'   \item Checks for single-layer networks (multilayer not supported)
-#'   \item Validates ego networks contain only one ego
+#'   \item ensures the input is a valid netify object
+#'   \item handles single-layer and multilayer networks
+#'   \item validates ego networks contain only one ego
 #' }
 #'
-#' \strong{Layout computation:}
+#' \strong{layout computation:}
 #' \itemize{
-#'   \item Generates node positions using specified algorithm if not provided
-#'   \item Calculates edge endpoint coordinates based on node positions
-#'   \item Handles both cross-sectional and longitudinal layouts
+#'   \item generates node positions using specified algorithm if not provided
+#'   \item calculates edge endpoint coordinates based on node positions
+#'   \item handles both cross-sectional and longitudinal layouts
 #' }
 #'
-#' \strong{Data organization:}
+#' \strong{data organization:}
 #' \itemize{
-#'   \item Merges layout information with network attributes
-#'   \item Processes plotting arguments and applies defaults
-#'   \item Organizes aesthetic parameters for ggplot2 compatibility
-#'   \item Removes isolates if requested
+#'   \item merges layout information with network attributes
+#'   \item processes plotting arguments and applies defaults
+#'   \item organizes aesthetic parameters for ggplot2 compatibility
+#'   \item removes isolates if requested
 #' }
 #'
-#' \strong{Output structure:}
+#' \strong{output structure:}
 #'
-#' The returned data is structured for direct use with ggplot2 or can be further
-#' customized. The separation of layout, aesthetics, and data allows for flexible
+#' the returned data is structured for direct use with ggplot2 or can be further
+#' customized. the separation of layout, aesthetics, and data allows for flexible
 #' visualization workflows.
 #'
 #' @note
-#' This function is primarily designed for use with netify's plot method but can
+#' this function is primarily designed for use with netify's plot method but can
 #' be called directly for custom visualization workflows.
 #'
-#' For multilayer networks, use \code{\link{subset_netify}} to extract individual
-#' layers before visualization.
+#' for multilayer networks, the returned node and edge data include a \code{layer}
+#' column.
 #'
-#' For ego networks with multiple egos, create separate visualizations and combine
+#' for ego networks with multiple egos, create separate visualizations and combine
 #' them using packages like patchwork.
 #'
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export net_plot_data
 
@@ -123,8 +123,23 @@ net_plot_data <- function(netlet, plot_args = list()) {
 			layer_name <- layers[i]
 
 			layer_net <- subset_netify(netlet, layers = layer_name)
+			layer_plot_args <- plot_args
+			layer_weight <- attr(layer_net, "weight")
+			if (!is.null(layer_weight) && length(layer_weight) == 1L &&
+				!is.na(layer_weight) && !identical(layer_weight, "weight")) {
+				edge_weight_args <- c(
+					"edge_alpha_by", "edge_alpha_var",
+					"edge_color_by", "edge_color_var",
+					"edge_linewidth_by", "edge_linewidth_var"
+				)
+				for (arg in edge_weight_args) {
+					if (identical(layer_plot_args[[arg]], "weight")) {
+						layer_plot_args[[arg]] <- layer_weight
+					}
+				}
+			}
 
-			layer_result <- net_plot_data(layer_net, plot_args)
+			layer_result <- net_plot_data(layer_net, layer_plot_args)
 
 			# tag rows with layer
 			if (!is.null(layer_result$net_dfs$nodal_data) && nrow(layer_result$net_dfs$nodal_data) > 0) {
@@ -156,11 +171,18 @@ net_plot_data <- function(netlet, plot_args = list()) {
 					names(edge_list[[i]])[4] <- "weight"
 				}
 			}
-			combined_result$net_dfs$edge_data <- do.call(rbind, edge_list)
-			rownames(combined_result$net_dfs$edge_data) <- NULL
+				combined_result$net_dfs$edge_data <- do.call(rbind, edge_list)
+				rownames(combined_result$net_dfs$edge_data) <- NULL
+				for (arg in c("edge_alpha_var", "edge_color_var", "edge_linewidth_var", "edge_linetype_var")) {
+					user_arg <- sub("_var$", "_by", arg)
+					if (identical(plot_args[[arg]], "weight") ||
+						identical(plot_args[[user_arg]], "weight")) {
+						combined_result$plot_args[[arg]] <- "weight"
+					}
+				}
 
-			if (!isFALSE(plot_args$edge_alpha)) {
-				combined_result$plot_args$edge_alpha_var <- "weight"
+				if (!isFALSE(plot_args$edge_alpha)) {
+					combined_result$plot_args$edge_alpha_var <- "weight"
 
 				if (is.null(combined_result$plot_args$edge_alpha_label)) {
 					combined_result$plot_args$edge_alpha_label <- "Edge Weight"
@@ -288,7 +310,8 @@ net_plot_data <- function(netlet, plot_args = list()) {
 
 	g_list <- netify_to_igraph(netlet,
 		add_nodal_attribs = FALSE,
-		add_dyad_attribs = FALSE
+		add_dyad_attribs = FALSE,
+		.quiet_na = TRUE
 	)
 
 	if (is.null(plot_args$point_layout)) {

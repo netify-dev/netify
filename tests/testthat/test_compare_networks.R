@@ -2,7 +2,6 @@ set.seed(6886)
 
 test_that("compare_networks works with basic edge comparison", {
 	skip_on_cran()
-	# create test networks
 	set.seed(6886)
 	n = 20
 
@@ -14,7 +13,6 @@ test_that("compare_networks works with basic edge comparison", {
 	net1 = new_netify(mat1, symmetric = TRUE)
 	net2 = new_netify(mat2, symmetric = TRUE)
 
-	# test basic comparison
 	comp = suppressWarnings(compare_networks(list(net1 = net1, net2 = net2)))
 
 	expect_s3_class(comp, "netify_comparison")
@@ -25,7 +23,6 @@ test_that("compare_networks works with basic edge comparison", {
 
 test_that("compare_networks handles different comparison types", {
 	skip_on_cran()
-	# create test networks
 	mat1 = matrix(rbinom(100, 1, 0.3), 10, 10)
 	mat2 = matrix(rbinom(100, 1, 0.3), 10, 10)
 
@@ -45,6 +42,51 @@ test_that("compare_networks handles different comparison types", {
 	expect_equal(node_comp$n_networks, 2)
 })
 
+test_that("compare_networks excludes diagonal cells from edge distances", {
+	mat1 = matrix(c(1, 1, 0, 0), 2, 2)
+	mat2 = matrix(c(0, 1, 0, 1), 2, 2)
+	rownames(mat1) = colnames(mat1) = c("a", "b")
+	rownames(mat2) = colnames(mat2) = c("a", "b")
+
+	net1 = new_netify(mat1, symmetric = FALSE, diag_to_NA = FALSE)
+	net2 = new_netify(mat2, symmetric = FALSE, diag_to_NA = FALSE)
+
+	without_diag = compare_networks(
+		list(net1, net2),
+		method = "hamming",
+		include_diagonal = FALSE
+	)
+	with_diag = compare_networks(
+		list(net1, net2),
+		method = "hamming",
+		include_diagonal = TRUE
+	)
+
+	expect_equal(without_diag$summary$hamming, 0)
+	expect_gt(with_diag$summary$hamming, 0)
+})
+
+test_that("compare_networks aligns bipartite row and column actors separately", {
+	mat1 = matrix(0, 2, 2,
+		dimnames = list(c("r1", "r2"), c("c1", "c2")))
+	mat2 = matrix(0, 2, 2,
+		dimnames = list(c("r2", "r3"), c("c2", "c3")))
+	mat1["r1", "c1"] = 1
+	mat1["r2", "c2"] = 1
+	mat2["r2", "c2"] = 1
+	mat2["r3", "c3"] = 1
+
+	net1 = new_netify(mat1, mode = "bipartite")
+	net2 = new_netify(mat2, mode = "bipartite")
+
+	comp = compare_networks(list(net1, net2), method = "hamming")
+	expect_equal(comp$summary$hamming, 2 / 9)
+	expect_error(
+		compare_networks(list(net1, net2), method = "qap", test = TRUE),
+		"QAP edge comparison"
+	)
+})
+
 test_that("compare_networks works with longitudinal data", {
 	skip_on_cran()
 	# create longitudinal network
@@ -59,7 +101,6 @@ test_that("compare_networks works with longitudinal data", {
 
 test_that("compare_networks correctly identifies comparison types", {
 	skip_on_cran()
-	# create test networks
 	n = 10
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
 	mat2 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -78,10 +119,8 @@ test_that("compare_networks correctly identifies comparison types", {
 
 })
 
-# test all 'what' options work correctly
 test_that("compare_networks handles all 'what' options", {
 	skip_on_cran()
-	# create test networks
 	mat1 = matrix(rbinom(100, 1, 0.3), 10, 10)
 	mat2 = matrix(rbinom(100, 1, 0.3), 10, 10)
 	net1 = new_netify(mat1)
@@ -99,27 +138,23 @@ test_that("compare_networks handles all 'what' options", {
 	comp_nodes = suppressWarnings(compare_networks(list(net1, net2), what = "nodes"))
 	expect_equal(comp_nodes$method, "node_composition")
 
-	# test attributes (will warn if no attributes)
 	comp_attr = suppressWarnings(compare_networks(list(net1, net2), what = "attributes"))
 	expect_equal(comp_attr$method, "attribute_comparison")
 })
 
-# additional comprehensive tests for compare_networks
+# comparison method cases
 
 test_that("compare_networks handles different similarity methods", {
 	skip_on_cran()
-	# create test networks
 	n = 15
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
 	mat2 = mat1
-	# make some changes
 	change_indices = sample(1:(n * n), size = round(0.3 * n * n))
 	mat2[change_indices] = 1 - mat2[change_indices]
 
 	net1 = new_netify(mat1, symmetric = FALSE)
 	net2 = new_netify(mat2, symmetric = FALSE)
 
-	# test all methods
 	methods = c("correlation", "jaccard", "hamming", "qap", "spectral", "all")
 
 	for (method in methods) {
@@ -127,7 +162,6 @@ test_that("compare_networks handles different similarity methods", {
 		expect_s3_class(comp, "netify_comparison")
 
 		if (method == "all") {
-			# should have all metrics
 			expect_true(all(c("correlation", "jaccard", "hamming", "qap_correlation", "spectral") %in% names(comp$summary)))
 		} else if (method == "qap") {
 			expect_true("qap_correlation" %in% names(comp$summary))
@@ -152,7 +186,6 @@ test_that("compare_networks handles weighted networks correctly", {
 	comp_weighted = suppressWarnings(compare_networks(list(net1_weighted, net2_weighted)))
 	expect_s3_class(comp_weighted, "netify_comparison")
 
-	# edge changes should track weight changes
 	expect_true("edge_changes" %in% names(comp_weighted))
 	edge_changes = comp_weighted$edge_changes[[1]]
 	expect_true("weight_correlation" %in% names(edge_changes))
@@ -160,7 +193,6 @@ test_that("compare_networks handles weighted networks correctly", {
 
 test_that("compare_networks with return_details provides full matrices", {
 	skip_on_cran()
-	# create test networks
 	n = 10
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
 	mat2 = matrix(rbinom(n * n, 1, 0.3), n, n)
@@ -181,7 +213,6 @@ test_that("compare_networks with return_details provides full matrices", {
 	expect_true("hamming_matrix" %in% names(comp_details$details))
 
 	# check that matrices have correct dimensions
-	# when comparing 2 networks, matrices should be 2x2
 	expect_equal(dim(comp_details$details$correlation_matrix), c(2, 2))
 })
 
@@ -200,7 +231,6 @@ test_that("compare_networks handles networks with different node sets", {
 	net1 = new_netify(mat1)
 	net2 = new_netify(mat2)
 
-	# node comparison should detect differences
 	comp_nodes = suppressWarnings(compare_networks(list(net1, net2), what = "nodes"))
 
 	expect_true("node_changes" %in% names(comp_nodes))
@@ -229,7 +259,6 @@ test_that("compare_networks handles longitudinal networks with missing time peri
 	expect_equal(comp$comparison_type, "temporal")
 	expect_equal(comp$n_networks, length(times))
 
-	# should compare consecutive available time periods
 	expect_true(length(comp$edge_changes) == choose(length(times), 2))
 })
 
@@ -254,14 +283,12 @@ test_that("compare_networks structural comparison includes all metrics", {
 	expect_true("summary" %in% names(comp_struct))
 	struct_summary = comp_struct$summary
 
-	# should have key structural metrics from summary.netify
 	expected_metrics = c(
 		"num_actors", "num_edges", "density", "reciprocity",
 		"transitivity", "mean_degree"
 	)
 	expect_true(all(expected_metrics %in% names(struct_summary)))
 
-	# density should be different
 	expect_true(abs(struct_summary$density[1] - struct_summary$density[2]) > 0.1)
 })
 
@@ -294,7 +321,7 @@ test_that("compare_networks handles attribute comparison", {
 	comp_attr = suppressWarnings(compare_networks(list(net1, net2), what = "attributes"))
 
 	expect_equal(comp_attr$method, "attribute_comparison")
-	# should detect that attributes have changed
+	# check attribute differences
 	expect_true("summary" %in% names(comp_attr))
 })
 
@@ -312,7 +339,6 @@ test_that("compare_networks QAP test with custom permutations", {
 	net1 = new_netify(base_mat)
 	net2 = new_netify(mat2)
 
-	# test with different permutation counts
 	comp_qap_100 = suppressWarnings(compare_networks(
 		list(net1, net2),
 		method = "qap",
@@ -328,7 +354,6 @@ test_that("compare_networks QAP test with custom permutations", {
 	expect_true("qap_pvalue" %in% names(comp_qap_100$summary))
 	expect_true("qap_pvalue" %in% names(comp_qap_500$summary))
 
-	# both should detect significant correlation
 	expect_true(comp_qap_100$summary$qap_correlation > 0)
 	expect_true(comp_qap_500$summary$qap_correlation > 0)
 })
@@ -399,7 +424,6 @@ test_that("compare_networks handles self-loops correctly", {
 
 	comp = suppressWarnings(compare_networks(list(net1, net2)))
 
-	# should detect differences due to self-loops
 	edge_changes = comp$edge_changes[[1]]
 	expect_true(edge_changes$removed > 0 || edge_changes$added > 0)
 })
@@ -442,7 +466,6 @@ test_that("compare_networks handles list input vs single network", {
 	expect_equal(comp_longit$comparison_type, "temporal")
 	expect_equal(comp_list$comparison_type, "cross_network")
 
-	# both should have same number of networks
 	expect_equal(comp_longit$n_networks, comp_list$n_networks)
 })
 
@@ -461,7 +484,6 @@ test_that("compare_networks handles named lists correctly", {
 
 	comp = suppressWarnings(compare_networks(net_list))
 
-	# should preserve names in comparisons
 	expect_true(length(comp$edge_changes) > 0)
 	comparison_names = names(comp$edge_changes)
 	expect_true(all(grepl("Network_[ABC]_vs_Network_[ABC]", comparison_names)))
@@ -482,7 +504,7 @@ test_that("compare_networks handles networks with all missing values", {
 	skip_on_cran()
 	n = 10
 
-	# network with all NA values
+	# network with all na values
 	na_mat = matrix(NA, n, n)
 	net_na = new_netify(na_mat)
 
@@ -490,7 +512,6 @@ test_that("compare_networks handles networks with all missing values", {
 	normal_mat = matrix(rbinom(n * n, 1, 0.3), n, n)
 	net_normal = new_netify(normal_mat)
 
-	# should handle comparison without error
 	comp = suppressWarnings(compare_networks(list(net_na, net_normal)))
 	expect_s3_class(comp, "netify_comparison")
 })
@@ -533,7 +554,6 @@ test_that("compare_networks structural comparison with extreme networks", {
 
 	comp_struct = suppressWarnings(compare_networks(list(net_star, net_ring), what = "structure"))
 
-	# should have very different structural properties
 	# star network has much higher centralization than ring network
 	# let's just verify the comparison completed successfully
 	expect_s3_class(comp_struct, "netify_comparison")
@@ -553,7 +573,6 @@ test_that("compare_networks handles networks with identical structure", {
 
 	comp = suppressWarnings(compare_networks(list(net1, net2), method = "all"))
 
-	# should have perfect correlation and jaccard
 	expect_equal(comp$summary$correlation, 1)
 	expect_equal(comp$summary$jaccard, 1)
 	expect_equal(comp$summary$hamming, 0)
@@ -584,16 +603,13 @@ test_that("spectral distance works correctly", {
 	comp_star_complete = compare_networks(list(net_star, net_complete), method = "spectral")
 	comp_empty_star = compare_networks(list(net_empty, net_star), method = "spectral")
 
-	# all should have non-zero spectral distances
 	expect_true(comp_empty_complete$summary$spectral > 0)
 	expect_true(comp_star_complete$summary$spectral > 0)
 	expect_true(comp_empty_star$summary$spectral > 0)
 
-	# test with identical networks
 	comp_identical = compare_networks(list(net_star, net_star), method = "spectral")
 	expect_equal(comp_identical$summary$spectral, 0)
 
-	# test with return_details
 	comp_details = compare_networks(
 		list(net_empty, net_complete),
 		method = "spectral",
@@ -666,23 +682,20 @@ test_that("spectral distance handles edge cases", {
 	net1 = new_netify(mat1)
 	net2 = new_netify(mat2)
 
-	# should handle different sized networks without error
 	comp = suppressWarnings(compare_networks(list(net1, net2), method = "spectral"))
 	expect_s3_class(comp, "netify_comparison")
 	expect_true(is.numeric(comp$summary$spectral))
 	expect_true(comp$summary$spectral >= 0)
 
-	# test with directed networks
 	mat_dir = matrix(rbinom(100, 1, 0.3), 10, 10)
 	net_dir = new_netify(mat_dir, symmetric = FALSE)
 
 	comp_dir = compare_networks(list(net_dir, net_dir), method = "spectral")
-	expect_equal(comp_dir$summary$spectral, 0) # same network should have 0 distance
+	expect_equal(comp_dir$summary$spectral, 0) # identical network distance
 })
 
 test_that("compare_networks handles multilayer networks", {
 	skip_on_cran()
-	# create test data
 	n = 10
 
 	# create two layers with different patterns
@@ -713,19 +726,18 @@ test_that("compare_networks handles multilayer networks", {
 	expect_equal(comp$n_networks, 2)
 	expect_true("summary" %in% names(comp))
 
-	# should compare Layer1 vs Layer2
 	expect_true(length(comp$edge_changes) > 0)
 	expect_true(any(grepl("Layer1.*Layer2", names(comp$edge_changes))))
 })
 
 test_that("compare_networks handles longitudinal multilayer networks", {
 	skip_on_cran()
-	# create 4D array for longitudinal multilayer
+	# create 4d array for longitudinal multilayer
 	n = 8
 	n_layers = 2
 	n_time = 3
 
-	# create 4D array [actors × actors × layers × time]
+	# create 4d array [actors x actors x layers x time]
 	longit_multilayer = array(
 		rbinom(n * n * n_layers * n_time, 1, 0.3),
 		dim = c(n, n, n_layers, n_time)
@@ -752,8 +764,6 @@ test_that("compare_networks handles longitudinal multilayer networks", {
 	expect_equal(comp$comparison_type, "multilayer")
 	expect_equal(comp$n_networks, 2) # two layers
 
-	# each layer should be a longitudinal array
-	# the comparison should be between cooperation and conflict layers
 	expect_true("summary" %in% names(comp))
 })
 
@@ -787,7 +797,6 @@ test_that("compare_networks handles temporal multilayer networks (longit_list)",
 		layer_labels = c("Verbal", "Material")
 	)
 
-	# test all comparison methods
 	# edge comparison
 	comp_edges = suppressWarnings(compare_networks(temporal_multilayer, what = "edges"))
 	expect_s3_class(comp_edges, "netify_comparison")
@@ -800,7 +809,7 @@ test_that("compare_networks handles temporal multilayer networks (longit_list)",
 	expect_s3_class(comp_struct, "netify_comparison")
 	expect_equal(comp_struct$method, "structural_comparison")
 	expect_true("summary" %in% names(comp_struct))
-	# for multilayer comparison, we compare layers not time×layer combinations
+	# for multilayer comparison, we compare layers not timexlayer combinations
 	# so we expect 2 rows (one for each layer)
 	expect_equal(nrow(comp_struct$summary), 2)
 
@@ -833,7 +842,6 @@ test_that("compare_networks handles multilayer networks with missing attributes"
 	attr(multilayer_net, "layers") = c("Layer1", "Layer2")
 	# missing many optional attributes
 
-	# should still work
 	comp = suppressWarnings(compare_networks(multilayer_net))
 	expect_s3_class(comp, "netify_comparison")
 	expect_equal(comp$comparison_type, "multilayer")
@@ -842,7 +850,6 @@ test_that("compare_networks handles multilayer networks with missing attributes"
 
 test_that("compare_networks handles different weight specifications in multilayer", {
 	skip_on_cran()
-	# test with different weight types per layer
 	n = 10
 
 	# create networks with different weight structures
@@ -859,7 +866,6 @@ test_that("compare_networks handles different weight specifications in multilaye
 	nets_extracted = netify:::extract_network_list(multilayer)
 	expect_equal(length(nets_extracted), 2)
 
-	# each should have appropriate weight info
 	expect_true(!is.null(attr(nets_extracted[[1]], "weight")))
 	expect_true(!is.null(attr(nets_extracted[[2]], "weight")))
 
@@ -871,14 +877,12 @@ test_that("compare_networks handles different weight specifications in multilaye
 
 test_that("compare_networks error handling for invalid multilayer inputs", {
 	skip_on_cran()
-	# test with mismatched dimensions in layers
 	n1 = 10
 	n2 = 15
 
 	mat1 = matrix(rbinom(n1 * n1, 1, 0.3), n1, n1)
 	mat2 = matrix(rbinom(n2 * n2, 1, 0.3), n2, n2)
 
-	# this should fail when trying to create multilayer
 	expect_error(
 		layer_netify(list(new_netify(mat1), new_netify(mat2)))
 	)
@@ -901,7 +905,6 @@ test_that("compare_networks handles all comparison methods with multilayer", {
 		layer_labels = c("Sparse", "Dense")
 	)
 
-	# test all edge comparison methods
 	methods = c("correlation", "jaccard", "hamming", "spectral")
 
 	for (method in methods) {
@@ -920,7 +923,6 @@ test_that("compare_networks handles all comparison methods with multilayer", {
 
 test_that("compare_networks with other_stats for structural comparison", {
 	skip_on_cran()
-	# create test networks
 	n = 15
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
 	mat2 = matrix(rbinom(n * n, 1, 0.5), n, n)
@@ -958,7 +960,6 @@ test_that("compare_networks with other_stats for structural comparison", {
 
 test_that("compare_networks with other_stats for edge comparison", {
 	skip_on_cran()
-	# create test networks
 	n = 10
 	mat1 = matrix(rbinom(n * n, 1, 0.4), n, n)
 	mat2 = mat1
@@ -994,7 +995,6 @@ test_that("compare_networks with other_stats for edge comparison", {
 
 test_that("compare_networks with multiple other_stats functions", {
 	skip_on_cran()
-	# create test networks
 	n = 12
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
 	mat2 = matrix(rbinom(n * n, 1, 0.4), n, n)
@@ -1034,7 +1034,6 @@ test_that("compare_networks with multiple other_stats functions", {
 	)
 	
 	# check that all custom stats are integrated into summary
-	# with multiple functions, names should be prefixed
 	expect_true("centrality.mean_degree" %in% names(comp$summary))
 	expect_true("centrality.degree_variance" %in% names(comp$summary))
 	expect_true("connectivity.edge_density" %in% names(comp$summary))
@@ -1043,13 +1042,11 @@ test_that("compare_networks with multiple other_stats functions", {
 
 test_that("compare_networks other_stats error handling", {
 	skip_on_cran()
-	# create test networks
 	n = 10
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
 	net1 = new_netify(mat1)
 	net2 = new_netify(mat1)
 	
-	# test with invalid other_stats input
 	expect_error(
 		compare_networks(
 			list(net1, net2),
@@ -1075,7 +1072,6 @@ test_that("compare_networks other_stats error handling", {
 		"All elements of other_stats must be functions"
 	)
 	
-	# test with function that errors — errors in other_stats propagate
 	# through the summary() -> graph_stats_for_netlet() path
 	error_function = function(net) {
 		stop("Intentional error")
@@ -1118,8 +1114,6 @@ test_that("compare_networks other_stats with longitudinal networks", {
 	
 	expect_equal(comp$comparison_type, "temporal")
 	
-	# custom stats should be integrated into summary
-	# should have stats for each time period
 	expect_equal(nrow(comp$summary), t)
 	# since there's only one other_stats function, names aren't prefixed
 	expect_true(all(c("period_density", "period_edges") %in% names(comp$summary)))
@@ -1211,7 +1205,7 @@ test_that("compare_networks other_stats with attribute comparison", {
 
 test_that("compare_networks other_stats preserves standard functionality", {
 	skip_on_cran()
-	# ensure adding other_stats doesn't break standard comparisons
+	# check custom stats with standard comparisons
 	n = 10
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
 	mat2 = matrix(rbinom(n * n, 1, 0.4), n, n)
@@ -1231,13 +1225,11 @@ test_that("compare_networks other_stats preserves standard functionality", {
 		other_stats = list(test = simple_stat)
 	)
 	
-	# standard results should be identical (except possibly QAP p-values due to randomness)
 	# compare all columns except qap_pvalue
 	summary_cols = setdiff(names(comp_standard$summary), "qap_pvalue")
 	expect_equal(comp_standard$summary[, summary_cols], comp_custom$summary[, summary_cols])
 	expect_equal(comp_standard$edge_changes, comp_custom$edge_changes)
 	
-	# custom should have additional custom_stats
 	expect_false("custom_stats" %in% names(comp_standard))
 	expect_true("custom_stats" %in% names(comp_custom))
 })
@@ -1273,13 +1265,12 @@ test_that("compare_networks other_stats with weighted networks", {
 	custom_df = comp$custom_stats
 	expect_true(all(c("network", "weights.weights_mean_weight", "weights.weights_median_weight", "weights.weights_weight_variance") %in% names(custom_df)))
 	
-	# values should be positive for these random weighted networks
 	expect_true(all(custom_df$weights.weights_mean_weight > 0))
 })
 
 test_that("compare_networks other_stats with return_details", {
 	skip_on_cran()
-	# test that other_stats works with return_details = TRUE
+	# test that other_stats works with return_details = true
 	n = 10
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
 	mat2 = matrix(rbinom(n * n, 1, 0.4), n, n)
@@ -1298,11 +1289,9 @@ test_that("compare_networks other_stats with return_details", {
 		other_stats = list(custom = custom_stat)
 	)
 	
-	# should have both details and custom_stats
 	expect_true("details" %in% names(comp))
 	expect_true("custom_stats" %in% names(comp))
 	
-	# details should include standard matrices
 	expect_true(all(c("correlation_matrix", "jaccard_matrix", "hamming_matrix") %in% names(comp$details)))
 })
 
@@ -1330,18 +1319,15 @@ test_that("compare_networks structural comparison includes all summary.netify st
 	# compare structures
 	comp = compare_networks(list("Dense" = net1, "Sparse" = net2), what = "structure")
 	
-	# the comparison summary should have all columns from summary.netify
 	expected_cols = names(sum1)
 	# remove 'net' column as it's replaced by 'network' in comparison
 	expected_cols = setdiff(expected_cols, "net")
 	
-	# all summary.netify columns should be present
 	for (col in expected_cols) {
 		expect_true(col %in% names(comp$summary), 
 				   info = paste("Missing column:", col))
 	}
 	
-	# for directed networks, should include:
 	expect_true(all(c("num_actors", "density", "num_edges", "prop_edges_missing",
 					 "competition_row", "competition_col", 
 					 "sd_of_row_means", "sd_of_col_means",
@@ -1361,7 +1347,6 @@ test_that("compare_networks structural comparison with weighted networks include
 	
 	comp = compare_networks(list(net1, net2), what = "structure")
 	
-	# should include weight statistics
 	weight_stats = c("mean_edge_weight", "sd_edge_weight", 
 					 "median_edge_weight", "min_edge_weight", "max_edge_weight")
 	
@@ -1370,13 +1355,11 @@ test_that("compare_networks structural comparison with weighted networks include
 				   info = paste("Missing weight stat:", stat))
 	}
 	
-	# weight stats should differ between networks
 	expect_true(comp$summary$mean_edge_weight[1] != comp$summary$mean_edge_weight[2])
 })
 
 test_that("compare_networks structural comparison adapts to network type", {
 	skip_on_cran()
-	# test undirected network - should not have reciprocity
 	n = 15
 	mat_sym = matrix(rbinom(n * n, 1, 0.4), n, n)
 	mat_sym[lower.tri(mat_sym)] = t(mat_sym)[lower.tri(mat_sym)]
@@ -1387,13 +1370,11 @@ test_that("compare_networks structural comparison adapts to network type", {
 	
 	comp_sym = compare_networks(list(net_sym1, net_sym2), what = "structure")
 	
-	# should NOT have directed-only stats
 	expect_false("reciprocity" %in% names(comp_sym$summary))
 	expect_false("covar_of_row_col_means" %in% names(comp_sym$summary))
 	expect_false("competition_row" %in% names(comp_sym$summary))
 	expect_false("competition_col" %in% names(comp_sym$summary))
 	
-	# should have simplified names
 	expect_true("competition" %in% names(comp_sym$summary))
 	expect_true("sd_of_actor_means" %in% names(comp_sym$summary))
 })
@@ -1411,7 +1392,6 @@ test_that("compare_networks structural comparison with binary networks", {
 	
 	comp = compare_networks(list(net1, net2), what = "structure")
 	
-	# should NOT have weight statistics for binary networks
 	weight_stats = c("mean_edge_weight", "sd_edge_weight", 
 					 "median_edge_weight", "min_edge_weight", "max_edge_weight")
 	
@@ -1430,7 +1410,7 @@ test_that("compare_networks structural percent changes calculated correctly", {
 	mat1 = matrix(0, n, n)
 	mat1[1:3, 4:6] = 1
 	
-	# second network: denser but ensure it's not symmetric
+	# second network is denser and asymmetric
 	mat2 = matrix(0, n, n) 
 	mat2[1:5, 1:6] = 1
 	mat2[6, 1:3] = 1  # make it asymmetric
@@ -1441,7 +1421,6 @@ test_that("compare_networks structural percent changes calculated correctly", {
 	
 	comp = compare_networks(list(net1, net2), what = "structure")
 	
-	# should have changes dataframe
 	expect_true("changes" %in% names(comp))
 	changes = comp$changes
 	
@@ -1449,12 +1428,10 @@ test_that("compare_networks structural percent changes calculated correctly", {
 	expect_true(all(c("metric", "value_net1", "value_net2", 
 					 "absolute_change", "percent_change") %in% names(changes)))
 	
-	# density should increase
 	density_row = changes[changes$metric == "density", ]
 	expect_true(density_row$absolute_change > 0)
 	expect_true(density_row$percent_change > 0)
 	
-	# all metrics from summary should be in changes
 	summary_metrics = setdiff(names(comp$summary), c("network", "layer"))
 	changes_metrics = unique(changes$metric)
 	
@@ -1466,7 +1443,6 @@ test_that("compare_networks structural percent changes calculated correctly", {
 
 test_that("compare_networks structural comparison with custom other_stats", {
 	skip_on_cran()
-	# create test networks
 	n = 15
 	mat1 = matrix(rbinom(n * n, 1, 0.3), n, n)
 	mat2 = matrix(rbinom(n * n, 1, 0.5), n, n)
@@ -1492,12 +1468,10 @@ test_that("compare_networks structural comparison with custom other_stats", {
 		other_stats = list(centralization = custom_centralization)
 	)
 	
-	# custom stats should be integrated into main summary
 	# when there's only one other_stats function, summary.netify doesn't prefix
 	expect_true("degree_centralization" %in% names(comp$summary))
 	expect_true("max_degree" %in% names(comp$summary))
 	
-	# and should appear in changes if comparing 2 networks
 	expect_true("degree_centralization" %in% comp$changes$metric)
 })
 
@@ -1508,20 +1482,23 @@ test_that("compare_networks structural comparison handles missing values", {
 	mat1 = matrix(rbinom(n * n, 1, 0.4), n, n)
 	mat2 = matrix(rbinom(n * n, 1, 0.4), n, n)
 	
-	# add some NAs
+	# add some nas
 	mat1[sample(1:(n*n), 10)] = NA
 	mat2[sample(1:(n*n), 15)] = NA
 	
 	net1 = new_netify(mat1)
 	net2 = new_netify(mat2)
 	
-	comp = compare_networks(list(net1, net2), what = "structure")
+	expect_warning(
+		{
+			comp = compare_networks(list(net1, net2), what = "structure")
+		},
+		NA
+	)
 	
-	# should calculate prop_edges_missing
 	expect_true("prop_edges_missing" %in% names(comp$summary))
 	expect_true(all(comp$summary$prop_edges_missing > 0))
 	
-	# other stats should still be calculated
 	expect_true(all(!is.na(comp$summary$density)))
 	expect_true(all(!is.na(comp$summary$num_edges)))
 })
@@ -1540,13 +1517,10 @@ test_that("compare_networks structural comparison with bipartite networks", {
 	
 	comp = compare_networks(list(net1, net2), what = "structure")
 	
-	# should have bipartite-specific columns
 	expect_true("num_row_actors" %in% names(comp$summary))
 	expect_true("num_col_actors" %in% names(comp$summary))
 	
-	# should not have unipartite-only stats
 	expect_false("num_actors" %in% names(comp$summary))
-	# bipartite networks should not include reciprocity or transitivity
 	expect_false("reciprocity" %in% names(comp$summary))
 	expect_false("mutual" %in% names(comp$summary))
 	expect_false("transitivity" %in% names(comp$summary))
@@ -1570,11 +1544,9 @@ test_that("compare_networks preserves all summary statistics in multilayer", {
 	# compare layers structurally
 	comp = compare_networks(multilayer, what = "structure")
 	
-	# should show each layer's full statistics
 	expect_equal(nrow(comp$summary), 2)
 	expect_true("network" %in% names(comp$summary))
 	
-	# all summary stats should be present
 	sum_individual = summary(net1)
 	expected_stats = setdiff(names(sum_individual), "net")
 	

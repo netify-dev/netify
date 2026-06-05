@@ -2,27 +2,27 @@
 % Please edit documentation in R/broom_methods.R
 \name{glance.netify}
 \alias{glance.netify}
-\title{One-row-per-network summary of a netify object (broom style)}
+\title{one-row-per-network summary of a netify object (broom style)}
 \usage{
 glance.netify(x, ...)
 }
 \arguments{
-\item{x}{A netify object.}
+\item{x}{a netify object.}
 
-\item{...}{Additional arguments passed to \code{\link[=summary.netify]{summary.netify()}} (e.g.,
+\item{...}{additional arguments passed to \code{\link[=summary.netify]{summary.netify()}} (e.g.,
 \code{other_stats = list(my_stat = my_fn)}).}
 }
 \value{
-A tibble (or data.frame if \code{tibble} isn't installed): one row
+a tibble (or data.frame if \code{tibble} isn't installed): one row
 per (network, time, layer) combination with density, reciprocity,
 mutual, transitivity, edge counts, etc.
 }
 \description{
-\code{glance.netify} is an S3 method for the \code{glance()} generic from the
-\pkg{broom} package. It returns the graph-level statistics produced
-by \code{\link[=summary.netify]{summary.netify()}} — one row per network / time period / layer —
+\code{glance.netify} is an s3 method for the \code{glance()} generic from the
+broom package. it returns the graph-level statistics produced
+by \code{\link[=summary.netify]{summary.netify()}} -- one row per network / time period / layer --
 so the netify object plays nicely with broom-style workflows. (broom
-is not a hard dependency; this method is registered as an S3 method
+is not a hard dependency; this method is registered as an s3 method
 on \code{glance} and only triggers when the generic is available.)
 }
 \examples{
@@ -38,5 +38,5 @@ glance.netify(net)
 for one-row-per-edge output.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

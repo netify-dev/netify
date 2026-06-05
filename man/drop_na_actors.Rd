@@ -7,45 +7,45 @@
 drop_na_actors(netlet, cols = NULL)
 }
 \arguments{
-\item{netlet}{A netify object with a \code{nodal_data} attribute.}
+\item{netlet}{a netify object with a \code{nodal_data} attribute.}
 
-\item{cols}{Character vector of column names in \code{nodal_data} to
-check for \code{NA}. \code{NULL} (the default) checks every
+\item{cols}{character vector of column names in \code{nodal_data} to
+check for \code{na}. \code{NULL} (the default) checks every
 non-bookkeeping column (everything except \code{actor},
 \code{time}, and \code{layer}).}
 }
 \value{
-A netify object equivalent to
+a netify object equivalent to
 \code{subset_netify(netlet, actors = clean_actors)} after dropping
-any actor whose nodal rows contain \code{NA} in the inspected
-columns. If no NAs are found the input is returned unchanged.
+any actor whose nodal rows contain \code{na} in the inspected
+columns. if no nas are found the input is returned unchanged.
 }
 \description{
-Removes actors whose \code{nodal_data} carries \code{NA} in one or more
-covariate columns. ERGM terms like \code{nodecov()} and
-\code{nodematch()} reject NA-bearing vertex attributes, so this helper
-is handy upstream of \code{\link{netify_to_statnet}}. Works for
+removes actors whose \code{nodal_data} carries \code{na} in one or more
+covariate columns. ergm terms like \code{nodecov()} and
+\code{nodematch()} reject na-bearing vertex attributes, so this helper
+is handy upstream of \code{\link{netify_to_statnet}}. works for
 cross-sectional, longitudinal, and bipartite netlets.
 }
 \details{
-For longitudinal netlets an actor is dropped from every period if any
-of its rows in \code{nodal_data} carry \code{NA} in the inspected
-columns. For bipartite netlets only actors in the mode that the
+for longitudinal netlets an actor is dropped from every period if any
+of its rows in \code{nodal_data} carry \code{na} in the inspected
+columns. for bipartite netlets only actors in the mode that the
 nodal table covers are filtered; the other mode passes through
 untouched.
 
-Corner cases:
+corner cases:
 \itemize{
-\item If \code{cols} references a name that is not in
+\item if \code{cols} references a name that is not in
 \code{nodal_data}, the call aborts with a clear message listing
 the missing columns.
-\item If no actor carries \code{NA} in the inspected columns, the
+\item if no actor carries \code{na} in the inspected columns, the
 input netlet is returned unchanged (no inform).
-\item If \emph{every} actor carries \code{NA} (so the cleaned
+\item if \emph{every} actor carries \code{na} (so the cleaned
 netlet would have zero actors), the call aborts rather than
 silently returning an empty netify, which would break downstream
 \code{to_statnet()} / \code{ergm()} pipelines.
-\item If the netlet has no \code{nodal_data} attribute attached,
+\item if the netlet has no \code{nodal_data} attribute attached,
 the input is returned unchanged.
 }
 }
@@ -63,5 +63,5 @@ clean <- drop_na_actors(net, cols = c("i_polity2", "i_log_gdp"))
 
 }
 \author{
-Shahryar Minhas
+shahryar minhas
 }

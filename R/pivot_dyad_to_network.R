@@ -1,55 +1,55 @@
 #' Pivot a dyadic variable to become the network
 #'
 #' `pivot_dyad_to_network` swaps a dyadic attribute with the main network in a netify object.
-#' This is useful when you want to analyze a different relationship type that was stored
-#' as a dyadic attribute. For example, if your network represents trade relationships
-#' but you have FDI stored as a dyadic attribute, you can pivot to make FDI the main network.
+#' this is useful when you want to analyze a different relationship type that was stored
+#' as a dyadic attribute. for example, if your network represents trade relationships
+#' but you have fdi stored as a dyadic attribute, you can pivot to make fdi the main network.
 #'
-#' @param netlet A netify object containing the network and dyadic attributes
-#' @param dyad_var Character string naming the dyadic variable to become the new network.
-#'   Must exist in the netlet's dyad_data attribute.
-#' @param make_network_dyad_var Logical. If TRUE (default), the current network
+#' @param netlet a netify object containing the network and dyadic attributes
+#' @param dyad_var character string naming the dyadic variable to become the new network.
+#'   must exist in the netlet's dyad_data attribute.
+#' @param make_network_dyad_var logical. if TRUE (default), the current network
 #'   will be preserved as a dyadic attribute.
-#' @param network_var_name Character string specifying the name for the old network
-#'   when converted to a dyadic attribute. If NULL (default), uses the current
+#' @param network_var_name character string specifying the name for the old network
+#'   when converted to a dyadic attribute. if NULL (default), uses the current
 #'   weight attribute name if available, otherwise "old_network".
-#' @param symmetric Logical or NULL. Specifies whether the new network should be
-#'   treated as symmetric. If NULL (default), attempts to detect from the dyadic
+#' @param symmetric logical or NULL. specifies whether the new network should be
+#'   treated as symmetric. if NULL (default), attempts to detect from the dyadic
 #'   variable's symmetry setting or data structure.
-#' @param weight_type Character string describing the type of weight for the new
-#'   network (e.g., "trade_volume", "fdi_amount"). If NULL (default), uses the
+#' @param weight_type character string describing the type of weight for the new
+#'   network (e.g., "trade_volume", "fdi_amount"). if NULL (default), uses the
 #'   dyad_var name.
-#' @param diag_to_NA Logical. Whether to set diagonal values to NA in the new
-#'   network. If NULL (default), inherits from the original netlet.
-#' @param missing_to_zero Logical. Whether to treat missing values as zeros in
-#'   the new network. If NULL (default), inherits from the original netlet.
+#' @param diag_to_NA logical. whether to set diagonal values to na in the new
+#'   network. if NULL (default), inherits from the original netlet.
+#' @param missing_to_zero logical. whether to treat missing values as zeros in
+#'   the new network. if NULL (default), inherits from the original netlet.
 #'
-#' @return A netify object with the dyadic variable as the main network and
-#'   (optionally) the old network preserved as a dyadic attribute. All other
+#' @return a netify object with the dyadic variable as the main network and
+#'   (optionally) the old network preserved as a dyadic attribute. all other
 #'   attributes and dyadic variables are preserved.
 #'
 #' @details
-#' The function handles different netify types appropriately:
+#' the function handles different netify types appropriately:
 #' \itemize{
-#'   \item For cross-sectional networks: performs a simple matrix swap
-#'   \item For longitudinal arrays: swaps matrices across all time periods
-#'   \item For longitudinal lists: swaps matrices for each time period
-#'   \item For multilayer networks: swaps within each layer
+#'   \item for cross-sectional networks: performs a simple matrix swap
+#'   \item for longitudinal arrays: swaps matrices across all time periods
+#'   \item for longitudinal lists: swaps matrices for each time period
+#'   \item for multilayer networks: swaps within each layer
 #' }
 #'
-#' When the new network has different properties than the original (e.g., different
+#' when the new network has different properties than the original (e.g., different
 #' symmetry or weight type), the function updates the netify attributes accordingly.
-#' For bipartite networks, the new network is always treated as asymmetric.
+#' for bipartite networks, the new network is always treated as asymmetric.
 #'
-#' If the dyadic variable was originally specified with symmetry information via
+#' if the dyadic variable was originally specified with symmetry information via
 #' `add_dyad_vars()`, that information is used unless overridden by the symmetric
 #' parameter.
 #'
 #' @examples
-#' # Load example data
+#' # load example data
 #' data(icews)
 #'
-#' # Create a netify object with verbal cooperation as the main network
+#' # create a netify object with verbal cooperation as the main network
 #' # and material cooperation as a dyadic attribute
 #' icews_10 <- icews[icews$year == 2010, ]
 #'
@@ -68,23 +68,23 @@
 #'     dyad_vars_symmetric = FALSE
 #' )
 #'
-#' # Check the current network
+#' # check the current network
 #' print(net)
 #'
-#' # Pivot to make material cooperation the main network
+#' # pivot to make material cooperation the main network
 #' net_pivoted <- pivot_dyad_to_network(
 #'     net,
 #'     dyad_var = "matlCoop",
 #'     network_var_name = "verbCoop"
 #' )
 #'
-#' # The main network is now material cooperation
+#' # the main network is now material cooperation
 #' print(net_pivoted)
 #'
-#' # The old network (verbal cooperation) is preserved as a dyadic attribute
+#' # the old network (verbal cooperation) is preserved as a dyadic attribute
 #' attr(net_pivoted, "dyad_data")[["1"]][["verbCoop"]][1:5, 1:5]
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @export pivot_dyad_to_network
 
@@ -146,13 +146,18 @@ pivot_dyad_to_network <- function(
 			cli::cli_warn("Bipartite networks must be asymmetric. Setting {.arg symmetric} = {.val FALSE}.")
 		}
 		symmetric <- FALSE
-	} else {
-		# for non-bipartite networks, detect symmetry if not explicitly provided
-		if (is.null(symmetric)) {
-			symmetric <- detect_dyad_symmetry(netlet, dyad_var)
-			cli::cli_alert_info("Auto-detected symmetry for '{dyad_var}': {ifelse(symmetric, 'symmetric', 'asymmetric')}")
+		} else {
+			# detect symmetry for non-bipartite networks
+			if (is.null(symmetric)) {
+				symmetric <- detect_dyad_symmetry(netlet, dyad_var)
+				symmetry_label <- if (length(symmetric) > 1L) {
+					paste0(names(symmetric), "=", ifelse(symmetric, "symmetric", "asymmetric"), collapse = ", ")
+				} else {
+					ifelse(symmetric, "symmetric", "asymmetric")
+				}
+				cli::cli_alert_info("Auto-detected symmetry for '{dyad_var}': {symmetry_label}")
+			}
 		}
-	}
 
 	# create a copy of the netlet object to modify
 	new_netlet <- netlet
@@ -168,13 +173,23 @@ pivot_dyad_to_network <- function(
 	}
 
 	# update attributes of the new netlet object
-	attr(new_netlet, "weight") <- dyad_var
+	layer_count <- length(new_attrs$layers %||% character(0))
+	attr(new_netlet, "weight") <- if (layer_count > 1L) {
+		paste(rep(dyad_var, layer_count), collapse = ", ")
+	} else {
+		dyad_var
+	}
 	attr(new_netlet, "symmetric") <- symmetric
-	attr(new_netlet, "detail_weight") <- ifelse(
+	detail_weight <- ifelse(
 		weight_type == dyad_var,
 		paste0("Weighted: ", weight_type),
 		paste0("Weighted: ", weight_type, " (", dyad_var, ")")
 	)
+	attr(new_netlet, "detail_weight") <- if (layer_count > 1L) {
+		paste(rep(detail_weight, layer_count), collapse = " | ")
+	} else {
+		detail_weight
+	}
 	attr(new_netlet, "diag_to_NA") <- diag_to_NA
 	attr(new_netlet, "missing_to_zero") <- missing_to_zero
 
@@ -195,21 +210,32 @@ pivot_dyad_to_network <- function(
 	return(new_netlet)
 }
 
-#' Detect symmetry of a dyadic variable
+#' detect symmetry of a dyadic variable
 #'
-#' Internal function to detect whether a dyadic variable is symmetric
+#' internal function to detect whether a dyadic variable is symmetric
 #' by checking if matrix\[i,j\] equals matrix\[j,i\] for all elements.
 #'
-#' @param netlet A netify object
-#' @param dyad_var Name of the dyadic variable to check
+#' @param netlet a netify object
+#' @param dyad_var name of the dyadic variable to check
 #'
-#' @return Logical indicating whether the variable is symmetric
+#' @return logical indicating whether the variable is symmetric
 #'
 #' @keywords internal
 #' @noRd
 detect_dyad_symmetry <- function(netlet, dyad_var) {
 	# get the first matrix for the dyadic variable
 	first_matrix <- attr(netlet, "dyad_data")[[1]][[dyad_var]]
+
+	if (length(dim(first_matrix)) == 3L) {
+		out <- vapply(seq_len(dim(first_matrix)[3]), function(i) {
+			layer_matrix <- first_matrix[, , i]
+			nrow(layer_matrix) == ncol(layer_matrix) &&
+				isSymmetric(layer_matrix, check.attributes = FALSE)
+		}, logical(1))
+		names(out) <- dimnames(first_matrix)[[3]] %||% paste0("layer", seq_along(out))
+		if (length(unique(out)) == 1L) return(unname(out[1]))
+		return(out)
+	}
 
 	# check if the matrix is square
 	if (nrow(first_matrix) != ncol(first_matrix)) {
@@ -222,14 +248,14 @@ detect_dyad_symmetry <- function(netlet, dyad_var) {
 	return(is_symmetric)
 }
 
-#' Swap matrices for cross-sectional netify objects
+#' swap matrices for cross-sectional netify objects
 #'
-#' @param netlet Cross-sectional netify object
-#' @param dyad_var Name of dyadic variable to become network
-#' @param make_network_dyad_var Whether to preserve old network as dyadic variable
-#' @param network_var_name Name for the old network when stored as dyadic variable
+#' @param netlet cross-sectional netify object
+#' @param dyad_var name of dyadic variable to become network
+#' @param make_network_dyad_var whether to preserve old network as dyadic variable
+#' @param network_var_name name for the old network when stored as dyadic variable
 #'
-#' @return Modified netify object
+#' @return modified netify object
 #' @keywords internal
 #' @noRd
 swap_cross_sec <- function(
@@ -240,24 +266,28 @@ swap_cross_sec <- function(
 
 	# if requested, save the old network as a dyadic variable
 	if (make_network_dyad_var) {
-		old_network_matrix <- netlet[, , drop = FALSE]
+		old_network_matrix <- if (length(dim(netlet)) == 3L) netlet[, , , drop = FALSE] else netlet[, , drop = FALSE]
 		attr(netlet, "dyad_data")[["1"]][[network_var_name]] <- old_network_matrix
 	}
 
 	# replace the network with the new matrix
-	netlet[, ] <- new_network_matrix
+	if (length(dim(netlet)) == 3L) {
+		netlet[, , ] <- pivot_replacement_array(new_network_matrix, dim(netlet), dimnames(netlet), dyad_var)
+	} else {
+		netlet[, ] <- new_network_matrix
+	}
 
 	return(netlet)
 }
 
-#' Swap matrices for longitudinal array netify objects
+#' swap matrices for longitudinal array netify objects
 #'
-#' @param netlet Longitudinal array netify object
-#' @param dyad_var Name of dyadic variable to become network
-#' @param make_network_dyad_var Whether to preserve old network as dyadic variable
-#' @param network_var_name Name for the old network when stored as dyadic variable
+#' @param netlet longitudinal array netify object
+#' @param dyad_var name of dyadic variable to become network
+#' @param make_network_dyad_var whether to preserve old network as dyadic variable
+#' @param network_var_name name for the old network when stored as dyadic variable
 #'
-#' @return Modified netify object
+#' @return modified netify object
 #' @keywords internal
 #' @noRd
 swap_longit_array <- function(
@@ -276,20 +306,18 @@ swap_longit_array <- function(
 		for (t_idx in 1:n_time) {
 			t_name <- time_names[t_idx]
 
-			# get the new network matrix for the current time point
-			new_network_matrix <- attr(netlet, "dyad_data")[[t_name]][[dyad_var]]
+				# get the new network matrix for the current time point
+				new_network_matrix <- attr(netlet, "dyad_data")[[t_name]][[dyad_var]]
 
 			# if requested, save the old network as a dyadic variable
 			if (make_network_dyad_var) {
-				old_network_array <- netlet[, , , t_idx, drop = FALSE]
-				attr(netlet, "dyad_data")[[t_name]][[network_var_name]] <- old_network_array[, , 1, 1]
-			}
+					old_network_array <- netlet[, , , t_idx, drop = FALSE]
+					attr(netlet, "dyad_data")[[t_name]][[network_var_name]] <- old_network_array[, , , 1, drop = FALSE]
+				}
 
-			# replace the network for each layer with the new matrix
-			for (l_idx in 1:n_layers) {
-				netlet[, , l_idx, t_idx] <- new_network_matrix
+				netlet[, , , t_idx] <- pivot_replacement_array(
+					new_network_matrix, dim(netlet)[1:3], dimnames(netlet)[1:3], dyad_var)
 			}
-		}
 	} else {
 		# get the number of time points
 		n_time <- dim(netlet)[3]
@@ -316,14 +344,14 @@ swap_longit_array <- function(
 	return(netlet)
 }
 
-#' Swap matrices for longitudinal list netify objects
+#' swap matrices for longitudinal list netify objects
 #'
-#' @param netlet Longitudinal list netify object
-#' @param dyad_var Name of dyadic variable to become network
-#' @param make_network_dyad_var Whether to preserve old network as dyadic variable
-#' @param network_var_name Name for the old network when stored as dyadic variable
+#' @param netlet longitudinal list netify object
+#' @param dyad_var name of dyadic variable to become network
+#' @param make_network_dyad_var whether to preserve old network as dyadic variable
+#' @param network_var_name name for the old network when stored as dyadic variable
 #'
-#' @return Modified netify object
+#' @return modified netify object
 #' @keywords internal
 #' @noRd
 swap_longit_list <- function(
@@ -343,15 +371,44 @@ swap_longit_list <- function(
 			attr(netlet, "dyad_data")[[t]][[network_var_name]] <- old_network_matrix
 		}
 
-		# preserve the attributes of the old network
-		old_attrs <- attributes(netlet[[t]])
+			# preserve the attributes of the old network
+			old_attrs <- attributes(netlet[[t]])
 
-		# replace the network with the new matrix
-		netlet[[t]][, ] <- new_network_matrix
+			# replace the network with the new matrix
+			if (length(dim(netlet[[t]])) == 3L) {
+				netlet[[t]][, , ] <- pivot_replacement_array(
+					new_network_matrix, dim(netlet[[t]]), dimnames(netlet[[t]]), dyad_var)
+			} else {
+				netlet[[t]][, ] <- new_network_matrix
+			}
 
-		# restore the attributes to the updated network
+		# restore network attributes
 		attributes(netlet[[t]]) <- old_attrs
 	}
 
 	return(netlet)
+}
+
+#' normalize a pivot replacement matrix for single- or multi-layer arrays
+#'
+#' @keywords internal
+#' @noRd
+pivot_replacement_array <- function(value, target_dim, target_dimnames, dyad_var) {
+	if (length(dim(value)) == 2L) {
+		cli::cli_warn(c(
+			"!" = "Dyadic variable {.val {dyad_var}} is stored as one matrix; using it for every layer.",
+			"i" = "Use a layer-specific dyadic array when each layer should receive a different replacement network."
+		), .frequency = "once", .frequency_id = paste0("pivot_replicate_", dyad_var))
+		out <- array(value,
+			dim = target_dim,
+			dimnames = target_dimnames)
+		return(out)
+	}
+	if (length(dim(value)) == 3L && identical(dim(value), target_dim)) {
+		return(value)
+	}
+	cli::cli_abort(c(
+		"x" = "Dyadic variable {.val {dyad_var}} has dimensions incompatible with the target multilayer network.",
+		"i" = "Expected a matrix with dimensions {.val {target_dim[1:2]}} or an array with dimensions {.val {target_dim}}."
+	))
 }

@@ -1,15 +1,15 @@
 #' Extract edges layer from netify plot components
 #'
-#' Extracts the edge layer from a netify plot components object, allowing for
-#' manual plot construction and customization. This function is part of the
+#' extracts the edge layer from a netify plot components object, allowing for
+#' manual plot construction and customization. this function is part of the
 #' modular plotting system that enables fine-grained control over network
 #' visualization elements.
 #'
-#' @param comp A netify_plot_components object returned from
+#' @param comp a netify_plot_components object returned from
 #'   \code{plot(..., return_components = TRUE)}
 #'
-#' @return A custom object of class "netify_edge" that can be added to a ggplot
-#'   object using the + operator. The object contains the edge layer with all
+#' @return a custom object of class "netify_edge" that can be added to a ggplot
+#'   object using the + operator. the object contains the edge layer with all
 #'   its aesthetic mappings and data.
 #'
 #' @examples
@@ -29,7 +29,7 @@
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_node}},
 #'   \code{\link{assemble_netify_plot}}
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 netify_edge <- function(comp) {
@@ -56,20 +56,20 @@ netify_edge <- function(comp) {
 	structure(list(layer), class = c("netify_edge", "list"))
 }
 
-#' Add netify_edge to ggplot
+#' add netify_edge to ggplot
 #'
-#' S3 method to add netify_edge objects to ggplot objects. This method is called
+#' s3 method to add netify_edge objects to ggplot objects. this method is called
 #' automatically when using the + operator with a netify_edge object.
 #'
-#' @param object A netify_edge object created by \code{\link{netify_edge}}
-#' @param plot A ggplot object to which the edge layer will be added
-#' @param ... Additional arguments passed by ggplot2 (used internally)
+#' @param object a netify_edge object created by \code{\link{netify_edge}}
+#' @param plot a ggplot object to which the edge layer will be added
+#' @param ... additional arguments passed by ggplot2 (used internally)
 #'
-#' @return A ggplot object with the edge layer added
+#' @return a ggplot object with the edge layer added
 #'
 #' @method ggplot_add netify_edge
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 ggplot_add.netify_edge <- function(object, plot, ...) {
@@ -77,17 +77,17 @@ ggplot_add.netify_edge <- function(object, plot, ...) {
 	plot
 }
 
-#' Extract nodes layer from netify plot components
+#' extract nodes layer from netify plot components
 #'
-#' Extracts the node (point) layer from a netify plot components object, allowing
-#' for manual plot construction and customization. Nodes represent actors in the
+#' extracts the node (point) layer from a netify plot components object, allowing
+#' for manual plot construction and customization. nodes represent actors in the
 #' network and can have various aesthetic mappings like size, color, and shape.
 #'
-#' @param comp A netify_plot_components object returned from
+#' @param comp a netify_plot_components object returned from
 #'   \code{plot(..., return_components = TRUE)}
 #'
-#' @return A custom object of class "netify_node" that can be added to a ggplot
-#'   object using the + operator. The object contains the node layer with all
+#' @return a custom object of class "netify_node" that can be added to a ggplot
+#'   object using the + operator. the object contains the node layer with all
 #'   its aesthetic mappings and data.
 #'
 #' @examples
@@ -107,7 +107,7 @@ ggplot_add.netify_edge <- function(object, plot, ...) {
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_edge}},
 #'   \code{\link{assemble_netify_plot}}
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 netify_node <- function(comp) {
@@ -134,20 +134,20 @@ netify_node <- function(comp) {
 	structure(list(layer), class = c("netify_node", "list"))
 }
 
-#' Add netify_node to ggplot
+#' add netify_node to ggplot
 #'
-#' S3 method to add netify_node objects to ggplot objects. This method is called
+#' s3 method to add netify_node objects to ggplot objects. this method is called
 #' automatically when using the + operator with a netify_node object.
 #'
-#' @param object A netify_node object created by \code{\link{netify_node}}
-#' @param plot A ggplot object to which the node layer will be added
-#' @param ... Additional arguments passed by ggplot2 (used internally)
+#' @param object a netify_node object created by \code{\link{netify_node}}
+#' @param plot a ggplot object to which the node layer will be added
+#' @param ... additional arguments passed by ggplot2 (used internally)
 #'
-#' @return A ggplot object with the node layer added
+#' @return a ggplot object with the node layer added
 #'
 #' @method ggplot_add netify_node
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 ggplot_add.netify_node <- function(object, plot, ...) {
@@ -155,17 +155,17 @@ ggplot_add.netify_node <- function(object, plot, ...) {
 	plot
 }
 
-#' Extract text layer from netify plot components
+#' extract text layer from netify plot components
 #'
-#' Extracts the text label layer from a netify plot components object. Text labels
+#' extracts the text label layer from a netify plot components object. text labels
 #' display actor names or other text annotations directly on the plot without
 #' background boxes.
 #'
-#' @param comp A netify_plot_components object returned from
+#' @param comp a netify_plot_components object returned from
 #'   \code{plot(..., return_components = TRUE)}
 #'
-#' @return A custom object of class "netify_text" that can be added to a ggplot
-#'   object using the + operator. The object contains the text layer with all
+#' @return a custom object of class "netify_text" that can be added to a ggplot
+#'   object using the + operator. the object contains the text layer with all
 #'   its aesthetic mappings and data.
 #'
 #' @examples
@@ -185,7 +185,7 @@ ggplot_add.netify_node <- function(object, plot, ...) {
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_label}},
 #'   \code{\link{assemble_netify_plot}}
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 netify_text <- function(comp) {
@@ -210,20 +210,20 @@ netify_text <- function(comp) {
 	structure(list(layer), class = c("netify_text", "list"))
 }
 
-#' Add netify_text to ggplot
+#' add netify_text to ggplot
 #'
-#' S3 method to add netify_text objects to ggplot objects. This method is called
+#' s3 method to add netify_text objects to ggplot objects. this method is called
 #' automatically when using the + operator with a netify_text object.
 #'
-#' @param object A netify_text object created by \code{\link{netify_text}}
-#' @param plot A ggplot object to which the text layer will be added
-#' @param ... Additional arguments passed by ggplot2 (used internally)
+#' @param object a netify_text object created by \code{\link{netify_text}}
+#' @param plot a ggplot object to which the text layer will be added
+#' @param ... additional arguments passed by ggplot2 (used internally)
 #'
-#' @return A ggplot object with the text layer added
+#' @return a ggplot object with the text layer added
 #'
 #' @method ggplot_add netify_text
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 ggplot_add.netify_text <- function(object, plot, ...) {
@@ -231,17 +231,17 @@ ggplot_add.netify_text <- function(object, plot, ...) {
 	plot
 }
 
-#' Extract label layer from netify plot components
+#' extract label layer from netify plot components
 #'
-#' Extracts the label layer from a netify plot components object. Labels display
+#' extracts the label layer from a netify plot components object. labels display
 #' actor names or other text annotations with background boxes, making them more
 #' visible against complex network backgrounds.
 #'
-#' @param comp A netify_plot_components object returned from
+#' @param comp a netify_plot_components object returned from
 #'   \code{plot(..., return_components = TRUE)}
 #'
-#' @return A custom object of class "netify_label" that can be added to a ggplot
-#'   object using the + operator. The object contains the label layer with all
+#' @return a custom object of class "netify_label" that can be added to a ggplot
+#'   object using the + operator. the object contains the label layer with all
 #'   its aesthetic mappings and data.
 #'
 #' @examples
@@ -261,7 +261,7 @@ ggplot_add.netify_text <- function(object, plot, ...) {
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_text}},
 #'   \code{\link{assemble_netify_plot}}
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 netify_label <- function(comp) {
@@ -286,20 +286,20 @@ netify_label <- function(comp) {
 	structure(list(layer), class = c("netify_label", "list"))
 }
 
-#' Add netify_label to ggplot
+#' add netify_label to ggplot
 #'
-#' S3 method to add netify_label objects to ggplot objects. This method is called
+#' s3 method to add netify_label objects to ggplot objects. this method is called
 #' automatically when using the + operator with a netify_label object.
 #'
-#' @param object A netify_label object created by \code{\link{netify_label}}
-#' @param plot A ggplot object to which the label layer will be added
-#' @param ... Additional arguments passed by ggplot2 (used internally)
+#' @param object a netify_label object created by \code{\link{netify_label}}
+#' @param plot a ggplot object to which the label layer will be added
+#' @param ... additional arguments passed by ggplot2 (used internally)
 #'
-#' @return A ggplot object with the label layer added
+#' @return a ggplot object with the label layer added
 #'
 #' @method ggplot_add netify_label
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 ggplot_add.netify_label <- function(object, plot, ...) {
@@ -307,17 +307,17 @@ ggplot_add.netify_label <- function(object, plot, ...) {
 	plot
 }
 
-#' Extract text_repel layer from netify plot components
+#' extract text_repel layer from netify plot components
 #'
-#' Extracts the text_repel layer from a netify plot components object. Text repel labels
+#' extracts the text_repel layer from a netify plot components object. text repel labels
 #' display actor names with automatic repositioning to avoid overlaps, making them more
 #' readable in dense networks.
 #'
-#' @param comp A netify_plot_components object returned from
+#' @param comp a netify_plot_components object returned from
 #'   \code{plot(..., return_components = TRUE)}
 #'
-#' @return A custom object of class "netify_text_repel" that can be added to a ggplot
-#'   object using the + operator. The object contains the text_repel layer with all
+#' @return a custom object of class "netify_text_repel" that can be added to a ggplot
+#'   object using the + operator. the object contains the text_repel layer with all
 #'   its aesthetic mappings and data.
 #'
 #' @examples
@@ -337,7 +337,7 @@ ggplot_add.netify_label <- function(object, plot, ...) {
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_text}},
 #'   \code{\link{assemble_netify_plot}}
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 netify_text_repel <- function(comp) {
@@ -362,20 +362,20 @@ netify_text_repel <- function(comp) {
 	structure(list(layer), class = c("netify_text_repel", "list"))
 }
 
-#' Add netify_text_repel to ggplot
+#' add netify_text_repel to ggplot
 #'
-#' S3 method to add netify_text_repel objects to ggplot objects. This method is called
+#' s3 method to add netify_text_repel objects to ggplot objects. this method is called
 #' automatically when using the + operator with a netify_text_repel object.
 #'
-#' @param object A netify_text_repel object created by \code{\link{netify_text_repel}}
-#' @param plot A ggplot object to which the text_repel layer will be added
-#' @param ... Additional arguments passed by ggplot2 (used internally)
+#' @param object a netify_text_repel object created by \code{\link{netify_text_repel}}
+#' @param plot a ggplot object to which the text_repel layer will be added
+#' @param ... additional arguments passed by ggplot2 (used internally)
 #'
-#' @return A ggplot object with the text_repel layer added
+#' @return a ggplot object with the text_repel layer added
 #'
 #' @method ggplot_add netify_text_repel
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 ggplot_add.netify_text_repel <- function(object, plot, ...) {
@@ -383,17 +383,17 @@ ggplot_add.netify_text_repel <- function(object, plot, ...) {
 	plot
 }
 
-#' Extract label_repel layer from netify plot components
+#' extract label_repel layer from netify plot components
 #'
-#' Extracts the label_repel layer from a netify plot components object. Label repel
+#' extracts the label_repel layer from a netify plot components object. label repel
 #' annotations display actor names with background boxes and automatic repositioning
 #' to avoid overlaps, providing optimal readability in dense networks.
 #'
-#' @param comp A netify_plot_components object returned from
+#' @param comp a netify_plot_components object returned from
 #'   \code{plot(..., return_components = TRUE)}
 #'
-#' @return A custom object of class "netify_label_repel" that can be added to a ggplot
-#'   object using the + operator. The object contains the label_repel layer with all
+#' @return a custom object of class "netify_label_repel" that can be added to a ggplot
+#'   object using the + operator. the object contains the label_repel layer with all
 #'   its aesthetic mappings and data.
 #'
 #' @examples
@@ -413,7 +413,7 @@ ggplot_add.netify_text_repel <- function(object, plot, ...) {
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_label}},
 #'   \code{\link{assemble_netify_plot}}
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 netify_label_repel <- function(comp) {
@@ -438,20 +438,20 @@ netify_label_repel <- function(comp) {
 	structure(list(layer), class = c("netify_label_repel", "list"))
 }
 
-#' Add netify_label_repel to ggplot
+#' add netify_label_repel to ggplot
 #'
-#' S3 method to add netify_label_repel objects to ggplot objects. This method is called
+#' s3 method to add netify_label_repel objects to ggplot objects. this method is called
 #' automatically when using the + operator with a netify_label_repel object.
 #'
-#' @param object A netify_label_repel object created by \code{\link{netify_label_repel}}
-#' @param plot A ggplot object to which the label_repel layer will be added
-#' @param ... Additional arguments passed by ggplot2 (used internally)
+#' @param object a netify_label_repel object created by \code{\link{netify_label_repel}}
+#' @param plot a ggplot object to which the label_repel layer will be added
+#' @param ... additional arguments passed by ggplot2 (used internally)
 #'
-#' @return A ggplot object with the label_repel layer added
+#' @return a ggplot object with the label_repel layer added
 #'
 #' @method ggplot_add netify_label_repel
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 ggplot_add.netify_label_repel <- function(object, plot, ...) {
@@ -459,18 +459,18 @@ ggplot_add.netify_label_repel <- function(object, plot, ...) {
 	plot
 }
 
-#' Reset aesthetic scales in ggplot
+#' reset aesthetic scales in ggplot
 #'
-#' Creates a scale reset object that can be added to a ggplot to reset color,
-#' fill, alpha, and size scales. This is necessary when using multiple layers
+#' creates a scale reset object that can be added to a ggplot to reset color,
+#' fill, alpha, and size scales. this is necessary when using multiple layers
 #' with different aesthetic mappings (e.g., different colors for edges vs nodes).
 #'
-#' @return A custom object of class "netify_scale_reset" that can be added to
+#' @return a custom object of class "netify_scale_reset" that can be added to
 #'   a ggplot object using the + operator
 #'
 #' @details
-#' This function addresses the limitation in ggplot2 where each aesthetic can
-#' only have one scale. By resetting scales between layers, you can have
+#' this function addresses the limitation in ggplot2 where each aesthetic can
+#' only have one scale. by resetting scales between layers, you can have
 #' different color mappings for edges and nodes, for example.
 #'
 #' @examples
@@ -488,27 +488,27 @@ ggplot_add.netify_label_repel <- function(object, plot, ...) {
 #'
 #' @seealso \code{\link[ggnewscale]{new_scale_color}}
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 reset_scales <- function() {
 	structure(list(), class = c("netify_scale_reset", "list"))
 }
 
-#' Add scale resets to ggplot
+#' add scale resets to ggplot
 #'
-#' S3 method to add scale reset objects to ggplot objects. This method resets
+#' s3 method to add scale reset objects to ggplot objects. this method resets
 #' color, fill, alpha, and size scales using the ggnewscale package.
 #'
-#' @param object A netify_scale_reset object created by \code{\link{reset_scales}}
-#' @param plot A ggplot object to which scale resets will be added
-#' @param ... Additional arguments passed by ggplot2 (used internally)
+#' @param object a netify_scale_reset object created by \code{\link{reset_scales}}
+#' @param plot a ggplot object to which scale resets will be added
+#' @param ... additional arguments passed by ggplot2 (used internally)
 #'
-#' @return A ggplot object with scale resets applied
+#' @return a ggplot object with scale resets applied
 #'
 #' @method ggplot_add netify_scale_reset
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 ggplot_add.netify_scale_reset <- function(object, plot, ...) {
@@ -519,26 +519,26 @@ ggplot_add.netify_scale_reset <- function(object, plot, ...) {
 	plot
 }
 
-#' Assemble netify plot from components
+#' assemble netify plot from components
 #'
-#' Assembles a complete network plot from netify plot components. This function
+#' assembles a complete network plot from netify plot components. this function
 #' automatically adds all available layers (edges, nodes, text, labels, and their
 #' repel versions) in the correct order with appropriate scale resets between layers.
 #'
-#' @param comp A netify_plot_components object returned from
+#' @param comp a netify_plot_components object returned from
 #'   \code{plot(..., return_components = TRUE)}
 #'
-#' @return A complete ggplot object ready for display or further customization
+#' @return a complete ggplot object ready for display or further customization
 #'
 #' @details
-#' This function provides a convenient way to reassemble a plot from its
+#' this function provides a convenient way to reassemble a plot from its
 #' components after extracting them with \code{return_components = TRUE}.
-#' It automatically:
+#' it automatically:
 #' \itemize{
-#'   \item Adds layers in the correct order (edges, nodes, text/text_repel, labels/label_repel)
-#'   \item Inserts scale resets between layers when necessary
-#'   \item Handles both standard and repel versions of text and label layers
-#'   \item Includes facets and themes if present
+#'   \item adds layers in the correct order (edges, nodes, text/text_repel, labels/label_repel)
+#'   \item inserts scale resets between layers when necessary
+#'   \item handles both standard and repel versions of text and label layers
+#'   \item includes facets and themes if present
 #' }
 #'
 #' @examples
@@ -557,7 +557,7 @@ ggplot_add.netify_scale_reset <- function(object, plot, ...) {
 #' @seealso \code{\link{plot.netify}}, \code{\link{netify_edge}},
 #'   \code{\link{netify_node}}
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 assemble_netify_plot <- function(comp) {
@@ -630,17 +630,17 @@ assemble_netify_plot <- function(comp) {
 	return(p)
 }
 
-#' Print netify plot components
+#' print netify plot components
 #'
-#' Prints a summary of the components available in a netify_plot_components object.
-#' This helps users understand what layers and elements are available for manual
+#' prints a summary of the components available in a netify_plot_components object.
+#' this helps users understand what layers and elements are available for manual
 #' plot construction.
 #'
-#' @param x A netify_plot_components object returned from
+#' @param x a netify_plot_components object returned from
 #'   \code{plot(..., return_components = TRUE)}
-#' @param ... Additional arguments (currently unused)
+#' @param ... additional arguments (currently unused)
 #'
-#' @return Invisibly returns the input object
+#' @return invisibly returns the input object
 #'
 #' @examples
 #' \dontrun{
@@ -653,7 +653,7 @@ assemble_netify_plot <- function(comp) {
 #'
 #' @method print netify_plot_components
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 print.netify_plot_components <- function(x, ...) {
@@ -680,22 +680,22 @@ print.netify_plot_components <- function(x, ...) {
 	invisible(x)
 }
 
-#' Set scale labels for netify plots
+#' set scale labels for netify plots
 #'
-#' Provides a convenient way to set labels for aesthetic scales in netify plots.
-#' This function simplifies the process of labeling scales that may be spread
+#' provides a convenient way to set labels for aesthetic scales in netify plots.
+#' this function simplifies the process of labeling scales that may be spread
 #' across different layers (edges, nodes, text, labels).
 #'
-#' @param ... Named arguments where the name is the aesthetic_component
+#' @param ... named arguments where the name is the aesthetic_component
 #'   (e.g., "edge_alpha", "node_size", "edge_color") and the value is the
 #'   label text to display in the legend
 #'
-#' @return A custom object of class "netify_labels" that can be added to a
+#' @return a custom object of class "netify_labels" that can be added to a
 #'   netify plot using the + operator
 #'
 #' @details
-#' This function provides a user-friendly interface for setting scale labels
-#' without needing to understand the complexity of ggnewscale. The naming
+#' this function provides a user-friendly interface for setting scale labels
+#' without needing to understand the complexity of ggnewscale. the naming
 #' convention is:
 #' \itemize{
 #'   \item \code{edge_*} for edge aesthetics (e.g., edge_color, edge_alpha)
@@ -704,8 +704,8 @@ print.netify_plot_components <- function(x, ...) {
 #'   \item \code{label_*} for boxed label aesthetics
 #' }
 #'
-#' @note This function only works with plots created using netify's plot method.
-#' It will issue a warning if used with other ggplot objects.
+#' @note this function only works with plots created using netify's plot method.
+#' it will issue a warning if used with other ggplot objects.
 #'
 #' @examples
 #' \dontrun{
@@ -715,14 +715,14 @@ print.netify_plot_components <- function(x, ...) {
 #'     point_size_var = "degree"
 #' ) +
 #'     netify_scale_labels(
-#'         edge_alpha = "Connection Strength",
-#'         node_size = "Node Degree" # node_* is converted to point_*
+#'         edge_alpha = "connection strength",
+#'         node_size = "node degree" # node_* is converted to point_*
 #'     )
 #' }
 #'
 #' @seealso \code{\link{plot.netify}}
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 netify_scale_labels <- function(...) {
@@ -734,21 +734,21 @@ netify_scale_labels <- function(...) {
 	structure(labels, class = c("netify_labels", "list"))
 }
 
-#' Add netify scale labels to ggplot
+#' add netify scale labels to ggplot
 #'
-#' S3 method to add netify_labels objects to ggplot objects. This method updates
+#' s3 method to add netify_labels objects to ggplot objects. this method updates
 #' the labels of existing scales based on the specifications in the netify_labels
 #' object.
 #'
-#' @param object A netify_labels object created by \code{\link{netify_scale_labels}}
-#' @param plot A ggplot object to which the labels will be added
-#' @param ... Additional arguments passed by ggplot2 (used internally)
+#' @param object a netify_labels object created by \code{\link{netify_scale_labels}}
+#' @param plot a ggplot object to which the labels will be added
+#' @param ... additional arguments passed by ggplot2 (used internally)
 #'
-#' @return A ggplot object with updated scale labels
+#' @return a ggplot object with updated scale labels
 #'
 #' @method ggplot_add netify_labels
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 ggplot_add.netify_labels <- function(object, plot, ...) {
@@ -790,18 +790,18 @@ ggplot_add.netify_labels <- function(object, plot, ...) {
 	return(plot)
 }
 
-#' Update scale labels in a ggplot
+#' update scale labels in a ggplot
 #'
-#' Internal helper function that updates the label of a specific aesthetic scale
-#' in a ggplot object. This function adds the appropriate labs() call based on
+#' internal helper function that updates the label of a specific aesthetic scale
+#' in a ggplot object. this function adds the appropriate labs() call based on
 #' the aesthetic type.
 #'
-#' @param plot The ggplot object to modify
-#' @param aesthetic The aesthetic to update (e.g., "alpha", "color", "size")
-#' @param label The new label text for the scale
-#' @param component_type The type of component (e.g., "edge", "node", "text", "label")
+#' @param plot the ggplot object to modify
+#' @param aesthetic the aesthetic to update (e.g., "alpha", "color", "size")
+#' @param label the new label text for the scale
+#' @param component_type the type of component (e.g., "edge", "node", "text", "label")
 #'
-#' @return The updated ggplot object with the new scale label
+#' @return the updated ggplot object with the new scale label
 #'
 #' @keywords internal
 #' @noRd

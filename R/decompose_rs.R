@@ -4,68 +4,68 @@
 #' object into its constituent parts: a data frame of edges with attributes and
 #' a data frame of nodal attributes.
 #'
-#' @param netlet A netify object (class "netify") to be decomposed.
-#' @param remove_zeros Logical. If TRUE (default), edges with zero weight values
-#'   are removed from the edge data frame. If FALSE, zero-weight edges are retained.
+#' @param netlet a netify object (class "netify") to be decomposed.
+#' @param remove_zeros logical. if TRUE (default), edges with zero weight values
+#'   are removed from the edge data frame. if FALSE, zero-weight edges are retained.
 #'
-#' @return A list containing two data frames:
+#' @return a list containing two data frames:
 #'   \itemize{
-#'     \item \strong{edge_data}: A data frame where each row represents an edge with columns:
+#'     \item \strong{edge_data}: a data frame where each row represents an edge with columns:
 #'       \itemize{
-#'         \item \code{from}: Source node identifier
-#'         \item \code{to}: Target node identifier
-#'         \item \code{time}: Time period (character; "1" for cross-sectional networks)
-#'         \item \code{weight}: Edge weight values (using original weight variable name if specified)
-#'         \item Additional columns for any dyadic variables stored in the netify object
+#'         \item \code{from}: source node identifier
+#'         \item \code{to}: target node identifier
+#'         \item \code{time}: time period (character; "1" for cross-sectional networks)
+#'         \item \code{weight}: edge weight values (using original weight variable name if specified)
+#'         \item additional columns for any dyadic variables stored in the netify object
 #'       }
-#'     \item \strong{nodal_data}: A data frame where each row represents a node-time combination with columns:
+#'     \item \strong{nodal_data}: a data frame where each row represents a node-time combination with columns:
 #'       \itemize{
-#'         \item \code{name}: Node identifier
-#'         \item \code{time}: Time period (character; "1" for cross-sectional networks)
-#'         \item Additional columns for any nodal variables stored in the netify object
+#'         \item \code{name}: node identifier
+#'         \item \code{time}: time period (character; "1" for cross-sectional networks)
+#'         \item additional columns for any nodal variables stored in the netify object
 #'       }
 #'   }
 #'
 #' @details
-#' The function helpful for:
+#' the function helpful for:
 #'
-#' \strong{Edge data processing:}
+#' \strong{edge data processing:}
 #' \itemize{
-#'   \item Extracts the adjacency matrix (or array for longitudinal networks) from the netify object
-#'   \item Optionally removes zero-weight edges based on the remove_zeros parameter
-#'   \item Merges any dyadic variables stored in the netify object
-#'   \item Renames columns to standardized names (from, to, time)
+#'   \item extracts the adjacency matrix (or array for longitudinal networks) from the netify object
+#'   \item optionally removes zero-weight edges based on the remove_zeros parameter
+#'   \item merges any dyadic variables stored in the netify object
+#'   \item renames columns to standardized names (from, to, time)
 #' }
 #'
-#' \strong{Node data processing:}
+#' \strong{node data processing:}
 #' \itemize{
-#'   \item Extracts nodal attributes if present, or constructs from actor_pds information
-#'   \item Ensures consistent time variable across node and edge data
-#'   \item Renames columns to standardized names (name, time)
+#'   \item extracts nodal attributes if present, or constructs from actor_pds information
+#'   \item ensures consistent time variable across node and edge data
+#'   \item renames columns to standardized names (name, time)
 #' }
 #'
-#' \strong{Time handling:}
+#' \strong{time handling:}
 #' \itemize{
-#'   \item For cross-sectional networks: Sets time to "1" in both data frames
-#'   \item For longitudinal networks: Preserves original time periods as character values
-#'   \item For ego networks: Extracts time from ego-time concatenated identifiers
+#'   \item for cross-sectional networks: sets time to "1" in both data frames
+#'   \item for longitudinal networks: preserves original time periods as character values
+#'   \item for ego networks: extracts time from ego-time concatenated identifiers
 #' }
 #'
-#' \strong{Variable preservation:}
+#' \strong{variable preservation:}
 #'
-#' All dyadic and nodal variables stored in the netify object are preserved in the
-#' output data frames. Dyadic variables are merged with the edge data, while nodal
+#' all dyadic and nodal variables stored in the netify object are preserved in the
+#' output data frames. dyadic variables are merged with the edge data, while nodal
 #' variables remain in the nodal data frame.
 #'
 #'
 #' @examples
-#' # Load example data
+#' # load example data
 #' data(icews)
 #'
-#' # Example 1: Cross-sectional network
+#' # example 1: cross-sectional network
 #' icews_10 <- icews[icews$year == 2010, ]
 #'
-#' # Create netify object
+#' # create netify object
 #' net_cs <- netify(
 #'     icews_10,
 #'     actor1 = "i", actor2 = "j",
@@ -73,31 +73,31 @@
 #'     weight = "verbCoop"
 #' )
 #'
-#' # Decompose to data frames
+#' # decompose to data frames
 #' decomposed_cs <- decompose_netify(net_cs)
 #'
-#' # Examine structure
+#' # examine structure
 #' str(decomposed_cs)
 #' head(decomposed_cs$edge_data)
 #' head(decomposed_cs$nodal_data)
 #'
-#' # Example 2: Keep zero-weight edges
+#' # example 2: keep zero-weight edges
 #' decomposed_with_zeros <- decompose_netify(net_cs, remove_zeros = FALSE)
 #'
-#' # Compare edge counts
-#' nrow(decomposed_cs$edge_data) # Without zeros
-#' nrow(decomposed_with_zeros$edge_data) # With zeros
+#' # compare edge counts
+#' nrow(decomposed_cs$edge_data) # without zeros
+#' nrow(decomposed_with_zeros$edge_data) # with zeros
 #'
-#' # Example 4: Use for visualization prep
+#' # example 4: use for visualization prep
 #' \dontrun{
-#' # Decompose for use with ggplot2
+#' # decompose for use with ggplot2
 #' plot_data <- decompose_netify(net_cs)
 #'
-#' # Can now use edge_data and nodal_data separately
+#' # can now use edge_data and nodal_data separately
 #' # for network visualization
 #' }
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export decompose_netify
 
@@ -123,7 +123,8 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
 		netify_type = netify_type,
 		weight_attr = weight_attr,
 		remove_zeros = remove_zeros,
-		ego_netlet = ego_netlet
+		ego_netlet = ego_netlet,
+		is_bipartite = identical(obj_attrs$mode, "bipartite")
 	)
 
 	# process dyadic attributes if they exist
@@ -131,7 +132,8 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
 		edge_data <- merge_dyadic_attributes(
 			edge_data = edge_data,
 			dyad_data_attr = obj_attrs$dyad_data,
-			netify_type = netify_type
+			netify_type = netify_type,
+			is_bipartite = identical(obj_attrs$mode, "bipartite")
 		)
 	}
 
@@ -139,9 +141,9 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
 	edge_data <- finalize_edge_data(edge_data, netify_type)
 
 	# process nodal data
-	# for longitudinal data, pass the time labels from the netlet names
+	# for longitudinal data, pass the resolved time labels
 	if (netify_type != "cross_sec") {
-		time_labels <- names(netlet)
+		time_labels <- netify_measurements(netlet)$time
 	} else {
 		time_labels <- NULL
 	}
@@ -162,82 +164,82 @@ decompose_netify <- function(netlet, remove_zeros = TRUE) {
 	return(out)
 }
 
-#' Decompose an igraph object into base R components
+#' decompose an igraph object into base r components
 #'
 #' `decompose_igraph` extracts the adjacency matrix and any vertex/edge attributes
 #' from an igraph object, returning them in a standardized list format.
 #'
-#' @param grph An igraph object to be decomposed.
-#' @param weight Character string specifying the edge attribute to use as weights
-#'   in the adjacency matrix. If NULL (default), the unweighted adjacency matrix
+#' @param grph an igraph object to be decomposed.
+#' @param weight character string specifying the edge attribute to use as weights
+#'   in the adjacency matrix. if NULL (default), the unweighted adjacency matrix
 #'   is returned with 1s for edges and 0s for non-edges.
 #'
-#' @return A list containing four elements:
+#' @return a list containing four elements:
 #'   \itemize{
-#'     \item \strong{adj_mat}: The adjacency matrix extracted from the igraph object
+#'     \item \strong{adj_mat}: the adjacency matrix extracted from the igraph object
 #'       \itemize{
-#'         \item For unipartite graphs: Square matrix of dimension n×n
-#'         \item For bipartite graphs: Rectangular matrix of dimension n₁×n₂
-#'         \item Values are edge weights if specified, otherwise 0/1
+#'         \item for unipartite graphs: square matrix of dimension \eqn{n \times n}{n x n}
+#'         \item for bipartite graphs: rectangular matrix of dimension \eqn{n_1 \times n_2}{n1 x n2}
+#'         \item values are edge weights if specified, otherwise 0/1
 #'       }
-#'     \item \strong{ndata}: A data frame of vertex attributes, or NULL if none exist
+#'     \item \strong{ndata}: a data frame of vertex attributes, or NULL if none exist
 #'       \itemize{
-#'         \item Always includes an 'actor' column with vertex names
-#'         \item Additional columns for each vertex attribute
+#'         \item always includes an 'actor' column with vertex names
+#'         \item additional columns for each vertex attribute
 #'       }
-#'     \item \strong{ddata}: A data frame of edge attributes, or NULL if none exist
+#'     \item \strong{ddata}: a data frame of edge attributes, or NULL if none exist
 #'       \itemize{
-#'         \item Columns 'from' and 'to' specify edge endpoints
-#'         \item Additional columns for each edge attribute
+#'         \item columns 'from' and 'to' specify edge endpoints
+#'         \item additional columns for each edge attribute
 #'       }
-#'     \item \strong{weight}: The edge attribute name used for weights, if provided
+#'     \item \strong{weight}: the edge attribute name used for weights, if provided
 #'   }
 #'
 #' @details
-#' The function handles both unipartite and bipartite graphs appropriately:
+#' the function handles both unipartite and bipartite graphs appropriately:
 #'
-#' \strong{Graph type detection:}
+#' \strong{graph type detection:}
 #' \itemize{
-#'   \item Bipartite graphs must have a logical 'type' vertex attribute
-#'   \item If the 'type' attribute exists but is not logical, the graph is treated
+#'   \item bipartite graphs must have a logical 'type' vertex attribute
+#'   \item if the 'type' attribute exists but is not logical, the graph is treated
 #'     as unipartite with a warning
 #' }
 #'
-#' \strong{Vertex naming:}
+#' \strong{vertex naming:}
 #'
-#' If the graph lacks vertex names, default names are assigned:
+#' if the graph lacks vertex names, default names are assigned:
 #' \itemize{
-#'   \item Unipartite graphs: "a1", "a2", ..., "an"
-#'   \item Bipartite graphs: "r1", "r2", ... for type 1; "c1", "c2", ... for type 2
+#'   \item unipartite graphs: "a1", "a2", ..., "an"
+#'   \item bipartite graphs: "r1", "r2", ... for type 1; "c1", "c2", ... for type 2
 #' }
 #'
-#' Existing vertex names are always preserved and used in the output.
+#' existing vertex names are always preserved and used in the output.
 #'
-#' \strong{Matrix extraction:}
+#' \strong{matrix extraction:}
 #' \itemize{
-#'   \item Unipartite: Uses `as_adjacency_matrix()` to get n×n matrix
-#'   \item Bipartite: Uses `as_biadjacency_matrix()` to get n₁×n₂ matrix where
+#'   \item unipartite: uses `as_adjacency_matrix()` to get \eqn{n \times n}{n x n} matrix
+#'   \item bipartite: uses `as_biadjacency_matrix()` to get \eqn{n_1 \times n_2}{n1 x n2} matrix where
 #'     rows correspond to type=FALSE vertices and columns to type=TRUE vertices
 #' }
 #'
-#' \strong{Attribute handling:}
+#' \strong{attribute handling:}
 #'
-#' All vertex and edge attributes are preserved in the output data frames. System
+#' all vertex and edge attributes are preserved in the output data frames. system
 #' attributes (like 'name' and 'type') are included alongside user-defined attributes.
 #'
 #' @note
-#' For longitudinal networks with changing actor composition, explicitly set vertex
+#' for longitudinal networks with changing actor composition, explicitly set vertex
 #' names before decomposition to ensure consistent actor identification across time
 #' periods.
 #'
-#' The adjacency matrix is always returned as a standard R matrix (not sparse),
+#' the adjacency matrix is always returned as a standard r matrix (not sparse),
 #' which may have memory implications for very large graphs.
 #'
-#' When edge attributes are used as weights, ensure they contain numeric values.
-#' Non-numeric edge attributes will cause an error.
+#' when edge attributes are used as weights, ensure they contain numeric values.
+#' non-numeric edge attributes will cause an error.
 #'
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export decompose_igraph
 
@@ -304,7 +306,7 @@ decompose_igraph <- function(grph, weight = NULL) {
 		if (is.null(vertex_names)) {
 			n_vertices <- igraph::vcount(grph)
 			# paste0("a", seq_len(0)) recycles to "a" (length 1), so guard the
-			# zero-vertex case explicitly to keep dimnames consistent with the
+			# handle zero-vertex graphs before building names
 			# 0x0 adjacency
 			vertex_names <- if (n_vertices == 0L) {
 				character(0)
@@ -380,87 +382,87 @@ decompose_igraph <- function(grph, weight = NULL) {
 	)
 }
 
-#' Decompose a network object into base R components
+#' decompose a network object into base r components
 #'
 #' `decompose_statnet` (also available as `decompose_network`) extracts the
 #' adjacency matrix and any vertex/edge attributes
 #' from a network object (from the statnet suite), returning them in a standardized
 #' list format.
 #'
-#' @param ntwk A network object (class "network") to be decomposed.
-#' @param weight Character string specifying the edge attribute to use as weights
-#'   in the adjacency matrix. If NULL (default), the unweighted adjacency matrix
+#' @param ntwk a network object (class "network") to be decomposed.
+#' @param weight character string specifying the edge attribute to use as weights
+#'   in the adjacency matrix. if NULL (default), the unweighted adjacency matrix
 #'   is returned with 1s for edges and 0s for non-edges.
 #'
-#' @return A list containing four elements:
+#' @return a list containing four elements:
 #'   \itemize{
-#'     \item \strong{adj_mat}: The adjacency matrix extracted from the network object
+#'     \item \strong{adj_mat}: the adjacency matrix extracted from the network object
 #'       \itemize{
-#'         \item For unipartite networks: Square matrix of dimension n×n
-#'         \item For bipartite networks: Full square matrix of dimension (n₁+n₂)×(n₁+n₂)
-#'         \item Values are edge weights if specified, otherwise 0/1
+#'         \item for unipartite networks: square matrix of dimension \eqn{n \times n}{n x n}
+#'         \item for bipartite networks: full square matrix of dimension \eqn{(n_1 + n_2) \times (n_1 + n_2)}{(n1 + n2) x (n1 + n2)}
+#'         \item values are edge weights if specified, otherwise 0/1
 #'       }
-#'     \item \strong{ndata}: A data frame of vertex attributes, or NULL if none exist
+#'     \item \strong{ndata}: a data frame of vertex attributes, or NULL if none exist
 #'       \itemize{
-#'         \item Always includes an 'actor' column with vertex names
-#'         \item Additional columns for each vertex attribute (excluding system attributes)
+#'         \item always includes an 'actor' column with vertex names
+#'         \item additional columns for each vertex attribute (excluding system attributes)
 #'       }
-#'     \item \strong{ddata}: A data frame of edge attributes, or NULL if none exist
+#'     \item \strong{ddata}: a data frame of edge attributes, or NULL if none exist
 #'       \itemize{
-#'         \item Columns 'from' and 'to' specify edge endpoints using vertex names
-#'         \item Additional columns for each edge attribute
+#'         \item columns 'from' and 'to' specify edge endpoints using vertex names
+#'         \item additional columns for each edge attribute
 #'       }
-#'     \item \strong{weight}: The edge attribute name used for weights, if provided
+#'     \item \strong{weight}: the edge attribute name used for weights, if provided
 #'   }
 #'
 #' @details
-#' The function handles both unipartite and bipartite networks appropriately:
+#' the function handles both unipartite and bipartite networks appropriately:
 #'
-#' \strong{Network type detection:}
+#' \strong{network type detection:}
 #' \itemize{
-#'   \item Bipartite networks are identified using `is.bipartite()`
-#'   \item The bipartite partition size is retrieved from the 'bipartite' network attribute
+#'   \item bipartite networks are identified using `is.bipartite()`
+#'   \item the bipartite partition size is retrieved from the 'bipartite' network attribute
 #' }
 #'
-#' \strong{Vertex naming:}
+#' \strong{vertex naming:}
 #'
-#' The function checks for existing vertex names in the 'vertex.names' attribute.
-#' If names are just the default numeric sequence (1, 2, 3, ...), they are treated
-#' as missing. Default names are assigned when needed:
+#' the function checks for existing vertex names in the 'vertex.names' attribute.
+#' if names are just the default numeric sequence (1, 2, 3, ...), they are treated
+#' as missing. default names are assigned when needed:
 #' \itemize{
-#'   \item Unipartite networks: "a1", "a2", ..., "an"
-#'   \item Bipartite networks: "r1", "r2", ... for first partition; "c1", "c2", ... for second partition
+#'   \item unipartite networks: "a1", "a2", ..., "an"
+#'   \item bipartite networks: "r1", "r2", ... for first partition; "c1", "c2", ... for second partition
 #' }
 #'
-#' \strong{Matrix extraction:}
+#' \strong{matrix extraction:}
 #'
-#' Unlike igraph's bipartite handling, the network package returns the full
-#' adjacency matrix even for bipartite networks. The function:
+#' unlike igraph's bipartite handling, the network package returns the full
+#' adjacency matrix even for bipartite networks. the function:
 #' \itemize{
-#'   \item Extracts the full matrix using `as.matrix.network.adjacency()`
-#'   \item For bipartite networks, the matrix has dimension (n₁+n₂)×(n₁+n₂) with
-#'     the first n₁ rows/columns for the first partition
+#'   \item extracts the full matrix using `as.matrix.network.adjacency()`
+#'   \item for bipartite networks, the matrix has dimension \eqn{(n_1 + n_2) \times (n_1 + n_2)}{(n1 + n2) x (n1 + n2)} with
+#'     the first \eqn{n_1}{n1} rows/columns for the first partition
 #' }
 #'
-#' \strong{Attribute handling:}
+#' \strong{attribute handling:}
 #'
-#' System attributes ('vertex.names' and 'na') are excluded from the vertex
-#' attribute data frame. All user-defined vertex and edge attributes are preserved.
+#' system attributes ('vertex.names' and 'na') are excluded from the vertex
+#' attribute data frame. all user-defined vertex and edge attributes are preserved.
 #'
 #' @note
-#' For longitudinal networks with changing actor composition, explicitly set vertex
+#' for longitudinal networks with changing actor composition, explicitly set vertex
 #' names before decomposition to ensure consistent actor identification across time
 #' periods.
 #'
-#' The adjacency matrix format differs between this function and `decompose_igraph`
+#' the adjacency matrix format differs between this function and `decompose_igraph`
 #' for bipartite networks: this function returns the full square matrix while
 #' `decompose_igraph` returns only the rectangular bipartite portion.
 #'
-#' Edge directions are preserved in the adjacency matrix according to the network's
+#' edge directions are preserved in the adjacency matrix according to the network's
 #' directed/undirected property.
 #'
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export decompose_statnet
 #' @aliases decompose_network
@@ -576,7 +578,7 @@ decompose_statnet <- function(ntwk, weight = NULL) {
 
 #' @rdname decompose_statnet
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 decompose_network <- decompose_statnet

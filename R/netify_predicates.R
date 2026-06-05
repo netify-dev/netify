@@ -1,25 +1,25 @@
 #' Type predicates and convenience accessors for netify objects
 #'
-#' These mirror the natural shape questions a user would ask: is
+#' these mirror the natural shape questions a user would ask: is
 #' this object bipartite? longitudinal? multilayer? how many actors
-#' does it have? They share a roxygen page with the small
+#' does it have? they share a roxygen page with the small
 #' attribute-accessor helpers `is_binary()` and `nodal_data()`.
 #'
 #' @name netify_predicates
 #' @rdname netify_predicates
-#' @param x A netify object.
+#' @param x a netify object.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 NULL
 
 #' @rdname netify_predicates
 #' @return `is_binary()` returns a single logical: `TRUE` when every
 #' off-diagonal cell of the underlying adjacency is `0`, `1`, or
-#' `NA`. Reads the cached `"is_binary"` attribute when available
+#' `na`. reads the cached `"is_binary"` attribute when available
 #' and falls back to probing the raw matrix / array / list.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export is_binary
 is_binary <- function(x) {
@@ -45,10 +45,10 @@ is_binary <- function(x) {
 #' @rdname netify_predicates
 #' @return `nodal_data()` returns the nodal-attribute data.frame
 #' stored on the netify object (the `"nodal_data"` attribute), or
-#' `NULL` if no nodal attributes have been attached. Convenience
+#' `NULL` if no nodal attributes have been attached. convenience
 #' wrapper so users do not have to remember the `attr()` call.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export nodal_data
 nodal_data <- function(x) {
@@ -57,13 +57,13 @@ nodal_data <- function(x) {
 }
 
 #' @rdname netify_predicates
-#' @return `is_bipartite()` returns a single logical. If `igraph` is
+#' @return `is_bipartite()` returns a single logical. if `igraph` is
 #' loaded after `netify`, the bare `is_bipartite()` may be masked by
-#' `igraph::is_bipartite()` (which doesn't accept a netify). Use
+#' `igraph::is_bipartite()` (which doesn't accept a netify). use
 #' `is_bipartite_netify()` (alias) or call as `netify::is_bipartite()`
 #' to avoid the collision.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export is_bipartite
 is_bipartite <- function(x) {
@@ -76,17 +76,17 @@ is_bipartite <- function(x) {
 #' won't collide with `igraph::is_bipartite()` when both packages are
 #' attached.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export is_bipartite_netify
 is_bipartite_netify <- function(x) is_bipartite(x)
 
 #' @rdname netify_predicates
-#' @return `is_directed_netify()` returns a single logical. Convenience
-#' alias for `!isTRUE(attr(x, "symmetric"))` that won't collide with
+#' @return `is_directed_netify()` returns a single logical. convenience
+#' alias for `!istrue(attr(x, "symmetric"))` that won't collide with
 #' `igraph::is_directed()`.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export is_directed_netify
 is_directed_netify <- function(x) {
@@ -98,7 +98,7 @@ is_directed_netify <- function(x) {
 #' @rdname netify_predicates
 #' @return `is_longitudinal()` returns a single logical.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export is_longitudinal
 is_longitudinal <- function(x) {
@@ -109,7 +109,7 @@ is_longitudinal <- function(x) {
 #' @rdname netify_predicates
 #' @return `is_multilayer()` returns a single logical.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export is_multilayer
 is_multilayer <- function(x) {
@@ -121,7 +121,7 @@ is_multilayer <- function(x) {
 #' @return `is_symmetric_netify()` returns a single logical (or, for
 #' mixed-directedness multilayer, the per-layer vector).
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export is_symmetric_netify
 is_symmetric_netify <- function(x) {
@@ -135,7 +135,7 @@ is_symmetric_netify <- function(x) {
 #' actors across all periods / both modes; for bipartite a length-2
 #' integer vector `c(row, col)`).
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export n_actors
 n_actors <- function(x) {
@@ -170,14 +170,17 @@ n_actors <- function(x) {
 #' @return `n_periods()` returns a single integer (1 for
 #' cross-sectional).
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export n_periods
 n_periods <- function(x) {
 	if (!is_netify(x)) cli::cli_abort("{.arg x} is not a netify object.")
 	switch(attr(x, "netify_type"),
 		"cross_sec"     = 1L,
-		"longit_array"  = as.integer(dim(get_raw(x))[3]),
+		"longit_array"  = {
+			raw_dims <- dim(get_raw(x))
+			if (length(raw_dims) == 4L) as.integer(raw_dims[4]) else as.integer(raw_dims[3])
+		},
 		"longit_list"   = length(x)
 	)
 }
@@ -185,7 +188,7 @@ n_periods <- function(x) {
 #' @rdname netify_predicates
 #' @return `n_layers()` returns a single integer (1 for single-layer).
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export n_layers
 n_layers <- function(x) {

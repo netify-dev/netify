@@ -37,7 +37,6 @@ test_that("ego_netify works for single ego in cross-sectional network", {
 })
 
 test_that("ego_netify works with multiple egos and direction options", {
-	# create test data with clear directional relationships
 	test_data = data.frame(
 		from = c("A", "A", "B", "C", "D", "D"),
 		to = c("B", "C", "A", "A", "A", "B"),
@@ -103,16 +102,13 @@ test_that("ego_netify works for longitudinal networks with thresholds", {
 	expect_s3_class(ego_longit[["2010"]], "netify")
 	expect_s3_class(ego_longit[["2011"]], "netify")
 
-	# test with threshold
 	ego_thresh = ego_netify(net_longit, ego = "A", threshold = 15)
 
 	# in 2010: a-b (10) < 15, a-c (5) < 15, b-a (20) > 15, c-a (15) = 15
-	# only b should be included as neighbor (b->a weight is 20)
 	actors_2010 = rownames(ego_thresh[["2010"]])
 	expect_equal(sort(actors_2010), c("A", "B"))
 
 	# in 2011: a-b (30) > 15, a-c (2) < 15, b-a (40) > 15, c-a (35) > 15
-	# both b and c should be included
 	actors_2011 = rownames(ego_thresh[["2011"]])
 	expect_equal(sort(actors_2011), c("A", "B", "C"))
 

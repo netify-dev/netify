@@ -1,22 +1,22 @@
 #' Merge netlet attributes with layout information
 #'
-#' This function organizes `netlet` data by integrating x and y positions from `nodes_list` and
+#' this function organizes `netlet` data by integrating x and y positions from `nodes_list` and
 #' connection data from `edges_list` into the node and edge data structures returned by
-#' `decompose_netify`. It supports both cross-sectional and longitudinal data formats.
+#' `decompose_netify`. it supports both cross-sectional and longitudinal data formats.
 #'
-#' @param netlet A `netify` object containing the network data.
-#' @param nodes_list A list of data frames (or a single data frame for cross-sectional data) containing
-#'        node positions with columns `actor`, `x`, and `y`. For longitudinal data, each list element
+#' @param netlet a `netify` object containing the network data.
+#' @param nodes_list a list of data frames (or a single data frame for cross-sectional data) containing
+#'        node positions with columns `actor`, `x`, and `y`. for longitudinal data, each list element
 #'        corresponds to a different time slice.
-#' @param edges_list A list of data frames (or a single data frame for cross-sectional data) detailing
-#'        the connections between nodes. Each data frame should include at least the columns `from`, `to`,
+#' @param edges_list a list of data frames (or a single data frame for cross-sectional data) detailing
+#'        the connections between nodes. each data frame should include at least the columns `from`, `to`,
 #'        and for longitudinal data, `time`.
 #'
-#' @return A list containing two data frames: `nodal_data` and `edge_data`. Each data frame incorporates
+#' @return a list containing two data frames: `nodal_data` and `edge_data`. each data frame incorporates
 #'         the corresponding node or edge data along with their spatial coordinates (and time indices for
 #'         longitudinal data).
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -161,6 +161,6 @@ merge_layout_attribs <- function(netlet, nodes_list, edges_list) {
 		}
 	}
 
-	# return the updated network data frames
+	# return network data frames
 	return(net_dfs)
 }

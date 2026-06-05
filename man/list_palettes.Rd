@@ -2,16 +2,16 @@
 % Please edit documentation in R/plot_palettes.R
 \name{list_palettes}
 \alias{list_palettes}
-\title{List available color palettes}
+\title{list available color palettes}
 \usage{
 list_palettes()
 }
 \value{
-Character vector of available palette names
+character vector of available palette names
 }
 \description{
-List available color palettes
+list available color palettes
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

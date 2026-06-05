@@ -1,76 +1,76 @@
 #' Create a netify matrix from cross-sectional dyadic data
 #'
 #' `get_adjacency` converts cross-sectional dyadic data into an adjacency matrix
-#' of class "netify". This function creates a single network matrix representing
+#' of class "netify". this function creates a single network matrix representing
 #' relationships at one point in time.
 #'
-#' @param dyad_data A data.frame containing dyadic observations. Will be coerced
-#'   to data.frame if a tibble or data.table is provided. As a convenience,
+#' @param dyad_data a data.frame containing dyadic observations. will be coerced
+#'   to data.frame if a tibble or data.table is provided. as a convenience,
 #'   an existing netify object is also accepted: in that case `get_adjacency()`
 #'   returns the underlying adjacency as a plain matrix (no class / attributes),
 #'   and for longitudinal inputs returns the first time slice with a cli hint
 #'   pointing to `as.matrix(net, time = ...)` for selecting a specific slice.
-#' @param actor1 Character string specifying the column name for the first actor
+#' @param actor1 character string specifying the column name for the first actor
 #'   in each dyad.
-#' @param actor2 Character string specifying the column name for the second actor
+#' @param actor2 character string specifying the column name for the second actor
 #'   in each dyad.
-#' @param symmetric Logical. If TRUE (default), treats the network as undirected
-#'   (i.e., edges have no direction). If FALSE, treats the network as directed.
-#' @param mode Character string specifying network structure. Options are:
+#' @param symmetric logical. if TRUE (default), treats the network as undirected
+#'   (i.e., edges have no direction). if FALSE, treats the network as directed.
+#' @param mode character string specifying network structure. options are:
 #'   \itemize{
-#'     \item \code{"unipartite"}: One set of actors (default)
-#'     \item \code{"bipartite"}: Two distinct sets of actors
+#'     \item \code{"unipartite"}: one set of actors (default)
+#'     \item \code{"bipartite"}: two distinct sets of actors
 #'   }
-#' @param weight Character string specifying the column name containing edge weights.
-#'   If NULL (default), edges are treated as unweighted (binary).
-#' @param sum_dyads Logical. If TRUE, sums weight values when multiple edges exist
-#'   between the same actor pair. If FALSE (default), uses the last observed value.
-#' @param diag_to_NA Logical. If TRUE (default), sets diagonal values (self-loops)
-#'   to NA. Automatically set to FALSE for bipartite networks.
-#' @param missing_to_zero Logical. If TRUE (default), treats missing edges as zeros.
-#'   If FALSE, missing edges remain as NA.
-#' @param nodelist Character vector of actor names to include in the network.
-#'   If provided, ensures all listed actors appear in the network even if they
-#'   have no edges (isolates). Useful when working with edgelists that only
+#' @param weight character string specifying the column name containing edge weights.
+#'   if NULL (default), edges are treated as unweighted (binary).
+#' @param sum_dyads logical. if TRUE, sums weight values when multiple edges exist
+#'   between the same actor pair. if FALSE (default), uses the last observed value.
+#' @param diag_to_NA logical. if TRUE (default), sets diagonal values (self-loops)
+#'   to na. automatically set to FALSE for bipartite networks.
+#' @param missing_to_zero logical. if TRUE (default), treats missing edges as zeros.
+#'   if FALSE, missing edges remain as na.
+#' @param nodelist character vector of actor names to include in the network.
+#'   if provided, ensures all listed actors appear in the network even if they
+#'   have no edges (isolates). useful when working with edgelists that only
 #'   contain active dyads.
 #'
-#' @return A matrix of class "netify" (a netify matrix) with:
+#' @return a matrix of class "netify" (a netify matrix) with:
 #'   \itemize{
-#'   \item \strong{Dimensions}: \code{[n_actors x n_actors]} for unipartite networks
+#'   \item \strong{dimensions}: \code{[n_actors x n_actors]} for unipartite networks
 #'       or \code{[n_actors1 x n_actors2]} for bipartite networks
-#'     \item \strong{Class}: "netify" - this is a full netify object compatible
+#'     \item \strong{class}: "netify" - this is a full netify object compatible
 #'       with all netify functions
-#'     \item \strong{Attributes}: Metadata including network properties and
+#'     \item \strong{attributes}: metadata including network properties and
 #'       processing parameters
 #'   }
 #'
-#'   The returned object is a netify matrix that can be used with all netify
+#'   the returned object is a netify matrix that can be used with all netify
 #'   functions such as `summary()`, `plot()`, `to_igraph()`, etc.
 #'
 #' @details
-#' \strong{Note on usage:}
+#' \strong{note on usage:}
 #'
-#' While this function is exported and available for direct use, the primary and
+#' while this function is exported and available for direct use, the primary and
 #' recommended way to create netify objects from dyadic data is through the
-#' `netify()` function. The `netify()` function:
+#' `netify()` function. the `netify()` function:
 #' \itemize{
-#'   \item Provides a consistent interface for both cross-sectional and longitudinal data
-#'   \item Includes additional data validation and preprocessing options
-#'   \item Can incorporate nodal and dyadic attributes during creation
-#'   \item Offers more comprehensive parameter checking
+#'   \item provides a consistent interface for both cross-sectional and longitudinal data
+#'   \item includes additional data validation and preprocessing options
+#'   \item can incorporate nodal and dyadic attributes during creation
+#'   \item checks parameters before constructing the matrix
 #' }
 #'
-#' Use `get_adjacency()` directly only when you need a simple adjacency matrix
+#' use `get_adjacency()` directly only when you need a simple adjacency matrix
 #' creation without additional features.
 #'
 #' @examples
-#' # Load example data
+#' # load example data
 #' data(icews)
 #'
-#' # Subset to one year for cross-sectional analysis
+#' # subset to one year for cross-sectional analysis
 #' icews_2010 <- icews[icews$year == 2010, ]
 #'
-#' # Create a directed network with verbal cooperation weights
+#' # create a directed network with verbal cooperation weights
 #' verbCoop_net <- get_adjacency(
 #'     dyad_data = icews_2010,
 #'     actor1 = "i",
@@ -79,7 +79,7 @@
 #'     weight = "verbCoop"
 #' )
 #'
-#' # Create a directed network with material conflict weights
+#' # create a directed network with material conflict weights
 #' matlConf_net <- get_adjacency(
 #'     dyad_data = icews_2010,
 #'     actor1 = "i",
@@ -88,13 +88,13 @@
 #'     weight = "matlConf"
 #' )
 #'
-#' # Verify class
+#' # verify class
 #' class(verbCoop_net) # "netify"
 #'
-#' # Check dimensions
+#' # check dimensions
 #' dim(verbCoop_net)
 #'
-#' @author Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+#' @author ha eun choi, cassy dorff, colin henry, shahryar minhas
 #'
 #' @export get_adjacency
 #'
@@ -139,8 +139,7 @@ get_adjacency <- function(
 		}
 	}
 
-	# bipartite forces diag_to_NA=FALSE and asymmetric; preserve user choice
-	user_symmetric <- symmetric
+	# bipartite forces diag_to_NA=false and asymmetric in stored metadata
 	if (mode == "bipartite") {
 		diag_to_NA <- FALSE
 		symmetric <- FALSE
@@ -166,19 +165,15 @@ get_adjacency <- function(
 	
 	# incorporate nodelist if provided
 	if (!is.null(nodelist)) {
-		# convert to character to ensure consistency
-		nodelist <- as.character(nodelist)
-		
 		# add any missing actors from nodelist
 		if (mode == "unipartite") {
+			nodelist <- as.character(nodelist)
 			actors <- unique_vector(actors, nodelist)
 			actors_rows <- actors_cols <- actors
 		} else {
-			# for bipartite, assume nodelist contains all actors
-			# user should specify which are row/col actors
-			cli::cli_alert_info("For bipartite networks, nodelist should contain all actors. Assigning to both row and column actors.")
-			actors_rows <- unique_vector(actors_rows, nodelist)
-			actors_cols <- unique_vector(actors_cols, nodelist)
+			bp_nodes <- normalize_bipartite_nodelist(nodelist, actors_rows, actors_cols)
+			actors_rows <- bp_nodes$rows
+			actors_cols <- bp_nodes$cols
 			actors <- unique_vector(actors_rows, actors_cols)
 		}
 	} else if (mode == "unipartite") {
@@ -205,7 +200,7 @@ get_adjacency <- function(
 		dyad_data <- aggregate_dyad(dyad_data, actor1, actor2, NULL, weight, symmetric, missing_to_zero)
 	}
 
-	# drop zero-weight rows but keep NaN/NA so they propagate as missing
+	# drop zero-weight rows but keep nan/na so they propagate as missing
 	if (missing_to_zero) {
 		w_vec <- dyad_data[, weight]
 		nan_rows <- is.nan(w_vec)
@@ -224,8 +219,9 @@ get_adjacency <- function(
 	# assign cross-section value for adjmat depending on user inputs
 	value <- dyad_weight
 
-	# create logical value that is TRUE if weight is just 0/1
-	is_binary <- length(value) == 0 || all(value %in% c(0, 1))
+	# create logical value that is true if observed weights are just 0/1
+	value_observed <- value[!is.na(value)]
+	is_binary <- length(value_observed) == 0 || all(value_observed %in% c(0, 1))
 
 	# pre-compute matrix indices
 	mat_row_indices <- match(dyad_actor1, actors_rows)
@@ -245,7 +241,7 @@ get_adjacency <- function(
 		diag_to_NA = diag_to_NA && mode == "unipartite"
 	)
 
-	# record weight as NULL when no weight supplied and sum_dyads is FALSE
+	# record weight as null when no weight supplied and sum_dyads is false
 	if (!sum_dyads && is.null(w_orig)) {
 		weight <- NULL
 	}
@@ -266,7 +262,7 @@ get_adjacency <- function(
 		weight = weight,
 		detail_weight = weight_label,
 		is_binary = is_binary,
-		symmetric = user_symmetric,
+		symmetric = symmetric,
 		mode = mode,
 		layers = layer_label,
 		diag_to_NA = diag_to_NA,

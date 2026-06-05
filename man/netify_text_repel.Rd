@@ -2,21 +2,21 @@
 % Please edit documentation in R/plot_helpers.R
 \name{netify_text_repel}
 \alias{netify_text_repel}
-\title{Extract text_repel layer from netify plot components}
+\title{extract text_repel layer from netify plot components}
 \usage{
 netify_text_repel(comp)
 }
 \arguments{
-\item{comp}{A netify_plot_components object returned from
+\item{comp}{a netify_plot_components object returned from
 \code{plot(..., return_components = TRUE)}}
 }
 \value{
-A custom object of class "netify_text_repel" that can be added to a ggplot
-object using the + operator. The object contains the text_repel layer with all
+a custom object of class "netify_text_repel" that can be added to a ggplot
+object using the + operator. the object contains the text_repel layer with all
 its aesthetic mappings and data.
 }
 \description{
-Extracts the text_repel layer from a netify plot components object. Text repel labels
+extracts the text_repel layer from a netify plot components object. text repel labels
 display actor names with automatic repositioning to avoid overlaps, making them more
 readable in dense networks.
 }
@@ -40,5 +40,5 @@ ggplot() +
 \code{\link{assemble_netify_plot}}
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

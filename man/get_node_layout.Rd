@@ -15,92 +15,92 @@ get_node_layout(
 )
 }
 \arguments{
-\item{netlet}{A netify object (class "netify") for which to compute layout positions.}
+\item{netlet}{a netify object (class "netify") for which to compute layout positions.}
 
-\item{layout}{Character string specifying the layout algorithm to use. Options include:
+\item{layout}{character string specifying the layout algorithm to use. options include:
 \itemize{
-\item \code{"nicely"}: Automatic selection of appropriate layout (default for unipartite)
-\item \code{"bipartite"}: Two-column layout for bipartite networks (default for bipartite)
-\item \code{"fruchtermanreingold"} or \code{"fr"}: Force-directed layout
-\item \code{"kamadakawai"} or \code{"kk"}: Another force-directed layout
-\item \code{"circle"}: Nodes arranged in a circle
-\item \code{"star"}: Star-shaped layout
-\item \code{"grid"}: Nodes on a grid
-\item \code{"tree"}: Hierarchical tree layout
-\item \code{"random"} or \code{"randomly"}: Random positions
-\item Additional options: \code{"graphopt"}, \code{"sugiyama"}, \code{"drl"},
+\item \code{"nicely"}: automatic selection of appropriate layout (default for unipartite)
+\item \code{"bipartite"}: two-column layout for bipartite networks (default for bipartite)
+\item \code{"fruchtermanreingold"} or \code{"fr"}: force-directed layout
+\item \code{"kamadakawai"} or \code{"kk"}: another force-directed layout
+\item \code{"circle"}: nodes arranged in a circle
+\item \code{"star"}: star-shaped layout
+\item \code{"grid"}: nodes on a grid
+\item \code{"tree"}: hierarchical tree layout
+\item \code{"random"} or \code{"randomly"}: random positions
+\item additional options: \code{"graphopt"}, \code{"sugiyama"}, \code{"drl"},
 \code{"lgl"}, \code{"dh"}, \code{"gem"}, \code{"mds"}
 }
-If NULL, defaults to "nicely" for unipartite or "bipartite" for bipartite networks.}
+if NULL, defaults to "nicely" for unipartite or "bipartite" for bipartite networks.}
 
-\item{static_actor_positions}{Logical. If TRUE, maintains consistent node positions
-across all time periods in longitudinal networks. If FALSE (default), each time
+\item{static_actor_positions}{logical. if TRUE, maintains consistent node positions
+across all time periods in longitudinal networks. if FALSE (default), each time
 period gets its own optimized layout.}
 
-\item{which_static}{Integer specifying which time period's layout to use as the
-static template when static_actor_positions is TRUE. If NULL (default), creates
+\item{which_static}{integer specifying which time period's layout to use as the
+static template when static_actor_positions is TRUE. if NULL (default), creates
 a static layout based on the union of all edges across time periods, giving
 more weight to persistent edges.}
 
-\item{seed}{Integer for random number generation to ensure reproducible layouts.
-Default is 6886.}
+\item{seed}{integer for random number generation to ensure reproducible layouts.
+default is 6886.}
 
-\item{ig_netlet}{An optional pre-converted igraph object. If provided, this
+\item{ig_netlet}{an optional pre-converted igraph object. if provided, this
 function will use it directly instead of converting the netify object again.}
 
-\item{...}{Additional arguments passed to ego-specific layout functions when
-layout is "radial" or "concentric". See \code{\link{get_ego_layout}} for
+\item{...}{additional arguments passed to ego-specific layout functions when
+layout is "radial" or "concentric". see \code{\link{get_ego_layout}} for
 available options (ego_group_by, ego_order_by, ego_weight_to_distance, etc.).}
 }
 \value{
-A list of data frames (one per time period) where each data frame contains:
+a list of data frames (one per time period) where each data frame contains:
 \itemize{
-\item \strong{index}: Integer node index
-\item \strong{actor}: Character string with actor name
-\item \strong{x}: Numeric x-coordinate for node position
-\item \strong{y}: Numeric y-coordinate for node position
+\item \strong{index}: integer node index
+\item \strong{actor}: character string with actor name
+\item \strong{x}: numeric x-coordinate for node position
+\item \strong{y}: numeric y-coordinate for node position
 }
 
-For cross-sectional networks, returns a list with one element. For longitudinal
+for cross-sectional networks, returns a list with one element. for longitudinal
 networks, returns a named list with time periods as names.
 }
 \description{
 \code{get_node_layout} computes node positions for network visualization using various
-layout algorithms from igraph. This function converts a netify object to igraph
+layout algorithms from igraph. this function converts a netify object to igraph
 format, applies the specified layout algorithm, and returns node coordinates
 suitable for plotting.
 }
 \details{
-This function handles layout generation for both cross-sectional and longitudinal
+this function handles layout generation for both cross-sectional and longitudinal
 networks with several key features:
 
-\strong{Layout algorithms:}
+\strong{layout algorithms:}
 
-The function provides access to all major igraph layout algorithms. The default
+the function provides access to all major igraph layout algorithms. the default
 "nicely" option automatically selects an appropriate algorithm based on the
-network structure. For ego networks, specialized layouts ("radial" and "concentric")
+network structure. for ego networks, specialized layouts ("radial" and "concentric")
 are available that emphasize the ego-alter structure.
 
-\strong{Longitudinal layouts:}
+\strong{longitudinal layouts:}
 
-For longitudinal networks, two approaches are available:
+for longitudinal networks, two approaches are available:
 \itemize{
-\item \strong{Dynamic layouts}: Each time period gets its own optimized layout,
+\item \strong{dynamic layouts}: each time period gets its own optimized layout,
 which may better reveal structural changes but makes visual comparison harder
-\item \strong{Static layouts}: All time periods use the same node positions,
+\item \strong{static layouts}: all time periods use the same node positions,
 facilitating visual comparison of network evolution
 }
 
-When using static layouts with which_static = NULL, the function creates a
-composite layout based on the union of all edges across time periods. Edges
+when using static layouts with which_static = NULL, the function creates a
+composite layout based on the union of all edges across time periods. edges
 that appear more frequently are given higher weight, producing layouts that
 emphasize the stable core structure of the network.
 
-\strong{Bipartite networks:}
+\strong{bipartite networks:}
 
-For bipartite networks, the default layout arranges the two node sets in separate
+for bipartite networks, the default layout arranges the two node sets in separate
 columns.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

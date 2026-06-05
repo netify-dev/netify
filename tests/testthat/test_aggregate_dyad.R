@@ -1,11 +1,9 @@
 set.seed(6886)
 
 
-# test basic directed aggregation
 test_that(
 	"aggregate_dyad: basic directed aggregation works",
 	{
-		# create test data with repeated dyads
 		test_data = data.frame(
 			from = c("A", "A", "A", "B", "B", "C"),
 			to = c("B", "B", "C", "A", "C", "A"),
@@ -38,7 +36,6 @@ test_that(
 test_that(
 	"aggregate_dyad: symmetric aggregation works",
 	{
-		# create test data
 		test_data = data.frame(
 			actor1 = c("USA", "China", "USA", "Russia"),
 			actor2 = c("China", "USA", "Russia", "USA"),
@@ -55,9 +52,8 @@ test_that(
 		)
 
 		# check symmetric aggregation
-		expect_equal(nrow(result), 4) # 2 unique undirected dyads × 2 directions
+		expect_equal(nrow(result), 4) # 2 unique undirected dyads x 2 directions
 
-		# usa-china should equal china-usa = 180 (100 + 80)
 		usa_china = result$trade[result$actor1 == "USA" & result$actor2 == "China"]
 		china_usa = result$trade[result$actor1 == "China" & result$actor2 == "USA"]
 		expect_equal(usa_china, 180)
@@ -89,9 +85,8 @@ test_that(
 		)
 
 		# check temporal aggregation
-		expect_equal(nrow(result), 4) # 2 dyads × 2 years
+		expect_equal(nrow(result), 4) # 2 dyads x 2 years
 
-		# a->b in 2020 should be 8 (5 + 3)
 		ab_2020 = result$events[
 			result$sender == "A" &
 				result$receiver == "B" &
@@ -99,7 +94,6 @@ test_that(
 		]
 		expect_equal(ab_2020, 8)
 
-		# a->b in 2021 should be 12 (10 + 2)
 		ab_2021 = result$events[
 			result$sender == "A" &
 				result$receiver == "B" &
@@ -130,7 +124,6 @@ test_that(
 			ignore_missing = TRUE
 		)
 
-		# a->b should be 10 (ignoring na)
 		expect_equal(
 			result_ignore$weight[result_ignore$i == "A" & result_ignore$j == "B"],
 			10
@@ -146,7 +139,6 @@ test_that(
 			ignore_missing = FALSE
 		)
 
-		# a->b should be na (because one value was na)
 		expect_true(
 			is.na(result_na$weight[result_na$i == "A" & result_na$j == "B"])
 		)
@@ -212,3 +204,44 @@ test_that(
 	}
 )
 
+test_that("aggregate_dyad: symmetric actor keys do not collide on underscores", {
+	test_data = data.frame(
+		from = c("a_b", "a_b", "a", "a"),
+		to = c("c", "c", "b_c", "b_c"),
+		count = c(1, 2, 10, 20),
+		stringsAsFactors = FALSE
+	)
+
+	result = aggregate_dyad(
+		dyad_data = test_data,
+		actor1 = "from",
+		actor2 = "to",
+		weight = "count",
+		symmetric = TRUE
+	)
+
+	expect_equal(nrow(result), 4)
+	expect_equal(result$count[result$from == "a_b" & result$to == "c"], 3)
+	expect_equal(result$count[result$from == "c" & result$to == "a_b"], 3)
+	expect_equal(result$count[result$from == "a" & result$to == "b_c"], 30)
+	expect_equal(result$count[result$from == "b_c" & result$to == "a"], 30)
+})
+
+test_that("duplicate dyad counters keep exact actor and time keys", {
+	expect_equal(
+		count_duplicate_dyads(c("a_b", "a"), c("c", "b_c"), c(1, 1)),
+		0L
+	)
+	expect_equal(
+		count_duplicate_dyads(c("A", "A"), c("B", "B"), c(1.1, 1.9)),
+		0L
+	)
+	expect_equal(
+		count_duplicate_dyads_indexed(c("A", "A"), c("B", "B"), c(1.1, 1.9)),
+		0L
+	)
+	expect_equal(
+		count_duplicate_dyads_indexed(c("A", "A"), c("B", "B"), c(1.1, 1.1)),
+		1L
+	)
+})

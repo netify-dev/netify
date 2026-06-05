@@ -13,60 +13,60 @@ from_lame_fit(
 )
 }
 \arguments{
-\item{fit}{A fitted object from \code{lame::ame()}, \code{lame::ame_als()},
-\code{lame::lame()}, or \code{amen::ame()}. Must expose a fitted-value
-matrix (e.g., \code{fit$EZ}, \code{fit$ZpostMean}, or \code{fitted(fit)}).
-For \code{value} in \code{"prob_lower"} / \code{"prob_upper"} / \code{"fitted_lower"}
+\item{fit}{a fitted object from \code{lame::ame()}, \code{lame::ame_als()},
+\code{lame::lame()}, or \code{amen::ame()}. must expose a fitted-value
+matrix (e.g., \code{fit$ez}, \code{fit$zpostmean}, or \code{fitted(fit)}).
+for \code{value} in \code{"prob_lower"} / \code{"prob_upper"} / \code{"fitted_lower"}
 / \code{"fitted_upper"} the fit must additionally expose a per-draw
-array of fitted values. The slots searched, in order, are:
-\code{fit$BOOT$EZ} and \code{fit$BOOT$Y_hat} (lame ALS parametric / block
-bootstrap), then \code{fit$EZ_draws}, \code{fit$EZps}, and \code{fit$Z_draws}
-(Gibbs posterior draws), with shape \verb{[n, n, B]} or \verb{[n, n, T, B]}.}
+array of fitted values. the slots searched, in order, are:
+\code{fit$boot$ez} and \code{fit$boot$y_hat} (lame als parametric / block
+bootstrap), then \code{fit$ez_draws}, \code{fit$ezps}, and \code{fit$z_draws}
+(gibbs posterior draws), with shape \verb{[n, n, b]} or \verb{[n, n, t, b]}.}
 
-\item{value}{One of \code{"fitted"} (default — posterior-mean linear
-predictor \code{EZ}/\code{ZpostMean}), \code{"residual"} (observed - fitted),
+\item{value}{one of \code{"fitted"} (default -- posterior-mean linear
+predictor \code{ez}/\code{zpostmean}), \code{"residual"} (observed - fitted),
 \code{"prob"} (logistic / probit -> probability scale, when the
 family supports it), or \code{"prob_lower"} / \code{"prob_upper"} /
 \code{"fitted_lower"} / \code{"fitted_upper"} (per-cell \code{alpha}/\code{1-alpha}
-quantiles across bootstrap or posterior draws). When \code{lame}
+quantiles across bootstrap or posterior draws). when \code{lame}
 exposes a \code{fitted()} method for the object, that's preferred.
-For \code{value = "prob"} with a binary family, link detection
+for \code{value = "prob"} with a binary family, link detection
 follows this priority:
 (1) any explicit \code{link} slot on the fit (or \code{fit$control$link});
-(2) ALS class (any token containing "als") or
+(2) als class (any token containing "als") or
 \code{fit$fit_method = "als"} -> probit, matching \code{lame::ame_als()};
-(3) \code{lame} class -> logit, matching \code{lame::lame()} Gibbs default;
+(3) \code{lame} class -> logit, matching \code{lame::lame()} gibbs default;
 (4) \code{ame} / \code{amen} class (and no \code{fit_method = "logit"} override)
--> probit, matching \code{amen::ame()} Gibbs convention;
+-> probit, matching \code{amen::ame()} gibbs convention;
 (5) otherwise logit fallback.}
 
-\item{symmetric}{Logical. Override the inferred symmetry; default
-reads from the fit's stored \code{mode}/\code{Y}.}
+\item{symmetric}{logical. override the inferred symmetry; default
+reads from the fit's stored \code{mode}/\code{y}.}
 
-\item{alpha}{Numeric in (0, 0.5). Tail probability for the
-\verb{*_lower} / \verb{*_upper} quantiles. Default \code{0.05} -> 90\% interval
+\item{alpha}{numeric in (0, 0.5). tail probability for the
+\verb{*_lower} / \verb{*_upper} quantiles. default \code{0.05} -> 90\% interval
 (lower = 0.025, upper = 0.975 when interpreted as a two-sided
-CI; here we use lower = alpha/2, upper = 1 - alpha/2).}
+ci; here we use lower = alpha/2, upper = 1 - alpha/2).}
 }
 \value{
-A cross-sectional netify object whose underlying matrix is
+a cross-sectional netify object whose underlying matrix is
 the fitted-value (or residual) matrix at the same actor ordering.
 }
 \description{
-Takes the posterior-mean (or point-estimate) prediction matrix
+takes the posterior-mean (or point-estimate) prediction matrix
 from a \code{lame::ame()} / \code{lame::ame_als()} / \code{amen::ame()} fit and
 wraps it as a netify so the predictions can be summarized, plotted,
 or compared to the observed netlet via \code{compare_networks()}.
 }
 \details{
-Useful for posterior-predictive checks: build the observed netlet,
-run an AME fit, then \code{from_lame_fit(fit) |> plot(style = "heatmap")}
+useful for posterior-predictive checks: build the observed netlet,
+run an ame fit, then \code{from_lame_fit(fit) |> plot(style = "heatmap")}
 to visualize the fitted intensity matrix.
 }
 \examples{
 \dontrun{
 lm_in <- to_lame(net, fit_method = "als", bootstrap = 200)
-fit <- lame::ame_als(Y = lm_in$Y, mode = "bipartite", family = "binary",
+fit <- lame::ame_als(y = lm_in$y, mode = "bipartite", family = "binary",
 bootstrap = 200)
 # round-trip predictions back into a netify for plotting
 pred_net <- from_lame_fit(fit, value = "prob")
@@ -75,5 +75,5 @@ plot(pred_net, style = "heatmap")
 
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

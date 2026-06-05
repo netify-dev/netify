@@ -1,4 +1,5 @@
 set.seed(6886)
+skip_on_cran()
 
 # load relevant datasets from package
 data(icews)
@@ -1192,7 +1193,7 @@ test_that(
 		netlet_subset = subset_netify(
 			netlet = netlet,
 			actors = actors_to_keep,
-			time = c("2002", "2003", "2004") # 3 time periods to ensure it stays longitudinal
+			time = c("2002", "2003", "2004") # three time periods preserve longitudinal output
 		)
 
 		# verify it's still a longitudinal list
@@ -1233,7 +1234,7 @@ test_that(
 		expect_true(!is.null(attr(netlet_subset, "mode")))
 		expect_true(!is.null(attr(netlet_subset, "weight")))
 
-		# verify actor_pds is properly updated
+		# check actor period metadata
 		actor_pds = attr(netlet_subset, "actor_pds")
 		expect_true(!is.null(actor_pds))
 		expect_equal(sort(unique(actor_pds$actor)), sort(actors_to_keep))

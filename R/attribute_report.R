@@ -1,47 +1,46 @@
-#' Comprehensive summary of network-attribute relationships
+#' Summary of network-attribute relationships
 #'
-#' Provides comprehensive analysis of how nodal and dyadic attributes relate to
-#' network structure. Combines multiple analytical approaches including homophily
-#' analysis, mixing patterns, dyadic correlations, and network position-based
-#' attribute summaries.
+#' summarizes how nodal and dyadic attributes relate to network structure.
+#' combines homophily analysis, mixing patterns, dyadic correlations, and
+#' network position-based attribute summaries.
 #'
-#' @param netlet A netify object containing network data.
-#' @param node_vars Character vector of nodal attributes to analyze. If NULL,
+#' @param netlet a netify object containing network data.
+#' @param node_vars character vector of nodal attributes to analyze. if NULL,
 #'   analyzes all available nodal variables except actor and time.
-#' @param dyad_vars Character vector of dyadic attributes to analyze. If NULL,
+#' @param dyad_vars character vector of dyadic attributes to analyze. if NULL,
 #'   analyzes all available dyadic variables.
-#' @param include_centrality Logical. Whether to calculate attribute-centrality
-#'   relationships. Default TRUE.
-#' @param include_homophily Logical. Whether to perform homophily analysis. Default TRUE.
-#' @param include_mixing Logical. Whether to create mixing matrices for categorical
-#'   attributes. Default TRUE.
-#' @param include_dyadic_correlations Logical. Whether to calculate dyadic correlations.
-#'   Default TRUE.
-#' @param centrality_measures Character vector of centrality measures to calculate.
-#'   Options: "degree", "betweenness", "closeness", "eigenvector". Default c("degree", "betweenness").
-#' @param categorical_threshold Maximum number of unique values for categorical
-#'   treatment. Default 10.
-#' @param significance_test Logical. Whether to perform significance tests. Default TRUE.
-#' @param other_stats Named list of custom functions for additional statistics.
-#' @param ... Additional arguments passed to component functions.
+#' @param include_centrality logical. whether to calculate attribute-centrality
+#'   relationships. default TRUE.
+#' @param include_homophily logical. whether to perform homophily analysis. default TRUE.
+#' @param include_mixing logical. whether to create mixing matrices for categorical
+#'   attributes. default TRUE.
+#' @param include_dyadic_correlations logical. whether to calculate dyadic correlations.
+#'   default TRUE.
+#' @param centrality_measures character vector of centrality measures to calculate.
+#'   options: "degree", "betweenness", "closeness", "eigenvector". default c("degree", "betweenness").
+#' @param categorical_threshold maximum number of unique values for categorical
+#'   treatment. default 10.
+#' @param significance_test logical. whether to perform significance tests. default TRUE.
+#' @param other_stats named list of custom functions for additional statistics.
+#' @param ... additional arguments passed to component functions.
 #'
-#' @return List containing:
+#' @return list containing:
 #'   \describe{
-#'     \item{\code{homophily_analysis}}{Results from homophily analysis for nodal attributes}
-#'     \item{\code{mixing_analysis}}{Results from mixing matrix analysis for categorical attributes}
-#'     \item{\code{dyadic_correlations}}{Results from dyadic correlation analysis}
-#'     \item{\code{centrality_correlations}}{Correlations between nodal attributes and centrality}
-#'     \item{\code{attribute_summaries}}{Descriptive statistics for attributes}
-#'     \item{\code{overall_summary}}{High-level summary of key findings}
+#'     \item{\code{homophily_analysis}}{results from homophily analysis for nodal attributes}
+#'     \item{\code{mixing_analysis}}{results from mixing matrix analysis for categorical attributes}
+#'     \item{\code{dyadic_correlations}}{results from dyadic correlation analysis}
+#'     \item{\code{centrality_correlations}}{correlations between nodal attributes and centrality}
+#'     \item{\code{attribute_summaries}}{descriptive statistics for attributes}
+#'     \item{\code{overall_summary}}{brief summary of key findings}
 #'   }
 #'
 #' @details
-#' Serves as comprehensive wrapper around exploratory analysis functions.
-#' Automatically determines appropriate analysis methods based on attribute types.
-#' For large networks or many attributes, consider setting some components to FALSE
-#' for faster computation. Centrality measures use igraph functions.
+#' wraps the exploratory analysis functions and chooses methods based on
+#' attribute types.
+#' for large networks or many attributes, consider setting some components to FALSE
+#' for faster computation. centrality measures use igraph functions.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export attribute_report
 
@@ -60,6 +59,8 @@ attribute_report <- function(
 	...) {
 	# input validation
 	netify_check(netlet)
+	requested_node_vars <- node_vars
+	requested_dyad_vars <- dyad_vars
 	checkmate::assert_character(node_vars, null.ok = TRUE)
 	checkmate::assert_character(dyad_vars, null.ok = TRUE)
 	checkmate::assert_logical(include_centrality, len = 1)
@@ -69,6 +70,16 @@ attribute_report <- function(
 	checkmate::assert_subset(centrality_measures, c("degree", "betweenness", "closeness", "eigenvector"))
 	checkmate::assert_count(categorical_threshold, positive = TRUE)
 	checkmate::assert_logical(significance_test, len = 1)
+	if (!is.null(other_stats)) {
+		if (!is.list(other_stats) || is.null(names(other_stats)) ||
+			anyNA(names(other_stats)) || any(names(other_stats) == "") ||
+			anyDuplicated(names(other_stats))) {
+			cli::cli_abort("other_stats must be a named list of functions with unique, non-empty names.")
+		}
+		if (!all(vapply(other_stats, is.function, logical(1)))) {
+			cli::cli_abort("All elements of other_stats must be functions.")
+		}
+	}
 
 	# extract object attributes
 	obj_attrs <- attributes(netlet)
@@ -88,6 +99,10 @@ attribute_report <- function(
 				node_vars <- intersect(node_vars, available_node_vars)
 			}
 		}
+		if (!is.null(requested_node_vars) && length(node_vars) == 0L &&
+			(include_centrality || include_homophily || include_mixing)) {
+			cli::cli_abort("None of the requested node variables are available.")
+		}
 	} else {
 		node_vars <- character(0)
 		if (include_centrality || include_homophily || include_mixing) {
@@ -97,8 +112,7 @@ attribute_report <- function(
 	}
 
 	if (!is.null(dyad_data)) {
-		first_time <- names(dyad_data)[1]
-		available_dyad_vars <- names(dyad_data[[first_time]])
+		available_dyad_vars <- unique(unlist(lapply(dyad_data, names), use.names = FALSE))
 		if (is.null(dyad_vars)) {
 			dyad_vars <- available_dyad_vars
 		} else {
@@ -107,6 +121,10 @@ attribute_report <- function(
 				cli::cli_warn("Dyadic variables not found: {paste(missing_dyad_vars, collapse = ', ')}")
 				dyad_vars <- intersect(dyad_vars, available_dyad_vars)
 			}
+		}
+		if (!is.null(requested_dyad_vars) && length(dyad_vars) == 0L &&
+			include_dyadic_correlations) {
+			cli::cli_abort("None of the requested dyadic variables are available.")
 		}
 	} else {
 		dyad_vars <- character(0)
@@ -124,45 +142,43 @@ attribute_report <- function(
 
 		homophily_results <- list()
 		for (var in node_vars) {
-			tryCatch(
-				{
-					# pick similarity method based on variable type
-					if (!is.null(nodal_data)) {
-						# pull variable values for the right data structure
-						if (netify_type == "cross_sec") {
-							var_values <- nodal_data[[var]]
-						} else if (is.list(nodal_data)) {
-							first_time <- names(nodal_data)[1]
-							var_values <- nodal_data[[first_time]][[var]]
-						} else {
-							var_values <- NULL
-						}
-
-						if (!is.null(var_values)) {
-							n_unique <- length(unique(var_values[!is.na(var_values)]))
-
-							method <- if (is.character(var_values) || is.factor(var_values) || n_unique <= categorical_threshold) {
-								"categorical"
-							} else {
-								"correlation"
-							}
-
-							homophily_result <- homophily(
-								netlet,
-								attribute = var, method = method,
-								significance_test = significance_test, ...
-							)
-							homophily_results[[var]] <- homophily_result
-						}
-					}
-				},
-				error = function(e) {
-					cli::cli_warn("Error in homophily analysis for {var}: {e$message}")
+			# pick similarity method based on variable type
+			if (!is.null(nodal_data)) {
+				# pull variable values for the right data structure
+				if (netify_type == "cross_sec") {
+					var_values <- nodal_data[[var]]
+				} else if (is.data.frame(nodal_data)) {
+					var_values <- nodal_data[[var]]
+				} else if (is.list(nodal_data)) {
+					first_time <- names(nodal_data)[1]
+					var_values <- nodal_data[[first_time]][[var]]
 				}
-			)
+
+				if (!is.null(var_values)) {
+					n_unique <- length(unique(var_values[!is.na(var_values)]))
+
+					method <- if (is.character(var_values) || is.factor(var_values) || n_unique <= categorical_threshold) {
+						"categorical"
+					} else {
+						"correlation"
+					}
+
+					homophily_result <- homophily(
+						netlet,
+						attribute = var, method = method,
+						significance_test = significance_test, ...
+					)
+					homophily_results[[var]] <- homophily_result
+				}
+			}
 		}
-		results$homophily_analysis <- do.call(rbind, homophily_results)
-	}
+			if (length(homophily_results) == 0L) {
+				cli::cli_warn("No homophily analyses completed. Check the requested nodal variables and network mode.")
+				results$homophily_analysis <- NULL
+			} else {
+				results$homophily_analysis <- do.call(rbind, homophily_results)
+			}
+		}
 
 	# mixing analysis
 	if (include_mixing && length(node_vars) > 0) {
@@ -182,19 +198,12 @@ attribute_report <- function(
 
 		mixing_results <- list()
 		for (var in categorical_vars) {
-			tryCatch(
-				{
-					mixing_result <- mixing_matrix(
-						netlet,
-						attribute = var,
-						normalized = TRUE, ...
-					)
-					mixing_results[[var]] <- mixing_result
-				},
-				error = function(e) {
-					cli::cli_warn("Error in mixing analysis for {var}: {e$message}")
-				}
+			mixing_result <- mixing_matrix(
+				netlet,
+				attribute = var,
+				normalized = TRUE, ...
 			)
+			mixing_results[[var]] <- mixing_result
 		}
 		results$mixing_analysis <- mixing_results
 	}
@@ -203,36 +212,22 @@ attribute_report <- function(
 	if (include_dyadic_correlations && length(dyad_vars) > 0) {
 		cli::cli_alert_info("Calculating dyadic correlations...")
 
-		tryCatch(
-			{
-				dyadic_result <- dyad_correlation(
-					netlet,
-					dyad_vars = dyad_vars,
-					significance_test = significance_test, ...
-				)
-				results$dyadic_correlations <- dyadic_result
-			},
-			error = function(e) {
-				cli::cli_warn("Error in dyadic correlation analysis: {e$message}")
-			}
+		dyadic_result <- dyad_correlation(
+			netlet,
+			dyad_vars = dyad_vars,
+			significance_test = significance_test, ...
 		)
+		results$dyadic_correlations <- dyadic_result
 	}
 
 	# centrality correlations
 	if (include_centrality && length(node_vars) > 0) {
 		cli::cli_alert_info("Calculating centrality correlations...")
 
-		tryCatch(
-			{
-				centrality_result <- calculate_centrality_correlations(
-					netlet, node_vars, centrality_measures, significance_test
-				)
-				results$centrality_correlations <- centrality_result
-			},
-			error = function(e) {
-				cli::cli_warn("Error in centrality correlation analysis: {e$message}")
-			}
+		centrality_result <- calculate_centrality_correlations(
+			netlet, node_vars, centrality_measures, significance_test
 		)
+		results$centrality_correlations <- centrality_result
 	}
 
 	# attribute summaries
@@ -251,14 +246,7 @@ attribute_report <- function(
 		cli::cli_alert_info("Calculating custom statistics...")
 		custom_results <- list()
 		for (stat_name in names(other_stats)) {
-			tryCatch(
-				{
-					custom_results[[stat_name]] <- other_stats[[stat_name]](netlet, ...)
-				},
-				error = function(e) {
-					cli::cli_warn("Error in custom statistic {stat_name}: {e$message}")
-				}
-			)
+			custom_results[[stat_name]] <- other_stats[[stat_name]](netlet, ...)
 		}
 		results$custom_statistics <- custom_results
 	}
@@ -278,7 +266,7 @@ calculate_centrality_correlations <- function(netlet, node_vars, centrality_meas
 	netlet_list <- switch(netify_type,
 		"cross_sec" = list("1" = netlet),
 		"longit_array" = {
-			# 4D = multilayer longitudinal, 3D = single layer longitudinal
+			# 4d = multilayer longitudinal, 3d = single layer longitudinal
 			if (length(dim(netlet)) == 4) {
 				time_names <- dimnames(netlet)[[4]]
 				if (is.null(time_names)) {
@@ -333,21 +321,27 @@ calculate_centrality_correlations <- function(netlet, node_vars, centrality_meas
 				matrix_actors <- as.character(seq_len(nrow(net_matrix)))
 			}
 
-			# correlate attributes with centralities
-			for (node_var in node_vars) {
-				if (node_var %in% names(time_nodal_data)) {
-					node_values <- time_nodal_data[[node_var]]
-					actors <- time_nodal_data$actor
+				# correlate attributes with centralities
+				for (node_var in node_vars) {
+					if (node_var %in% names(time_nodal_data)) {
+						node_values <- time_nodal_data[[node_var]]
+						if (!is.numeric(node_values)) {
+							next
+						}
+						actors <- time_nodal_data$actor
 
-					attr_indices <- match(matrix_actors, actors)
-					node_values <- node_values[attr_indices]
+						attr_indices <- match(matrix_actors, actors)
+						node_values <- node_values[attr_indices]
 
-					for (cent_measure in names(centralities)) {
-						cent_values <- centralities[[cent_measure]]
+						for (cent_measure in names(centralities)) {
+							cent_values <- centralities[[cent_measure]]
 
-						complete_cases <- !is.na(node_values) & !is.na(cent_values)
-						if (sum(complete_cases) > 2) {
-							# surface cor.test failures rather than letting them become silent NAs
+							complete_cases <- !is.na(node_values) & is.finite(node_values) &
+								!is.na(cent_values) & is.finite(cent_values)
+							if (sum(complete_cases) > 2 &&
+								length(unique(node_values[complete_cases])) > 1L &&
+								length(unique(cent_values[complete_cases])) > 1L) {
+							# surface cor.test failures rather than letting them become silent nas
 							corr_result <- tryCatch(
 								{
 									if (significance_test) {
@@ -432,7 +426,10 @@ calculate_centrality_measures <- function(net_matrix, centrality_measures) {
 			{
 				igraph::betweenness(g, directed = TRUE)
 			},
-			error = function(e) rep(NA, igraph::vcount(g))
+			error = function(e) {
+				cli::cli_warn("Could not calculate betweenness centrality: {conditionMessage(e)}")
+				rep(NA, igraph::vcount(g))
+			}
 		)
 	}
 
@@ -441,7 +438,10 @@ calculate_centrality_measures <- function(net_matrix, centrality_measures) {
 			{
 				igraph::closeness(g, mode = "total")
 			},
-			error = function(e) rep(NA, igraph::vcount(g))
+			error = function(e) {
+				cli::cli_warn("Could not calculate closeness centrality: {conditionMessage(e)}")
+				rep(NA, igraph::vcount(g))
+			}
 		)
 	}
 
@@ -450,7 +450,10 @@ calculate_centrality_measures <- function(net_matrix, centrality_measures) {
 			{
 				igraph::eigen_centrality(g, directed = TRUE)$vector
 			},
-			error = function(e) rep(NA, igraph::vcount(g))
+			error = function(e) {
+				cli::cli_warn("Could not calculate eigenvector centrality: {conditionMessage(e)}")
+				rep(NA, igraph::vcount(g))
+			}
 		)
 	}
 
@@ -511,7 +514,7 @@ calculate_attribute_summaries <- function(netlet, node_vars, dyad_vars) {
 	return(summaries)
 }
 
-# build the high-level summary of key findings
+	# build the findings summary
 create_overall_summary <- function(results, node_vars, dyad_vars) {
 	summary_text <- character(0)
 

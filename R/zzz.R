@@ -1,4 +1,4 @@
-# register S3 methods for external generics without hard dependencies
+# register s3 methods for external generics without hard dependencies
 
 .onLoad <- function(libname, pkgname) {
 	pkg_ns <- topenv(parent.frame())

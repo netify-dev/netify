@@ -1,6 +1,7 @@
 #include <Rcpp.h>
 #include <algorithm>
 #include <unordered_set>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -235,7 +236,7 @@ List align_matrices_cpp(
     
     for (int i = 0; i < mat1.nrow(); i++) {
         for (int j = 0; j < mat1.ncol(); j++) {
-            if (!NumericMatrix::is_na(mat1(i,j)) && rnames1.size() > i && cnames1.size() > j) {
+            if (rnames1.size() > i && cnames1.size() > j) {
                 std::string row_actor = std::string(rnames1[i]);
                 std::string col_actor = std::string(cnames1[j]);
                 
@@ -259,7 +260,7 @@ List align_matrices_cpp(
     
     for (int i = 0; i < mat2.nrow(); i++) {
         for (int j = 0; j < mat2.ncol(); j++) {
-            if (!NumericMatrix::is_na(mat2(i,j)) && rnames2.size() > i && cnames2.size() > j) {
+            if (rnames2.size() > i && cnames2.size() > j) {
                 std::string row_actor = std::string(rnames2[i]);
                 std::string col_actor = std::string(cnames2[j]);
                 
@@ -323,6 +324,11 @@ List batch_align_matrices_cpp(
         // Set names
         rownames(aligned) = all_actors;
         colnames(aligned) = all_actors;
+        if (!include_diagonal) {
+            for (int d = 0; d < n_actors; d++) {
+                aligned(d, d) = NA_REAL;
+            }
+        }
         
         // Fill values
         List dimnames = mat.attr("dimnames");
@@ -336,7 +342,7 @@ List batch_align_matrices_cpp(
             for (int j = 0; j < mat.ncol(); j++) {
                 if (!include_diagonal && i == j) continue;
                 
-                if (!NumericMatrix::is_na(mat(i,j)) && rnames.size() > i && cnames.size() > j) {
+                if (rnames.size() > i && cnames.size() > j) {
                     std::string row_actor = std::string(rnames[i]);
                     std::string col_actor = std::string(cnames[j]);
                     

@@ -2,25 +2,25 @@
 % Please edit documentation in R/plot_helpers.R
 \name{ggplot_add.netify_labels}
 \alias{ggplot_add.netify_labels}
-\title{Add netify scale labels to ggplot}
+\title{add netify scale labels to ggplot}
 \usage{
 \method{ggplot_add}{netify_labels}(object, plot, ...)
 }
 \arguments{
-\item{object}{A netify_labels object created by \code{\link{netify_scale_labels}}}
+\item{object}{a netify_labels object created by \code{\link{netify_scale_labels}}}
 
-\item{plot}{A ggplot object to which the labels will be added}
+\item{plot}{a ggplot object to which the labels will be added}
 
-\item{...}{Additional arguments passed by ggplot2 (used internally)}
+\item{...}{additional arguments passed by ggplot2 (used internally)}
 }
 \value{
-A ggplot object with updated scale labels
+a ggplot object with updated scale labels
 }
 \description{
-S3 method to add netify_labels objects to ggplot objects. This method updates
+s3 method to add netify_labels objects to ggplot objects. this method updates
 the labels of existing scales based on the specifications in the netify_labels
 object.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

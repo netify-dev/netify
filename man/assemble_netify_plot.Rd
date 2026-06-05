@@ -2,31 +2,31 @@
 % Please edit documentation in R/plot_helpers.R
 \name{assemble_netify_plot}
 \alias{assemble_netify_plot}
-\title{Assemble netify plot from components}
+\title{assemble netify plot from components}
 \usage{
 assemble_netify_plot(comp)
 }
 \arguments{
-\item{comp}{A netify_plot_components object returned from
+\item{comp}{a netify_plot_components object returned from
 \code{plot(..., return_components = TRUE)}}
 }
 \value{
-A complete ggplot object ready for display or further customization
+a complete ggplot object ready for display or further customization
 }
 \description{
-Assembles a complete network plot from netify plot components. This function
+assembles a complete network plot from netify plot components. this function
 automatically adds all available layers (edges, nodes, text, labels, and their
 repel versions) in the correct order with appropriate scale resets between layers.
 }
 \details{
-This function provides a convenient way to reassemble a plot from its
+this function provides a convenient way to reassemble a plot from its
 components after extracting them with \code{return_components = TRUE}.
-It automatically:
+it automatically:
 \itemize{
-\item Adds layers in the correct order (edges, nodes, text/text_repel, labels/label_repel)
-\item Inserts scale resets between layers when necessary
-\item Handles both standard and repel versions of text and label layers
-\item Includes facets and themes if present
+\item adds layers in the correct order (edges, nodes, text/text_repel, labels/label_repel)
+\item inserts scale resets between layers when necessary
+\item handles both standard and repel versions of text and label layers
+\item includes facets and themes if present
 }
 }
 \examples{
@@ -48,5 +48,5 @@ print(p)
 \code{\link{netify_node}}
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

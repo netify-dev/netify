@@ -1,79 +1,79 @@
 #' Subset netify objects
 #'
-#' Extracts a subset of a netify object based on specified actors, time periods,
+#' extracts a subset of a netify object based on specified actors, time periods,
 #' and/or layers while preserving all netify attributes and structure.
 #'
-#' @param x A netify object to subset
-#' @param actors Character vector of actor names or numeric indices to subset.
-#'   Extracts the subgraph among these actors (includes ties both from and to
-#'   these actors). Default is NULL, which includes all actors.
-#' @param time Time periods to subset. Can be:
+#' @param x a netify object to subset
+#' @param actors character vector of actor names or numeric indices to subset.
+#'   extracts the subgraph among these actors (includes ties both from and to
+#'   these actors). default is NULL, which includes all actors.
+#' @param time time periods to subset. can be:
 #'   \itemize{
-#'     \item Numeric vector: used as indices to the time dimension
-#'     \item Character vector: matched against time dimension labels
+#'     \item numeric vector: used as indices to the time dimension
+#'     \item character vector: matched against time dimension labels
 #'     \item NULL: includes all time periods (default)
 #'   }
-#' @param layers Character vector of layer names to subset from multilayer networks.
-#'   For single-layer networks, this is ignored. For multilayer networks, at least
+#' @param layers character vector of layer names to subset from multilayer networks.
+#'   for single-layer networks, this is ignored. for multilayer networks, at least
 #'   one layer must be specified.
-#' @param from Character vector of actor names or numeric indices for actors sending
-#'   ties (row actors). Overrides \code{actors}. Set to NULL to include all
-#'   sending actors. In bipartite networks, this refers to actors in the first mode.
-#' @param to Character vector of actor names or numeric indices for actors receiving
-#'   ties (column actors). Overrides \code{actors}. Set to NULL to include all
-#'   receiving actors. In bipartite networks, this refers to actors in the second mode.
-#' @param ... Additional arguments (currently unused)
+#' @param from character vector of actor names or numeric indices for actors sending
+#'   ties (row actors). overrides \code{actors}. set to NULL to include all
+#'   sending actors. in bipartite networks, this refers to actors in the first mode.
+#' @param to character vector of actor names or numeric indices for actors receiving
+#'   ties (column actors). overrides \code{actors}. set to NULL to include all
+#'   receiving actors. in bipartite networks, this refers to actors in the second mode.
+#' @param ... additional arguments (currently unused)
 #'
-#' @return A netify object containing the requested subset with:
+#' @return a netify object containing the requested subset with:
 #'   \itemize{
-#'     \item Subsetted adjacency matrix/matrices
-#'     \item Corresponding nodal attributes (filtered to included actors/times)
-#'     \item Corresponding dyadic attributes (filtered to included actor pairs/times)
-#'     \item Updated netify attributes reflecting the new dimensions
+#'     \item subsetted adjacency matrix/matrices
+#'     \item corresponding nodal attributes (filtered to included actors/times)
+#'     \item corresponding dyadic attributes (filtered to included actor pairs/times)
+#'     \item updated netify attributes reflecting the new dimensions
 #'   }
 #'
-#'   The returned object's structure depends on the subset:
+#'   the returned object's structure depends on the subset:
 #'   \itemize{
-#'     \item If one time period is selected from longitudinal data, returns cross-sectional
-#'     \item If one layer is selected from multilayer data, returns single-layer
-#'     \item Otherwise, maintains the original structure type
+#'     \item if one time period is selected from longitudinal data, returns cross-sectional
+#'     \item if one layer is selected from multilayer data, returns single-layer
+#'     \item otherwise, maintains the original structure type
 #'   }
 #'
 #' @details
-#' This function is a netify-aware wrapper around the \code{\link{peek}} function,
-#' which handles the raw data extraction. While \code{peek} returns raw matrices/arrays,
+#' this function is a netify-aware wrapper around the \code{\link{peek}} function,
+#' which handles the raw data extraction. while \code{peek} returns raw matrices/arrays,
 #' \code{subset} additionally:
 #' \itemize{
-#'   \item Preserves and updates all netify attributes
-#'   \item Filters nodal and dyadic attribute data to match the subset
-#'   \item Adjusts the netify type when dimensions change (e.g., longitudinal to cross-sectional)
-#'   \item Maintains consistency between network data and attributes
+#'   \item preserves and updates all netify attributes
+#'   \item filters nodal and dyadic attribute data to match the subset
+#'   \item adjusts the netify type when dimensions change (e.g., longitudinal to cross-sectional)
+#'   \item maintains consistency between network data and attributes
 #' }
 #'
-#' The \code{from} and \code{to} parameters allow precise control over which ties
+#' the \code{from} and \code{to} parameters allow precise control over which ties
 #' to include:
 #' \itemize{
-#'   \item Use \code{actors} to get all ties among a set of actors (subgraph extraction)
-#'   \item Use \code{from} to get all ties sent by specific actors
-#'   \item Use \code{to} to get all ties received by specific actors
-#'   \item Use both \code{from} and \code{to} to get ties between specific sets of actors
+#'   \item use \code{actors} to get all ties among a set of actors (subgraph extraction)
+#'   \item use \code{from} to get all ties sent by specific actors
+#'   \item use \code{to} to get all ties received by specific actors
+#'   \item use both \code{from} and \code{to} to get ties between specific sets of actors
 #' }
 #'
-#' For bipartite networks, \code{from} refers to actors in the first mode (e.g.,
+#' for bipartite networks, \code{from} refers to actors in the first mode (e.g.,
 #' people) and \code{to} refers to actors in the second mode (e.g., organizations).
 #'
 #' @note
-#' When subsetting longitudinal data to a single time period, the function automatically
-#' converts the result to a cross-sectional netify object. Similarly, subsetting
+#' when subsetting longitudinal data to a single time period, the function automatically
+#' converts the result to a cross-sectional netify object. similarly, subsetting
 #' multilayer data to a single layer produces a single-layer object.
 #'
 #' @examples
 #'
 #' \donttest{
-#' # load example directed event data from ICEWS
+#' # load example directed event data from icews
 #' data(icews)
 #'
-#' # generate a longitudional netify object
+#' # generate a longitudinal netify object
 #' # with both dyadic and nodal attributes
 #' icews_matlConf <- netify(
 #'     icews,
@@ -84,12 +84,12 @@
 #'     dyad_vars_symmetric = c(FALSE, FALSE, FALSE)
 #' )
 #'
-#' # subset to a few countries using S3 method
+#' # subset to a few countries using s3 method
 #' icews_subset <- subset(
 #'     icews_matlConf,
 #'     actors = c(
-#'         "United States", "United Kingdom",
-#'         "Russian Federation", "China"
+#'         "united states", "united kingdom",
+#'         "russian federation", "china"
 #'     )
 #' )
 #'
@@ -97,8 +97,8 @@
 #' icews_subset_2 <- subset(
 #'     icews_matlConf,
 #'     actors = c(
-#'         "United States", "United Kingdom",
-#'         "Russian Federation", "China"
+#'         "united states", "united kingdom",
+#'         "russian federation", "china"
 #'     ),
 #'     time = c("2010", "2011")
 #' )
@@ -107,14 +107,14 @@
 #' icews_subset_3 <- subset_netify(
 #'     netlet = icews_matlConf,
 #'     actors = c(
-#'         "United States", "United Kingdom",
-#'         "Russian Federation", "China"
+#'         "united states", "united kingdom",
+#'         "russian federation", "china"
 #'     ),
 #'     time = c("2010", "2011")
 #' )
 #' }
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @method subset netify
 #' @export
@@ -138,20 +138,20 @@ subset.netify <- function(
 	)
 }
 
-#' Internal subset function for netify objects
+#' internal subset function for netify objects
 #'
-#' This is the internal workhorse function called by the S3 method \code{subset.netify}.
-#' Users should typically use \code{subset()} on netify objects rather than calling
+#' this is the internal workhorse function called by the s3 method \code{subset.netify}.
+#' users should typically use \code{subset()} on netify objects rather than calling
 #' this function directly.
 #'
-#' @param netlet A netify object to subset
-#' @param actors Character vector of actor names or numeric indices to subset
-#' @param time Time periods to subset
-#' @param layers Character vector of layer names to subset from multilayer networks
-#' @param from Character vector of actor names or numeric indices for actors sending ties
-#' @param to Character vector of actor names or numeric indices for actors receiving ties
+#' @param netlet a netify object to subset
+#' @param actors character vector of actor names or numeric indices to subset
+#' @param time time periods to subset
+#' @param layers character vector of layer names to subset from multilayer networks
+#' @param from character vector of actor names or numeric indices for actors sending ties
+#' @param to character vector of actor names or numeric indices for actors receiving ties
 #'
-#' @return A netify object containing the requested subset
+#' @return a netify object containing the requested subset
 #'
 #' @keywords internal
 #' @export subset_netify
@@ -201,17 +201,30 @@ subset_netify <- function(
 		))
 	}
 
-	# check if output should be multilayer
+		# choose multilayer output
 	nlayers_subset <- if (!is.null(layers)) length(layers) else nlayers
 	is_multilayer_out <- nlayers_subset > 1
 
-	# check if output should be longitudinal
+		# choose time points
+	time_values <- NULL
 	if (is_longit) {
-		# if user puts null for time and object is longit, use all time points
+			# keep all time points when none are requested
 		if (is.null(time)) {
-			time <- msrmnts$time
+			time_values <- msrmnts$time
+		} else if (is.numeric(time)) {
+			time_idx <- time[time >= 1 & time <= length(msrmnts$time)]
+			if (length(time_idx) == 0L) {
+				cli::cli_abort("No valid time periods selected.")
+			}
+			time_values <- msrmnts$time[time_idx]
+		} else {
+			time_values <- msrmnts$time[match(as.character(time), as.character(msrmnts$time))]
+			time_values <- time_values[!is.na(time_values)]
+			if (length(time_values) == 0L) {
+				cli::cli_abort("No valid time periods selected.")
+			}
 		}
-		n_time_out <- length(time)
+		n_time_out <- length(time_values)
 		is_longit_out <- n_time_out > 1
 	} else {
 		is_longit_out <- FALSE
@@ -222,8 +235,9 @@ subset_netify <- function(
 		netlet,
 		from = from,
 		to = to,
-		time = time,
-		layers = layers
+		time = time_values %||% time,
+		layers = layers,
+		drop_dimensions = !is_multilayer_out
 	)
 
 	# rebuild the netify structure on top of peek's raw matrices
@@ -231,6 +245,7 @@ subset_netify <- function(
 		# get a reference element to copy attributes from
 		ref_elem <- netlet[[1]]
 		ref_attrs <- attributes(ref_elem)
+		sub_net_names <- names(sub_net)
 
 		# rebuild each element with proper netify attributes
 		sub_net <- lapply(names(sub_net), function(time_name) {
@@ -248,12 +263,12 @@ subset_netify <- function(
 			# apply attributes
 			attributes(mat) <- all_attrs
 
-			# ensure class is set
+			# keep netify class
 			class(mat) <- "netify"
 
 			return(mat)
 		})
-		names(sub_net) <- names(peek(netlet, from = from, to = to, time = time, layers = layers))
+		names(sub_net) <- sub_net_names
 	}
 
 	# handle structure changes when going from longit to cross-sectional
@@ -297,14 +312,18 @@ subset_netify <- function(
 		layer_idx <- match(layers, obj_attrs$layers)
 
 		# update all layer-specific attributes at once
-		if (length(obj_attrs[["weight"]]) > 1) {
-			weight_vec <- strsplit(obj_attrs[["weight"]], ", ")[[1]]
-			new_attrs[["weight"]] <- paste(weight_vec[layer_idx], collapse = ", ")
+		if (!is.null(obj_attrs[["weight"]])) {
+			weight_vec <- strsplit(as.character(obj_attrs[["weight"]]), ", ")[[1]]
+			if (length(weight_vec) == length(obj_attrs$layers)) {
+				new_attrs[["weight"]] <- paste(weight_vec[layer_idx], collapse = ", ")
+			}
 		}
 
-		if (length(obj_attrs$detail_weight) > 1) {
-			detail_vec <- strsplit(obj_attrs$detail_weight, " \\| ", perl = TRUE)[[1]]
-			new_attrs$detail_weight <- paste(detail_vec[layer_idx], collapse = " | ")
+		if (!is.null(obj_attrs$detail_weight)) {
+			detail_vec <- strsplit(as.character(obj_attrs$detail_weight), " \\| ", perl = TRUE)[[1]]
+			if (length(detail_vec) == length(obj_attrs$layers)) {
+				new_attrs$detail_weight <- paste(detail_vec[layer_idx], collapse = " | ")
+			}
 		}
 
 		# update logical vectors
@@ -350,6 +369,7 @@ subset_netify <- function(
 				elem_attrs$is_binary <- new_attrs$is_binary
 				elem_attrs$diag_to_NA <- new_attrs$diag_to_NA
 				elem_attrs$missing_to_zero <- new_attrs$missing_to_zero
+				elem_attrs$symmetric <- new_attrs$symmetric
 				# reapply attributes
 				attributes(x) <- elem_attrs
 				return(x)
@@ -381,16 +401,16 @@ subset_netify <- function(
 		actor_pds <- new_attrs$actor_pds
 		actor_pds_subset <- actor_pds[actor_pds$actor %in% all_actors, , drop = FALSE]
 
-		if (is_longit && !is_longit_out) {
-			# update time bounds
-			if (is.numeric(time)) {
-				time_val <- time
-			} else {
-				time_val <- which(msrmnts$time %in% time)
+			if (is_longit && !is_longit_out) {
+				# update time bounds
+				if (is.numeric(time)) {
+					time_val <- time_values
+				} else {
+					time_val <- time_values
+				}
+				actor_pds_subset$min_time <- time_val[1]
+				actor_pds_subset$max_time <- time_val[length(time_val)]
 			}
-			actor_pds_subset$min_time <- pmax(actor_pds_subset$min_time, min(time_val))
-			actor_pds_subset$max_time <- pmin(actor_pds_subset$max_time, max(time_val))
-		}
 		new_attrs$actor_pds <- actor_pds_subset
 	}
 
@@ -400,12 +420,16 @@ subset_netify <- function(
 
 		# filter by time for longitudinal networks
 		if (is_longit) {
-			keep_rows <- nodal_data$actor %in% all_actors & nodal_data$time %in% time
+			keep_rows <- nodal_data$actor %in% all_actors &
+				as.character(nodal_data$time) %in% as.character(time_values)
 		} else {
 			keep_rows <- nodal_data$actor %in% all_actors
 		}
 
 		new_attrs$nodal_data <- nodal_data[keep_rows, , drop = FALSE]
+		if (is_longit && !is_longit_out && "time" %in% names(new_attrs$nodal_data)) {
+			new_attrs$nodal_data$time <- NULL
+		}
 	}
 
 	# update dyad_data efficiently
@@ -414,12 +438,12 @@ subset_netify <- function(
 
 		# subset time periods first if needed
 		if (is_longit && !extracted_single_time) {
-			dyad_data <- dyad_data[as.character(time)]
+			dyad_data <- dyad_data[as.character(time_values)]
 		}
 
 		# for single time extraction, get the right time period
 		if (extracted_single_time && length(dyad_data) > 1) {
-			dyad_data <- dyad_data[as.character(time)]
+			dyad_data <- dyad_data[as.character(time_values)]
 		}
 
 		# process each time period
@@ -439,12 +463,12 @@ subset_netify <- function(
 	if (is.list(sub_net) && is_longit_out) {
 		# for longitudinal lists, apply list-level attributes
 		attributes(sub_net) <- new_attrs
-		# ensure list has netify class
+		# keep netify class on the list
 		class(sub_net) <- "netify"
 	} else {
 		# for single matrices/arrays, apply all attributes at once
 		attributes(sub_net) <- new_attrs
-		# ensure netify class
+		# keep netify class
 		if (!inherits(sub_net, "netify")) {
 			class(sub_net) <- c("netify", class(sub_net))
 		}

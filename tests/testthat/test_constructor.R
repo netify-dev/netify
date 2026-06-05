@@ -18,10 +18,10 @@ test_that(
 		expect_false(attr(net_obj, "diag_to_NA"))
 		expect_true(attr(net_obj, "missing_to_zero"))
 
-		# random data => not symmetric => expect FALSE
+		# random data => not symmetric => expect false
 		expect_false(attr(net_obj, "symmetric"))
 
-		# random data => not strictly binary => is_binary=FALSE
+		# random data => not strictly binary => is_binary=false
 		expect_false(attr(net_obj, "is_binary"))
 
 		# check row/col names assigned if none existed
@@ -30,7 +30,7 @@ test_that(
 		expect_equal(msrs$row_actors, paste0("a", 1:10))
 		expect_equal(msrs$col_actors, paste0("a", 1:10))
 
-		# test forced diag_to_NA
+		# test forced diag_to_na
 		m_diag_na = m
 		diag(m_diag_na) = NA
 		net_obj_diag_na = new_netify(m_diag_na, diag_to_NA = TRUE)
@@ -38,7 +38,7 @@ test_that(
 
 		# test forced symmetric
 		m_sym = m + t(m) # make it symmetric
-		diag(m_sym) = NA # also set diag NA
+		diag(m_sym) = NA # also set diag na
 		net_obj_sym = new_netify(m_sym, symmetric = TRUE)
 		expect_true(attr(net_obj_sym, "symmetric"))
 		expect_true(attr(net_obj_sym, "diag_to_NA"))
@@ -59,9 +59,9 @@ test_that(
 )
 
 
-# longit array input: Use a larger 3D array with at least 10 rows/cols per slice
+# longit array input: use a larger 3d array with at least 10 rows/cols per slice
 test_that("new_netify works with large array input", {
-	# create a 3D array with dimensions 10 (rows) x 10 (cols) x 3 (time slices)
+	# create a 3d array with dimensions 10 (rows) x 10 (cols) x 3 (time slices)
 	a = array(sample(1:1000, 10 * 10 * 3, replace = TRUE), dim = c(10, 10, 3))
 	net_obj = new_netify(a)
 
@@ -87,14 +87,14 @@ test_that("new_netify works with large array input", {
 		msrs$time, as.character(1:3)
 	)
 
-	# check for NAs in off-diagonal elements
+	# check for nas in off-diagonal elements
 	a_w_miss = a
 	a_w_miss[1, 2, 1] = NA
 	net_obj_miss = new_netify(a_w_miss)
 	expect_false(attr(net_obj_miss, "diag_to_NA"))
 	expect_false(attr(net_obj_miss, "missing_to_zero"))
 
-	# make diags NA in a
+	# make diags na in a
 	a_diag_NA = a
 	for (ii in 1:dim(a)[3]) {
 		diag(a_diag_NA[, , ii]) = NA
@@ -103,7 +103,7 @@ test_that("new_netify works with large array input", {
 	expect_true(attr(net_obj_diag_NA, "diag_to_NA"))
 	expect_true(attr(net_obj_diag_NA, "missing_to_zero"))
 
-	# make a symmetric and diags NA
+	# make a symmetric and diags na
 	a_sym = a
 	for (i in 1:dim(a)[3]) {
 		a_sym[, , i] = a[, , i] + t(a[, , i])
@@ -141,14 +141,13 @@ test_that(
 			matrix(sample(1:300, 100, replace = TRUE), nrow = 10, ncol = 10)
 		})
 
-		# no names => new_netify should label them t1, t2, t3
 		net_obj = new_netify(mat_list)
 
 		# check that attributes are set as expected
 		expect_s3_class(net_obj, "netify")
 		expect_equal(attr(net_obj, "netify_type"), "longit_list")
 
-		# if row/col dims are all 10x10 with the same row/col sets => actor_time_uniform=TRUE
+		# if row/col dims are all 10x10 with the same row/col sets => actor_time_uniform=true
 		# but let's see if new_netify auto-detects
 		# by default, each matrix is random => not symmetric => so we expect net_obj is unsymmetric
 		expect_false(attr(net_obj, "symmetric"))
@@ -162,9 +161,9 @@ test_that(
 		expect_equal(length(msrs$row_actors[[1]]), 10)
 		expect_equal(length(msrs$col_actors[[1]]), 10)
 
-		# if the row/col sets are identical across all slices, actor_time_uniform => TRUE
+		# if the row/col sets are identical across all slices, actor_time_uniform => true
 		# but let's see
-		# we can test forced: net_obj2 <- new_netify(mat_list, actor_time_uniform=FALSE)
+		# we can test forced: net_obj2 = new_netify(mat_list, actor_time_uniform=false)
 
 		# test forcibly bipartite => e.g. first slice is 6x10, second is 6x10, third is 6x10
 		mat_list_bi = lapply(1:3, function(i) {
@@ -192,20 +191,21 @@ test_that(
 		net_obj_bin = new_netify(mat_list_binary)
 		expect_true(attr(net_obj_bin, "is_binary"))
 
-		# test missing => set random NA off diag
+		# test missing => set random na off diag
 		mat_list_miss = mat_list
 		mat_list_miss[[1]][1, 5] = NA
 		net_obj_miss = new_netify(mat_list_miss)
-		# by default, a single NA might not force missing_to_zero unless user sets it
+		# by default, a single na might not force missing_to_zero unless user sets it
 		expect_false(attr(net_obj_miss, "missing_to_zero"))
 
-		# forcibly diag_to_NA => check first slice
-		mat_list_diag_na = mat_list
-		diag(mat_list_diag_na[[1]]) = NA
-		net_obj_diag_na = new_netify(mat_list_diag_na, diag_to_NA = TRUE)
-		expect_true(attr(net_obj_diag_na, "diag_to_NA"))
-	}
-)
+			# forcibly diag_to_na => check first slice
+			mat_list_diag_na = mat_list
+			diag(mat_list_diag_na[[1]]) = NA
+			net_obj_diag_na = new_netify(mat_list_diag_na, diag_to_NA = TRUE)
+			expect_true(attr(net_obj_diag_na, "diag_to_NA"))
+			expect_false(is.null(attr(net_obj_diag_na, "actor_pds")))
+		}
+	)
 
 test_that(
 	"new_netify handles partial dimnames in array",
@@ -219,7 +219,6 @@ test_that(
 		expect_s3_class(net_obj, "netify")
 		# check that colnames are auto-labeled while rownames remain as "row1...row5"
 		expect_equal(dimnames(net_obj)[[1]], paste0("row", 1:5))
-		# e.g. colnames should have default "a1...a5" if unipartite
 		expect_equal(dimnames(net_obj)[[2]], paste0("a", 1:5))
 	}
 )
@@ -232,7 +231,7 @@ test_that(
 		m_sym = m_sym + t(m_sym)
 		diag(m_sym) = NA
 
-		# auto-detect => symmetric=TRUE, but we override
+		# auto-detect => symmetric=true, but we override
 		net_obj_override = new_netify(m_sym, symmetric = FALSE)
 		# confirm that we see the user override, not auto-detection
 		expect_false(attr(net_obj_override, "symmetric"))
@@ -293,19 +292,18 @@ test_that("new_netify handles longit_list with varying actor sets (dimensions) a
 	expect_s3_class(net_obj_vary, "netify")
 	expect_equal(attr(net_obj_vary, "netify_type"), "longit_list")
 
-	# since slice sizes differ, we expect actor_time_uniform = FALSE
+	# since slice sizes differ, we expect actor_time_uniform = false
 	expect_false(attr(net_obj_vary, "actor_time_uniform"))
 
 	# check that the slices got named t1, t2, t3
 	expect_equal(names(net_obj_vary), as.character(1:3))
 
-	# ensure each slice is class netify with cross_sec type
+	# check each slice class
 	# and has assigned row/col names
 	for (i in seq_along(net_obj_vary)) {
 		slice_i = net_obj_vary[[i]]
 		expect_s3_class(slice_i, "netify")
 		expect_equal(attr(slice_i, "netify_type"), "cross_sec")
-		# row/col names should exist
 		expect_false(is.null(rownames(slice_i)))
 		expect_false(is.null(colnames(slice_i)))
 	}

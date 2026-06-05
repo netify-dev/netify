@@ -1,49 +1,49 @@
 #' Extract measurements and dimensions from a netify object
 #'
 #' `netify_measurements` (also available as `measurements`)
-#' extracts comprehensive information about the structure, dimensions, and attributes
-#' of a netify object. This function provides a standardized way to inspect network
+#' extracts information about the structure, dimensions, and attributes
+#' of a netify object. this function provides a standardized way to inspect network
 #' properties across different netify types.
 #'
-#' @param netlet A netify object (class "netify") to analyze. Can be cross-sectional,
+#' @param netlet a netify object (class "netify") to analyze. can be cross-sectional,
 #'   longitudinal array, or longitudinal list format.
 #'
-#' @return A list containing measurements of the netify object with the following
+#' @return a list containing measurements of the netify object with the following
 #'   components (availability depends on netify type):
 #'
-#'   \strong{Actor information:}
+#'   \strong{actor information:}
 #'   \itemize{
-#'     \item \code{row_actors}: Character vector (or list) of row actor names
-#'     \item \code{col_actors}: Character vector (or list) of column actor names
-#'     \item \code{n_row_actors}: Integer (or list) count of row actors
-#'     \item \code{n_col_actors}: Integer (or list) count of column actors
+#'     \item \code{row_actors}: character vector (or list) of row actor names
+#'     \item \code{col_actors}: character vector (or list) of column actor names
+#'     \item \code{n_row_actors}: integer (or list) count of row actors
+#'     \item \code{n_col_actors}: integer (or list) count of column actors
 #'   }
 #'
-#'   \strong{Temporal information:}
+#'   \strong{temporal information:}
 #'   \itemize{
-#'     \item \code{time}: Character vector of time period labels (NULL for cross-sectional)
-#'     \item \code{n_time}: Integer count of time periods (NULL for cross-sectional)
+#'     \item \code{time}: character vector of time period labels (NULL for cross-sectional)
+#'     \item \code{n_time}: integer count of time periods (NULL for cross-sectional)
 #'   }
 #'
-#'   \strong{Layer information:}
+#'   \strong{layer information:}
 #'   \itemize{
-#'     \item \code{layers}: Character vector of layer names (NULL if single layer)
-#'     \item \code{n_layers}: Integer count of layers (NULL if single layer)
+#'     \item \code{layers}: character vector of layer names (NULL if single layer)
+#'     \item \code{n_layers}: integer count of layers (NULL if single layer)
 #'   }
 #'
-#'   \strong{Attribute information:}
+#'   \strong{attribute information:}
 #'   \itemize{
-#'     \item \code{nvars}: Character vector of nodal variable names
-#'     \item \code{n_nvars}: Integer count of nodal variables
-#'     \item \code{dvars}: Character vector of dyadic variable names
-#'     \item \code{n_dvars}: Integer count of dyadic variables
+#'     \item \code{nvars}: character vector of nodal variable names
+#'     \item \code{n_nvars}: integer count of nodal variables
+#'     \item \code{dvars}: character vector of dyadic variable names
+#'     \item \code{n_dvars}: integer count of dyadic variables
 #'   }
 #'
 #' @details
-#' The function will adapt its output based on the netify object type.
+#' the function will adapt its output based on the netify object type.
 #'
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export netify_measurements
 #' @aliases measurements
@@ -73,6 +73,17 @@ netify_measurements <- function(netlet) {
 		nvars = NULL, n_nvars = NULL, dvars = NULL, n_dvars = NULL
 	)
 
+	nodal_vars <- function(nd, netlet_type) {
+		metadata <- "actor"
+		if (netlet_type != "cross_sec") {
+			metadata <- c(metadata, "time")
+		}
+		setdiff(colnames(nd), metadata)
+	}
+	dyad_vars <- function(dd) {
+		unique(unlist(lapply(dd, names), use.names = FALSE))
+	}
+
 	# cross-sec
 	if (netlet_type == "cross_sec") {
 		# dv measurements
@@ -92,17 +103,16 @@ netify_measurements <- function(netlet) {
 
 		# check nodal data
 		if (nodal_data_exist) {
-			msrmnts$nvars <- colnames(attributes(netlet)$nodal_data)[-1]
-			msrmnts$n_nvars <- ncol(attributes(netlet)$nodal_data) - 1
+			msrmnts$nvars <- nodal_vars(attributes(netlet)$nodal_data, netlet_type)
+			msrmnts$n_nvars <- length(msrmnts$nvars)
 		}
 
 		# check dyad data
 		if (dyad_data_exist) {
 			# extract variable names from new structure: list(time) -> list(vars) -> matrix
 			dyad_data_raw <- attributes(netlet)$dyad_data
-			first_time_period <- dyad_data_raw[[1]]
-			msrmnts$dvars <- names(first_time_period)
-			msrmnts$n_dvars <- length(first_time_period)
+			msrmnts$dvars <- dyad_vars(dyad_data_raw)
+			msrmnts$n_dvars <- length(msrmnts$dvars)
 		}
 	}
 
@@ -131,17 +141,16 @@ netify_measurements <- function(netlet) {
 
 		# check nodal data
 		if (nodal_data_exist) {
-			msrmnts$nvars <- colnames(attributes(netlet)$nodal_data)[-c(1:2)]
-			msrmnts$n_nvars <- ncol(attributes(netlet)$nodal_data) - 2
+			msrmnts$nvars <- nodal_vars(attributes(netlet)$nodal_data, netlet_type)
+			msrmnts$n_nvars <- length(msrmnts$nvars)
 		}
 
 		# check dyad data
 		if (dyad_data_exist) {
 			# extract variable names from new structure: list(time) -> list(vars) -> matrix
 			dyad_data_raw <- attributes(netlet)$dyad_data
-			first_time_period <- dyad_data_raw[[1]]
-			msrmnts$dvars <- names(first_time_period)
-			msrmnts$n_dvars <- length(first_time_period)
+			msrmnts$dvars <- dyad_vars(dyad_data_raw)
+			msrmnts$n_dvars <- length(msrmnts$dvars)
 		}
 	}
 
@@ -166,17 +175,16 @@ netify_measurements <- function(netlet) {
 
 		# check nodal data
 		if (nodal_data_exist) {
-			msrmnts$nvars <- colnames(attributes(netlet)$nodal_data)[-c(1:2)]
-			msrmnts$n_nvars <- ncol(attributes(netlet)$nodal_data) - 2
+			msrmnts$nvars <- nodal_vars(attributes(netlet)$nodal_data, netlet_type)
+			msrmnts$n_nvars <- length(msrmnts$nvars)
 		}
 
 		# check dyad data
 		if (dyad_data_exist) {
 			# extract variable names from new structure: list(time) -> list(vars) -> matrix
 			dyad_data_raw <- attributes(netlet)$dyad_data
-			first_time_period <- dyad_data_raw[[1]]
-			msrmnts$dvars <- names(first_time_period)
-			msrmnts$n_dvars <- length(first_time_period)
+			msrmnts$dvars <- dyad_vars(dyad_data_raw)
+			msrmnts$n_dvars <- length(msrmnts$dvars)
 		}
 	}
 
@@ -186,7 +194,7 @@ netify_measurements <- function(netlet) {
 
 #' @rdname netify_measurements
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 measurements <- netify_measurements

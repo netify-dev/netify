@@ -47,12 +47,12 @@ test_that("plot parameter validation catches common mistakes", {
 
 test_that("plot errors friendly when *_by references a missing column", {
 	# small directed mention-style network
-	df <- data.frame(
+	df = data.frame(
 		from = c("a", "a", "b", "c", "d", "e"),
 		to   = c("b", "c", "c", "d", "a", "a"),
 		stringsAsFactors = FALSE
 	)
-	net <- netify(df, actor1 = "from", actor2 = "to", symmetric = FALSE)
+	net = netify(df, actor1 = "from", actor2 = "to", symmetric = FALSE)
 
 	# node_color_by with bad col: error names the kwarg + lists available cols
 	expect_error(
@@ -70,5 +70,21 @@ test_that("plot errors friendly when *_by references a missing column", {
 	expect_error(
 		plot(net, edge_color_by = "fakecol"),
 		regexp = "edge_color_by.*fakecol.*does not exist"
+	)
+})
+
+test_that("plot network-statistic hint includes time for longitudinal networks", {
+	df = data.frame(
+		from = c("a", "b", "a", "c"),
+		to = c("b", "c", "c", "a"),
+		year = c(1, 1, 2, 2),
+		stringsAsFactors = FALSE
+	)
+	net = netify(df, actor1 = "from", actor2 = "to", time = "year",
+		symmetric = FALSE)
+
+	expect_error(
+		plot(net, node_size_by = "degree_total"),
+		regexp = "add_node_vars.*time = \"time\""
 	)
 })

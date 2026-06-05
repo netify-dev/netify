@@ -1,10 +1,10 @@
 ####
-#' Is this object a netify object?
+#' is this object a netify object?
 #'
-#' @param x An R object
-#' @return Logical constant, \code{TRUE} if argument \code{x} is a netify
+#' @param x an r object
+#' @return logical constant, \code{TRUE} if argument \code{x} is a netify
 #' object
-#' @author Colin Henry
+#' @author colin henry
 #' @keywords netify
 #' @export is_netify
 
@@ -16,12 +16,12 @@ is_netify <- function(x) {
 ####
 #' netify_check
 #'
-#' Checks to make sure that object is of class netify
+#' checks to make sure that object is of class netify
 #' and stops process if not
 #' @param netlet user inputted object to check
 #' @return NULL object but stops the process if there
 #' is an error detected
-#' @author Ha Eun Choi, Colin Henry, Shahryar Minhas
+#' @author ha eun choi, colin henry, shahryar minhas
 #' @keywords internal
 #' @noRd
 
@@ -35,92 +35,92 @@ netify_check <- function(netlet) {
 ####
 
 ####
-#' Low-level constructor for netify objects
+#' low-level constructor for netify objects
 #'
 #' `new_netify` (also available as `new_netlet`) is a low-level constructor that
-#' creates netify objects from raw matrix, array, or list data structures. This
+#' creates netify objects from raw matrix, array, or list data structures. this
 #' function automatically detects network properties and sets appropriate attributes,
 #' making it useful for converting existing network data into the netify format.
 #'
-#' @param data A network data structure to convert:
+#' @param data a network data structure to convert:
 #'   \itemize{
-#'     \item \strong{Matrix}: Creates a cross-sectional netify object
-#'     \item \strong{3D array}: Creates a longitudinal array netify object
-#'       (dimensions: actors × actors × time)
-#'     \item \strong{List of matrices}: Creates a longitudinal list netify object
+#'     \item \strong{matrix}: creates a cross-sectional netify object
+#'     \item \strong{3d array}: creates a longitudinal array netify object
+#'       (dimensions: actors x actors x time)
+#'     \item \strong{list of matrices}: creates a longitudinal list netify object
 #'       (useful for time-varying actor composition)
 #'   }
-#' @param ... Additional parameters to set as attributes on the netify object.
-#'   Common parameters include:
+#' @param ... additional parameters to set as attributes on the netify object.
+#'   common parameters include:
 #'   \itemize{
-#'     \item \code{symmetric}: Logical indicating if network is undirected
+#'     \item \code{symmetric}: logical indicating if network is undirected
 #'     \item \code{mode}: "unipartite" or "bipartite"
-#'     \item \code{weight}: Name of the edge weight variable
-#'     \item \code{diag_to_NA}: Whether to set diagonal to NA
-#'     \item \code{missing_to_zero}: Whether to treat missing edges as zeros
-#'     \item \code{nodal_data}: Data frame of node attributes
-#'     \item \code{dyad_data}: Dyadic attributes (see netify documentation)
+#'     \item \code{weight}: name of the edge weight variable
+#'     \item \code{diag_to_NA}: whether to set diagonal to na
+#'     \item \code{missing_to_zero}: whether to treat missing edges as zeros
+#'     \item \code{nodal_data}: data frame of node attributes
+#'     \item \code{dyad_data}: dyadic attributes (see netify documentation)
 #'   }
 #'
-#'   If not provided, these properties are automatically detected from the data.
+#'   if not provided, these properties are automatically detected from the data.
 #'
-#' @return A netify object with class "netify" and appropriate structure:
+#' @return a netify object with class "netify" and appropriate structure:
 #'   \itemize{
-#'     \item For matrices: A single netify matrix with netify_type = "cross_sec"
-#'     \item For arrays: A netify array with netify_type = "longit_array"
-#'     \item For lists: A netify list with netify_type = "longit_list", where
+#'     \item for matrices: a single netify matrix with netify_type = "cross_sec"
+#'     \item for arrays: a netify array with netify_type = "longit_array"
+#'     \item for lists: a netify list with netify_type = "longit_list", where
 #'       each element is itself a netify object
 #'   }
 #'
-#'   All netify objects include automatically detected or user-specified attributes
+#'   all netify objects include automatically detected or user-specified attributes
 #'   for network properties, making them ready for use with netify functions.
 #'
 #' @details
-#' \strong{Automatic property detection:}
+#' \strong{automatic property detection:}
 #'
-#' When properties are not explicitly provided, `new_netify` intelligently detects:
+#' when properties are not explicitly provided, `new_netify` intelligently detects:
 #' \itemize{
-#'   \item \strong{Symmetry}: Checks if matrix equals its transpose
-#'   \item \strong{Mode}: Infers unipartite/bipartite from dimensions and actor names
-#'   \item \strong{Edge weights}: Detects binary (0/1) vs. weighted networks
-#'   \item \strong{Diagonal treatment}: Checks if diagonal contains all NAs
-#'   \item \strong{Missing values}: Determines if NAs exist off-diagonal
-#'   \item \strong{Actor composition}: For longitudinal data, detects if actors
+#'   \item \strong{symmetry}: checks if matrix equals its transpose
+#'   \item \strong{mode}: infers unipartite/bipartite from dimensions and actor names
+#'   \item \strong{edge weights}: detects binary (0/1) vs. weighted networks
+#'   \item \strong{diagonal treatment}: checks if diagonal contains all nas
+#'   \item \strong{missing values}: determines if nas exist off-diagonal
+#'   \item \strong{actor composition}: for longitudinal data, detects if actors
 #'     remain constant or vary over time
 #' }
 #'
-#' \strong{Naming conventions:}
+#' \strong{naming conventions:}
 #'
-#' If row/column names are not provided:
+#' if row/column names are not provided:
 #' \itemize{
-#'   \item Unipartite networks: Actors named "a1", "a2", ...
-#'   \item Bipartite networks: Row actors "r1", "r2", ...; column actors "c1", "c2", ...
-#'   \item Time periods: Named as "1", "2", ... if not specified
+#'   \item unipartite networks: actors named "a1", "a2", ...
+#'   \item bipartite networks: row actors "r1", "r2", ...; column actors "c1", "c2", ...
+#'   \item time periods: named as "1", "2", ... if not specified
 #' }
 #'
-#' \strong{Longitudinal data handling:}
+#' \strong{longitudinal data handling:}
 #'
-#' For longitudinal networks:
+#' for longitudinal networks:
 #' \itemize{
-#'   \item Arrays assume constant actor composition across time
-#'   \item Lists allow for time-varying actor composition
-#'   \item Each time slice in a list becomes a separate cross-sectional netify object
-#'   \item Properties are detected across all time periods (e.g., symmetric if ALL
+#'   \item arrays assume constant actor composition across time
+#'   \item lists allow for time-varying actor composition
+#'   \item each time slice in a list becomes a separate cross-sectional netify object
+#'   \item properties are detected across all time periods (e.g., symmetric if all
 #'     time slices are symmetric)
 #' }
 #'
 #' @note
-#' This is a low-level constructor primarily intended for package developers or
-#' advanced users. Most users should use the higher-level `netify()` function,
-#' which provides more comprehensive data validation and preprocessing.
+#' this is a low-level constructor primarily intended for package developers or
+#' advanced users. most users should use the higher-level `netify()` function,
+#' which provides more validation and preprocessing.
 #'
-#' The function does not support multilayer networks directly. To create multilayer
+#' the function does not support multilayer networks directly. to create multilayer
 #' networks, create separate netify objects and combine them with `layer_netify()`.
 #'
-#' While the function attempts to detect network properties automatically, explicitly
+#' while the function attempts to detect network properties automatically, explicitly
 #' providing these parameters is recommended for clarity.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export new_netify
 
@@ -179,11 +179,12 @@ new_netify <- function(data, ...) {
 
 	if (netify_type == "cross_sec") {
 		mat <- data
-		if (detect_symmetric) {
-			final_params$symmetric <- check_symmetric(mat)
-		}
 		if (detect_mode) {
 			final_params$mode <- guess_mode(mat)
+		}
+		mat <- align_unipartite_dimnames(mat, final_params$mode)
+		if (detect_symmetric) {
+			final_params$symmetric <- check_symmetric(mat)
 		}
 		if (detect_diag_to_NA) {
 			final_params$diag_to_NA <- guess_diag_to_NA(mat)
@@ -202,7 +203,7 @@ new_netify <- function(data, ...) {
 				final_params$weight <- "edge_value"
 				final_params$detail_weight <- paste0("Edges weighted by ", final_params$weight)
 				final_params$is_binary <- FALSE
-			}
+		}
 		} else if (detect_is_binary) {
 			final_params$is_binary <- check_binary(mat)
 		}
@@ -229,6 +230,7 @@ new_netify <- function(data, ...) {
 			final_params$mode <- guess_mode(data[, , 1, drop = TRUE])
 		}
 
+		data <- align_unipartite_dimnames(data, final_params$mode)
 		data <- assign_dimnames(data, final_params$mode)
 
 		if (is.null(dimnames(data)[[3]])) {
@@ -248,9 +250,6 @@ new_netify <- function(data, ...) {
 			if (detect_weight && !any_nonbinary) {
 				if (!check_binary(mat)) any_nonbinary <- TRUE
 			}
-		}
-		if (detect_mode) {
-			final_params$mode <- guess_mode(data[, , 1, drop = TRUE])
 		}
 		if (detect_symmetric) {
 			final_params$symmetric <- !any_not_sym
@@ -319,14 +318,15 @@ new_netify <- function(data, ...) {
 
 		any_not_sym <- FALSE
 		any_nonbinary <- FALSE
-		for (ii in seq_along(data)) {
-			mat <- data[[ii]]
-			if (!is.matrix(mat)) next
-			if (is.null(guess_md)) {
-				guess_md <- guess_mode(mat)
-			}
+			for (ii in seq_along(data)) {
+				mat <- data[[ii]]
+				if (!is.matrix(mat)) next
+				if (is.null(guess_md)) {
+					guess_md <- guess_mode(mat)
+				}
+			mat <- align_unipartite_dimnames(mat, guess_md)
 			mat <- assign_dimnames(mat, guess_md)
-			data[[ii]] <- mat
+				data[[ii]] <- mat
 
 			if (detect_symmetric && !any_not_sym) {
 				if (!check_symmetric(mat)) any_not_sym <- TRUE
@@ -410,13 +410,20 @@ new_netify <- function(data, ...) {
 					melt_list_sparse(data), "Var1", "Var2", "L1"
 				)
 			}
+			final_params$actor_pds <- actor_pds
 		}
 	}
 
+	if (identical(final_params$mode, "bipartite")) {
+		final_params$symmetric <- FALSE
+		final_params$diag_to_NA <- FALSE
+	}
+
 	# enforce resolved diag_to_NA / missing_to_zero on the data so flags
-	# and contents stay in sync. explicit FALSE leaves data untouched.
-	apply_diag_NA <- isTRUE(final_params$diag_to_NA)
-	apply_miss_0  <- isTRUE(final_params$missing_to_zero)
+	# and contents stay in sync. explicit false leaves data untouched.
+	apply_diag_NA <- isTRUE(final_params$diag_to_NA) &&
+		!identical(final_params$mode, "bipartite")
+	apply_miss_0 <- isTRUE(final_params$missing_to_zero)
 	apply_flags_to_slice <- function(mat) {
 		if (!is.matrix(mat)) return(mat)
 		# diag_to_NA only meaningful on square (unipartite) matrices
@@ -424,7 +431,7 @@ new_netify <- function(data, ...) {
 			if (any(!is.na(diag(mat)))) diag(mat) <- NA
 		}
 		if (apply_miss_0 && anyNA(mat)) {
-			# preserve diagonal NAs when filling off-diagonal NAs
+			# preserve diagonal nas when filling off-diagonal nas
 			if (apply_diag_NA && nrow(mat) == ncol(mat)) {
 				d <- diag(mat)
 				mat[is.na(mat)] <- 0
@@ -501,18 +508,18 @@ new_netify <- function(data, ...) {
 ####
 
 ####
-#' Assign Default Row/Column Names
+#' assign default row/column names
 #'
-#' Internal helper function that assigns default row and column names to a matrix,
-#' depending on whether the network is unipartite or bipartite. If the matrix
+#' internal helper function that assigns default row and column names to a matrix,
+#' depending on whether the network is unipartite or bipartite. if the matrix
 #' already has row/col names, they are preserved.
 #'
-#' @param mat A matrix (potentially without row or column names).
-#' @param mode Character string: "unipartite" or "bipartite".
+#' @param mat a matrix (potentially without row or column names).
+#' @param mode character string: "unipartite" or "bipartite".
 #'
-#' @return The same \code{mat} with updated row and column names as needed.
+#' @return the same \code{mat} with updated row and column names as needed.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -540,16 +547,59 @@ assign_dimnames <- function(mat, mode) {
 ####
 
 ####
-#' Check if a Matrix is Symmetric (Ignoring NA Diagonals)
+#' align unipartite column order
 #'
-#' Internal helper that checks whether \code{mat} is equal to its transpose,
-#' after temporarily setting any \code{NA} diagonal entries to \code{0}.
+#' internal helper that reorders columns so a unipartite adjacency matrix uses the
+#' same actor order on rows and columns.
 #'
-#' @param mat A matrix to be checked.
+#' @param mat a matrix or array.
+#' @param mode character string: "unipartite" or "bipartite".
 #'
-#' @return Logical. \code{TRUE} if \code{mat} is symmetric, otherwise \code{FALSE}.
+#' @return the same object, with columns reordered when needed.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @keywords internal
+#' @noRd
+align_unipartite_dimnames <- function(mat, mode) {
+	if (!identical(mode, "unipartite")) {
+		return(mat)
+	}
+	if (nrow(mat) != ncol(mat)) {
+		cli::cli_abort("Unipartite matrices must be square.")
+	}
+
+	rn <- rownames(mat)
+	cn <- colnames(mat)
+	if (is.null(rn) || is.null(cn) || identical(rn, cn)) {
+		return(mat)
+	}
+	if (length(rn) != length(cn) || !setequal(rn, cn)) {
+		cli::cli_abort(
+			"Unipartite matrices must have the same actor names on rows and columns."
+		)
+	}
+
+	if (is.matrix(mat)) {
+		return(mat[, rn, drop = FALSE])
+	}
+	if (is.array(mat)) {
+		return(mat[, rn, , drop = FALSE])
+	}
+
+	mat
+}
+####
+
+####
+#' check if a matrix is symmetric (ignoring na diagonals)
+#'
+#' internal helper that checks whether \code{mat} is equal to its transpose,
+#' after temporarily setting any \code{na} diagonal entries to \code{0}.
+#'
+#' @param mat a matrix to be checked.
+#'
+#' @return logical. \code{TRUE} if \code{mat} is symmetric, otherwise \code{FALSE}.
+#'
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -560,16 +610,16 @@ check_symmetric <- function(mat) {
 ####
 
 ####
-#' Check if Matrix is Strictly Binary
+#' check if matrix is strictly binary
 #'
-#' Internal helper that tests if all non-\code{NA} entries of \code{mat}
+#' internal helper that tests if all non-\code{na} entries of \code{mat}
 #' are in \code{\{0, 1\}}.
 #'
-#' @param mat A matrix to be tested.
+#' @param mat a matrix to be tested.
 #'
-#' @return Logical. \code{TRUE} if all non-NA entries are 0/1, otherwise \code{FALSE}.
+#' @return logical. \code{TRUE} if all non-na entries are 0/1, otherwise \code{FALSE}.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -580,16 +630,16 @@ check_binary <- function(mat) {
 ####
 
 ####
-#' Check if Diagonal is Entirely NA
+#' check if diagonal is entirely na
 #'
-#' Internal helper that checks whether the diagonal of \code{mat} is fully
-#' \code{NA}. Used to guess whether \code{diag_to_NA} should be \code{TRUE}.
+#' internal helper that checks whether the diagonal of \code{mat} is fully
+#' \code{na}. used to guess whether \code{diag_to_NA} should be \code{TRUE}.
 #'
-#' @param mat A matrix to examine.
+#' @param mat a matrix to examine.
 #'
-#' @return Logical. \code{TRUE} if \code{diag(mat)} is all \code{NA}, otherwise \code{FALSE}.
+#' @return logical. \code{TRUE} if \code{diag(mat)} is all \code{na}, otherwise \code{FALSE}.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -599,19 +649,19 @@ guess_diag_to_NA <- function(mat) {
 ####
 
 ####
-#' Check if Missing Values Appear Off-Diagonal
+#' check if missing values appear off-diagonal
 #'
-#' Internal helper that determines if any off-diagonal entries of \code{mat}
-#' are \code{NA}. Sets diagonal to zero temporarily, then checks for \code{NA}.
+#' internal helper that determines if any off-diagonal entries of \code{mat}
+#' are \code{na}. sets diagonal to zero temporarily, then checks for \code{na}.
 #'
-#' @param mat A matrix to examine.
-#' @param diag_NA Logical. If \code{TRUE}, treat diagonal entries as \code{0} for the
-#'  purpose of this check. If \code{FALSE}, diagonal entries are not considered.
+#' @param mat a matrix to examine.
+#' @param diag_na logical. if \code{TRUE}, treat diagonal entries as \code{0} for the
+#'  purpose of this check. if \code{FALSE}, diagonal entries are not considered.
 #'
-#' @return Logical. \code{TRUE} if no off-diagonal \code{NA}s are found,
+#' @return logical. \code{TRUE} if no off-diagonal \code{na}s are found,
 #'   otherwise \code{FALSE}.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
@@ -625,16 +675,16 @@ guess_missing_to_zero <- function(mat, diag_NA = TRUE) {
 ####
 
 ####
-#' Guess Whether Matrix is Unipartite or Bipartite
+#' guess whether matrix is unipartite or bipartite
 #'
-#' Internal helper that infers if \code{mat} should be treated as unipartite or
+#' internal helper that infers if \code{mat} should be treated as unipartite or
 #' bipartite based on its dimensions and row/column name overlap.
 #'
-#' @param mat A matrix whose dimensions/names we examine.
+#' @param mat a matrix whose dimensions/names we examine.
 #'
-#' @return Character. Either \code{"unipartite"} or \code{"bipartite"}.
+#' @return character. either \code{"unipartite"} or \code{"bipartite"}.
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd

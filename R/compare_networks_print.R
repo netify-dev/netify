@@ -1,17 +1,17 @@
 #' Print method for netify_comparison objects
 #'
-#' Provides a clear, formatted output for network comparison results.
-#' Handles different comparison types (temporal, cross-network, multilayer)
+#' provides a clear, formatted output for network comparison results.
+#' handles different comparison types (temporal, cross-network, multilayer)
 #' with appropriate formatting.
 #'
-#' @param x A netify_comparison object from compare_networks()
-#' @param ... Additional arguments (currently unused)
-#' @param n Maximum number of rows to print for summary tables (default 20)
+#' @param x a netify_comparison object from compare_networks()
+#' @param ... additional arguments (currently unused)
+#' @param n maximum number of rows to print for summary tables (default 20)
 #'
-#' @return Invisibly returns the input object
+#' @return invisibly returns the input object
 #'
 #' @examples
-#' # Compare two networks
+#' # compare two networks
 #' data(icews)
 #' net1 <- netify(icews[icews$year == 2010,], actor1 = "i", actor2 = "j")
 #' net2 <- netify(icews[icews$year == 2011,], actor1 = "i", actor2 = "j")
@@ -21,7 +21,7 @@
 #' @importFrom utils head
 #' @method print netify_comparison
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 print.netify_comparison <- function(x, ..., n = 20) {
@@ -103,8 +103,8 @@ print.netify_comparison <- function(x, ..., n = 20) {
 	if (x$what == "structure") {
 		cli::cli_h2("Structural Properties")
 		
-		if (!is.null(x$summary)) {
-			# for many networks, check if we should group by network name patterns
+			if (!is.null(x$summary)) {
+				# limit long comparison summaries
 			if (nrow(x$summary) > n) {
 				cli::cli_alert_info("Showing first {n} of {nrow(x$summary)} comparisons. Use print(x, n = Inf) to see all.")
 				print(format_df(head(x$summary, n)))
@@ -217,18 +217,18 @@ print.netify_comparison <- function(x, ..., n = 20) {
 	invisible(x)
 }
 
-#' Summary method for netify_comparison objects
+#' summary method for netify_comparison objects
 #'
-#' Provides a concise summary of network comparison results.
+#' provides a concise summary of network comparison results.
 #'
-#' @param object A netify_comparison object from compare_networks()
-#' @param ... Additional arguments (currently unused)
+#' @param object a netify_comparison object from compare_networks()
+#' @param ... additional arguments (currently unused)
 #'
-#' @return A summary data frame or list depending on comparison type
+#' @return a summary data frame or list depending on comparison type
 #'
 #' @method summary netify_comparison
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 summary.netify_comparison <- function(object, ...) {

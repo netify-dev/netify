@@ -1,34 +1,34 @@
 #' Event data slice from ICEWS
 #'
-#' Event data from ICEWS for select countries from 2002 to 2014,
-#' and additional nodal variables from the World Bank and Polity IV.
+#' event data from icews for select countries from 2002 to 2014,
+#' and additional nodal variables from the world bank and polity iv.
 #'
-#' @format A data frame with dyadic observations and the following variables:
+#' @format a data frame with dyadic observations and the following variables:
 #'   \describe{
-#'     \item{i}{Source country}
-#'     \item{j}{Target country}
-#'     \item{year}{Year of observation}
-#'     \item{id}{Observation identifier}
-#'     \item{verbCoop}{Verbal cooperation score}
-#'     \item{matlCoop}{Material cooperation score}
-#'     \item{verbConf}{Verbal conflict score}
-#'     \item{matlConf}{Material conflict score}
-#'     \item{i_year}{Year for source country}
-#'     \item{j_year}{Year for target country}
-#'     \item{i_polity2}{Polity IV democracy score for source country}
-#'     \item{j_polity2}{Polity IV democracy score for target country}
-#'     \item{i_iso3c}{ISO 3166-1 alpha-3 code for source country}
-#'     \item{j_iso3c}{ISO 3166-1 alpha-3 code for target country}
-#'     \item{i_region}{Region for source country}
-#'     \item{j_region}{Region for target country}
-#'     \item{i_gdp}{GDP for source country}
-#'     \item{j_gdp}{GDP for target country}
-#'     \item{i_log_gdp}{Log GDP for source country}
-#'     \item{j_log_gdp}{Log GDP for target country}
-#'     \item{i_pop}{Population for source country}
-#'     \item{j_pop}{Population for target country}
-#'     \item{i_log_pop}{Log population for source country}
-#'     \item{j_log_pop}{Log population for target country}
+#'     \item{i}{source country}
+#'     \item{j}{target country}
+#'     \item{year}{year of observation}
+#'     \item{id}{observation identifier}
+#'     \item{verbCoop}{verbal cooperation score}
+#'     \item{matlCoop}{material cooperation score}
+#'     \item{verbConf}{verbal conflict score}
+#'     \item{matlConf}{material conflict score}
+#'     \item{i_year}{year for source country}
+#'     \item{j_year}{year for target country}
+#'     \item{i_polity2}{polity iv democracy score for source country}
+#'     \item{j_polity2}{polity iv democracy score for target country}
+#'     \item{i_iso3c}{iso 3166-1 alpha-3 code for source country}
+#'     \item{j_iso3c}{iso 3166-1 alpha-3 code for target country}
+#'     \item{i_region}{region for source country}
+#'     \item{j_region}{region for target country}
+#'     \item{i_gdp}{gdp for source country}
+#'     \item{j_gdp}{gdp for target country}
+#'     \item{i_log_gdp}{log gdp for source country}
+#'     \item{j_log_gdp}{log gdp for target country}
+#'     \item{i_pop}{population for source country}
+#'     \item{j_pop}{population for target country}
+#'     \item{i_log_pop}{log population for source country}
+#'     \item{j_log_pop}{log population for target country}
 #'   }
 #'
 #' @name icews
@@ -36,15 +36,16 @@
 #' @usage data(icews)
 #' @keywords datasets
 #'
-#' @references add icews reference
-#' (\href{https://dataverse.harvard.edu/dataverse/icews}{icews})
+#' @references boschee, e., lautenschlager, j., o'brien, s., shellman, s.,
+#' starz, j., and ward, m. (2015). icews coded event data. harvard dataverse.
+#' \doi{10.7910/dvn/28075}.
 #'
-#' @source \href{https://dataverse.harvard.edu/dataverse/icews}{icews}
+#' @source icews coded event data, harvard dataverse.
 #'
 #' @examples
 #' data(icews)
 #' icews[1:3, ]
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 NULL

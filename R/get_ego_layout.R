@@ -1,116 +1,116 @@
 #' Calculate ego-centric layout positions for network visualization
 #'
 #' `get_ego_layout` computes node positions for ego network visualization using
-#' ego-centric layout algorithms. These layouts place the ego at the center and
+#' ego-centric layout algorithms. these layouts place the ego at the center and
 #' arrange alters around it (radially, by concentric ring, etc.) so that the
 #' ego's relationships are organized around the focal node.
 #'
-#' @param netlet A netify object (class "netify") that is an ego network, created
-#'   using \code{\link{ego_netify}}. The object must have ego_netify = TRUE attribute.
-#' @param layout Character string specifying the ego-centric layout algorithm. Options:
+#' @param netlet a netify object (class "netify") that is an ego network, created
+#'   using \code{\link{ego_netify}}. the object must have ego_netify = TRUE attribute.
+#' @param layout character string specifying the ego-centric layout algorithm. options:
 #'   \itemize{
-#'     \item \code{"radial"}: Places ego at center with alters arranged in a circle
-#'       around it. Distance from center can encode relationship strength.
-#'     \item \code{"concentric"}: Places ego at center with alters in concentric
+#'     \item \code{"radial"}: places ego at center with alters arranged in a circle
+#'       around it. distance from center can encode relationship strength.
+#'     \item \code{"concentric"}: places ego at center with alters in concentric
 #'       circles based on a grouping variable or relationship strength.
-#'     \item \code{"star"}: Simple star layout with ego at center and alters
+#'     \item \code{"star"}: simple star layout with ego at center and alters
 #'       equally spaced around it (default).
 #'   }
-#' @param group_by Character string specifying a nodal attribute to use for grouping
-#'   alters in the layout. For "radial" layout, groups are arranged in sectors.
-#'   For "concentric" layout, groups determine which ring alters appear in.
-#'   If NULL (default), no grouping is applied.
-#' @param order_by Character string specifying a nodal attribute to use for ordering
-#'   alters within their groups or around the ego. Common options include network
-#'   statistics like "degree_total" or custom attributes. If NULL (default),
+#' @param group_by character string specifying a nodal attribute to use for grouping
+#'   alters in the layout. for "radial" layout, groups are arranged in sectors.
+#'   for "concentric" layout, groups determine which ring alters appear in.
+#'   if NULL (default), no grouping is applied.
+#' @param order_by character string specifying a nodal attribute to use for ordering
+#'   alters within their groups or around the ego. common options include network
+#'   statistics like "degree_total" or custom attributes. if NULL (default),
 #'   alters are arranged alphabetically.
-#' @param weight_to_distance Logical. If TRUE and the network is weighted, use edge
-#'   weights to determine distance from ego (higher weights = closer). For "radial"
-#'   layout only. Default is FALSE.
-#' @param ring_gap Numeric value between 0 and 1 specifying the gap between
-#'   concentric rings as a proportion of the total radius. Only used for
-#'   "concentric" layout. Default is 0.3.
-#' @param ego_size Numeric value specifying the relative size of the central area
-#'   reserved for the ego. Larger values create more space between ego and alters.
-#'   Default is 0.1.
-#' @param seed Integer for random number generation to ensure reproducible layouts
-#'   when there are ties in ordering. Default is 6886.
+#' @param weight_to_distance logical. if TRUE and the network is weighted, use edge
+#'   weights to determine distance from ego (higher weights = closer). for "radial"
+#'   layout only. default is FALSE.
+#' @param ring_gap numeric value between 0 and 1 specifying the gap between
+#'   concentric rings as a proportion of the total radius. only used for
+#'   "concentric" layout. default is 0.3.
+#' @param ego_size numeric value specifying the relative size of the central area
+#'   reserved for the ego. larger values create more space between ego and alters.
+#'   default is 0.1.
+#' @param seed integer for random number generation to ensure reproducible layouts
+#'   when there are ties in ordering. default is 6886.
 #'
-#' @return A list of data frames (one per time period) where each data frame contains:
+#' @return a list of data frames (one per time period) where each data frame contains:
 #'   \itemize{
-#'     \item \strong{index}: Integer node index
-#'     \item \strong{actor}: Character string with actor name
-#'     \item \strong{x}: Numeric x-coordinate for node position
-#'     \item \strong{y}: Numeric y-coordinate for node position
+#'     \item \strong{index}: integer node index
+#'     \item \strong{actor}: character string with actor name
+#'     \item \strong{x}: numeric x-coordinate for node position
+#'     \item \strong{y}: numeric y-coordinate for node position
 #'   }
 #'
-#'   For cross-sectional networks, returns a list with one element. For longitudinal
+#'   for cross-sectional networks, returns a list with one element. for longitudinal
 #'   networks, returns a named list with time periods as names.
 #'
 #' @details
-#' This function provides specialized layouts for ego networks that emphasize the
+#' this function provides specialized layouts for ego networks that emphasize the
 #' ego-alter structure:
 #'
-#' \strong{Layout algorithms:}
+#' \strong{layout algorithms:}
 #' \itemize{
-#'   \item \strong{Radial}: Places the ego at the origin and arranges alters in
-#'     a circle around it. If grouping is specified, alters are arranged in sectors
-#'     with related nodes near each other. If weight_to_distance is TRUE, alters
+#'   \item \strong{radial}: places the ego at the origin and arranges alters in
+#'     a circle around it. if grouping is specified, alters are arranged in sectors
+#'     with related nodes near each other. if weight_to_distance is TRUE, alters
 #'     with stronger ties to ego are placed closer to the center.
-#'   \item \strong{Concentric}: Places the ego at the origin and arranges alters
-#'     in concentric circles. The ring assignment can be based on a grouping
+#'   \item \strong{concentric}: places the ego at the origin and arranges alters
+#'     in concentric circles. the ring assignment can be based on a grouping
 #'     variable (categorical) or a continuous variable (discretized into rings).
-#'   \item \strong{Star}: A simple star layout that places ego at center and
-#'     distributes alters evenly around a single circle. This is equivalent to
+#'   \item \strong{star}: a simple star layout that places ego at center and
+#'     distributes alters evenly around a single circle. this is equivalent to
 #'     the radial layout without grouping or weighting.
 #' }
 #'
-#' \strong{Visual encoding:}
+#' \strong{visual encoding:}
 #'
-#' The layouts allow encoding of network properties through spatial arrangement:
+#' the layouts allow encoding of network properties through spatial arrangement:
 #' \itemize{
-#'   \item \strong{Distance from ego}: Can represent tie strength, frequency of
+#'   \item \strong{distance from ego}: can represent tie strength, frequency of
 #'     interaction, or other dyadic measures
-#'   \item \strong{Angular position}: Can group similar alters together (e.g.,
+#'   \item \strong{angular position}: can group similar alters together (e.g.,
 #'     family, friends, colleagues)
-#'   \item \strong{Ring assignment}: Can represent categories, levels of importance,
+#'   \item \strong{ring assignment}: can represent categories, levels of importance,
 #'     or discretized continuous variables
 #' }
 #'
-#' \strong{Longitudinal networks:}
+#' \strong{longitudinal networks:}
 #'
-#' For longitudinal ego networks, the function maintains consistent angular positions
+#' for longitudinal ego networks, the function maintains consistent angular positions
 #' for alters across time periods when possible, making it easier to track changes
 #' in the ego's network over time.
 #'
 #' @note
-#' This function is designed specifically for ego networks created with
-#' \code{\link{ego_netify}}. For general network layouts, use
+#' this function is designed specifically for ego networks created with
+#' \code{\link{ego_netify}}. for general network layouts, use
 #' \code{\link{get_node_layout}}.
 #'
-#' The function will issue a warning if used on non-ego networks but will
+#' the function will issue a warning if used on non-ego networks but will
 #' attempt to proceed by treating the first node as the ego.
 #'
 #' @examples
 #' \dontrun{
-#' # Create an ego network
-#' ego_net <- ego_netify(my_network, ego = "Alice")
+#' # create an ego network
+#' ego_net <- ego_netify(my_network, ego = "alice")
 #'
-#' # Get radial layout with alters grouped by attribute
-#' layout_radial <- get_ego_layout(ego_net, 
+#' # get radial layout with alters grouped by attribute
+#' layout_radial <- get_ego_layout(ego_net,
 #'                                layout = "radial",
 #'                                group_by = "department")
 #'
-#' # Get concentric layout with rings based on degree
+#' # get concentric layout with rings based on degree
 #' layout_circles <- get_ego_layout(ego_net,
-#'                                 layout = "concentric", 
+#'                                 layout = "concentric",
 #'                                 group_by = "degree_total")
 #'
-#' # Use with plot
+#' # use with plot
 #' plot(ego_net, point_layout = layout_radial)
 #' }
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export get_ego_layout
 #' @importFrom stats quantile runif
@@ -118,7 +118,7 @@
 
 get_ego_layout <- function(
 	netlet,
-	layout = "star", 
+	layout = "star",
 	group_by = NULL,
 	order_by = NULL,
 	weight_to_distance = FALSE,
@@ -128,52 +128,52 @@ get_ego_layout <- function(
 
 	# check if netify object
 	netify_check(netlet)
-	
+
 	# check if this is an ego network
 	is_ego <- attr(netlet, "ego_netify") %||% FALSE
 	ego_id <- attr(netlet, "ego_id")
-	
+
 	if (!is_ego) {
 		cli::cli_alert_warning(
 			"This does not appear to be an ego network (created with ego_netify).
 			 Attempting to proceed by treating the first actor as ego."
 		)
 	}
-	
+
 	# validate layout parameter
-	layout <- match.arg(tolower(layout), 
+	layout <- match.arg(tolower(layout),
 					   choices = c("radial", "concentric", "star"))
-	
+
 	# get network info
 	obj_attrs <- attributes(netlet)
 	netify_type <- obj_attrs$netify_type
-	
+
 	# handle longitudinal case - process as list
 	if (netify_type == "longit_list") {
 		# get network data for each time period
 		layout_list <- lapply(seq_along(netlet), function(t) {
 			time_name <- names(netlet)[t]
 			netlet_t <- netlet[[t]]
-			
+
 			# calculate layout for this time period
 			layout_df <- calculate_ego_layout_single(
 				netlet = netlet_t,
 				layout = layout,
 				ego_id = ego_id,
 				group_by = group_by,
-				order_by = order_by, 
+				order_by = order_by,
 				weight_to_distance = weight_to_distance,
 				ring_gap = ring_gap,
 				ego_size = ego_size,
 				seed = seed + t - 1  # different seed per time period
 			)
-			
+
 			return(layout_df)
 		})
-		
+
 		names(layout_list) <- names(netlet)
 		return(layout_list)
-		
+
 	} else {
 		# cross-sectional case
 		layout_df <- calculate_ego_layout_single(
@@ -187,25 +187,25 @@ get_ego_layout <- function(
 			ego_size = ego_size,
 			seed = seed
 		)
-		
+
 		return(list(layout_df))
 	}
 }
 
-#' Calculate ego layout for a single network
-#' 
-#' Internal function that computes ego-centric layout for one time period
-#' 
+#' calculate ego layout for a single network
+#'
+#' internal function that computes ego-centric layout for one time period
+#'
 #' @keywords internal
 #' @noRd
 calculate_ego_layout_single <- function(
 	netlet, layout, ego_id, group_by, order_by,
 	weight_to_distance, ring_gap, ego_size, seed) {
-	
+
 	# get actor names
 	actors <- rownames(netlet)
 	n_actors <- length(actors)
-	
+
 	# identify ego - use provided ego_id or first actor
 	if (is.null(ego_id)) {
 		ego_id <- actors[1]
@@ -213,16 +213,16 @@ calculate_ego_layout_single <- function(
 			paste0("No ego_id found. Using first actor '", ego_id, "' as ego.")
 		)
 	}
-	
+
 	# verify ego is in the network
 	if (!ego_id %in% actors) {
 		stop("Ego '", ego_id, "' not found in network")
 	}
-	
+
 	# get alters (everyone except ego)
 	alters <- setdiff(actors, ego_id)
 	n_alters <- length(alters)
-	
+
 	# initialize layout data frame
 	layout_df <- data.frame(
 		index = seq_len(n_actors),
@@ -231,24 +231,24 @@ calculate_ego_layout_single <- function(
 		y = numeric(n_actors),
 		stringsAsFactors = FALSE
 	)
-	
+
 	# place ego at center
 	ego_idx <- which(actors == ego_id)
 	layout_df$x[ego_idx] <- 0
 	layout_df$y[ego_idx] <- 0
-	
+
 	# if no alters, return ego-only layout
 	if (n_alters == 0) {
 		return(layout_df)
 	}
-	
+
 	# get nodal attributes if needed
 	nodal_attrs <- NULL
 	if (!is.null(group_by) || !is.null(order_by)) {
 		nodal_attrs <- attr(netlet, "nodal_data")
-		
+
 		# check if requested attributes exist
-		if (!is.null(group_by) && !is.null(nodal_attrs) && 
+		if (!is.null(group_by) && !is.null(nodal_attrs) &&
 			!group_by %in% names(nodal_attrs)) {
 			cli::cli_alert_warning(
 				paste0("Grouping variable '", group_by, "' not found in nodal attributes. ",
@@ -256,24 +256,24 @@ calculate_ego_layout_single <- function(
 			)
 			group_by <- NULL
 		}
-		
-		if (!is.null(order_by) && !is.null(nodal_attrs) && 
+
+		if (!is.null(order_by) && !is.null(nodal_attrs) &&
 			!order_by %in% names(nodal_attrs)) {
 			cli::cli_alert_warning(
 				paste0("Ordering variable '", order_by, "' not found in nodal attributes. ",
-					   "Proceeding with alphabetical order.")  
+					   "Proceeding with alphabetical order.")
 			)
 			order_by <- NULL
 		}
 	}
-	
+
 	# get edge weights if needed
 	edge_weights <- NULL
 	if (weight_to_distance && !attr(netlet, "is_binary")) {
 		# extract weights from ego to each alter
 		edge_weights <- numeric(n_alters)
 		names(edge_weights) <- alters
-		
+
 		for (i in seq_along(alters)) {
 			alter <- alters[i]
 			# get weight in both directions and use max
@@ -281,11 +281,11 @@ calculate_ego_layout_single <- function(
 			w2 <- netlet[alter, ego_id]
 			edge_weights[i] <- max(w1, w2, na.rm = TRUE)
 		}
-		
-		# handle NAs
+
+		# handle nas
 		edge_weights[is.na(edge_weights)] <- 0
 	}
-	
+
 	# calculate positions based on layout type
 	if (layout == "star") {
 		alter_positions <- calculate_star_positions(
@@ -293,7 +293,7 @@ calculate_ego_layout_single <- function(
 		)
 	} else if (layout == "radial") {
 		alter_positions <- calculate_radial_positions(
-			alters, group_by, order_by, nodal_attrs, 
+			alters, group_by, order_by, nodal_attrs,
 			edge_weights, weight_to_distance, ego_size, seed
 		)
 	} else if (layout == "concentric") {
@@ -302,7 +302,7 @@ calculate_ego_layout_single <- function(
 			ring_gap, ego_size, seed
 		)
 	}
-	
+
 	# assign alter positions to layout data frame
 	for (i in seq_along(alters)) {
 		alter <- alters[i]
@@ -310,29 +310,29 @@ calculate_ego_layout_single <- function(
 		layout_df$x[alter_idx] <- alter_positions$x[i]
 		layout_df$y[alter_idx] <- alter_positions$y[i]
 	}
-	
+
 	return(layout_df)
 }
 
-#' Calculate star layout positions
-#' @keywords internal  
+#' calculate star layout positions
+#' @keywords internal
 #' @noRd
 calculate_star_positions <- function(alters, order_by, nodal_attrs, ego_size, seed) {
 	n_alters <- length(alters)
-	
+
 	# order alters
 	ordered_alters <- order_alters(alters, order_by, nodal_attrs, seed)
-	
+
 	# calculate angles - evenly distributed
 	angles <- seq(0, 2 * pi, length.out = n_alters + 1)[-1]
-	
+
 	# constant radius for all alters
 	radius <- 1
 
 	# convert to x,y coordinates
 	x <- radius * cos(angles)
 	y <- radius * sin(angles)
-	
+
 	# reorder to match original alter order
 	positions <- data.frame(
 		alter = ordered_alters,
@@ -340,25 +340,25 @@ calculate_star_positions <- function(alters, order_by, nodal_attrs, ego_size, se
 		y = y,
 		stringsAsFactors = FALSE
 	)
-	
+
 	# match back to input order
 	match_idx <- match(alters, positions$alter)
-	
+
 	return(data.frame(
 		x = positions$x[match_idx],
 		y = positions$y[match_idx]
 	))
 }
 
-#' Calculate radial layout positions
+#' calculate radial layout positions
 #' @keywords internal
-#' @noRd  
+#' @noRd
 calculate_radial_positions <- function(
-	alters, group_by, order_by, nodal_attrs, 
+	alters, group_by, order_by, nodal_attrs,
 	edge_weights, weight_to_distance, ego_size, seed) {
-	
+
 	n_alters <- length(alters)
-	
+
 	# get groups if specified
 	if (!is.null(group_by) && !is.null(nodal_attrs)) {
 		alter_groups <- nodal_attrs[[group_by]][match(alters, nodal_attrs$actor)]
@@ -369,23 +369,23 @@ calculate_radial_positions <- function(
 		unique_groups <- 1
 		n_groups <- 1
 	}
-	
+
 	# initialize positions
 	x <- numeric(n_alters)
 	y <- numeric(n_alters)
-	
+
 	# process each group
 	for (g in seq_len(n_groups)) {
 		group <- unique_groups[g]
 		group_mask <- alter_groups == group & !is.na(alter_groups)
 		group_alters <- alters[group_mask]
 		n_group <- length(group_alters)
-		
+
 		if (n_group == 0) next
-		
+
 		# order alters within group
 		ordered_group <- order_alters(group_alters, order_by, nodal_attrs, seed)
-		
+
 		# calculate angular range for this group
 		if (n_groups > 1) {
 			# divide circle into sectors
@@ -399,27 +399,27 @@ calculate_radial_positions <- function(
 			sector_start <- 0
 			sector_end <- 2 * pi
 		}
-		
+
 		# calculate angles within sector
 		if (n_group == 1) {
 			group_angles <- (sector_start + sector_end) / 2
 		} else {
 			group_angles <- seq(sector_start, sector_end, length.out = n_group)
 		}
-		
+
 		# calculate radii
 		if (weight_to_distance && !is.null(edge_weights)) {
 			# get weights for this group
 			group_weights <- edge_weights[ordered_group]
-			
+
 			# normalize weights to [0,1]
 			if (max(group_weights) > min(group_weights)) {
-				norm_weights <- (group_weights - min(group_weights)) / 
+				norm_weights <- (group_weights - min(group_weights)) /
 							   (max(group_weights) - min(group_weights))
 			} else {
 				norm_weights <- rep(0.5, n_group)
 			}
-			
+
 			# map to radius (closer = higher weight)
 			# use ego_size as minimum distance
 			min_radius <- ego_size + 0.2
@@ -429,7 +429,7 @@ calculate_radial_positions <- function(
 			# constant radius for all
 			group_radii <- rep(1, n_group)
 		}
-		
+
 		# calculate positions
 		for (i in seq_len(n_group)) {
 			alter_idx <- which(alters == ordered_group[i])
@@ -437,48 +437,48 @@ calculate_radial_positions <- function(
 			y[alter_idx] <- group_radii[i] * sin(group_angles[i])
 		}
 	}
-	
-	# handle any ungrouped alters (NAs in grouping variable)
+
+	# handle any ungrouped alters (nas in grouping variable)
 	if (any(is.na(alter_groups))) {
 		na_mask <- is.na(alter_groups)
 		na_alters <- alters[na_mask]
 		n_na <- length(na_alters)
-		
+
 		# place at outer edge in a separate arc
 		na_angles <- seq(3*pi/2, 2*pi, length.out = n_na + 1)[-1]
-		
+
 		for (i in seq_len(n_na)) {
 			alter_idx <- which(alters == na_alters[i])
 			x[alter_idx] <- 1.1 * cos(na_angles[i])
 			y[alter_idx] <- 1.1 * sin(na_angles[i])
 		}
 	}
-	
+
 	return(data.frame(x = x, y = y))
 }
 
-#' Calculate concentric layout positions  
+#' calculate concentric layout positions
 #' @keywords internal
 #' @noRd
 calculate_concentric_positions <- function(
 	alters, group_by, order_by, nodal_attrs,
 	ring_gap, ego_size, seed) {
-	
+
 	n_alters <- length(alters)
-	
+
 	# determine ring assignment
 	if (!is.null(group_by) && !is.null(nodal_attrs)) {
 		group_var <- nodal_attrs[[group_by]][match(alters, nodal_attrs$actor)]
-		
+
 		# check if numeric or factor/character
 		if (is.numeric(group_var)) {
 			# discretize numeric variable into rings
 			# use quantiles to create roughly equal-sized rings
 			n_rings <- min(4, ceiling(sqrt(n_alters)))  # max 4 rings
-			ring_breaks <- quantile(group_var, 
+			ring_breaks <- quantile(group_var,
 								  probs = seq(0, 1, length.out = n_rings + 1),
 								  na.rm = TRUE)
-			ring_assignment <- cut(group_var, breaks = ring_breaks, 
+			ring_assignment <- cut(group_var, breaks = ring_breaks,
 								 include.lowest = TRUE, labels = FALSE)
 		} else {
 			# use factor levels or unique values as rings
@@ -491,52 +491,52 @@ calculate_concentric_positions <- function(
 		ring_assignment <- rep(1, n_alters)
 		n_rings <- 1
 	}
-	
-	# handle NAs - put in outermost ring
+
+	# handle nas - put in outermost ring
 	if (any(is.na(ring_assignment))) {
 		n_rings <- n_rings + 1
 		ring_assignment[is.na(ring_assignment)] <- n_rings
 	}
-	
+
 	# calculate ring radii
 	min_radius <- ego_size + 0.2
 	max_radius <- 1
-	
+
 	if (n_rings == 1) {
 		ring_radii <- 0.7  # single ring at moderate distance
 	} else {
 		available_space <- max_radius - min_radius
 		gap_total <- ring_gap * (n_rings - 1)
 		ring_spacing <- (available_space - gap_total) / n_rings
-		
+
 		ring_radii <- numeric(n_rings)
 		for (r in 1:n_rings) {
 			ring_radii[r] <- min_radius + (r - 1) * (ring_spacing + ring_gap) + ring_spacing/2
 		}
 	}
-	
+
 	# initialize positions
 	x <- numeric(n_alters)
 	y <- numeric(n_alters)
-	
+
 	# place alters in each ring
 	for (r in 1:n_rings) {
 		ring_mask <- ring_assignment == r
 		ring_alters <- alters[ring_mask]
 		n_ring <- length(ring_alters)
-		
+
 		if (n_ring == 0) next
-		
+
 		# order alters within ring
 		ordered_ring <- order_alters(ring_alters, order_by, nodal_attrs, seed)
-		
+
 		# calculate angles - evenly distributed
 		ring_angles <- seq(0, 2 * pi, length.out = n_ring + 1)[-1]
-		
+
 		# add small rotation to each ring for visual interest
 		rotation_offset <- (r - 1) * pi / (2 * n_rings)
 		ring_angles <- ring_angles + rotation_offset
-		
+
 		# assign positions
 		for (i in seq_len(n_ring)) {
 			alter_idx <- which(alters == ordered_ring[i])
@@ -544,36 +544,38 @@ calculate_concentric_positions <- function(
 			y[alter_idx] <- ring_radii[r] * sin(ring_angles[i])
 		}
 	}
-	
+
 	return(data.frame(x = x, y = y))
 }
 
-#' Order alters for layout
+#' order alters for layout
 #' @keywords internal
 #' @noRd
 order_alters <- function(alters, order_by, nodal_attrs, seed) {
 	n_alters <- length(alters)
-	
+	restore_rng <- save_rng_state()
+	on.exit(restore_rng(), add = TRUE)
+
 	if (!is.null(order_by) && !is.null(nodal_attrs)) {
 		# get ordering variable
 		order_var <- nodal_attrs[[order_by]][match(alters, nodal_attrs$actor)]
-		
-		# handle NAs by putting them last
+
+		# handle nas by putting them last
 		na_mask <- is.na(order_var)
 		if (any(na_mask)) {
-			# set NAs to a value that will sort last
+			# set nas to a value that will sort last
 			if (is.numeric(order_var)) {
 				order_var[na_mask] <- min(order_var, na.rm = TRUE) - 1
 			} else {
 				order_var[na_mask] <- "ZZZZZZ"  # sort last alphabetically
 			}
 		}
-		
+
 		# create order with tie-breaking
 		set.seed(seed)
 		tie_breaker <- runif(n_alters)
 		order_idx <- order(order_var, tie_breaker)
-		
+
 		return(alters[order_idx])
 	} else {
 		# default to alphabetical order

@@ -2,29 +2,29 @@
 % Please edit documentation in R/bind_netifies.R
 \name{as_tibble.netify}
 \alias{as_tibble.netify}
-\title{Convert a netify object to a tibble (long edge frame)}
+\title{convert a netify object to a tibble (long edge frame)}
 \usage{
 as_tibble.netify(x, ...)
 }
 \arguments{
-\item{x}{A netify object.}
+\item{x}{a netify object.}
 
-\item{...}{Passed to \code{\link[=unnetify]{unnetify()}} (e.g., \code{remove_zeros = TRUE}).}
+\item{...}{passed to \code{\link[=unnetify]{unnetify()}} (e.g., \code{remove_zeros = TRUE}).}
 }
 \value{
-A tibble (or data.frame if tibble isn't installed) with
-one row per dyad. Includes \code{from}, \code{to}, optional \code{time}/\code{layer},
+a tibble (or data.frame if tibble isn't installed) with
+one row per dyad. includes \code{from}, \code{to}, optional \code{time}/\code{layer},
 the edge weight, dyadic covariates, and nodal covariates merged
 in with \verb{_from} / \verb{_to} suffixes.
 }
 \description{
-S3 method for \code{tibble::as_tibble()}. Returns the same long-format
+s3 method for \code{tibble::as_tibble()}. returns the same long-format
 frame as \code{\link[=unnetify]{unnetify()}} / \code{\link[=tidy.netify]{tidy.netify()}}, wrapped in a tibble for
 tidyverse-pipe friendliness.
 }
 \details{
-Registered against the \code{tibble::as_tibble} generic via \code{.onLoad},
-so \code{tibble} is not a hard dependency. When \code{tibble} isn't
+registered against the \code{tibble::as_tibble} generic via \code{.onload},
+so \code{tibble} is not a hard dependency. when \code{tibble} isn't
 installed, a plain data.frame is returned.
 }
 \examples{
@@ -42,5 +42,5 @@ tibble::as_tibble(net)
 \code{\link[=unnetify]{unnetify()}} for the underlying converter.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

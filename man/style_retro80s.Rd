@@ -2,17 +2,17 @@
 % Please edit documentation in R/plot_styles.R
 \name{style_retro80s}
 \alias{style_retro80s}
-\title{Retro 80s-inspired network style}
+\title{retro 80s-inspired network style}
 \usage{
 style_retro80s()
 }
 \value{
-List of plot arguments
+list of plot arguments
 }
 \description{
-A network style channeling 1980s design aesthetics
+a network style channeling 1980s design aesthetics
 with bold colors and geometric shapes
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

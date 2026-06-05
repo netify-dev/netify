@@ -1,25 +1,25 @@
 #' Convert a netify_comparison to a tibble
 #'
-#' S3 method for `tibble::as_tibble()` that returns the
-#' `$comparisons` data frame directly. The raw `netify_comparison`
+#' s3 method for `tibble::as_tibble()` that returns the
+#' `$comparisons` data frame directly. the raw `netify_comparison`
 #' object is a list with mixed scalar / nested fields, which
-#' `tibble::as_tibble()` cannot coerce cleanly. The per-pair
+#' `tibble::as_tibble()` cannot coerce cleanly. the per-pair
 #' comparison table is almost always what tidyverse users want
 #' downstream (filter / arrange / pivot / join with metadata).
 #'
-#' Registered against the `tibble::as_tibble` generic via `.onLoad`,
+#' registered against the `tibble::as_tibble` generic via `.onload`,
 #' so `tibble` is not a hard dependency.
 #'
-#' @param x A `netify_comparison` object from [compare_networks()].
-#' @param ... Currently unused.
-#' @return A tibble of pairwise comparisons (one row per
-#' (`net_i`, `net_j`, `metric`) triple). If the comparison object
+#' @param x a `netify_comparison` object from [compare_networks()].
+#' @param ... currently unused.
+#' @return a tibble of pairwise comparisons (one row per
+#' (`net_i`, `net_j`, `metric`) triple). if the comparison object
 #' has no `$comparisons` slot (e.g., a single-network input), an
 #' empty tibble is returned with a one-shot inform.
 #'
 #' @seealso [compare_networks()], [as_tibble.netify()].
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 as_tibble.netify_comparison <- function(x, ...) {

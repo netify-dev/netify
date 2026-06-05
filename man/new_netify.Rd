@@ -2,97 +2,97 @@
 % Please edit documentation in R/netify_constructors.R
 \name{new_netify}
 \alias{new_netify}
-\title{Low-level constructor for netify objects}
+\title{low-level constructor for netify objects}
 \usage{
 new_netify(data, ...)
 }
 \arguments{
-\item{data}{A network data structure to convert:
+\item{data}{a network data structure to convert:
 \itemize{
-\item \strong{Matrix}: Creates a cross-sectional netify object
-\item \strong{3D array}: Creates a longitudinal array netify object
-(dimensions: actors × actors × time)
-\item \strong{List of matrices}: Creates a longitudinal list netify object
+\item \strong{matrix}: creates a cross-sectional netify object
+\item \strong{3d array}: creates a longitudinal array netify object
+(dimensions: actors x actors x time)
+\item \strong{list of matrices}: creates a longitudinal list netify object
 (useful for time-varying actor composition)
 }}
 
-\item{...}{Additional parameters to set as attributes on the netify object.
-Common parameters include:
+\item{...}{additional parameters to set as attributes on the netify object.
+common parameters include:
 \itemize{
-\item \code{symmetric}: Logical indicating if network is undirected
+\item \code{symmetric}: logical indicating if network is undirected
 \item \code{mode}: "unipartite" or "bipartite"
-\item \code{weight}: Name of the edge weight variable
-\item \code{diag_to_NA}: Whether to set diagonal to NA
-\item \code{missing_to_zero}: Whether to treat missing edges as zeros
-\item \code{nodal_data}: Data frame of node attributes
-\item \code{dyad_data}: Dyadic attributes (see netify documentation)
+\item \code{weight}: name of the edge weight variable
+\item \code{diag_to_NA}: whether to set diagonal to na
+\item \code{missing_to_zero}: whether to treat missing edges as zeros
+\item \code{nodal_data}: data frame of node attributes
+\item \code{dyad_data}: dyadic attributes (see netify documentation)
 }
 
-If not provided, these properties are automatically detected from the data.}
+if not provided, these properties are automatically detected from the data.}
 }
 \value{
-A netify object with class "netify" and appropriate structure:
+a netify object with class "netify" and appropriate structure:
 \itemize{
-\item For matrices: A single netify matrix with netify_type = "cross_sec"
-\item For arrays: A netify array with netify_type = "longit_array"
-\item For lists: A netify list with netify_type = "longit_list", where
+\item for matrices: a single netify matrix with netify_type = "cross_sec"
+\item for arrays: a netify array with netify_type = "longit_array"
+\item for lists: a netify list with netify_type = "longit_list", where
 each element is itself a netify object
 }
 
-All netify objects include automatically detected or user-specified attributes
+all netify objects include automatically detected or user-specified attributes
 for network properties, making them ready for use with netify functions.
 }
 \description{
 \code{new_netify} (also available as \code{new_netlet}) is a low-level constructor that
-creates netify objects from raw matrix, array, or list data structures. This
+creates netify objects from raw matrix, array, or list data structures. this
 function automatically detects network properties and sets appropriate attributes,
 making it useful for converting existing network data into the netify format.
 }
 \details{
-\strong{Automatic property detection:}
+\strong{automatic property detection:}
 
-When properties are not explicitly provided, \code{new_netify} intelligently detects:
+when properties are not explicitly provided, \code{new_netify} intelligently detects:
 \itemize{
-\item \strong{Symmetry}: Checks if matrix equals its transpose
-\item \strong{Mode}: Infers unipartite/bipartite from dimensions and actor names
-\item \strong{Edge weights}: Detects binary (0/1) vs. weighted networks
-\item \strong{Diagonal treatment}: Checks if diagonal contains all NAs
-\item \strong{Missing values}: Determines if NAs exist off-diagonal
-\item \strong{Actor composition}: For longitudinal data, detects if actors
+\item \strong{symmetry}: checks if matrix equals its transpose
+\item \strong{mode}: infers unipartite/bipartite from dimensions and actor names
+\item \strong{edge weights}: detects binary (0/1) vs. weighted networks
+\item \strong{diagonal treatment}: checks if diagonal contains all nas
+\item \strong{missing values}: determines if nas exist off-diagonal
+\item \strong{actor composition}: for longitudinal data, detects if actors
 remain constant or vary over time
 }
 
-\strong{Naming conventions:}
+\strong{naming conventions:}
 
-If row/column names are not provided:
+if row/column names are not provided:
 \itemize{
-\item Unipartite networks: Actors named "a1", "a2", ...
-\item Bipartite networks: Row actors "r1", "r2", ...; column actors "c1", "c2", ...
-\item Time periods: Named as "1", "2", ... if not specified
+\item unipartite networks: actors named "a1", "a2", ...
+\item bipartite networks: row actors "r1", "r2", ...; column actors "c1", "c2", ...
+\item time periods: named as "1", "2", ... if not specified
 }
 
-\strong{Longitudinal data handling:}
+\strong{longitudinal data handling:}
 
-For longitudinal networks:
+for longitudinal networks:
 \itemize{
-\item Arrays assume constant actor composition across time
-\item Lists allow for time-varying actor composition
-\item Each time slice in a list becomes a separate cross-sectional netify object
-\item Properties are detected across all time periods (e.g., symmetric if ALL
+\item arrays assume constant actor composition across time
+\item lists allow for time-varying actor composition
+\item each time slice in a list becomes a separate cross-sectional netify object
+\item properties are detected across all time periods (e.g., symmetric if all
 time slices are symmetric)
 }
 }
 \note{
-This is a low-level constructor primarily intended for package developers or
-advanced users. Most users should use the higher-level \code{netify()} function,
-which provides more comprehensive data validation and preprocessing.
+this is a low-level constructor primarily intended for package developers or
+advanced users. most users should use the higher-level \code{netify()} function,
+which provides more validation and preprocessing.
 
-The function does not support multilayer networks directly. To create multilayer
+the function does not support multilayer networks directly. to create multilayer
 networks, create separate netify objects and combine them with \code{layer_netify()}.
 
-While the function attempts to detect network properties automatically, explicitly
+while the function attempts to detect network properties automatically, explicitly
 providing these parameters is recommended for clarity.
 }
 \author{
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 }

@@ -1,32 +1,93 @@
 #' Process edge data from netify object
 #' @keywords internal
 #' @noRd
-process_edge_data <- function(netlet, netify_type, weight_attr, remove_zeros, ego_netlet) {
+process_edge_data <- function(netlet, netify_type, weight_attr, remove_zeros, ego_netlet, is_bipartite = FALSE) {
 	# extract raw adjacency data
 	raw_data <- get_raw(netlet)
+	remove_diagonal <- !isTRUE(is_bipartite)
+	empty_edge_data <- function(has_layer = FALSE) {
+		out <- data.frame(
+			Var1 = character(),
+			Var2 = character(),
+			L1 = character(),
+			value = numeric(),
+			stringsAsFactors = FALSE
+		)
+		if (isTRUE(has_layer)) {
+			out$layer <- character()
+			out <- out[, c("Var1", "Var2", "L1", "layer", "value"), drop = FALSE]
+		}
+		out
+	}
+	melt_layer_array <- function(arr, time_label = "1") {
+		df <- melt_array(
+			arr,
+			remove_zeros = remove_zeros,
+			remove_diagonal = remove_diagonal
+		)
+		if (nrow(df) == 0L) {
+			return(empty_edge_data(has_layer = TRUE))
+		}
+		df$layer <- df$L1
+		df$L1 <- as.character(time_label)
+		df[, c("Var1", "Var2", "L1", "layer", setdiff(names(df), c("Var1", "Var2", "L1", "layer"))), drop = FALSE]
+	}
 
 	# handle different data structures
 	if (netify_type == "cross_sec") {
-		# for cross-sectional, raw_data is a matrix
-		edge_data <- melt_matrix(
-			raw_data,
-			remove_zeros = remove_zeros,
-			remove_diagonal = TRUE
-		)
+		if (length(dim(raw_data)) == 3L) {
+			edge_data <- melt_layer_array(raw_data, time_label = "1")
+		} else {
+			# for cross-sectional, raw_data is a matrix
+			edge_data <- melt_matrix(
+				raw_data,
+				remove_zeros = remove_zeros,
+				remove_diagonal = remove_diagonal
+			)
+		}
 	} else if (netify_type == "longit_array") {
-		# for longitudinal array, melt the 3d array
-		edge_data <- melt_array(
-			raw_data,
-			remove_zeros = remove_zeros,
-			remove_diagonal = TRUE
-		)
+		if (length(dim(raw_data)) == 4L) {
+			dn <- dimnames(raw_data)
+			layer_labels <- dn[[3]] %||% as.character(seq_len(dim(raw_data)[3]))
+			time_labels <- dn[[4]] %||% as.character(seq_len(dim(raw_data)[4]))
+			parts <- lapply(seq_len(dim(raw_data)[4]), function(t_idx) {
+				df <- melt_layer_array(raw_data[, , , t_idx, drop = FALSE][, , , 1],
+					time_label = time_labels[t_idx])
+				if (nrow(df) > 0L) {
+					df$layer <- factor(df$layer, levels = layer_labels)
+					df$layer <- as.character(df$layer)
+				}
+				df
+			})
+			nonempty <- parts[vapply(parts, nrow, integer(1)) > 0L]
+			edge_data <- if (length(nonempty) == 0L) empty_edge_data(has_layer = TRUE) else do.call(rbind, nonempty)
+			rownames(edge_data) <- NULL
+		} else {
+			# for longitudinal array, melt the 3d array
+			edge_data <- melt_array(
+				raw_data,
+				remove_zeros = remove_zeros,
+				remove_diagonal = remove_diagonal
+			)
+		}
 	} else if (netify_type == "longit_list") {
-		# for longitudinal list, process each time period
-		edge_data <- melt_list_sparse(
-			raw_data,
-			remove_zeros = remove_zeros,
-			remove_diagonal = TRUE
-		)
+		has_layer <- any(vapply(raw_data, function(x) length(dim(x)) == 3L, logical(1)))
+		if (has_layer) {
+			parts <- lapply(seq_along(raw_data), function(i) {
+				time_label <- names(raw_data)[i] %||% as.character(i)
+				melt_layer_array(raw_data[[i]], time_label = time_label)
+			})
+			nonempty <- parts[vapply(parts, nrow, integer(1)) > 0L]
+			edge_data <- if (length(nonempty) == 0L) empty_edge_data(has_layer = TRUE) else do.call(rbind, nonempty)
+			rownames(edge_data) <- NULL
+		} else {
+			# for longitudinal list, process each time period
+			edge_data <- melt_list_sparse(
+				raw_data,
+				remove_zeros = remove_zeros,
+				remove_diagonal = remove_diagonal
+			)
+		}
 	}
 
 	# rename weight column
@@ -47,10 +108,10 @@ process_edge_data <- function(netlet, netify_type, weight_attr, remove_zeros, eg
 	edge_data
 }
 
-#' Merge dyadic attributes into edge data
+#' merge dyadic attributes into edge data
 #' @keywords internal
 #' @noRd
-merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type) {
+merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type, is_bipartite = FALSE) {
 	# melt dyad data once
 	dyad_data_melted <- melt_var_time_list(dyad_data_attr)
 
@@ -58,9 +119,12 @@ merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type) {
 		return(edge_data)
 	}
 
-	# remove self-loops
-	self_loop_idx <- dyad_data_melted$Var1 != dyad_data_melted$Var2
-	dyad_data_melted <- dyad_data_melted[self_loop_idx, ]
+	# remove self-loops only for unipartite networks. in bipartite data, a
+	# matching row/column index can be a valid cross-mode tie.
+	if (!isTRUE(is_bipartite)) {
+		self_loop_idx <- dyad_data_melted$Var1 != dyad_data_melted$Var2
+		dyad_data_melted <- dyad_data_melted[self_loop_idx, ]
+	}
 
 	# get unique variables
 	var_names <- unique(dyad_data_melted$Var3)
@@ -167,7 +231,7 @@ merge_dyadic_attributes <- function(edge_data, dyad_data_attr, netify_type) {
 }
 
 
-#' Finalize edge data structure
+#' finalize edge data structure
 #' @keywords internal
 #' @noRd
 finalize_edge_data <- function(edge_data, netify_type) {
@@ -177,7 +241,7 @@ finalize_edge_data <- function(edge_data, netify_type) {
 		edge_data$L1 <- rep("1", nrow(edge_data))
 	}
 
-	# ensure L1 exists
+	# add default time label
 	if (!"L1" %in% names(edge_data)) {
 		edge_data$L1 <- rep("1", nrow(edge_data))
 	}
@@ -191,14 +255,14 @@ finalize_edge_data <- function(edge_data, netify_type) {
 	edge_data <- edge_data[, col_order, drop = FALSE]
 	names(edge_data)[1:3] <- c("from", "to", "time")
 
-	# ensure time is character (vectorized)
+	# store time as character
 	edge_data$time <- as.character(edge_data$time)
 
 	#
 	return(edge_data)
 }
 
-#' Process nodal data from netify object
+#' process nodal data from netify object
 #' @keywords internal
 #' @noRd
 process_nodal_data <- function(obj_attrs, netify_type, time_labels = NULL) {

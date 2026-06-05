@@ -1,41 +1,41 @@
 #' Drop actors with NA covariates from a netify object
 #'
-#' Removes actors whose \code{nodal_data} carries \code{NA} in one or more
-#' covariate columns. ERGM terms like \code{nodecov()} and
-#' \code{nodematch()} reject NA-bearing vertex attributes, so this helper
-#' is handy upstream of \code{\link{netify_to_statnet}}. Works for
+#' removes actors whose \code{nodal_data} carries \code{na} in one or more
+#' covariate columns. ergm terms like \code{nodecov()} and
+#' \code{nodematch()} reject na-bearing vertex attributes, so this helper
+#' is handy upstream of \code{\link{netify_to_statnet}}. works for
 #' cross-sectional, longitudinal, and bipartite netlets.
 #'
-#' @param netlet A netify object with a \code{nodal_data} attribute.
-#' @param cols Character vector of column names in \code{nodal_data} to
-#'   check for \code{NA}. \code{NULL} (the default) checks every
+#' @param netlet a netify object with a \code{nodal_data} attribute.
+#' @param cols character vector of column names in \code{nodal_data} to
+#'   check for \code{na}. \code{NULL} (the default) checks every
 #'   non-bookkeeping column (everything except \code{actor},
 #'   \code{time}, and \code{layer}).
 #'
-#' @return A netify object equivalent to
+#' @return a netify object equivalent to
 #'   \code{subset_netify(netlet, actors = clean_actors)} after dropping
-#'   any actor whose nodal rows contain \code{NA} in the inspected
-#'   columns. If no NAs are found the input is returned unchanged.
+#'   any actor whose nodal rows contain \code{na} in the inspected
+#'   columns. if no nas are found the input is returned unchanged.
 #'
 #' @details
-#' For longitudinal netlets an actor is dropped from every period if any
-#' of its rows in \code{nodal_data} carry \code{NA} in the inspected
-#' columns. For bipartite netlets only actors in the mode that the
+#' for longitudinal netlets an actor is dropped from every period if any
+#' of its rows in \code{nodal_data} carry \code{na} in the inspected
+#' columns. for bipartite netlets only actors in the mode that the
 #' nodal table covers are filtered; the other mode passes through
 #' untouched.
 #'
-#' Corner cases:
+#' corner cases:
 #' \itemize{
-#'   \item If \code{cols} references a name that is not in
+#'   \item if \code{cols} references a name that is not in
 #'     \code{nodal_data}, the call aborts with a clear message listing
 #'     the missing columns.
-#'   \item If no actor carries \code{NA} in the inspected columns, the
+#'   \item if no actor carries \code{na} in the inspected columns, the
 #'     input netlet is returned unchanged (no inform).
-#'   \item If \emph{every} actor carries \code{NA} (so the cleaned
+#'   \item if \emph{every} actor carries \code{na} (so the cleaned
 #'     netlet would have zero actors), the call aborts rather than
 #'     silently returning an empty netify, which would break downstream
 #'     \code{to_statnet()} / \code{ergm()} pipelines.
-#'   \item If the netlet has no \code{nodal_data} attribute attached,
+#'   \item if the netlet has no \code{nodal_data} attribute attached,
 #'     the input is returned unchanged.
 #' }
 #'
@@ -51,7 +51,7 @@
 #' clean <- drop_na_actors(net, cols = c("i_polity2", "i_log_gdp"))
 #' }
 #'
-#' @author Shahryar Minhas
+#' @author shahryar minhas
 #'
 #' @export
 
@@ -87,7 +87,7 @@ drop_na_actors <- function(netlet, cols = NULL) {
 		return(netlet)
 	}
 
-	# find actors whose rows carry NA in any inspected column
+	# find actors whose rows carry na in any inspected column
 	check_frame <- nd[, cols, drop = FALSE]
 	bad_rows <- !stats::complete.cases(check_frame)
 	if (!any(bad_rows)) {
@@ -101,10 +101,7 @@ drop_na_actors <- function(netlet, cols = NULL) {
 	if (bip) {
 		row_actors <- unique(unlist(msrmnts$row_actors, use.names = FALSE))
 		col_actors <- unique(unlist(msrmnts$col_actors, use.names = FALSE))
-		# a mode is genuinely "covered" by the nodal table only when at
-		# least one of its actors has a non-NA value in any inspected col;
-		# rows that are all-NA across `cols` are typically padding from
-		# add_node_vars() and should not flag the other mode for removal.
+			# only observed actor rows count toward mode coverage
 		any_obs <- function(actors_subset) {
 			rows <- as.character(nd[[actor_col]]) %in% actors_subset
 			if (!any(rows)) return(FALSE)
@@ -118,7 +115,7 @@ drop_na_actors <- function(netlet, cols = NULL) {
 		} else if (touches_col && !touches_row) {
 			bad_actors <- intersect(bad_actors, col_actors)
 		}
-		# if neither side has any non-NA observation in `cols`, there is
+		# if neither side has any non-na observation in `cols`, there is
 		# nothing meaningful to filter on
 		if (!touches_row && !touches_col) {
 			return(netlet)

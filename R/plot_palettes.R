@@ -1,24 +1,24 @@
 #' Get predefined color palette
 #'
-#' Returns a list of colors for edges and nodes based on palette name
+#' returns a list of colors for edges and nodes based on palette name
 #'
-#' @param palette_name Character string naming the palette
-#' @return List with edge_color, node_fill, node_color, and other styling elements
+#' @param palette_name character string naming the palette
+#' @return list with edge_color, node_fill, node_color, and other styling elements
 #'
 #' @keywords internal
 #' @noRd
 
 get_palette <- function(palette_name) {
 	palettes <- list(
-		budapest = list(
+		rose = list(
 			edge_color = "#F4B5BD", # soft pink
 			node_fill = "#9A8C98", # purple
 			node_color = "#C9ADA7", # light purple border
 			edge_alpha = 0.6,
 			curve_edges = FALSE
 		),
-		economist = list(
-			edge_color = "#E3120B", # Economist red
+		red_blue = list(
+			edge_color = "#E3120B", # red
 			node_fill = "#6BABEB", # light blue
 			node_color = "#01621E", # dark green
 			edge_alpha = 0.7,
@@ -31,7 +31,7 @@ get_palette <- function(palette_name) {
 			edge_alpha = 0.8,
 			curve_edges = FALSE
 		),
-		nature = list(
+		scientific_blue = list(
 			edge_color = "#003F7F", # dark blue
 			node_fill = "#ED6D35", # orange
 			node_color = "#003F7F", # dark blue border
@@ -89,17 +89,17 @@ get_palette <- function(palette_name) {
 	}
 }
 
-#' List available color palettes
+#' list available color palettes
 #'
-#' @return Character vector of available palette names
+#' @return character vector of available palette names
 #'
-#' @author Cassy Dorff, Shahryar Minhas
+#' @author cassy dorff, shahryar minhas
 #'
 #' @export
 
 list_palettes <- function() {
 	c(
-		"budapest", "economist", "cyberpunk", "nature", "pastel",
+		"rose", "red_blue", "cyberpunk", "scientific_blue", "pastel",
 		"solarized", "viridis", "grayscale", "sunset", "ocean"
 	)
 }
