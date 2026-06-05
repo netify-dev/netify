@@ -15,20 +15,21 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/quickstart_inference.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Quickstart to Inference</a></li>
+    <li><a class="dropdown-item" href="../articles/quickstart_inference.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
@@ -69,7 +70,7 @@
           <code><a href="new_netify.html">new_netify()</a></code>
 
         </dt>
-        <dd>Low-level constructor for netify objects</dd>
+        <dd>low-level constructor for netify objects</dd>
 
         <dt>
 
@@ -90,7 +91,7 @@
           <code><a href="merge.netify.html">merge(<i>&lt;netify&gt;</i>)</a></code>
 
         </dt>
-        <dd>Merge method for netify objects (S3 alias for <code>bind_netifies</code>)</dd>
+        <dd>merge method for netify objects (s3 alias for <code>bind_netifies</code>)</dd>
 
         <dt>
 
@@ -118,7 +119,7 @@
           <code><a href="netify_workflows.html">netify_workflows</a></code>
 
         </dt>
-        <dd>Common netify workflows — index of patterns</dd>
+        <dd>Common netify workflows – index of patterns</dd>
       </dl></div><div class="section level2">
       <h2 id="adding-attributes">Adding Attributes<a class="anchor" aria-label="anchor" href="#adding-attributes"></a></h2>
 
@@ -157,7 +158,7 @@
           <code><a href="subset_netify.html">subset_netify()</a></code>
 
         </dt>
-        <dd>Internal subset function for netify objects</dd>
+        <dd>internal subset function for netify objects</dd>
 
         <dt>
 
@@ -206,7 +207,7 @@
           <code><a href="gen_symm_id.html">gen_symm_id()</a></code>
 
         </dt>
-        <dd>Generate symmetric identifiers for dyadic data</dd>
+        <dd>generate symmetric identifiers for dyadic data</dd>
       </dl></div><div class="section level2">
       <h2 id="analysis">Analysis<a class="anchor" aria-label="anchor" href="#analysis"></a></h2>
 
@@ -229,7 +230,7 @@
           <code><a href="summary.netify_comparison.html">summary(<i>&lt;netify_comparison&gt;</i>)</a></code>
 
         </dt>
-        <dd>Summary method for netify_comparison objects</dd>
+        <dd>summary method for netify_comparison objects</dd>
 
         <dt>
 
@@ -285,7 +286,7 @@
           <code><a href="attribute_report.html">attribute_report()</a></code>
 
         </dt>
-        <dd>Comprehensive summary of network-attribute relationships</dd>
+        <dd>Summary of network-attribute relationships</dd>
 
         <dt>
 
@@ -315,14 +316,14 @@
           <code><a href="compare_to_null.html">compare_to_null()</a></code>
 
         </dt>
-        <dd>Test an observed network statistic against a null distribution</dd>
+        <dd>Test an observed network statistic against a NULL distribution</dd>
 
         <dt>
 
           <code><a href="simulate.netify.html">simulate(<i>&lt;netify&gt;</i>)</a></code>
 
         </dt>
-        <dd>Simulate null-model networks from a netify object</dd>
+        <dd>Simulate NULL-model networks from a netify object</dd>
       </dl></div><div class="section level2">
       <h2 id="visualization">Visualization<a class="anchor" aria-label="anchor" href="#visualization"></a></h2>
 
@@ -349,10 +350,17 @@
 
         <dt>
 
+          <code><a href="plot.summary.netify.html">plot(<i>&lt;summary.netify&gt;</i>)</a></code>
+
+        </dt>
+        <dd>plot graph-level summary statistics</dd>
+
+        <dt>
+
           <code><a href="plot.summary_actor.html">plot(<i>&lt;summary_actor&gt;</i>)</a></code>
 
         </dt>
-        <dd>Plot method for summary_actor output</dd>
+        <dd>plot method for summary_actor output</dd>
 
         <dt>
 
@@ -387,7 +395,7 @@
           <code><a href="plot_mixing_matrix_facet.html">plot_mixing_matrix_facet()</a></code>
 
         </dt>
-        <dd>Create a multi-panel mixing matrix visualization</dd>
+        <dd>create a multi-panel mixing matrix visualization</dd>
 
         <dt>
 
@@ -429,14 +437,14 @@
           <code><a href="list_network_styles.html">list_network_styles()</a></code>
 
         </dt>
-        <dd>List available network styles</dd>
+        <dd>list available network styles</dd>
 
         <dt>
 
           <code><a href="list_palettes.html">list_palettes()</a></code>
 
         </dt>
-        <dd>List available color palettes</dd>
+        <dd>list available color palettes</dd>
       </dl></div><div class="section level2">
       <h2 id="plot-styles">Plot Styles<a class="anchor" aria-label="anchor" href="#plot-styles"></a></h2>
 
@@ -452,154 +460,154 @@
           <code><a href="style_random.html">style_random()</a></code>
 
         </dt>
-        <dd>Apply random network style</dd>
+        <dd>apply random network style</dd>
 
         <dt>
 
-          <code><a href="style_budapest.html">style_budapest()</a></code>
+          <code><a href="style_rose.html">style_rose()</a></code>
 
         </dt>
-        <dd>Wes Anderson-inspired network style (Grand Budapest Hotel)</dd>
+        <dd>rose network style</dd>
 
         <dt>
 
-          <code><a href="style_economist.html">style_economist()</a></code>
+          <code><a href="style_red_blue.html">style_red_blue()</a></code>
 
         </dt>
-        <dd>Economist-style network style</dd>
+        <dd>red and blue network style</dd>
 
         <dt>
 
-          <code><a href="style_538.html">style_538()</a></code>
+          <code><a href="style_orange_teal.html">style_orange_teal()</a></code>
 
         </dt>
-        <dd>FiveThirtyEight-inspired network style</dd>
+        <dd>orange and teal network style</dd>
 
         <dt>
 
           <code><a href="style_solarized.html">style_solarized()</a></code>
 
         </dt>
-        <dd>Solarized-inspired network style</dd>
+        <dd>solarized-inspired network style</dd>
 
         <dt>
 
-          <code><a href="style_stata.html">style_stata()</a></code>
+          <code><a href="style_navy_maroon.html">style_navy_maroon()</a></code>
 
         </dt>
-        <dd>Stata-inspired network style</dd>
+        <dd>navy and maroon network style</dd>
 
         <dt>
 
-          <code><a href="style_nature.html">style_nature()</a></code>
+          <code><a href="style_scientific_blue.html">style_scientific_blue()</a></code>
 
         </dt>
-        <dd>Nature journal-inspired network style</dd>
+        <dd>scientific blue network style</dd>
 
         <dt>
 
           <code><a href="style_cyberpunk.html">style_cyberpunk()</a></code>
 
         </dt>
-        <dd>Cyberpunk-inspired network style</dd>
+        <dd>cyberpunk-inspired network style</dd>
 
         <dt>
 
           <code><a href="style_tufte.html">style_tufte()</a></code>
 
         </dt>
-        <dd>Minimal Tufte-inspired network style</dd>
+        <dd>minimal tufte-inspired network style</dd>
 
         <dt>
 
           <code><a href="style_pastel.html">style_pastel()</a></code>
 
         </dt>
-        <dd>Pastel rainbow network style</dd>
+        <dd>pastel rainbow network style</dd>
 
         <dt>
 
           <code><a href="style_retro80s.html">style_retro80s()</a></code>
 
         </dt>
-        <dd>Retro 80s-inspired network style</dd>
+        <dd>retro 80s-inspired network style</dd>
 
         <dt>
 
           <code><a href="style_dark2.html">style_dark2()</a></code>
 
         </dt>
-        <dd>ColorBrewer Dark2-based network style</dd>
+        <dd>colorbrewer dark2-based network style</dd>
+
+        <dt>
+
+          <code><a href="style_crimson_silver.html">style_crimson_silver()</a></code>
+
+        </dt>
+        <dd>crimson and silver network style</dd>
+
+        <dt>
+
+          <code><a href="style_green_gold.html">style_green_gold()</a></code>
+
+        </dt>
+        <dd>green and gold network style</dd>
+
+        <dt>
+
+          <code><a href="style_slate_silver.html">style_slate_silver()</a></code>
+
+        </dt>
+        <dd>slate and silver network style</dd>
+
+        <dt>
+
+          <code><a href="style_bronze_block.html">style_bronze_block()</a></code>
+
+        </dt>
+        <dd>bronze block network style</dd>
+
+        <dt>
+
+          <code><a href="style_lime_magenta.html">style_lime_magenta()</a></code>
+
+        </dt>
+        <dd>lime and magenta network style</dd>
+
+        <dt>
+
+          <code><a href="style_black_yellow.html">style_black_yellow()</a></code>
+
+        </dt>
+        <dd>black and yellow network style</dd>
+
+        <dt>
+
+          <code><a href="style_sunburst.html">style_sunburst()</a></code>
+
+        </dt>
+        <dd>sunburst network style</dd>
+
+        <dt>
+
+          <code><a href="style_racing_blue.html">style_racing_blue()</a></code>
+
+        </dt>
+        <dd>racing blue network style</dd>
 
         <dt>
 
           <code><a href="style_bipartite_network.html">style_bipartite_network()</a></code>
 
         </dt>
-        <dd>Preset style for bipartite networks</dd>
+        <dd>preset style for bipartite networks</dd>
 
         <dt>
 
           <code><a href="style_temporal_network.html">style_temporal_network()</a></code>
 
         </dt>
-        <dd>Preset style for temporal/longitudinal networks</dd>
-
-        <dt>
-
-          <code><a href="style_witcher_feline.html">style_witcher_feline()</a></code>
-
-        </dt>
-        <dd>Witcher 3 Feline School network style</dd>
-
-        <dt>
-
-          <code><a href="style_witcher_griffin.html">style_witcher_griffin()</a></code>
-
-        </dt>
-        <dd>Witcher 3 Griffin School network style</dd>
-
-        <dt>
-
-          <code><a href="style_witcher_wolven.html">style_witcher_wolven()</a></code>
-
-        </dt>
-        <dd>Witcher 3 Wolven School network style</dd>
-
-        <dt>
-
-          <code><a href="style_witcher_ursine.html">style_witcher_ursine()</a></code>
-
-        </dt>
-        <dd>Witcher 3 Ursine School network style</dd>
-
-        <dt>
-
-          <code><a href="style_witcher_manticore.html">style_witcher_manticore()</a></code>
-
-        </dt>
-        <dd>Witcher 3 Manticore School network style (bonus)</dd>
-
-        <dt>
-
-          <code><a href="style_witcher_viper.html">style_witcher_viper()</a></code>
-
-        </dt>
-        <dd>Witcher 3 Viper School network style (bonus)</dd>
-
-        <dt>
-
-          <code><a href="style_pokemon_pikachu.html">style_pokemon_pikachu()</a></code>
-
-        </dt>
-        <dd>Pokemon-style network style (Pikachu)</dd>
-
-        <dt>
-
-          <code><a href="style_secretariat.html">style_secretariat()</a></code>
-
-        </dt>
-        <dd>Secretariat-style network style</dd>
+        <dd>preset style for temporal/longitudinal networks</dd>
       </dl></div><div class="section level2">
       <h2 id="plot-components">Plot Components<a class="anchor" aria-label="anchor" href="#plot-components"></a></h2>
 
@@ -650,14 +658,14 @@
           <code><a href="remove_ego_edges.html">remove_ego_edges()</a></code>
 
         </dt>
-        <dd>Remove ego-alter edges from ego network</dd>
+        <dd>remove ego-alter edges from ego network</dd>
 
         <dt>
 
           <code><a href="assemble_netify_plot.html">assemble_netify_plot()</a></code>
 
         </dt>
-        <dd>Assemble netify plot from components</dd>
+        <dd>assemble netify plot from components</dd>
 
         <dt>
 
@@ -671,49 +679,49 @@
           <code><a href="netify_node.html">netify_node()</a></code>
 
         </dt>
-        <dd>Extract nodes layer from netify plot components</dd>
+        <dd>extract nodes layer from netify plot components</dd>
 
         <dt>
 
           <code><a href="netify_text.html">netify_text()</a></code>
 
         </dt>
-        <dd>Extract text layer from netify plot components</dd>
+        <dd>extract text layer from netify plot components</dd>
 
         <dt>
 
           <code><a href="netify_label.html">netify_label()</a></code>
 
         </dt>
-        <dd>Extract label layer from netify plot components</dd>
+        <dd>extract label layer from netify plot components</dd>
 
         <dt>
 
           <code><a href="netify_text_repel.html">netify_text_repel()</a></code>
 
         </dt>
-        <dd>Extract text_repel layer from netify plot components</dd>
+        <dd>extract text_repel layer from netify plot components</dd>
 
         <dt>
 
           <code><a href="netify_label_repel.html">netify_label_repel()</a></code>
 
         </dt>
-        <dd>Extract label_repel layer from netify plot components</dd>
+        <dd>extract label_repel layer from netify plot components</dd>
 
         <dt>
 
           <code><a href="netify_scale_labels.html">netify_scale_labels()</a></code>
 
         </dt>
-        <dd>Set scale labels for netify plots</dd>
+        <dd>set scale labels for netify plots</dd>
 
         <dt>
 
           <code><a href="reset_scales.html">reset_scales()</a></code>
 
         </dt>
-        <dd>Reset aesthetic scales in ggplot</dd>
+        <dd>reset aesthetic scales in ggplot</dd>
 
         <dt>
 
@@ -734,63 +742,63 @@
           <code><a href="print.netify_plot_components.html">print(<i>&lt;netify_plot_components&gt;</i>)</a></code>
 
         </dt>
-        <dd>Print netify plot components</dd>
+        <dd>print netify plot components</dd>
 
         <dt>
 
           <code><a href="ggplot_add.netify_edge.html">ggplot_add(<i>&lt;netify_edge&gt;</i>)</a></code>
 
         </dt>
-        <dd>Add netify_edge to ggplot</dd>
+        <dd>add netify_edge to ggplot</dd>
 
         <dt>
 
           <code><a href="ggplot_add.netify_node.html">ggplot_add(<i>&lt;netify_node&gt;</i>)</a></code>
 
         </dt>
-        <dd>Add netify_node to ggplot</dd>
+        <dd>add netify_node to ggplot</dd>
 
         <dt>
 
           <code><a href="ggplot_add.netify_text.html">ggplot_add(<i>&lt;netify_text&gt;</i>)</a></code>
 
         </dt>
-        <dd>Add netify_text to ggplot</dd>
+        <dd>add netify_text to ggplot</dd>
 
         <dt>
 
           <code><a href="ggplot_add.netify_label.html">ggplot_add(<i>&lt;netify_label&gt;</i>)</a></code>
 
         </dt>
-        <dd>Add netify_label to ggplot</dd>
+        <dd>add netify_label to ggplot</dd>
 
         <dt>
 
           <code><a href="ggplot_add.netify_text_repel.html">ggplot_add(<i>&lt;netify_text_repel&gt;</i>)</a></code>
 
         </dt>
-        <dd>Add netify_text_repel to ggplot</dd>
+        <dd>add netify_text_repel to ggplot</dd>
 
         <dt>
 
           <code><a href="ggplot_add.netify_label_repel.html">ggplot_add(<i>&lt;netify_label_repel&gt;</i>)</a></code>
 
         </dt>
-        <dd>Add netify_label_repel to ggplot</dd>
+        <dd>add netify_label_repel to ggplot</dd>
 
         <dt>
 
           <code><a href="ggplot_add.netify_scale_reset.html">ggplot_add(<i>&lt;netify_scale_reset&gt;</i>)</a></code>
 
         </dt>
-        <dd>Add scale resets to ggplot</dd>
+        <dd>add scale resets to ggplot</dd>
 
         <dt>
 
           <code><a href="ggplot_add.netify_labels.html">ggplot_add(<i>&lt;netify_labels&gt;</i>)</a></code>
 
         </dt>
-        <dd>Add netify scale labels to ggplot</dd>
+        <dd>add netify scale labels to ggplot</dd>
       </dl></div><div class="section level2">
       <h2 id="conversion">Conversion<a class="anchor" aria-label="anchor" href="#conversion"></a></h2>
 
@@ -862,14 +870,14 @@
           <code><a href="decompose_igraph.html">decompose_igraph()</a></code>
 
         </dt>
-        <dd>Decompose an igraph object into base R components</dd>
+        <dd>decompose an igraph object into base r components</dd>
 
         <dt>
 
           <code><a href="decompose_statnet.html">decompose_statnet()</a></code> <code><a href="decompose_statnet.html">decompose_network()</a></code>
 
         </dt>
-        <dd>Decompose a network object into base R components</dd>
+        <dd>decompose a network object into base r components</dd>
 
         <dt>
 
@@ -883,7 +891,7 @@
           <code><a href="as.matrix.netify.html">as.matrix(<i>&lt;netify&gt;</i>)</a></code>
 
         </dt>
-        <dd>Coerce a netify object to a plain matrix</dd>
+        <dd>coerce a netify object to a plain matrix</dd>
 
         <dt>
 
@@ -904,7 +912,7 @@
           <code><a href="as_tibble.netify.html">as_tibble.netify()</a></code>
 
         </dt>
-        <dd>Convert a netify object to a tibble (long edge frame)</dd>
+        <dd>convert a netify object to a tibble (long edge frame)</dd>
 
         <dt>
 
@@ -925,7 +933,7 @@
           <code><a href="glance.netify.html">glance.netify()</a></code>
 
         </dt>
-        <dd>One-row-per-network summary of a netify object (broom style)</dd>
+        <dd>one-row-per-network summary of a netify object (broom style)</dd>
       </dl></div><div class="section level2">
       <h2 id="inspection">Inspection<a class="anchor" aria-label="anchor" href="#inspection"></a></h2>
 
@@ -955,7 +963,7 @@
           <code><a href="get_raw.html">get_raw()</a></code>
 
         </dt>
-        <dd>Get raw network data without netify attributes</dd>
+        <dd>get raw network data without netify attributes</dd>
 
         <dt>
 
@@ -983,7 +991,7 @@
           <code><a href="is_netify.html">is_netify()</a></code>
 
         </dt>
-        <dd>Is this object a netify object?</dd>
+        <dd>is this object a netify object?</dd>
 
         <dt>
 
@@ -1027,14 +1035,14 @@
           <code><a href="myanmar.html">myanmar</a></code>
 
         </dt>
-        <dd>Event data slice from UCDP on Myanmar</dd>
+        <dd>event data slice from ucdp on myanmar</dd>
 
         <dt>
 
           <code><a href="classroom_edges.html">classroom_edges</a></code>
 
         </dt>
-        <dd>Synthetic high-school friendship edgelist</dd>
+        <dd>synthetic high-school friendship edgelist</dd>
 
         <dt>
 

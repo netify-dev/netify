@@ -7,9 +7,14 @@ quantitative political science researchers of two main types: (1)
 new(ish) to networks users and (2) researchers focused on studying
 networks and conflict.
 
-## New to networks
+After
+[`vignette("quickstart_inference", package = "netify")`](https://netify-dev.github.io/netify/articles/quickstart_inference.md),
+use this page for methods background, applied examples, and citations
+for the workflow vignettes.
 
-### Overview Books
+## new to networks
+
+### overview books
 
 - Larson, J. M. (2024). *Designing empirical social networks research*.
   Cambridge University Press.
@@ -23,7 +28,7 @@ networks and conflict.
 - Wasserman, S., & Faust, K. (1994). *Social network analysis: Methods
   and applications*.
 
-### Academic Articles
+### academic articles
 
 - Cranmer, S. J., & Desmarais, B. A. (2016). A critique of dyadic
   design. *International Studies Quarterly*, 60(2), 355-362.
@@ -39,7 +44,7 @@ networks and conflict.
   & Ward, M. D. (2022). Taking dyads seriously. *Political Science
   Research and Methods*, 10(4), 703-721.
 
-## Networks & Conflict
+## networks & conflict
 
 - Dorff, C., Gallop, M., & Minhas, S. (2020). Networks of violence:
   Predicting conflict in Nigeria. *The Journal of Politics*, 82(2),
@@ -52,13 +57,13 @@ networks and conflict.
 - Larson, J. M. (2021). Networks of conflict and cooperation. *Annual
   Review of Political Science*, 24, 89-107.
 
-## Model/Approach Specific
+## model-specific
 
 - Cranmer, S. J., & Desmarais, B. A. (2011). Inferential network
   analysis with exponential random graph models. *Political Analysis*,
   19(1), 66-86.
 
-- Csárdi G, Nepusz T, Traag V, Horvát S, Zanini F, Noom D, Müller K
+- Csardi G, Nepusz T, Traag V, Horvat S, Zanini F, Noom D, Muller K
   (2024). igraph: Network Analysis and Visualization in R.
   <doi:10.5281/zenodo.7682609>, R package version 2.0.3,
   <https://CRAN.R-project.org/package=igraph>.
@@ -73,4 +78,4 @@ networks and conflict.
 - Statnet Development Team (Pavel N. Krivitsky, Mark S. Handcock,
   David R. Hunter, Carter T. Butts, Chad Klumb, Steven M. Goodreau, &
   Martina Morris). (2003-2023). statnet: Software tools for the
-  Statistical Modeling of Network Data. <http://statnet.org>
+  Statistical Modeling of Network Data. <https://statnet.org/>

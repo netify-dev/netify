@@ -11,6 +11,8 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Foundations">
+<meta name="description" content="Build a netify object from dyadic political-science data.">
+<meta property="og:description" content="Build a netify object from dyadic political-science data.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -29,21 +31,22 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/quickstart_inference.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Quickstart to Inference</a></li>
+    <li><a class="dropdown-item" href="../articles/quickstart_inference.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -72,7 +75,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-05-29</h4>
+            <h4 data-toc-skip class="date">2026-06-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/foundations.Rmd" class="external-link"><code>vignettes/foundations.Rmd</code></a></small>
       <div class="d-none name"><code>foundations.Rmd</code></div>
@@ -81,40 +84,34 @@ Shahryar Minhas</h4>
     
     
 <div class="section level2">
-<h2 id="package-overview">Package Overview<a class="anchor" aria-label="anchor" href="#package-overview"></a>
+<h2 id="package-overview">package overview<a class="anchor" aria-label="anchor" href="#package-overview"></a>
 </h2>
-<p>You supply data and <code>netify</code> transforms it into
-easy-to-work-with network data. The goal of <code>netify</code> is to
-provide R functions that simplify and facilitate common tasks related to
-network creation, summary, visualization, and modeling. Although our
-package was built with social scientists (especially peace science
-scholars) in mind, anyone can use it!</p>
-<p>This vignette provides a high-level overview of our package from
-start to finish. It introduces the core components of the package with
-data examples and minimal writing.</p>
-<p><code>netify</code> goals:</p>
+<p>You supply dyadic data, and <code>netify</code> turns it into network
+objects that work with summary, plotting, and modeling tools. The
+package is built for social-science network data, especially peace
+science data, but the same workflow works for many dyadic data sets.</p>
+<p>This vignette walks through the main workflow: create a network,
+inspect it, plot it, add attributes, and pass it to other network
+packages.</p>
+<p>The main workflow has three parts:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Create</strong>: Netify your data! We make it easy for users
-to create networks from raw data in R as well as add additional
-features, such as nodal and dyadic variables, to the network
-object.</li>
+<strong>Create</strong>: Build network objects from dyadic data and
+attach nodal or dyadic variables.</li>
 <li>
-<strong>Explore</strong>: Explore characteristics of the network you
-created, like summary statistics at both the network and actor levels.
-Visualize your network.</li>
+<strong>Explore</strong>: Summarize networks at the graph and actor
+levels, then visualize the results.</li>
 <li>
-<strong>Advance</strong>: Advance your network analysis to the next
-stage by preparing it for use in other network packages and modeling
-approaches.</li>
+<strong>Model</strong>: Prepare the network for other R network
+packages.</li>
 </ol>
-<p><code>netify</code> provides a suite of primary functions to help
-achieve these goals:</p>
+<p>The table below lists common functions for each part of the
+workflow.</p>
 <table class="table">
 <thead><tr class="header">
-<th>Create💡</th>
-<th>Explore 🔎</th>
-<th>Advance ️🚀</th>
+<th>Create</th>
+<th>Explore</th>
+<th>Model</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -175,7 +172,7 @@ including:</p>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="step-1-create">Step 1: Create 💡<a class="anchor" aria-label="anchor" href="#step-1-create"></a>
+<h2 id="step-1-create">step 1: create<a class="anchor" aria-label="anchor" href="#step-1-create"></a>
 </h2>
 <p>Begin by loading packages and supplying the data. We will use the
 <code>peacesciencer</code> package to grab some familiar data.</p>
@@ -189,36 +186,37 @@ including:</p>
 <span><span class="co"># organize external data for peacesciencer</span></span>
 <span><span class="fu">peacesciencer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/download_extdata.html" class="external-link">download_extdata</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># create dyadic data set over time using peacesciencer</span></span>
+<span><span class="co"># build a dyadic panel with peacesciencer</span></span>
 <span><span class="va">cow_dyads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/create_dyadyears.html" class="external-link">create_dyadyears</a></span><span class="op">(</span></span>
 <span>    subset_years <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1995</span><span class="op">:</span><span class="fl">2014</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="co"># add mids</span></span>
+<span>    <span class="co"># add mid data</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/add_cow_mids.html" class="external-link">add_cow_mids</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="co"># add capital distance</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/add_capital_distance.html" class="external-link">add_capital_distance</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="co"># add democracy</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/add_democracy.html" class="external-link">add_democracy</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="co"># add gdp</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/add_sdp_gdp.html" class="external-link">add_sdp_gdp</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>Next, create a <code>netlet</code> object from the above COW data
-frame using our package’s core function <code>netify.</code> There are a
-number of useful parameters, but the most important ones to highlight
-are:</p>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/peacesciencer/man/add_sim_gdp_pop.html" class="external-link">add_sim_gdp_pop</a></span><span class="op">(</span>keep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pwtrgdp"</span>, <span class="st">"pwtpop"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Next, create a <code>netlet</code> object from the COW data frame
+with <code><a href="../reference/netify.html">netify()</a></code>. The main arguments are:</p>
 <ul>
 <li>
 <p><code>input</code> is, in this use case, a dyadic data.frame that
 should have at the following variables used to specify actors:</p>
 <ul>
 <li>
-<code>actor1</code>: indicates actor 1 variable in the data</li>
+<code>actor1</code>: names the first actor column</li>
 <li>
-<code>actor2</code>: indicates actor 2 variable in the data</li>
+<code>actor2</code>: names the second actor column</li>
 </ul>
 </li>
-<li><p><code>netify_type</code> is a type of netlet object
-(<code>cross-sec</code>, <code>longit_list</code>, or
-<code>longit_array</code>).</p></li>
+<li><p><code>time</code> names the period variable for longitudinal
+data.</p></li>
+<li><p><code>output_format</code> sets the storage shape when you need
+one explicitly (<code>"cross_sec"</code>, <code>"longit_array"</code>,
+or <code>"longit_list"</code>); otherwise <code><a href="../reference/netify.html">netify()</a></code> picks
+from the input structure.</p></li>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mid_long_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
@@ -233,33 +231,38 @@ should have at the following variables used to specify actors:</p>
 <span>    dyad_vars_symmetric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #BBBB00;">!</span> Converting `actor1` and/or `actor2` to character vector(s).</span></span></code></pre>
-<p><strong>Congratulations</strong> you have created a network object!
-🎉</p>
-<p>We can also add nodal and dyadic data after we’ve created the network
-via the <code><a href="../reference/add_node_vars.html">add_node_vars()</a></code> and <code><a href="../reference/add_dyad_vars.html">add_dyad_vars()</a></code>
-functions.</p>
-<p>Let’s assume that we had information about each actor in the network
-that we’d like to add as a nodal variable after we already made the
-network object. This could be from our original data set or elsewhere.
-For example, lets add a logged variable measuring gdp for each node in
-the network over time:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># create a vector of nodal data</span></span>
-<span><span class="va">node_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">cow_dyads</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ccode1"</span>, <span class="st">"year"</span>, <span class="st">"wbgdppc2011est2"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="va">node_data</span><span class="op">$</span><span class="va">wbgdppc2011est2_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">node_data</span><span class="op">$</span><span class="va">wbgdppc2011est2</span><span class="op">)</span></span>
+<pre><code><span><span class="co">## <span style="color: #00BBBB;">ℹ</span> `netify()` collapsed repeated actor-time rows before attaching nodal</span></span>
+<span><span class="co">##   variables.</span></span>
+<span><span class="co">## <span style="color: #00BBBB;">•</span> Numeric nodal variables were averaged; non-numeric variables use the most</span></span>
+<span><span class="co">##   common non-missing value within each key.</span></span>
+<span><span class="co">## <span style="color: #555555;">This message is displayed once per session.</span></span></span></code></pre>
+<p>You have created a network object.</p>
+<p>You can also add nodal and dyadic data after creating the network
+with <code><a href="../reference/add_node_vars.html">add_node_vars()</a></code> and <code><a href="../reference/add_dyad_vars.html">add_dyad_vars()</a></code>.</p>
+<p>For example, add logged GDP for each actor-year:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># build one actor-year row for each node</span></span>
+<span><span class="va">node_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
+<span>    <span class="va">cow_dyads</span> <span class="op">|&gt;</span></span>
+<span>        <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>actor <span class="op">=</span> <span class="va">ccode1</span>, <span class="va">year</span>, pwtrgdp <span class="op">=</span> <span class="va">pwtrgdp1</span><span class="op">)</span>,</span>
+<span>    <span class="va">cow_dyads</span> <span class="op">|&gt;</span></span>
+<span>        <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>actor <span class="op">=</span> <span class="va">ccode2</span>, <span class="va">year</span>, pwtrgdp <span class="op">=</span> <span class="va">pwtrgdp2</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">actor</span>, <span class="va">year</span>, .keep_all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>pwtrgdp_log <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">pwtrgdp</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># add nodal variable to netlet object</span></span>
+<span><span class="co"># attach the nodal variable</span></span>
 <span><span class="va">mid_long_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span>
 <span>    netlet <span class="op">=</span> <span class="va">mid_long_network</span>,</span>
 <span>    node_data <span class="op">=</span> <span class="va">node_data</span>,</span>
-<span>    actor <span class="op">=</span> <span class="st">"ccode1"</span>,</span>
+<span>    actor <span class="op">=</span> <span class="st">"actor"</span>,</span>
 <span>    time <span class="op">=</span> <span class="st">"year"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># create another dyadic var in cow</span></span>
+<span><span class="co"># build a dyadic distance variable</span></span>
 <span><span class="va">cow_dyads</span><span class="op">$</span><span class="va">log_capdist</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">cow_dyads</span><span class="op">$</span><span class="va">capdist</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># now lets add this to the netlet</span></span>
+<span><span class="co"># attach the dyadic variable</span></span>
 <span><span class="va">mid_long_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_dyad_vars.html">add_dyad_vars</a></span><span class="op">(</span></span>
 <span>    netlet <span class="op">=</span> <span class="va">mid_long_network</span>,</span>
 <span>    dyad_data <span class="op">=</span> <span class="va">cow_dyads</span>,</span>
@@ -271,7 +274,7 @@ the network over time:</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="step-2-explore-and-summarize">Step 2: Explore and Summarize 🔎<a class="anchor" aria-label="anchor" href="#step-2-explore-and-summarize"></a>
+<h2 id="step-2-explore-and-summarize">step 2: explore and summarize<a class="anchor" aria-label="anchor" href="#step-2-explore-and-summarize"></a>
 </h2>
 <p>We made a network, so let’s look at it. First, we might want to take
 a <code>peek</code> at the network object to see if the matrix looks the
@@ -279,7 +282,7 @@ way we’d expect it to look. This function lets you glance at a specific
 slice of the network if it is longitudinal or the entire network if it
 is cross-sectional. (To actually subset the netlet object and make a new
 object use netify’s <code>subset</code> function.)</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/peek.html">peek</a></span><span class="op">(</span><span class="va">mid_long_network</span>,</span>
 <span>    from <span class="op">=</span> <span class="fl">5</span>, to <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>    time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2009"</span>, <span class="st">"2010"</span><span class="op">)</span></span>
@@ -301,34 +304,32 @@ object use netify’s <code>subset</code> function.)</p>
 <span><span class="co">## 130   0   0   0   0  NA</span></span></code></pre>
 <p>Next, let’s examine a few basic summary statistics about the network
 using our<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> function.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># create data.frame that provides network-level summary stats</span></span>
-<span><span class="co"># for each year of the network</span></span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># build network-level summary statistics</span></span>
 <span><span class="va">mid_long_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span></code></pre></div>
 <p>We can also make a quick visualization of network statistics over
 time using the summary statistics data frame.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_graph_stats.html">plot_graph_stats</a></span><span class="op">(</span><span class="va">mid_long_summary</span><span class="op">)</span></span></code></pre></div>
 <p><img src="foundations_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="900"></p>
-<p>These graph statistics are useful for understanding changes overtime
-at the network level, however, we might also want to look at actor-level
-statistics overtime. Our built-in function, <code>summary_actor</code>
-will calculate in-degree, out-degree, average degree, and eigenvector
-centrality for each actor in each time period. The
-<code>across_actors</code> function allows users to toggle whether they
-want a summary of a given statistic across all actors (shown in a
-density plot) or for specific actors:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># every year &amp; every actor</span></span>
+<p>These graph statistics are useful for understanding changes over time
+at the network level. We might also want to look at actor-level
+statistics over time. The built-in <code><a href="../reference/summary_actor.html">summary_actor()</a></code> function
+calculates actor-level degree, strength, and centrality statistics for
+each actor in each time period. The <code><a href="../reference/plot_actor_stats.html">plot_actor_stats()</a></code>
+function can show distributions across actors or trajectories for
+selected actors:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># summarize every actor-year</span></span>
 <span><span class="va">summary_actor_mids</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">summary_actor_mids</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   actor time degree   prop_ties network_share closeness betweenness</span></span>
-<span><span class="co">## 1   100 1995      1 0.005347594    0.01470588         1           0</span></span>
-<span><span class="co">## 2   101 1995      1 0.005347594    0.01470588         1           0</span></span>
+<span><span class="co">## 1   100 1995      1 0.005376344    0.01470588         1           0</span></span>
+<span><span class="co">## 2   101 1995      1 0.005376344    0.01470588         1           0</span></span>
 <span><span class="co">## 3   110 1995      0 0.000000000    0.00000000       NaN           0</span></span>
 <span><span class="co">## 4   115 1995      0 0.000000000    0.00000000       NaN           0</span></span>
-<span><span class="co">## 5   130 1995      1 0.005347594    0.01470588         1           0</span></span>
-<span><span class="co">## 6   135 1995      1 0.005347594    0.01470588         1           0</span></span>
+<span><span class="co">## 5   130 1995      1 0.005376344    0.01470588         1           0</span></span>
+<span><span class="co">## 6   135 1995      1 0.005376344    0.01470588         1           0</span></span>
 <span><span class="co">##   eigen_vector</span></span>
 <span><span class="co">## 1            0</span></span>
 <span><span class="co">## 2            0</span></span>
@@ -338,17 +339,18 @@ density plot) or for specific actors:</p>
 <span><span class="co">## 6            0</span></span></code></pre>
 <p>We can look at the distribution of the statistic for all actors over
 time:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># density plot across all actors</span></span>
-<span><span class="co"># for each stat</span></span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># plot actor-level distributions</span></span>
 <span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span></span>
 <span>    <span class="va">summary_actor_mids</span>,</span>
-<span>    across_actor <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    across_actor <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Removed 2913 rows containing non-finite outside the scale range</span></span>
+<span><span class="co">## (`stat_density_ridges()`).</span></span></code></pre>
 <p><img src="foundations_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="900"></p>
 <p>Or we might like to select a specific statistic to focus on across
 actors over time:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># focus on closeness</span></span>
 <span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span></span>
 <span>    <span class="va">summary_actor_mids</span>,</span>
@@ -359,15 +361,12 @@ actors over time:</p>
 <pre><code><span><span class="co">## Warning: Removed 2913 rows containing non-finite outside the scale range</span></span>
 <span><span class="co">## (`stat_density_ridges()`).</span></span></code></pre>
 <p><img src="foundations_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="900"></p>
-<p>Say that we wanted to showcase actor-specific statistics over time.
-We can use the plot_actor_stats function for this as well, though it’s
-<strong>highly recommended</strong> to subset to a few actors for a more
-legible plot.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># top 5 GDP countries (USA, China, Japan, Germany, India)</span></span>
+<p>For actor-specific statistics over time, subset to a few actors so
+the plot stays legible.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># selected high-gdp countries</span></span>
 <span><span class="va">top_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span>, <span class="st">"710"</span>, <span class="st">"740"</span>, <span class="st">"255"</span>, <span class="st">"750"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">#</span></span>
 <span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span></span>
 <span>    <span class="va">summary_actor_mids</span>,</span>
 <span>    across_actor <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -379,7 +378,7 @@ legible plot.</p>
 <span><span class="co">## (`geom_point()`).</span></span></code></pre>
 <p><img src="foundations_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="900"></p>
 <p>We can also zoom into a specific time slice of the network:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">summary_df_static</span> <span class="op">&lt;-</span> <span class="va">summary_actor_mids</span><span class="op">[</span><span class="va">summary_actor_mids</span><span class="op">$</span><span class="va">time</span> <span class="op">==</span> <span class="fl">2011</span>, <span class="op">]</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot_actor_stats.html">plot_actor_stats</a></span><span class="op">(</span></span>
@@ -401,14 +400,14 @@ transparency increases for denser networks, and text labels appear for
 small networks (≤15 nodes). You can disable this with
 <code>auto_format = FALSE</code> for full manual control, or simply
 override any individual parameter.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># default plot with auto_format</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mid_long_network</span>,</span>
 <span>    static_actor_positions <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    remove_isolates <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="foundations_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="900"></p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># override specific defaults</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
@@ -416,22 +415,21 @@ override any individual parameter.</p>
 <span>    node_size <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="foundations_files/figure-html/unnamed-chunk-12-2.png" class="r-plt" alt="" width="900"></p>
-<p>We can also use <code>netify</code> functions to explore actor level
-summary statistics in the network graph.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># add actor variables from summary_actor_mids</span></span>
+<p>You can also map actor-level summary statistics onto the network
+plot.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># attach actor statistics</span></span>
 <span><span class="va">mid_long_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
 <span>    <span class="va">summary_actor_mids</span>,</span>
 <span>    actor <span class="op">=</span> <span class="st">"actor"</span>, time <span class="op">=</span> <span class="st">"time"</span>,</span>
 <span>    node_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"degree"</span>, <span class="st">"prop_ties"</span>, <span class="st">"eigen_vector"</span><span class="op">)</span>,</span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>We can quickly inspect the object with the <code>print</code>
-function.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># print netlet obj to make sure they got added to nodal features</span></span>
+<p>Print the object to inspect its metadata.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># inspect the netlet object</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #00BB00;">✔</span> Hello, you have created network data, yay!</span></span>
+<pre><code><span><span class="co">## <span style="color: #00BB00;">✔</span> Network data created.</span></span>
 <span><span class="co">## • Unipartite</span></span>
 <span><span class="co">## • Symmetric</span></span>
 <span><span class="co">## • Weights from `cowmidonset`</span></span>
@@ -440,57 +438,55 @@ function.</p>
 <span><span class="co">## Network Summary Statistics (averaged across time):</span></span>
 <span><span class="co">##              dens miss trans</span></span>
 <span><span class="co">## cowmidonset 0.002    0 0.056</span></span>
-<span><span class="co">## • Nodal Features: v2x_polyarchy1, v2x_polyarchy2, wbgdppc2011est2,</span></span>
-<span><span class="co">## wbgdppc2011est2_log, degree, prop_ties, eigen_vector</span></span>
+<span><span class="co">## • Nodal Features: v2x_polyarchy1, v2x_polyarchy2, pwtrgdp, pwtrgdp_log, degree,</span></span>
+<span><span class="co">## prop_ties, eigen_vector</span></span>
 <span><span class="co">## • Dyad Features: capdist, log_capdist</span></span></code></pre>
-<p>As well as look at the attributes of the data and specify showing the
-nodal data information.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># if you're curious as to where they live</span></span>
+<p>The nodal attributes are stored on the object.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># inspect nodal data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span></span>
 <span>        <span class="va">mid_long_network</span>,</span>
 <span>        <span class="st">"nodal_data"</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   actor time v2x_polyarchy1 v2x_polyarchy2 wbgdppc2011est2 wbgdppc2011est2_log</span></span>
-<span><span class="co">## 1   100 1995          0.563          0.868          10.740            2.373975</span></span>
-<span><span class="co">## 2   100 1996          0.554          0.867          10.768            2.376579</span></span>
-<span><span class="co">## 3   100 1997          0.554          0.866          10.798            2.379361</span></span>
-<span><span class="co">## 4   100 1998          0.544          0.867          10.833            2.382597</span></span>
-<span><span class="co">## 5   100 1999          0.539          0.870          10.860            2.385086</span></span>
-<span><span class="co">## 6   100 2000          0.548          0.868          10.888            2.387661</span></span>
-<span><span class="co">##   degree   prop_ties eigen_vector</span></span>
-<span><span class="co">## 1      1 0.005347594 0.000000e+00</span></span>
-<span><span class="co">## 2      0 0.000000000 0.000000e+00</span></span>
-<span><span class="co">## 3      1 0.005347594 0.000000e+00</span></span>
-<span><span class="co">## 4      0 0.000000000 5.137642e-20</span></span>
-<span><span class="co">## 5      0 0.000000000 0.000000e+00</span></span>
-<span><span class="co">## 6      1 0.005235602 4.953675e-03</span></span></code></pre>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># i.e.,</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span><span class="op">$</span><span class="va">nodal_data</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##   actor time v2x_polyarchy1 v2x_polyarchy2 wbgdppc2011est2 wbgdppc2011est2_log</span></span>
-<span><span class="co">## 1   100 1995          0.563          0.868          10.740            2.373975</span></span>
-<span><span class="co">## 2   100 1996          0.554          0.867          10.768            2.376579</span></span>
-<span><span class="co">## 3   100 1997          0.554          0.866          10.798            2.379361</span></span>
-<span><span class="co">## 4   100 1998          0.544          0.867          10.833            2.382597</span></span>
-<span><span class="co">## 5   100 1999          0.539          0.870          10.860            2.385086</span></span>
-<span><span class="co">## 6   100 2000          0.548          0.868          10.888            2.387661</span></span>
-<span><span class="co">##   degree   prop_ties eigen_vector</span></span>
-<span><span class="co">## 1      1 0.005347594 0.000000e+00</span></span>
-<span><span class="co">## 2      0 0.000000000 0.000000e+00</span></span>
-<span><span class="co">## 3      1 0.005347594 0.000000e+00</span></span>
-<span><span class="co">## 4      0 0.000000000 5.137642e-20</span></span>
-<span><span class="co">## 5      0 0.000000000 0.000000e+00</span></span>
-<span><span class="co">## 6      1 0.005235602 4.953675e-03</span></span></code></pre>
+<pre><code><span><span class="co">##   actor time v2x_polyarchy1 v2x_polyarchy2  pwtrgdp pwtrgdp_log degree</span></span>
+<span><span class="co">## 1     2 1995          0.868      0.4767047 13375583    16.40894      1</span></span>
+<span><span class="co">## 2     2 1996          0.867      0.4741600 14136908    16.46430      3</span></span>
+<span><span class="co">## 3     2 1997          0.866      0.4898562 14480122    16.48829      4</span></span>
+<span><span class="co">## 4     2 1998          0.867      0.4879351 15268303    16.54129      4</span></span>
+<span><span class="co">## 5     2 1999          0.870      0.4921494 16085312    16.59342      3</span></span>
+<span><span class="co">## 6     2 2000          0.868      0.4940449 16191328    16.59999      4</span></span>
+<span><span class="co">##     prop_ties eigen_vector</span></span>
+<span><span class="co">## 1 0.005376344    0.4334163</span></span>
+<span><span class="co">## 2 0.016129032    0.5097062</span></span>
+<span><span class="co">## 3 0.021505376    1.0000000</span></span>
+<span><span class="co">## 4 0.021505376    0.2690264</span></span>
+<span><span class="co">## 5 0.015873016    0.2492445</span></span>
+<span><span class="co">## 6 0.021052632    0.2037526</span></span></code></pre>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span><span class="op">$</span><span class="va">nodal_data</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   actor time v2x_polyarchy1 v2x_polyarchy2  pwtrgdp pwtrgdp_log degree</span></span>
+<span><span class="co">## 1     2 1995          0.868      0.4767047 13375583    16.40894      1</span></span>
+<span><span class="co">## 2     2 1996          0.867      0.4741600 14136908    16.46430      3</span></span>
+<span><span class="co">## 3     2 1997          0.866      0.4898562 14480122    16.48829      4</span></span>
+<span><span class="co">## 4     2 1998          0.867      0.4879351 15268303    16.54129      4</span></span>
+<span><span class="co">## 5     2 1999          0.870      0.4921494 16085312    16.59342      3</span></span>
+<span><span class="co">## 6     2 2000          0.868      0.4940449 16191328    16.59999      4</span></span>
+<span><span class="co">##     prop_ties eigen_vector</span></span>
+<span><span class="co">## 1 0.005376344    0.4334163</span></span>
+<span><span class="co">## 2 0.016129032    0.5097062</span></span>
+<span><span class="co">## 3 0.021505376    1.0000000</span></span>
+<span><span class="co">## 4 0.021505376    0.2690264</span></span>
+<span><span class="co">## 5 0.015873016    0.2492445</span></span>
+<span><span class="co">## 6 0.021052632    0.2037526</span></span></code></pre>
 <p>And now return to our network graph by highlighting specific nodal
 attributes. To map visual properties to data, we use the
 <code>node_*_by</code> naming convention (e.g.,
 <code>node_size_by</code>, <code>node_color_by</code>). The legacy
 <code>point_*_var</code> names (e.g., <code>point_size_var</code>) also
 work identically if you prefer that style.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># vary node size by degree</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
@@ -498,7 +494,7 @@ work identically if you prefer that style.</p>
 <span>    node_size_by <span class="op">=</span> <span class="st">"degree"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="foundations_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" alt="" width="900"></p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># vary node color by polyarchy</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
@@ -513,7 +509,7 @@ work identically if you prefer that style.</p>
 <span><span class="co">## Adding another scale for <span style="color: #00BB00;">colour</span>, which will replace the existing scale.</span></span></code></pre>
 <p><img src="foundations_files/figure-html/unnamed-chunk-16-2.png" class="r-plt" alt="" width="900"></p>
 <p>We might also prefer to add labels, but only a select few:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vincentarelbundock.github.io/countrycode/" class="external-link">countrycode</a></span><span class="op">)</span></span>
 <span><span class="va">cowns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -537,29 +533,22 @@ work identically if you prefer that style.</p>
 <span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_color_gradient2</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="foundations_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="900"></p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># or we can go with labels only</span></span>
-<span><span class="co"># and remove points</span></span>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># draw labels without points</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>
 <span>    edge_color <span class="op">=</span> <span class="st">"grey"</span>,</span>
 <span>    add_points <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>    add_label <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    label_size_by <span class="op">=</span> <span class="st">"degree"</span>,</span>
+<span>    label_size_var <span class="op">=</span> <span class="st">"degree"</span>,</span>
 <span>    label_color <span class="op">=</span> <span class="st">"white"</span>,</span>
-<span>    label_fill_by <span class="op">=</span> <span class="st">"v2x_polyarchy1"</span>,</span>
+<span>    label_fill_var <span class="op">=</span> <span class="st">"v2x_polyarchy1"</span>,</span>
 <span>    label_fill_label <span class="op">=</span> <span class="st">"Polyarchy"</span>,</span>
 <span>    label_size_label <span class="op">=</span> <span class="st">"Degree"</span></span>
 <span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>size <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: <span style="color: #BBBB00;">!</span> Unknown parameter 'label_size_by' in plot.netify().</span></span>
-<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Did you mean 'label_size'?</span></span>
-<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> The parameter 'label_size_by' is being ignored.</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: <span style="color: #BBBB00;">!</span> Unknown parameter 'label_fill_by' in plot.netify().</span></span>
-<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Did you mean 'label_fill'?</span></span>
-<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> The parameter 'label_fill_by' is being ignored.</span></span></code></pre>
 <p><img src="foundations_files/figure-html/unnamed-chunk-17-2.png" class="r-plt" alt="" width="900"></p>
 <div class="section level3">
-<h3 id="extracting-data-back-to-a-data-frame">Extracting data back to a data frame<a class="anchor" aria-label="anchor" href="#extracting-data-back-to-a-data-frame"></a>
+<h3 id="extracting-data-back-to-a-data-frame">extracting data back to a data frame<a class="anchor" aria-label="anchor" href="#extracting-data-back-to-a-data-frame"></a>
 </h3>
 <p>If you need to convert a netify object back into a dyadic data frame
 — for example, to run regressions or export to other software — use
@@ -580,16 +569,13 @@ edges for a more compact result.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="step-3-advance">Step 3: Advance 🚀<a class="anchor" aria-label="anchor" href="#step-3-advance"></a>
+<h2 id="step-3-model">step 3: model<a class="anchor" aria-label="anchor" href="#step-3-model"></a>
 </h2>
-<p>Once we have created and explored our network object, we might want
-to continue analyzing the data using different modeling approaches.
-<code>netify</code> makes this simple even though those models often
-aren’t! And for the sake of convergence lets go with cross-sectional
-networks.</p>
-<p>First, prep the data:</p>
+<p>After creating and exploring the network, you can pass it to other
+modeling packages. The examples below use a cross-sectional network.</p>
+<p>First, prepare the data:</p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># prep data</span></span>
+<code class="sourceCode R"><span><span class="co"># prepare cross-sectional data</span></span>
 <span><span class="va">cow_cross</span> <span class="op">&lt;-</span> <span class="va">cow_dyads</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ccode1</span>, <span class="va">ccode2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span></span>
@@ -597,20 +583,20 @@ networks.</p>
 <span>        capdist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">capdist</span><span class="op">)</span>,</span>
 <span>        polity21 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">polity21</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>        polity22 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">polity22</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span>        wbgdp2011est1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">wbgdp2011est1</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span>        wbgdp2011est2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">wbgdp2011est2</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span>        wbpopest1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">wbpopest1</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
-<span>        wbpopest2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">wbpopest2</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>        pwtrgdp1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">pwtrgdp1</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>        pwtrgdp2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">pwtrgdp2</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>        pwtpop1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">pwtpop1</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>        pwtpop2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">pwtpop2</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>        capdist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">capdist</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
 <span></span>
-<span><span class="co"># subset set to actors with 10mil pop</span></span>
+<span><span class="co"># subset to actors with average population above 10 million</span></span>
 <span><span class="va">actor_to_keep</span> <span class="op">&lt;-</span> <span class="va">cow_cross</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ccode1</span>, <span class="va">wbpopest1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">wbpopest1</span> <span class="op">&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">10000000</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ccode1</span>, <span class="va">pwtpop1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">pwtpop1</span> <span class="op">&gt;</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">ccode1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># filter cow_cross by actor_to_keep</span></span>
@@ -618,7 +604,7 @@ networks.</p>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">ccode1</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">actor_to_keep</span><span class="op">$</span><span class="va">ccode1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">ccode2</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">actor_to_keep</span><span class="op">$</span><span class="va">ccode1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># create netlet</span></span>
+<span><span class="co"># build cross-sectional netlet</span></span>
 <span><span class="va">mid_cross_network</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">cow_cross</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"ccode1"</span>, actor2 <span class="op">=</span> <span class="st">"ccode2"</span>,</span>
@@ -626,50 +612,46 @@ networks.</p>
 <span>    sum_dyads <span class="op">=</span> <span class="cn">FALSE</span>, symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    diag_to_NA <span class="op">=</span> <span class="cn">TRUE</span>, missing_to_zero <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>    nodal_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>        <span class="st">"polity21"</span>, <span class="st">"polity22"</span>, <span class="st">"wbgdp2011est1"</span>,</span>
-<span>        <span class="st">"wbgdp2011est2"</span>, <span class="st">"wbpopest1"</span>, <span class="st">"wbpopest2"</span></span>
+<span>        <span class="st">"polity21"</span>, <span class="st">"polity22"</span>, <span class="st">"pwtrgdp1"</span>,</span>
+<span>        <span class="st">"pwtrgdp2"</span>, <span class="st">"pwtpop1"</span>, <span class="st">"pwtpop2"</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    dyad_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"capdist"</span><span class="op">)</span>,</span>
 <span>    dyad_vars_symmetric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Next, let’s take a look at passing our netify object to the
-<code>amen</code> function. <em>Note: this chunk runs only when the
-<code>amen</code> package is installed
-(<code>install.packages("amen")</code>). If <code>amen</code> is not
-available, the chunk is skipped but the rest of the vignette is
-unaffected.</em></p>
+<p>Next, pass the netify object to <code>amen</code>. This section
+requires the <code>amen</code> package
+(<code>install.packages("amen")</code>).</p>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pdhoff/amen" class="external-link">amen</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># prep for amen</span></span>
+<span><span class="co"># prepare amen inputs</span></span>
 <span><span class="va">mid_cross_amen</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_amen.html">netify_to_amen</a></span><span class="op">(</span><span class="va">mid_cross_network</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># we got all the elements we need for amen</span></span>
+<span><span class="co"># inspect amen inputs</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">mid_cross_amen</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## List of 4</span></span>
-<span><span class="co">##  $ Y    : num [1:81, 1:81] NA 1 1 0 0 0 0 0 0 0 ...</span></span>
+<span><span class="co">##  $ Y    : num [1:86, 1:86] NA 1 1 0 0 0 0 0 0 0 ...</span></span>
 <span><span class="co">##   ..- attr(*, "dimnames")=List of 2</span></span>
-<span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
-<span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
-<span><span class="co">##  $ Xdyad: num [1:81, 1:81, 1] 0 6.93 6.6 7.54 7.96 ...</span></span>
+<span><span class="co">##   .. ..$ : chr [1:86] "100" "101" "130" "135" ...</span></span>
+<span><span class="co">##   .. ..$ : chr [1:86] "100" "101" "130" "135" ...</span></span>
+<span><span class="co">##  $ Xdyad: num [1:86, 1:86, 1] 0 6.93 6.6 7.54 7.96 ...</span></span>
 <span><span class="co">##   ..- attr(*, "dimnames")=List of 3</span></span>
-<span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
-<span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
+<span><span class="co">##   .. ..$ : chr [1:86] "100" "101" "130" "135" ...</span></span>
+<span><span class="co">##   .. ..$ : chr [1:86] "100" "101" "130" "135" ...</span></span>
 <span><span class="co">##   .. ..$ : chr "capdist"</span></span>
-<span><span class="co">##  $ Xrow : num [1:81, 1:6] 7 4.35 6.4 6.25 8 9.2 7.8 10 10 10 ...</span></span>
+<span><span class="co">##  $ Xrow : num [1:86, 1:6] 7 4.3 6.38 6.28 8 ...</span></span>
 <span><span class="co">##   ..- attr(*, "dimnames")=List of 2</span></span>
-<span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
-<span><span class="co">##   .. ..$ : chr [1:6] "polity21" "polity22" "wbgdp2011est1" "wbgdp2011est2" ...</span></span>
-<span><span class="co">##  $ Xcol : num [1:81, 1:6] 7 4.35 6.4 6.25 8 9.2 7.8 10 10 10 ...</span></span>
+<span><span class="co">##   .. ..$ : chr [1:86] "100" "101" "130" "135" ...</span></span>
+<span><span class="co">##   .. ..$ : chr [1:6] "polity21" "polity22" "pwtrgdp1" "pwtrgdp2" ...</span></span>
+<span><span class="co">##  $ Xcol : num [1:86, 1:6] 7 4.3 6.38 6.28 8 ...</span></span>
 <span><span class="co">##   ..- attr(*, "dimnames")=List of 2</span></span>
-<span><span class="co">##   .. ..$ : chr [1:81] "100" "101" "130" "135" ...</span></span>
-<span><span class="co">##   .. ..$ : chr [1:6] "polity21" "polity22" "wbgdp2011est1" "wbgdp2011est2" ...</span></span></code></pre>
+<span><span class="co">##   .. ..$ : chr [1:86] "100" "101" "130" "135" ...</span></span>
+<span><span class="co">##   .. ..$ : chr [1:6] "polity21" "polity22" "pwtrgdp1" "pwtrgdp2" ...</span></span></code></pre>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># plug and run</span></span>
+<code class="sourceCode R"><span><span class="co"># fit amen model</span></span>
 <span><span class="va">mid_amen_mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/amen/man/ame.html" class="external-link">ame</a></span><span class="op">(</span></span>
 <span>    Y <span class="op">=</span> <span class="va">mid_cross_amen</span><span class="op">$</span><span class="va">Y</span>,</span>
 <span>    Xdyad <span class="op">=</span> <span class="va">mid_cross_amen</span><span class="op">$</span><span class="va">Xdyad</span>,</span>
-<span>    Xrow <span class="op">=</span> <span class="va">mid_cross_amen</span><span class="op">$</span><span class="va">Xrow</span>,</span>
 <span>    family <span class="op">=</span> <span class="st">"bin"</span>,</span>
 <span>    R <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>    symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -680,13 +662,9 @@ unaffected.</em></p>
 <span>    plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>    print <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## WARNING: replacing NAs in design matrix with zeros</span></span></code></pre>
-<p>We can apply the same process to ERGMs. <em>Note: this chunk runs
-only when the <code>ergm</code> package is installed
-(<code>install.packages("ergm")</code>). If <code>ergm</code> is not
-available, the chunk is skipped but the rest of the vignette is
-unaffected.</em></p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<p>We can apply the same process to ERGMs. This section requires the
+<code>ergm</code> package (<code>install.packages("ergm")</code>).</p>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://statnet.org" class="external-link">ergm</a></span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Loading required package: network</span></span></code></pre>
 <pre><code><span><span class="co">## </span></span>
@@ -694,6 +672,10 @@ unaffected.</em></p>
 <span><span class="co">## * 'news(package="network")' for changes since last version</span></span>
 <span><span class="co">## * 'citation("network")' for citation information</span></span>
 <span><span class="co">## * 'https://statnet.org' for help, support, and other information</span></span></code></pre>
+<pre><code><span><span class="co">## Registered S3 methods overwritten by 'ergm':</span></span>
+<span><span class="co">##   method               from</span></span>
+<span><span class="co">##   simulate.formula     lme4</span></span>
+<span><span class="co">##   simulate.formula_lhs lme4</span></span></code></pre>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## 'ergm' 4.12.0 (2026-02-17), part of the Statnet Project</span></span>
 <span><span class="co">## * 'news(package="ergm")' for changes since last version</span></span>
@@ -716,32 +698,28 @@ unaffected.</em></p>
 <span><span class="co">##   <span style="color: #0000BB;">"_e"</span> per-edge attribute is for descriptive use such as edge styling.</span></span>
 <span><span class="co">## <span style="color: #555555;">This message is displayed once per session.</span></span></span></code></pre>
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># attributes should all be loaded into the</span></span>
-<span><span class="co"># appropriate slot</span></span>
-<span><span class="co"># notice edge attributes get a _e suffix added</span></span>
+<code class="sourceCode R"><span><span class="co"># inspect statnet attributes</span></span>
 <span><span class="va">mid_cross_ergm</span></span></code></pre></div>
 <pre><code><span><span class="co">##  Network attributes:</span></span>
-<span><span class="co">##   vertices = 81 </span></span>
+<span><span class="co">##   vertices = 86 </span></span>
 <span><span class="co">##   directed = FALSE </span></span>
 <span><span class="co">##   hyper = FALSE </span></span>
 <span><span class="co">##   loops = FALSE </span></span>
 <span><span class="co">##   multiple = FALSE </span></span>
 <span><span class="co">##   bipartite = FALSE </span></span>
-<span><span class="co">##   cowmidonset: 81x81 matrix</span></span>
-<span><span class="co">##   capdist: 81x81 matrix</span></span>
-<span><span class="co">##   total edges= 160 </span></span>
+<span><span class="co">##   cowmidonset: 86x86 matrix</span></span>
+<span><span class="co">##   capdist: 86x86 matrix</span></span>
+<span><span class="co">##   total edges= 149 </span></span>
 <span><span class="co">##     missing edges= 0 </span></span>
-<span><span class="co">##     non-missing edges= 160 </span></span>
+<span><span class="co">##     non-missing edges= 149 </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">##  Vertex attribute names: </span></span>
-<span><span class="co">##     polity21 polity22 vertex.names wbgdp2011est1 wbgdp2011est2 wbpopest1 wbpopest2 </span></span>
+<span><span class="co">##     polity21 polity22 pwtpop1 pwtpop2 pwtrgdp1 pwtrgdp2 vertex.names </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">##  Edge attribute names: </span></span>
 <span><span class="co">##     capdist_e cowmidonset</span></span></code></pre>
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># set NA values to 0 for the three nodecov variables</span></span>
-<span><span class="co"># this is only for demonstration purposes in the vignette/example</span></span>
-<span><span class="co"># in any real analysis, carefully consider how to handle missing data</span></span>
+<code class="sourceCode R"><span><span class="co"># replace missing nodecov values for the example</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">set.vertex.attribute</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_cross_ergm</span>, <span class="st">"polity21"</span>, </span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span></span>
@@ -749,24 +727,24 @@ unaffected.</em></p>
 <span>        <span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"polity21"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">set.vertex.attribute</a></span><span class="op">(</span></span>
-<span>    <span class="va">mid_cross_ergm</span>, <span class="st">"wbgdp2011est2"</span>, </span>
+<span>    <span class="va">mid_cross_ergm</span>, <span class="st">"pwtrgdp2"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span></span>
-<span>        <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"wbgdp2011est2"</span><span class="op">)</span><span class="op">)</span>, </span>
-<span>        <span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"wbgdp2011est2"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"pwtrgdp2"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>        <span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"pwtrgdp2"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">set.vertex.attribute</a></span><span class="op">(</span></span>
-<span>    <span class="va">mid_cross_ergm</span>, <span class="st">"wbpopest2"</span>, </span>
+<span>    <span class="va">mid_cross_ergm</span>, <span class="st">"pwtpop2"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span></span>
-<span>        <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"wbpopest2"</span><span class="op">)</span><span class="op">)</span>, </span>
-<span>        <span class="fl">0</span>,  <span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"wbpopest2"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"pwtpop2"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>        <span class="fl">0</span>,  <span class="fu"><a href="https://rdrr.io/pkg/network/man/attribute.methods.html" class="external-link">get.vertex.attribute</a></span><span class="op">(</span><span class="va">mid_cross_ergm</span>, <span class="st">"pwtpop2"</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
-<span><span class="co"># plug and run</span></span>
+<span><span class="co"># fit ergm model</span></span>
 <span><span class="va">ergm_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm</a></span><span class="op">(</span></span>
 <span>    formula <span class="op">=</span> <span class="va">mid_cross_ergm</span> <span class="op">~</span></span>
 <span>        <span class="va">edges</span> <span class="op">+</span></span>
 <span>        <span class="fu">nodecov</span><span class="op">(</span><span class="st">"polity21"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>        <span class="fu">nodecov</span><span class="op">(</span><span class="st">"wbgdp2011est2"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>        <span class="fu">nodecov</span><span class="op">(</span><span class="st">"wbpopest2"</span><span class="op">)</span></span>
+<span>        <span class="fu">nodecov</span><span class="op">(</span><span class="st">"pwtrgdp2"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>        <span class="fu">nodecov</span><span class="op">(</span><span class="st">"pwtpop2"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Starting maximum pseudolikelihood estimation (MPLE):</span></span>
 <span><span class="co">## Obtaining the responsible dyads.</span></span>
@@ -776,7 +754,7 @@ unaffected.</em></p>
 <span><span class="co">## Evaluating log-likelihood at the estimate.</span></span></code></pre>
 </div>
 <div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 id="references">references<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <ul>
 <li><p>Csárdi G, Nepusz T, Traag V, Horvát S, Zanini F, Noom D, Müller K
@@ -786,7 +764,7 @@ Organized violence 1989-2022 and the return of conflicts between
 states?. Journal of Peace Research 60(4).</p></li>
 <li><p>Handcock M, Hunter D, Butts C, Goodreau S, Krivitsky P, Morris M
 (2018). ergm: Fit, Simulate and Diagnose Exponential-Family Models for
-Networks. The Statnet Project (<a href="http://www.statnet.org" class="external-link uri">http://www.statnet.org</a>). R package version 3.9.4, <a href="https://CRAN.R-project.org/package=ergm" class="external-link uri">https://CRAN.R-project.org/package=ergm</a>.</p></li>
+Networks. The Statnet Project (<a href="https://statnet.org/" class="external-link uri">https://statnet.org/</a>). R package version 3.9.4, <a href="https://CRAN.R-project.org/package=ergm" class="external-link uri">https://CRAN.R-project.org/package=ergm</a>.</p></li>
 <li><p>Hoff, Peter D. “Dyadic data analysis with amen.” arXiv preprint
 arXiv:1506.08237 (2015).</p></li>
 <li><p>Högbladh Stina, 2023, “UCDP GED Codebook version 23.1”,
@@ -797,7 +775,7 @@ Peace Science Research.” Conflict Management and Peace Science, 39(6),
 <li><p>Statnet Development Team (Pavel N. Krivitsky, Mark S. Handcock,
 David R. Hunter, Carter T. Butts, Chad Klumb, Steven M. Goodreau, and
 Martina Morris) (2003-2023). statnet: Software tools for the Statistical
-Modeling of Network Data. URL <a href="http://statnet.org" class="external-link uri">http://statnet.org</a></p></li>
+Modeling of Network Data. URL <a href="https://statnet.org/" class="external-link uri">https://statnet.org/</a></p></li>
 <li><p>Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP
 Georeferenced Event Dataset. Journal of Peace Research 50(4).</p></li>
 </ul>

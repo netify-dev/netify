@@ -1,6 +1,6 @@
 # Print method for netify objects
 
-Displays a formatted summary of a netify object, including network type,
+displays a formatted summary of a netify object, including network type,
 dimensions, summary statistics, and available attributes.
 
 ## Usage
@@ -14,38 +14,38 @@ print(x, ...)
 
 - x:
 
-  A netify object
+  a netify object
 
 - ...:
 
-  Additional parameters (not used)
+  additional parameters (not used)
 
 ## Value
 
-Invisibly returns the input netify object. Called for its side effect of
+invisibly returns the input netify object. called for its side effect of
 printing network information to the console.
 
 ## Details
 
-The print method displays:
+the print method displays:
 
-- Network type (unipartite/bipartite, symmetric/asymmetric)
+- network type (unipartite/bipartite, symmetric/asymmetric)
 
-- Edge weight specification
+- edge weight specification
 
-- Temporal structure (cross-sectional or number of time periods)
+- temporal structure (cross-sectional or number of time periods)
 
-- Actor counts (total unique actors, or separate row/column counts for
+- actor counts (total unique actors, or separate row/column counts for
   bipartite)
 
-- Summary statistics (density, reciprocity, transitivity, etc.)
+- summary statistics (density, reciprocity, transitivity, etc.)
 
-- Available nodal and dyadic attributes
+- available nodal and dyadic attributes
 
-For longitudinal networks, summary statistics are averaged across time
-periods. For multilayer networks, statistics are shown separately for
+for longitudinal networks, summary statistics are averaged across time
+periods. for multilayer networks, statistics are shown separately for
 each layer.
 
 ## Author
 
-Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+ha eun choi, cassy dorff, colin henry, shahryar minhas

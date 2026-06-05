@@ -1,9 +1,9 @@
 # Convert netify objects to statnet network format
 
-Transforms netify network objects into statnet's network objects (also
+transforms netify network objects into statnet's network objects (also
 available as `netify_to_network`, `to_statnet`, and `to_network`),
 providing access to the extensive statistical modeling capabilities of
-the statnet suite, including ERGMs (Exponential Random Graph Models),
+the statnet suite, including ergms (exponential random graph models),
 descriptive statistics, and network visualization tools.
 
 ## Usage
@@ -22,120 +22,120 @@ to_network(netlet, add_nodal_attribs = TRUE, add_dyad_attribs = TRUE)
 
 - netlet:
 
-  A netify object containing network data. Cross-sectional,
+  a netify object containing network data. cross-sectional,
   longitudinal, and multilayer netlets are all supported; multilayer
   inputs are dispatched layer-by-layer and the layer results are
   returned in a named list keyed by layer.
 
 - add_nodal_attribs:
 
-  Logical. If TRUE (default), includes nodal attributes from the netify
-  object as vertex attributes in the network object. Set to FALSE to
+  logical. if TRUE (default), includes nodal attributes from the netify
+  object as vertex attributes in the network object. set to FALSE to
   create a network with structure only.
 
 - add_dyad_attribs:
 
-  Logical. If TRUE (default), includes dyadic attributes from the netify
-  object as edge attributes in the network object. Each dyad variable is
+  logical. if TRUE (default), includes dyadic attributes from the netify
+  object as edge attributes in the network object. each dyad variable is
   attached in two places on the resulting network: as a network-level
   attribute under its original name (the full \\n\times n\\ matrix) and
-  as a per-edge attribute under `<var>_e`. The trailing `_e`
-  disambiguates the per-edge edgelist from the network-level matrix. For
+  as a per-edge attribute under `<var>_e`. the trailing `_e`
+  disambiguates the per-edge edgelist from the network-level matrix. for
   `ergm::edgecov()` pass the *original* (matrix) name, not the `_e`
-  alias, since `edgecov()` reads a network-level matrix attribute. The
+  alias, since `edgecov()` reads a network-level matrix attribute. the
   `_e` per-edge attribute is exposed for descriptive use (e.g. coloring
   edges in
   [`network::plot.network`](https://rdrr.io/pkg/network/man/plot.network.html)).
 
 ## Value
 
-A network object or list of network objects:
+a network object or list of network objects:
 
-- Cross-sectional networks:
+- cross-sectional networks:
 
-  Returns a single network object
+  returns a single network object
 
-- Longitudinal networks:
+- longitudinal networks:
 
-  Returns a named list of network objects with class
-  `c("network.list", "list")`, names corresponding to time periods. The
-  `network.list` class is the format that tergm CMLE
-  (`tergm(nl ~ Form(.) + Persist(.), estimate = "CMLE", times = seq_along(nl))`)
+  returns a named list of network objects with class
+  `c("network.list", "list")`, names corresponding to time periods. the
+  `network.list` class is the format that tergm cmle
+  (`tergm(nl ~ form(.) + persist(.), estimate = "cmle", times = seq_along(nl))`)
   and `stergm` expect directly, so the output is plug-and-play for
-  longitudinal ERGMs.
+  longitudinal ergms.
 
-- Multilayer networks:
+- multilayer networks:
 
-  Returns a named list of (per-time) network objects keyed by layer name
+  returns a named list of (per-time) network objects keyed by layer name
 
-The resulting network object(s) will have:
+the resulting network object(s) will have:
 
-- Vertices named according to actors in the netify object
+- vertices named according to actors in the netify object
 
-- Edge weights from the netify weight variable stored as "weight"
+- edge weights from the netify weight variable stored as "weight"
   attribute
 
-- Vertex attributes for each nodal variable (if add_nodal_attribs =
+- vertex attributes for each nodal variable (if add_nodal_attribs =
   TRUE)
 
-- Edge attributes for each dyadic variable (if add_dyad_attribs = TRUE);
+- edge attributes for each dyadic variable (if add_dyad_attribs = TRUE);
   per-edge attributes carry the `_e` suffix, network-level attributes
   keep the original name
 
-- Proper directedness based on the symmetric parameter of the netify
+- proper directedness based on the symmetric parameter of the netify
   object
 
-- A `netify_na_cols` attribute (character vector) listing nodal columns
-  that carry `NA`s; pass this directly to
+- a `netify_na_cols` attribute (character vector) listing nodal columns
+  that carry `na`s; pass this directly to
   [`drop_na_actors()`](https://netify-dev.github.io/netify/reference/drop_na_actors.md)
   to drop the offending actors before fitting ergm formulas that
   reference those columns
 
 ## Details
 
-The conversion process handles different netify structures:
+the conversion process handles different netify structures:
 
-- **Cross-sectional**: Direct conversion to a single network object
+- **cross-sectional**: direct conversion to a single network object
 
-- **Longitudinal arrays**: Internally converted to list format, then
+- **longitudinal arrays**: internally converted to list format, then
   each time slice becomes a separate network object
 
-- **Longitudinal lists**: Each time period converted to separate network
+- **longitudinal lists**: each time period converted to separate network
   object
 
-The statnet network format stores networks as an edgelist with
-attributes, making it memory-efficient for sparse networks. All nodal
+the statnet network format stores networks as an edgelist with
+attributes, making it memory-efficient for sparse networks. all nodal
 and dyadic attributes from the netify object are preserved and can be
-used in subsequent ERGM modeling or network analysis.
+used in subsequent ergm modeling or network analysis.
 
-For longitudinal data, each time period results in an independent
-network object. This format is suitable for discrete-time network
-analysis or pooled ERGM estimation across time periods.
+for longitudinal data, each time period results in an independent
+network object. this format is suitable for discrete-time network
+analysis or pooled ergm estimation across time periods.
 
 ## Note
 
-This function requires the network package (part of statnet) to be
+this function requires the network package (part of statnet) to be
 installed.
 
-For ERGM modeling, the ergm package (also part of statnet) should be
+for ergm modeling, the ergm package (also part of statnet) should be
 loaded after creating the network objects.
 
 ## Author
 
-Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+ha eun choi, cassy dorff, colin henry, shahryar minhas
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
-# Load example data
+# load example data
 data(icews)
 
-# Cross-sectional example
+# cross-sectional example
 icews_10 <- icews[icews$year == 2010, ]
 
-# Create netify object with attributes
+# create netify object with attributes
 dvars <- c("matlCoop", "verbConf", "matlConf")
 nvars <- c("i_polity2", "i_log_gdp", "i_log_pop")
 
@@ -149,7 +149,7 @@ verbCoop_net <- netify(
     nodal_vars = nvars
 )
 
-# Convert to statnet network object
+# convert to statnet network object
 ntwk <- netify_to_statnet(verbCoop_net)
 #> ! Nodal columns with "NA" detected: "i_polity2" and "i_log_gdp". Ergm terms
 #>   like `nodecov()`/`nodematch()` will refuse to fit.
@@ -163,7 +163,7 @@ ntwk <- netify_to_statnet(verbCoop_net)
 #>   "_e" per-edge attribute is for descriptive use such as edge styling.
 #> This message is displayed once per session.
 
-# Examine the result
+# examine the result
 ntwk
 #>  Network attributes:
 #>   vertices = 152 
@@ -193,7 +193,7 @@ network::list.vertex.attributes(ntwk) # nodal attributes
 network::list.edge.attributes(ntwk) # edge attributes
 #> [1] "matlConf_e" "matlCoop_e" "na"         "verbConf_e" "verbCoop"  
 
-# Access specific attributes
+# access specific attributes
 network::get.vertex.attribute(ntwk, "i_polity2") # polity scores
 #>   [1]  NA   9   2  -2   8   5  10  10  -7  -5   5  -7   8   7   7  NA   8   9
 #>  [19]   0   6   2  -4  10  10  -1  -2  10  -7   7   9  -4   5  10   0   9  -7
@@ -204,17 +204,571 @@ network::get.vertex.attribute(ntwk, "i_polity2") # polity scores
 #> [109]   4   8   9   8  10  10 -10   9   4  -4 -10   7   7  -2  10  10   8   0
 #> [127]   9  10   3  -2   5  10  10  -7  -3  -1   4  -2  10  -4  -9  -1   6  -8
 #> [145]  10  10  10  -9  -7  -2   7   1
-network::get.edge.attribute(ntwk, "matlCoop") # material cooperation
-#> NULL
+network::get.edge.attribute(ntwk, "matlCoop_e") # material cooperation on edges
+#>    [1]   0   2   0   0   0   0   0   1   0   1   0   2   0   0   0   0   0   0
+#>   [19]   2   2  20   2   0   3   0   1   5   0   2   3   0   0  10   0   0   1
+#>   [37]   2   0   0   0   2   1   0   0   0   4   0   0   2   0   0   0  39   1
+#>   [55]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2
+#>   [73]   1   0   1   4  30   0   0   0   4   0   0   0   1   0   0   0   0   0
+#>   [91]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#>  [109]   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#>  [127]   0   0   0   1   0   0   0   2   0   0   0   0   0   0   0   0   0   0
+#>  [145]   0   0   0   0   0   0   0   3   0   0   1   0   3   0   0   0   0   0
+#>  [163]   1   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0
+#>  [181]   0   0   1   0   0   0   2   0   0   0   1   0   0   0   0   0   0   0
+#>  [199]   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0
+#>  [217]   0   0   1   1   0   1   0   0   0   0   0   0   0   0   0   0   0   0
+#>  [235]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   3   0
+#>  [253]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   0   0
+#>  [271]   0   0   0   3   2   0   0   0   0   0   0   0   0   0   0   0   0   0
+#>  [289]   1   1   0   0   0   0   0   2   3   0  20   2   0   0   0   0   0   0
+#>  [307]   2   1   0   0   0   1   0   0   2   0   0   0   0   0   0   0   0   0
+#>  [325]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1
+#>  [343]   0   3   0   0   0   0   0   0   4   0   2   0   0   0   9   0   0   0
+#>  [361]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   8   0   0   0
+#>  [379]   0   0   0   0   0   0   0   0   0   0   0   0   0   5   0   0   0   0
+#>  [397]   0   0   0   0   0   0   0   0   0   0   0   0  19   0   0   0   0   1
+#>  [415]   0   0   4   3   1   2   0   1   2   0   0   0   0   0   2   2   0   2
+#>  [433]   0   0   0   0   0   1   0  13  11   0   6   0   2   0   0   5   0   0
+#>  [451]   0   0   2   1   1   0   0   1   4   0   0   0   0  12   3   3   0   0
+#>  [469]   9   3   0   2   0   0   0   0   2   0   0   0   1   0   1   0   0   0
+#>  [487]   2   3   1   0   0   4   0   0   0  20  16   1   3   2   0   0   0   0
+#>  [505]   0   0   0   0   0   1   0   0   1   0   0   0   0   0   1   0   0   0
+#>  [523]   0   0   0   1   0   0   0   0   0   1   0   0   0   0   4   0   0   0
+#>  [541]   0   0   1   0   2   0   1   0   0   0   1   0   0   0   0   1   0   0
+#>  [559]   0   1   0   0   0   0   0   0   0   0   0   0   2   0   0   0   0   0
+#>  [577]   0   0   0   1   0   0   0   0   1   0   0   0   5   2   0   0   0   0
+#>  [595]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   0
+#>  [613]   1   0   0   1   0   4   1   0   0   1   0   0   1   0   0   0   0   0
+#>  [631]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2
+#>  [649]   0   0   0   0  12   0   0   0   0   0   0   0   1   0   0   0   0   0
+#>  [667]   0   1   0   0   2   0   0   0   0   0   0   0   0   1   0   0   0   0
+#>  [685]   0   0   0   0   0   0   0   0   0   3   0   0   0   0   0   0   0   2
+#>  [703]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   0   0
+#>  [721]   0   0   2   0   0   1   0   0   0   0   0   9   0   1   0   0   0   0
+#>  [739]   0   1   0   0   0   4   2   0   0   0   0   0   0   0   0   0   1   1
+#>  [757]   0   0   2   0   0   0   2   0   0   1   0   1   0   0   0   0   0   3
+#>  [775]   0   0   0   0   0   0   0   0   0   1   0   0   0   1   0   0   0   0
+#>  [793]   0   5   0   0   0   2   0   0   0  32   0   1   2   0   0   0   0   0
+#>  [811]   0   0  15   0   0   0   0   0   0   0   2   0   0   2   1   0   0   0
+#>  [829]   0   0   0   0   0   0   0   0   1   1   0   0   0   0   1   0   0   0
+#>  [847]   0   1   0   0   0   0   0   0   0   2   0   0   0   0   0   0   0   1
+#>  [865]   0   0   0   0   0   0   1   0   1   0   0   3   0   0   0   1   0   0
+#>  [883]   0   0   0   0   0   1   0   0   1   0   0   0   0   0   0   0   0   0
+#>  [901]   0   2   0   0   0   0   1   0   1   0   0   0   0   0   0   0   0   2
+#>  [919]   0   0   0   0   0   0   0   0   5   0   0   1   0   0   0   0   0   0
+#>  [937]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#>  [955]   0   2   0   0   0   0   0   0   0   0   0   0   0   2   0   0   0   0
+#>  [973]   1   0   2   0   0   0   0   0   0   2   0   0   0   0   0   1   0   0
+#>  [991]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0
+#> [1009]   0   0   0   0   0   1   0   0   0   1   0   0   0   1   0   0   0   0
+#> [1027]   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0   0
+#> [1045]   0   0   0   0   0   0   0   0   0   0   0   1   9   0   0   0   0   0
+#> [1063]   0   0   2   0   0   0   0   1   0   2   5   2   0   0   0   0   0   0
+#> [1081]   1   1   0   0   0   0   1   1   0   0   3   0   0   0   8  12   0   1
+#> [1099]   0   7   0   0   2   1   0   0   0   0   0   2   0   0   0   0   0   1
+#> [1117]   0   0   0   0   0   0   1   0   0   4   1   1   0   0   0   0   0   1
+#> [1135]   0   0   0   0   0   1   0   0   0   0   1   0   0   0   0   0   0   4
+#> [1153]   1   0   0   0   0   5   0   0   0   0   0   0   0   1   0   0   0   0
+#> [1171]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   0   0   0
+#> [1189]   0   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [1207]   0   0   0   0   0   0   0   0   0   0   0   2   0   0   0   0   0   0
+#> [1225]   0   0   0   0   0   0   0   0   0   0   4   0   0   0   0   0   0   0
+#> [1243]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [1261]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [1279]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [1297]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [1315]   0   1   0  21   0   0   2   0   1   0   0   0   0   0   0   0   0   3
+#> [1333]   0  12   0   0   0   0   0   0   0   0   0   0   0   0   0   1   1   2
+#> [1351]   0   0   0   0   1   0   0   0   0   0   0   1   0   0   0   1   0   0
+#> [1369]   0   7   0  17   0   8   1   0   0   0   0   0   0   0   0   3   0   0
+#> [1387]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [1405]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [1423]   0  11   0   0   0   0   6   0   0   0   1   0   0   0   3   0   0   1
+#> [1441]   4   1   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0
+#> [1459]   0   0   7   0   5   0   0   0   0   0   1   0   5   0   0   0   0   0
+#> [1477]   0   0   0   0   0   0   0   0   0   0   0   1   0   0   1   0   1   0
+#> [1495]   1   0   0   9   2   0   0   0   1   0   0   3   2   0   1   0   0   0
+#> [1513]   0   2   1   0   0   0   0   0   0   0   1   0   0   1  13   0   0   0
+#> [1531]   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [1549]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [1567]   0   0   3   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0
+#> [1585]   0   0   0   2   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [1603]   0   0   0   0   0   0   0   0   0   4   0   0   4   0   0   0   0   2
+#> [1621]   0   0   0   0   0   1   0   0   0   1   0   1   0   0   2   0   0   2
+#> [1639]   0   1   0   0   0   1   0   0   0   0   3   0   2   0   0   0   0   0
+#> [1657]   2   0   0   0   0   0   0   0   0   0   0   0   0   0   0   4   0   0
+#> [1675]   2   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [1693]   0   0  17   2   0   5   3   0   3   0   0   0   3   2   0   2   3   2
+#> [1711]   4   0   0   1  18   2   1   0   2   0   3   3   1   4   1   4   0   0
+#> [1729]   0   2   1   0   0   3   3   0   0   0  11   6   0   6   4   0   0   0
+#> [1747]   8   1   0   1   1  53   1   7   5   9   3   1   0   2   0  56   1   2
+#> [1765]   4  49   5   0  10   5   1   1   5   0   1   0   2   1   0   2   3   0
+#> [1783]   2   1   6   0   3   6   3   0   1   0   0   4   0   0 118   0   0   3
+#> [1801]   6   0   3   0   0  17   8   0   1   2   5   0   0   4   6   0   8  13
+#> [1819]   0   0   0   3   1   3  11   0   0   2   3   1   0   3  50   0   3  27
+#> [1837]   7  14  13   0   0   0   1   2   0   0   2   0   2   0   1   0   0   0
+#> [1855]   0   0   0   3   0   1   0   0   0   1   0   0   5   0   0   0   0   0
+#> [1873]   0   0   0   2   0   0   2   0   0   0   0   0   0   0   1   0   4   0
+#> [1891]   6   0   0   0   0   0   1   0   0   0   0   0   0   0  18   0   0   0
+#> [1909]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [1927]   0   0   0   0   0   0   0   0   0   1   0   0   3   0   0   0   0   0
+#> [1945]   0   0   0   0   0   1   1   0   0   0   0   0   0   0   0   0   0   0
+#> [1963]   2   0   0   1   0   0   0   0   0   0   0   0   0   0   1   0   0   0
+#> [1981]   0   0   0   0   1   0   3   0   0   0   0   0   0   0   0   0   0   0
+#> [1999]   0   0   1   1   1   1   0   1   0   0   0   0   0   0   1   0   0   0
+#> [2017]   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0
+#> [2035]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   0   0   0
+#> [2053]   0   0   1   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0
+#> [2071]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [2089]   0   0   0   0   0   0   0   0   0   0   0   0   0   1   1   0   0   0
+#> [2107]   0   5   0   0   0   0   0   0   0   3   0   0   0   0   0   0   0   1
+#> [2125]   0   0   0   0   2   0   1   0   0   0   0   1   0   0   5   0   0   0
+#> [2143]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [2161]   1   0   0   0   0   3   0   0   1   7   0   0   1   1   0   0   0   0
+#> [2179]   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0   0
+#> [2197]   0   0   1   0   0   0   0   0   0   2   0   1   0   0   0   0   0   0
+#> [2215]   6   0   0   1   0   0   0   0   0   5   0   0   0   1   0   0   0   0
+#> [2233]   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1  10
+#> [2251]   0   0   0   0   0   0   0   5   0   0   0   1   0   0   0   0   1   0
+#> [2269]   0   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0   2   0
+#> [2287]   0   0   0   1   0   0   0   0   0   1   0   0   0   0   0   0   0   0
+#> [2305]   1   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0  10   1
+#> [2323]   0   0   0   0   0   0   0   2   0   0   0   0   0   0   0   0   0   0
+#> [2341]   0   0   0   0   0   0   1   0   0   0   0   0   1   0   0   0   0   0
+#> [2359]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   4   0
+#> [2377]   0   0   0   0   0   0   0   4   0   0   0   0   0   0   0   0   0   0
+#> [2395]   0   0   0   1   0   0   1   0   0   0   0   0   0   0   0   0   0   0
+#> [2413]   0   0   2   0   0   0   0   0   0   0   0   0   0   4   0   0   0   0
+#> [2431]   0   0   0   2   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [2449]   0   0   0  10   0   0   0   0   0   0   0   0   0   0   0   0   0   2
+#> [2467]   0   0   7   1   1   0   0   0   0   0   2   2   1   0   0   0   1   0
+#> [2485]   0   0   0   0   0   0   2   0   0   0   0   0   0   0   0   0   0   0
+#> [2503]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0
+#> [2521]   0   0   0   1   0   1   0   0   0   0   0   1   0   0   3   0   0   0
+#> [2539]   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [2557]   1   6   0   0   1   0   0   6   2  12   0   0   4   0   0   0   0   0
+#> [2575]   0   4   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0
+#> [2593]   0   1   0   0   0   0   0   0   1   0   1   0   0   0   0   0   2   0
+#> [2611]   0   0   6   2   0   0   2   0   0   0   1   0   2   0   0   0   4   0
+#> [2629]   0   4   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0
+#> [2647]   0   0   0   4   0   0   0   0   2   0   0   0   0   0   0   0   0   0
+#> [2665]   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0
+#> [2683]   0   0   0   0   1   0   0   0   0   0   0   0   1   0   0   0   0   0
+#> [2701]   1   0   0   0   0   1   0   0   0   1   0   0   0   0   0   0   0   0
+#> [2719]   0   0   0   0   0   0   0   0   2   0   0   1   0   0   0   0   0   0
+#> [2737]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [2755]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [2773]   0   2   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0
+#> [2791]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0  29   0   0
+#> [2809]   0   2   0   0   0   0   0   0   0   0   1   0   0   0   0   0   1   0
+#> [2827]   0   0   1   0   0   0   0   2   1   0   0   0   3   0   0   0   0   0
+#> [2845]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [2863]   0   0   2   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [2881]   0   0   0   0   0   0   2   0   0   0   3   0   0   0   0   2   0   0
+#> [2899]   0   0   1   0   0   0   0   0   0   0   0   0   0   0   4   0   2  11
+#> [2917]   0   6   0   0   0   1   0   0   0   0   0   0   0   2  13   0   0   0
+#> [2935]   1   1   0   2   1   9   2   0   1   0   0   1   2   2   3   0   0   0
+#> [2953]   0   0   2   0   0   1   0   2   0   2   0   0   0   0  13   0   0   3
+#> [2971]   2  20   2   0   1   1   0   1   0   1   2   0   0   2   0   0   8   0
+#> [2989]   0   0   0   0   0   0   2   4  18   0   1   2   2   0   0   1   0   1
+#> [3007]  12   1   0   7   2   0   0   0   0   0  16   9   2   1   1   1   0   0
+#> [3025]   0   1   1   7   2   0   0   0   0   3   0   0   1   0   0   0   2   0
+#> [3043]   1   5   2   0   0   5   4   0   0   0   0   0   0   0   0   0   0   0
+#> [3061]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [3079]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [3097]   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0   0
+#> [3115]   0   0   0   1  19   0   0   1   0   0   5   0   0   1   0   0   0   0
+#> [3133]   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0   1
+#> [3151]   0   0   0   0   2   0   0   0   3   0   0   5   0   0   0   1   0   0
+#> [3169]   3   0   0   0   0   0   0   0   0   0   0   0   2   0   0   0   0   2
+#> [3187]   0   0   0  21   0   0   0   0   0   0   0   2   0   0   0   0   2   0
+#> [3205]   0   2   0  25   0   0   0   1   1   0   1   0   1   0   0   0   0   1
+#> [3223]   1   0   0   0   0   0   0   0   3   0   0   0   0   0   0   3   0   0
+#> [3241]   0   1   0   3   0   5   0   0   0  16   0   1   0   2   0  11  11   0
+#> [3259]  11   6   2   0   2   2   0   0   0   0   1   1   0   1   0   0   0   0
+#> [3277]   0   0   1   0   0   0   0   0   0   0   0   0   5   0   0   0   4   0
+#> [3295]   0   0  10   1   0   1   1   0   0   0   3   1   0   0   1   0   0   0
+#> [3313]   0   0   1   0   0   1   1   3   1   1   6   0   0   5   0   0   1   0
+#> [3331]   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0
+#> [3349]   0   0   0   0   0   0   0   2   0   0   0   0   0   0   0   0   0   0
+#> [3367]   0   1   3   0   0   1   0   0   0   0   0   0   0   0   0   0   2   0
+#> [3385]   0   0   0   2   0   0   1   0   0   0   0   3   0   0   0   0   0   0
+#> [3403]   0   0   3   0   2   0   5   0   0   0   0   0   2   4   2   1   0   0
+#> [3421]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [3439]   0   5   0   0   0   1   1   0   0   0   0   0   0   5   1   0   0   0
+#> [3457]   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0   1   0
+#> [3475]   0   0   0   1   0   0   0   0   0   0   0   0   0   3   0   0   0   0
+#> [3493]   0   0   0   0   0   2   0   0   0   0   0   0   0   0   0   0   0   0
+#> [3511]   0   0   3   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0
+#> [3529]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1
+#> [3547]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [3565]   0   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0
+#> [3583]   0   0   0   0   0   0   0   0   0   0   2   0   0   0   0   0   0   0
+#> [3601]   0   0   0   7   0   0   1  18   0   0   0   0   0   0   0   0   0   0
+#> [3619]   0   0   0   1   8   0   0   0   0   0   0   0   0   0   0   1   0   0
+#> [3637]   0   0   0   0   0   0   0   0   0   0   0  44   2   0   1   0   0   0
+#> [3655]   0   0   0   0   0   0   3   0   0   0   0   0   0   0   0   0   0   0
+#> [3673]   0   5   0   0   0   0   0   0   0   0   2   0   0   0   0   1   0   1
+#> [3691]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   4   0
+#> [3709]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   4   0   0   2
+#> [3727]   0   0   2   0   0   0   0   0   0   0   0   3   0   0   0  12   0   0
+#> [3745]   0   0   1   0   0  28   0   0   0   1   0   0   3   0   1   0   0   7
+#> [3763]   0   4   0   0   1   0   0   0   0   0   7   0   0   0   0   0   1   1
+#> [3781]   0   0   0   0   0   1   4   0   2   0   4   0   0   0   0  10   0   5
+#> [3799]   2   0   0   3   0   0   4   0   0   0   2   1   5   9   1   0   0   0
+#> [3817]   0   0  69   0   0   1   0   0   0   0  15   0   1   0   1   0   0   0
+#> [3835]   0   0  19   0   0   0   0   0   1   0   3   0   0   0   0   0   1   3
+#> [3853]  18   0   1   1   5   0   2   3   0   0   0   0   0   0   0   0   0   0
+#> [3871]   0   0   7   0   0   0   0   0   0   0   0   1   0   4   0   1   0   1
+#> [3889]   0   0   0   0   0   0   0   0   0   5   7   0   0   0   2   0   0   0
+#> [3907]   0  11   0   0   0   0   1   0   0   0   0   0   1   0   0   0   0   1
+#> [3925]   0   0   0   0   0   0   0   0   0   0   0   0   8   0   0   2   0  91
+#> [3943]   0   0   0   0   5   0   1   4   1   1   0   2   0   2   2   3   0   0
+#> [3961]   0   0   1   0   0   4   0   0   0   0   0   0   2   0   0   0   0   4
+#> [3979]   0   0   1  13   0   0   0   5   0   0   0   0   2   2   0   1   0  46
+#> [3997]   0   1   0   3   0   2   0   2   0   0   6   0 101   0   0   0   0   1
+#> [4015]   0   5   0   0   0   0   0   0   0   0   0   3   0   0  83   0   0   0
+#> [4033]   0   0   0   5   3   0   0   0   0   1   0   0   4   2   0   0   1   7
+#> [4051]   3   0   0   0   0   5   2   0   2   1  94   0   2   0   0   0   1   4
+#> [4069]   0   0   1   0   1   0   0   0   1   0   0   0   1   0   3   0   0   0
+#> [4087]   1   0   0   0   0   0   0   0  13   0   0   2   1   0   0   3   0   1
+#> [4105]   0   0   0   0   0   0   0  11   0   2   0   0   0   0   0   6   0   0
+#> [4123]   1   0   0   0   0   0   0   1   0   0   0   0   0   1   0   3  66   0
+#> [4141]   0   0   1   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0
+#> [4159]   2   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [4177]   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [4195]   7   0   0   0   1   2   2   0   1   2   0   0   0   0   0   0   0   0
+#> [4213]   0   0   0   9   3   0   0   0   0   0   0   4   0   0   0   0   1   7
+#> [4231]   4   0   5   0   4   0   4   2  10   4   0   2   0  26   0   3   0   3
+#> [4249]   3   1   0  21   2   0   1   9   0   0   1   0   0   0   0   0   0   0
+#> [4267]   0   0   0   2   0   0   4   4   0   0   0   0   0   2   2   0   0   1
+#> [4285]   0   0   0  13   0   0   0   1   3   0   4  24   0   0   3   5   1   0
+#> [4303]   3   0   0   0   0   0   0   0   0   0   1   0   0   0   0   1   0   0
+#> [4321]   0   0   0   0   0   0   0   0   0   1   0   0   0   0   1   0   0   1
+#> [4339]   0  13   0   0   3   0   0   0   0   0   0   0   0   0   0   4   1   0
+#> [4357]   1   0   0   0   1   0   1   0   0   0   0   0   0   0   0   0   0   0
+#> [4375]   0   0   0   1   0   0   0   0   4   0   0   0   0   2   0   0   0   0
+#> [4393]   2   0   0   0   0   4   0   0   0   6   1   0   0   0   0   0   0   0
+#> [4411]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [4429]   1   6   0   0   0   0   6   0   1   7   2   3   1   1   0   2   0   0
+#> [4447]   6   0   6  12 159   0   0   2   1   0   0   0   1   0   1   0   6   1
+#> [4465]   0   1   0   3   5   0   0   0   8   0  13   3   2   6   0   0   0   0
+#> [4483]   6   0   7   4  11   0   0   1   0   0   0   0   0   0   1   0   1   1
+#> [4501]   0   1  19   0   0   0   0   2   3   0   0   6   0   0   0   0   2   0
+#> [4519]   0   1   3   4   1   0   0   0   0   0   0   2   0   0   2   3   0   0
+#> [4537]   1   5   0  13   0   0   0   2   0   0   2  54   1   5   7   7   4   3
+#> [4555]  10   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0
+#> [4573]   0   0   0  12   0   0   0   0   0   0   6   0   0   0   0   6   7   0
+#> [4591]   0   0   0   0   0   2   0   0   0   0   0   0   0   0   0   0   0   1
+#> [4609]   0   1   0   0   0   0   0   2   0   0   0   0   6   0   0   6   0   0
+#> [4627]   0   0   0   5   0   0   8   0   0   0   0   0   0   0   0   0   0   2
+#> [4645]   0   0   0   0   0   0   1   0   0   3   0   0   2   0   0   0   0   0
+#> [4663]   0   0   7   0   0   0   0   0   0   0   0   0   2   0   0   0   0   8
+#> [4681]   0   0   1   0   0   0   0   0   6   0   2   0   0   0   0   0   0   0
+#> [4699]   0   0   0   0   0   1   0   1   0   0   0   0   0   0   0   2   0   0
+#> [4717]   0  11   1   0   0   0   0   0   0   1   0   0   1   0   0   0   0   0
+#> [4735]   0   0   0   0   0   1   0   2   0   0   0   0   0   0   0   0   0  23
+#> [4753]   0   0   2   1   0   0   0   6   1   1   5   0   0   0   0   2   0   0
+#> [4771]   0   0   0   0   0   0   0   0   0   0   0   0  18   0   0   0   0   0
+#> [4789]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [4807]  20   0   0   0   3   0   0  13   0   0   0   1   0   0   0   0   0   0
+#> [4825]  12   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0   0
+#> [4843]   0   2   0   6   0   0   0   0   0   0   1  39   0   0   0   0   0   4
+#> [4861]   0   0   0   0   0  11   0   0   2   0   0   1   0   1   0   0   0   0
+#> [4879]   2   0   0   0   2  19   1   0   0   0   2   0   0   0   0   0   0   0
+#> [4897]   0   0   0   0   1   0   0   0   0   0   0   1   0   0  13   0   0   4
+#> [4915]   3   4   2   0   0   0   0  11   4   0   1  48   3   1   2   0   0   0
+#> [4933]   2   0   0   0   1   0   1   0   0   0   0   1   0   0   0   0   1   0
+#> [4951]   2   3   3   0   3   1   0   0   2   2   7   0   0   0   0   0   0   0
+#> [4969]   0   0   0   1   0   0   0   0   0   0   2   0   0   0   5   0   4   0
+#> [4987] 122   0   1   1   0   0   1   0   0   0   0   0   0   0   0   0   0   0
+#> [5005]   0   0   0   0   0   0   2   0   0   0   0   0   0   0   0   0   0   0
+#> [5023]   0   0   0   0   0   0   0   0   2  11   3   0   0   0   0   0   1   0
+#> [5041]   0   0   1   0   0   0   0   0   0   0   3   0   0   0   0   0   0   0
+#> [5059]   2   0   3   0   0   0   0   0   0   2   1   0   0   0   0   0   0   3
+#> [5077]   0   0   0   0   0   0   0   0   0   0   2   1   2   0   0   0   0   0
+#> [5095]   0   4   0   0   2   0   0   0   0   0   0   0   0   3   0   0   0   1
+#> [5113]   0   0   0   0   0   0   0   0   0   0   0   9   0   0   0   0   0   0
+#> [5131]   0   0   0   0   0   2   0   0   0   0   0   0   1   0   0   0   0   0
+#> [5149]   0   0   0   0   0   0   1   7   2   0   0   1   0   0   2   0   0   0
+#> [5167]   0   0   0   0   0   5   0   4   0   0   1   0   0   0   0   0   0   0
+#> [5185]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5203]   0   0   0   0   0   0   2   1   0   1   0   0   0   0   0   0   2   0
+#> [5221]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   4
+#> [5239]   0   0   0   0   0   1   0   0   0   0   0   1   0   0   0   2   0   4
+#> [5257]   0   0   0   2   0   6   2   2   0   5   0   0   2   0   0   0   0   0
+#> [5275]   0   0   2   0   0   0   0   0   0   0   1   0   0   2   0   0   2   1
+#> [5293]   0   0   0   1   0   0   6   0   0   0   1   0   1   9   0   0   0   0
+#> [5311]   0   0   0   0   0   0   0   1   1   0   0   0   0   0   0   0   0   0
+#> [5329]   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0
+#> [5347]   0   0   0   0   0   0   0  20   0   0   0   0   0   0   0   1   5   1
+#> [5365]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   0   0
+#> [5383]   0   0   0   0   0   0   0   0   0   1   0   0   0   0   1   0   0   0
+#> [5401]   0   0   0   0   0   0   0   0   0   0   0   8   0   0   0  24   0   0
+#> [5419]   0   0   0   1   6   0   0   0   1   0   0   1   0   0   1   0   0   3
+#> [5437]   0   0   0   0   0   0   0   6   0   0   0   3  23   0   0   0   0   0
+#> [5455]   0   0   0   1   1   0   0   0   0   5   0   0   0   0   2   0   0   0
+#> [5473]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5491]   0   1   0   0   0   0   0   1   1   0   0   0   0   0   0   0   0   0
+#> [5509]   3   0   0   0   0   2   0   0   0   0   0   0   0   0   2   0   3   1
+#> [5527]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5545]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5563]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   3
+#> [5581]   1   0   0   2   0   0   0   0   0   0   1   0   0   0   0   0   0   0
+#> [5599]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5617]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5635]   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5653]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5671]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5689]   2   0   0   1   0   0   0   4   0   0   0   0   1   0   0   2   0   0
+#> [5707]   0   1   0   0   0   0   0   0   0   0   0   0   0   1  13   3   0   0
+#> [5725]   0   0   0   0   0   0   0   1   2   0   0   0   0   4   0   0   1   0
+#> [5743]   0   2   0   1   0   0   0   0   1   3   0   3   0   0   0   0   0  10
+#> [5761]   0   0   0   0   2   0   0   0   3   0   4   0   0   0   0   0   0   0
+#> [5779]   0   0   0   0   0   0   6   0   0   0   1   0   0   3   0   0   0   1
+#> [5797]   0   1   0   0   0   0   1   3   0   0   0   3   0   0   0   0   0   0
+#> [5815]   0   0   0   0   0   0   1   0   0   0   0   0   0   4   0   0   0   0
+#> [5833]   0   0   0   0   0   4   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5851]   0   0   1   0   1   0   0   0   0   0   0   0   0   1   0   0   0   0
+#> [5869]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5887]   0   0   0   0   2   1   4   0   0   0   0   3   0   0   0   0   1   0
+#> [5905]   0   2   0   0   0   0   8   0  12   2   2   0   0   0   0   0   1   0
+#> [5923]   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0
+#> [5941]   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0  51
+#> [5959]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5977]   0   0   0   2   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [5995]   0   0   0   0   0   0   9   0   0   0   0   0   0   0   4   0   0   0
+#> [6013]   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0
+#> [6031]   0   0   2   0   3   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [6049]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [6067]   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [6085]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [6103]   0   0   0   1   0   0   0   0   0   0   0   0   1   1   6   0   0   0
+#> [6121]   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0
+#> [6139]   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0
+#> [6157]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0
+#> [6175]   5   0   0   0   0   0   0   0   3   0   0   0   0   2   3   0   0   6
+#> [6193]   0   0   0   0   0   0   0   0   0   0   0   0   4   0   0  12   0   0
+#> [6211]   7   6   2   0   0   0   0   0   5   0   0   6   2   0   1   0   0   0
+#> [6229]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0  27   2   0
+#> [6247]   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   1   0   0
+#> [6265]   0   0   0   3   1   0   1   0   0   0   0   0   1   0   0   0   0   0
+#> [6283]   0   0   0   0   0   0   0   0   0   1   1   1   2   0   0   0   1   0
+#> [6301]   0   0   0   0   1   1   0   0   0   0   0   4   0   0   0   0   1   0
+#> [6319]   0   0   0   0   0   6   6   0   0   4   0   1   5   0   0   0   0   0
+#> [6337]   0   0   0   1   0   0   0   4   0   0   0   1   0   0   1   0   0   0
+#> [6355]   0   0   0   0   0   0   0   0   0   3   0   0   0   0   0   0   0   2
+#> [6373]   0   0   1   0   0   0   0   0   0   0   3   5   0   0   0   0   0   7
+#> [6391]   1   0   0   0   0   0   0   0   0   0   0   0   0   0   2   1   2   0
+#> [6409]   0   0   0   0   0   0   0   2   0   1   0   0   0   0   0   0   0   0
+#> [6427]   0   0   3   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [6445]   0   1   0   0   0   0   0   0   0   0   2   0   0   0   0   0   0   0
+#> [6463]   0   0   0   0   1   0   0   0   0   0   0   0   0   0   4   2   0   0
+#> [6481]   0   1   0   0   0   0   0   0   1   0   0   0   0   0   0   2   1   0
+#> [6499]   0   0   3   0   0   2   0   0   0   0   0   0   0   0   0   1   0   4
+#> [6517]   4   0   0   0   1   0   0   0   0   0   0   0   2   0   0   0   1   1
+#> [6535]   0   0   0   1   0   0   0   1   0   0   0   0   0   0   0   0   1   0
+#> [6553]   0   0   0   0   0   0   0   0   8  10   0   0   0   1   0   1   0   0
+#> [6571]   0   0   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0   1
+#> [6589]   0   0   0   0   0   1   0   0   3   7   1   0   0   0   0   0   0   0
+#> [6607]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0
+#> [6625]   0   0   0   0   0   0   3   0   0   0   0   0   0   0   0   1   2   0
+#> [6643]   0   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0
+#> [6661]   0   0   0   0   1   1   0   0   0   0   0   0   0   0   0   0   0   2
+#> [6679]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [6697]   0  61   0   0   0   0   2   0   3   0   1   0   0   0   0   0   0   0
+#> [6715]   0   0   0  19   0   0   0   0   0   0   0   0   0   0   0   2  74   4
+#> [6733]  23   0   0   1   0   0   0   0   0   0   0   0   1   0   0   0   0   0
+#> [6751]   0   0   0   1   0   0   0   0   0   0   2   0   1   0   2   0   5   0
+#> [6769]   0   0   1   0   0   0   0   3   0   0   0   0   0   1   6  32   0   0
+#> [6787]   0   1   0   0   0   2   0   0   7   0   0   0   0   3   0   0   0   1
+#> [6805]   0   0   0   0   0   0   0   3   0   0   2   0   2   0   0   0   1   0
+#> [6823]   0   0   4   0   4   0   0   0   0   0   0   0   0   0   0   1   0   0
+#> [6841]   0   0   2   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0
+#> [6859]   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0   0   0
+#> [6877]   1   0   0   0   0   2   1   0   7   2   4   0   0   0   0   1   0   0
+#> [6895]   0   0   0   0   0   0   0   0   2   0   2   0   0   0   0   2   0   0
+#> [6913]   5   0   0   0   0   0   0   0   0   0   0   0   0   0   2   0   0   0
+#> [6931]   0   0   1   0   0   0   0   0   0   0   0   0   0   0   3   0   0   0
+#> [6949]   0   0   2   0   1   0   0  15   0   0   0   0   0   0   1   0   0   1
+#> [6967]   0   1   0   0   0   0   1   0   0   0   3   0   0   0   0   0   0   0
+#> [6985]   4   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   1   0
+#> [7003]   0   0   0   0   0   0   3   0   0   0   0   0   0   4   0   0   8   0
+#> [7021]   0   0   0   0   0   0   2   0   0   0   0   0   0   0   0   0   0   0
+#> [7039]   0   0   0   0   0   0   0   2   7   0   2   0   0   1   0   0   1   0
+#> [7057]   0   1   0   1   0   0   0   0   1   0   0   0   0   0   0   0   0   0
+#> [7075]   0   0   0   0   2   9   0   0   0   0   1   0   0   0   0   0   0   0
+#> [7093]   0   0   1   0   0   1   0   1   0   1   0   0   0   0   0   0   0   1
+#> [7111]   0   0   2   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [7129]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [7147]   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0
+#> [7165]   0   1   0   0   0   0   0   2   0   0   0   0   0   0   0   0   0   0
+#> [7183]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [7201]   0   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [7219]   0   0   0   0   0   0   0   2   0   0   0   1   0   0   0   0   0   1
+#> [7237]   2   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [7255]   0   0   7   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0
+#> [7273]   0   1   0   0   0   0   0   1   0   0   0   0   0   0   0   1   0   0
+#> [7291]   0   0   0   0   0   0   0   1   0   0   0   0   0   0   2   0   0   0
+#> [7309]   0   1   0   2   0   0   0   2   0   0   0   0   0   0   0  13   0   0
+#> [7327]   0   0   1   2   0   0   2   0   0   0   0   0   0   0   0   0   1   0
+#> [7345]   0   0   0   8   0   0   0  26   0   0   0   0   9   1   1   7   0   1
+#> [7363]  33   0   0   0   2   4   2   0   0   4  23  22   4   0   1   0   0   2
+#> [7381]   0   0   0   0   0   1   0   0   0   5   0   0   8  51   0   0   0   0
+#> [7399]   0   0  13   1  19   2  27   1   0  15   0   1   0   5   0   9   3   0
+#> [7417]  88   0   1   6   0   0   0   0   0   0   0   0  14   2   0   0   0   1
+#> [7435]   0   0   0   2   0   5   0   1   2   0  37   0   0   0   0   0   0   0
+#> [7453]   0   0   3  14   0   0   1   7   0   0  17  10   0   1   0   0   0  36
+#> [7471]   0   6  71   0   2   9   1   0   0   0   0   0   0   1   0   0   0   1
+#> [7489]   0   0   0   0   2   0   0   0   0   2   0   0   0   0   0   0   0   0
+#> [7507]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0  16
+#> [7525]   0   0   2   0   0   4   0   0   7   0   0   0   2   0   0   0   0   0
+#> [7543]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   3
+#> [7561]   0   0   0   0   0   0   1   0   3   0   0   0   1   0   0   0   0   0
+#> [7579]   1   0   0   0   0   1   4   0   0   0   0   0   0   0   0   0   5   0
+#> [7597]   0  19   0   1   0   0   0   0   1   0   0   7   0   0   2   0   0   0
+#> [7615]   0   1   2   0   1   0   0   0   0   0   0  15   0   0   1  24   0   0
+#> [7633]   0   0   0   0   0   0   0   0   0   0   1   0   0   1   0   0   0   0
+#> [7651]   0   0   0   0   0   0   1   1   0   0   0   0   0   0   0   0   0   0
+#> [7669]   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0
+#> [7687]   0   0   0   0   0   0   0   0   0   2   0   0   3   0   0   0   0   0
+#> [7705]   0   0   0   0   0   0   0   0   0   0   0   0   2   1   0   0   0   0
+#> [7723]   0   0   0   0   0   0   8   0   0   0   0   0   1   0   0   0   0   0
+#> [7741]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2
+#> [7759]   0   4   0   0   0   0   0   0   0   0   0   0   0   0   0   0   3   0
+#> [7777]   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0
+#> [7795]   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [7813]   0   0   0   0   3   0   0   0   0   3   0   6   0   0   0   0   0   0
+#> [7831]   0   0   0   0   0   0   1   4   0   0   0   0   0   0   0   0  14   1
+#> [7849]   0   0   0   5   0   0   0   0   0   0   0   0   0   0   0   2   0   0
+#> [7867]   0   3   0   0   1   0   0   0   0   1   0   0   0   0   0   0   0   2
+#> [7885]   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0   0   0
+#> [7903]   0   2   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0
+#> [7921]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   3
+#> [7939]   0   0   0   0   0   0   0   0   2   0   0   0   0   0   1   0   0   0
+#> [7957]   0   0   0  23   0   3   0   0   0   3   0   9   0   0   0   0   5   0
+#> [7975]   0   1   0   0   0   0   5   0   0   1   0   0   0   0   0   0   8  10
+#> [7993]   0   1   0   1   1   1   0   1   0   0   0   0   0  56   0  14   1   4
+#> [8011]   0   0   0   0   1   0   0   0   0   1   0   0   0   0   0   1   0   0
+#> [8029]   0   0   1   0   0   2   0   0   0   0   0   0   3   0   0   0   0   0
+#> [8047]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0
+#> [8065]   0   0   0   0   2   0   0   2   1   1   0   1   0   0   0   0   2   0
+#> [8083]   0   1   0   0   0   4   0   0  35   0   0   1   0   5   3   0   1   0
+#> [8101]   0   0  10   3   0   0   0   4   6   7   0   1   0   0   0   0   0   0
+#> [8119]   0   0   1   1   0   0   0   0   0   0   0   0   0   0   0   2   0   2
+#> [8137]   0   0   0   0   2   0   0   0   0   0   2   2   0   1   3   4   0   8
+#> [8155]   0   0   1   0   0   2   0   1   1   0   0   0   4   0   0   0   2   0
+#> [8173]   0   0   0   0   0   0   3   0   0   1   0   0   0   0   0   1   0   0
+#> [8191]   0   0   0   1   0   0   0   0   3   0   3   0   0   0   0   4   0   0
+#> [8209]   0   0   0   0   0   0   0   0   0   2   0   1   3   0   1   0   0   0
+#> [8227]   0   0   0   2   0   0   0   0   0   4   0   0   0   0   1   0   1   0
+#> [8245]   0   0   0   0   0   1   0   0   2   0   0   0   0   0   0   0   0   0
+#> [8263]   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0   0   2
+#> [8281]   0   0   0   0   0   0   2   0   0   0   0   0   0   7   0   0   0   4
+#> [8299]   5   0   0   1   0   0   0   0   1   1   0   0   2   0   2   2   0   1
+#> [8317]   0   1   0   0  10   1   0   0   0   5   0   0   0   0   0   0   0   0
+#> [8335]   0   2   0   0   2   0   1   0   0   0  24  15   0   0   2  31   0   0
+#> [8353]   0   0   0   0   0   0   1   0   1   7   0   0   0   1   0   0   0   0
+#> [8371]   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [8389]   0   0   0   0   0   3   0   0   0   0   0   0   0   0   0   0   0   0
+#> [8407]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [8425]   0   4   0   0   0   0   1   1   0   0   0   0   0   0   0   0   0   0
+#> [8443]   0   0   2   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0
+#> [8461]   1   0   0   0   4   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [8479]   1   0   0   0   0   0   0   0   0   2   0   1   0   0   0   0   0   0
+#> [8497]   0   1   1   1   1   0   0   0   0   0   0   0   0   0   1   0   2   0
+#> [8515]   0   0   0   0   0   0   2   6   0   0   2   0   0   0   0   0   0   0
+#> [8533]   0   0   0   0   0   0   6   0   0   3   0   1   1   0   0   0   0   0
+#> [8551]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0
+#> [8569]   2   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [8587]   1   0   0   0   0   3   0   0   1   0   0   0   0   0   2   0   0   1
+#> [8605]   0   0   0   0   0   3   0   0   0   2   0   0   9   0   1   6   0   4
+#> [8623]   0   0   0   0 358   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [8641]   0   0   3   0   0   0   0   2   0   1   0   0   0   0   0   0   0   0
+#> [8659]   0   0   0   0   0   0   0   2   0   0   0   0   0   0   0   0   0   0
+#> [8677]   0   0   0   0   0   0   0   0   0   1   0   0   0   5   0   3   0   0
+#> [8695]   7   0   0   0   0   0   0   0   0   0   0   0   0   4   0   0   0   0
+#> [8713]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   3
+#> [8731]   0   3   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [8749]   1   0   1   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0
+#> [8767]   3   0   0   0   0   0   0   0   3   1   0   0   0   0   0   0   0   1
+#> [8785]   0   0   0   2   1   0   1   0  14   0   2   0   0   7   0   0   0   0
+#> [8803]   0   0   1   0   1   0  17   0   0   0   0   0   0   4   0   3   1   0
+#> [8821]   2   0   8   0   0   0   0   6   1   0   0  14   0   0   0   0   0   0
+#> [8839]   0   0   1   0   0   0   1  11   0   2   3   0   0   0   0   3   0   0
+#> [8857]   0   0   0   0   0   2   1  60   0   0   0   0   0   0   0   0   0   0
+#> [8875]   0   0   0   1   0   0   0   2   0   0   0   0   0   0   0   0   0   0
+#> [8893]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+#> [8911]   0   1   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0
+#> [8929]   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0   0
+#> [8947]   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0   0   0   0
+#> [8965]   2   0   0   0   1   0   0   0   0   0   0   0   0   1   0   0   0   0
+#> [8983]   0   0   0   0   0   0   0  12   0   0   0   0   0   0   1   0   0   0
+#> [9001]   1   0   0   0   0   0   0   0   2   0   0   0   5   0   0   0   0   0
+#> [9019]   0   0   0   0   0   0   0   3   0   0   0   0   3   0   0   0   0   0
+#> [9037]   0   0   0   1   0   0   0   0   0   0   0   0   0   0   1   0   0   2
+#> [9055]   0   0   0   2   1   0   0   0   0   0   0   1   0   0   0   0   0   0
+#> [9073]   0   0   0   0   0   0   0   0   3   1   0   0   0   0   0   0   1   0
+#> [9091]   0   0   0   0   0   0   0   0   0   0   7   0   0  71   0   0   7   0
+#> [9109]   0   0   1   0   0   0   0   0   0   1   0   0   0   0   0   0   0   0
+#> [9127]   0   3   0   0   0   0   0   0   2   0   0   0   0   0   0   0   0   0
+#> [9145]   0   2   1   0   0   0   2   0   0   1   1   0   0   0   0   0   0   0
+#> [9163]   0   0   1   0   1   0   0   0   0   0   0   0   0   0   0   0   2   0
+#> [9181]   0   1   0   0   1  25   0   0   0   0   0   0   0   0   0   1   0   0
+#> [9199]   0   0   0   0   2   0   0   0   0   1   2   1   0   0   0   0   0   0
+#> [9217]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2
+#> [9235]   0   0   1   0   1   0   1   0   2   3   0   0   0   0   0   0   0   0
+#> [9253]   0   0   3   0   0   0   0   0   0   0   0   0   0   0   0   0   7   0
+#> [9271]   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   0   4   0
+#> [9289]   0   0   0   2   0   0   0   3   0  67   1   4   0   0   0  19   0   0
+#> [9307]   0   3   0   0   0   7   0   0   0   1   0   2   0   0   0   6   0   0
+#> [9325]   0   0   0   0   0   0   0   0   0   0   0   1   0   0   6   0   2   0
+#> [9343]   0   0   0   0   0   3   0   0   4   0   5  14  10   3   1   0   0   1
+#> [9361]   0   1   1   2   0   0   0   0   2  13   1   0   0   0   0   1   0   0
+#> [9379]   0   0   1   0   0   0   0   4   0   0   2   0   0  17   0   0   0   2
+#> [9397]   1   0   0   0   5   0   0   0   2   0   0   0   0   2   8   0   4   7
+#> [9415]   0   3   0   0   2   2   1   0   0   0   0   1   0   0  23   0   0   3
+#> [9433]   6   0   3 138   5   0   3   1   2  10   0   3   0   4   1   1   0   1
+#> [9451]   5   6   4   0   4  13   1  10   0   0   0   5  65  22   0   3   0   0
+#> [9469]   3   5  31   2   0   1   1   2   2   3   0   0   6   0   0  22   0   0
+#> [9487]  32  11   3   1   6   2   0   0  72   2   0  46  10  29 226   1  45   0
+#> [9505]   0  35   7   2   5  10 127   4  19   0   0  35  10   4   2   0   2   0
+#> [9523]   0   4   1   1   0  29   8   1   2   1   2   2   0   1   1   0   6   0
+#> [9541]   0 157   7   0   2   3  20   4   0   1   8  96   1  13   2   0   0   0
+#> [9559]   0   0  25   0   6   7   9   0   0   5   1   7   3   9   2   0   0   1
+#> [9577]  17   5   1  29   2   4  18  59   0   4   1   0   0   0   0   0   2   0
+#> [9595]   0   0   0   0   0   0   0   0   0   0   2   0   3   0   0   0   0   0
+#> [9613]   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0
+#> [9631]   0   0   0   0   1   0   0   2   0   0   0   0   0   0   0   0   0   0
+#> [9649]   0   0   0   0   0   0   0   0   0   2   0   0   0   0   0   0   3   0
+#> [9667]  16   0   0   0   0   0   0   0   6   0   0   1   0   0   0   0   3   0
+#> [9685]   0   0   0   1   0   0   0   0   0   0   2   0   0   0   0   0   0   0
+#> [9703]   0   0  18   0   0   0  23   0   2   0   0   0   0   0   0   0   0   3
+#> [9721]   2   0   0   0   1   1   0   0   0   0   0   0   4   0   0   9   0   0
+#> [9739]   0   0   0   0   1   0   0   0   0   0   2   0   0   2   0   0   1   0
+#> [9757]   0   0   0   0   0   0   0   0   0   1   0   0   0   0   0   0   0   2
+#> [9775]   0   0   0   4   1   0   0   0   0   0  12   0   0   0   0   0   0   0
+#> [9793]   2   0   0   0   0   0   0   0   0   4   0   0   0   0   0   0   1   0
+#> [9811]   3   1   0   0   0   1   0   0   0   0   0   0   0   0   0   0   1   0
+#> [9829]   0   0   3   0   0   0   0   4   1   0   0   4   0   0   0   0   0   2
+#> [9847]  13   0   0  25   0   0   0   0   1   1   2   0   0   0   0   0   0   0
+#> [9865]  17   0   0   0   0   0   0   0   0   0   0   0   2   0   1   0   0   0
+#> [9883]   0   0   0   0   0   0   0   0   0   0   1   0   0   0   0   0   0   1
+#> [9901]   0   0   0   0   0   1   0   0   0   0   0   1   1   0   0   0   0   0
+#> [9919]   0   0   2   1   0   0   0   0   0   0   0   0   0   0   1   0   0   0
+#> [9937]   0   0   0   0   0   0   2   0   0   0   0   0   0   0   1   3   0   0
+#> [9955]   0   0   0   0   0   0   4   0   0   0   0   0   0   0   0   0   0   0
+#> [9973]   1   0   0   0
 
-# Check network properties
+# check network properties
 network::is.directed(ntwk) # TRUE for this example
 #> [1] TRUE
 network::has.loops(ntwk) # FALSE (no self-ties)
 #> [1] FALSE
 
 # \donttest{
-# Longitudinal example
+# longitudinal example
 verbCoop_longit <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
@@ -225,17 +779,17 @@ verbCoop_longit <- netify(
     nodal_vars = nvars
 )
 
-# Convert to list of network objects
+# convert to list of network objects
 ntwk_list <- netify_to_statnet(verbCoop_longit)
 
-# Examine structure
+# examine structure
 length(ntwk_list) # number of time periods
 #> [1] 13
 names(ntwk_list) # time period labels
 #>  [1] "2002" "2003" "2004" "2005" "2006" "2007" "2008" "2009" "2010" "2011"
 #> [11] "2012" "2013" "2014"
 
-# Access specific time period
+# access specific time period
 ntwk_2002 <- ntwk_list[["2002"]]
 ntwk_2002
 #>  Network attributes:
@@ -260,7 +814,7 @@ ntwk_2002
 # }
 
 if (FALSE) { # \dontrun{
-# Use with ergm for modeling (requires ergm package)
+# use with ergm for modeling (requires ergm package)
 library(ergm)
 model <- ergm(ntwk ~ edges + mutual + nodematch("i_polity2"))
 } # }

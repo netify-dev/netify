@@ -1,7 +1,7 @@
-# Set scale labels for netify plots
+# set scale labels for netify plots
 
-Provides a convenient way to set labels for aesthetic scales in netify
-plots. This function simplifies the process of labeling scales that may
+provides a convenient way to set labels for aesthetic scales in netify
+plots. this function simplifies the process of labeling scales that may
 be spread across different layers (edges, nodes, text, labels).
 
 ## Usage
@@ -14,19 +14,19 @@ netify_scale_labels(...)
 
 - ...:
 
-  Named arguments where the name is the aesthetic_component (e.g.,
+  named arguments where the name is the aesthetic_component (e.g.,
   "edge_alpha", "node_size", "edge_color") and the value is the label
   text to display in the legend
 
 ## Value
 
-A custom object of class "netify_labels" that can be added to a netify
+a custom object of class "netify_labels" that can be added to a netify
 plot using the + operator
 
 ## Details
 
-This function provides a user-friendly interface for setting scale
-labels without needing to understand the complexity of ggnewscale. The
+this function provides a user-friendly interface for setting scale
+labels without needing to understand the complexity of ggnewscale. the
 naming convention is:
 
 - `edge_*` for edge aesthetics (e.g., edge_color, edge_alpha)
@@ -39,8 +39,8 @@ naming convention is:
 
 ## Note
 
-This function only works with plots created using netify's plot method.
-It will issue a warning if used with other ggplot objects.
+this function only works with plots created using netify's plot method.
+it will issue a warning if used with other ggplot objects.
 
 ## See also
 
@@ -48,7 +48,7 @@ It will issue a warning if used with other ggplot objects.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
@@ -60,8 +60,8 @@ plot(my_netify_obj,
     point_size_var = "degree"
 ) +
     netify_scale_labels(
-        edge_alpha = "Connection Strength",
-        node_size = "Node Degree" # node_* is converted to point_*
+        edge_alpha = "connection strength",
+        node_size = "node degree" # node_* is converted to point_*
     )
 } # }
 ```

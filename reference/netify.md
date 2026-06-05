@@ -1,6 +1,6 @@
 # Create network object from various data types
 
-This function takes in various types of network data (dyadic datasets,
+this function takes in various types of network data (dyadic datasets,
 matrices, arrays, lists, igraph objects, or network objects) and outputs
 a netify object.
 
@@ -35,21 +35,21 @@ netify(
 
 - input:
 
-  data object to netify. Can be:
+  data object to netify. can be:
 
-  - A data.frame (or tibble/data.table) with dyadic data
+  - a data.frame (or tibble/data.table) with dyadic data
 
-  - A matrix representing an adjacency matrix
+  - a matrix representing an adjacency matrix
 
-  - A 3D array representing longitudinal networks
+  - a 3d array representing longitudinal networks
 
-  - A list of matrices representing longitudinal networks
+  - a list of matrices representing longitudinal networks
 
-  - An igraph object
+  - an igraph object
 
-  - A network object (from the network package)
+  - a network object (from the network package)
 
-  - A list of igraph or network objects
+  - a list of igraph or network objects
 
 - actor1:
 
@@ -63,22 +63,22 @@ netify(
 
 - time:
 
-  character: name of the time variable in the data. Can contain numeric,
-  Date, POSIXct/POSIXlt, or character values. Non-numeric types will be
-  converted to numeric indices while preserving original labels. If no
+  character: name of the time variable in the data. can contain numeric,
+  date, posixct/posixlt, or character values. non-numeric types will be
+  converted to numeric indices while preserving original labels. if no
   time is provided then a cross-sectional network will be created.
 
 - symmetric:
 
-  logical: whether ties are symmetric, default is TRUE. For matrix,
+  logical: whether ties are symmetric, default is TRUE. for matrix,
   array, list, igraph, or network inputs this default is ignored unless
   explicitly set by the caller; symmetry is instead detected from the
-  input itself. The default applies for data.frame inputs.
+  input itself. the default applies for data.frame inputs.
 
 - mode:
 
   character: whether the network is unipartite or bipartite, default is
-  unipartite. As with `symmetric`, this default applies to data.frame
+  unipartite. as with `symmetric`, this default applies to data.frame
   inputs and is auto-detected for matrix / array / list / igraph /
   network inputs unless explicitly set.
 
@@ -101,7 +101,7 @@ netify(
   out of the observed data and their "existence" should be determined by
   the data, meaning that their first year of existence will be
   determined by the time point of their first event and their last year
-  of existence by the time point of their last event. Outputted netify
+  of existence by the time point of their last event. outputted netify
   object will be in a list format.
 
 - actor_pds:
@@ -112,25 +112,25 @@ netify(
 
 - diag_to_NA:
 
-  logical: whether diagonals should be set to NA, default is TRUE. For
+  logical: whether diagonals should be set to na, default is TRUE. for
   matrix / array / list inputs, the default is ignored unless explicitly
   set: instead, `diag_to_NA` is auto-detected by inspecting whether the
-  diagonal of the supplied matrix is already `NA`. Pass an explicit
+  diagonal of the supplied matrix is already `na`. pass an explicit
   value to override the auto-detection.
 
 - missing_to_zero:
 
   logical: whether missing values should be set to zero, default is
-  TRUE. As with `diag_to_NA`, this is auto-detected for matrix / array /
+  TRUE. as with `diag_to_NA`, this is auto-detected for matrix / array /
   list inputs based on whether the supplied data already contains
-  off-diagonal `NA`s.
+  off-diagonal `na`s.
 
 - output_format:
 
-  character: "cross_sec", "longit_array", or "longit_list". If not
+  character: "cross_sec", "longit_array", or "longit_list". if not
   specified and time is NULL then output_format will be "cross_sec" and
   if time is specified then output_format will default to "longit_list".
-  Only applies to data.frame inputs.
+  only applies to data.frame inputs.
 
 - nodal_vars:
 
@@ -151,26 +151,27 @@ netify(
 
 - input_type:
 
-  character: force specific input type interpretation. Options are
-  "auto" (default), "dyad_df", or "netify_obj". Use "dyad_df" to force
+  character: force specific input type interpretation. options are
+  "auto" (default), "dyad_df", or "netify_obj". use "dyad_df" to force
   data.frame interpretation or "netify_obj" to force matrix/array/
   igraph/network interpretation.
 
 - nodelist:
 
-  character vector: optional list of all actors (nodes) that should be
-  included in the network. This ensures isolates (nodes with no edges)
-  are properly represented. Particularly useful when working with
-  edgelists that only contain active dyads.
+  optional list of all actors (nodes) that should be included in the
+  network. for unipartite networks, pass a character vector. for
+  bipartite networks, pass partition-aware input such as
+  `list(row = row_actors, col = col_actors)` or a data frame with actor
+  and mode columns. a flat vector can include only actors already
+  observed in a bipartite row or column mode because new isolates cannot
+  be assigned to a partition from their names alone.
 
 - force_dense:
 
-  logical: when a
-  [`Matrix::sparseMatrix`](https://rdrr.io/pkg/Matrix/man/sparseMatrix.html)
-  input would densify to a large allocation (N \> 5000 and density \<
-  1%), `netify()` aborts with a guidance message. Set
-  `force_dense = TRUE` to override the guard and proceed with
-  densification.
+  logical: when a `matrix::sparsematrix` input would densify to a large
+  allocation (n \> 5000 and density \< 1%), `netify()` aborts with a
+  guidance message. set `force_dense = TRUE` to override the guard and
+  proceed with densification.
 
 - ...:
 
@@ -184,7 +185,7 @@ a netify object
 ## See also
 
 [`netify_workflows`](https://netify-dev.github.io/netify/reference/netify_workflows.md)
-for an overview of the Create / Explore / Advance pipeline and how
+for an overview of the create / explore / model workflow and how
 `netify()` fits into it;
 [`add_node_vars`](https://netify-dev.github.io/netify/reference/add_node_vars.md),
 [`add_dyad_vars`](https://netify-dev.github.io/netify/reference/add_dyad_vars.md)
@@ -196,18 +197,18 @@ for a small worked example.
 
 ## Author
 
-Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+ha eun choi, cassy dorff, colin henry, shahryar minhas
 
 ## Examples
 
 ``` r
 
-# load example directed event data from ICEWS
+# load example directed event data from icews
 # this data comes in the form of a dyadic
 # dataframe where all dyad pairs are listed
 data(icews)
 
-# From a data.frame: generate a longitudional, directed and weighted network
+# from a data.frame: generate a longitudinal, directed and weighted network
 # where the weights are matlConf
 icews_matlConf <- netify(
     input = icews,
@@ -215,11 +216,11 @@ icews_matlConf <- netify(
     symmetric = FALSE, weight = "matlConf"
 )
 
-# From a matrix
+# from a matrix
 adj_matrix <- matrix(rbinom(100, 1, 0.3), 10, 10)
 net_from_matrix <- netify(adj_matrix)
 
-# From an igraph object
+# from an igraph object
 if (FALSE) { # \dontrun{
 library(igraph)
 g <- sample_gnp(10, 0.3)

@@ -1,6 +1,6 @@
-# Extract label layer from netify plot components
+# extract label layer from netify plot components
 
-Extracts the label layer from a netify plot components object. Labels
+extracts the label layer from a netify plot components object. labels
 display actor names or other text annotations with background boxes,
 making them more visible against complex network backgrounds.
 
@@ -14,13 +14,13 @@ netify_label(comp)
 
 - comp:
 
-  A netify_plot_components object returned from
+  a netify_plot_components object returned from
   `plot(..., return_components = TRUE)`
 
 ## Value
 
-A custom object of class "netify_label" that can be added to a ggplot
-object using the + operator. The object contains the label layer with
+a custom object of class "netify_label" that can be added to a ggplot
+object using the + operator. the object contains the label layer with
 all its aesthetic mappings and data.
 
 ## See also
@@ -31,7 +31,7 @@ all its aesthetic mappings and data.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

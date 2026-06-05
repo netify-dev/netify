@@ -1,6 +1,6 @@
-# ColorBrewer Dark2-based network style
+# colorbrewer dark2-based network style
 
-A network style using ColorBrewer's Dark2 palette for high contrast and
+a network style using colorbrewer's dark2 palette for high contrast and
 accessibility
 
 ## Usage
@@ -11,8 +11,8 @@ style_dark2()
 
 ## Value
 
-List of plot arguments
+list of plot arguments
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

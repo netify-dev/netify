@@ -1,9 +1,9 @@
 # as.igraph method for netify objects
 
-S3 method that lets igraph's
+s3 method that lets igraph's
 [`as.igraph`](https://r.igraph.org/reference/as.igraph.html) generic
-dispatch on netify objects. Equivalent to `netify_to_igraph(x, ...)`.
-Registered against the igraph namespace in `.onLoad`, so the dispatch
+dispatch on netify objects. equivalent to `netify_to_igraph(x, ...)`.
+registered against the igraph namespace in `.onload`, so the dispatch
 works regardless of whether igraph is attached before or after netify.
 
 ## Usage
@@ -16,19 +16,19 @@ as.igraph.netify(x, ...)
 
 - x:
 
-  A netify object.
+  a netify object.
 
 - ...:
 
-  Extra arguments forwarded to
+  extra arguments forwarded to
   [`netify_to_igraph`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md)
   (e.g. `add_nodal_attribs`, `add_dyad_attribs`).
 
 ## Value
 
-An igraph object, or a list of igraph objects (longitudinal /
+an igraph object, or a list of igraph objects (longitudinal /
 multilayer), as produced by `netify_to_igraph`.
 
 ## Author
 
-Shahryar Minhas
+shahryar minhas

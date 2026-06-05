@@ -1,11 +1,11 @@
-# One-row-per-network summary of a netify object (broom style)
+# one-row-per-network summary of a netify object (broom style)
 
-`glance.netify` is an S3 method for the `glance()` generic from the
-broom package. It returns the graph-level statistics produced by
+`glance.netify` is an s3 method for the `glance()` generic from the
+broom package. it returns the graph-level statistics produced by
 [`summary.netify()`](https://netify-dev.github.io/netify/reference/summary.netify.md)
-— one row per network / time period / layer — so the netify object plays
+– one row per network / time period / layer – so the netify object plays
 nicely with broom-style workflows. (broom is not a hard dependency; this
-method is registered as an S3 method on `glance` and only triggers when
+method is registered as an s3 method on `glance` and only triggers when
 the generic is available.)
 
 ## Usage
@@ -18,17 +18,17 @@ glance.netify(x, ...)
 
 - x:
 
-  A netify object.
+  a netify object.
 
 - ...:
 
-  Additional arguments passed to
+  additional arguments passed to
   [`summary.netify()`](https://netify-dev.github.io/netify/reference/summary.netify.md)
   (e.g., `other_stats = list(my_stat = my_fn)`).
 
 ## Value
 
-A tibble (or data.frame if `tibble` isn't installed): one row per
+a tibble (or data.frame if `tibble` isn't installed): one row per
 (network, time, layer) combination with density, reciprocity, mutual,
 transitivity, edge counts, etc.
 
@@ -40,7 +40,7 @@ output.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
@@ -53,7 +53,7 @@ glance.netify(net)
 #> # A tibble: 1 × 18
 #>   net   num_actors density num_edges prop_edges_missing mean_edge_weight
 #>   <chr>      <dbl>   <dbl>     <dbl>              <dbl>            <dbl>
-#> 1 1            152   0.435      9976                  0             18.1
+#> 1 1            152   0.435      9976                  0             41.7
 #> # ℹ 12 more variables: sd_edge_weight <dbl>, median_edge_weight <dbl>,
 #> #   min_edge_weight <dbl>, max_edge_weight <dbl>, competition_row <dbl>,
 #> #   competition_col <dbl>, sd_of_row_means <dbl>, sd_of_col_means <dbl>,

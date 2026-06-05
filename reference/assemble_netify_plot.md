@@ -1,6 +1,6 @@
-# Assemble netify plot from components
+# assemble netify plot from components
 
-Assembles a complete network plot from netify plot components. This
+assembles a complete network plot from netify plot components. this
 function automatically adds all available layers (edges, nodes, text,
 labels, and their repel versions) in the correct order with appropriate
 scale resets between layers.
@@ -15,27 +15,27 @@ assemble_netify_plot(comp)
 
 - comp:
 
-  A netify_plot_components object returned from
+  a netify_plot_components object returned from
   `plot(..., return_components = TRUE)`
 
 ## Value
 
-A complete ggplot object ready for display or further customization
+a complete ggplot object ready for display or further customization
 
 ## Details
 
-This function provides a convenient way to reassemble a plot from its
-components after extracting them with `return_components = TRUE`. It
+this function provides a convenient way to reassemble a plot from its
+components after extracting them with `return_components = TRUE`. it
 automatically:
 
-- Adds layers in the correct order (edges, nodes, text/text_repel,
+- adds layers in the correct order (edges, nodes, text/text_repel,
   labels/label_repel)
 
-- Inserts scale resets between layers when necessary
+- inserts scale resets between layers when necessary
 
-- Handles both standard and repel versions of text and label layers
+- handles both standard and repel versions of text and label layers
 
-- Includes facets and themes if present
+- includes facets and themes if present
 
 ## See also
 
@@ -45,7 +45,7 @@ automatically:
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

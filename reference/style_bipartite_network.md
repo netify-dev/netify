@@ -1,6 +1,6 @@
-# Preset style for bipartite networks
+# preset style for bipartite networks
 
-A complete visual style optimized for displaying bipartite networks with
+a complete visual style optimized for displaying bipartite networks with
 two distinct node sets
 
 ## Usage
@@ -11,8 +11,8 @@ style_bipartite_network()
 
 ## Value
 
-List of plot arguments
+list of plot arguments
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

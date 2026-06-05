@@ -1,7 +1,7 @@
 # Event data slice from ICEWS
 
-Event data from ICEWS for select countries from 2002 to 2014, and
-additional nodal variables from the World Bank and Polity IV.
+event data from icews for select countries from 2002 to 2014, and
+additional nodal variables from the world bank and polity iv.
 
 ## Usage
 
@@ -11,116 +11,117 @@ data(icews)
 
 ## Format
 
-A data frame with dyadic observations and the following variables:
+a data frame with dyadic observations and the following variables:
 
 - i:
 
-  Source country
+  source country
 
 - j:
 
-  Target country
+  target country
 
 - year:
 
-  Year of observation
+  year of observation
 
 - id:
 
-  Observation identifier
+  observation identifier
 
 - verbCoop:
 
-  Verbal cooperation score
+  verbal cooperation score
 
 - matlCoop:
 
-  Material cooperation score
+  material cooperation score
 
 - verbConf:
 
-  Verbal conflict score
+  verbal conflict score
 
 - matlConf:
 
-  Material conflict score
+  material conflict score
 
 - i_year:
 
-  Year for source country
+  year for source country
 
 - j_year:
 
-  Year for target country
+  year for target country
 
 - i_polity2:
 
-  Polity IV democracy score for source country
+  polity iv democracy score for source country
 
 - j_polity2:
 
-  Polity IV democracy score for target country
+  polity iv democracy score for target country
 
 - i_iso3c:
 
-  ISO 3166-1 alpha-3 code for source country
+  iso 3166-1 alpha-3 code for source country
 
 - j_iso3c:
 
-  ISO 3166-1 alpha-3 code for target country
+  iso 3166-1 alpha-3 code for target country
 
 - i_region:
 
-  Region for source country
+  region for source country
 
 - j_region:
 
-  Region for target country
+  region for target country
 
 - i_gdp:
 
-  GDP for source country
+  gdp for source country
 
 - j_gdp:
 
-  GDP for target country
+  gdp for target country
 
 - i_log_gdp:
 
-  Log GDP for source country
+  log gdp for source country
 
 - j_log_gdp:
 
-  Log GDP for target country
+  log gdp for target country
 
 - i_pop:
 
-  Population for source country
+  population for source country
 
 - j_pop:
 
-  Population for target country
+  population for target country
 
 - i_log_pop:
 
-  Log population for source country
+  log population for source country
 
 - j_log_pop:
 
-  Log population for target country
+  log population for target country
 
 ## Source
 
-[icews](https://dataverse.harvard.edu/dataverse/icews)
+icews coded event data, harvard dataverse.
 
 ## References
 
-add icews reference
-([icews](https://dataverse.harvard.edu/dataverse/icews))
+boschee, e., lautenschlager, j., o'brien, s., shellman, s., starz, j.,
+and ward, m. (2015). icews coded event data. harvard dataverse.
+[doi:10.7910/dvn/28075](https://doi.org/10.7910/dvn/28075) .
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

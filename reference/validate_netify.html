@@ -3,13 +3,13 @@
 goes further: it verifies that the netify's internal pieces still
 agree with each other after any user-side surgery (e.g., manually
 edited attr(., &quot;nodal_data&quot;), subset() followed by an attribute
-overwrite, etc.). Use this when you've hand-modified a netlet and
+overwrite, etc.). use this when you've hand-modified a netlet and
 want to confirm it's still well-formed before passing to
 to_statnet() / to_amen() / plot()."><meta property="og:description" content="netify_check() validates only class membership. validate_netify()
 goes further: it verifies that the netify's internal pieces still
 agree with each other after any user-side surgery (e.g., manually
 edited attr(., &quot;nodal_data&quot;), subset() followed by an attribute
-overwrite, etc.). Use this when you've hand-modified a netlet and
+overwrite, etc.). use this when you've hand-modified a netlet and
 want to confirm it's still well-formed before passing to
 to_statnet() / to_amen() / plot()."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -27,20 +27,21 @@ to_statnet() / to_amen() / plot()."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/quickstart_inference.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Quickstart to Inference</a></li>
+    <li><a class="dropdown-item" href="../articles/quickstart_inference.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
@@ -66,7 +67,7 @@ to_statnet() / to_amen() / plot()."></head><body>
 goes further: it verifies that the netify's internal pieces still
 agree with each other after any user-side surgery (e.g., manually
 edited <code>attr(., "nodal_data")</code>, <code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> followed by an attribute
-overwrite, etc.). Use this when you've hand-modified a netlet and
+overwrite, etc.). use this when you've hand-modified a netlet and
 want to confirm it's still well-formed before passing to
 <code><a href="netify_to_statnet.html">to_statnet()</a></code> / <code><a href="netify_to_amen.html">to_amen()</a></code> / <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
     </div>
@@ -81,24 +82,24 @@ want to confirm it's still well-formed before passing to
 
 
 <dl><dt id="arg-netlet">netlet<a class="anchor" aria-label="anchor" href="#arg-netlet"></a></dt>
-<dd><p>A netify object.</p></dd>
+<dd><p>a netify object.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>Logical. If <code>TRUE</code> (default), print a per-check
+<dd><p>logical. if <code>TRUE</code> (default), print a per-check
 status banner; otherwise return silently.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Invisibly returns a list with one logical per check (<code>TRUE</code>
-= passed). The function <code><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli::cli_abort()</a></code>s on any failure unless
+    <p>invisibly returns a list with one logical per check (<code>TRUE</code>
+= passed). the function <code><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli::cli_abort()</a></code>s on any failure unless
 <code>verbose = TRUE</code>, in which case failures are reported per-check
 and the function returns invisibly with the full failure list.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
-    <p>Cassy Dorff, Shahryar Minhas</p>
+    <p>cassy dorff, shahryar minhas</p>
     </div>
 
     <div class="section level2">

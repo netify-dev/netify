@@ -6,7 +6,7 @@ between the same actors – a crucial feature for understanding complex
 political systems where actors interact through various channels
 simultaneously.
 
-## Why Multilayer Networks Matter for Social Science
+## why multilayer networks matter for social science
 
 Traditional network analysis forces us to choose: study trade OR
 conflict, cooperation OR competition, formal OR informal ties. But
@@ -21,12 +21,12 @@ multiple relationship types together, revealing:
 - **Substitution effects**: Do actors use one type of relationship
   instead of another?
 - **Complementarities**: Do certain relationships tend to co-occur?
-- **Cross-layer influence**: Does position in one network affect
+- **Cross-layer association**: Is position in one network related to
   behavior in another?
-- **Structural coupling**: How do different relationship types shape
-  each other?
+- **Structural coupling**: How do different relationship types move
+  together?
 
-### Quick Start Example
+### quick start example
 
 We’ll use data from the Integrated Crisis Early Warning System (ICEWS)
 throughout here.
@@ -38,43 +38,44 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 
-# Load the ICEWS event data
+# load the icews event data
 data(icews)
 
-# Create a simple multilayer network for 2010
+# create a simple multilayer network for 2010
 icews_2010 <- icews[icews$year == 2010, ]
 
-# Verbal cooperation network
+# verbal cooperation network
 verbal_net <- netify(
     icews_2010,
     actor1 = "i", actor2 = "j",
     weight = "verbCoop"
 )
 
-# Material cooperation network
+# material cooperation network
 material_net <- netify(
     icews_2010,
     actor1 = "i", actor2 = "j",
     weight = "matlCoop"
 )
 
-# Combine into multilayer network
+# combine into multilayer network
 multi_net <- layer_netify(
     list(verbal = verbal_net, material = material_net)
 )
 
-# Quick visualization
+# quick visualization
 plot(multi_net, add_text = FALSE)
 ```
 
 ![](multilayer_networks_files/figure-html/unnamed-chunk-1-1.png)
 
-**What we see**: Even this simple example reveals the “cheap talk”
-problem in international relations. The verbal cooperation network
-(left) is dense with connections, while material cooperation (right) is
-sparse. Most diplomatic promises don’t translate into material support.
+**What we see**: Even this simple example shows a common measurement
+contrast in international relations event data. The verbal cooperation
+network (left) is dense with connections, while material cooperation
+(right) is sparse. In this sample, verbal cooperation events are much
+more common than material cooperation events.
 
-## Building Multilayer Networks: A Substantive Example
+## building multilayer networks: a substantive example
 
 Let’s build a more complete multilayer network to study international
 cooperation patterns during a critical period – 2002, shortly after 9/11
@@ -89,10 +90,10 @@ directed analyses (e.g. who initiates cooperation), set
 
 ``` r
 
-# Focus on 2002 - post-9/11 cooperation dynamics
+# focus on 2002 - post-9/11 cooperation dynamics
 icews_2002 <- icews[icews$year == 2002, ]
 
-# Create networks with relevant attributes. symmetric = TRUE collapses
+# create networks with relevant attributes. symmetric = true collapses
 # i->j and j->i counts into a single undirected weight; appropriate for
 # the undirected mixing / homophily / multiplexity analyses below.
 verbal_coop_net <- netify(
@@ -113,7 +114,7 @@ material_coop_net <- netify(
     dyad_vars = c("verbConf", "matlConf")
 )
 
-# Combine into multilayer network
+# combine into multilayer network
 multilayer_net <- layer_netify(
     netlet_list = list(verbal_coop_net, material_coop_net),
     layer_labels = c("Verbal", "Material")
@@ -122,9 +123,9 @@ multilayer_net <- layer_netify(
 multilayer_net
 ```
 
-## Visualizing Multilayer Structures
+## visualizing multilayer structures
 
-### Basic Visualization with Interpretation
+### basic visualization with interpretation
 
 ``` r
 
@@ -136,6 +137,8 @@ plot(multilayer_net,
     theme(
         legend.position = "right"
     )
+#> Warning: Removed 6 rows containing missing values or values outside the scale range
+#> (`geom_point()`).
 ```
 
 ![](multilayer_networks_files/figure-html/unnamed-chunk-3-1.png)
@@ -148,19 +151,19 @@ with resources. Node sizes (GDP) show that while large economies
 participate in both networks, material cooperation isn’t simply a
 function of capacity.
 
-### Comparing Network Structures
+### comparing network structures
 
 ``` r
 
-# Get structural comparison
+# get structural comparison
 struct_comp <- compare_networks(multilayer_net, what = "structure")
 struct_comp
 #>    network num_actors density num_edges prop_edges_missing mean_edge_weight
-#> 1   Verbal        152   0.409      4689                  0           19.800
-#> 2 Material        152   0.112      1288                  0            0.521
+#> 1   Verbal        152   0.409      4689                  0            48.50
+#> 2 Material        152   0.112      1288                  0             4.64
 #>   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition
-#> 1          145.3                  0               0            5760       0.040
-#> 2            5.5                  0               0             380       0.038
+#> 1          224.3                  6               1            5760       0.040
+#> 2           15.8                  2               1             380       0.038
 #>   sd_of_actor_means transitivity mean_degree
 #> 1             44.80        0.606        61.7
 #> 2              1.14        0.311        16.9
@@ -169,10 +172,10 @@ struct_comp
 #> density                       density      0.409      0.112          -0.296
 #> num_edges                   num_edges   4689.000   1288.000       -3401.000
 #> prop_edges_missing prop_edges_missing      0.000      0.000           0.000
-#> mean_edge_weight     mean_edge_weight     19.800      0.521         -19.300
-#> sd_edge_weight         sd_edge_weight    145.300      5.500        -139.800
-#> median_edge_weight median_edge_weight      0.000      0.000           0.000
-#> min_edge_weight       min_edge_weight      0.000      0.000           0.000
+#> mean_edge_weight     mean_edge_weight     48.500      4.640         -43.900
+#> sd_edge_weight         sd_edge_weight    224.300     15.800        -208.500
+#> median_edge_weight median_edge_weight      6.000      2.000          -4.000
+#> min_edge_weight       min_edge_weight      1.000      1.000           0.000
 #> max_edge_weight       max_edge_weight   5760.000    380.000       -5380.000
 #> competition               competition      0.040      0.038          -0.002
 #> sd_of_actor_means   sd_of_actor_means     44.800      1.140         -43.700
@@ -183,10 +186,10 @@ struct_comp
 #> density                    -72.50
 #> num_edges                  -72.50
 #> prop_edges_missing             NA
-#> mean_edge_weight           -97.40
-#> sd_edge_weight             -96.20
-#> median_edge_weight             NA
-#> min_edge_weight                NA
+#> mean_edge_weight           -90.40
+#> sd_edge_weight             -92.90
+#> median_edge_weight         -66.70
+#> min_edge_weight              0.00
 #> max_edge_weight            -93.40
 #> competition                 -5.13
 #> sd_of_actor_means          -97.50
@@ -205,20 +208,21 @@ struct_comp
   (0.606 vs 0.311) suggests diplomatic communities form more readily
   than material support clusters
 
-This structural evidence supports the “cheap talk” hypothesis but also
-reveals something deeper: material cooperation follows different
-organizational logics than diplomacy.
+This structural evidence is consistent with a “cheap talk”
+interpretation, but it should be read descriptively here: material
+cooperation follows different patterns than verbal diplomacy in this
+sample.
 
-## Testing Political Science Theories with Multilayer Networks
+## testing political science theories with multilayer networks
 
-### Theory 1: Democratic Peace in Different Domains
+### theory 1: democratic peace in different domains
 
 Do democracies cooperate more with each other? And does this vary by
 cooperation type?
 
 ``` r
 
-# Test homophily across layers
+# test homophily across layers
 multilayer_homophily <- homophily(
     multilayer_net,
     attribute = "i_polity2",
@@ -232,30 +236,31 @@ multilayer_homophily
 #>   mean_similarity_connected mean_similarity_unconnected similarity_difference
 #> 1                 -6.964294                   -7.444698             0.4804043
 #> 2                 -7.016653                   -7.279288             0.2626347
-#>   p_value     ci_lower   ci_upper n_connected_pairs n_unconnected_pairs
-#> 1   0.000  0.023587017 0.06056327              4453                6573
-#> 2   0.133 -0.005243832 0.03430080              1201                9825
+#>       p_value    ci_lower   ci_upper n_connected_pairs n_unconnected_pairs
+#> 1 0.000999001  0.02125211 0.05949489              4453                6573
+#> 2 0.129870130 -0.00710257 0.03415305              1201                9825
 #>   n_missing n_pairs
-#> 1         3   11476
-#> 2         3   11476
+#> 1         3   11026
+#> 2         3   11026
 ```
 
 Democratic homophily registers in verbal cooperation (p \< 0.001) but
 not material cooperation (p = 0.13). The verbal correlation is small in
 absolute terms (about 0.04) – at this magnitude the significance flag
-mostly reflects the large dyad count, so read it as “consistent with a
-diplomatic-channel mechanism” rather than as a clean effect estimate.
-Material support, by contrast, crosses regime boundaries entirely,
-plausibly driven by strategic rather than ideological considerations.
+mostly reflects the large dyad count, so read it as weak evidence
+consistent with regime similarity in diplomatic channels rather than as
+a large association. Material support, by contrast, crosses regime
+boundaries more often, plausibly reflecting strategic rather than
+ideological considerations.
 
-### Theory 2: Regional Security Complexes
+### theory 2: regional security complexes
 
 Do security concerns create regional cooperation clusters? Let’s examine
 regional patterns:
 
 ``` r
 
-# Regional mixing patterns
+# regional mixing patterns
 multilayer_mixing <- mixing_matrix(
     multilayer_net,
     attribute = "i_region"
@@ -272,36 +277,36 @@ multilayer_mixing$summary_stats
 
 Material cooperation shows stronger regional clustering (assortativity =
 0.218) than verbal cooperation (0.156), consistent with regional
-security complex theory – when countries commit resources, they
+security complex theory – when countries commit resources, they often
 prioritize neighbors. Verbal cooperation, being cheaper, is more
 globally distributed. One caveat: material events are substantially
 sparser than verbal ones, and sparse networks mechanically push
 assortativity up (fewer ties means each within-region tie carries more
 weight in the index). Read the gap directionally rather than as a
-precise effect size.
+precise magnitude estimate.
 
-### Theory 3: Conflict-Cooperation Dynamics
+### theory 3: conflict-cooperation dynamics
 
 How does conflict in one domain relate to cooperation in another?
 
 ``` r
 
-# Analyze conflict-cooperation relationships
+# analyze conflict-cooperation relationships
 cross_layer_corr <- dyad_correlation(
     multilayer_net,
     dyad_vars = c("verbConf", "matlConf"),
     edge_vars = c("Verbal", "Material")
 )
 
-# Show key correlations
+# show key correlations
 cross_layer_corr |>
     select(dyad_var, edge_var, correlation, p_value) |>
-    filter(row_number() <= 4) # Show first 4 unique combinations
-#>   dyad_var edge_var correlation p_value
-#> 1 matlConf Material   0.2791647       0
-#> 2 matlConf   Verbal   0.2783377       0
-#> 3 verbConf Material   0.2692519       0
-#> 4 verbConf   Verbal   0.4557314       0
+    filter(row_number() <= 4) # show first 4 unique combinations
+#>   dyad_var edge_var correlation       p_value
+#> 1 matlConf Material   0.2791647 1.855120e-204
+#> 2 matlConf   Verbal   0.2783377 3.274369e-203
+#> 3 verbConf Material   0.2692519 8.521003e-190
+#> 4 verbConf   Verbal   0.4557314  0.000000e+00
 ```
 
 Verbal conflict and verbal cooperation are moderately correlated (r =
@@ -309,19 +314,19 @@ Verbal conflict and verbal cooperation are moderately correlated (r =
 correlations with both cooperation layers (~0.27-0.28), suggesting
 material interactions follow different dynamics than diplomatic ones.
 
-## Identifying Strategic Actors
+## identifying strategic actors
 
-### Who Bridges the Cooperation Gap?
+### who bridges the cooperation gap?
 
 Some countries specialize in material cooperation despite limited
 diplomatic engagement:
 
 ``` r
 
-# Find actor-level patterns
+# find actor-level patterns
 actor_stats <- summary_actor(multilayer_net)
 
-# Identify material cooperation specialists
+# identify material cooperation specialists
 centrality_comparison <- actor_stats |>
     select(actor, layer, degree, betweenness, strength_sum) |>
     pivot_wider(names_from = layer, values_from = c(degree, betweenness, strength_sum))
@@ -336,13 +341,13 @@ material_specialists <- centrality_comparison |>
 
 material_specialists[, c("actor", "betweenness_Verbal", "betweenness_Material", "material_bias")]
 #> # A tibble: 5 × 4
-#>   actor          betweenness_Verbal betweenness_Material material_bias
-#>   <chr>                       <dbl>                <dbl>         <dbl>
-#> 1 Spain                     0                      2978.         2978.
-#> 2 India                     0.124                  2215.         1970.
-#> 3 France                    0.0182                 2004.         1969.
-#> 4 United Kingdom            0.00377                1776.         1770.
-#> 5 Netherlands               0.00338                1644.         1639.
+#>   actor              betweenness_Verbal betweenness_Material material_bias
+#>   <chr>                           <dbl>                <dbl>         <dbl>
+#> 1 Afghanistan                 0.0132                   0.421        0.415 
+#> 2 United States               0.793                    0.691        0.386 
+#> 3 Japan                       0.0000883                0.142        0.142 
+#> 4 Iraq                        0.0260                   0.116        0.113 
+#> 5 Russian Federation          0.462                    0.126        0.0860
 ```
 
 The top material brokers in 2002 – ranked by the ratio of material to
@@ -360,16 +365,18 @@ denominator – this filter is designed to surface countries that are
 *only* important in the material channel, not the overall biggest
 players.
 
-### Power Dynamics Across Layers
+### power dynamics across layers
 
 ``` r
 
-# Compare major powers
+# compare major powers
 plot_actor_stats(
     actor_stats,
     across_actor = FALSE,
     specific_actors = c("United States", "China", "Russian Federation", "Japan", "Germany")
 )
+#> Warning: Removed 21 rows containing missing values or values outside the scale range
+#> (`position_quasirandom()`).
 ```
 
 ![](multilayer_networks_files/figure-html/unnamed-chunk-9-1.png)
@@ -377,20 +384,20 @@ plot_actor_stats(
 **Power Analysis**:
 
 - The US dominates both layers, confirming hegemonic status
-- Russia shows high verbal but lower material engagement – influence
-  through diplomacy rather than resources
+- Russia shows high verbal but lower material engagement – a
+  diplomacy-heavy profile in these layers
 - China (in 2002) shows moderate engagement, presaging its later rise
 - Japan’s material cooperation exceeds its diplomatic footprint
 - Germany balances both dimensions, reflecting EU leadership
 
-## Understanding Multiplexity: The Architecture of International Relations
+## understanding multiplexity: the architecture of international relations
 
 Multiplexity analysis reveals which relationships involve multiple types
 of interaction – a key indicator of relationship depth and stability:
 
 ``` r
 
-# Analyze edge patterns
+# analyze edge patterns
 verbal_melt <- melt(verbal_coop_net, remove_zeros = FALSE, na.rm = TRUE)
 material_melt <- melt(material_coop_net, remove_zeros = FALSE, na.rm = TRUE)
 
@@ -402,7 +409,7 @@ edge_comparison <- merge(
 ) |>
     filter(value_verbal > 0 | value_material > 0)
 
-# Categorize relationships
+# categorize relationships
 multiplexity_summary <- edge_comparison |>
     mutate(
         relationship_type = case_when(
@@ -412,7 +419,7 @@ multiplexity_summary <- edge_comparison |>
         )
     )
 
-# Summary and visualization
+# summary and visualization
 table(multiplexity_summary$relationship_type)
 #> 
 #> Material Only     Multiplex   Verbal Only 
@@ -446,11 +453,11 @@ ggplot(multiplexity_summary, aes(x = relationship_type)) +
 - The 2,452 multiplex relationships form the stable core of
   international cooperation
 
-### Who Has Multiplex Relationships?
+### who has multiplex relationships?
 
 ``` r
 
-# Identify multiplex relationships
+# identify multiplex relationships
 multiplex_pairs <- multiplexity_summary |>
     filter(relationship_type == "Multiplex") |>
     mutate(total_coop = value_verbal + value_material) |>
@@ -477,46 +484,50 @@ and strategic competitors (China) also show high multiplexity,
 indicating relationship importance transcends simple friend/foe
 categories.
 
-## Advanced Analysis: Layer Dependencies
+## advanced analysis: layer dependencies
 
-### How Do Layers Relate?
+### how do layers relate?
 
 ``` r
 
-# Comprehensive layer comparison
+# compare all layer pairs
 layer_comparison <- compare_networks(multilayer_net, what = "edges", method = "all")
 layer_comparison
 #>           comparison correlation jaccard hamming qap_correlation qap_pvalue
-#> 1 Verbal vs Material       0.472   0.258   0.305           0.472          0
+#> 1 Verbal vs Material       0.472   0.258   0.307           0.472      2e-04
 #>   spectral
 #> 1 9.12e+04
 #>             Verbal  Material
-#> Verbal   1.0000000 0.4718002
-#> Material 0.4718002 1.0000000
+#> Verbal   1.0000000 0.4717581
+#> Material 0.4717581 1.0000000
+#>              Verbal   Material
+#> Verbal           NA 0.00019996
+#> Material 0.00019996         NA
+#> attr(,"n_perm")
+#> [1] 5000
 #>          Verbal Material
-#> Verbal        0        0
-#> Material      0        0
+#> Verbal       NA     5000
+#> Material   5000       NA
 #> attr(,"n_perm")
 #> [1] 5000
 ```
 
 **Key Metrics Explained**:
 
-- **Correlation (0.472)**: Moderate positive relationship – verbal
-  cooperation somewhat predicts material cooperation
+- **Correlation (0.472)**: Moderate positive relationship – dyads with
+  more verbal cooperation also tend to have more material cooperation
 - **Jaccard (0.258)**: Only 26% edge overlap – most relationships exist
   in just one layer
 - **Hamming (0.305)**: About 30% of possible edges differ between layers
-- **QAP test (p \< 0.001)**: The correlation is statistically
-  significant, not due to chance
+- **QAP test (p \< 0.001)**: The observed correlation is larger than
+  expected under the permutation reference distribution
 
 For downstream filtering and plotting,
 [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md)
 also exposes a tidy `$comparisons` data frame with one row per (pair,
 metric). This is the layout you usually want when you have more than two
-networks (see the multilayer section of
-[`vignette("tracking_changes")`](https://netify-dev.github.io/netify/articles/tracking_changes.md)
-for a fuller example):
+networks; the project-site tracking-changes article has a fuller
+example.
 
 ``` r
 
@@ -531,17 +542,17 @@ knitr::kable(
 |:------:|:--------:|:---------------:|:---------:|:-------:|
 | Verbal | Material |   correlation   |   0.472   |   NA    |
 | Verbal | Material |     jaccard     |   0.258   |   NA    |
-| Verbal | Material |     hamming     |   0.305   |   NA    |
+| Verbal | Material |     hamming     |   0.307   |   NA    |
 | Verbal | Material | qap_correlation |   0.472   |    0    |
 | Verbal | Material |    spectral     | 91163.546 |   NA    |
 
 Tidy per-pair comparison frame {.table}
 
-### Visualizing Layer Relationships
+### visualizing layer relationships
 
 ``` r
 
-# Cross-layer scatter
+# cross-layer scatter
 ggplot(edge_comparison, aes(x = log1p(value_verbal), y = log1p(value_material))) +
     geom_point(alpha = 0.2) +
     geom_smooth(method = "lm", se = TRUE) +
@@ -565,15 +576,15 @@ ggplot(edge_comparison, aes(x = log1p(value_verbal), y = log1p(value_material)))
 
 ![](multilayer_networks_files/figure-html/unnamed-chunk-14-1.png)
 
-## Temporal Dynamics in Multilayer Networks
+## temporal dynamics in multilayer networks
 
 Understanding how different layers evolve over time reveals changing
 cooperation dynamics:
 
 ``` r
 
-# Create temporal multilayer network
-years_example <- c(2001, 2002, 2003) # Around 9/11
+# create temporal multilayer network
+years_example <- c(2002, 2003, 2004)
 icews_subset <- icews[icews$year %in% years_example, ]
 
 verbal_temporal <- netify(
@@ -597,7 +608,7 @@ temporal_multilayer <- layer_netify(
     layer_labels = c("Verbal", "Material")
 )
 
-# Visualize evolution
+# visualize evolution
 plot(temporal_multilayer,
     add_text = FALSE,
     facet_type = "wrap",
@@ -607,17 +618,17 @@ plot(temporal_multilayer,
 
 ![](multilayer_networks_files/figure-html/unnamed-chunk-15-1.png)
 
-The post-9/11 period shows network evolution. Both layers densify from
-2001 to 2003, but material cooperation grows more selectively,
+The early-2000s period shows network evolution. Both layers change from
+2002 to 2004, but material cooperation grows more selectively,
 suggesting crisis-driven coalition building.
 
-## Practical Recommendations
+## practical recommendations
 
-### When to Use Multilayer vs. Separate Analysis
+### when to use multilayer vs. separate analysis
 
 **Use multilayer when:**
 
-- Relationships theoretically influence each other
+- Relationships are theoretically related to each other
 - You suspect substitution or complementarity effects
 - Actor positions might differ across relationship types
 - You need to identify relationship depth through multiplexity
@@ -629,9 +640,9 @@ suggesting crisis-driven coalition building.
 - Computational constraints exist
 - Initial exploration before multilayer modeling
 
-### Choosing Analysis Methods
+### choosing analysis methods
 
-1.  **For regime type effects**: Use
+1.  **For regime type patterns**: Use
     [`homophily()`](https://netify-dev.github.io/netify/reference/homophily.md)
     with “correlation” method for continuous variables like polity
     scores
@@ -640,7 +651,7 @@ suggesting crisis-driven coalition building.
     to see full interaction patterns
 3.  **For relationship strength**: Use
     [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md)
-    with `what="edges"` and `method="all"` for comprehensive comparison
+    with `what="edges"` and `method="all"` to compare edge patterns
 4.  **For individual actors**: Use
     [`summary_actor()`](https://netify-dev.github.io/netify/reference/summary_actor.md)
     and examine layer-specific centralities
@@ -655,9 +666,10 @@ single-layer analysis, we can:
 2.  Identify actors with specialized roles across different domains
 3.  Understand the architecture of complex political systems
 4.  Track how relationship portfolios evolve over time
-5.  Most importantly … have fun!
+5.  Keep layer-specific interpretations tied to the measurement scale
+    and sparsity of each layer
 
-## References
+## references
 
 1.  Dorff, C., Gallop, M., & Minhas, S. (2020). Networks of Violence:
     Predicting Conflict in Nigeria. The Journal of Politics, 82(2),
@@ -670,5 +682,5 @@ single-layer analysis, we can:
 
 3.  Minhas, S., Hoff, P. D., & Ward, M. D. (2016). A new approach to
     analyzing coevolving longitudinal networks in international
-    relations. Journal of Peace Research, 53(3), 491–505.
-    <https://doi.org/10.1177/0022343316630783Minhas>,
+    relations. Journal of Peace Research, 53(3), 491-505.
+    <https://doi.org/10.1177/0022343316630783>

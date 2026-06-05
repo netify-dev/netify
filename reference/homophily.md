@@ -1,7 +1,7 @@
 # Analyze homophily in network data
 
-Tests whether connected actors have similar attributes (homophily).
-Calculates the correlation between attribute similarity and tie
+tests whether connected actors have similar attributes (homophily).
+calculates the correlation between attribute similarity and tie
 presence, with support for multiple similarity metrics and significance
 testing.
 
@@ -26,198 +26,199 @@ homophily(
 
 - netlet:
 
-  A netify object containing network data.
+  a netify object containing network data.
 
 - attribute:
 
-  Character string specifying the nodal attribute to analyze.
+  character string specifying the nodal attribute to analyze.
 
 - method:
 
-  Character string specifying the similarity metric:
+  character string specifying the similarity metric:
 
   "correlation"
 
-  :   Negative absolute difference for continuous data (default)
+  :   negative absolute difference for continuous data (default)
 
   "euclidean"
 
-  :   Negative euclidean distance for continuous data
+  :   negative euclidean distance for continuous data
 
   "manhattan"
 
-  :   Negative Manhattan/city-block distance for continuous data
+  :   negative manhattan/city-block distance for continuous data
 
   "cosine"
 
-  :   Cosine similarity for continuous data
+  :   cosine similarity for continuous data
 
   "categorical"
 
-  :   Binary similarity (0/1) for categorical data
+  :   binary similarity (0/1) for categorical data
 
   "jaccard"
 
-  :   Jaccard similarity for binary/presence-absence data
+  :   jaccard similarity for binary/presence-absence data
 
   "hamming"
 
-  :   Negative Hamming distance for categorical data
+  :   negative hamming distance for categorical data
 
 - threshold:
 
-  Numeric value or function to determine tie presence in weighted
-  networks. If numeric, edges with weights \> threshold are considered
-  ties. If a function, it should take the network matrix and return a
-  logical matrix. Default is 0 (any positive weight is a tie). Common
+  numeric value or function to determine tie presence in weighted
+  networks. if numeric, edges with weights \> threshold are considered
+  ties. if a function, it should take the network matrix and return a
+  logical matrix. default is 0 (any positive weight is a tie). common
   values: 0 (default), mean(weights), median(weights), or quantile-based
-  thresholds. For pre-binarized networks, consider using
+  thresholds. for pre-binarized networks, consider using
   [`mutate_weights()`](https://netify-dev.github.io/netify/reference/mutate_weights.md)
   first.
 
 - signed_handling:
 
-  Character. Strategy for signed (negative-weight) edges:
+  character. strategy for signed (negative-weight) edges:
 
   `"abs"`
 
-  :   (default) Take absolute values before thresholding so any tie
-      magnitude — positive or negative — can become a connection.
+  :   (default) take absolute values before thresholding so any tie
+      magnitude – positive or negative – can become a connection.
 
   `"drop_negative"`
 
-  :   Set negative weights to zero before thresholding (positive ties
+  :   set negative weights to zero before thresholding (positive ties
       only).
 
   `"preserve_sign"`
 
-  :   Treat any non-zero entry (positive or negative) as a connection;
+  :   treat any non-zero entry (positive or negative) as a connection;
       `threshold` is ignored for sign decisions.
 
-  Ignored when the network has no negative weights.
+  ignored when the network has no negative weights.
 
 - significance_test:
 
-  Logical. Whether to perform permutation test. Default TRUE.
+  logical. whether to perform a dyad-level permutation test. default
+  TRUE.
 
 - n_permutations:
 
-  Number of permutations for significance testing. Default 1000.
+  number of permutations for significance testing. default 1000.
 
 - alpha:
 
-  Significance level for confidence intervals. Default 0.05.
+  significance level for confidence intervals. default 0.05.
 
 - other_stats:
 
-  Named list of custom functions for additional statistics.
+  named list of custom functions for additional statistics.
 
 - ...:
 
-  Additional arguments passed to custom functions.
+  additional arguments passed to custom functions.
 
 ## Value
 
-Data frame with homophily statistics per network/time period:
+data frame with homophily statistics per network/time period:
 
 - `net`:
 
-  Network/time identifier
+  network/time identifier
 
 - `layer`:
 
-  Layer name
+  layer name
 
 - `attribute`:
 
-  Analyzed attribute name
+  analyzed attribute name
 
 - `method`:
 
-  Similarity method used
+  similarity method used
 
 - `threshold_value`:
 
-  Threshold used for determining ties (NA for binary networks)
+  threshold used for determining ties (na for binary networks)
 
 - `homophily_correlation`:
 
-  Correlation between similarity and tie presence (binary: tie/no tie)
+  correlation between similarity and tie presence (binary: tie/no tie)
 
 - `mean_similarity_connected`:
 
-  Mean similarity among connected pairs (weight \> threshold)
+  mean similarity among connected pairs (weight \> threshold)
 
 - `mean_similarity_unconnected`:
 
-  Mean similarity among unconnected pairs (weight \<= threshold or
+  mean similarity among unconnected pairs (weight \<= threshold or
   missing)
 
 - `similarity_difference`:
 
-  Difference between connected and unconnected mean similarities
+  difference between connected and unconnected mean similarities
 
 - `p_value`:
 
-  Permutation test p-value
+  permutation test p-value
 
 - `ci_lower`, `ci_upper`:
 
-  Confidence interval bounds
+  confidence interval bounds
 
 - `n_connected_pairs`:
 
-  Number of connected pairs
+  number of connected pairs
 
 - `n_unconnected_pairs`:
 
-  Number of unconnected pairs
+  number of unconnected pairs
 
 ## Details
 
-**Auto-promotion to `categorical`:**
+**auto-promotion to `categorical`:**
 
-If you leave `method` at its default and pass a `character`, `factor`,
+if you leave `method` at its default and pass a `character`, `factor`,
 or `logical` attribute, `homophily()` will switch to
 `method = "categorical"` automatically and inform you once per
-attribute. This avoids the C++-level error that would otherwise come
+attribute. this avoids the c++-level error that would otherwise come
 from feeding non-numeric data to the correlation-based similarity
-routine. Pass `method = "categorical"` (or any other explicit choice) to
+routine. pass `method = "categorical"` (or any other explicit choice) to
 silence the message.
 
-**Similarity Metrics:**
+**similarity metrics:**
 
-For continuous attributes:
+for continuous attributes:
 
-- `correlation`: Based on absolute difference, good general purpose
+- `correlation`: based on absolute difference, good general purpose
   metric
 
-- `euclidean`: Similar to correlation for single attributes
+- `euclidean`: similar to correlation for single attributes
 
-- `manhattan`: Less sensitive to outliers than euclidean
+- `manhattan`: less sensitive to outliers than euclidean
 
-- `cosine`: Useful for normalized data or when sign matters
+- `cosine`: useful for normalized data or when sign matters
 
-For categorical/binary attributes:
+for categorical/binary attributes:
 
-- `categorical`: Simple matching (1 if same, 0 if different)
+- `categorical`: simple matching (1 if same, 0 if different)
 
-- `jaccard`: For binary data, emphasizes shared presence over shared
+- `jaccard`: for binary data, emphasizes shared presence over shared
   absence
 
-- `hamming`: Counts positions where values differ (negated for
+- `hamming`: counts positions where values differ (negated for
   similarity)
 
-**Threshold Parameter:**
+**threshold parameter:**
 
-For weighted networks, the `threshold` parameter determines what edge
-weights constitute a "connection". You can specify:
+for weighted networks, the `threshold` parameter determines what edge
+weights constitute a "connection". you can specify:
 
-- A numeric value: edges with weight \> threshold are ties
+- a numeric value: edges with weight \> threshold are ties
 
-- A function: should take a matrix and return a single numeric threshold
+- a function: should take a matrix and return a single numeric threshold
 
-- Common threshold functions:
+- common threshold functions:
 
   - `function(x) mean(x, na.rm = TRUE)` - mean weight
 
@@ -225,14 +226,24 @@ weights constitute a "connection". You can specify:
 
   - `function(x) quantile(x, 0.75, na.rm = TRUE)` - 75th percentile
 
-For more complex binarization needs (e.g., different thresholds by time
+for more complex binarization needs (e.g., different thresholds by time
 period), consider using
 [`mutate_weights()`](https://netify-dev.github.io/netify/reference/mutate_weights.md)
 to pre-process your network.
 
+**permutation test:**
+
+when `significance_test = TRUE`, `homophily()` holds the tie indicators
+fixed and permutes the dyad-level similarity values to form an
+exploratory reference distribution. the resulting p-value and confidence
+interval summarize how unusual the observed dyad-level association is
+under that exchangeability assumption. they are not a node-label
+permutation test and should not be read as a causal estimate of tie
+formation.
+
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
@@ -252,37 +263,37 @@ homophily(net, attribute = "gender", method = "categorical")
 #> 1   1 weight1    gender categorical              NA            0.07436588
 #>   mean_similarity_connected mean_similarity_unconnected similarity_difference
 #> 1                 0.6666667                   0.5520833             0.1145833
-#>   p_value    ci_lower  ci_upper n_connected_pairs n_unconnected_pairs n_missing
-#> 1   0.125 -0.01847974 0.1638452                51                 384         0
-#>   n_pairs
-#> 1     435
+#>     p_value    ci_lower  ci_upper n_connected_pairs n_unconnected_pairs
+#> 1 0.1278721 -0.02260239 0.1701738                51                 384
+#>   n_missing n_pairs
+#> 1         0     435
 
 if (FALSE) { # \dontrun{
-# Basic homophily analysis with default threshold (> 0)
+# basic homophily analysis with default threshold (> 0)
 homophily_default <- homophily(net, attribute = "group")
 
-# Using different similarity metrics for continuous data
+# using different similarity metrics for continuous data
 homophily_manhattan <- homophily(
     net,
     attribute = "age",
-    method = "manhattan" # Less sensitive to outliers
+    method = "manhattan" # less sensitive to outliers
 )
 
-# For binary attributes (e.g., gender, membership)
+# for binary attributes (e.g., gender, membership)
 homophily_jaccard <- homophily(
     net,
     attribute = "member",
-    method = "jaccard" # Better for binary data than correlation
+    method = "jaccard" # better for binary data than correlation
 )
 
-# For categorical attributes
+# for categorical attributes
 homophily_categorical <- homophily(
     net,
     attribute = "department",
     method = "categorical"
 )
 
-# Combining method and threshold
+# combining method and threshold
 homophily_combined <- homophily(
     net,
     attribute = "score",

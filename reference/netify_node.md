@@ -1,7 +1,7 @@
-# Extract nodes layer from netify plot components
+# extract nodes layer from netify plot components
 
-Extracts the node (point) layer from a netify plot components object,
-allowing for manual plot construction and customization. Nodes represent
+extracts the node (point) layer from a netify plot components object,
+allowing for manual plot construction and customization. nodes represent
 actors in the network and can have various aesthetic mappings like size,
 color, and shape.
 
@@ -15,13 +15,13 @@ netify_node(comp)
 
 - comp:
 
-  A netify_plot_components object returned from
+  a netify_plot_components object returned from
   `plot(..., return_components = TRUE)`
 
 ## Value
 
-A custom object of class "netify_node" that can be added to a ggplot
-object using the + operator. The object contains the node layer with all
+a custom object of class "netify_node" that can be added to a ggplot
+object using the + operator. the object contains the node layer with all
 its aesthetic mappings and data.
 
 ## See also
@@ -32,7 +32,7 @@ its aesthetic mappings and data.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

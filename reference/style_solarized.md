@@ -1,6 +1,6 @@
-# Solarized-inspired network style
+# solarized-inspired network style
 
-A network style based on the popular Solarized color scheme, optimized
+a network style based on the popular solarized color scheme, optimized
 for reduced eye strain
 
 ## Usage
@@ -11,8 +11,8 @@ style_solarized()
 
 ## Value
 
-List of plot arguments
+list of plot arguments
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

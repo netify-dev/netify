@@ -1,6 +1,6 @@
-# List available network styles
+# list available network styles
 
-Shows all available preset network styles with descriptions
+shows all available preset network styles with descriptions
 
 ## Usage
 
@@ -10,8 +10,8 @@ list_network_styles()
 
 ## Value
 
-A data frame with style names and descriptions
+a data frame with style names and descriptions
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

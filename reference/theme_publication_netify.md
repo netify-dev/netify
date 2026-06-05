@@ -1,8 +1,8 @@
 # ggplot theme for netify network plots
 
-A ggplot theme with a larger base font, italicized legend titles, and
-(by default) stripped axes / panel chrome — the right default for a
-force-directed network layout. Drop on top of any
+a ggplot theme with a larger base font, italicized legend titles, and
+(by default) stripped axes / panel chrome – the right default for a
+force-directed network layout. drop on top of any
 [`plot.netify()`](https://netify-dev.github.io/netify/reference/plot.netify.md)
 output.
 
@@ -16,21 +16,21 @@ theme_publication_netify(base_size = 12, for_network = TRUE)
 
 - base_size:
 
-  Base font size, passed to
+  base font size, passed to
   [`theme_minimal()`](https://ggplot2.tidyverse.org/reference/ggtheme.html).
-  Default 12.
+  default 12.
 
 - for_network:
 
-  Logical. When `TRUE` (default) removes axis text / titles / ticks /
+  logical. when `TRUE` (default) removes axis text / titles / ticks /
   panel border, which is the right behavior for a force-directed network
-  layout. Set `FALSE` if you want to keep axes on (e.g. for a heatmap or
+  layout. set `FALSE` if you want to keep axes on (e.g. for a heatmap or
   actor-stat plot).
 
 ## Value
 
-A ggplot2 theme object.
+a ggplot2 theme object.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

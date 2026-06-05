@@ -19,20 +19,21 @@ a data frame of nodal attributes."></head><body>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/quickstart_inference.html">Get started</a></li>
+<li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Quickstart to Inference</a></li>
+    <li><a class="dropdown-item" href="../articles/quickstart_inference.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul></li>
@@ -69,59 +70,59 @@ a data frame of nodal attributes.</p>
 
 
 <dl><dt id="arg-netlet">netlet<a class="anchor" aria-label="anchor" href="#arg-netlet"></a></dt>
-<dd><p>A netify object (class "netify") to be decomposed.</p></dd>
+<dd><p>a netify object (class "netify") to be decomposed.</p></dd>
 
 
 <dt id="arg-remove-zeros">remove_zeros<a class="anchor" aria-label="anchor" href="#arg-remove-zeros"></a></dt>
-<dd><p>Logical. If TRUE (default), edges with zero weight values
-are removed from the edge data frame. If FALSE, zero-weight edges are retained.</p></dd>
+<dd><p>logical. if TRUE (default), edges with zero weight values
+are removed from the edge data frame. if FALSE, zero-weight edges are retained.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing two data frames:</p><ul><li><p><strong>edge_data</strong>: A data frame where each row represents an edge with columns:</p><ul><li><p><code>from</code>: Source node identifier</p></li>
-<li><p><code>to</code>: Target node identifier</p></li>
-<li><p><code>time</code>: Time period (character; "1" for cross-sectional networks)</p></li>
-<li><p><code>weight</code>: Edge weight values (using original weight variable name if specified)</p></li>
-<li><p>Additional columns for any dyadic variables stored in the netify object</p></li>
+    <p>a list containing two data frames:</p><ul><li><p><strong>edge_data</strong>: a data frame where each row represents an edge with columns:</p><ul><li><p><code>from</code>: source node identifier</p></li>
+<li><p><code>to</code>: target node identifier</p></li>
+<li><p><code>time</code>: time period (character; "1" for cross-sectional networks)</p></li>
+<li><p><code>weight</code>: edge weight values (using original weight variable name if specified)</p></li>
+<li><p>additional columns for any dyadic variables stored in the netify object</p></li>
 </ul></li>
-<li><p><strong>nodal_data</strong>: A data frame where each row represents a node-time combination with columns:</p><ul><li><p><code>name</code>: Node identifier</p></li>
-<li><p><code>time</code>: Time period (character; "1" for cross-sectional networks)</p></li>
-<li><p>Additional columns for any nodal variables stored in the netify object</p></li>
+<li><p><strong>nodal_data</strong>: a data frame where each row represents a node-time combination with columns:</p><ul><li><p><code>name</code>: node identifier</p></li>
+<li><p><code>time</code>: time period (character; "1" for cross-sectional networks)</p></li>
+<li><p>additional columns for any nodal variables stored in the netify object</p></li>
 </ul></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The function helpful for:</p>
-<p><strong>Edge data processing:</strong></p><ul><li><p>Extracts the adjacency matrix (or array for longitudinal networks) from the netify object</p></li>
-<li><p>Optionally removes zero-weight edges based on the remove_zeros parameter</p></li>
-<li><p>Merges any dyadic variables stored in the netify object</p></li>
-<li><p>Renames columns to standardized names (from, to, time)</p></li>
-</ul><p><strong>Node data processing:</strong></p><ul><li><p>Extracts nodal attributes if present, or constructs from actor_pds information</p></li>
-<li><p>Ensures consistent time variable across node and edge data</p></li>
-<li><p>Renames columns to standardized names (name, time)</p></li>
-</ul><p><strong>Time handling:</strong></p><ul><li><p>For cross-sectional networks: Sets time to "1" in both data frames</p></li>
-<li><p>For longitudinal networks: Preserves original time periods as character values</p></li>
-<li><p>For ego networks: Extracts time from ego-time concatenated identifiers</p></li>
-</ul><p><strong>Variable preservation:</strong></p>
-<p>All dyadic and nodal variables stored in the netify object are preserved in the
-output data frames. Dyadic variables are merged with the edge data, while nodal
+    <p>the function helpful for:</p>
+<p><strong>edge data processing:</strong></p><ul><li><p>extracts the adjacency matrix (or array for longitudinal networks) from the netify object</p></li>
+<li><p>optionally removes zero-weight edges based on the remove_zeros parameter</p></li>
+<li><p>merges any dyadic variables stored in the netify object</p></li>
+<li><p>renames columns to standardized names (from, to, time)</p></li>
+</ul><p><strong>node data processing:</strong></p><ul><li><p>extracts nodal attributes if present, or constructs from actor_pds information</p></li>
+<li><p>ensures consistent time variable across node and edge data</p></li>
+<li><p>renames columns to standardized names (name, time)</p></li>
+</ul><p><strong>time handling:</strong></p><ul><li><p>for cross-sectional networks: sets time to "1" in both data frames</p></li>
+<li><p>for longitudinal networks: preserves original time periods as character values</p></li>
+<li><p>for ego networks: extracts time from ego-time concatenated identifiers</p></li>
+</ul><p><strong>variable preservation:</strong></p>
+<p>all dyadic and nodal variables stored in the netify object are preserved in the
+output data frames. dyadic variables are merged with the edge data, while nodal
 variables remain in the nodal data frame.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
-    <p>Cassy Dorff, Shahryar Minhas</p>
+    <p>cassy dorff, shahryar minhas</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Load example data</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># load example data</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 1: Cross-sectional network</span></span></span>
+<span class="r-in"><span><span class="co"># example 1: cross-sectional network</span></span></span>
 <span class="r-in"><span><span class="va">icews_10</span> <span class="op">&lt;-</span> <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Create netify object</span></span></span>
+<span class="r-in"><span><span class="co"># create netify object</span></span></span>
 <span class="r-in"><span><span class="va">net_cs</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">icews_10</span>,</span></span>
 <span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
@@ -129,10 +130,10 @@ variables remain in the nodal data frame.</p>
 <span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Decompose to data frames</span></span></span>
+<span class="r-in"><span><span class="co"># decompose to data frames</span></span></span>
 <span class="r-in"><span><span class="va">decomposed_cs</span> <span class="op">&lt;-</span> <span class="fu">decompose_netify</span><span class="op">(</span><span class="va">net_cs</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Examine structure</span></span></span>
+<span class="r-in"><span><span class="co"># examine structure</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">decomposed_cs</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ edge_data :'data.frame':	9976 obs. of  4 variables:</span>
@@ -160,21 +161,21 @@ variables remain in the nodal data frame.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5   Argentina    1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6     Armenia    1</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 2: Keep zero-weight edges</span></span></span>
+<span class="r-in"><span><span class="co"># example 2: keep zero-weight edges</span></span></span>
 <span class="r-in"><span><span class="va">decomposed_with_zeros</span> <span class="op">&lt;-</span> <span class="fu">decompose_netify</span><span class="op">(</span><span class="va">net_cs</span>, remove_zeros <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Compare edge counts</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">decomposed_cs</span><span class="op">$</span><span class="va">edge_data</span><span class="op">)</span> <span class="co"># Without zeros</span></span></span>
+<span class="r-in"><span><span class="co"># compare edge counts</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">decomposed_cs</span><span class="op">$</span><span class="va">edge_data</span><span class="op">)</span> <span class="co"># without zeros</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 9976</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">decomposed_with_zeros</span><span class="op">$</span><span class="va">edge_data</span><span class="op">)</span> <span class="co"># With zeros</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">decomposed_with_zeros</span><span class="op">$</span><span class="va">edge_data</span><span class="op">)</span> <span class="co"># with zeros</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 22952</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Example 4: Use for visualization prep</span></span></span>
+<span class="r-in"><span><span class="co"># example 4: use for visualization prep</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Decompose for use with ggplot2</span></span></span>
+<span class="r-in"><span><span class="co"># decompose for use with ggplot2</span></span></span>
 <span class="r-in"><span><span class="va">plot_data</span> <span class="op">&lt;-</span> <span class="fu">decompose_netify</span><span class="op">(</span><span class="va">net_cs</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Can now use edge_data and nodal_data separately</span></span></span>
+<span class="r-in"><span><span class="co"># can now use edge_data and nodal_data separately</span></span></span>
 <span class="r-in"><span><span class="co"># for network visualization</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

@@ -1,7 +1,7 @@
 # Create multilayer networks from multiple netify objects
 
 `layer_netify` combines multiple netify objects into a single multilayer
-network structure. Each input network becomes a layer in the resulting
+network structure. each input network becomes a layer in the resulting
 multilayer network, enabling analysis of multiple relationship types or
 network views simultaneously.
 
@@ -15,75 +15,75 @@ layer_netify(netlet_list, ..., layer_labels = NULL)
 
 - netlet_list:
 
-  A list of netify objects to layer together, or the first netify object
-  when passing multiple objects as separate arguments via `...`. All
-  objects must have compatible dimensions and attributes (see Details).
+  a list of netify objects to layer together, or the first netify object
+  when passing multiple objects as separate arguments via `...`. all
+  objects must have compatible dimensions and attributes (see details).
 
 - ...:
 
-  Additional netify objects. When provided, `netlet_list` should be a
-  single netify object and all arguments are collected into a list. This
+  additional netify objects. when provided, `netlet_list` should be a
+  single netify object and all arguments are collected into a list. this
   allows calling `layer_netify(net1, net2, net3)` as a shorthand for
   `layer_netify(list(net1, net2, net3))`.
 
 - layer_labels:
 
-  Character vector specifying names for each layer. If NULL (default),
+  character vector specifying names for each layer. if NULL (default),
   uses names from netlet_list or generates generic labels ("layer1",
-  "layer2", etc.). Length must match the number of netify objects.
+  "layer2", etc.). length must match the number of netify objects.
 
 ## Value
 
-A multilayer netify object with structure depending on input type:
+a multilayer netify object with structure depending on input type:
 
-- **Cross-sectional input**: 3D array `[actors × actors × layers]`
+- **cross-sectional input**: 3d array `[actors x actors x layers]`
 
-- **Longitudinal array input**: 4D array
-  `[actors × actors × layers × time]`
+- **longitudinal array input**: 4d array
+  `[actors x actors x layers x time]`
 
-- **Longitudinal list input**: List of 3D arrays, one per time period
+- **longitudinal list input**: list of 3d arrays, one per time period
 
-The returned object maintains the netify class and includes:
+the returned object maintains the netify class and includes:
 
-- Combined nodal attributes (if compatible)
+- combined nodal attributes (if compatible)
 
-- Combined dyadic attributes (if compatible)
+- combined dyadic attributes (if compatible)
 
-- Layer information accessible via `attr(obj, 'layers')`
+- layer information accessible via `attr(obj, 'layers')`
 
-- All standard netify attributes
+- all standard netify attributes
 
 ## Details
 
-**Compatibility requirements:**
+**compatibility requirements:**
 
-All netify objects in netlet_list must have identical:
+all netify objects in netlet_list must have identical:
 
-- Network type (cross-sectional or longitudinal)
+- network type (cross-sectional or longitudinal)
 
-- Dimensions (same actors and time periods)
+- dimensions (same actors and time periods)
 
-- Mode (all unipartite or all bipartite)
+- mode (all unipartite or all bipartite)
 
-- Actor composition (same actors in same order)
+- actor composition (same actors in same order)
 
-**Mixed directedness:**
+**mixed directedness:**
 
-Layers are allowed to have different symmetry settings (e.g., some
-symmetric and others directed). When layers have mixed directedness, the
+layers are allowed to have different symmetry settings (e.g., some
+symmetric and others directed). when layers have mixed directedness, the
 `symmetric` attribute is stored as a named logical vector with one
 element per layer.
 
-**Attribute handling:**
+**attribute handling:**
 
-Nodal and dyadic attributes are combined when possible:
+nodal and dyadic attributes are combined when possible:
 
-- If attributes are identical across layers, the first layer's
+- if attributes are identical across layers, the first layer's
   attributes are used
 
-- If attributes differ but have compatible structure, they are merged
+- if attributes differ but have compatible structure, they are merged
 
-- If attributes are incompatible, a warning is issued and attributes
+- if attributes are incompatible, a warning is issued and attributes
   must be added manually using
   [`add_node_vars()`](https://netify-dev.github.io/netify/reference/add_node_vars.md)
   or
@@ -91,24 +91,24 @@ Nodal and dyadic attributes are combined when possible:
 
 ## Note
 
-Memory usage increases with the number of layers. For large networks
+memory usage increases with the number of layers. for large networks
 with many layers, consider whether all layers are necessary for your
 analysis.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
-# Load example data
+# load example data
 data(icews)
 
-# Example 1: Cross-sectional multilayer network
+# example 1: cross-sectional multilayer network
 icews_10 <- icews[icews$year == 2010, ]
 
-# Create separate networks for different interaction types
+# create separate networks for different interaction types
 verbal_coop <- netify(
     icews_10,
     actor1 = "i", actor2 = "j",
@@ -127,20 +127,20 @@ material_coop <- netify(
     dyad_vars = "matlConf"
 )
 
-# Layer them together
+# layer them together
 coop_multilayer <- layer_netify(
     netlet_list = list(verbal_coop, material_coop),
-    layer_labels = c("Verbal", "Material")
+    layer_labels = c("verbal", "material")
 )
 
-# Check structure
-dim(get_raw(coop_multilayer)) # [actors × actors × 2]
+# check structure
+dim(get_raw(coop_multilayer)) # [actors x actors x 2]
 #> [1] 152 152   2
-attr(coop_multilayer, "layers") # "Verbal" "Material"
-#> [1] "Verbal"   "Material"
+attr(coop_multilayer, "layers") # "verbal" "material"
+#> [1] "verbal"   "material"
 
 # \donttest{
-# Example 2: Longitudinal multilayer (array format)
+# example 2: longitudinal multilayer (array format)
 verbal_longit <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
@@ -157,13 +157,13 @@ material_longit <- netify(
     output_format = "longit_array"
 )
 
-# Create longitudinal multilayer
+# create longitudinal multilayer
 longit_multilayer <- layer_netify(
     list(verbal_longit, material_longit),
-    layer_labels = c("Verbal", "Material")
+    layer_labels = c("verbal", "material")
 )
 
-dim(get_raw(longit_multilayer)) # [actors × actors × 2 × years]
+dim(get_raw(longit_multilayer)) # [actors x actors x 2 x years]
 #> [1] 152 152   2  13
 # }
 ```

@@ -1,6 +1,6 @@
-# Retro 80s-inspired network style
+# retro 80s-inspired network style
 
-A network style channeling 1980s design aesthetics with bold colors and
+a network style channeling 1980s design aesthetics with bold colors and
 geometric shapes
 
 ## Usage
@@ -11,8 +11,8 @@ style_retro80s()
 
 ## Value
 
-List of plot arguments
+list of plot arguments
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

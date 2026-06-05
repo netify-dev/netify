@@ -1,9 +1,9 @@
-# Synthetic high-school friendship edgelist
+# synthetic high-school friendship edgelist
 
-A small synthetic edgelist of reported friendships among 30 students
+a small synthetic edgelist of reported friendships among 30 students
 (see
 [`classroom_nodes`](https://netify-dev.github.io/netify/reference/classroom_nodes.md)).
-Ties are **undirected** – each row records that two students named each
+ties are **undirected** – each row records that two students named each
 other as friends.
 
 ## Usage
@@ -14,20 +14,20 @@ data(classroom_edges)
 
 ## Format
 
-A data frame with about 50 rows and 2 columns:
+a data frame with about 50 rows and 2 columns:
 
 - `from`:
 
-  Student identifier of one friend, character.
+  student identifier of one friend, character.
 
 - `to`:
 
-  Student identifier of the other friend, character.
+  student identifier of the other friend, character.
 
 ## Details
 
-The edgelist is synthetic and contains one row per friendship (not two).
-When you build a netify object with `symmetric = TRUE` (the default for
+the edgelist is synthetic and contains one row per friendship (not two).
+when you build a netify object with `symmetric = TRUE` (the default for
 undirected ties), the constructor automatically fills in both
 directions.
 
@@ -39,7 +39,7 @@ directions.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
@@ -55,7 +55,7 @@ head(classroom_edges)
 #> 5  s01 s08
 #> 6  s06 s08
 
-# Build a friendship network with student attributes attached.
+# build a friendship network with student attributes attached.
 net <- netify(
     classroom_edges,
     actor1 = "from", actor2 = "to",

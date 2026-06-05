@@ -1,6 +1,6 @@
-# Add netify_label_repel to ggplot
+# add netify_label_repel to ggplot
 
-S3 method to add netify_label_repel objects to ggplot objects. This
+s3 method to add netify_label_repel objects to ggplot objects. this
 method is called automatically when using the + operator with a
 netify_label_repel object.
 
@@ -15,21 +15,21 @@ ggplot_add(object, plot, ...)
 
 - object:
 
-  A netify_label_repel object created by
+  a netify_label_repel object created by
   [`netify_label_repel`](https://netify-dev.github.io/netify/reference/netify_label_repel.md)
 
 - plot:
 
-  A ggplot object to which the label_repel layer will be added
+  a ggplot object to which the label_repel layer will be added
 
 - ...:
 
-  Additional arguments passed by ggplot2 (used internally)
+  additional arguments passed by ggplot2 (used internally)
 
 ## Value
 
-A ggplot object with the label_repel layer added
+a ggplot object with the label_repel layer added
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

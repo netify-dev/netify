@@ -1,6 +1,6 @@
-# Apply random network style
+# apply random network style
 
-Randomly selects and returns one of the available network styles
+randomly selects and returns one of the available network styles
 
 ## Usage
 
@@ -12,12 +12,12 @@ style_random(seed = NULL)
 
 - seed:
 
-  Optional seed for reproducibility
+  optional seed for reproducibility
 
 ## Value
 
-A style list that can be passed to plot()
+a style list that can be passed to plot()
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

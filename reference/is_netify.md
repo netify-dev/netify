@@ -1,6 +1,6 @@
-# Is this object a netify object?
+# is this object a netify object?
 
-Is this object a netify object?
+is this object a netify object?
 
 ## Usage
 
@@ -12,12 +12,12 @@ is_netify(x)
 
 - x:
 
-  An R object
+  an r object
 
 ## Value
 
-Logical constant, `TRUE` if argument `x` is a netify object
+logical constant, `TRUE` if argument `x` is a netify object
 
 ## Author
 
-Colin Henry
+colin henry

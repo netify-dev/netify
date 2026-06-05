@@ -1,8 +1,8 @@
-# Merge method for netify objects (S3 alias for `bind_netifies`)
+# merge method for netify objects (s3 alias for `bind_netifies`)
 
-Provides the base-R [`merge()`](https://rdrr.io/r/base/merge.html)
+provides the base-r [`merge()`](https://rdrr.io/r/base/merge.html)
 generic dispatch for combining two netify objects along the time axis.
-For more than two inputs or programmatic use, prefer
+for more than two inputs or programmatic use, prefer
 [`bind_netifies()`](https://netify-dev.github.io/netify/reference/bind_netifies.md)
 directly.
 
@@ -21,12 +21,12 @@ merge(x, y, ...)
 
 - ...:
 
-  Additional netify objects, or a `names =` argument.
+  additional netify objects, or a `names =` argument.
 
 ## Value
 
-A `longit_list` netify object.
+a `longit_list` netify object.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

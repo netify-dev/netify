@@ -1,11 +1,11 @@
 # Tidy a netify object into a long edge data frame
 
-`tidy.netify` is an S3 method for the `tidy()` generic from the broom
-package. It returns one row per edge with all attached nodal and dyadic
-attributes — equivalent to `unnetify(x, remove_zeros = TRUE)` but
+`tidy.netify` is an s3 method for the `tidy()` generic from the broom
+package. it returns one row per edge with all attached nodal and dyadic
+attributes – equivalent to `unnetify(x, remove_zeros = TRUE)` but
 exposed under the broom convention so the netify object plays nicely
 with broom-style workflows. (broom is not a hard dependency; this method
-is registered as an S3 method on `tidy` and only triggers when the
+is registered as an s3 method on `tidy` and only triggers when the
 generic is available, e.g., when the user has
 [`library(broom)`](https://broom.tidymodels.org/) loaded.)
 
@@ -19,25 +19,25 @@ tidy.netify(x, remove_zeros = TRUE, ...)
 
 - x:
 
-  A netify object.
+  a netify object.
 
 - remove_zeros:
 
-  Logical. Drop zero-weight edges? Default `TRUE` (matches the typical
+  logical. drop zero-weight edges? default `TRUE` (matches the typical
   broom expectation that the returned frame is actually-observed
   observations).
 
 - ...:
 
-  Additional arguments passed to
+  additional arguments passed to
   [`unnetify()`](https://netify-dev.github.io/netify/reference/unnetify.md).
 
 ## Value
 
-A tibble (or data.frame if `tibble` isn't installed) with one row per
-(non-zero) edge. Columns include `from`, `to`, optional `time`
+a tibble (or data.frame if `tibble` isn't installed) with one row per
+(non-zero) edge. columns include `from`, `to`, optional `time`
 (longitudinal), the edge weight column, dyadic covariates, and nodal
-covariates merged in with `_from` / `_to` suffixes. Zero-edge inputs
+covariates merged in with `_from` / `_to` suffixes. zero-edge inputs
 return a 0-row tibble with the schema preserved.
 
 ## See also
@@ -48,7 +48,7 @@ one-row-per-network summary statistics.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

@@ -11,6 +11,8 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Helpful Resources">
+<meta name="description" content="Network methods and political-science applications.">
+<meta property="og:description" content="Network methods and political-science applications.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -29,21 +31,22 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/quickstart_inference.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Quickstart to Inference</a></li>
+    <li><a class="dropdown-item" href="../articles/quickstart_inference.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -72,7 +75,7 @@
                         <h4 data-toc-skip class="author">Various
 Authors</h4>
             
-            <h4 data-toc-skip class="date">2026-05-29</h4>
+            <h4 data-toc-skip class="date">2026-06-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/resources.Rmd" class="external-link"><code>vignettes/resources.Rmd</code></a></small>
       <div class="d-none name"><code>resources.Rmd</code></div>
@@ -86,11 +89,15 @@ below! We have tried to share a brief list of resources relevant to
 quantitative political science researchers of two main types: (1)
 new(ish) to networks users and (2) researchers focused on studying
 networks and conflict.</p>
+<p>After
+<code><a href="../articles/quickstart_inference.html">vignette("quickstart_inference", package = "netify")</a></code>, use
+this page for methods background, applied examples, and citations for
+the workflow vignettes.</p>
 <div class="section level2">
-<h2 id="new-to-networks">New to networks<a class="anchor" aria-label="anchor" href="#new-to-networks"></a>
+<h2 id="new-to-networks">new to networks<a class="anchor" aria-label="anchor" href="#new-to-networks"></a>
 </h2>
 <div class="section level3">
-<h3 id="overview-books">Overview Books<a class="anchor" aria-label="anchor" href="#overview-books"></a>
+<h3 id="overview-books">overview books<a class="anchor" aria-label="anchor" href="#overview-books"></a>
 </h3>
 <ul>
 <li><p>Larson, J. M. (2024). <em>Designing empirical social networks
@@ -106,7 +113,7 @@ analysis: Methods and applications</em>.</p></li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="academic-articles">Academic Articles<a class="anchor" aria-label="anchor" href="#academic-articles"></a>
+<h3 id="academic-articles">academic articles<a class="anchor" aria-label="anchor" href="#academic-articles"></a>
 </h3>
 <ul>
 <li><p>Cranmer, S. J., &amp; Desmarais, B. A. (2016). A critique of
@@ -126,7 +133,7 @@ Tellez, J., &amp; Ward, M. D. (2022). Taking dyads seriously.
 </div>
 </div>
 <div class="section level2">
-<h2 id="networks-conflict">Networks &amp; Conflict<a class="anchor" aria-label="anchor" href="#networks-conflict"></a>
+<h2 id="networks-conflict">networks &amp; conflict<a class="anchor" aria-label="anchor" href="#networks-conflict"></a>
 </h2>
 <ul>
 <li><p>Dorff, C., Gallop, M., &amp; Minhas, S. (2020). Networks of
@@ -140,13 +147,13 @@ Journal of Political Science</em>, 53(2), 441-459.</p></li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="modelapproach-specific">Model/Approach Specific<a class="anchor" aria-label="anchor" href="#modelapproach-specific"></a>
+<h2 id="model-specific">model-specific<a class="anchor" aria-label="anchor" href="#model-specific"></a>
 </h2>
 <ul>
 <li><p>Cranmer, S. J., &amp; Desmarais, B. A. (2011). Inferential
 network analysis with exponential random graph models. <em>Political
 Analysis</em>, 19(1), 66-86.</p></li>
-<li><p>Csárdi G, Nepusz T, Traag V, Horvát S, Zanini F, Noom D, Müller K
+<li><p>Csardi G, Nepusz T, Traag V, Horvat S, Zanini F, Noom D, Muller K
 (2024). igraph: Network Analysis and Visualization in R. <a href="doi:10.5281/zenodo.7682609" class="uri">doi:10.5281/zenodo.7682609</a>, R package version 2.0.3, <a href="https://CRAN.R-project.org/package=igraph" class="external-link uri">https://CRAN.R-project.org/package=igraph</a>.</p></li>
 <li><p>Cranmer, S. J., Desmarais, B. A., &amp; Morgan, J. W. (2020).
 <em>Inferential network analysis.</em> Cambridge University
@@ -157,7 +164,7 @@ approaches for network analysis: Amen for latent factor models.
 <li><p>Statnet Development Team (Pavel N. Krivitsky, Mark S. Handcock,
 David R. Hunter, Carter T. Butts, Chad Klumb, Steven M. Goodreau, &amp;
 Martina Morris). (2003-2023). statnet: Software tools for the
-Statistical Modeling of Network Data. <a href="http://statnet.org" class="external-link uri">http://statnet.org</a></p></li>
+Statistical Modeling of Network Data. <a href="https://statnet.org/" class="external-link uri">https://statnet.org/</a></p></li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

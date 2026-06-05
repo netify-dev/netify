@@ -1,8 +1,8 @@
 # Convert netify objects to dbn format
 
 `netify_to_dbn` (also available as `to_dbn`) transforms netify network
-objects into the array format required by the dbn package for Dynamic
-Bilinear Network models. This enables the use of longitudinal latent
+objects into the array format required by the dbn package for dynamic
+bilinear network models. this enables the use of longitudinal latent
 space models for multilayer and single-layer networks.
 
 ## Usage
@@ -17,74 +17,77 @@ to_dbn(netlet)
 
 - netlet:
 
-  A netify object (class "netify") containing longitudinal network data.
-  Must be of type `longit_array` or `longit_list`. Supports both
+  a netify object (class "netify") containing longitudinal network data.
+  must be of type `longit_array` or `longit_list`. supports both
   single-layer and multilayer networks.
 
 ## Value
 
-A list containing:
+a list containing:
 
-- **Y**:
+- **y**:
 
-  Network adjacency data as a 4D array of dimensions
-  `[n_actors, n_actors, n_layers, n_time]`. For single-layer networks,
+  network adjacency data as a 4d array of dimensions
+  `[n_actors, n_actors, n_layers, n_time]`. for single-layer networks,
   `n_layers = 1` and the third dimension is labeled with the weight
-  variable name (or `"edge_value"` for binary networks). Missing edges
-  are preserved as NA.
+  variable name (or `"edge_value"` for binary networks). missing edges
+  are preserved as na.
 
-- **Xdyad**:
+- **xdyad**:
 
-  Dyadic covariates as a 4D array of dimensions
+  dyadic covariates as a 4d array of dimensions
   `[n_actors, n_actors, n_covariates, n_time]`, or NULL if none exist.
 
-- **Xrow**:
+- **xrow**:
 
-  Sender/row actor attributes as a 3D array of dimensions
+  sender/row actor attributes as a 3d array of dimensions
   `[n_actors, n_attributes, n_time]`, or NULL if none exist.
 
-- **Xcol**:
+- **xcol**:
 
-  Receiver/column actor attributes as a 3D array of dimensions
-  `[n_actors, n_attributes, n_time]`, or NULL if none exist. For
-  symmetric networks, Xcol is identical to Xrow.
+  receiver/column actor attributes as a 3d array of dimensions
+  `[n_actors, n_attributes, n_time]`, or NULL if none exist. for
+  symmetric networks, xcol is identical to xrow.
 
 ## Details
 
-The dbn package expects a 4D array with dimensions `[n, n, p, T]` where
+the dbn package expects a 4d array with dimensions `[n, n, p, t]` where
 `n` is the number of actors, `p` is the number of relation types
-(layers), and `T` is the number of time periods.
+(layers), and `t` is the number of time periods.
 
-**Supported netify types:**
+**supported netify types:**
 
-- `longit_array`: Directly extracts or reshapes the underlying array
+- `longit_array`: directly extracts or reshapes the underlying array
 
-- `longit_list`: Converts to array format first (actors are unioned
-  across time, missing entries become NA)
+- `longit_list`: converts to array format first (actors are unioned
+  across time, missing entries become na)
 
-Cross-sectional networks are not supported since dbn is designed for
-longitudinal data.
+cross-sectional networks are not supported since dbn is designed for
+longitudinal data. bipartite networks are also not supported because dbn
+expects square actor-by-actor arrays.
 
-**Variable requirements:**
+**variable requirements:**
 
-- All nodal attributes must be numeric (integer or double)
+- all nodal attributes must be numeric (integer or double)
 
-- Character or factor variables must be converted before using this
+- all dyadic attributes must be numeric or logical matrices
+
+- character or factor variables must be converted before using this
   function
 
 ## Author
 
-Shahryar Minhas
+shahryar minhas
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
-# Load example data
+# load example data
 data(icews)
 
-# Create two longitudinal networks
+# create two longitudinal networks
 verbal_net <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
@@ -101,20 +104,20 @@ material_net <- netify(
     output_format = "longit_array"
 )
 
-# Create multilayer network
+# create multilayer network
 multi_net <- layer_netify(
     list(verbal_net, material_net),
-    layer_labels = c("Verbal", "Material")
+    layer_labels = c("verbal", "material")
 )
 
-# Convert to dbn format
+# convert to dbn format
 dbn_data <- netify_to_dbn(multi_net)
-dim(dbn_data$Y) # [n_actors, n_actors, 2, n_years]
-#> [1] 152 152   2  13
+dim(dbn_data$y) # [n_actors, n_actors, 2, n_years]
+#> NULL
 
 if (FALSE) { # \dontrun{
-# Single-layer also works
+# single-layer also works
 dbn_single <- netify_to_dbn(verbal_net)
-dim(dbn_single$Y) # [n_actors, n_actors, 1, n_years]
+dim(dbn_single$y) # [n_actors, n_actors, 1, n_years]
 } # }
 ```

@@ -1,6 +1,6 @@
-# Tracking Changes & Comparing Networks
+# Tracking Changes in Cooperation and Conflict: Comparing Networks
 
-## Vignette Summary
+## vignette summary
 
 This vignette demonstrates how to use **netify** to analyze changes in
 international relations over time using data from the Integrated Crisis
@@ -22,10 +22,7 @@ to answer these questions:
 
 **[`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md):**
 
-- Compares networks across multiple dimensions - edges, structure,
-  nodes, and attributes. Think of it as running a comprehensive
-  diagnostic between any two (or more) networks to understand what’s
-  similar, what’s different, and why it matters.
+- Compares networks across edges, structure, nodes, and attributes.
 
 - Function notes:
 
@@ -34,7 +31,8 @@ to answer these questions:
   - **Four comparison modes**: Compare edges (who connects to whom),
     structure (density, clustering), nodes (actor composition), or
     attributes (actor characteristics)
-  - **Statistical rigor**: Built-in permutation tests for significance
+  - **QAP testing**: Optional permutation tests for edge-correlation
+    comparisons
   - **Output**: Returns information on edge changes, similarity metrics,
     and structural differences
 
@@ -47,7 +45,7 @@ library(tidyr)
 library(patchwork)
 ```
 
-## Understanding ICEWS Data
+## understanding icews data
 
 The Integrated Crisis Early Warning System (ICEWS) provides event-level
 data on interactions between international actors. Each event captures:
@@ -60,10 +58,10 @@ data on interactions between international actors. Each event captures:
 
 ``` r
 
-# Load ICEWS data
+# load icews data
 data(icews)
 
-# Take a peek
+# take a peek
 head(icews)
 ```
 
@@ -103,17 +101,17 @@ The *quad variables* in ICEWS:
 - `verbConf`: Verbal conflict (threats, accusations)
 - `matlConf`: Material conflict (sanctions, military actions)
 
-## Creating Networks for Comparison
+## creating networks for comparison
 
 First, let’s create separate networks for different types of
 interactions in a single year:
 
 ``` r
 
-# Create networks for different interaction types in 2002
+# create networks for different interaction types in 2002
 icews_2002 <- icews[icews$year == 2002, ]
 
-# Verbal cooperation network
+# verbal cooperation network
 verb_coop_2002 <- netify(
     icews_2002,
     actor1 = "i", actor2 = "j",
@@ -122,7 +120,7 @@ verb_coop_2002 <- netify(
     nodal_vars = c('i_polity2', 'i_log_gdp', 'i_region')
 )
 
-# Material cooperation network
+# material cooperation network
 matl_coop_2002 <- netify(
     icews_2002,
     actor1 = "i", actor2 = "j",
@@ -131,7 +129,7 @@ matl_coop_2002 <- netify(
     nodal_vars = c('i_polity2', 'i_log_gdp', 'i_region')
 )
 
-# Verbal conflict network
+# verbal conflict network
 verb_conf_2002 <- netify(
     icews_2002,
     actor1 = "i", actor2 = "j",
@@ -140,7 +138,7 @@ verb_conf_2002 <- netify(
     nodal_vars = c('i_polity2', 'i_log_gdp', 'i_region')
 )
 
-# Material conflict network
+# material conflict network
 matl_conf_2002 <- netify(
     icews_2002,
     actor1 = "i", actor2 = "j",
@@ -150,16 +148,16 @@ matl_conf_2002 <- netify(
 )
 ```
 
-## 1. Comparing Cooperation Networks: Verbal vs. Material
+## 1. comparing cooperation networks: verbal vs. material
 
 Do countries that cooperate verbally also cooperate materially? Let’s
 use
 [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md)
-with `method = "all"` to get a comprehensive comparison:
+with `method = "all"` to compare the two networks:
 
 ``` r
 
-# Compare verbal vs material cooperation
+# compare verbal vs material cooperation
 coop_comparison <- compare_networks(
     list(
         verbal = verb_coop_2002,
@@ -168,7 +166,7 @@ coop_comparison <- compare_networks(
     method = "all"
 )
 
-# Render the summary frame as a knitr table
+# render the summary frame as a knitr table
 knitr::kable(
     coop_comparison$summary,
     caption = "Verbal vs Material Cooperation Comparison Metrics",
@@ -179,13 +177,13 @@ knitr::kable(
 
 | comparison | correlation | jaccard | hamming | qap_correlation | qap_pvalue | spectral |
 |:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| verbal vs material | 0.507 | 0.19 | 0.308 | 0.507 | 0 | 91481.76 |
+| verbal vs material | 0.507 | 0.19 | 0.311 | 0.507 | 0 | 90096.66 |
 
 Verbal vs Material Cooperation Comparison Metrics {.table}
 
 ``` r
 
-# Display edge changes
+# display edge changes
 edge_changes_df <- data.frame(
     Change_Type = c("Added", "Removed", "Maintained"),
     Count = c(
@@ -211,7 +209,7 @@ Edge Changes Between Networks {.table}
 
 ``` r
 
-# Interpret results
+# interpret results
 cat("\n**INTERPRETATION**\n")
 ```
 
@@ -225,13 +223,13 @@ if (coop_comparison$summary$correlation > 0.7) {
 } else if (coop_comparison$summary$correlation > 0.4) {
     cat("Moderate alignment: Verbal and material cooperation partially overlap\n")
 } else {
-    cat("Weak alignment: Verbal promises don't strongly translate to material actions\n")
+    cat("Weak alignment: Verbal cooperation does not strongly align with material actions\n")
 }
 ```
 
     ## Moderate alignment: Verbal and material cooperation partially overlap
 
-### The tidy `$comparisons` frame
+### the tidy `$comparisons` frame
 
 [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md)
 also returns a long-format `$comparisons` data frame with one row per
@@ -254,9 +252,9 @@ knitr::kable(
 |:------:|:--------:|:---------------:|:---------:|:-------:|
 | verbal | material |   correlation   |   0.507   |   NA    |
 | verbal | material |     jaccard     |   0.190   |   NA    |
-| verbal | material |     hamming     |   0.308   |   NA    |
+| verbal | material |     hamming     |   0.311   |   NA    |
 | verbal | material | qap_correlation |   0.507   |    0    |
-| verbal | material |    spectral     | 91481.762 |   NA    |
+| verbal | material |    spectral     | 90096.660 |   NA    |
 
 Tidy per-pair comparison frame {.table}
 
@@ -265,7 +263,7 @@ scales naturally to dozens of networks (longitudinal, multilayer,
 by-group), where it’s much easier to filter and plot than the wide
 `$summary` table.
 
-### Understanding the Output
+### understanding the output
 
 Let’s break down what each metric tells us:
 
@@ -290,9 +288,10 @@ Let’s break down what each metric tells us:
 - **hamming (0.308)**: About 31% of dyads (after NA handling) differ
   between the two networks. This measures the proportion of comparable
   country pairs that have different connection patterns.
-- **qap_correlation (0.507) with qap_pvalue (0)**: The QAP test confirms
-  the correlation is statistically significant (p \< 1/5000 ≈ 0.0002).
-  This isn’t due to random chance.
+- **qap_correlation (0.507) with qap_pvalue \< 0.001**: The printed zero
+  is a rounding artifact from the permutation test. With 5,000
+  permutations, read it as p \< 1/5000 (about 0.0002), not as a literal
+  zero.
 
 **Edge Changes:**
 
@@ -304,27 +303,27 @@ Let’s break down what each metric tells us:
   cooperation
 
 This tells us verbal cooperation is much more common than material
-cooperation, and most verbal promises don’t translate into material
-actions.
+cooperation, and verbal cooperation events do not map one-to-one onto
+material actions.
 
-### Visualizing Domain Differences
+### visualizing domain differences
 
 ``` r
 
-# Extract edge change information
+# extract edge change information
 edge_changes <- coop_comparison$edge_changes[[1]]
 
-# Create summary of changes
+# create summary of changes
 change_summary <- data.frame(
     Type = c("Verbal Only", "Material Only", "Both"),
     Count = c(
-        edge_changes$removed, # In verbal but not material
-        edge_changes$added, # In material but not verbal
-        edge_changes$maintained # In both
+        edge_changes$removed, # in verbal but not material
+        edge_changes$added, # in material but not verbal
+        edge_changes$maintained # in both
     )
 )
 
-# Visualize
+# visualize
 ggplot(change_summary, aes(x = Type, y = Count)) +
     geom_col() +
     labs(
@@ -348,25 +347,25 @@ Note that this pattern may partly reflect reporting bias in event data,
 as verbal events (statements, promises) are more likely to be captured
 in news sources than material actions.
 
-## 2. Cooperation vs. Conflict: Testing Network Relationships
+## 2. cooperation vs. conflict: testing network relationships
 
 Are cooperation and conflict networks related? Let’s use the QAP
 (Quadratic Assignment Procedure) method for statistical testing:
 
 ``` r
 
-# Perform QAP test between cooperation and conflict
+# perform qap test between cooperation and conflict
 coop_conf_qap <- compare_networks(
     list(
         cooperation = verb_coop_2002,
         conflict = verb_conf_2002
     ),
     method = "qap",
-    n_permutations = 500, # Reduced for vignette speed
-    seed = 12345 # For reproducibility
+    n_permutations = 500, # reduced for vignette speed
+    seed = 12345 # for reproducibility
 )
 
-# Construct message
+# construct message
 qap_msg <- paste0(
     "**QAP Test Results:**\n\n",
     "- Observed correlation: ", round(coop_conf_qap$summary$qap_correlation, 3), "\n",
@@ -379,7 +378,7 @@ qap_msg <- paste0(
     "\n"
 )
 
-# Add interpretation based on significance
+# add interpretation based on significance
 if (coop_conf_qap$summary$qap_pvalue < 0.05) {
     if (coop_conf_qap$summary$qap_correlation > 0) {
         qap_msg <- paste0(
@@ -401,40 +400,44 @@ if (coop_conf_qap$summary$qap_pvalue < 0.05) {
     )
 }
 
-# Print result
+# print result
 cat(qap_msg)
 ```
 
     ## **QAP Test Results:**
     ## 
     ## - Observed correlation: 0.506
-    ## - P-value: < 0.002 (1/500 permutations)
+    ## - P-value: 0.002
     ## → Cooperation and conflict networks are positively correlated
     ##   (Countries interact through both cooperation AND conflict)
 
-### Understanding QAP Results
+### understanding qap results
 
-The positive correlation (0.506) with p-value \< 0.002 tells us that
-countries that cooperate also tend to have conflicts. This
-counterintuitive finding reflects the multiplex nature of international
-relations: countries that appear frequently in international news tend
-to have both cooperative and conflictual interactions. High-interaction
-dyads accumulate both cooperative and conflictual events; the
-correlation therefore captures activity rather than affinity. In
-contrast, countries that rarely interact have neither cooperation nor
-conflict events recorded. This pattern is well-documented in the
-international relations literature as the “interaction density” effect.
+The positive correlation (0.506) with a small QAP p-value (about 0.002
+in this run) tells us that countries that cooperate also tend to have
+conflicts. This counterintuitive finding reflects the multiplex nature
+of international relations: countries that appear frequently in
+international news tend to have both cooperative and conflictual
+interactions. High-interaction dyads accumulate both cooperative and
+conflictual events; the correlation therefore captures activity rather
+than affinity. In contrast, countries that rarely interact have neither
+cooperation nor conflict events recorded. This pattern is often
+described in the international relations literature as interaction
+density.
 
-### Advanced QAP Options: Different Permutation Schemes
+### qap options: classic and degree-preserving permutations
 
-The
+For pairwise network comparisons,
 [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md)
-function supports multiple permutation schemes for more sophisticated
-hypothesis testing:
+supports classic node-label QAP and a degree-preserving option for
+binary networks:
 
 ``` r
 
-# Compare different permutation schemes
+# compare supported permutation schemes
+verb_coop_bin <- binarize(verb_coop_2002)
+verb_conf_bin <- binarize(verb_conf_2002)
+
 qap_methods <- list(
     classic = compare_networks(
         list(cooperation = verb_coop_2002, conflict = verb_conf_2002),
@@ -443,72 +446,55 @@ qap_methods <- list(
         n_permutations = 500,
         seed = 12345
     ),
-    freedman_lane = compare_networks(
-        list(cooperation = verb_coop_2002, conflict = verb_conf_2002),
+    degree_preserving = compare_networks(
+        list(cooperation = verb_coop_bin, conflict = verb_conf_bin),
         method = "qap",
-        permutation_type = "freedman_lane",
-        n_permutations = 500,
-        seed = 12345
-    ),
-    dsp_mrqap = compare_networks(
-        list(cooperation = verb_coop_2002, conflict = verb_conf_2002),
-        method = "qap",
-        permutation_type = "dsp_mrqap",
+        permutation_type = "degree_preserving",
         n_permutations = 500,
         seed = 12345
     )
 )
 
-# Compare results
+# compare results
 qap_results <- data.frame(
-    Permutation_Type = c("Classic", "Freedman-Lane", "DSP-MRQAP"),
+    Permutation_Type = c("Classic", "Degree-preserving"),
     Correlation = c(
         qap_methods$classic$summary$qap_correlation,
-        qap_methods$freedman_lane$summary$qap_correlation,
-        qap_methods$dsp_mrqap$summary$qap_correlation
+        qap_methods$degree_preserving$summary$qap_correlation
     ),
     P_Value = c(
         qap_methods$classic$summary$qap_pvalue,
-        qap_methods$freedman_lane$summary$qap_pvalue,
-        qap_methods$dsp_mrqap$summary$qap_pvalue
+        qap_methods$degree_preserving$summary$qap_pvalue
     )
 )
 
 knitr::kable(qap_results, 
-             caption = "QAP Results with Different Permutation Schemes",
+             caption = "QAP Results with Supported Pairwise Permutation Schemes",
              digits = 3)
 ```
 
-| Permutation_Type | Correlation | P_Value |
-|:-----------------|------------:|--------:|
-| Classic          |       0.506 |   0.000 |
-| Freedman-Lane    |      -0.007 |   0.112 |
-| DSP-MRQAP        |      -0.007 |   0.112 |
+| Permutation_Type  | Correlation | P_Value |
+|:------------------|------------:|--------:|
+| Classic           |       0.506 |   0.002 |
+| Degree-preserving |       0.388 |   0.002 |
 
-QAP Results with Different Permutation Schemes {.table}
+QAP Results with Supported Pairwise Permutation Schemes {.table}
 
-**Understanding Different Permutation Types:**
+**Understanding the Permutation Types:**
 
 - **Classic**: Standard node label permutation. Fast and widely used.
-- **Freedman-Lane**: Controls for network autocorrelation by
-  residualizing before permutation.
-- **DSP-MRQAP**: Double Semi-Partialling - removes mutual influence
-  between networks.
+- **Degree-preserving**: Rewires a binary network while preserving the
+  degree sequence. Use this when degree heterogeneity is a central
+  concern.
 
-Note that MRQAP methods (Freedman-Lane and DSP) often yield higher
-p-values as they account for network dependencies. Because Freedman-Lane
-and DSP residualize the matrices before permutation, the point estimate
-can shrink and occasionally flip sign; what matters is the
-(non-)significance after accounting for structural autocorrelation.
-
-### Correlation Types: Pearson vs. Spearman
+### correlation types: pearson vs. spearman
 
 For networks with skewed weight distributions, Spearman correlation may
 be more appropriate:
 
 ``` r
 
-# Compare using different correlation types
+# compare using different correlation types
 cor_comparison <- data.frame(
     Correlation_Type = c("Pearson", "Spearman"),
     Cooperation_Networks = c(
@@ -545,10 +531,10 @@ knitr::kable(cor_comparison,
 
 Pearson vs. Spearman Correlations {.table}
 
-Spearman correlation is rank-based and more robust to outliers, which is
-useful when edge weights have extreme values.
+Spearman correlation is rank-based and less sensitive to outliers, which
+is useful when edge weights have extreme values.
 
-## 3. Temporal Evolution: Tracking Network Changes
+## 3. temporal evolution: tracking network changes
 
 How do international networks evolve over time? When you pass a
 longitudinal netify object to
@@ -557,10 +543,10 @@ it automatically compares consecutive time periods:
 
 ``` r
 
-# Create networks for multiple years
+# create networks for multiple years
 years_to_compare <- seq(2002, 2014, by = 4)
 
-# Create cooperation networks for each year
+# create cooperation networks for each year
 coop_net_longit <- netify(
     icews[icews$year %in% years_to_compare, ],
     actor1 = "i", actor2 = "j",
@@ -570,12 +556,12 @@ coop_net_longit <- netify(
     output_format = "longit_list"
 )
 
-# Compare across time - automatic pairwise comparisons
+# compare across time - automatic pairwise comparisons
 temporal_comparison <- compare_networks(
     coop_net_longit,
     method = "all"
 )
-# Render the summary frame as a knitr table
+# render the summary frame as a knitr table
 knitr::kable(
     temporal_comparison$summary,
     caption = "Temporal Network Comparison Summary",
@@ -588,13 +574,13 @@ knitr::kable(
 |:---------------:|:---------:|:--------:|:--------:|:---------:|
 |   correlation   |   0.828   |  0.034   |  0.771   |   0.874   |
 |     jaccard     |   0.581   |  0.014   |  0.561   |   0.594   |
-|     hamming     |   0.217   |  0.009   |  0.200   |   0.225   |
+|     hamming     |   0.219   |  0.009   |  0.201   |   0.227   |
 | qap_correlation |   0.828   |  0.034   |  0.771   |   0.874   |
-|    spectral     | 13325.806 | 3718.830 | 9436.173 | 18155.052 |
+|    spectral     | 13240.234 | 3756.815 | 8847.569 | 17658.467 |
 
 Temporal Network Comparison Summary {.table}
 
-### Understanding Temporal Comparison Output
+### understanding temporal comparison output
 
 **Header Changes:**
 
@@ -626,11 +612,11 @@ Shows all pairwise comparisons (not just consecutive years):
 - `2010_vs_2014`: Last consecutive comparison
 - Notice that as time gaps increase, more edges are added/removed
 
-### Visualizing Temporal Changes
+### visualizing temporal changes
 
 ``` r
 
-# Extract edge changes over time
+# extract edge changes over time
 edge_change_data <- data.frame(
     Comparison = names(temporal_comparison$edge_changes),
     Added = sapply(temporal_comparison$edge_changes, function(x) x$added),
@@ -638,7 +624,7 @@ edge_change_data <- data.frame(
     Maintained = sapply(temporal_comparison$edge_changes, function(x) x$maintained)
 )
 
-# Reshape for plotting
+# reshape for plotting
 edge_change_long <- edge_change_data |>
     pivot_longer(
         cols = c(Added, Removed, Maintained),
@@ -646,7 +632,7 @@ edge_change_long <- edge_change_data |>
         values_to = "Count"
     )
 
-# Plot edge changes
+# plot edge changes
 ggplot(edge_change_long, aes(x = Comparison, y = Count, fill = Change_Type)) +
     geom_col(position = "dodge") +
     scale_fill_manual(
@@ -677,7 +663,7 @@ Notice that “Maintained” edges dominate - most relationships persist
 across time periods, confirming the stability we observed in the
 correlation metrics.
 
-### Multiple Testing Correction
+### multiple testing correction
 
 When comparing multiple networks, it’s important to adjust p-values for
 multiple comparisons. The `p_adjust` parameter offers several correction
@@ -685,17 +671,17 @@ methods:
 
 ``` r
 
-# Demonstrate multiple testing correction
-# Compare all years pairwise with QAP
+# demonstrate multiple testing correction
+# compare all years pairwise with qap
 multi_year_comparison <- compare_networks(
     coop_net_longit,
     method = "qap",
-    n_permutations = 500,  # Lower for vignette
-    p_adjust = "BH",  # Benjamini-Hochberg correction
+    n_permutations = 500,  # lower for vignette
+    p_adjust = "BH",  # benjamini-hochberg correction
     seed = 123
 )
 
-# Show adjusted p-values
+# show adjusted p-values
 cat("Number of pairwise comparisons:", 
     choose(length(names(coop_net_longit)), 2), "\n")
 ```
@@ -711,7 +697,7 @@ cat("P-value adjustment method: Benjamini-Hochberg (FDR)\n\n")
 
 ``` r
 
-# Display the p-value matrix
+# display the p-value matrix
 knitr::kable(
     round(multi_year_comparison$significance_tests$qap_pvalues, 4),
     caption = "QAP P-values (Adjusted using BH method)",
@@ -719,12 +705,12 @@ knitr::kable(
 )
 ```
 
-|      | 2002 | 2006 | 2010 | 2014 |
-|:-----|:----:|:----:|:----:|:----:|
-| 2002 |  0   |  0   |  0   |  0   |
-| 2006 |  0   |  0   |  0   |  0   |
-| 2010 |  0   |  0   |  0   |  0   |
-| 2014 |  0   |  0   |  0   |  0   |
+|      | 2002  | 2006  | 2010  | 2014  |
+|:-----|:-----:|:-----:|:-----:|:-----:|
+| 2002 |  NA   | 0.002 | 0.002 | 0.002 |
+| 2006 | 0.002 |  NA   | 0.002 | 0.002 |
+| 2010 | 0.002 | 0.002 |  NA   | 0.002 |
+| 2014 | 0.002 | 0.002 | 0.002 |  NA   |
 
 QAP P-values (Adjusted using BH method) {.table}
 
@@ -738,20 +724,20 @@ QAP P-values (Adjusted using BH method) {.table}
 Use p-value adjustment when making many comparisons to avoid inflated
 Type I error rates.
 
-## 4. Structural Evolution: Beyond Individual Edges
+## 4. structural evolution: beyond individual edges
 
 The `what = "structure"` option compares network-level properties rather
 than individual edges:
 
 ``` r
 
-# Compare structural properties across years
+# compare structural properties across years
 struct_comparison <- compare_networks(
     coop_net_longit,
     what = "structure"
 )
 
-# Display structural comparison
+# display structural comparison
 knitr::kable(struct_comparison$summary,
     caption = "Structural Properties Across Time Periods",
     digits = 3,
@@ -761,14 +747,14 @@ knitr::kable(struct_comparison$summary,
 
 | network | num_actors | density | num_edges | prop_edges_missing | mean_edge_weight | sd_edge_weight | median_edge_weight | min_edge_weight | max_edge_weight | competition_row | competition_col | sd_of_row_means | sd_of_col_means | covar_of_row_col_means | reciprocity | mutual | transitivity | mean_degree |
 |:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| 2002 | 152 | 0.379 | 8692 | 0 | 19.591 | 143.821 | 0 | 0 | 6003 | 0.041 | 0.038 | 44.915 | 43.049 | 0.995 | 0.978 | 0.854 | 0.606 | 57.184 |
-| 2006 | 152 | 0.411 | 9429 | 0 | 21.091 | 160.078 | 0 | 0 | 7579 | 0.042 | 0.037 | 48.763 | 45.485 | 0.991 | 0.977 | 0.851 | 0.628 | 62.033 |
-| 2010 | 152 | 0.435 | 9976 | 0 | 18.134 | 132.367 | 0 | 0 | 4937 | 0.041 | 0.035 | 41.441 | 37.770 | 0.993 | 0.982 | 0.840 | 0.639 | 65.632 |
-| 2014 | 152 | 0.426 | 9774 | 0 | 18.393 | 136.541 | 0 | 0 | 6327 | 0.041 | 0.035 | 41.954 | 38.498 | 0.990 | 0.973 | 0.839 | 0.630 | 64.303 |
+| 2002 | 152 | 0.379 | 8692 | 0 | 51.732 | 230.131 | 8 | 1 | 6003 | 0.041 | 0.038 | 44.915 | 43.049 | 0.995 | 0.978 | 0.854 | 0.606 | 57.184 |
+| 2006 | 152 | 0.411 | 9429 | 0 | 51.340 | 246.631 | 7 | 1 | 7579 | 0.042 | 0.037 | 48.763 | 45.485 | 0.991 | 0.977 | 0.851 | 0.628 | 62.033 |
+| 2010 | 152 | 0.435 | 9976 | 0 | 41.721 | 198.316 | 6 | 1 | 4937 | 0.041 | 0.035 | 41.441 | 37.770 | 0.993 | 0.982 | 0.840 | 0.639 | 65.632 |
+| 2014 | 152 | 0.426 | 9774 | 0 | 43.192 | 206.667 | 6 | 1 | 6327 | 0.041 | 0.035 | 41.954 | 38.498 | 0.990 | 0.973 | 0.839 | 0.630 | 64.303 |
 
 Structural Properties Across Time Periods {.table}
 
-### Understanding Structural Comparison Output
+### understanding structural comparison output
 
 This table shows how network-wide properties evolve:
 
@@ -791,19 +777,19 @@ This table shows how network-wide properties evolve:
 The increasing density and mean degree suggest growing
 interconnectedness in international cooperation.
 
-### Visualizing Structural Changes
+### visualizing structural changes
 
 ``` r
 
-# Prepare data for visualization
+# prepare data for visualization
 # struct_comparison$summary contains a
 # data.frame with structural metrics over time
 struct_data <- struct_comparison$summary
 
-# Calculate percent changes from baseline
+# calculate percent changes from baseline
 baseline_year <- struct_data$network[1]
 struct_long <- struct_data |>
-    select(-num_actors) |> # Remove num_actors since it doesn't change much
+    select(-num_actors) |> # remove num_actors since it doesn't change much
     pivot_longer(cols = -network, names_to = "metric", values_to = "value") |>
     group_by(metric) |>
     mutate(
@@ -812,7 +798,7 @@ struct_long <- struct_data |>
     ) |>
     ungroup()
 
-# Create heatmap of changes
+# create heatmap of changes
 ggplot(
     filter(struct_long, network != baseline_year),
     aes(x = network, y = metric, fill = percent_change)
@@ -837,6 +823,9 @@ ggplot(
     )
 ```
 
+    ## Warning: Removed 3 rows containing missing values or values outside the scale range
+    ## (`geom_text()`).
+
 ![](tracking_changes_files/figure-html/unnamed-chunk-14-1.png)
 
 The heatmap reveals that density, number of edges, and mean degree all
@@ -849,21 +838,21 @@ plot:
 
 ``` r
 
-# Reshape data for visualization
+# reshape data for visualization
 struct_long <- struct_data |>
-    select(-num_actors) |> # Remove num_actors since it doesn't change
+    select(-num_actors) |> # remove num_actors since it doesn't change
     pivot_longer(cols = -network, names_to = "metric", values_to = "value") |>
     group_by(metric) |>
     mutate(
-        # Calculate percent change from first year
+        # calculate percent change from first year
         first_value = value[1],
         percent_change = (value - first_value) / first_value * 100,
-        # Also calculate year-to-year change
+        # also calculate year-to-year change
         yoy_change = (value - lag(value)) / lag(value) * 100
     ) |>
     ungroup()
 
-# Visualize structural changes over time
+# visualize structural changes over time
 ggplot(struct_long, aes(x = network, y = value, group = metric)) +
     geom_line(size = 1.2) +
     geom_point(size = 3) +
@@ -883,22 +872,28 @@ ggplot(struct_long, aes(x = network, y = value, group = metric)) +
     )
 ```
 
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once per session.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
 ![](tracking_changes_files/figure-html/unnamed-chunk-15-1.png)
 
-## 5. Node Composition: Tracking Actor Dynamics
+## 5. node composition: tracking actor dynamics
 
 The `what = "nodes"` option tracks which actors enter and exit the
 network:
 
 ``` r
 
-# Compare node composition
+# compare node composition
 node_comparison <- compare_networks(
     coop_net_longit,
     what = "nodes"
 )
 
-# Display node comparison
+# display node comparison
 knitr::kable(node_comparison$summary,
     caption = "Node Composition Across Time Periods",
     digits = 0,
@@ -925,14 +920,14 @@ This is by design in our example since we filtered the data to only
 include certain countries. In real-world datasets, you might see actors
 entering or exiting the network over time.
 
-## 6. Deep Dive: Using return_details for Comprehensive Analysis
+## 6. Using `return_details`
 
 The `return_details = TRUE` option provides access to full comparison
 matrices:
 
 ``` r
 
-# Compare 2002 and 2014 cooperation networks with full details
+# compare 2002 and 2014 cooperation networks with full details
 early_late_comp <- compare_networks(
     # note subset here is
     # subset.netify() function
@@ -942,10 +937,10 @@ early_late_comp <- compare_networks(
     ),
     method = "all",
     return_details = TRUE,
-    n_permutations = 1000 # Lower for vignette speed
+    n_permutations = 1000 # lower for vignette speed
 )
 
-# Access detailed comparison matrices
+# access detailed comparison matrices
 names(early_late_comp$details)
 ```
 
@@ -954,10 +949,10 @@ names(early_late_comp$details)
 
 ``` r
 
-# Get edge changes
+# get edge changes
 changes <- early_late_comp$edge_changes[[1]]
 
-# Summary of relationship dynamics
+# summary of relationship dynamics
 changes_summary <- paste0(
     "**Relationship Dynamics 2002-2014:**\n\n",
     "- Stable relationships: ", changes$maintained, "\n",
@@ -998,7 +993,7 @@ if (!is.na(changes$weight_correlation)) {
 - Weight correlation for maintained edges: 0.762 → Stable cooperation
   intensities for continuing relationships
 
-### Understanding Detailed Output
+### understanding detailed output
 
 With `return_details = TRUE`, you get:
 
@@ -1019,7 +1014,7 @@ With this detailed information you could create custom visualizations or
 further statistical tests, such as detecting structural breaks in time
 series.
 
-## 7. Spectral Distance: Comparing Network Structure Through Eigenvalues
+## 7. spectral distance: comparing network structure through eigenvalues
 
 The spectral distance approach provides a way to compare networks based
 on their fundamental structural properties captured by eigenvalues (See
@@ -1028,7 +1023,7 @@ a useful introduction):
 
 ``` r
 
-# Compare networks using spectral distance
+# compare networks using spectral distance
 spectral_comp <- compare_networks(
     list(
         "2002" = coop_net_longit[["2002"]],
@@ -1037,7 +1032,7 @@ spectral_comp <- compare_networks(
     method = "spectral"
 )
 
-# Render the spectral summary as a knitr table
+# render the spectral summary as a knitr table
 knitr::kable(
     spectral_comp$summary,
     caption = "Spectral Distance Results",
@@ -1048,14 +1043,14 @@ knitr::kable(
 
 |  comparison  | spectral |
 |:------------:|:--------:|
-| 2002 vs 2014 | 14369.14 |
+| 2002 vs 2014 | 15167.86 |
 
 Spectral Distance Results {.table}
 
 ``` r
 
-# Interpretation
-# Build spectral interpretation message
+# interpretation
+# build spectral interpretation message
 spec_dist <- spectral_comp$summary$spectral
 
 spec_msg <- paste0(
@@ -1063,26 +1058,24 @@ spec_msg <- paste0(
     "- Spectral distance: ", round(spec_dist, 2), "\n"
 )
 
-# Add interpretation
-# Note: Spectral distance should be interpreted relative to other comparisons
-# in your study, as the scale depends on network size
+# add scale note
 interpretation <- paste0(
     "→ The spectral distance of ", round(spec_dist, 0), 
     " should be interpreted relative to other network comparisons in your study.\n",
     "  Larger values indicate greater structural differences."
 )
 
-# Combine and print
+# combine and print
 cat(paste0(spec_msg, "→ ", interpretation))
 ```
 
     ## **SPECTRAL DISTANCE INTERPRETATION**
     ## 
-    ## - Spectral distance: 14369.14
-    ## → → The spectral distance of 14369 should be interpreted relative to other network comparisons in your study.
+    ## - Spectral distance: 15167.86
+    ## → → The spectral distance of 15168 should be interpreted relative to other network comparisons in your study.
     ##   Larger values indicate greater structural differences.
 
-### Understanding Spectral Distance
+### understanding spectral distance
 
 Spectral distance measures how different two networks are by comparing
 their eigenvalue spectra. It captures global structural properties that
@@ -1102,7 +1095,7 @@ other metrics might miss:
   - Identifying networks with similar spectral properties (useful for
     network classification)
 
-### Performance Optimization for Large Networks
+### performance optimization for large networks
 
 For large networks (\>1000 nodes), computing all eigenvalues can be
 computationally expensive. The `spectral_rank` parameter allows you to
@@ -1113,11 +1106,11 @@ run it.*
 
 ``` r
 
-# For large networks, use spectral_rank to improve performance
+# for large networks, use spectral_rank to improve performance
 spectral_comp_fast <- compare_networks(
     list(large_net1, large_net2),
     method = "spectral",
-    spectral_rank = 50  # Use only top 50 eigenvalues (rule of thumb: round(sqrt(n)))
+    spectral_rank = 50  # use only top 50 eigenvalues (rule of thumb: round(sqrt(n)))
 )
 ```
 
@@ -1125,11 +1118,11 @@ The top eigenvalues capture the most significant structural features. A
 good rule of thumb is to use `round(sqrt(n))` eigenvalues, where n is
 the number of nodes.
 
-### Combining with Other Methods
+### combining with other methods
 
 ``` r
 
-# Compare all methods including spectral
+# compare all methods including spectral
 full_comp <- compare_networks(
     list(
         early = coop_net_longit[["2002"]],
@@ -1139,7 +1132,7 @@ full_comp <- compare_networks(
     return_details = TRUE
 )
 
-# Extract similarity metrics (0-1 scale) and spectral distance separately
+# extract similarity metrics (0-1 scale) and spectral distance separately
 similarity_metrics <- data.frame(
     Method = c("Correlation", "Jaccard", "Hamming"),
     Value = c(
@@ -1151,7 +1144,7 @@ similarity_metrics <- data.frame(
 
 spectral_distance <- full_comp$summary$spectral
 
-# Display similarity metrics table
+# display similarity metrics table
 knitr::kable(
     rbind(
         similarity_metrics,
@@ -1167,14 +1160,14 @@ knitr::kable(
 |:-----------------:|:---------:|
 |    Correlation    |   0.771   |
 |      Jaccard      |   0.561   |
-|      Hamming      |   0.225   |
-| Spectral Distance | 14369.141 |
+|      Hamming      |   0.227   |
+| Spectral Distance | 15167.856 |
 
 Network Similarity Metrics: 2002 vs 2014 {.table}
 
 ``` r
 
-# Create visualization for similarity metrics
+# create visualization for similarity metrics
 p_similarity <- ggplot(similarity_metrics, aes(x = Method, y = Value)) +
     geom_col(width = 0.7) +
     geom_text(aes(label = round(Value, 3)), hjust = -0.1, size = 3.5) +
@@ -1191,10 +1184,10 @@ p_similarity <- ggplot(similarity_metrics, aes(x = Method, y = Value)) +
     ) +
     coord_flip()
 
-# Create separate note for spectral distance
+# create separate note for spectral distance
 spectral_note <- paste("Spectral Distance:", round(spectral_distance, 2))
 
-# Combine the plot with spectral distance information
+# combine the plot with spectral distance information
 library(patchwork)
 p_similarity + plot_annotation(
     title = "Network Comparison: Multiple Metrics",
@@ -1209,7 +1202,7 @@ Note that spectral distance is on a different scale than the other
 metrics (which are typically 0-1), so it’s best interpreted relative to
 other spectral distance values rather than in absolute terms.
 
-## 8. Multilayer Networks: Comparing Different Relationship Types
+## 8. multilayer networks: comparing different relationship types
 
 The
 [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md)
@@ -1220,10 +1213,10 @@ within the same set of actors:
 
 ``` r
 
-# Create multilayer network for 2010
+# create multilayer network for 2010
 icews_2010 <- icews[icews$year == 2010, ]
 
-# Create individual networks for each layer
+# create individual networks for each layer
 verb_coop_2010 <- netify(
     icews_2010,
     actor1 = "i", actor2 = "j",
@@ -1252,7 +1245,7 @@ matl_conf_2010 <- netify(
     symmetric = FALSE
 )
 
-# Combine into multilayer network
+# combine into multilayer network
 multilayer_2010 <- layer_netify(
     list(
         verbal_coop = verb_coop_2010,
@@ -1262,9 +1255,9 @@ multilayer_2010 <- layer_netify(
     )
 )
 
-# Compare layers automatically
+# compare layers automatically
 layer_comparison <- compare_networks(multilayer_2010, method = "all")
-# Render the layer-comparison summary as a knitr table
+# render the layer-comparison summary as a knitr table
 knitr::kable(
     layer_comparison$summary,
     caption = "Multilayer Network Comparison Summary",
@@ -1273,17 +1266,17 @@ knitr::kable(
 )
 ```
 
-|     metric      |   mean    |    sd     |   min   |    max    |
-|:---------------:|:---------:|:---------:|:-------:|:---------:|
-|   correlation   |   0.531   |   0.106   |  0.422  |   0.643   |
-|     jaccard     |   0.280   |   0.069   |  0.198  |   0.385   |
-|     hamming     |   0.223   |   0.129   |  0.100  |   0.351   |
-| qap_correlation |   0.531   |   0.106   |  0.422  |   0.643   |
-|    spectral     | 42200.921 | 42019.957 | 529.314 | 84148.029 |
+|     metric      |   mean    |    sd     |   min    |    max    |
+|:---------------:|:---------:|:---------:|:--------:|:---------:|
+|   correlation   |   0.531   |   0.106   |  0.422   |   0.643   |
+|     jaccard     |   0.280   |   0.069   |  0.198   |   0.385   |
+|     hamming     |   0.224   |   0.130   |  0.101   |   0.353   |
+| qap_correlation |   0.531   |   0.106   |  0.422   |   0.643   |
+|    spectral     | 40929.781 | 40168.876 | 1847.796 | 81155.371 |
 
 Multilayer Network Comparison Summary {.table}
 
-### Understanding Multilayer Comparison Output
+### understanding multilayer comparison output
 
 When you pass a multilayer network to
 [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md),
@@ -1301,7 +1294,7 @@ other. For example:
 - Lower correlation between cooperation and conflict layers indicates
   these are distinct relationship patterns
 
-### Interpreting Multilayer Results
+### interpreting multilayer results
 
 The output shows all six pairwise comparisons between the four network
 layers. To inspect them individually, pull the tidy `$comparisons`
@@ -1340,16 +1333,16 @@ Key patterns:
   material cooperation – costly material support is the layer that
   overlaps least with the others
 - **Range**: correlations span 0.42 to 0.64, all positive – interaction
-  density drives a baseline overlap even between cooperation and
+  density creates a baseline overlap even between cooperation and
   conflict.
 
-### Longitudinal Multilayer Networks
+### longitudinal multilayer networks
 
 You can also compare multilayer networks that evolve over time:
 
 ``` r
 
-# Create longitudinal multilayer networks
+# create longitudinal multilayer networks
 verb_coop_longit <- netify(
     icews,
     actor1 = "i", actor2 = "j",
@@ -1368,7 +1361,7 @@ matl_coop_longit <- netify(
     output_format = "longit_array"
 )
 
-# Combine into longitudinal multilayer
+# combine into longitudinal multilayer
 longit_multilayer <- layer_netify(
     list(
         verbal = verb_coop_longit,
@@ -1376,10 +1369,10 @@ longit_multilayer <- layer_netify(
     )
 )
 
-# Compare layers across all time periods
+# compare layers across all time periods
 longit_layer_comp <- compare_networks(longit_multilayer)
 
-# Display results cleanly
+# display results cleanly
 longit_summary <- paste0(
     "**Longitudinal multilayer comparison:**\n\n",
     "- Type: ", longit_layer_comp$comparison_type, "\n",
@@ -1409,10 +1402,10 @@ change:
 
 ``` r
 
-# Compare two networks
+# compare two networks
 comparison <- compare_networks(list(net1, net2))
 
-# Compare longitudinal networks automatically
+# compare longitudinal networks automatically
 comparison <- compare_networks(longitudinal_netify_object)
 ```
 
@@ -1423,9 +1416,10 @@ comparison <- compare_networks(longitudinal_netify_object)
 - `what`: “edges” (default), “structure”, “nodes”, or “attributes”
 - `return_details`: Set TRUE to get full comparison matrices
 - `n_permutations`: For QAP significance testing (default 5000)
-- `permutation_type`: “classic” (default), “degree_preserving”,
-  “freedman_lane”, or “dsp_mrqap”
-- `correlation_type`: “pearson” (default) or “spearman”
+- `permutation_type`: “classic” (default) or “degree_preserving” for
+  pairwise QAP
+- `correlation_type`: “pearson” (default) or “spearman” for non-QAP edge
+  correlations
 - `seed`: Set for reproducible permutation tests
 - `p_adjust`: “none” (default), “holm”, “BH”, or “BY” for multiple
   testing correction
@@ -1448,16 +1442,16 @@ comparison <- compare_networks(longitudinal_netify_object)
     matrices
 4.  For longitudinal data, just pass your netify object - it handles the
     rest
-5.  Use `permutation_type = "freedman_lane"` or `"dsp_mrqap"` when
-    comparing networks that may have autocorrelation
-6.  Set `correlation_type = "spearman"` for networks with skewed weight
-    distributions
+5.  Use `permutation_type = "degree_preserving"` for binary QAP when
+    degree heterogeneity is central
+6.  Set `correlation_type = "spearman"` for non-QAP comparisons with
+    skewed weight distributions
 7.  Use `p_adjust` when making multiple comparisons to control false
     discovery rate
 8.  Set `spectral_rank = round(sqrt(n))` for large networks to improve
     performance
 
-### When to Use Advanced Options
+### when to use advanced options
 
 The
 [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md)
@@ -1471,19 +1465,13 @@ analysis to your specific network characteristics:
 - **`degree_preserving`**: Maintains degree sequences through edge
   swaps. Essential for sparse, binary networks with high degree
   heterogeneity.
-- **`freedman_lane`**: Residualizes before permutation. Use when you
-  suspect network autocorrelation (e.g., geographic networks, social
-  influence).
-- **`dsp_mrqap`**: Double semi-partialling. Most conservative option;
-  use for multiple regression-style comparisons or when networks have
-  strong mutual dependencies.
 
 **Correlation Types:**
 
 - **`pearson`** (default): Standard linear correlation. Appropriate for
   normally distributed edge weights.
-- **`spearman`**: Rank-based correlation. Use when edge weights are
-  skewed, zero-inflated, or contain outliers.
+- **`spearman`**: Rank-based correlation for non-QAP edge comparisons.
+  Use when edge weights are skewed, zero-inflated, or contain outliers.
 
 **P-value Adjustments:**
 
@@ -1504,24 +1492,23 @@ analysis to your specific network characteristics:
 - **`mean_centered`**: Centers matrices before correlation. Reduces bias
   from density differences.
 
-## Using `compare_networks()` in Your Research Workflow
+## using `compare_networks()` in your research workflow
 
-### Where `compare_networks()` Fits in Network Analysis
+### where `compare_networks()` fits in network analysis
 
 The
 [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md)
-function serves as a comprehensive diagnostic tool that should be used
-throughout your network analysis workflow:
+function can be used at several points in a network analysis workflow:
 
 | Analysis Stage | Key Questions | How [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md) Helps |
 |----|----|----|
 | **Data cleaning** | Have I built the networks correctly? | Quick edge & node sanity checks |
 | **Exploration** | Where are the major differences? | Multi-metric similarity diagnostics |
-| **Theory building** | Which dimensions matter (time, layer, subgroup)? | Temporal/multilayer/by-group comparisons highlight mechanisms |
+| **Theory building** | Which dimensions vary most (time, layer, subgroup)? | Temporal/multilayer/by-group comparisons highlight patterns to investigate |
 | **Model specification** | Which terms belong in my ERGM/SAOM? | Structural summaries reveal relevant patterns |
 | **Model validation** | Does my model capture observed differences? | Compare observed vs. simulated networks |
 
-### Recommended Pre-Modeling Workflow
+### recommended pre-modeling workflow
 
 Before fitting ERGMs, SAOMs, or latent space models, follow this
 systematic approach:
@@ -1550,11 +1537,11 @@ systematic approach:
     - Detect regime-change style discontinuities
     - May require sample breaks or change-point models
 7.  **Statistical Validation**:
-    `compare_networks(nets, method="qap", permutation_type="...")`
+    `compare_networks(nets, method="qap", permutation_type="degree_preserving")`
     - Test if correlations are spurious under network constraints
     - Guides which controls must enter your model
 
-### Interpreting Results for Model Building
+### interpreting results for model building
 
 **For ERGMs:**
 
@@ -1575,7 +1562,7 @@ systematic approach:
 - Community structure (from eigenvalues) → number of latent positions
 - Temporal stability → fixed vs. dynamic latent positions
 
-### Computational Considerations
+### computational considerations
 
 For large networks (\>1000 nodes):
 
@@ -1586,39 +1573,46 @@ For large networks (\>1000 nodes):
   distributions
 - Always use `p_adjust` when making many comparisons
 
-### Example: Complete Pre-Modeling Diagnostic
+### example: complete pre-modeling diagnostic
 
 *Example: adapt the template below to your own networks to run it.*
 
 ``` r
 
-# Comprehensive diagnostic before ERGM fitting
-diagnostic_results <- compare_networks(
+# check edge, structure, and node composition
+edge_results <- compare_networks(
     network_list,
     method = "all",
     what = "edges",
-    permutation_type = "degree_preserving",  # For sparse networks
-    correlation_type = "spearman",           # For skewed weights
-    n_permutations = 10000,                  # For final analysis
-    p_adjust = "BH",                         # Multiple comparisons
-    spectral_rank = 75,                      # Large network optimization
-    return_details = TRUE,                   # For custom analysis
-    seed = 12345                             # Reproducibility
+    permutation_type = "degree_preserving",  # for sparse networks
+    correlation_type = "spearman",           # for skewed weights
+    n_permutations = 10000,                  # for final analysis
+    p_adjust = "BH",                         # multiple comparisons
+    spectral_rank = 75,                      # large network optimization
+    return_details = TRUE,                   # for custom analysis
+    seed = 12345                             # reproducibility
 )
 
-# Extract insights for model specification
-if (diagnostic_results$summary$transitivity > 0.3) {
-    # High clustering suggests including triadic closure terms
+structure_results <- compare_networks(
+    network_list,
+    method = "all",
+    what = "structure",
+    return_details = TRUE
+)
+
+# extract insights for model specification
+if (any(structure_results$summary$transitivity > 0.3, na.rm = TRUE)) {
+    # high clustering suggests including triadic closure terms
     ergm_formula <- formula(net ~ edges + gwesp(0.5, fixed=TRUE))
 }
 
-if (diagnostic_results$spectral > 100) {
-    # Large spectral distance suggests structural regime change
-    # Consider separate models for different periods
+if (max(edge_results$summary$spectral, na.rm = TRUE) > 100) {
+    # large spectral distance suggests structural regime change
+    # consider separate models for different periods
 }
 ```
 
-### Metric Interpretation Guidelines
+### metric interpretation guidelines
 
 **Edge-level Metrics:**
 
@@ -1646,7 +1640,7 @@ if (diagnostic_results$spectral > 100) {
 - `degree_preserving` typically more conservative than `classic`
 - Small p-values more credible with more permutations
 
-### Computational Performance Guide
+### computational performance guide
 
 | Method | Time Complexity | Memory Usage | When to Optimize |
 |----|----|----|----|
@@ -1658,7 +1652,7 @@ if (diagnostic_results$spectral > 100) {
 
 R = number of permutations, n = number of nodes, m = number of edges
 
-### Common Pitfalls and Solutions
+### common pitfalls and solutions
 
 1.  **Binary vs. Weighted Networks**
     - If your “weighted” network is actually binary (0/1), set
@@ -1677,20 +1671,5 @@ R = number of permutations, n = number of nodes, m = number of edges
 
 The
 [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md)
-function is your comprehensive pre-modeling diagnostic tool. Use it
-early and often to ensure your subsequent modeling choices are
-well-informed and defensible.
-
-## References
-
-1.  Krackhardt, D. (1988). Predicting with networks: Nonparametric
-    multiple regression analysis of dyadic data. Social Networks, 10(4),
-    359–381
-
-2.  Freedman, D., & Lane, D. (1983). A nonstochastic interpretation of
-    reported significance levels. Journal of Business & Economic
-    Statistics, 1(4), 292–298.
-
-3.  Dekker, D., Krackhardt, D., & Snijders, T. A. B. (2007). Sensitivity
-    of MRQAP tests to collinearity and autocorrelation conditions.
-    Psychometrika, 72(4), 563–581.
+function is a pre-modeling diagnostic tool for checking whether network
+differences are large enough to matter for the next analysis step.

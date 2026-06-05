@@ -2,8 +2,8 @@
 
 `netify_to_amen` (also available as `to_amen`) transforms netify network
 objects into the data structure required by the amen package for
-advanced network modeling. This enables the use of Social Relations
-Models (SRM), Additive and Multiplicative Effects (AME) models, and
+advanced network modeling. this enables the use of social relations
+models (srm), additive and multiplicative effects (ame) models, and
 other network regression approaches implemented in amen.
 
 ## Usage
@@ -18,162 +18,165 @@ to_amen(netlet, lame = FALSE)
 
 - netlet:
 
-  A netify object (class "netify") containing network data. Must be a
-  single-layer network. For multilayer networks, first extract
+  a netify object (class "netify") containing network data. must be a
+  single-layer network. for multilayer networks, first extract
   individual layers using
   [`subset_netify`](https://netify-dev.github.io/netify/reference/subset_netify.md).
 
 - lame:
 
-  Logical. Controls the output format for longitudinal data:
+  logical. controls the output format for longitudinal data:
 
-  - `FALSE` (default): Formats output for compatibility with the
-    standard version of the amen package, which uses array structures. Y
-    is returned as a 3D array `[n_actors x n_actors x n_time]`, Xdyad as
-    a 4D array `[n_actors x n_actors x n_covariates x n_time]`, and
-    Xrow/Xcol as 3D arrays `[n_actors x n_attributes x n_time]`. This
+  - `FALSE` (default): formats output for compatibility with the
+    standard version of the amen package, which uses array structures. y
+    is returned as a 3d array `[n_actors x n_actors x n_time]`, xdyad as
+    a 4d array `[n_actors x n_actors x n_covariates x n_time]`, and
+    xrow/xcol as 3d arrays `[n_actors x n_attributes x n_time]`. this
     requires constant actor composition across time.
 
-  - `TRUE`: Formats output for compatibility with the netify-verse
+  - `TRUE`: formats output for compatibility with the netify-verse
     version called lame, which supports longitudinal network modeling
-    with time-varying actor compositions. Y is returned as a list of T
-    matrices (one per time period), Xdyad as a list of T 3D arrays, and
-    Xrow/Xcol as lists of T matrices. Actor sets can vary across time
+    with time-varying actor compositions. y is returned as a list of t
+    matrices (one per time period), xdyad as a list of t 3d arrays, and
+    xrow/xcol as lists of t matrices. actor sets can vary across time
     periods, making this suitable for panels where countries enter/exit.
 
-  This parameter is ignored for cross-sectional data.
+  this parameter is ignored for cross-sectional data.
 
 ## Value
 
-The structure of the returned list depends on the data type and `lame`
+the structure of the returned list depends on the data type and `lame`
 parameter:
 
-**For cross-sectional data or longitudinal with lame = FALSE (standard
+**for cross-sectional data or longitudinal with lame = FALSE (standard
 amen):**
 
-- **Y**:
+- **y**:
 
-  Network adjacency data as a numeric matrix or array:
+  network adjacency data as a numeric matrix or array:
 
-  - Cross-sectional: Matrix of dimensions `[n_actors × n_actors]`
+  - cross-sectional: matrix of dimensions `[n_actors x n_actors]`
 
-  - Longitudinal: Array of dimensions `[n_actors × n_actors × n_time]`
+  - longitudinal: array of dimensions `[n_actors x n_actors x n_time]`
 
-  Contains edge weights or binary indicators. Missing edges are
-  preserved as NA.
+  contains edge weights or binary indicators. missing edges are
+  preserved as na.
 
-- **Xdyad**:
+- **xdyad**:
 
-  Dyadic covariates as an array, or NULL if none exist:
+  dyadic covariates as an array, or NULL if none exist:
 
-  - Cross-sectional: `[n_actors × n_actors × n_covariates]`
+  - cross-sectional: `[n_actors x n_actors x n_covariates]`
 
-  - Longitudinal: `[n_actors × n_actors × n_covariates × n_time]`
+  - longitudinal: `[n_actors x n_actors x n_covariates x n_time]`
 
-  Each slice contains one dyadic covariate across all actor pairs.
+  each slice contains one dyadic covariate across all actor pairs.
 
-- **Xrow**:
+- **xrow**:
 
-  Sender/row actor attributes as a matrix or array, or NULL if none
+  sender/row actor attributes as a matrix or array, or NULL if none
   exist:
 
-  - Cross-sectional: `[n_actors × n_attributes]`
+  - cross-sectional: `[n_actors x n_attributes]`
 
-  - Longitudinal: `[n_actors × n_attributes × n_time]`
+  - longitudinal: `[n_actors x n_attributes x n_time]`
 
-  Contains numeric attributes for actors when they act as senders.
+  contains numeric attributes for actors when they act as senders.
 
-- **Xcol**:
+- **xcol**:
 
-  Receiver/column actor attributes, structured identically to Xrow. For
-  symmetric networks, Xcol is identical to Xrow. For bipartite networks,
+  receiver/column actor attributes, structured identically to xrow. for
+  symmetric networks, xcol is identical to xrow. for bipartite networks,
   contains attributes for the second mode.
 
-**For longitudinal data with lame = TRUE (lame package):**
+**for longitudinal data with lame = TRUE (lame package):**
 
-- **Y**:
+- **y**:
 
-  A list of length T (time periods), where each element is an n × n
-  relational matrix. Actor sets can vary across time periods.
+  a list of length t (time periods), where each element is an n x n
+  relational matrix. actor sets can vary across time periods.
 
-- **Xdyad**:
+- **xdyad**:
 
-  A list of length T, where each element is an n × n × pd array of
+  a list of length t, where each element is an n x n x pd array of
   dyadic covariates, or NULL if none exist
 
-- **Xrow**:
+- **xrow**:
 
-  A list of length T, where each element is an n × pr matrix of nodal
+  a list of length t, where each element is an n x pr matrix of nodal
   row covariates, or NULL if none exist
 
-- **Xcol**:
+- **xcol**:
 
-  A list of length T, where each element is an n × pc matrix of nodal
+  a list of length t, where each element is an n x pc matrix of nodal
   column covariates, or NULL if none exist
 
 ## Details
 
-**Variable requirements:**
+**variable requirements:**
 
-- All nodal attributes must be numeric (integer or double)
+- all nodal attributes must be numeric (integer or double)
 
-- Character or factor variables must be converted before using this
+- all dyadic attributes must be numeric or logical matrices
+
+- character or factor variables must be converted before using this
   function
 
-- Missing values (NA) are preserved and can be handled by amen's models
+- missing values (na) are preserved and can be handled by amen's models
 
-**When to use each format:**
+**when to use each format:**
 
-- Use `lame = FALSE` when:
+- use `lame = FALSE` when:
 
-  - Actor composition is constant across time
+  - actor composition is constant across time
 
-- Use `lame = TRUE` when:
+- use `lame = TRUE` when:
 
-  - Actors enter/exit the network over time
+  - actors enter/exit the network over time
 
-  - Want access to other features in lame
+  - want access to other features in lame
 
 ## Note
 
-The function performs several validation checks:
+the function performs several validation checks:
 
-- Ensures single-layer networks (multilayer not supported). For
+- ensures single-layer networks (multilayer not supported). for
   multilayer networks, first extract individual layers using
   [`subset_netify`](https://netify-dev.github.io/netify/reference/subset_netify.md)
   (e.g., `subset(net, layers = "trade")`).
 
-- Verifies all nodal attributes are numeric
+- verifies all nodal and dyadic attributes are model-ready numeric
+  inputs
 
-- Maintains actor ordering from the original netify object
+- maintains actor ordering from the original netify object
 
-For multilayer longitudinal models that require a 4D array
-`[n, n, p, T]`, see
+for multilayer longitudinal models that require a 4d array
+`[n, n, p, t]`, see
 [`netify_to_dbn`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md)
 instead.
 
-**Bipartite networks.**
+**bipartite networks.**
 [`amen::ame()`](https://rdrr.io/pkg/amen/man/ame.html) does not accept
-rectangular Y matrices; passing the output of `to_amen()` on a bipartite
+rectangular y matrices; passing the output of `to_amen()` on a bipartite
 netify to [`amen::ame()`](https://rdrr.io/pkg/amen/man/ame.html) will
-fail. Use
+fail. use
 [`netify_to_lame`](https://netify-dev.github.io/netify/reference/netify_to_lame.md)
 (which sets `mode = "bipartite"` and targets `lame::ame()`) for
 bipartite networks instead.
 
 ## Author
 
-Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+ha eun choi, cassy dorff, colin henry, shahryar minhas
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
-# Load example data
+# load example data
 data(icews)
 
-# Create a netify object
+# create a netify object
 net <- netify(
     icews[icews$year == 2010, ],
     actor1 = "i", actor2 = "j",
@@ -181,13 +184,13 @@ net <- netify(
     weight = "verbCoop"
 )
 
-# Convert to amen format (standard)
+# convert to amen format (standard)
 amen_data <- netify_to_amen(net)
-names(amen_data) # Y, Xdyad, Xrow, Xcol
+names(amen_data) # y, xdyad, xrow, xcol
 #> [1] "Y"     "Xdyad" "Xrow"  "Xcol" 
 
 if (FALSE) { # \dontrun{
-# For longitudinal data with time-varying composition
+# for longitudinal data with time-varying composition
 longit_net <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
@@ -195,7 +198,7 @@ longit_net <- netify(
     weight = "verbCoop"
 )
 
-# Convert to lame format
+# convert to lame format
 lame_data <- netify_to_amen(longit_net, lame = TRUE)
 } # }
 ```

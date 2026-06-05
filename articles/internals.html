@@ -5,12 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Internals: object structure &amp; custom extensions • netify</title>
+<title>Internals: object structure &amp; writing custom extensions • netify</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Internals: object structure &amp; custom extensions">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Internals: object structure &amp; writing custom extensions">
+<meta name="description" content="Inspect netify object structure and validation checks.">
+<meta property="og:description" content="Inspect netify object structure and validation checks.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -29,21 +31,22 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/quickstart_inference.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Quickstart to Inference</a></li>
+    <li><a class="dropdown-item" href="../articles/quickstart_inference.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -68,11 +71,11 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Internals: object structure &amp; custom extensions</h1>
+      <h1>Internals: object structure &amp; writing custom extensions</h1>
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-05-29</h4>
+            <h4 data-toc-skip class="date">2026-06-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/internals.Rmd" class="external-link"><code>vignettes/internals.Rmd</code></a></small>
       <div class="d-none name"><code>internals.Rmd</code></div>
@@ -84,13 +87,14 @@ Shahryar Minhas</h4>
 <strong>methodologists writing custom extensions</strong>, and
 <strong>anyone who wants to inspect the underlying object
 structure</strong>. End-user workflows are covered in
-<code><a href="../articles/foundations_lite.html">vignette("foundations_lite", package = "netify")</a></code> and the
-topic-specific vignettes; this one goes one layer deeper.</p>
+<code><a href="../articles/quickstart_inference.html">vignette("quickstart_inference", package = "netify")</a></code> and
+the topic-specific project-site articles; this one goes one layer
+deeper.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/netify/">netify</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="the-netify-object-a-base-r-object-with-attributes">The netify object: a base R object with attributes<a class="anchor" aria-label="anchor" href="#the-netify-object-a-base-r-object-with-attributes"></a>
+<h2 id="the-netify-object-a-base-r-object-with-attributes">the netify object: a base r object with attributes<a class="anchor" aria-label="anchor" href="#the-netify-object-a-base-r-object-with-attributes"></a>
 </h2>
 <p>A <strong>netify object</strong> is a base R matrix / 3D array /
 list-of-matrices with <code>class = "netify"</code> and a bundle of
@@ -111,14 +115,14 @@ records one of three shapes:</p>
 <tr class="odd">
 <td><code>cross_sec</code></td>
 <td>
-<code>[n × n]</code> matrix (or <code>[r × c]</code> bipartite)</td>
+<code>[n x n]</code> matrix (or <code>[r x c]</code> bipartite)</td>
 <td>One time period</td>
 </tr>
 <tr class="even">
 <td><code>longit_array</code></td>
 <td>
-<code>[n × n × T]</code> array (or
-<code>[n × n × p × T]</code>)</td>
+<code>[n x n x T]</code> array (or
+<code>[n x n x p x T]</code>)</td>
 <td>Multi-period, constant actor set</td>
 </tr>
 <tr class="odd">
@@ -174,18 +178,18 @@ implemented.</p>
 <p>Key attributes:</p>
 <ul>
 <li>
-<code>netify_type</code> — <code>"cross_sec"</code>,
+<code>netify_type</code> – <code>"cross_sec"</code>,
 <code>"longit_array"</code>, or <code>"longit_list"</code>
 </li>
 <li>
-<code>mode</code> — <code>"unipartite"</code> or
+<code>mode</code> – <code>"unipartite"</code> or
 <code>"bipartite"</code>
 </li>
 <li>
-<code>symmetric</code> — scalar logical (or named vector for
+<code>symmetric</code> – scalar logical (or named vector for
 mixed-directedness multilayer)</li>
 <li>
-<code>weight</code> — column name (or <code>NULL</code> for
+<code>weight</code> – column name (or <code>NULL</code> for
 binary)</li>
 <li>
 <code>is_binary</code>, <code>detail_weight</code>,
@@ -193,22 +197,22 @@ binary)</li>
 <code>sum_dyads</code>
 </li>
 <li>
-<code>layers</code> — character vector; length &gt; 1 means
+<code>layers</code> – character vector; length &gt; 1 means
 multilayer</li>
 <li>
-<code>actor_pds</code> — data.frame with <code>actor</code>,
+<code>actor_pds</code> – data.frame with <code>actor</code>,
 <code>min_time</code>, <code>max_time</code> per actor</li>
 <li>
-<code>nodal_data</code> — data.frame with <code>actor</code>,
+<code>nodal_data</code> – data.frame with <code>actor</code>,
 optional <code>time</code>, and one column per nodal variable</li>
 <li>
-<code>dyad_data</code> — <strong>nested list</strong>:
+<code>dyad_data</code> – <strong>nested list</strong>:
 <code>list[[time]][[var]] = matrix</code>. Cross-sec uses
 <code>"1"</code> as the time key.</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="extracting-parts">Extracting parts<a class="anchor" aria-label="anchor" href="#extracting-parts"></a>
+<h2 id="extracting-parts">extracting parts<a class="anchor" aria-label="anchor" href="#extracting-parts"></a>
 </h2>
 <table class="table">
 <thead><tr class="header">
@@ -255,13 +259,13 @@ optional <code>time</code>, and one column per nodal variable</li>
 </tbody>
 </table>
 <p><code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> and <code><a href="https://generics.r-lib.org/reference/glance.html" class="external-link">glance()</a></code> are S3 methods on the
-broom generics — they’re registered on package load if
+broom generics – they’re registered on package load if
 <code>generics</code> (or anything that imports it, like
 <code>broom</code>, <code>dplyr</code>, <code>tidymodels</code>) is
 installed. No hard dependency on broom.</p>
 </div>
 <div class="section level2">
-<h2 id="tidy-interop">Tidy interop<a class="anchor" aria-label="anchor" href="#tidy-interop"></a>
+<h2 id="tidy-interop">tidy interop<a class="anchor" aria-label="anchor" href="#tidy-interop"></a>
 </h2>
 <p>If <code>tibble</code> and <code>broom</code> are installed, three
 tidyverse-flavored entry points are available.
@@ -308,17 +312,17 @@ against the broom generics.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 18</span></span></span>
 <span><span class="co">#&gt;   net   num_actors density num_edges prop_edges_missing mean_edge_weight</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 1            152   0.435      <span style="text-decoration: underline;">9</span>976                  0             18.1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 1            152   0.435      <span style="text-decoration: underline;">9</span>976                  0             41.7</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: sd_edge_weight &lt;dbl&gt;, median_edge_weight &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   min_edge_weight &lt;dbl&gt;, max_edge_weight &lt;dbl&gt;, competition_row &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   competition_col &lt;dbl&gt;, sd_of_row_means &lt;dbl&gt;, sd_of_col_means &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   covar_of_row_col_means &lt;dbl&gt;, reciprocity &lt;dbl&gt;, mutual &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   transitivity &lt;dbl&gt;</span></span></span></code></pre></div>
 <p><code>as_tibble(net)</code> and <code>tidy(net)</code> share the same
-long-format payload as <code>unnetify(net)</code> — they differ only in
+long-format payload as <code>unnetify(net)</code> – they differ only in
 whether zero-weight edges are dropped by default (<code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code>
 drops them, matching the broom convention). <code>glance(net)</code> is
-the broom-flavored sibling of <code>summary(net)</code> — one row of
+the broom-flavored sibling of <code>summary(net)</code> – one row of
 graph-level statistics per network (or per (time, layer) slice for
 longitudinal / multilayer inputs).</p>
 <p><code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble()</a></code> also has a method for
@@ -328,18 +332,23 @@ longitudinal / multilayer inputs).</p>
 <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter()</a></code> / <code><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange()</a></code> /
 <code>pivot_wider()</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"2010"</span> <span class="op">=</span> <span class="va">net1</span>, <span class="st">"2011"</span> <span class="op">=</span> <span class="va">net2</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">panel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span><span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2010</span>, <span class="fl">2011</span><span class="op">)</span>, <span class="op">]</span>,</span>
+<span>                actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>, time <span class="op">=</span> <span class="st">"year"</span>,</span>
+<span>                symmetric <span class="op">=</span> <span class="cn">FALSE</span>, weight <span class="op">=</span> <span class="st">"verbCoop"</span><span class="op">)</span></span>
+<span><span class="va">net_2010</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subset_netify.html">subset_netify</a></span><span class="op">(</span><span class="va">panel</span>, time <span class="op">=</span> <span class="st">"2010"</span><span class="op">)</span></span>
+<span><span class="va">net_2011</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subset_netify.html">subset_netify</a></span><span class="op">(</span><span class="va">panel</span>, time <span class="op">=</span> <span class="st">"2011"</span><span class="op">)</span></span>
+<span><span class="va">cmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"2010"</span> <span class="op">=</span> <span class="va">net_2010</span>, <span class="st">"2011"</span> <span class="op">=</span> <span class="va">net_2011</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 1 x 5</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 5</span></span></span>
 <span><span class="co">#&gt;   net_i net_j metric      value p_value</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;       &lt;dbl&gt;   &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 2011  2010  correlation 0.884      NA</span></span></code></pre></div>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 2010  2011  correlation 0.884      <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="predicates-and-descriptors">Predicates and descriptors<a class="anchor" aria-label="anchor" href="#predicates-and-descriptors"></a>
+<h2 id="predicates-and-descriptors">predicates and descriptors<a class="anchor" aria-label="anchor" href="#predicates-and-descriptors"></a>
 </h2>
-<p>For programmatic dispatch — e.g. inside a custom exporter or pipeline
-step — netify ships a small set of non-masking predicates and size
+<p>For programmatic dispatch – e.g. inside a custom exporter or pipeline
+step – netify ships a small set of non-masking predicates and size
 accessors:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># class / structure predicates</span></span>
@@ -363,160 +372,14 @@ accessors:</p>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="fu"><a href="../reference/netify_predicates.html">n_layers</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span>              <span class="co"># number of layers (1 for single-layer)</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
-<span><span class="fu"><a href="../reference/get_actor_time_info.html">get_actor_time_info</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span>   <span class="co"># returns the stored actor_pds: actor, min_time, max_time</span></span>
-<span><span class="co">#&gt;                                          actor min_time max_time</span></span>
-<span><span class="co">#&gt; 1                                  Afghanistan        1        1</span></span>
-<span><span class="co">#&gt; 2                                      Albania        1        1</span></span>
-<span><span class="co">#&gt; 3                                      Algeria        1        1</span></span>
-<span><span class="co">#&gt; 4                                       Angola        1        1</span></span>
-<span><span class="co">#&gt; 5                                    Argentina        1        1</span></span>
-<span><span class="co">#&gt; 6                                      Armenia        1        1</span></span>
-<span><span class="co">#&gt; 7                                    Australia        1        1</span></span>
-<span><span class="co">#&gt; 8                                      Austria        1        1</span></span>
-<span><span class="co">#&gt; 9                                   Azerbaijan        1        1</span></span>
-<span><span class="co">#&gt; 10                                     Bahrain        1        1</span></span>
-<span><span class="co">#&gt; 11                                  Bangladesh        1        1</span></span>
-<span><span class="co">#&gt; 12                                     Belarus        1        1</span></span>
-<span><span class="co">#&gt; 13                                     Belgium        1        1</span></span>
-<span><span class="co">#&gt; 14                                       Benin        1        1</span></span>
-<span><span class="co">#&gt; 15             Bolivia, Plurinational State Of        1        1</span></span>
-<span><span class="co">#&gt; 16                      Bosnia And Herzegovina        1        1</span></span>
-<span><span class="co">#&gt; 17                                      Brazil        1        1</span></span>
-<span><span class="co">#&gt; 18                                    Bulgaria        1        1</span></span>
-<span><span class="co">#&gt; 19                                Burkina Faso        1        1</span></span>
-<span><span class="co">#&gt; 20                                     Burundi        1        1</span></span>
-<span><span class="co">#&gt; 21                                    Cambodia        1        1</span></span>
-<span><span class="co">#&gt; 22                                    Cameroon        1        1</span></span>
-<span><span class="co">#&gt; 23                                      Canada        1        1</span></span>
-<span><span class="co">#&gt; 24                                  Cape Verde        1        1</span></span>
-<span><span class="co">#&gt; 25                    Central African Republic        1        1</span></span>
-<span><span class="co">#&gt; 26                                        Chad        1        1</span></span>
-<span><span class="co">#&gt; 27                                       Chile        1        1</span></span>
-<span><span class="co">#&gt; 28                                       China        1        1</span></span>
-<span><span class="co">#&gt; 29                                    Colombia        1        1</span></span>
-<span><span class="co">#&gt; 30                                     Comoros        1        1</span></span>
-<span><span class="co">#&gt; 31                          Congo, Republic Of        1        1</span></span>
-<span><span class="co">#&gt; 32           Congo, The Democratic Republic Of        1        1</span></span>
-<span><span class="co">#&gt; 33                                  Costa Rica        1        1</span></span>
-<span><span class="co">#&gt; 34                               Cote D'ivoire        1        1</span></span>
-<span><span class="co">#&gt; 35                                     Croatia        1        1</span></span>
-<span><span class="co">#&gt; 36                                        Cuba        1        1</span></span>
-<span><span class="co">#&gt; 37                                      Cyprus        1        1</span></span>
-<span><span class="co">#&gt; 38                                     Denmark        1        1</span></span>
-<span><span class="co">#&gt; 39                                    Djibouti        1        1</span></span>
-<span><span class="co">#&gt; 40                          Dominican Republic        1        1</span></span>
-<span><span class="co">#&gt; 41                                     Ecuador        1        1</span></span>
-<span><span class="co">#&gt; 42                                       Egypt        1        1</span></span>
-<span><span class="co">#&gt; 43                                 El Salvador        1        1</span></span>
-<span><span class="co">#&gt; 44                           Equatorial Guinea        1        1</span></span>
-<span><span class="co">#&gt; 45                                     Estonia        1        1</span></span>
-<span><span class="co">#&gt; 46                                    Ethiopia        1        1</span></span>
-<span><span class="co">#&gt; 47                                        Fiji        1        1</span></span>
-<span><span class="co">#&gt; 48                                     Finland        1        1</span></span>
-<span><span class="co">#&gt; 49                                      France        1        1</span></span>
-<span><span class="co">#&gt; 50                                       Gabon        1        1</span></span>
-<span><span class="co">#&gt; 51                                      Gambia        1        1</span></span>
-<span><span class="co">#&gt; 52                                     Georgia        1        1</span></span>
-<span><span class="co">#&gt; 53                                     Germany        1        1</span></span>
-<span><span class="co">#&gt; 54                                       Ghana        1        1</span></span>
-<span><span class="co">#&gt; 55                                      Greece        1        1</span></span>
-<span><span class="co">#&gt; 56                                   Guatemala        1        1</span></span>
-<span><span class="co">#&gt; 57                                      Guinea        1        1</span></span>
-<span><span class="co">#&gt; 58                               Guinea-Bissau        1        1</span></span>
-<span><span class="co">#&gt; 59                                      Guyana        1        1</span></span>
-<span><span class="co">#&gt; 60                                       Haiti        1        1</span></span>
-<span><span class="co">#&gt; 61                                    Honduras        1        1</span></span>
-<span><span class="co">#&gt; 62                                     Hungary        1        1</span></span>
-<span><span class="co">#&gt; 63                                       India        1        1</span></span>
-<span><span class="co">#&gt; 64                                   Indonesia        1        1</span></span>
-<span><span class="co">#&gt; 65                   Iran, Islamic Republic Of        1        1</span></span>
-<span><span class="co">#&gt; 66                                        Iraq        1        1</span></span>
-<span><span class="co">#&gt; 67                                     Ireland        1        1</span></span>
-<span><span class="co">#&gt; 68                                      Israel        1        1</span></span>
-<span><span class="co">#&gt; 69                                       Italy        1        1</span></span>
-<span><span class="co">#&gt; 70                                     Jamaica        1        1</span></span>
-<span><span class="co">#&gt; 71                                       Japan        1        1</span></span>
-<span><span class="co">#&gt; 72                                      Jordan        1        1</span></span>
-<span><span class="co">#&gt; 73                                  Kazakhstan        1        1</span></span>
-<span><span class="co">#&gt; 74                                       Kenya        1        1</span></span>
-<span><span class="co">#&gt; 75      Korea, Democratic People's Republic Of        1        1</span></span>
-<span><span class="co">#&gt; 76                          Korea, Republic Of        1        1</span></span>
-<span><span class="co">#&gt; 77                                      Kuwait        1        1</span></span>
-<span><span class="co">#&gt; 78                                  Kyrgyzstan        1        1</span></span>
-<span><span class="co">#&gt; 79            Lao People's Democratic Republic        1        1</span></span>
-<span><span class="co">#&gt; 80                                      Latvia        1        1</span></span>
-<span><span class="co">#&gt; 81                                     Lebanon        1        1</span></span>
-<span><span class="co">#&gt; 82                                     Liberia        1        1</span></span>
-<span><span class="co">#&gt; 83                      Libyan Arab Jamahiriya        1        1</span></span>
-<span><span class="co">#&gt; 84                                   Lithuania        1        1</span></span>
-<span><span class="co">#&gt; 85                                  Luxembourg        1        1</span></span>
-<span><span class="co">#&gt; 86  Macedonia, The Former Yugoslav Republic Of        1        1</span></span>
-<span><span class="co">#&gt; 87                                  Madagascar        1        1</span></span>
-<span><span class="co">#&gt; 88                                      Malawi        1        1</span></span>
-<span><span class="co">#&gt; 89                                    Malaysia        1        1</span></span>
-<span><span class="co">#&gt; 90                                        Mali        1        1</span></span>
-<span><span class="co">#&gt; 91                                  Mauritania        1        1</span></span>
-<span><span class="co">#&gt; 92                                   Mauritius        1        1</span></span>
-<span><span class="co">#&gt; 93                                      Mexico        1        1</span></span>
-<span><span class="co">#&gt; 94                        Moldova, Republic Of        1        1</span></span>
-<span><span class="co">#&gt; 95                                    Mongolia        1        1</span></span>
-<span><span class="co">#&gt; 96                                     Morocco        1        1</span></span>
-<span><span class="co">#&gt; 97                                  Mozambique        1        1</span></span>
-<span><span class="co">#&gt; 98                                     Myanmar        1        1</span></span>
-<span><span class="co">#&gt; 99                                       Nepal        1        1</span></span>
-<span><span class="co">#&gt; 100                                Netherlands        1        1</span></span>
-<span><span class="co">#&gt; 101                                New Zealand        1        1</span></span>
-<span><span class="co">#&gt; 102                                  Nicaragua        1        1</span></span>
-<span><span class="co">#&gt; 103                                      Niger        1        1</span></span>
-<span><span class="co">#&gt; 104                                    Nigeria        1        1</span></span>
-<span><span class="co">#&gt; 105                                     Norway        1        1</span></span>
-<span><span class="co">#&gt; 106                                       Oman        1        1</span></span>
-<span><span class="co">#&gt; 107                                   Pakistan        1        1</span></span>
-<span><span class="co">#&gt; 108                                     Panama        1        1</span></span>
-<span><span class="co">#&gt; 109                           Papua New Guinea        1        1</span></span>
-<span><span class="co">#&gt; 110                                   Paraguay        1        1</span></span>
-<span><span class="co">#&gt; 111                                       Peru        1        1</span></span>
-<span><span class="co">#&gt; 112                                Philippines        1        1</span></span>
-<span><span class="co">#&gt; 113                                     Poland        1        1</span></span>
-<span><span class="co">#&gt; 114                                   Portugal        1        1</span></span>
-<span><span class="co">#&gt; 115                                      Qatar        1        1</span></span>
-<span><span class="co">#&gt; 116                                    Romania        1        1</span></span>
-<span><span class="co">#&gt; 117                         Russian Federation        1        1</span></span>
-<span><span class="co">#&gt; 118                                     Rwanda        1        1</span></span>
-<span><span class="co">#&gt; 119                               Saudi Arabia        1        1</span></span>
-<span><span class="co">#&gt; 120                                    Senegal        1        1</span></span>
-<span><span class="co">#&gt; 121                               Sierra Leone        1        1</span></span>
-<span><span class="co">#&gt; 122                                  Singapore        1        1</span></span>
-<span><span class="co">#&gt; 123                                   Slovakia        1        1</span></span>
-<span><span class="co">#&gt; 124                                   Slovenia        1        1</span></span>
-<span><span class="co">#&gt; 125                            Solomon Islands        1        1</span></span>
-<span><span class="co">#&gt; 126                                    Somalia        1        1</span></span>
-<span><span class="co">#&gt; 127                               South Africa        1        1</span></span>
-<span><span class="co">#&gt; 128                                      Spain        1        1</span></span>
-<span><span class="co">#&gt; 129                                  Sri Lanka        1        1</span></span>
-<span><span class="co">#&gt; 130                                      Sudan        1        1</span></span>
-<span><span class="co">#&gt; 131                                   Suriname        1        1</span></span>
-<span><span class="co">#&gt; 132                                     Sweden        1        1</span></span>
-<span><span class="co">#&gt; 133                                Switzerland        1        1</span></span>
-<span><span class="co">#&gt; 134                       Syrian Arab Republic        1        1</span></span>
-<span><span class="co">#&gt; 135                                 Tajikistan        1        1</span></span>
-<span><span class="co">#&gt; 136               Tanzania, United Republic Of        1        1</span></span>
-<span><span class="co">#&gt; 137                                   Thailand        1        1</span></span>
-<span><span class="co">#&gt; 138                                       Togo        1        1</span></span>
-<span><span class="co">#&gt; 139                        Trinidad And Tobago        1        1</span></span>
-<span><span class="co">#&gt; 140                                    Tunisia        1        1</span></span>
-<span><span class="co">#&gt; 141                               Turkmenistan        1        1</span></span>
-<span><span class="co">#&gt; 142                                     Uganda        1        1</span></span>
-<span><span class="co">#&gt; 143                                    Ukraine        1        1</span></span>
-<span><span class="co">#&gt; 144                       United Arab Emirates        1        1</span></span>
-<span><span class="co">#&gt; 145                             United Kingdom        1        1</span></span>
-<span><span class="co">#&gt; 146                              United States        1        1</span></span>
-<span><span class="co">#&gt; 147                                    Uruguay        1        1</span></span>
-<span><span class="co">#&gt; 148                                 Uzbekistan        1        1</span></span>
-<span><span class="co">#&gt; 149                                    Vietnam        1        1</span></span>
-<span><span class="co">#&gt; 150                                      Yemen        1        1</span></span>
-<span><span class="co">#&gt; 151                                     Zambia        1        1</span></span>
-<span><span class="co">#&gt; 152                                   Zimbabwe        1        1</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_actor_time_info.html">get_actor_time_info</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span><span class="op">)</span>   <span class="co"># stored actor_pds: actor, min_time, max_time</span></span>
+<span><span class="co">#&gt;         actor min_time max_time</span></span>
+<span><span class="co">#&gt; 1 Afghanistan        1        1</span></span>
+<span><span class="co">#&gt; 2     Albania        1        1</span></span>
+<span><span class="co">#&gt; 3     Algeria        1        1</span></span>
+<span><span class="co">#&gt; 4      Angola        1        1</span></span>
+<span><span class="co">#&gt; 5   Argentina        1        1</span></span>
+<span><span class="co">#&gt; 6     Armenia        1        1</span></span></code></pre></div>
 <p>The <code>_netify</code> suffix on <code><a href="../reference/netify_predicates.html">is_bipartite_netify()</a></code>
 and <code><a href="../reference/netify_predicates.html">is_directed_netify()</a></code> avoids masking the same-named
 predicates from <code>igraph</code> and <code>network</code>. The
@@ -524,7 +387,7 @@ unsuffixed versions exist too and defer to the foreign package if a
 non-netify graph object is passed.</p>
 </div>
 <div class="section level2">
-<h2 id="object-level-validation">Object-level validation<a class="anchor" aria-label="anchor" href="#object-level-validation"></a>
+<h2 id="object-level-validation">object-level validation<a class="anchor" aria-label="anchor" href="#object-level-validation"></a>
 </h2>
 <p><code><a href="../reference/validate_netify.html">validate_netify()</a></code> is the developer’s pre-flight check.
 It walks the attribute bundle and confirms the invariants the rest of
@@ -535,38 +398,38 @@ the package relies on:</p>
 <p>The full list of checks:</p>
 <ul>
 <li>
-<code>netify_type</code> — one of <code>"cross_sec"</code>,
+<code>netify_type</code> – one of <code>"cross_sec"</code>,
 <code>"longit_array"</code>, <code>"longit_list"</code>, and matches the
 underlying R object</li>
 <li>
-<code>mode</code> — <code>"unipartite"</code> or
+<code>mode</code> – <code>"unipartite"</code> or
 <code>"bipartite"</code>
 </li>
 <li>
-<code>symmetric_type</code> — scalar logical, or named logical of
+<code>symmetric_type</code> – scalar logical, or named logical of
 length <code>n_layers</code> for mixed-directedness multilayer</li>
 <li>
-<code>layers_consistent</code> — <code>attr(net, "layers")</code>
+<code>layers_consistent</code> – <code>attr(net, "layers")</code>
 length matches the layer dimension where applicable</li>
 <li>
-<code>nodal_actors_known</code> — every actor referenced in
+<code>nodal_actors_known</code> – every actor referenced in
 <code>nodal_data</code> exists in the network’s actor set</li>
 <li>
-<code>is_binary_consistent</code> — the stored
+<code>is_binary_consistent</code> – the stored
 <code>is_binary</code> flag matches the actual content</li>
 <li>
-<code>symmetric_consistent</code> — if stored as symmetric, the
+<code>symmetric_consistent</code> – if stored as symmetric, the
 matrix content is actually symmetric</li>
 <li>
-<code>unipartite_dimnames</code> — row and column names agree for
+<code>unipartite_dimnames</code> – row and column names agree for
 unipartite networks</li>
 <li>
-<code>slice_dimnames_consistent</code> — every slice of a
+<code>slice_dimnames_consistent</code> – every slice of a
 longitudinal array/list has dimnames in the order recorded in
 <code>actor_pds</code>
 </li>
 <li>
-<code>nodal_time_known</code> — time keys in nodal/dyad data are a
+<code>nodal_time_known</code> – time keys in nodal/dyad data are a
 subset of the network’s time axis</li>
 </ul>
 <p>A quick demo on a clean netlet versus one tampered to introduce a
@@ -590,33 +453,34 @@ stray actor:</p>
 <code><a href="../reference/validate_netify.html">validate_netify()</a></code> is the first place to look.</p>
 </div>
 <div class="section level2">
-<h2 id="open-cohort-panels-with-actor_pds">Open-cohort panels with <code>actor_pds</code><a class="anchor" aria-label="anchor" href="#open-cohort-panels-with-actor_pds"></a>
+<h2 id="open-cohort-panels-with-actor_pds">open-cohort panels with <code>actor_pds</code><a class="anchor" aria-label="anchor" href="#open-cohort-panels-with-actor_pds"></a>
 </h2>
-<p>When the actor roster changes over time — entries, exits, attrition,
-contact-tracing windows — pass <code>actor_time_uniform = FALSE</code>
+<p>When the actor roster changes over time – entries, exits, attrition,
+contact-tracing windows – pass <code>actor_time_uniform = FALSE</code>
 and supply an <code>actor_pds</code> data.frame giving each actor’s
 <code>[min_time, max_time]</code> window. Each period’s netlet then
 contains only the actors whose window covers that period; densities,
 degree counts, and per-period actor sets respect those entry / exit
 boundaries.</p>
 <div class="section level3">
-<h3 id="the-actor_pds-roster-step-by-step">The <code>actor_pds</code> roster, step by step<a class="anchor" aria-label="anchor" href="#the-actor_pds-roster-step-by-step"></a>
+<h3 id="the-actor_pds-roster-step-by-step">the <code>actor_pds</code> roster, step by step<a class="anchor" aria-label="anchor" href="#the-actor_pds-roster-step-by-step"></a>
 </h3>
 <p>Three pieces have to line up for an open-cohort netlet to be
 well-formed:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>A roster</strong> — one row per actor, with
+<strong>A roster</strong> – one row per actor, with
 <code>actor</code>, <code>min_time</code>, <code>max_time</code>. The
 <code>[min_time, max_time]</code> interval is <em>closed</em> (the actor
 is alive in the boundary periods themselves).</li>
 <li>
-<strong>An edgelist</strong> — one row per observed interaction.
-Edges whose endpoints or time fall outside the roster’s windows are
-silently dropped during construction.</li>
+<strong>An edgelist</strong> – one row per observed interaction.
+During construction, rows outside the roster windows are excluded
+because the referenced actor is not in the risk set for that
+period.</li>
 <li>
 <strong><code>netify(actor_time_uniform = FALSE, actor_pds = roster, ...)</code></strong>
-— this is what tells the constructor to honor the roster instead of
+– this is what tells the constructor to honor the roster instead of
 treating every actor as present in every period.</li>
 </ol>
 <p>Below, actor <code>a</code> is in the network only during periods 1-2
@@ -649,7 +513,7 @@ so we can verify the period-by-period actor sets afterwards.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># read the roster back off the netlet itself</span></span>
-<span><span class="fu"><a href="../reference/get_actor_time_info.html">get_actor_time_info</a></span><span class="op">(</span><span class="va">net_oc</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_actor_time_info.html">get_actor_time_info</a></span><span class="op">(</span><span class="va">net_oc</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   actor min_time max_time</span></span>
 <span><span class="co">#&gt; 1     a        1        2</span></span>
 <span><span class="co">#&gt; 2     b        1        5</span></span>
@@ -664,16 +528,16 @@ so we can verify the period-by-period actor sets afterwards.</p>
 stored <code>actor_pds</code> directly (it is also the argument name on
 <code><a href="../reference/netify.html">netify()</a></code> itself, so the round trip is exact). On a raw dyad
 data.frame the same function <em>derives</em> the roster from observed
-activity — that’s how you build the <code>actor_pds</code> argument in
+activity – that’s how you build the <code>actor_pds</code> argument in
 the first place.</p>
-<p>This is the standard path for open-cohort longitudinal data — panel
+<p>This is the standard path for open-cohort longitudinal data – panel
 surveys with attrition, contact-tracing chains, organizational
 membership over time, animal co-occurrence with births / deaths, and
 similar settings where treating every actor as present in every period
 would distort denominators.</p>
 </div>
 <div class="section level3">
-<h3 id="density-and-per-period-actor-sets">Density and per-period actor sets<a class="anchor" aria-label="anchor" href="#density-and-per-period-actor-sets"></a>
+<h3 id="density-and-per-period-actor-sets">density and per-period actor sets<a class="anchor" aria-label="anchor" href="#density-and-per-period-actor-sets"></a>
 </h3>
 <p>The key correctness guarantee: density (and every other per-period
 statistic) is computed against the actor set <em>alive in that
@@ -707,8 +571,8 @@ now out, <code>d</code> / <code>e</code> enter)</li>
 <span><span class="co">#&gt; 3   3          4 0.3333333         2</span></span>
 <span><span class="co">#&gt; 4   4          4 0.1666667         1</span></span>
 <span><span class="co">#&gt; 5   5          3 0.6666667         2</span></span></code></pre></div>
-<p>The period-3 denominator is <strong>4 × 3 = 12</strong> (directed) or
-<strong>4 × 3 / 2 = 6</strong> (symmetric), <em>not</em> 5 × 4 — actor
+<p>The period-3 denominator is <strong>4 x 3 = 12</strong> (directed) or
+<strong>4 x 3 / 2 = 6</strong> (symmetric), <em>not</em> 5 x 4 – actor
 <code>a</code> is not counted because its <code>max_time</code> is 2.
 This is the load-bearing invariant: density at <code>t = 3</code>
 excludes the actor present only in periods 1-2, so a researcher
@@ -716,16 +580,16 @@ comparing densities across periods is not comparing apples to
 oranges.</p>
 <p>The same accounting flows into <code><a href="../reference/summary_actor.html">summary_actor()</a></code>,
 <code><a href="../reference/homophily.html">homophily()</a></code>, <code><a href="../reference/mixing_matrix.html">mixing_matrix()</a></code>, and the plot
-helpers — open-cohort actors never show up as zero-degree placeholders
+helpers – open-cohort actors never show up as zero-degree placeholders
 in periods they did not exist.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="na-versus-zero-in-weighted-networks">NA versus zero in weighted networks<a class="anchor" aria-label="anchor" href="#na-versus-zero-in-weighted-networks"></a>
+<h2 id="na-versus-zero-in-weighted-networks">na versus zero in weighted networks<a class="anchor" aria-label="anchor" href="#na-versus-zero-in-weighted-networks"></a>
 </h2>
 <p>For weighted data, the distinction between <code>0</code> (observed,
 but no edge / zero-valued interaction) and <code>NA</code> (unobserved /
-not-at-risk) is semantically important in many domains — epidemiology,
+not-at-risk) is semantically important in many domains – epidemiology,
 animal behavior, sparse survey rosters. By default
 <code>netify(missing_to_zero = TRUE)</code> fills unobserved dyads with
 <code>0</code>. Pass <code>missing_to_zero = FALSE</code> to keep them
@@ -736,7 +600,7 @@ propagate the NA semantics rather than silently treating the dyad as a
 zero-weight tie.</p>
 <p>Both <code>prop_edges_missing</code> and
 <code>prop_unknown_edges</code> use the same denominator as
-<code>density</code> — the number of <em>potential edge dyads</em>
+<code>density</code> – the number of <em>potential edge dyads</em>
 (off-diagonal for unipartite + <code>diag_to_NA</code>, halved for
 symmetric, all cells for bipartite). That means
 <code>density + prop_edges_missing + observed_zero_fraction = 1</code>
@@ -749,23 +613,23 @@ identically zero in every row; when present it tracks
 NA semantics” cue downstream.</p>
 </div>
 <div class="section level2">
-<h2 id="writing-a-custom-graph-level-statistic">Writing a custom graph-level statistic<a class="anchor" aria-label="anchor" href="#writing-a-custom-graph-level-statistic"></a>
+<h2 id="writing-a-custom-graph-level-statistic">writing a custom graph-level statistic<a class="anchor" aria-label="anchor" href="#writing-a-custom-graph-level-statistic"></a>
 </h2>
 <p><code>summary(net, other_stats = list(my_stat = fn))</code> accepts
 user-supplied functions. Each function receives the <strong>netify
 object</strong> for the current time period / layer (not a stripped
 matrix), so you can call <code><a href="../reference/netify_to_igraph.html">netify_to_igraph()</a></code>,
 <code><a href="../reference/peek.html">peek()</a></code>, or whatever you want inside.</p>
-<p>Return a <strong>named numeric vector</strong> — names become column
+<p>Return a <strong>named numeric vector</strong> – names become column
 names in the output frame.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example: number of weakly connected components with at least 2 nodes</span></span>
+<code class="sourceCode R"><span><span class="co"># example: number of weakly connected components with at least 2 nodes</span></span>
 <span><span class="va">n_components_2plus</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">net</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_igraph.html">netify_to_igraph</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>n_components_2plus <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu">igraph</span><span class="fu">::</span><span class="fu"><a href="https://r.igraph.org/reference/components.html" class="external-link">components</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">$</span><span class="va">csize</span> <span class="op">&gt;=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># Example: edge weight skewness</span></span>
+<span><span class="co"># example: edge weight skewness</span></span>
 <span><span class="va">weight_skew</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">net</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span></span>
 <span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="va">v</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">v</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">]</span></span>
@@ -777,14 +641,18 @@ names in the output frame.</p>
 <span>  comp <span class="op">=</span> <span class="va">n_components_2plus</span>,</span>
 <span>  skew <span class="op">=</span> <span class="va">weight_skew</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> `netify_to_igraph()` kept the igraph edge set unchanged.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> 131 dyadic covariate cells on non-edges cannot be stored as igraph edge</span></span>
+<span><span class="co">#&gt;   attributes.</span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">This message is displayed once per session.</span></span></span>
 <span><span class="co">#&gt;   net num_actors   density num_edges prop_edges_missing mean_edge_weight</span></span>
-<span><span class="co">#&gt; 1   1        152 0.4346462      9976                  0         18.13393</span></span>
+<span><span class="co">#&gt; 1   1        152 0.4346462      9976                  0         41.72113</span></span>
 <span><span class="co">#&gt;   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight</span></span>
-<span><span class="co">#&gt; 1        132.367                  0               0            4937</span></span>
+<span><span class="co">#&gt; 1       198.3157                  6               1            4937</span></span>
 <span><span class="co">#&gt;   competition_row competition_col sd_of_row_means sd_of_col_means</span></span>
 <span><span class="co">#&gt; 1      0.04071163      0.03493156         41.4412        37.76971</span></span>
 <span><span class="co">#&gt;   covar_of_row_col_means reciprocity    mutual transitivity</span></span>
-<span><span class="co">#&gt; 1              0.9934913   0.9823385 0.8402509    0.6458631</span></span>
+<span><span class="co">#&gt; 1              0.9934913   0.9823385 0.8402509    0.6386063</span></span>
 <span><span class="co">#&gt;   comp.n_components_2plus skew.weight_skew</span></span>
 <span><span class="co">#&gt; 1                       1         13.76129</span></span></code></pre></div>
 <p>The same <code>other_stats</code> mechanism is available in
@@ -795,13 +663,13 @@ once per time period / layer / iteration as appropriate; check the
 function’s <code>?</code> for the exact contract.</p>
 </div>
 <div class="section level2">
-<h2 id="writing-a-custom-actor-level-statistic">Writing a custom actor-level statistic<a class="anchor" aria-label="anchor" href="#writing-a-custom-actor-level-statistic"></a>
+<h2 id="writing-a-custom-actor-level-statistic">writing a custom actor-level statistic<a class="anchor" aria-label="anchor" href="#writing-a-custom-actor-level-statistic"></a>
 </h2>
 <p><code>summary_actor(net, other_stats = list(my_stat = fn))</code>.
 The function should return a vector with one value per actor (in row
 order):</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example: per-actor mean tie weight to non-isolates</span></span>
+<code class="sourceCode R"><span><span class="co"># example: per-actor mean tie weight to non-isolates</span></span>
 <span><span class="va">mean_active_tie</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">mat</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">mat</span>, <span class="fl">1</span>, <span class="kw">function</span><span class="op">(</span><span class="va">row</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">nonzero</span> <span class="op">&lt;-</span> <span class="va">row</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">row</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">row</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">]</span></span>
@@ -809,61 +677,52 @@ order):</p>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">net</span>, other_stats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean_active <span class="op">=</span> <span class="va">mean_active_tie</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in betweenness_cutoff_impl(graph = graph, vids = v, directed = directed, : Some weights are smaller than epsilon, calculations may suffer from numerical precision issues.</span></span>
-<span><span class="co">#&gt; Source: centrality/betweenness.c:441</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">net</span>, stats <span class="op">=</span> <span class="st">"fast"</span>, other_stats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean_active <span class="op">=</span> <span class="va">mean_active_tie</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         actor degree_in degree_out degree_total prop_ties_in prop_ties_out</span></span>
-<span><span class="co">#&gt; 1 Afghanistan        95         80          175    0.6250000     0.5263158</span></span>
-<span><span class="co">#&gt; 2     Albania        53         51          104    0.3486842     0.3355263</span></span>
-<span><span class="co">#&gt; 3     Algeria        78         94          172    0.5131579     0.6184211</span></span>
-<span><span class="co">#&gt; 4      Angola        68         61          129    0.4473684     0.4013158</span></span>
-<span><span class="co">#&gt; 5   Argentina        64         66          130    0.4210526     0.4342105</span></span>
-<span><span class="co">#&gt; 6     Armenia        56         56          112    0.3684211     0.3684211</span></span>
+<span><span class="co">#&gt; 1 Afghanistan        95         80          175    0.6291391     0.5298013</span></span>
+<span><span class="co">#&gt; 2     Albania        53         51          104    0.3509934     0.3377483</span></span>
+<span><span class="co">#&gt; 3     Algeria        78         94          172    0.5165563     0.6225166</span></span>
+<span><span class="co">#&gt; 4      Angola        68         61          129    0.4503311     0.4039735</span></span>
+<span><span class="co">#&gt; 5   Argentina        64         66          130    0.4238411     0.4370861</span></span>
+<span><span class="co">#&gt; 6     Armenia        56         56          112    0.3708609     0.3708609</span></span>
 <span><span class="co">#&gt;   prop_ties_total network_share_in network_share_out network_share_total</span></span>
-<span><span class="co">#&gt; 1               1      0.025958050       0.021073497         0.023515773</span></span>
-<span><span class="co">#&gt; 2               1      0.001170082       0.001158069         0.001164076</span></span>
-<span><span class="co">#&gt; 3               1      0.002919199       0.003056150         0.002987674</span></span>
-<span><span class="co">#&gt; 4               1      0.002349775       0.002011004         0.002180390</span></span>
-<span><span class="co">#&gt; 5               1      0.003925903       0.004175777         0.004050840</span></span>
-<span><span class="co">#&gt; 6               1      0.004995075       0.004862930         0.004929002</span></span>
-<span><span class="co">#&gt;   closeness_in closeness_out closeness_all betweenness authority_score</span></span>
-<span><span class="co">#&gt; 1    128.82255     112.49032      202.3025 0.119495953     0.470595036</span></span>
-<span><span class="co">#&gt; 2    128.88784     111.88795      202.3025 0.084083885     0.006988585</span></span>
-<span><span class="co">#&gt; 3    110.00485     108.85637      202.3025 0.021258278     0.022841447</span></span>
-<span><span class="co">#&gt; 4     62.87728      86.84856      202.3025 0.012737307     0.016299497</span></span>
-<span><span class="co">#&gt; 5     81.34646     109.64682      202.3025 0.008222958     0.033471704</span></span>
-<span><span class="co">#&gt; 6    107.69934      94.19641      152.5994 0.000000000     0.064875541</span></span>
-<span><span class="co">#&gt;     hub_score strength_sum_in strength_sum_out strength_sum_total</span></span>
-<span><span class="co">#&gt; 1 0.233837051           10804             8771              19575</span></span>
-<span><span class="co">#&gt; 2 0.005265195             487              482                969</span></span>
-<span><span class="co">#&gt; 3 0.014840880            1215             1272               2487</span></span>
-<span><span class="co">#&gt; 4 0.009186279             978              837               1815</span></span>
-<span><span class="co">#&gt; 5 0.023840418            1634             1738               3372</span></span>
-<span><span class="co">#&gt; 6 0.039673958            2079             2024               4103</span></span>
-<span><span class="co">#&gt;   strength_avg_in strength_avg_out strength_avg_total strength_std_in</span></span>
-<span><span class="co">#&gt; 1       71.549669        58.086093          64.817881      350.116660</span></span>
-<span><span class="co">#&gt; 2        3.225166         3.192053           3.208609        7.694303</span></span>
-<span><span class="co">#&gt; 3        8.046358         8.423841           8.235099       22.421221</span></span>
-<span><span class="co">#&gt; 4        6.476821         5.543046           6.009934       16.701231</span></span>
-<span><span class="co">#&gt; 5       10.821192        11.509934          11.165563       31.414452</span></span>
-<span><span class="co">#&gt; 6       13.768212        13.403974          13.586093       65.122392</span></span>
-<span><span class="co">#&gt;   strength_std_out strength_std_total strength_median_in strength_median_out</span></span>
-<span><span class="co">#&gt; 1        285.28528         317.700972                  2                   1</span></span>
-<span><span class="co">#&gt; 2          8.35122           8.022761                  0                   0</span></span>
-<span><span class="co">#&gt; 3         21.96283          22.192025                  1                   1</span></span>
-<span><span class="co">#&gt; 4         14.70543          15.703333                  0                   0</span></span>
-<span><span class="co">#&gt; 5         32.11954          31.766997                  0                   0</span></span>
-<span><span class="co">#&gt; 6         63.81538          64.468885                  0                   0</span></span>
+<span><span class="co">#&gt; 1       0.5794702      0.025958050       0.021073497         0.023515773</span></span>
+<span><span class="co">#&gt; 2       0.3443709      0.001170082       0.001158069         0.001164076</span></span>
+<span><span class="co">#&gt; 3       0.5695364      0.002919199       0.003056150         0.002987674</span></span>
+<span><span class="co">#&gt; 4       0.4271523      0.002349775       0.002011004         0.002180390</span></span>
+<span><span class="co">#&gt; 5       0.4304636      0.003925903       0.004175777         0.004050840</span></span>
+<span><span class="co">#&gt; 6       0.3708609      0.004995075       0.004862930         0.004929002</span></span>
+<span><span class="co">#&gt;   strength_sum_in strength_sum_out strength_sum_total strength_avg_in</span></span>
+<span><span class="co">#&gt; 1           10804             8771              19575      113.726316</span></span>
+<span><span class="co">#&gt; 2             487              482                969        9.188679</span></span>
+<span><span class="co">#&gt; 3            1215             1272               2487       15.576923</span></span>
+<span><span class="co">#&gt; 4             978              837               1815       14.382353</span></span>
+<span><span class="co">#&gt; 5            1634             1738               3372       25.531250</span></span>
+<span><span class="co">#&gt; 6            2079             2024               4103       37.125000</span></span>
+<span><span class="co">#&gt;   strength_avg_out strength_avg_total strength_std_in strength_std_out</span></span>
+<span><span class="co">#&gt; 1        109.63750         111.857143       436.76245        385.75910</span></span>
+<span><span class="co">#&gt; 2          9.45098           9.317308        10.72032         12.20215</span></span>
+<span><span class="co">#&gt; 3         13.53191          14.459302        29.33396         26.61098</span></span>
+<span><span class="co">#&gt; 4         13.72131          14.069767        22.56270         20.65279</span></span>
+<span><span class="co">#&gt; 5         26.33333          25.938462        44.36392         44.54672</span></span>
+<span><span class="co">#&gt; 6         36.14286          36.633929       103.35993        101.33983</span></span>
+<span><span class="co">#&gt;   strength_std_total strength_median_in strength_median_out</span></span>
+<span><span class="co">#&gt; 1          413.06464                  7                10.0</span></span>
+<span><span class="co">#&gt; 2           11.41560                  5                 5.0</span></span>
+<span><span class="co">#&gt; 3           27.81441                  4                 4.0</span></span>
+<span><span class="co">#&gt; 4           21.59904                  4                 5.0</span></span>
+<span><span class="co">#&gt; 5           44.28602                  6                 7.0</span></span>
+<span><span class="co">#&gt; 6          101.89396                  4                 4.5</span></span>
 <span><span class="co">#&gt;   strength_median_total mean_active</span></span>
-<span><span class="co">#&gt; 1                   1.5   109.63750</span></span>
-<span><span class="co">#&gt; 2                   0.0     9.45098</span></span>
-<span><span class="co">#&gt; 3                   1.0    13.53191</span></span>
-<span><span class="co">#&gt; 4                   0.0    13.72131</span></span>
-<span><span class="co">#&gt; 5                   0.0    26.33333</span></span>
-<span><span class="co">#&gt; 6                   0.0    36.14286</span></span></code></pre></div>
+<span><span class="co">#&gt; 1                   8.0   109.63750</span></span>
+<span><span class="co">#&gt; 2                   5.0     9.45098</span></span>
+<span><span class="co">#&gt; 3                   4.0    13.53191</span></span>
+<span><span class="co">#&gt; 4                   5.0    13.72131</span></span>
+<span><span class="co">#&gt; 5                   6.5    26.33333</span></span>
+<span><span class="co">#&gt; 6                   4.0    36.14286</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="reading-the-dyad_data-nested-list">Reading the dyad_data nested list<a class="anchor" aria-label="anchor" href="#reading-the-dyad_data-nested-list"></a>
+<h2 id="reading-the-dyad_data-nested-list">reading the dyad_data nested list<a class="anchor" aria-label="anchor" href="#reading-the-dyad_data-nested-list"></a>
 </h2>
 <p><code>attr(net, "dyad_data")</code> is the structure that gives
 netify O(1) access to per-time dyadic covariates. Its shape is:</p>
@@ -881,26 +740,26 @@ netify O(1) access to per-time dyadic covariates. Its shape is:</p>
 <p>For longitudinal networks the top level has one entry per period:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># pseudo-structure for a 3-period network with 2 dyadic vars:</span></span>
-<span><span class="co"># dd[["2010"]][["matlCoop"]]   -&gt; n×n matrix</span></span>
-<span><span class="co"># dd[["2010"]][["verbConf"]]   -&gt; n×n matrix</span></span>
-<span><span class="co"># dd[["2011"]][["matlCoop"]]   -&gt; n×n matrix</span></span>
+<span><span class="co"># dd[["2010"]][["matlCoop"]]   -&gt; n x n matrix</span></span>
+<span><span class="co"># dd[["2010"]][["verbConf"]]   -&gt; n x n matrix</span></span>
+<span><span class="co"># dd[["2011"]][["matlCoop"]]   -&gt; n x n matrix</span></span>
 <span><span class="co"># ... etc.</span></span></code></pre></div>
 <p>If you’re writing a converter (e.g., to a new modeling format), this
 is the structure to iterate over.</p>
 </div>
 <div class="section level2">
-<h2 id="writing-a-custom-exporter-to_-function">Writing a custom exporter (<code>to_*</code> function)<a class="anchor" aria-label="anchor" href="#writing-a-custom-exporter-to_-function"></a>
+<h2 id="writing-a-custom-exporter-to_-function">writing a custom exporter (<code>to_*</code> function)<a class="anchor" aria-label="anchor" href="#writing-a-custom-exporter-to_-function"></a>
 </h2>
 <p>The existing <code><a href="../reference/netify_to_amen.html">to_amen()</a></code>, <code><a href="../reference/netify_to_lame.html">to_lame()</a></code>,
 <code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code>, <code><a href="../reference/netify_to_igraph.html">to_igraph()</a></code>,
-<code><a href="../reference/netify_to_statnet.html">to_statnet()</a></code> give you templates. (<code><a href="../reference/netify_to_lame.html">to_lame()</a></code> is
-the modern AME / latent-factor handoff and emits a snippet of executable
-code under the binding <code>nl</code>; <code><a href="../reference/netify_to_amen.html">to_amen()</a></code> is the
-historical alias and now redirects to <code><a href="../reference/netify_to_lame.html">to_lame()</a></code>.) A new
+<code><a href="../reference/netify_to_statnet.html">to_statnet()</a></code> give you templates. <code><a href="../reference/netify_to_amen.html">to_amen()</a></code>
+exports the standard amen-style data structure; <code><a href="../reference/netify_to_lame.html">to_lame()</a></code>
+wraps that exporter with <code>mode</code>, <code>family</code>, and an
+executable <code>ame_call</code> snippet for lame workflows. A new
 exporter generally needs to:</p>
 <ol style="list-style-type: decimal">
 <li>Validate the netify object with
-<code>netify_check(netlet)</code>
+<code>validate_netify(netlet, verbose = FALSE)</code>
 </li>
 <li>Branch on <code>attr(netlet, "netify_type")</code> (cross_sec /
 longit_array / longit_list)</li>
@@ -920,7 +779,7 @@ reshape to your target format</li>
 netify inputs, the standard pattern is:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">to_mymodel</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">netlet</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu">netify_check</span><span class="op">(</span><span class="va">netlet</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="../reference/validate_netify.html">validate_netify</a></span><span class="op">(</span><span class="va">netlet</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span>    <span class="va">layer_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">netlet</span><span class="op">)</span><span class="op">$</span><span class="va">layers</span></span>
 <span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">layer_names</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
 <span>        <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">layer_names</span>, <span class="kw">function</span><span class="op">(</span><span class="va">lyr</span><span class="op">)</span> <span class="op">{</span></span>
@@ -935,7 +794,7 @@ netify inputs, the standard pattern is:</p>
 <code><a href="../reference/netify_to_lame.html">to_lame()</a></code> do.</p>
 </div>
 <div class="section level2">
-<h2 id="performance-characteristics">Performance characteristics<a class="anchor" aria-label="anchor" href="#performance-characteristics"></a>
+<h2 id="performance-characteristics">performance characteristics<a class="anchor" aria-label="anchor" href="#performance-characteristics"></a>
 </h2>
 <table class="table">
 <colgroup>
@@ -952,54 +811,55 @@ netify inputs, the standard pattern is:</p>
 <tr class="odd">
 <td>
 <code>netify(df)</code> cross-sec</td>
-<td>O(N × E)</td>
+<td>O(N * E)</td>
 <td>C++ via Rcpp; fast</td>
 </tr>
 <tr class="even">
 <td>
 <code>netify(df, time = ...)</code> longit</td>
-<td>O(N × E × T)</td>
+<td>O(N * E * T)</td>
 <td>C++; fast</td>
 </tr>
 <tr class="odd">
 <td><code>summary(net)</code></td>
-<td>O(N²) per period</td>
+<td>O(N^2) per period</td>
 <td>igraph backend</td>
 </tr>
 <tr class="even">
 <td><code>summary_actor(net)</code></td>
-<td>O(N²) per period × per layer</td>
+<td>O(N^2) per period x per layer</td>
 <td>igraph; closeness/betweenness dominate</td>
 </tr>
 <tr class="odd">
-<td><code>summary_actor(net, bootstrap = TRUE)</code></td>
-<td>O(B × n × N²)</td>
-<td>linear in <code>n_boot</code>; defaults to 200</td>
+<td><code>bootstrap_netlet(net, fn, n_boot = B)</code></td>
+<td>O(B * n * N^2)</td>
+<td>depends on the statistic supplied in <code>fn</code>
+</td>
 </tr>
 <tr class="even">
 <td><code>compare_networks(method = "qap")</code></td>
-<td>O(R × N²)</td>
+<td>O(R * N^2)</td>
 <td>C++ permutations; tunable via <code>n_permutations</code>
 </td>
 </tr>
 <tr class="odd">
 <td><code>compare_networks(method = "spectral")</code></td>
-<td>O(N³)</td>
+<td>O(N^3)</td>
 <td>use <code>spectral_rank = round(sqrt(N))</code> for large nets</td>
 </tr>
 <tr class="even">
 <td><code>unnetify(net)</code></td>
-<td>O(N² × T)</td>
+<td>O(N^2 * T)</td>
 <td>use <code>remove_zeros = TRUE</code> for sparse output</td>
 </tr>
 <tr class="odd">
 <td><code>melt(net)</code></td>
-<td>O(N² × T)</td>
+<td>O(N^2 * T)</td>
 <td>leaner than <code>unnetify</code>; no nodal merge</td>
 </tr>
 <tr class="even">
 <td><code>plot(net)</code></td>
-<td>O(N²) layout + O(E) render</td>
+<td>O(N^2) layout + O(E) render</td>
 <td>igraph layout dominates</td>
 </tr>
 </tbody>
@@ -1010,10 +870,11 @@ everything runs in seconds. The C++ routines for <code><a href="../reference/net
 the heaviest paths. The R-side wrappers (especially in plotting and
 attribute handling) are not as optimized.</p>
 <p><strong>Memory budget rule of thumb.</strong> netify stores
-adjacencies densely: an N × N double-precision matrix is 8·N² bytes. For
-longitudinal stacks the cost is 8·N²·T (<code>longit_array</code>) or
-the sum over per-period sizes (<code>longit_list</code>, when actor
-composition varies). Concretely:</p>
+adjacencies densely: an N x N double-precision matrix is 8 * N^2 bytes.
+For longitudinal stacks the cost is 8 * N^2 * T
+(<code>longit_array</code>) or the sum over per-period sizes
+(<code>longit_list</code>, when actor composition varies).
+Concretely:</p>
 <table class="table">
 <thead><tr class="header">
 <th>N</th>
@@ -1055,7 +916,7 @@ composition varies). Concretely:</p>
 </tbody>
 </table>
 <p><code>longit_list</code> netlets cost the <em>sum</em> of per-period
-sizes rather than <code>T × max(N)²</code>, so they pay less when actor
+sizes rather than <code>T x max(N)^2</code>, so they pay less when actor
 composition is sparse over time. For 15,000-node weekly Twitter
 snapshots over a year (<code>T = 52</code>), a <code>longit_array</code>
 is ~93 GB and would not fit on a laptop; a <code>longit_list</code>
@@ -1073,7 +934,7 @@ detection and other large-N algorithms.
 <p><strong>Sparse-input guard.</strong> Passing a
 <code>Matrix::dgCMatrix</code> (or any <code>sparseMatrix</code>) with
 density &lt; 1% and N &gt; 5,000 aborts construction with a pointer to
-the edgelist path. The motivating case is a 15K × 15K follower graph at
+the edgelist path. The motivating case is a 15K x 15K follower graph at
 density 0.001: densifying allocates ~1.7 GB of mostly zeros, which is
 almost never what the caller wants. Pass <code>force_dense = TRUE</code>
 to override if you really do want the dense allocation.</p>
@@ -1085,7 +946,7 @@ numbers for your own machine.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/netify/">netify</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">bench_one</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">N</span>, <span class="va">p</span> <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># build an ER adjacency directly as an edgelist (skips the dense intermediate)</span></span>
+<span>  <span class="co"># build an er adjacency directly as an edgelist (skips the dense intermediate)</span></span>
 <span>  <span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample.int</a></span><span class="op">(</span><span class="va">N</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">p</span> <span class="op">*</span> <span class="va">N</span> <span class="op">*</span> <span class="va">N</span><span class="op">)</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span>  <span class="va">j</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample.int</a></span><span class="op">(</span><span class="va">N</span>, size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">i</span><span class="op">)</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span>  <span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>from <span class="op">=</span> <span class="va">i</span>, to <span class="op">=</span> <span class="va">j</span><span class="op">)</span></span>
@@ -1146,25 +1007,25 @@ numbers for your own machine.</p>
 metrics and grows fastest; <code><a href="../reference/netify.html">netify()</a></code> itself stays under a
 few seconds even at N = 10,000 when fed an edgelist. The full
 <code><a href="../reference/summary_actor.html">summary_actor()</a></code> (with closeness / betweenness / eigen /
-HITS) blows up roughly quadratically — at N = 10,000 it takes several
+HITS) blows up roughly quadratically – at N = 10,000 it takes several
 minutes versus the few seconds shown above for the fast path. That’s why
 the auto-promote fires by default.</p>
 </div>
 <div class="section level2">
-<h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a>
+<h2 id="see-also">see also<a class="anchor" aria-label="anchor" href="#see-also"></a>
 </h2>
 <ul>
 <li>
-<code><a href="../articles/foundations_lite.html">vignette("foundations_lite", package = "netify")</a></code> —
+<code><a href="../articles/quickstart_inference.html">vignette("quickstart_inference", package = "netify")</a></code> –
 minimal end-to-end tour</li>
 <li>
-<code><a href="../articles/foundations.html">vignette("foundations", package = "netify")</a></code> — full IR
-walkthrough</li>
+<a href="https://netify-dev.github.io/netify/articles/foundations.html">Foundations</a>
+– full IR walkthrough</li>
 <li>
-<code><a href="../articles/pipeline_lame_dbn.html">vignette("pipeline_lame_dbn", package = "netify")</a></code> —
-modeling handoff to amen / lame / dbn</li>
+<a href="https://netify-dev.github.io/netify/articles/pipeline_lame_dbn.html">Pipeline:
+netify to lame and dbn</a> – optional modeling handoff article</li>
 <li>
-<code><a href="../articles/pipeline_netify_ergm.html">vignette("pipeline_netify_ergm", package = "netify")</a></code> —
+<code><a href="../articles/pipeline_netify_ergm.html">vignette("pipeline_netify_ergm", package = "netify")</a></code> –
 modeling handoff to ergm / statnet</li>
 </ul>
 </div>

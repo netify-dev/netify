@@ -1,10 +1,8 @@
 # Pipeline: netify to ergm (statnet)
 
 ERGMs (Exponential Random Graph Models) are the workhorse of inferential
-network analysis in the [statnet](https://statnet.org/) ecosystem.
-`netify` provides a clean bridge: build your network with
-[`netify()`](https://netify-dev.github.io/netify/reference/netify.md),
-attach attributes with
+network analysis in the [statnet](https://statnet.org/) ecosystem. With
+`netify`, build the network, attach attributes with
 [`add_node_vars()`](https://netify-dev.github.io/netify/reference/add_node_vars.md)
 /
 [`add_dyad_vars()`](https://netify-dev.github.io/netify/reference/add_dyad_vars.md),
@@ -13,9 +11,9 @@ then convert to the `network` format that `ergm` expects with
 
 This vignette covers:
 
-1.  The cross-sectional pipeline (single network → single ergm fit)
+1.  The cross-sectional pipeline (single network -\> single ergm fit)
 2.  The longitudinal pipeline (per-time ergm fits)
-3.  The multilayer pipeline (per-layer ergm fits —
+3.  The multilayer pipeline (per-layer ergm fits –
     [`to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)
     now iterates layers automatically)
 4.  Round-tripping ergm-simulated networks back into netify for
@@ -44,7 +42,7 @@ library(ergm)
 data(icews)
 ```
 
-## 1. Cross-sectional pipeline
+## 1. cross-sectional pipeline
 
 The simplest case: one snapshot, one model.
 
@@ -103,7 +101,7 @@ sn_2010
 carries nodal attributes through as vertex attributes and dyadic
 attributes through as edge attributes.
 
-### Before you fit: three sanity checks
+### before you fit: three sanity checks
 
 ERGMs fail in cryptic ways when the underlying network is malformed.
 Three checks catch most “invalid output from statistic” headaches before
@@ -111,7 +109,7 @@ you ever call [`ergm()`](https://rdrr.io/pkg/ergm/man/ergm.html):
 
 ``` r
 
-# 1. NAs in nodal covariates referenced by nodecov / nodematch
+# 1. nas in nodal covariates referenced by nodecov / nodematch
 nd <- attr(verb_coop, "nodal_data")
 na_cols <- names(nd)[vapply(nd, function(c) any(is.na(c)), logical(1))]
 na_cols <- setdiff(na_cols, c("actor", "time", "layer"))
@@ -133,48 +131,92 @@ attr(verb_coop, "symmetric")
 
 If `na_cols` is non-empty, drop the affected actors with
 `drop_na_actors(verb_coop, cols = na_cols)` or impute before converting.
-Now fit an ergm:
+Here we create a cleaned network before showing a model formula that
+uses nodal covariates:
 
 ``` r
 
-# Note: this chunk is not evaluated by default to keep vignette build fast.
-# Replace eval = FALSE with eval = TRUE to actually run.
+clean_cols <- attr(sn_2010, "netify_na_cols")
+if (is.null(clean_cols)) clean_cols <- na_cols
+if (!is.null(clean_cols) && length(clean_cols) > 0) {
+    verb_coop_clean <- drop_na_actors(verb_coop, cols = clean_cols)
+} else {
+    verb_coop_clean <- verb_coop
+}
+#> ℹ Dropped 5 of 152 actors with NA covariates: "Afghanistan", "Bosnia And
+#>   Herzegovina", "Djibouti", "Korea, Democratic People's Republic Of", and
+#>   "Somalia".
+#> This message is displayed once per session.
+
+sn_2010_clean <- to_statnet(verb_coop_clean)
+attr(sn_2010_clean, "netify_na_cols")
+#> character(0)
+```
+
+Now fit an ergm against the cleaned network:
+
+``` r
+
+# note: this chunk is not evaluated by default to keep vignette build fast.
+# replace eval = false with eval = true to actually run.
 set.seed(6886)
 m <- ergm(
-    sn_2010 ~ edges +
+    sn_2010_clean ~ edges +
         nodecov("i_polity2") +
         nodecov("i_log_gdp")
 )
 summary(m)
 ```
 
-One footgun worth flagging: `nodecov("i_polity2")` will refuse to fit if
-any vertex has an `NA` polity score. Either subset to actors with
-complete covariates or impute before passing to
+The full model above is not evaluated during vignette builds. The short
+block below checks the
+[`netify()`](https://netify-dev.github.io/netify/reference/netify.md)
+-\>
+[`to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)
+-\> [`ergm()`](https://rdrr.io/pkg/ergm/man/ergm.html) handoff:
+
+``` r
+
+toy_edges <- data.frame(
+    i = c("a", "a", "b", "c"),
+    j = c("b", "c", "c", "d"),
+    y = 1
+)
+toy_net <- suppressMessages(netify(
+    toy_edges,
+    actor1 = "i", actor2 = "j",
+    weight = "y", symmetric = FALSE
+))
+toy_sn <- to_statnet(toy_net)
+set.seed(6886)
+invisible(capture.output(
+    toy_fit <- ergm(toy_sn ~ edges, estimate = "MPLE", eval.loglik = FALSE)
+))
+#> Starting maximum pseudolikelihood estimation (MPLE):
+#> Obtaining the responsible dyads.
+#> Evaluating the predictor and response matrix.
+#> Maximizing the pseudolikelihood.
+#> Finished MPLE.
+coef(toy_fit)
+#>      edges 
+#> -0.6931472
+```
+
+One common ERGM failure comes from missing nodal covariates:
+`ergm::nodecov("i_polity2")` will refuse to fit if any vertex has an
+`NA` polity score. Either subset to actors with complete covariates or
+impute before passing to
 [`to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md).
-`netify` emits a one-shot inform when it detects NAs in a nodal
-attribute and stashes the offending column names on the resulting
-network object so you can introspect:
-
-``` r
-
-attr(sn_2010, "netify_na_cols")   # character vector of NA-bearing nodal vars
-```
-
-If non-empty, drop or impute those columns before fitting
-[`ergm()`](https://rdrr.io/pkg/ergm/man/ergm.html) formulas that
-reference them with `nodecov()` / `nodematch()`. The
+When
+[`to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)
+sees NAs in nodal attributes, it records the affected column names on
+the output object. The
 [`drop_na_actors()`](https://netify-dev.github.io/netify/reference/drop_na_actors.md)
-helper does this in one call and works for cross-sectional,
-longitudinal, and bipartite netlets:
+helper handles this for cross-sectional, longitudinal, and bipartite
+netlets. Use the same approach before formulas that reference nodal
+attributes with `ergm::nodecov()` or `ergm::nodematch()`.
 
-``` r
-
-clean <- drop_na_actors(verb_coop, cols = attr(sn_2010, "netify_na_cols"))
-sn_2010_clean <- to_statnet(clean)
-```
-
-### Dyadic edge covariates: the `_e` suffix
+### dyadic edge covariates: the `_e` suffix
 
 Any dyadic covariate you passed to
 [`netify()`](https://netify-dev.github.io/netify/reference/netify.md)
@@ -189,7 +231,7 @@ object in two places:
 
 The trailing `_e` disambiguates the per-edge edgelist from the
 network-level matrix. For `ergm::edgecov()`, pass the **original
-(matrix) name** — `edgecov()` resolves its argument as a network-level
+(matrix) name** – `edgecov()` resolves its argument as a network-level
 matrix attribute, so the `_e` per-edge alias will not work there:
 
 ``` r
@@ -207,11 +249,11 @@ dyadic covariates.
 Goodness-of-fit, mcmc.diagnostics, and other postestimation tools live
 in `ergm` itself.
 
-## 2. Longitudinal pipeline (per-time fits)
+## 2. longitudinal pipeline (per-time fits)
 
 For a longitudinal netify,
 [`to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)
-returns a named list — one `network` object per time period:
+returns a named list – one `network` object per time period:
 
 ``` r
 
@@ -243,24 +285,24 @@ Fit a separate ergm per period:
 
 set.seed(6886)
 fits <- lapply(sn_list, function(n) {
-    ergm(n ~ edges + nodecov("i_polity2"))
+    ergm(n ~ edges)
 })
 ```
 
 For *coevolution* models (where ties change as a function of past ties),
-look at `tergm` from the statnet suite — `netify` provides the data,
+look at `tergm` from the statnet suite – `netify` provides the data,
 `tergm` does the modeling. A typical tergm 4.x call against the same
 per-period list looks like this:
 
 ``` r
 
-# Longitudinal ERGM via tergm 4.x
+# longitudinal ergm via tergm 4.x
 library(tergm)
 set.seed(6886)
 
 nets <- to_statnet(verb_longit)   # named list of network objects
 fit <- tergm(
-    nets ~ Form(~ edges + nodecov("i_polity2")) +
+    nets ~ Form(~ edges) +
            Persist(~ edges),
     estimate = "CMLE",
     times = seq_along(nets)
@@ -271,13 +313,11 @@ summary(fit)
 In the tergm 4.x split formulation, `Form()` models the *formation* of
 new edges between periods, and `Persist()` models the *persistence* of
 existing edges from one period to the next; both formulas accept the
-same ergm terms (`edges`, `nodecov`, `nodematch`, `mutual`, `gwesp`,
-etc.). (Note: `i_polity2` has missing values for some country-years —
-[`to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)
-flags this and stashes the offending column names on
-`attr(net, "netify_na_cols")` so you can drop or impute before fitting.)
+same ergm terms (`edges`, `ergm::nodecov()`, `ergm::nodematch()`,
+`mutual`, `gwesp`, etc.). Add nodal covariates after applying the same
+missing-data check shown in the cross-sectional example.
 
-## 3. Multilayer pipeline (per-layer fits)
+## 3. multilayer pipeline (per-layer fits)
 
 Multilayer ergm modeling is its own research literature. The simple
 pragmatic approach is to fit one ergm per layer.
@@ -303,7 +343,7 @@ names(sn_multi)
 Each element is a `network` object you can plug straight into
 [`ergm()`](https://rdrr.io/pkg/ergm/man/ergm.html).
 
-## 4. Round-tripping simulated networks back to netify
+## 4. round-tripping simulated networks back to netify
 
 A useful descriptive check after fitting an ergm is to simulate from the
 fit, compute descriptives on the simulated networks, and compare to the
@@ -314,6 +354,7 @@ descriptive tools:
 ``` r
 
 set.seed(6886)
+# m is the fitted ergm object from the model chunk above
 sims <- simulate(m, nsim = 100)  # list of network objects
 
 # convert each simulated network back into a netify for comparison
@@ -324,54 +365,43 @@ all_nets <- c(list(observed = verb_coop), sim_nets)
 struct_comp <- compare_networks(all_nets, what = "structure")
 ```
 
-This gives you observed-vs-simulated comparisons for density,
-reciprocity, transitivity, mean degree, etc. — useful for assessing
-whether your ergm captured the descriptive features you care about.
+This gives observed-vs-simulated comparisons for density, reciprocity,
+transitivity, mean degree, and related summaries.
 
 ## tl;dr
 
 ``` r
 
-# build → attach attrs → export → model
+# build -> attach attrs -> export -> model
 net <- netify(df, actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "x")
 net <- add_node_vars(net, attrs, actor = "id")
 sn  <- to_statnet(net)               # single network, longit list, or multilayer list
 m   <- ergm(sn ~ edges + ...)        # modeling happens in ergm/statnet
 ```
 
-For modeling beyond ergm:
+For latent-factor and DBN workflows, see the project-site article on
+`lame` and `dbn`.
 
-- Latent factor / additive-multiplicative:
-  [`pipeline_lame_dbn`](https://netify-dev.github.io/netify/articles/pipeline_lame_dbn.md)
-  vignette
-- Social relations model:
-  [netify-dev/srm](https://github.com/netify-dev/srm) via `to_amen(net)`
-- Social influence regression (Minhas & Hoff):
-  [netify-dev/sir](https://github.com/netify-dev/sir)
+## references
 
-Have fun!
-
-## References
-
-1.  Butts, C.Butts, C. T. (2008). network: A Package for Managing
-    Relational Data in R. Journal of Statistical Software, 24(2), 1–36.
-    <https://doi.org/10.18637/jss.v024.i02>
+1.  Butts, C. T. (2008). network: A Package for Managing Relational Data
+    in R. Journal of Statistical Software, 24(2), 1-36.
+    <doi:10.18637/jss.v024.i02>
 
 2.  Cranmer, S. J., Desmarais, B. A., & Morgan, J. W. (2021).
     Inferential Network Analysis. Cambridge University Press.
-    <https://doi.org/10.1017/9781316662915>
+    <doi:10.1017/9781316662915>
 
 3.  Hunter, D. R., Handcock, M. S., Butts, C. T., Goodreau, S. M., &
     Morris, M. (2008). ergm: A Package to Fit, Simulate and Diagnose
     Exponential-Family Models for Networks. Journal of Statistical
-    Software, 24(3), 1–29. <https://doi.org/10.18637/jss.v024.i03>
+    Software, 24(3), 1-29. <doi:10.18637/jss.v024.i03>
 
 4.  Krivitsky, P. N., & Handcock, M. S. (2014). A Separable Model for
     Dynamic Networks. Journal of the Royal Statistical Society: Series B
-    (Statistical Methodology), 76(1), 29–46.
-    <https://doi.org/10.1111/rssb.12014>
+    (Statistical Methodology), 76(1), 29-46. <doi:10.1111/rssb.12014>
 
 5.  Snijders, T. A. B., Pattison, P. E., Robins, G. L., &
     Handcock, M. S. (2006). New Specifications for Exponential Random
-    Graph Models. Sociological Methodology, 36(1), 99–153.
-    <https://doi.org/10.1111/j.1467-9531.2006.00176.x>
+    Graph Models. Sociological Methodology, 36(1), 99-153.
+    <doi:10.1111/j.1467-9531.2006.00176.x>

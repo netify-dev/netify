@@ -1,9 +1,9 @@
 # Extract measurements and dimensions from a netify object
 
 `netify_measurements` (also available as `measurements`) extracts
-comprehensive information about the structure, dimensions, and
-attributes of a netify object. This function provides a standardized way
-to inspect network properties across different netify types.
+information about the structure, dimensions, and attributes of a netify
+object. this function provides a standardized way to inspect network
+properties across different netify types.
 
 ## Usage
 
@@ -17,51 +17,51 @@ measurements(netlet)
 
 - netlet:
 
-  A netify object (class "netify") to analyze. Can be cross-sectional,
+  a netify object (class "netify") to analyze. can be cross-sectional,
   longitudinal array, or longitudinal list format.
 
 ## Value
 
-A list containing measurements of the netify object with the following
+a list containing measurements of the netify object with the following
 components (availability depends on netify type):
 
-**Actor information:**
+**actor information:**
 
-- `row_actors`: Character vector (or list) of row actor names
+- `row_actors`: character vector (or list) of row actor names
 
-- `col_actors`: Character vector (or list) of column actor names
+- `col_actors`: character vector (or list) of column actor names
 
-- `n_row_actors`: Integer (or list) count of row actors
+- `n_row_actors`: integer (or list) count of row actors
 
-- `n_col_actors`: Integer (or list) count of column actors
+- `n_col_actors`: integer (or list) count of column actors
 
-**Temporal information:**
+**temporal information:**
 
-- `time`: Character vector of time period labels (NULL for
+- `time`: character vector of time period labels (NULL for
   cross-sectional)
 
-- `n_time`: Integer count of time periods (NULL for cross-sectional)
+- `n_time`: integer count of time periods (NULL for cross-sectional)
 
-**Layer information:**
+**layer information:**
 
-- `layers`: Character vector of layer names (NULL if single layer)
+- `layers`: character vector of layer names (NULL if single layer)
 
-- `n_layers`: Integer count of layers (NULL if single layer)
+- `n_layers`: integer count of layers (NULL if single layer)
 
-**Attribute information:**
+**attribute information:**
 
-- `nvars`: Character vector of nodal variable names
+- `nvars`: character vector of nodal variable names
 
-- `n_nvars`: Integer count of nodal variables
+- `n_nvars`: integer count of nodal variables
 
-- `dvars`: Character vector of dyadic variable names
+- `dvars`: character vector of dyadic variable names
 
-- `n_dvars`: Integer count of dyadic variables
+- `n_dvars`: integer count of dyadic variables
 
 ## Details
 
-The function will adapt its output based on the netify object type.
+the function will adapt its output based on the netify object type.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

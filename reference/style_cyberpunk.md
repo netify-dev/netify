@@ -1,6 +1,6 @@
-# Cyberpunk-inspired network style
+# cyberpunk-inspired network style
 
-A futuristic network style with neon colors on dark background
+a futuristic network style with neon colors on dark background
 
 ## Usage
 
@@ -10,8 +10,8 @@ style_cyberpunk()
 
 ## Value
 
-List of plot arguments
+list of plot arguments
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

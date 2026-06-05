@@ -3,7 +3,7 @@
 This vignette shows how `netify` handles ego networks—the network
 surrounding a specific actor and their immediate connections.
 
-## What Are Ego Networks?
+## what are ego networks?
 
 An **ego network** focuses on one actor (the “ego”) and includes:
 
@@ -14,7 +14,7 @@ An **ego network** focuses on one actor (the “ego”) and includes:
 Think of it as zooming in on one node and asking: “Who are their
 connections, and how are those connections related to each other?”
 
-## Examples
+## examples
 
 Pakistan’s diplomatic neighborhood includes not just major powers (US,
 China) but regional rivals (India) and neighbors (Afghanistan). The
@@ -29,14 +29,14 @@ An activist organization’s ego network shows both allies and the broader
 movement structure—are they bridging disconnected groups or embedded in
 a tight cluster?
 
-## Why Ego Networks Matter
+## why ego networks matter
 
 Ego networks let you apply network thinking without needing complete
 network data. You can study:
 
 - How actors manage competing relationships
 - Whether similar actors cluster together (homophily)
-- How an actor’s position affects their influence
+- How an actor’s position changes across relationships
 - Whether an actor brokers between otherwise disconnected groups
 
 ``` r
@@ -46,7 +46,7 @@ library(dplyr)
 library(ggplot2)
 ```
 
-## Getting Started: Extract an Ego Network
+## getting started: extract an ego network
 
 We’ll use data from the Integrated Crisis Early Warning System (ICEWS)
 to demonstrate:
@@ -66,7 +66,7 @@ netlet <- netify(
 )
 ```
 
-### Extract Your First Ego Network
+### extract your first ego network
 
 The
 [`ego_netify()`](https://netify-dev.github.io/netify/reference/ego_netify.md)
@@ -79,46 +79,54 @@ pakistan_ego_net <- ego_netify(
     ego = "Pakistan"
     )
 
-pakistan_ego_net
+print(pakistan_ego_net)
+head(summary(pakistan_ego_net)[, c("net", "num_actors", "density", "num_edges")])
+#>    net num_actors   density num_edges
+#> 1 2002         33 0.8049242       425
+#> 2 2003         28 0.9312169       352
+#> 3 2004         49 0.7891156       928
+#> 4 2005         44 0.8985201       850
+#> 5 2006         40 0.8846154       690
+#> 6 2007         39 0.9082321       673
 ```
 
-## Key Features
+## key features
 
-### 1. Network Statistics
+### 1. network statistics
 
 ``` r
 
 ngbd_summ <- summary(pakistan_ego_net)
 head(ngbd_summ)
-#>    net num_actors   density num_edges prop_edges_missing mean_edge_weight
-#> 1 2002         33 0.8049242       425                  0         182.9545
-#> 2 2003         28 0.9312169       352                  0         285.6905
-#> 3 2004         49 0.7891156       928                  0         101.3461
-#> 4 2005         44 0.8985201       850                  0         138.4968
-#> 5 2006         40 0.8846154       690                  0         150.0731
-#> 6 2007         39 0.9082321       673                  0         182.9852
-#>   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition
-#> 1       541.2426               16.0               0            5760  0.08270328
-#> 2       718.2698               43.5               0            5937  0.08521930
-#> 3       369.8192               11.0               0            5141  0.06014910
-#> 4       475.6012               19.0               0            6561  0.06605279
-#> 5       531.0351               18.0               0            7579  0.07536095
-#> 6       553.8835               28.0               0            6698  0.06860271
-#>   sd_of_actor_means transitivity
-#> 1          244.3143    0.8513921
-#> 2          342.5283    0.9417385
-#> 3          142.8899    0.8390159
-#> 4          193.4328    0.9174501
-#> 5          215.7135    0.9116163
-#> 6          239.9547    0.9247124
+#>    net    layer num_actors   density num_edges prop_edges_missing
+#> 1 2002 Pakistan         33 0.8049242       425                  0
+#> 2 2003 Pakistan         28 0.9312169       352                  0
+#> 3 2004 Pakistan         49 0.7891156       928                  0
+#> 4 2005 Pakistan         44 0.8985201       850                  0
+#> 5 2006 Pakistan         40 0.8846154       690                  0
+#> 6 2007 Pakistan         39 0.9082321       673                  0
+#>   mean_edge_weight sd_edge_weight median_edge_weight min_edge_weight
+#> 1         227.2941       595.2732                 35               1
+#> 2         306.7926       740.5199                 51               1
+#> 3         128.4300       412.2462                 22               1
+#> 4         154.1388       499.4925                 25               1
+#> 5         169.6478       561.8834                 25               1
+#> 6         201.4740       578.2115                 35               1
+#>   max_edge_weight competition sd_of_actor_means transitivity
+#> 1            5760  0.08270328          244.3143    0.8513921
+#> 2            5937  0.08521930          342.5283    0.9417385
+#> 3            5141  0.06014910          142.8899    0.8390159
+#> 4            6561  0.06605279          193.4328    0.9174501
+#> 5            7579  0.07536095          215.7135    0.9116163
+#> 6            6698  0.06860271          239.9547    0.9247124
 ```
 
-Pakistan’s network shows remarkably high density (0.78-0.89)—most
-countries that interact with Pakistan also interact with each other. The
-network size fluctuates between 28-49 actors across years, but that high
-density persists. This isn’t a hub-and-spoke pattern where Pakistan
-connects otherwise isolated actors; it’s a dense web where multilateral
-dynamics likely matter.
+Pakistan’s network shows high density (0.79-0.97)—most countries that
+interact with Pakistan also interact with each other. The network size
+fluctuates between 24-49 actors across years, but that high density
+persists. This isn’t a hub-and-spoke pattern where Pakistan connects
+otherwise isolated actors; it’s a dense web where multilateral dynamics
+likely matter.
 
 ``` r
 
@@ -133,30 +141,30 @@ plot_graph_stats(ngbd_summ) +
 
 ![](ego_networks_files/figure-html/unnamed-chunk-5-1.png)
 
-Notice the consistently high transitivity (~0.85-0.94). Pakistan’s
+Notice the consistently high transitivity (~0.84-0.97). Pakistan’s
 partners tend to cooperate with each other, creating a tightly clustered
 neighborhood rather than structural holes Pakistan could exploit.
 
-### 2. Actor-Level Analysis
+### 2. actor-level analysis
 
 ``` r
 
 ngbd_actor_summ <- summary_actor(pakistan_ego_net)
 head(ngbd_actor_summ)
-#>         actor time degree prop_ties strength_sum strength_avg strength_std
-#> 1    Pakistan 2002     32 0.9696970        10766    336.43750    671.72383
-#> 2 Afghanistan 2002     30 0.9090909         8864    277.00000    435.27537
-#> 3  Azerbaijan 2002     24 0.7272727         2435     76.09375    193.87697
-#> 4  Bangladesh 2002     24 0.7272727         1457     45.53125     88.71701
-#> 5      Canada 2002     28 0.8484848         1587     49.59375     99.01934
-#> 6       China 2002     32 0.9696970        16311    509.71875    971.41673
-#>   strength_median network_share closeness betweenness eigen_vector
-#> 1           102.5   0.055724638  267.8291   0.0625000   0.37512591
-#> 2            45.0   0.045879917  253.9336   0.0625000   0.28240824
-#> 3             7.0   0.012603520  215.1176   0.0000000   0.08126347
-#> 4             4.0   0.007541408  157.0965   0.0000000   0.04026397
-#> 5            14.5   0.008214286  180.4695   0.0000000   0.06184088
-#> 6           223.5   0.084425466  273.2608   0.1229839   0.62166587
+#>         actor    layer time degree prop_ties strength_sum strength_avg
+#> 1    Pakistan Pakistan 2002     32    1.0000        10766    336.43750
+#> 2 Afghanistan Pakistan 2002     30    0.9375         8864    295.46667
+#> 3  Azerbaijan Pakistan 2002     24    0.7500         2435    101.45833
+#> 4  Bangladesh Pakistan 2002     24    0.7500         1457     60.70833
+#> 5      Canada Pakistan 2002     28    0.8750         1587     56.67857
+#> 6       China Pakistan 2002     32    1.0000        16311    509.71875
+#>   strength_std strength_median network_share closeness betweenness eigen_vector
+#> 1    671.72383           102.5   0.055724638  267.8291   0.0625000   0.37512591
+#> 2    443.71921            73.5   0.045879917  253.9336   0.0625000   0.28240824
+#> 3    219.03682            16.0   0.012603520  215.1176   0.0000000   0.08126347
+#> 4     98.21869            13.5   0.007541408  157.0965   0.0000000   0.04026397
+#> 5    104.11996            15.5   0.008214286  180.4695   0.0000000   0.06184088
+#> 6    971.41673           223.5   0.084425466  273.2608   0.1229839   0.62166587
 ```
 
 Beyond degree (number of connections), look at eigenvector centrality—it
@@ -182,11 +190,10 @@ plot_actor_stats(ngbd_actor_summ,
 ![](ego_networks_files/figure-html/unnamed-chunk-7-1.png)
 
 The diverging trajectories are striking. China’s rising centrality
-measures across the board reflect its growing influence in Pakistan’s
-neighborhood, while the US shows more variable engagement despite
-maintaining presence.
+measures show growing connectedness in Pakistan’s neighborhood, while
+the US shows more variable engagement despite maintaining presence.
 
-### 3. Visualization
+### 3. visualization
 
 By default, [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
 highlights the ego:
@@ -194,11 +201,13 @@ highlights the ego:
 ``` r
 
 plot(pakistan_ego_net)
+#> Warning: Removed 1525 rows containing missing values or values outside the scale range
+#> (`geom_point()`).
 ```
 
 ![](ego_networks_files/figure-html/unnamed-chunk-8-1.png)
 
-### 4. Advanced Visualization
+### 4. advanced visualization
 
 For clearer visualization of alter-alter relationships, remove the ego’s
 edges—we already know everyone connects to Pakistan:
@@ -237,6 +246,8 @@ plot(pakistan_no_ego_edges,
         title = "Pakistan's Diplomatic Neighborhood",
         subtitle = "Node size = GDP; Edges show cooperation between Pakistan's partners") +
     theme(legend.position = 'right')
+#> Warning: Removed 87 rows containing missing values or values outside the scale range
+#> (`geom_point()`).
 ```
 
 ![](ego_networks_files/figure-html/unnamed-chunk-10-1.png)
@@ -245,9 +256,9 @@ The visualization reveals how Pakistan’s partners form a dense web of
 relationships among themselves, with major powers like the US and China
 occupying central positions.
 
-## Comparing Ego Networks
+## comparing ego networks
 
-### 5. Compare Across Actors
+### 5. compare across actors
 
 One strength of ego network analysis is systematic comparison:
 
@@ -283,7 +294,7 @@ highly interconnected. The US shows lower density, suggesting more of a
 hub-and-spoke pattern. Russia’s volatile pattern may reflect shifting
 alliances during this period.
 
-### 6. Test for Homophily
+### 6. test for homophily
 
 Do birds of a feather flock together? Let’s test if similar regime types
 cluster:
@@ -303,11 +314,12 @@ plot_homophily(pakistan_homophily, type = "temporal") +
 
 ![](ego_networks_files/figure-html/unnamed-chunk-12-1.png)
 
-The results show weak and fluctuating homophily—regime type doesn’t
-consistently predict cooperation patterns in Pakistan’s neighborhood.
-Geopolitics seems to override ideological alignment.
+The results show weak and fluctuating homophily: regime type is not
+consistently associated with cooperation patterns in Pakistan’s
+neighborhood. Geopolitics appears more central than ideological
+alignment in this example.
 
-### 7. Control Neighborhood Boundaries
+### 7. control neighborhood boundaries
 
 Sometimes you want to focus on only the strongest relationships:
 
@@ -334,7 +346,7 @@ tibble(
 | All connections    |         34.7 |
 | Strong only (\>50) |         20.1 |
 
-### 8. Different Relationship Types
+### 8. different relationship types
 
 Networks of cooperation and conflict often follow different logics:
 
@@ -347,7 +359,7 @@ conflict_net <- netify(
     weight = "verbConf"
 )
 
-# cooperation vs conflict ego networks for Pakistan
+# cooperation vs conflict ego networks for pakistan
 pak_coop_ego <- ego_netify(netlet, ego = "Pakistan")
 pak_conf_ego <- ego_netify(conflict_net, ego = "Pakistan")
 
@@ -375,10 +387,10 @@ knitr::kable(comparison)
 | Average density |       0.904 |    0.646 |
 
 Pakistan’s conflict network is smaller but still substantial. The lower
-density in conflict (0.62 vs 0.88) suggests conflicts are more bilateral
-while cooperation tends to be multilateral.
+average density in conflict (about 0.65 vs 0.90) suggests conflicts are
+more bilateral while cooperation tends to be multilateral.
 
-### 9. Track Network Evolution
+### 9. track network evolution
 
 How stable are relationships over time?
 
@@ -407,10 +419,10 @@ tibble(
 |:-------------|------:|--------:|-----------:|----------------:|
 | 2010 to 2011 |   444 |     720 |        512 |           0.416 |
 
-A stability ratio of 0.614 indicates moderate turnover—about 40% of
+A stability ratio of 0.416 indicates moderate turnover – about 58% of
 relationships don’t persist year-to-year.
 
-### 10. Compare Network Structures: Rising vs Established Powers
+### 10. compare network structures: rising vs established powers
 
 How do the US and China structure their diplomatic neighborhoods
 differently?
@@ -424,6 +436,10 @@ structural_comp <- compare_networks(
     list("US" = us_ego, "China" = china_ego),
     what = 'structure'
 )
+#> Warning: Network US appears to be longitudinal. Using first time period for structural
+#> comparison.
+#> Warning: Network China appears to be longitudinal. Using first time period for
+#> structural comparison.
 
 comp_summary <- structural_comp$summary
 avg_props <- comp_summary |>
@@ -525,14 +541,14 @@ Finally, who’s in these networks?
 
 ``` r
 
-# Compare node composition
+# compare node composition
 node_comp <- compare_networks(
     list("US" = us_ego, "China" = china_ego),
     what = "nodes"
 )
 
-# The 75% overlap reflects shared major partners
-# but the US's 24 unique partners vs China's 8 shows its broader global reach
+# the 75% overlap reflects shared major partners
+# but the us's 24 unique partners vs china's 8 shows its broader global reach
 knitr::kable(node_comp$summary)
 ```
 
@@ -544,22 +560,22 @@ knitr::kable(node_comp$summary)
 
 ``` r
 
-# Extract ego network
+# extract ego network
 ego_net <- ego_netify(netlet, ego = "Actor Name")
 
-# Basic analysis
-summary(ego_net)                    # Network-level stats
-summary_actor(ego_net)              # Actor-level stats
-plot(ego_net)                       # Visualize
-plot(remove_ego_edges(ego_net))     # Focus on alter-alter ties
+# basic analysis
+summary(ego_net)                    # network-level stats
+summary_actor(ego_net)              # actor-level stats
+plot(ego_net)                       # visualize
+plot(remove_ego_edges(ego_net))     # focus on alter-alter ties
 
-# Advanced analysis
-homophily(ego_net, attribute = "democracy")     # Test homophily
-compare_networks(ego_net, what = "edges")       # Temporal comparison
-compare_networks(list(ego1, ego2), what = "edges")  # Cross-sectional comparison
+# advanced analysis
+homophily(ego_net, attribute = "democracy")     # test homophily
+compare_networks(ego_net, what = "edges")       # temporal comparison
+compare_networks(list(ego1, ego2), what = "edges")  # cross-sectional comparison
 ```
 
-## References
+## references
 
 Boschee, E., Lautenschlager, J., O’Brien, S., Shellman, S., Starz, J., &
 Ward, M. (2015). ICEWS Coded Event Data. Harvard Dataverse. DOI

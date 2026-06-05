@@ -1,7 +1,7 @@
 # Create attribute mixing matrices for network data
 
-Creates cross-tabulation matrices showing how connections are
-distributed across different attribute values. This reveals mixing
+creates cross-tabulation matrices showing how connections are
+distributed across different attribute values. this reveals mixing
 patterns and assortativity in networks by examining the frequency of
 ties between actors with different attribute combinations.
 
@@ -24,60 +24,60 @@ mixing_matrix(
 
 - netlet:
 
-  A netify object containing network data.
+  a netify object containing network data.
 
 - attribute:
 
-  Character string specifying the nodal attribute to analyze.
+  character string specifying the nodal attribute to analyze.
 
 - row_attribute:
 
-  Optional different attribute for matrix rows. If NULL, uses the same
+  optional different attribute for matrix rows. if NULL, uses the same
   attribute for both dimensions.
 
 - normalized:
 
-  Logical. Whether to return proportions instead of raw counts. Default
+  logical. whether to return proportions instead of raw counts. default
   TRUE.
 
 - by_row:
 
-  Logical. If TRUE and normalized=TRUE, normalizes by row. Default
+  logical. if TRUE and normalized=TRUE, normalizes by row. default
   FALSE.
 
 - include_weights:
 
-  Logical. Whether to use edge weights. Default FALSE.
+  logical. whether to use edge weights. default FALSE.
 
 - other_stats:
 
-  Named list of custom functions for additional statistics.
+  named list of custom functions for additional statistics.
 
 - ...:
 
-  Additional arguments passed to custom functions.
+  additional arguments passed to custom functions.
 
 ## Value
 
-List containing:
+list containing:
 
 - `mixing_matrices`:
 
-  Named list of mixing matrices per time/layer
+  named list of mixing matrices per time/layer
 
 - `summary_stats`:
 
-  Data frame with mixing statistics:
+  data frame with mixing statistics:
 
 ## Details
 
-Mixing matrix elements represent ties between actors with attribute
-values i and j. For undirected networks, matrices are symmetrized.
-Assortativity ranges from -1 (disassortative) to 1 (assortative).
+mixing matrix elements represent ties between actors with attribute
+values i and j. for undirected networks, matrices are symmetrized.
+assortativity ranges from -1 (disassortative) to 1 (assortative).
 
 ## Author
 
-Casy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

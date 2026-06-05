@@ -1,24 +1,27 @@
 # Pipeline: netify to lame and dbn
 
-Latent space models for network data require carefully structured array
-inputs whose construction is both tedious and error-prone when performed
-manually. The `amen` package handles cross-sectional and single-layer
-longitudinal networks, `lame` extends this to longitudinal networks with
-time-varying actor compositions, and `dbn` fits Dynamic Bilinear Network
-models to multilayer longitudinal networks. Each package expects a
-distinct data structure (3D arrays, lists of matrices, or 4D arrays,
-respectively), and `netify` provides a unified pipeline for producing
-all of them. Users describe their data once with
-[`netify()`](https://netify-dev.github.io/netify/reference/netify.md),
-optionally combine layers with
-[`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md),
-and then call
-[`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)
-or
+Latent space models for network data require array inputs that are easy
+to get wrong by hand. The `amen` package handles cross-sectional and
+single-layer longitudinal networks, `lame` adds support for longitudinal
+networks with changing actor sets, and `dbn` fits Dynamic Bilinear
+Network models to multilayer longitudinal networks. Each package expects
+a different shape: 3D arrays, lists of matrices, or 4D arrays.
+[`netify()`](https://netify-dev.github.io/netify/reference/netify.md)
+and
+[`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md)
+build the network object;
+[`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md),
+[`to_lame()`](https://netify-dev.github.io/netify/reference/netify_to_lame.md),
+and
 [`to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md)
-to obtain the exact structure each modeling package requires.
+export the shape needed by the modeling package.
 
-## Setup
+The conversion chunks use `netify`. The model-fitting chunks require
+`lame` or `dbn`; install those packages before running them. You can
+still run the conversion chunks to inspect the arrays that `netify`
+creates.
+
+## setup
 
 The examples below use ICEWS event data, which captures directed
 interactions between 152 countries from 2002 to 2014 across four
@@ -30,7 +33,7 @@ conflict, and material conflict.
 library(netify)
 library(ggplot2)
 
-# load the ICEWS event data
+# load the icews event data
 data(icews)
 
 # preview
@@ -42,9 +45,9 @@ head(icews[, c("i", "j", "year", "verbCoop", "matlCoop", "verbConf", "matlConf")
 #> 5 Afghanistan Albania 2005        0        0        0        0
 ```
 
-## Part 1: Single-Layer Pipeline (netify to amen)
+## part 1: single-layer pipeline (netify to amen)
 
-### Step 1: Create the network
+### step 1: create the network
 
 The first step is always
 [`netify()`](https://netify-dev.github.io/netify/reference/netify.md).
@@ -79,7 +82,7 @@ Key choices:
 - **`nodal_vars` and `dyad_vars`**: These covariates will be carried
   through to the amen output automatically.
 
-### Step 2: Inspect the network
+### step 2: inspect the network
 
 Before modeling, it’s worth checking basic properties.
 
@@ -106,7 +109,7 @@ plot(verbal_2010, add_text = FALSE)
 
 ![](pipeline_lame_dbn_files/figure-html/unnamed-chunk-4-1.png)
 
-### Step 3: Convert to amen format
+### step 3: convert to amen format
 
 [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)
 converts a single-layer netify object into the list structure that
@@ -162,20 +165,20 @@ ame_fit = ame(
 )
 ```
 
-## Part 2: Longitudinal Pipeline with lame
+## part 2: longitudinal pipeline with lame
 
-For longitudinal modeling with time-varying actor compositions, use
+For longitudinal modeling workflows that need per-period matrices, use
 [`to_lame()`](https://netify-dev.github.io/netify/reference/netify_to_lame.md).
 This is a thin specialization of
 [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md)
-that (a) auto-pads ragged per-period matrices into a 3D array via
-`lame::list_to_array()`, (b) emits a ready-to-run `lame::lame()`
-snippet, and (c) provides
+that (a) can return ragged per-period matrices when actor sets vary, (b)
+emits a ready-to-run padding + `lame::lame()` snippet, and (c) provides
 [`from_lame_fit()`](https://netify-dev.github.io/netify/reference/from_lame_fit.md)
 for round-tripping posterior predictions back into a netify for
-plotting.
+plotting. The ICEWS example below has the same actor set in each year,
+but the format also supports open-cohort panels.
 
-### When to use lame format
+### when to use lame format
 
 Use
 [`to_lame()`](https://netify-dev.github.io/netify/reference/netify_to_lame.md)
@@ -183,9 +186,9 @@ when:
 
 - Actors enter and exit the network over time (e.g., new states forming,
   organizations dissolving)
-- You want to leverage lame’s longitudinal latent space models
+- You want to fit longitudinal latent space models with `lame`
 
-### Create a network with varying actors
+### create a per-period list for lame
 
 ``` r
 
@@ -205,7 +208,7 @@ verbal_list = netify(
 verbal_list
 ```
 
-### Convert to lame format
+### convert to lame format
 
 ``` r
 
@@ -263,13 +266,15 @@ lame_fit = lame::lame(
 )
 ```
 
-### Round-tripping fitted values back to netify
+### round-tripping fitted values back to netify
 
 Once a fit is in hand,
 [`from_lame_fit()`](https://netify-dev.github.io/netify/reference/from_lame_fit.md)
 pulls the posterior-mean linear predictor (or a residual / probability /
 per-cell quantile) back into a cross-sectional netify so it can be
-plotted or compared against the observed network:
+plotted or compared against the observed network. In the example below,
+`lame_fit` is the object created by running the model-fitting snippet
+above:
 
 ``` r
 
@@ -289,13 +294,13 @@ auto-detects the link function: probit for `lame::ame_als()` /
 `lame::lame()` Gibbs fits, with an explicit `link` slot taking
 precedence.
 
-## Part 3: Multilayer Pipeline (netify to dbn)
+## part 3: multilayer pipeline (netify to dbn)
 
 The `dbn` package models multilayer longitudinal networks using Dynamic
 Bilinear Network models. It expects a 4D array with dimensions
 `[n, n, p, T]` where `p` is the number of relation types (layers).
 
-### Step 1: Create individual layer networks
+### step 1: create individual layer networks
 
 ``` r
 
@@ -325,7 +330,7 @@ material_coop = netify(
 )
 ```
 
-### Step 2: Combine into a multilayer network
+### step 2: combine into a multilayer network
 
 [`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md)
 supports mixed directedness, meaning layers can have different symmetry
@@ -345,7 +350,7 @@ multi_net
 
 Notice that the print output shows the mixed directedness across layers.
 
-### Step 3: Convert to dbn format
+### step 3: convert to dbn format
 
 [`to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md)
 extracts the multilayer longitudinal netify object into the exact 4D
@@ -388,7 +393,7 @@ dbn_fit = dbn(
 )
 ```
 
-### Single-layer networks work too
+### single-layer networks work too
 
 [`to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md)
 also handles single-layer longitudinal networks by adding a layer
@@ -403,7 +408,7 @@ cat("Layer name:", dimnames(dbn_single$Y)[[3]], "\n")
 #> Layer name: verbCoop
 ```
 
-## Part 4: Working with Mixed Directedness
+## part 4: working with mixed directedness
 
 A common challenge in political science is that data naturally includes
 both symmetric and directed relations. For example:
@@ -414,7 +419,7 @@ both symmetric and directed relations. For example:
 
 `netify` now handles this directly.
 
-### Creating mixed-directedness multilayer networks
+### creating mixed-directedness multilayer networks
 
 ``` r
 
@@ -466,7 +471,7 @@ cat("Material layer symmetric:", attr(material_only, "symmetric"), "\n")
 #> Material layer symmetric: FALSE
 ```
 
-### Converting mixed-directedness to dbn
+### converting mixed-directedness to dbn
 
 [`to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md)
 handles mixed-directedness multilayer objects:
@@ -482,54 +487,63 @@ Note that the 4D array represents all layers uniformly. The per-layer
 symmetry information is metadata that you would pass to your model
 separately. For dbn, you would typically specify this in the model call.
 
-## Part 5: The missing_to_zero Decision
+## part 5: the missing_to_zero decision
 
 The `missing_to_zero` parameter deserves special attention for modeling
 pipelines. By default,
 [`netify()`](https://netify-dev.github.io/netify/reference/netify.md)
 sets `missing_to_zero = TRUE`, which fills unobserved dyads with zeros.
-This is fine for descriptive analysis but can be problematic for
-statistical models.
+That is appropriate when an unrecorded dyad means no event occurred, but
+it is not appropriate when unrecorded dyads were never observed.
 
-### Why it matters
+### why it matters
 
 ``` r
 
-# compare the two approaches
+observed_contacts = data.frame(
+    i = c("a", "b"),
+    j = c("b", "c"),
+    contacts = c(2, 1),
+    stringsAsFactors = FALSE
+)
+all_people = c("a", "b", "c", "d")
+
 net_zeros = netify(
-    icews[icews$year == 2010, ],
+    observed_contacts,
     actor1 = "i", actor2 = "j",
     symmetric = FALSE,
-    weight = "verbCoop",
+    weight = "contacts",
+    nodelist = all_people,
     missing_to_zero = TRUE
 )
 
 net_na = netify(
-    icews[icews$year == 2010, ],
+    observed_contacts,
     actor1 = "i", actor2 = "j",
     symmetric = FALSE,
-    weight = "verbCoop",
+    weight = "contacts",
+    nodelist = all_people,
     missing_to_zero = FALSE
 )
 
-# count zeros vs NAs
+# count zeros vs nas
 raw_zeros = get_raw(net_zeros)
 raw_na = get_raw(net_na)
 
 cat("With missing_to_zero = TRUE:\n")
 #> With missing_to_zero = TRUE:
 cat("  Zeros:", sum(raw_zeros == 0, na.rm = TRUE), "\n")
-#>   Zeros: 12976
+#>   Zeros: 10
 cat("  NAs:", sum(is.na(raw_zeros)), "\n")
-#>   NAs: 152
+#>   NAs: 4
 
 cat("\nWith missing_to_zero = FALSE:\n")
 #> 
 #> With missing_to_zero = FALSE:
 cat("  Zeros:", sum(raw_na == 0, na.rm = TRUE), "\n")
-#>   Zeros: 12976
+#>   Zeros: 0
 cat("  NAs:", sum(is.na(raw_na)), "\n")
-#>   NAs: 152
+#>   NAs: 14
 ```
 
 For latent space models, the distinction matters:
@@ -543,13 +557,13 @@ For latent space models, the distinction matters:
 `missing_to_zero = FALSE` unless you are confident that all unobserved
 dyads represent genuine zeros.
 
-## Quick Reference: Choosing Your Export Function
+## quick reference: choosing your export function
 
 | Scenario | Function | Output |
 |----|----|----|
 | Single-layer, cross-sectional | [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md) | list(Y, Xdyad, Xrow, Xcol) |
 | Single-layer, longitudinal (constant actors) | [`to_amen()`](https://netify-dev.github.io/netify/reference/netify_to_amen.md) | 3D arrays |
-| Single-layer, longitudinal (varying actors) | `to_lame(lame=TRUE)` | padded 3D arrays + ame_call snippet |
+| Single-layer, longitudinal (varying actors) | `to_lame(lame=TRUE)` | per-period lists + padding / fit snippet |
 | Round-trip AME/LAME fit back to netify | [`from_lame_fit()`](https://netify-dev.github.io/netify/reference/from_lame_fit.md) | netify (fitted / residual / prob / quantiles) |
 | Multilayer, longitudinal | [`to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md) | 4D array `[n, n, p, T]` |
 | Single-layer, longitudinal (dbn format) | [`to_dbn()`](https://netify-dev.github.io/netify/reference/netify_to_dbn.md) | 4D array `[n, n, 1, T]` |

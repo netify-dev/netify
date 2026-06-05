@@ -8,8 +8,7 @@ who fought who, who cited whom) becomes a unipartite network.
 attendees at meetings) becomes a bipartite network. This vignette walks
 through both. Along the way we cover transforming weights, single-actor
 highlighting, applying a ggplot theme, and how to export a figure with
-[`ggsave()`](https://ggplot2.tidyverse.org/reference/ggsave.html). Have
-fun!
+[`ggsave()`](https://ggplot2.tidyverse.org/reference/ggsave.html).
 
 ``` r
 
@@ -17,7 +16,7 @@ library(netify)
 library(ggplot2)
 ```
 
-## One-mode event data: UCDP conflict in Mexico
+## one-mode event data: ucdp conflict in mexico
 
 A common data type used to build conflict networks is **event data**,
 where actors are repeated across rows but no single column explicitly
@@ -39,7 +38,7 @@ subset ships internally so the code below runs as-is.
 
 ``` r
 
-# load UCDP GED data on Mexico
+# load ucdp ged data on mexico
 data(mexico)
 
 # construct count-weighted network (number_of_events by default)
@@ -63,9 +62,9 @@ summary(mex_network)
 ```
 
     ##   net num_actors    density num_edges prop_edges_missing mean_edge_weight
-    ## 1   1         74 0.02554609        69                  0         7.018512
+    ## 1   1         74 0.02554609        69                  0         274.7391
     ##   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight competition
-    ## 1        113.395                  0               0            3757   0.1371326
+    ## 1       660.3139                 58               1            3757   0.1371326
     ##   sd_of_actor_means transitivity
     ## 1          21.37264    0.1046512
 
@@ -75,9 +74,15 @@ actor_stats <- summary_actor(mex_network)
 plot_actor_stats(actor_stats)
 ```
 
+    ## Warning: Removed 55 rows containing non-finite outside the scale range
+    ## (`stat_density()`).
+
+    ## Warning: Removed 55 rows containing missing values or values outside the scale range
+    ## (`geom_rug()`).
+
 ![](event_data_files/figure-html/unnamed-chunk-2-1.png)
 
-### tl;dr Sidebar: NA versus zero in event-count weights
+### tl;dr sidebar: na versus zero in event-count weights
 
 Event counts have a sharp interpretation gap that does not show up in,
 say, a 0/1 alliance network: the difference between **“these two actors
@@ -104,7 +109,7 @@ tiny <- data.frame(
     stringsAsFactors = FALSE
 )
 
-# preserve unobserved dyads as NA
+# preserve unobserved dyads as na
 net_na <- netify(
     tiny,
     actor1 = "a1", actor2 = "a2",
@@ -114,7 +119,7 @@ net_na <- netify(
     nodelist = c("p1", "p2", "p3", "p4", "p5")
 )
 
-# the raw matrix carries explicit NAs for the never-asked dyads
+# the raw matrix carries explicit nas for the never-asked dyads
 get_raw(net_na)
 ```
 
@@ -128,7 +133,7 @@ get_raw(net_na)
 ``` r
 
 # summary() reports the missingness fraction in its own column when
-# missing_to_zero = FALSE
+# missing_to_zero = false
 summary(net_na)[, c("num_actors", "density", "num_edges",
                     "prop_edges_missing", "prop_unknown_edges")]
 ```
@@ -138,16 +143,16 @@ summary(net_na)[, c("num_actors", "density", "num_edges",
 
 `prop_unknown_edges` only shows up when `missing_to_zero = FALSE` — that
 is the cue that the netlet is actually carrying NA semantics downstream.
-Build the same netlet with the default and the NAs are silently replaced
-with `0`s and the column disappears; that is fine for UCDP / GED event
-counts (the rest of this vignette uses the default for exactly that
-reason) but it is the wrong choice when “we did not measure this dyad”
-is a meaningful state. Have fun choosing!
+Build the same netlet with the default and the NAs are replaced with
+`0`s and the column disappears; that is fine for UCDP / GED event counts
+(the rest of this vignette uses the default for exactly that reason) but
+it is the wrong choice when “we did not measure this dyad” is a
+meaningful state.
 
 2.  **Explore**: next we use the basic
     [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method to
     visualize the network of violent interactions in Mexico. The
-    dead-simple call labels every actor:
+    simplest call labels every actor:
 
 ``` r
 
@@ -198,7 +203,7 @@ plot(mex_network,
 
 ![](event_data_files/figure-html/unnamed-chunk-6-1.png)
 
-### Highlighting a single actor
+### highlighting a single actor
 
 Often there is one actor you really want to call out — a focal group, a
 state agency, a single firm.
@@ -226,7 +231,7 @@ plot(mex_network,
 The focal actor is now visually distinct from the rest of the network —
 useful for storytelling and for slide decks.
 
-### Applying a theme
+### applying a theme
 
 Drop on
 [`theme_publication_netify()`](https://netify-dev.github.io/netify/reference/theme_publication_netify.md)
@@ -236,9 +241,15 @@ stripped axes (the right default for force-directed layouts):
 ``` r
 
 # add degree centrality from summary_actor()
+actor_stats <- summary_actor(mex_network)
+actor_stats$degree_group <- ifelse(
+    actor_stats$degree > median(actor_stats$degree, na.rm = TRUE),
+    "higher degree",
+    "lower degree"
+)
 mex_network <- add_node_vars(
     mex_network,
-    summary_actor(mex_network),
+    actor_stats,
     actor = "actor"
 )
 
@@ -263,7 +274,7 @@ heatmaps — where you *do* want axes — use
 (the `_ts` is for “tables / time-series”, anything that isn’t a
 node-edge layout).
 
-### Saving the figure
+### saving the figure
 
 Once you have a plot you like, export it with
 [`ggsave()`](https://ggplot2.tidyverse.org/reference/ggsave.html). A
@@ -275,12 +286,12 @@ a PNG at 300 dpi is fine.
 # the last plot rendered is captured by ggsave() by default
 ggsave("mexico_conflict.pdf", width = 7, height = 6)
 
-# or store the plot and pass it explicitly
+# pass a named plot object
 p <- plot(mex_network, mutate_weight = log1p) + theme_publication_netify()
 ggsave("mexico_conflict.png", plot = p, width = 7, height = 6, dpi = 300)
 ```
 
-### A note on color choice
+### a note on color choice
 
 Colors matter for accessibility — roughly 8% of men and 0.5% of women
 have some form of color vision deficiency. When you encode a variable in
@@ -299,18 +310,18 @@ color, prefer a colorblind-safe palette. Two easy options:
 
 # example: colorblind-safe categorical fill via plot.netify()
 plot(mex_network,
-    node_color_by = "side",         # some categorical attribute
-    node_color_palette = "Set2"     # ColorBrewer colorblind-safe
+    node_color_by = "degree_group",
+    node_color_palette = "Set2"     # colorbrewer colorblind-safe
 ) +
     theme_publication_netify()
 
 # example: colorblind-safe continuous color, manual
-plot(mex_network) +
+plot(mex_network, node_color_by = "degree") +
     scale_color_viridis_c(option = "cividis") +
     theme_publication_netify()
 ```
 
-### Advanced: assemble the plot from components
+### advanced: assemble the plot from components
 
 For most uses the calls above are enough. If you want full control over
 how the layers are stacked — say, to insert a custom annotation between
@@ -366,7 +377,7 @@ comp$base +
 
 ![](event_data_files/figure-html/unnamed-chunk-11-1.png)
 
-### A note on missingness
+### a note on missingness
 
 When you build a network from event data,
 [`netify()`](https://netify-dev.github.io/netify/reference/netify.md) by
@@ -381,7 +392,7 @@ Set `missing_to_zero = FALSE` to keep NAs as NAs. Similarly,
 [`?netify`](https://netify-dev.github.io/netify/reference/netify.md) for
 details.
 
-## Two-mode (bipartite) event data: offshore jurisdictions
+## two-mode (bipartite) event data: offshore jurisdictions
 
 Event data are not limited to one-mode actor-on-actor interactions.
 People attending venues, students enrolling in classes, firms registered
@@ -445,7 +456,7 @@ bp <- netify(
 bp
 ```
 
-    ## ✔ Hello, you have created network data, yay!
+    ## ✔ Network data created.
     ## • Bipartite
     ## • Sum of Binary Weights
     ## • Cross-Sectional
@@ -454,22 +465,28 @@ bp
     ## • # Unique Actors: 8
     ## Network Summary Statistics:
     ##             dens miss  mean
-    ## weight_var 0.542    0 0.833
+    ## weight_var 0.542    0 1.538
     ## • Nodal Features: None
     ## • Dyad Features: None
 
 Because the row actors (firms) and column actors (havens) are different
-sets, the resulting adjacency is rectangular and asymmetric. The
-cleanest way to read it is as a **heatmap** — one cell per firm-haven
-pair, color encoding the number of incorporations.
+sets, the resulting adjacency is rectangular and asymmetric. A
+**heatmap** is a natural display here – one cell per firm-haven pair,
+color encoding the number of incorporations.
 
-[`plot.netify()`](https://netify-dev.github.io/netify/reference/plot.netify.md)
-does not currently ship a built-in heatmap style, but the data
-extraction is one call away:
+Use `plot(bp, style = "heatmap")` for a quick plot:
+
+``` r
+
+plot(bp, style = "heatmap")
+```
+
+![](event_data_files/figure-html/unnamed-chunk-14-1.png)
+
+The code below extracts the same adjacency with
 [`get_raw()`](https://netify-dev.github.io/netify/reference/get_raw.md)
-returns the underlying adjacency matrix, and
-[`ggplot2::geom_tile()`](https://ggplot2.tidyverse.org/reference/geom_tile.html)
-does the rest. Wrap it as a function and reuse it:
+and draws the tile plot directly with
+[`ggplot2::geom_tile()`](https://ggplot2.tidyverse.org/reference/geom_tile.html):
 
 ``` r
 
@@ -496,7 +513,7 @@ ggplot(bp_long, aes(x = col, y = row, fill = value)) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-![](event_data_files/figure-html/unnamed-chunk-14-1.png)
+![](event_data_files/figure-html/unnamed-chunk-15-1.png)
 
 Note the use of
 [`theme_publication_netify_ts()`](https://netify-dev.github.io/netify/reference/theme_publication_netify_ts.md)
@@ -520,9 +537,11 @@ summary(bp)
     ##   net num_row_actors num_col_actors   density num_edges prop_edges_missing
     ## 1   1              8              6 0.5416667        26                  0
     ##   mean_edge_weight sd_edge_weight median_edge_weight min_edge_weight
-    ## 1        0.8333333       1.017576                  1               0
-    ##   max_edge_weight competition sd_of_actor_means
-    ## 1               4     0.13875         0.2954684
+    ## 1         1.538462      0.9046886                  1               1
+    ##   max_edge_weight competition_row competition_col sd_of_row_means
+    ## 1               4         0.13875         0.21125       0.2954684
+    ##   sd_of_col_means covar_of_row_col_means
+    ## 1       0.4721405                     NA
 
 To save the heatmap for a story or a slide deck:
 
@@ -531,7 +550,7 @@ To save the heatmap for a story or a slide deck:
 ggsave("offshore_heatmap.pdf", width = 7, height = 5)
 ```
 
-## Cookbook: Twitter `@mentions`
+## cookbook: twitter `@mentions`
 
 Event data is not just for conflict. Anything that arrives as rows of
 `(source, target, time)` – a tweet that mentions another handle, an
@@ -563,7 +582,7 @@ mention_net <- netify(
 mention_net
 ```
 
-    ## ✔ Hello, you have created network data, yay!
+    ## ✔ Network data created.
     ## • Unipartite
     ## • Asymmetric
     ## • Sum of Binary Weights
@@ -583,7 +602,7 @@ gives you the picture:
 plot(mention_net)
 ```
 
-![](event_data_files/figure-html/unnamed-chunk-18-1.png)
+![](event_data_files/figure-html/unnamed-chunk-19-1.png)
 
 And the usual `summary*` helpers tell you who is most active and who is
 most mentioned:
@@ -625,7 +644,7 @@ Same recipe, different domain – the only thing that changes is the
 column names you hand to
 [`netify()`](https://netify-dev.github.io/netify/reference/netify.md).
 
-## References
+## references
 
 - Sundberg, Ralph and Erik Melander (2013) Introducing the UCDP
   Georeferenced Event Dataset. *Journal of Peace Research* 50(4).

@@ -1,6 +1,6 @@
-# Preset style for temporal/longitudinal networks
+# preset style for temporal/longitudinal networks
 
-A complete visual style optimized for displaying networks over time
+a complete visual style optimized for displaying networks over time
 
 ## Usage
 
@@ -10,8 +10,8 @@ style_temporal_network()
 
 ## Value
 
-List of plot arguments
+list of plot arguments
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

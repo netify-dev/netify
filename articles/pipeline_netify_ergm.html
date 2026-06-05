@@ -11,6 +11,8 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Pipeline: netify to ergm (statnet)">
+<meta name="description" content="Prepare netify objects for ERGM modeling with statnet.">
+<meta property="og:description" content="Prepare netify objects for ERGM modeling with statnet.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -29,21 +31,22 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/quickstart_inference.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Quickstart to Inference</a></li>
+    <li><a class="dropdown-item" href="../articles/quickstart_inference.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -72,7 +75,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-05-29</h4>
+            <h4 data-toc-skip class="date">2026-06-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/pipeline_netify_ergm.Rmd" class="external-link"><code>vignettes/pipeline_netify_ergm.Rmd</code></a></small>
       <div class="d-none name"><code>pipeline_netify_ergm.Rmd</code></div>
@@ -81,17 +84,17 @@ Shahryar Minhas</h4>
     
     
 <p>ERGMs (Exponential Random Graph Models) are the workhorse of
-inferential network analysis in the <a href="https://statnet.org/" class="external-link">statnet</a> ecosystem. <code>netify</code>
-provides a clean bridge: build your network with <code><a href="../reference/netify.html">netify()</a></code>,
-attach attributes with <code><a href="../reference/add_node_vars.html">add_node_vars()</a></code> /
-<code><a href="../reference/add_dyad_vars.html">add_dyad_vars()</a></code>, then convert to the <code>network</code>
-format that <code>ergm</code> expects with
-<code><a href="../reference/netify_to_statnet.html">to_statnet()</a></code>.</p>
+inferential network analysis in the <a href="https://statnet.org/" class="external-link">statnet</a> ecosystem. With
+<code>netify</code>, build the network, attach attributes with
+<code><a href="../reference/add_node_vars.html">add_node_vars()</a></code> / <code><a href="../reference/add_dyad_vars.html">add_dyad_vars()</a></code>, then
+convert to the <code>network</code> format that <code>ergm</code>
+expects with <code><a href="../reference/netify_to_statnet.html">to_statnet()</a></code>.</p>
 <p>This vignette covers:</p>
 <ol style="list-style-type: decimal">
-<li>The cross-sectional pipeline (single network → single ergm fit)</li>
+<li>The cross-sectional pipeline (single network -&gt; single ergm
+fit)</li>
 <li>The longitudinal pipeline (per-time ergm fits)</li>
-<li>The multilayer pipeline (per-layer ergm fits —
+<li>The multilayer pipeline (per-layer ergm fits –
 <code><a href="../reference/netify_to_statnet.html">to_statnet()</a></code> now iterates layers automatically)</li>
 <li>Round-tripping ergm-simulated networks back into netify for
 descriptive checks</li>
@@ -117,7 +120,7 @@ descriptive checks</li>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="cross-sectional-pipeline">1. Cross-sectional pipeline<a class="anchor" aria-label="anchor" href="#cross-sectional-pipeline"></a>
+<h2 id="cross-sectional-pipeline">1. cross-sectional pipeline<a class="anchor" aria-label="anchor" href="#cross-sectional-pipeline"></a>
 </h2>
 <p>The simplest case: one snapshot, one model.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -171,13 +174,13 @@ descriptive checks</li>
 <p><code><a href="../reference/netify_to_statnet.html">to_statnet()</a></code> carries nodal attributes through as vertex
 attributes and dyadic attributes through as edge attributes.</p>
 <div class="section level3">
-<h3 id="before-you-fit-three-sanity-checks">Before you fit: three sanity checks<a class="anchor" aria-label="anchor" href="#before-you-fit-three-sanity-checks"></a>
+<h3 id="before-you-fit-three-sanity-checks">before you fit: three sanity checks<a class="anchor" aria-label="anchor" href="#before-you-fit-three-sanity-checks"></a>
 </h3>
 <p>ERGMs fail in cryptic ways when the underlying network is malformed.
 Three checks catch most “invalid output from statistic” headaches before
 you ever call <code><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm()</a></code>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># 1. NAs in nodal covariates referenced by nodecov / nodematch</span></span>
+<code class="sourceCode R"><span><span class="co"># 1. nas in nodal covariates referenced by nodecov / nodematch</span></span>
 <span><span class="va">nd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">verb_coop</span>, <span class="st">"nodal_data"</span><span class="op">)</span></span>
 <span><span class="va">na_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">nd</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">nd</span>, <span class="kw">function</span><span class="op">(</span><span class="va">c</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">c</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">na_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">na_cols</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"actor"</span>, <span class="st">"time"</span>, <span class="st">"layer"</span><span class="op">)</span><span class="op">)</span></span>
@@ -197,36 +200,75 @@ you ever call <code><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="exte
 <span><span class="co">#&gt; [1] FALSE</span></span></code></pre></div>
 <p>If <code>na_cols</code> is non-empty, drop the affected actors with
 <code>drop_na_actors(verb_coop, cols = na_cols)</code> or impute before
-converting. Now fit an ergm:</p>
+converting. Here we create a cleaned network before showing a model
+formula that uses nodal covariates:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Note: this chunk is not evaluated by default to keep vignette build fast.</span></span>
-<span><span class="co"># Replace eval = FALSE with eval = TRUE to actually run.</span></span>
+<code class="sourceCode R"><span><span class="va">clean_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">sn_2010</span>, <span class="st">"netify_na_cols"</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">clean_cols</span><span class="op">)</span><span class="op">)</span> <span class="va">clean_cols</span> <span class="op">&lt;-</span> <span class="va">na_cols</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">clean_cols</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">clean_cols</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">verb_coop_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/drop_na_actors.html">drop_na_actors</a></span><span class="op">(</span><span class="va">verb_coop</span>, cols <span class="op">=</span> <span class="va">clean_cols</span><span class="op">)</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>    <span class="va">verb_coop_clean</span> <span class="op">&lt;-</span> <span class="va">verb_coop</span></span>
+<span><span class="op">}</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Dropped 5 of 152 actors with NA covariates: <span style="color: #0000BB;">"Afghanistan"</span>, <span style="color: #0000BB;">"Bosnia And</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #0000BB;">Herzegovina"</span>, <span style="color: #0000BB;">"Djibouti"</span>, <span style="color: #0000BB;">"Korea, Democratic People's Republic Of"</span>, and</span></span>
+<span><span class="co">#&gt;   <span style="color: #0000BB;">"Somalia"</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">This message is displayed once per session.</span></span></span>
+<span></span>
+<span><span class="va">sn_2010_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_statnet.html">to_statnet</a></span><span class="op">(</span><span class="va">verb_coop_clean</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">sn_2010_clean</span>, <span class="st">"netify_na_cols"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
+<p>Now fit an ergm against the cleaned network:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># note: this chunk is not evaluated by default to keep vignette build fast.</span></span>
+<span><span class="co"># replace eval = false with eval = true to actually run.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">6886</span><span class="op">)</span></span>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm</a></span><span class="op">(</span></span>
-<span>    <span class="va">sn_2010</span> <span class="op">~</span> <span class="va">edges</span> <span class="op">+</span></span>
+<span>    <span class="va">sn_2010_clean</span> <span class="op">~</span> <span class="va">edges</span> <span class="op">+</span></span>
 <span>        <span class="fu">nodecov</span><span class="op">(</span><span class="st">"i_polity2"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>        <span class="fu">nodecov</span><span class="op">(</span><span class="st">"i_log_gdp"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></code></pre></div>
-<p>One footgun worth flagging: <code>nodecov("i_polity2")</code> will
-refuse to fit if any vertex has an <code>NA</code> polity score. Either
-subset to actors with complete covariates or impute before passing to
-<code><a href="../reference/netify_to_statnet.html">to_statnet()</a></code>. <code>netify</code> emits a one-shot inform
-when it detects NAs in a nodal attribute and stashes the offending
-column names on the resulting network object so you can introspect:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">sn_2010</span>, <span class="st">"netify_na_cols"</span><span class="op">)</span>   <span class="co"># character vector of NA-bearing nodal vars</span></span></code></pre></div>
-<p>If non-empty, drop or impute those columns before fitting
-<code><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm()</a></code> formulas that reference them with
-<code>nodecov()</code> / <code>nodematch()</code>. The
-<code><a href="../reference/drop_na_actors.html">drop_na_actors()</a></code> helper does this in one call and works for
-cross-sectional, longitudinal, and bipartite netlets:</p>
+<p>The full model above is not evaluated during vignette builds. The
+short block below checks the <code><a href="../reference/netify.html">netify()</a></code> -&gt;
+<code><a href="../reference/netify_to_statnet.html">to_statnet()</a></code> -&gt; <code><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm()</a></code> handoff:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/drop_na_actors.html">drop_na_actors</a></span><span class="op">(</span><span class="va">verb_coop</span>, cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">sn_2010</span>, <span class="st">"netify_na_cols"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">sn_2010_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_statnet.html">to_statnet</a></span><span class="op">(</span><span class="va">clean</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">toy_edges</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span>,</span>
+<span>    j <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b"</span>, <span class="st">"c"</span>, <span class="st">"c"</span>, <span class="st">"d"</span><span class="op">)</span>,</span>
+<span>    y <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">toy_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span><span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
+<span>    <span class="va">toy_edges</span>,</span>
+<span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
+<span>    weight <span class="op">=</span> <span class="st">"y"</span>, symmetric <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">toy_sn</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_statnet.html">to_statnet</a></span><span class="op">(</span><span class="va">toy_net</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">6886</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/capture.output.html" class="external-link">capture.output</a></span><span class="op">(</span></span>
+<span>    <span class="va">toy_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm</a></span><span class="op">(</span><span class="va">toy_sn</span> <span class="op">~</span> <span class="va">edges</span>, estimate <span class="op">=</span> <span class="st">"MPLE"</span>, eval.loglik <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Starting maximum pseudolikelihood estimation (MPLE):</span></span>
+<span><span class="co">#&gt; Obtaining the responsible dyads.</span></span>
+<span><span class="co">#&gt; Evaluating the predictor and response matrix.</span></span>
+<span><span class="co">#&gt; Maximizing the pseudolikelihood.</span></span>
+<span><span class="co">#&gt; Finished MPLE.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">toy_fit</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      edges </span></span>
+<span><span class="co">#&gt; -0.6931472</span></span></code></pre></div>
+<p>One common ERGM failure comes from missing nodal covariates:
+<code>ergm::nodecov("i_polity2")</code> will refuse to fit if any vertex
+has an <code>NA</code> polity score. Either subset to actors with
+complete covariates or impute before passing to
+<code><a href="../reference/netify_to_statnet.html">to_statnet()</a></code>. When <code><a href="../reference/netify_to_statnet.html">to_statnet()</a></code> sees NAs in
+nodal attributes, it records the affected column names on the output
+object. The <code><a href="../reference/drop_na_actors.html">drop_na_actors()</a></code> helper handles this for
+cross-sectional, longitudinal, and bipartite netlets. Use the same
+approach before formulas that reference nodal attributes with
+<code>ergm::nodecov()</code> or <code>ergm::nodematch()</code>.</p>
 </div>
 <div class="section level3">
-<h3 id="dyadic-edge-covariates-the-_e-suffix">Dyadic edge covariates: the <code>_e</code> suffix<a class="anchor" aria-label="anchor" href="#dyadic-edge-covariates-the-_e-suffix"></a>
+<h3 id="dyadic-edge-covariates-the-_e-suffix">dyadic edge covariates: the <code>_e</code> suffix<a class="anchor" aria-label="anchor" href="#dyadic-edge-covariates-the-_e-suffix"></a>
 </h3>
 <p>Any dyadic covariate you passed to <code><a href="../reference/netify.html">netify()</a></code>
 (e.g. <code>dyad_vars = "matlCoop"</code>) is attached to the resulting
@@ -241,7 +283,7 @@ exist.</li>
 </ul>
 <p>The trailing <code>_e</code> disambiguates the per-edge edgelist from
 the network-level matrix. For <code>ergm::edgecov()</code>, pass the
-<strong>original (matrix) name</strong> — <code>edgecov()</code>
+<strong>original (matrix) name</strong> – <code>edgecov()</code>
 resolves its argument as a network-level matrix attribute, so the
 <code>_e</code> per-edge alias will not work there:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -256,10 +298,10 @@ live in <code>ergm</code> itself.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="longitudinal-pipeline-per-time-fits">2. Longitudinal pipeline (per-time fits)<a class="anchor" aria-label="anchor" href="#longitudinal-pipeline-per-time-fits"></a>
+<h2 id="longitudinal-pipeline-per-time-fits">2. longitudinal pipeline (per-time fits)<a class="anchor" aria-label="anchor" href="#longitudinal-pipeline-per-time-fits"></a>
 </h2>
 <p>For a longitudinal netify, <code><a href="../reference/netify_to_statnet.html">to_statnet()</a></code> returns a named
-list — one <code>network</code> object per time period:</p>
+list – one <code>network</code> object per time period:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">verb_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">2010</span><span class="op">:</span><span class="fl">2012</span>, <span class="op">]</span>,</span>
@@ -285,21 +327,21 @@ list — one <code>network</code> object per time period:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">6886</span><span class="op">)</span></span>
 <span><span class="va">fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">sn_list</span>, <span class="kw">function</span><span class="op">(</span><span class="va">n</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm</a></span><span class="op">(</span><span class="va">n</span> <span class="op">~</span> <span class="va">edges</span> <span class="op">+</span> <span class="fu">nodecov</span><span class="op">(</span><span class="st">"i_polity2"</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm</a></span><span class="op">(</span><span class="va">n</span> <span class="op">~</span> <span class="va">edges</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
 <p>For <em>coevolution</em> models (where ties change as a function of
-past ties), look at <code>tergm</code> from the statnet suite —
+past ties), look at <code>tergm</code> from the statnet suite –
 <code>netify</code> provides the data, <code>tergm</code> does the
 modeling. A typical tergm 4.x call against the same per-period list
 looks like this:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Longitudinal ERGM via tergm 4.x</span></span>
+<code class="sourceCode R"><span><span class="co"># longitudinal ergm via tergm 4.x</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://statnet.org" class="external-link">tergm</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">6886</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">nets</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_statnet.html">to_statnet</a></span><span class="op">(</span><span class="va">verb_longit</span><span class="op">)</span>   <span class="co"># named list of network objects</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">tergm</span><span class="op">(</span></span>
-<span>    <span class="va">nets</span> <span class="op">~</span> <span class="fu">Form</span><span class="op">(</span><span class="op">~</span> <span class="va">edges</span> <span class="op">+</span> <span class="fu">nodecov</span><span class="op">(</span><span class="st">"i_polity2"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="va">nets</span> <span class="op">~</span> <span class="fu">Form</span><span class="op">(</span><span class="op">~</span> <span class="va">edges</span><span class="op">)</span> <span class="op">+</span></span>
 <span>           <span class="fu">Persist</span><span class="op">(</span><span class="op">~</span> <span class="va">edges</span><span class="op">)</span>,</span>
 <span>    estimate <span class="op">=</span> <span class="st">"CMLE"</span>,</span>
 <span>    times <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">nets</span><span class="op">)</span></span>
@@ -309,15 +351,13 @@ looks like this:</p>
 <em>formation</em> of new edges between periods, and
 <code>Persist()</code> models the <em>persistence</em> of existing edges
 from one period to the next; both formulas accept the same ergm terms
-(<code>edges</code>, <code>nodecov</code>, <code>nodematch</code>,
-<code>mutual</code>, <code>gwesp</code>, etc.). (Note:
-<code>i_polity2</code> has missing values for some country-years —
-<code><a href="../reference/netify_to_statnet.html">to_statnet()</a></code> flags this and stashes the offending column
-names on <code>attr(net, "netify_na_cols")</code> so you can drop or
-impute before fitting.)</p>
+(<code>edges</code>, <code>ergm::nodecov()</code>,
+<code>ergm::nodematch()</code>, <code>mutual</code>, <code>gwesp</code>,
+etc.). Add nodal covariates after applying the same missing-data check
+shown in the cross-sectional example.</p>
 </div>
 <div class="section level2">
-<h2 id="multilayer-pipeline-per-layer-fits">3. Multilayer pipeline (per-layer fits)<a class="anchor" aria-label="anchor" href="#multilayer-pipeline-per-layer-fits"></a>
+<h2 id="multilayer-pipeline-per-layer-fits">3. multilayer pipeline (per-layer fits)<a class="anchor" aria-label="anchor" href="#multilayer-pipeline-per-layer-fits"></a>
 </h2>
 <p>Multilayer ergm modeling is its own research literature. The simple
 pragmatic approach is to fit one ergm per layer.
@@ -339,7 +379,7 @@ netify, get back a named list keyed by layer.</p>
 into <code><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm()</a></code>.</p>
 </div>
 <div class="section level2">
-<h2 id="round-tripping-simulated-networks-back-to-netify">4. Round-tripping simulated networks back to netify<a class="anchor" aria-label="anchor" href="#round-tripping-simulated-networks-back-to-netify"></a>
+<h2 id="round-tripping-simulated-networks-back-to-netify">4. round-tripping simulated networks back to netify<a class="anchor" aria-label="anchor" href="#round-tripping-simulated-networks-back-to-netify"></a>
 </h2>
 <p>A useful descriptive check after fitting an ergm is to simulate from
 the fit, compute descriptives on the simulated networks, and compare to
@@ -348,6 +388,7 @@ the observed network. <code>simulate.ergm()</code> returns
 back into a netify for any of netify’s descriptive tools:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">6886</span><span class="op">)</span></span>
+<span><span class="co"># m is the fitted ergm object from the model chunk above</span></span>
 <span><span class="va">sims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/simulate.html" class="external-link">simulate</a></span><span class="op">(</span><span class="va">m</span>, nsim <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>  <span class="co"># list of network objects</span></span>
 <span></span>
 <span><span class="co"># convert each simulated network back into a netify for comparison</span></span>
@@ -356,49 +397,39 @@ back into a netify for any of netify’s descriptive tools:</p>
 <span><span class="co"># compare observed vs simulated at the structural level</span></span>
 <span><span class="va">all_nets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>observed <span class="op">=</span> <span class="va">verb_coop</span><span class="op">)</span>, <span class="va">sim_nets</span><span class="op">)</span></span>
 <span><span class="va">struct_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">all_nets</span>, what <span class="op">=</span> <span class="st">"structure"</span><span class="op">)</span></span></code></pre></div>
-<p>This gives you observed-vs-simulated comparisons for density,
-reciprocity, transitivity, mean degree, etc. — useful for assessing
-whether your ergm captured the descriptive features you care about.</p>
+<p>This gives observed-vs-simulated comparisons for density,
+reciprocity, transitivity, mean degree, and related summaries.</p>
 </div>
 <div class="section level2">
 <h2 id="tldr">tl;dr<a class="anchor" aria-label="anchor" href="#tldr"></a>
 </h2>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># build → attach attrs → export → model</span></span>
+<code class="sourceCode R"><span><span class="co"># build -&gt; attach attrs -&gt; export -&gt; model</span></span>
 <span><span class="va">net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span><span class="va">df</span>, actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>, symmetric <span class="op">=</span> <span class="cn">FALSE</span>, weight <span class="op">=</span> <span class="st">"x"</span><span class="op">)</span></span>
 <span><span class="va">net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span><span class="va">net</span>, <span class="va">attrs</span>, actor <span class="op">=</span> <span class="st">"id"</span><span class="op">)</span></span>
 <span><span class="va">sn</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_statnet.html">to_statnet</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span>               <span class="co"># single network, longit list, or multilayer list</span></span>
 <span><span class="va">m</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ergm/man/ergm.html" class="external-link">ergm</a></span><span class="op">(</span><span class="va">sn</span> <span class="op">~</span> <span class="va">edges</span> <span class="op">+</span> <span class="va">...</span><span class="op">)</span>        <span class="co"># modeling happens in ergm/statnet</span></span></code></pre></div>
-<p>For modeling beyond ergm:</p>
-<ul>
-<li>Latent factor / additive-multiplicative: <a href="pipeline_lame_dbn.html"><code>pipeline_lame_dbn</code></a>
-vignette</li>
-<li>Social relations model: <a href="https://github.com/netify-dev/srm" class="external-link">netify-dev/srm</a> via
-<code>to_amen(net)</code>
-</li>
-<li>Social influence regression (Minhas &amp; Hoff): <a href="https://github.com/netify-dev/sir" class="external-link">netify-dev/sir</a>
-</li>
-</ul>
-<p>Have fun!</p>
+<p>For latent-factor and DBN workflows, see the project-site article on
+<code>lame</code> and <code>dbn</code>.</p>
 </div>
 <div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 id="references">references<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <ol style="list-style-type: decimal">
-<li><p>Butts, C.Butts, C. T. (2008). network: A Package for Managing
-Relational Data in R. Journal of Statistical Software, 24(2), 1–36. <a href="https://doi.org/10.18637/jss.v024.i02" class="external-link uri">https://doi.org/10.18637/jss.v024.i02</a></p></li>
+<li><p>Butts, C. T. (2008). network: A Package for Managing Relational
+Data in R. Journal of Statistical Software, 24(2), 1-36. <a href="doi:10.18637/jss.v024.i02" class="uri">doi:10.18637/jss.v024.i02</a></p></li>
 <li><p>Cranmer, S. J., Desmarais, B. A., &amp; Morgan, J. W. (2021).
-Inferential Network Analysis. Cambridge University Press. <a href="https://doi.org/10.1017/9781316662915" class="external-link uri">https://doi.org/10.1017/9781316662915</a></p></li>
+Inferential Network Analysis. Cambridge University Press. <a href="doi:10.1017/9781316662915" class="uri">doi:10.1017/9781316662915</a></p></li>
 <li><p>Hunter, D. R., Handcock, M. S., Butts, C. T., Goodreau, S. M.,
 &amp; Morris, M. (2008). ergm: A Package to Fit, Simulate and Diagnose
 Exponential-Family Models for Networks. Journal of Statistical Software,
-24(3), 1–29. <a href="https://doi.org/10.18637/jss.v024.i03" class="external-link uri">https://doi.org/10.18637/jss.v024.i03</a></p></li>
+24(3), 1-29. <a href="doi:10.18637/jss.v024.i03" class="uri">doi:10.18637/jss.v024.i03</a></p></li>
 <li><p>Krivitsky, P. N., &amp; Handcock, M. S. (2014). A Separable Model
 for Dynamic Networks. Journal of the Royal Statistical Society: Series B
-(Statistical Methodology), 76(1), 29–46. <a href="https://doi.org/10.1111/rssb.12014" class="external-link uri">https://doi.org/10.1111/rssb.12014</a></p></li>
+(Statistical Methodology), 76(1), 29-46. <a href="doi:10.1111/rssb.12014" class="uri">doi:10.1111/rssb.12014</a></p></li>
 <li><p>Snijders, T. A. B., Pattison, P. E., Robins, G. L., &amp;
 Handcock, M. S. (2006). New Specifications for Exponential Random Graph
-Models. Sociological Methodology, 36(1), 99–153. <a href="https://doi.org/10.1111/j.1467-9531.2006.00176.x" class="external-link uri">https://doi.org/10.1111/j.1467-9531.2006.00176.x</a></p></li>
+Models. Sociological Methodology, 36(1), 99-153. <a href="doi:10.1111/j.1467-9531.2006.00176.x" class="uri">doi:10.1111/j.1467-9531.2006.00176.x</a></p></li>
 </ol>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

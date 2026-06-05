@@ -1,6 +1,6 @@
 # Validate plot parameters and warn about common mistakes
 
-This function checks the parameter names passed through ... in
+this function checks the parameter names passed through ... in
 plot.netify and warns users about potential typos or deprecated
 parameter names.
 
@@ -14,11 +14,11 @@ validate_plot_params(plot_args, ...)
 
 - plot_args:
 
-  List of all plot arguments
+  list of all plot arguments
 
 - ...:
 
-  Additional arguments passed to plot.netify
+  additional arguments passed to plot.netify
 
 ## Value
 

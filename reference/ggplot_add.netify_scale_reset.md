@@ -1,6 +1,6 @@
-# Add scale resets to ggplot
+# add scale resets to ggplot
 
-S3 method to add scale reset objects to ggplot objects. This method
+s3 method to add scale reset objects to ggplot objects. this method
 resets color, fill, alpha, and size scales using the ggnewscale package.
 
 ## Usage
@@ -14,21 +14,21 @@ ggplot_add(object, plot, ...)
 
 - object:
 
-  A netify_scale_reset object created by
+  a netify_scale_reset object created by
   [`reset_scales`](https://netify-dev.github.io/netify/reference/reset_scales.md)
 
 - plot:
 
-  A ggplot object to which scale resets will be added
+  a ggplot object to which scale resets will be added
 
 - ...:
 
-  Additional arguments passed by ggplot2 (used internally)
+  additional arguments passed by ggplot2 (used internally)
 
 ## Value
 
-A ggplot object with scale resets applied
+a ggplot object with scale resets applied
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

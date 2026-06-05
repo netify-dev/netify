@@ -1,6 +1,6 @@
-# List available color palettes
+# list available color palettes
 
-List available color palettes
+list available color palettes
 
 ## Usage
 
@@ -10,8 +10,8 @@ list_palettes()
 
 ## Value
 
-Character vector of available palette names
+character vector of available palette names
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

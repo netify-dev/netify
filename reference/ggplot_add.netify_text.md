@@ -1,6 +1,6 @@
-# Add netify_text to ggplot
+# add netify_text to ggplot
 
-S3 method to add netify_text objects to ggplot objects. This method is
+s3 method to add netify_text objects to ggplot objects. this method is
 called automatically when using the + operator with a netify_text
 object.
 
@@ -15,21 +15,21 @@ ggplot_add(object, plot, ...)
 
 - object:
 
-  A netify_text object created by
+  a netify_text object created by
   [`netify_text`](https://netify-dev.github.io/netify/reference/netify_text.md)
 
 - plot:
 
-  A ggplot object to which the text layer will be added
+  a ggplot object to which the text layer will be added
 
 - ...:
 
-  Additional arguments passed by ggplot2 (used internally)
+  additional arguments passed by ggplot2 (used internally)
 
 ## Value
 
-A ggplot object with the text layer added
+a ggplot object with the text layer added
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

@@ -1,10 +1,10 @@
 # Drop actors with NA covariates from a netify object
 
-Removes actors whose `nodal_data` carries `NA` in one or more covariate
-columns. ERGM terms like `nodecov()` and `nodematch()` reject NA-bearing
+removes actors whose `nodal_data` carries `na` in one or more covariate
+columns. ergm terms like `nodecov()` and `nodematch()` reject na-bearing
 vertex attributes, so this helper is handy upstream of
 [`netify_to_statnet`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md).
-Works for cross-sectional, longitudinal, and bipartite netlets.
+works for cross-sectional, longitudinal, and bipartite netlets.
 
 ## Usage
 
@@ -16,48 +16,48 @@ drop_na_actors(netlet, cols = NULL)
 
 - netlet:
 
-  A netify object with a `nodal_data` attribute.
+  a netify object with a `nodal_data` attribute.
 
 - cols:
 
-  Character vector of column names in `nodal_data` to check for `NA`.
+  character vector of column names in `nodal_data` to check for `na`.
   `NULL` (the default) checks every non-bookkeeping column (everything
   except `actor`, `time`, and `layer`).
 
 ## Value
 
-A netify object equivalent to
+a netify object equivalent to
 `subset_netify(netlet, actors = clean_actors)` after dropping any actor
-whose nodal rows contain `NA` in the inspected columns. If no NAs are
+whose nodal rows contain `na` in the inspected columns. if no nas are
 found the input is returned unchanged.
 
 ## Details
 
-For longitudinal netlets an actor is dropped from every period if any of
-its rows in `nodal_data` carry `NA` in the inspected columns. For
+for longitudinal netlets an actor is dropped from every period if any of
+its rows in `nodal_data` carry `na` in the inspected columns. for
 bipartite netlets only actors in the mode that the nodal table covers
 are filtered; the other mode passes through untouched.
 
-Corner cases:
+corner cases:
 
-- If `cols` references a name that is not in `nodal_data`, the call
+- if `cols` references a name that is not in `nodal_data`, the call
   aborts with a clear message listing the missing columns.
 
-- If no actor carries `NA` in the inspected columns, the input netlet is
+- if no actor carries `na` in the inspected columns, the input netlet is
   returned unchanged (no inform).
 
-- If *every* actor carries `NA` (so the cleaned netlet would have zero
+- if *every* actor carries `na` (so the cleaned netlet would have zero
   actors), the call aborts rather than silently returning an empty
   netify, which would break downstream
   [`to_statnet()`](https://netify-dev.github.io/netify/reference/netify_to_statnet.md)
   / `ergm()` pipelines.
 
-- If the netlet has no `nodal_data` attribute attached, the input is
+- if the netlet has no `nodal_data` attribute attached, the input is
   returned unchanged.
 
 ## Author
 
-Shahryar Minhas
+shahryar minhas
 
 ## Examples
 

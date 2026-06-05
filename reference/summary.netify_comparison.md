@@ -1,6 +1,6 @@
-# Summary method for netify_comparison objects
+# summary method for netify_comparison objects
 
-Provides a concise summary of network comparison results.
+provides a concise summary of network comparison results.
 
 ## Usage
 
@@ -13,16 +13,16 @@ summary(object, ...)
 
 - object:
 
-  A netify_comparison object from compare_networks()
+  a netify_comparison object from compare_networks()
 
 - ...:
 
-  Additional arguments (currently unused)
+  additional arguments (currently unused)
 
 ## Value
 
-A summary data frame or list depending on comparison type
+a summary data frame or list depending on comparison type
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

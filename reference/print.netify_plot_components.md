@@ -1,7 +1,7 @@
-# Print netify plot components
+# print netify plot components
 
-Prints a summary of the components available in a netify_plot_components
-object. This helps users understand what layers and elements are
+prints a summary of the components available in a netify_plot_components
+object. this helps users understand what layers and elements are
 available for manual plot construction.
 
 ## Usage
@@ -15,20 +15,20 @@ print(x, ...)
 
 - x:
 
-  A netify_plot_components object returned from
+  a netify_plot_components object returned from
   `plot(..., return_components = TRUE)`
 
 - ...:
 
-  Additional arguments (currently unused)
+  additional arguments (currently unused)
 
 ## Value
 
-Invisibly returns the input object
+invisibly returns the input object
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

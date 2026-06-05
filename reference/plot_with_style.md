@@ -1,6 +1,6 @@
 # Apply style to netify plot
 
-Helper function to properly apply styles to netify plots
+helper function to properly apply styles to netify plots
 
 ## Usage
 
@@ -12,20 +12,20 @@ plot_with_style(netlet, style_fun, ...)
 
 - netlet:
 
-  A netify object
+  a netify object
 
 - style_fun:
 
-  A style function (e.g., style_budapest)
+  a style function (e.g., style_rose)
 
 - ...:
 
-  Additional plot parameters
+  additional plot parameters
 
 ## Value
 
-A ggplot object
+a ggplot object
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

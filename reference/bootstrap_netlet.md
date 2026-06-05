@@ -1,6 +1,6 @@
 # Bootstrap any user-supplied function of a netify object
 
-Resamples actors with replacement (Snijders & Borgatti 1999 vertex
+resamples actors with replacement (snijders & borgatti 1999 vertex
 bootstrap) per panel, rebuilds the netlet on each draw, applies the
 user-supplied `fn`, and returns the per-draw values plus percentile
 confidence intervals.
@@ -22,101 +22,109 @@ bootstrap_netlet(
 
 - netlet:
 
-  A `netify` object.
+  a `netify` object.
 
 - fn:
 
-  Function. Takes a netlet, returns a single numeric value or a named
-  numeric vector. Called once per bootstrap draw.
+  function. takes a netlet, returns a single numeric value or a named
+  numeric vector. called once per bootstrap draw.
 
 - n_boot:
 
-  Integer. Number of bootstrap replicates (default `200`).
+  integer. number of bootstrap replicates (default `200`).
 
 - alpha:
 
-  Numeric in (0, 1). Two-sided percentile-CI alpha (default `0.05` → 95%
-  intervals).
+  numeric in (0, 1). two-sided percentile-ci alpha (default `0.05` -\>
+  95% intervals).
 
 - seed:
 
-  Optional integer. If supplied, sets a local RNG seed without leaking
-  into the user's global stream.
+  optional integer. if supplied, sets a local rng seed and restores the
+  user's global stream afterward. if `NULL`, bootstrap draws use and
+  advance the current rng stream normally.
 
 - verbose:
 
-  Logical. If `TRUE` (default), print a progress ticker every 50 draws.
+  logical. if `TRUE` (default), print a progress ticker every 50 draws.
 
 ## Value
 
-A `data.frame` with one row per element of `fn(netlet)` and columns:
+a `data.frame` with one row per element of `fn(netlet)` and columns:
 
 - `metric`:
 
-  Name of the output element (or `"value"` for scalar fn).
+  name of the output element (or `"value"` for scalar fn).
 
 - `point`:
 
-  Point estimate from `fn(netlet)` on the original (un-resampled)
+  point estimate from `fn(netlet)` on the original (un-resampled)
   netlet.
+
+- `n_valid`:
+
+  number of non-`na` bootstrap draws used for that metric.
 
 - `mean`:
 
-  Bootstrap mean.
+  bootstrap mean.
 
 - `sd`:
 
-  Bootstrap standard deviation.
+  bootstrap standard deviation.
 
 - `lower`, `upper`:
 
-  Lower / upper percentile CI bounds.
+  lower / upper percentile ci bounds.
 
-The full per-draw matrix is stashed as `attr(out, "bootstrap_draws")`
+the full per-draw matrix is stashed as `attr(out, "bootstrap_draws")`
 for callers who want the empirical distribution (e.g., for
 kernel-density plots).
 
 ## Details
 
-This generalizes the per-graph-stat bootstrap that
-`summary(net, bootstrap = TRUE)` runs internally: any scalar / named
-numeric vector summary of a netify can be wrapped. Useful for homophily
-/ mixing-matrix / centrality stats that don't expose their own
-bootstrap, and for downstream fit summaries (e.g., the coefficient of a
+this is the general bootstrap interface for any scalar or named numeric
+vector summary of a netify. it is useful for homophily, mixing-matrix,
+centrality, and downstream fit summaries (e.g., the coefficient of a
 `to_igraph` -\> `igraph::cluster_*` -\> modularity pipeline).
 
-Resampling is **vertex-level**, not edge-level: actors are sampled with
-replacement and the netlet's adjacency is sliced accordingly. For
+resampling is **vertex-level**, not edge-level: actors are sampled with
+replacement and the netlet's adjacency is sliced accordingly. for
 longitudinal netlets, the same resampled index set is applied to every
-period (preserves within-actor dependence). Multilayer netlets are
-unsupported — bootstrap each layer independently via
-`subset_netify(layers = ...)` first.
+period (preserves within-actor dependence). multilayer netlets are
+unsupported – bootstrap each layer independently via
+`subset_netify(layers = ...)` first. the resampled netlets contain the
+resampled adjacency only. statistics that require attached nodal or
+dyadic attributes should recreate those attributes inside `fn`, or use a
+NULL-model workflow such as
+`compare_to_null(..., model = "dyad_permutation")` when the goal is an
+attribute-aware randomization.
 
-## Parallel execution
+## parallel execution
 
-`bootstrap_netlet` runs serially. When `n_boot > 50` and the netlet is
-large enough that each draw is non-trivial (rule of thumb: N \> ~1000
-with the default centrality-heavy `fn`), parallelism helps. There is no
+`bootstrap_netlet` runs serially. when `n_boot > 50` and the netlet is
+large enough that each draw is non-trivial (rule of thumb: n \> ~1000
+with the default centrality-heavy `fn`), parallelism helps. there is no
 built-in `parallel =` argument; instead drive the loop yourself with
 `future.apply::future_lapply()`, which respects whatever
 `future::plan()` the caller set:
 
 
     library(future); library(future.apply)
-    plan(multisession)        # or multicore on Linux/macOS
+    plan(multisession)        # or multicore on linux/macos
     draws <- future_lapply(1:n_boot, function(b) {
       idx <- sample(actors, length(actors), replace = TRUE)
       fn(subset_netify(net, actors = idx))
     }, future.seed = TRUE)
 
-Then summarize `draws` exactly as `bootstrap_netlet` does internally.
-Wrapping the inner body of `bootstrap_netlet` in a future-aware loop is
-a small refactor and is the recommended path for ~15K-node weekly
+then summarize `draws` exactly as `bootstrap_netlet` does internally.
+wrapping the inner body of `bootstrap_netlet` in a future-aware loop is
+a small refactor and is the recommended path for ~15k-node weekly
 snapshots where the serial pass would tie up a single core for hours.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
@@ -127,7 +135,7 @@ net <- netify(icews[icews$year == 2010, ],
 actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "verbCoop")
 # bootstrap a custom scalar: mean(closeness)
 my_stat <- function(net) {
-sa <- summary_actor(net, stats = "closeness")
+sa <- summary_actor(net, stats = "all")
 c(mean_closeness = mean(sa$closeness_all, na.rm = TRUE))
 }
 boot_out <- bootstrap_netlet(net, fn = my_stat, n_boot = 100, seed = 1)

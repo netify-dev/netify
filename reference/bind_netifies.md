@@ -1,10 +1,10 @@
 # Combine multiple netify objects
 
 `bind_netifies()` concatenates two or more netify objects along the time
-axis (for combining cross-sec → longit, or stacking two longit panels
-into a longer one). All inputs must share the same mode (`unipartite` /
+axis (for combining cross-sec -\> longit, or stacking two longit panels
+into a longer one). all inputs must share the same mode (`unipartite` /
 `bipartite`), symmetry, layers, and (for cross-sec inputs) the same
-actor set. Actor sets across periods may differ — the result is a
+actor set. actor sets across periods may differ – the result is a
 `longit_list`.
 
 ## Usage
@@ -21,17 +21,17 @@ bind_netifies(
 
 - ...:
 
-  Two or more netify objects, or a single list of netify objects.
+  two or more netify objects, or a single list of netify objects.
 
 - names:
 
-  Optional character vector to name the resulting periods. If `NULL`,
+  optional character vector to name the resulting periods. if `NULL`,
   periods are auto-named from the inputs' existing period labels (with
   deduplication if collisions).
 
 - align_actors:
 
-  One of `"none"` (default), `"union"`, or `"intersection"`. Controls
+  one of `"none"` (default), `"union"`, or `"intersection"`. controls
   how per-period actor sets are reconciled when inputs differ:
 
   - `"none"`: keep each period's actor set as supplied; resulting
@@ -39,39 +39,47 @@ bind_netifies(
     behavior).
 
   - `"union"`: take the union of actor sets across all inputs and pad
-    each period with NA rows/columns for actors not originally present.
+    each period with na rows/columns for actors not originally present.
 
   - `"intersection"`: take the intersection of actor sets across all
     inputs and subset each period to only those actors.
 
 ## Value
 
-A `longit_list` netify object.
+a `longit_list` netify object.
 
 ## Details
 
-For combining different *layers* of the same time slice, use
+for combining different *layers* of the same time slice, use
 [`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md).
 
-This is **not** the same as
+this is **not** the same as
 [`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md):
 
-- `bind_netifies()` joins along TIME.
+- `bind_netifies()` joins along time.
 
 - [`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md)
-  joins along RELATION (layer).
+  joins along relation (layer).
 
-Nodal and dyadic attributes are concatenated per-period; if two inputs
+nodal and dyadic attributes are concatenated per-period; if two inputs
 supply conflicting values for the same (actor, time), the later input
 wins (with a one-shot inform).
 
-When downstream models (e.g., `tergm` CMLE) require uniform actor
+when downstream models (e.g., `tergm` cmle) require uniform actor
 composition across periods, use `align_actors = "union"` or
 `"intersection"`.
 
+multilayer inputs are supported when each input has the same layer
+labels. the result is a longitudinal list whose per-period elements keep
+the layer dimension, so `as.matrix(x, time = ..., layer = ...)`,
+[`unnetify()`](https://netify-dev.github.io/netify/reference/unnetify.md),
+and
+[`decompose_netify()`](https://netify-dev.github.io/netify/reference/decompose_netify.md)
+can still address layers.
+
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

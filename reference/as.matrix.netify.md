@@ -1,41 +1,47 @@
-# Coerce a netify object to a plain matrix
+# coerce a netify object to a plain matrix
 
-Strips the netify class and netify-specific attributes so the result is
-a clean numeric matrix carrying only `dim` and `dimnames`. For
+strips the netify class and netify-specific attributes so the result is
+a clean numeric matrix carrying only `dim` and `dimnames`. for
 longitudinal netify objects, `time` selects which slice to return; it
-defaults to the first time period and emits a hint. Round-trips
+defaults to the first time period and emits a hint. round-trips
 (`net |> as.matrix() |> netify()`) recover a fresh cross-sectional
 netify object, but structural attributes (symmetric / diag_to_NA /
 weight) are re-detected from the matrix on the way back in rather than
-copied across, so a directed matrix or one with a non-NA diagonal will
+copied across, so a directed matrix or one with a non-na diagonal will
 be flagged accordingly.
 
 ## Usage
 
 ``` r
 # S3 method for class 'netify'
-as.matrix(x, time = NULL, ...)
+as.matrix(x, time = NULL, layer = NULL, ...)
 ```
 
 ## Arguments
 
 - x:
 
-  A netify object.
+  a netify object.
 
 - time:
 
-  For longitudinal netify objects, either the integer index or character
-  label of the time slice to extract. Defaults to the first slice and
+  for longitudinal netify objects, either the integer index or character
+  label of the time slice to extract. defaults to the first slice and
   emits a hint when used implicitly.
+
+- layer:
+
+  for multilayer netify objects, either the integer index or character
+  label of the layer to extract. defaults to the first layer and emits a
+  hint when used implicitly.
 
 - ...:
 
-  Additional args (ignored).
+  additional args (ignored).
 
 ## Value
 
-A plain numeric matrix with `dim` and `dimnames` only (no `netify`
+a plain numeric matrix with `dim` and `dimnames` only (no `netify`
 class, no netify metadata attributes).
 
 ## See also
@@ -47,7 +53,7 @@ rebuilding a netify object from a plain matrix.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

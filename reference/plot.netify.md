@@ -1,7 +1,7 @@
 # Plotting method for netify objects
 
-Creates customizable network visualizations from netify objects using
-ggplot2. Supports cross-sectional and longitudinal networks with
+creates customizable network visualizations from netify objects using
+ggplot2. supports cross-sectional and longitudinal networks with
 extensive options for mapping network attributes to visual properties.
 
 ## Usage
@@ -15,85 +15,85 @@ plot(x, auto_format = TRUE, ...)
 
 - x:
 
-  A 'netify' object containing network data to visualize.
+  a 'netify' object containing network data to visualize.
 
 - auto_format:
 
-  Logical. If TRUE (default), automatically adjusts plot parameters
+  logical. if TRUE (default), automatically adjusts plot parameters
   based on network characteristics such as size, density, and structure.
-  This includes "intelligent" defaults for:
+  this includes "intelligent" defaults for:
 
-  - Node size (smaller for larger networks)
+  - node size (smaller for larger networks)
 
-  - Edge transparency (lower for denser networks)
+  - edge transparency (lower for denser networks)
 
-  - Text labels (enabled for small networks)
+  - text labels (enabled for small networks)
 
-  - Curved edges (for small dense networks)
+  - curved edges (for small dense networks)
 
-  - Isolate removal (for large networks)
+  - isolate removal (for large networks)
 
-  Set to FALSE to disable all automatic formatting. Individual
+  set to FALSE to disable all automatic formatting. individual
   parameters can still be overridden even when auto_format is TRUE.
 
 - ...:
 
-  Additional arguments controlling plot appearance:
+  additional arguments controlling plot appearance:
 
 ## Value
 
-A ggplot2 object that can be further customized with additional layers,
-scales, themes, etc. For longitudinal networks, includes facets for each
+a ggplot2 object that can be further customized with additional layers,
+scales, themes, etc. for longitudinal networks, includes facets for each
 time period.
 
-If `return_components = TRUE`, returns a list of plot components that
+if `return_components = TRUE`, returns a list of plot components that
 can be manually assembled or modified.
 
 ## Details
 
-**Naming Conventions:**
+**naming conventions:**
 
-The function supports two naming styles for parameters:
+the function supports two naming styles for parameters:
 
-- **Recommended**: Use `node_*` for node attributes and `*_by` for
+- **recommended**: use `node_*` for node attributes and `*_by` for
   variable mappings (e.g., `node_size_by = "degree"`)
 
-- **Legacy**: Use `point_*` for nodes and `*_var` for variables (e.g.,
+- **legacy**: use `point_*` for nodes and `*_var` for variables (e.g.,
   `point_size_var = "degree"`)
 
-**Default Behaviors:**
+**default behaviors:**
 
-- For weighted networks, edge transparency maps to weight by default
+- for weighted networks, edge transparency maps to weight by default
 
-- For directed networks, arrows are added automatically
+- for directed networks, arrows are added automatically
 
-- For longitudinal networks, time periods are shown as facets
+- for longitudinal networks, time periods are shown as facets
 
-- Isolates are removed by default (set `remove_isolates = FALSE` to
+- isolates are removed by default (set `remove_isolates = FALSE` to
   keep)
 
-**Customization Tips:**
+**customization tips:**
 
-- Use `mutate_weight` to handle skewed weight distributions
+- use `mutate_weight` to handle skewed weight distributions
 
-- Combine fixed and variable aesthetics (e.g., fixed color with variable
+- combine fixed and variable aesthetics (e.g., fixed color with variable
   size)
 
-- Add ggplot2 layers after the plot call for further customization
+- add ggplot2 layers after the plot call for further customization
 
-- Use `select_text` for selective labeling in dense networks
+- use `select_text` for selective labeling in dense networks
 
-## Layout Parameters
+## layout parameters
 
 - `layout`:
 
-  Character string specifying the igraph layout algorithm. Options
-  include: `"nicely"` (default), `"fr"` (Fruchterman-Reingold), `"kk"`
-  (Kamada-Kawai), `"circle"`, `"star"`, `"grid"`, `"tree"`,
-  `"bipartite"` (for bipartite networks), `"randomly"`, and others. For
+  character string specifying the igraph layout algorithm. options
+  include: `"nicely"` (default), `"fr"` (fruchterman-reingold), `"kk"`
+  (kamada-kawai), `"circle"`, `"star"`, `"grid"`, `"tree"`,
+  `"bipartite"` (for bipartite networks), `"randomly"`, and others. for
   ego networks, additional options are available: `"radial"`
   (ego-centric with optional grouping) and `"concentric"` (ego at center
-  with alters in rings). See
+  with alters in rings). see
   [`get_node_layout`](https://netify-dev.github.io/netify/reference/get_node_layout.md)
   and
   [`get_ego_layout`](https://netify-dev.github.io/netify/reference/get_ego_layout.md)
@@ -101,412 +101,411 @@ The function supports two naming styles for parameters:
 
 - `point_layout`:
 
-  Optional data.frame or list of data.frames containing pre-computed
-  node positions with columns 'actor', 'x', and 'y'. Overrides `layout`
+  optional data.frame or list of data.frames containing pre-computed
+  node positions with columns 'actor', 'x', and 'y'. overrides `layout`
   if provided.
 
 - `static_actor_positions`:
 
-  Logical. For longitudinal networks, should node positions remain
-  constant across time? Default is `FALSE`.
+  logical. for longitudinal networks, should node positions remain
+  constant across time? default is `FALSE`.
 
 - `which_static`:
 
-  Integer. When `static_actor_positions = TRUE`, which time period's
-  layout to use as template? If `NULL` (default), creates composite
+  integer. when `static_actor_positions = TRUE`, which time period's
+  layout to use as template? if `NULL` (default), creates composite
   layout from all time periods.
 
 - `seed`:
 
-  Integer for reproducible layouts. Default is 6886.
+  integer for reproducible layouts. default is 6886.
 
-## Display Control
+## display control
 
 - `add_edges`:
 
-  Logical. Display edges? Default is `TRUE`.
+  logical. display edges? default is `TRUE`.
 
 - `add_points`:
 
-  Logical. Display nodes as points? Default is `TRUE`.
+  logical. display nodes as points? default is `TRUE`.
 
 - `add_text`:
 
-  Logical. Add text labels to nodes? Default is `FALSE`.
+  logical. add text labels to nodes? default is `FALSE`.
 
 - `add_text_repel`:
 
-  Logical. Add text labels with automatic repositioning to avoid
-  overlaps? Default is `FALSE`. When `TRUE`, overrides `add_text`. Uses
+  logical. add text labels with automatic repositioning to avoid
+  overlaps? default is `FALSE`. when `TRUE`, overrides `add_text`. uses
   ggrepel for positioning.
 
 - `add_label`:
 
-  Logical. Add boxed labels to nodes? Default is `FALSE`.
+  logical. add boxed labels to nodes? default is `FALSE`.
 
 - `add_label_repel`:
 
-  Logical. Add boxed labels with automatic repositioning to avoid
-  overlaps? Default is `FALSE`. When `TRUE`, overrides `add_label`. Uses
+  logical. add boxed labels with automatic repositioning to avoid
+  overlaps? default is `FALSE`. when `TRUE`, overrides `add_label`. uses
   ggrepel for positioning.
 
 - `remove_isolates`:
 
-  Logical. Remove unconnected nodes? Default is `TRUE`.
+  logical. remove unconnected nodes? default is `TRUE`.
 
 - `curve_edges`:
 
-  Logical. Use curved edges? Default is `FALSE`.
+  logical. use curved edges? default is `FALSE`.
 
 - `use_theme_netify`:
 
-  Logical. Apply netify theme? Default is `TRUE`.
+  logical. apply netify theme? default is `TRUE`.
 
 - `facet_type`:
 
-  Character. For multilayer longitudinal networks, controls faceting
-  style: `"grid"` (default) creates a 2D grid with time × layer,
+  character. for multilayer longitudinal networks, controls faceting
+  style: `"grid"` (default) creates a 2d grid with time x layer,
   `"wrap"` creates wrapped facets with combined time-layer labels.
 
 - `facet_ncol`:
 
-  Integer. Number of columns for facet_wrap layouts. Only used when
+  integer. number of columns for facet_wrap layouts. only used when
   `facet_type = "wrap"` or for single-dimension faceting.
 
 - `rescale_edge_weights`:
 
-  Logical. For multilayer networks, should edge weights be rescaled to a
-  common 0-1 range across all layers? This is useful when layers have
-  very different weight scales. Default is `FALSE`.
+  logical. for multilayer networks, should edge weights be rescaled to a
+  common 0-1 range across all layers? this is useful when layers have
+  very different weight scales. default is `FALSE`.
 
-## Subsetting Parameters
+## subsetting parameters
 
 - `node_filter`:
 
-  An expression to filter nodes. The expression can reference any nodal
-  attribute. For example: `node_filter = degree_total > 5` to show only
-  nodes with total degree greater than 5. The expression is evaluated in
-  the context of the nodal data, so any node-level variable can be used.
+  a formula, quoted expression, or function to filter nodes. the
+  expression can reference any nodal attribute. for example:
+  `node_filter = ~ degree_total > 5` shows only nodes with total degree
+  greater than 5.
 
 - `edge_filter`:
 
-  An expression to filter edges. The expression can reference any edge
-  attribute (including 'weight' for weighted networks). For example:
-  `edge_filter = weight > 0.5` to show only edges with weight greater
-  than 0.5. The expression is evaluated in the context of the edge data,
-  so any edge-level variable can be used.
+  a formula, quoted expression, or function to filter edges. the
+  expression can reference any edge attribute, including 'weight' for
+  weighted networks. for example: `edge_filter = ~ weight > 0.5` shows
+  only edges with weight greater than 0.5.
 
 - `time_filter`:
 
-  For longitudinal networks, a vector of time periods to include in the
-  plot. Can be numeric indices or character labels matching the time
-  dimension. If NULL (default), all time periods are plotted. For
+  for longitudinal networks, a vector of time periods to include in the
+  plot. can be numeric indices or character labels matching the time
+  dimension. if NULL (default), all time periods are plotted. for
   cross-sectional networks, this parameter is ignored.
 
-## Node Aesthetics
+## node aesthetics
 
-Fixed aesthetics (same for all nodes):
+fixed aesthetics (same for all nodes):
 
 - `node_size` or `point_size`:
 
-  Numeric. Size of all nodes.
+  numeric. size of all nodes.
 
 - `node_color` or `point_color`:
 
-  Color of node borders.
+  color of node borders.
 
 - `node_fill` or `point_fill`:
 
-  Fill color of nodes (note that fill will only work with certain
+  fill color of nodes (note that fill will only work with certain
   shapes).
 
 - `node_shape` or `point_shape`:
 
-  Shape of nodes (see [`?pch`](https://rdrr.io/r/graphics/points.html)).
+  shape of nodes (see [`?pch`](https://rdrr.io/r/graphics/points.html)).
 
 - `node_alpha` or `point_alpha`:
 
-  Transparency (0-1).
+  transparency (0-1).
 
 - `node_stroke` or `point_stroke`:
 
-  Width of node borders.
+  width of node borders.
 
-Variable aesthetics (mapped to data):
+variable aesthetics (mapped to data):
 
 - `node_size_by` or `point_size_var`:
 
-  Column name for size mapping.
+  column name for size mapping.
 
 - `node_color_by` or `point_color_var`:
 
-  Column name for border color.
+  column name for border color.
 
 - `node_fill_by` or `point_fill_var`:
 
-  Column name for fill color (note that fill will only work with certain
+  column name for fill color (note that fill will only work with certain
   shapes).
 
 - `node_shape_by` or `point_shape_var`:
 
-  Column name for shape.
+  column name for shape.
 
 - `node_alpha_by` or `point_alpha_var`:
 
-  Column name for transparency.
+  column name for transparency.
 
-## Edge Aesthetics
+## edge aesthetics
 
-Fixed aesthetics:
+fixed aesthetics:
 
 - `edge_color`:
 
-  Color for all edges. Default is "black".
+  color for all edges. default is "black".
 
 - `edge_linewidth`:
 
-  Width for all edges. Default is 0.5.
+  width for all edges. default is 0.5.
 
 - `edge_linetype`:
 
-  Line type (1=solid, 2=dashed, etc.).
+  line type (1=solid, 2=dashed, etc.).
 
 - `edge_alpha`:
 
-  Transparency (0-1).
+  transparency (0-1).
 
 - `edge_curvature`:
 
-  Curvature amount when `curve_edges = TRUE`.
+  curvature amount when `curve_edges = TRUE`.
 
 - `edge_arrow`:
 
-  Arrow specification for directed networks. Example:
+  arrow specification for directed networks. example:
   `arrow(length = unit(0.2, "cm"))`.
 
-Variable aesthetics:
+variable aesthetics:
 
 - `edge_color_by` or `edge_color_var`:
 
-  Column name for color mapping.
+  column name for color mapping.
 
 - `edge_linewidth_by` or `edge_linewidth_var`:
 
-  Column name for width.
+  column name for width.
 
 - `edge_linetype_by` or `edge_linetype_var`:
 
-  Column name for line type.
+  column name for line type.
 
 - `edge_alpha_by` or `edge_alpha_var`:
 
-  Column name for transparency. For weighted networks, defaults to the
+  column name for transparency. for weighted networks, defaults to the
   weight variable if not specified.
 
-## Text and Label Options
+## text and label options
 
-Selective labeling:
+selective labeling:
 
 - `select_text`:
 
-  Character vector of node names to show as text. When used, text labels
+  character vector of node names to show as text. when used, text labels
   will automatically use `geom_text_repel` to avoid overlaps.
 
 - `select_text_display`:
 
-  Alternative text to display (same length as `select_text`).
+  alternative text to display (same length as `select_text`).
 
 - `select_label`:
 
-  Character vector of node names to show with boxes. When used, labels
+  character vector of node names to show with boxes. when used, labels
   will automatically use `geom_label_repel` to avoid overlaps.
 
 - `select_label_display`:
 
-  Alternative labels (same length as `select_label`).
+  alternative labels (same length as `select_label`).
 
-Text aesthetics:
+text aesthetics:
 
 - `text_size`:
 
-  Fixed size for all text. Default is 3.88.
+  fixed size for all text. default is 3.88.
 
 - `text_color`:
 
-  Fixed color for all text. Default is "black".
+  fixed color for all text. default is "black".
 
 - `text_alpha`:
 
-  Fixed transparency for text.
+  fixed transparency for text.
 
 - `text_size_by`:
 
-  Variable to map to text size.
+  variable to map to text size.
 
 - `text_color_by`:
 
-  Variable to map to text color.
+  variable to map to text color.
 
-Label (boxed text) aesthetics have similar parameters with `label_`
+label (boxed text) aesthetics have similar parameters with `label_`
 prefix.
 
-Text repel parameters (when `add_text_repel = TRUE`):
+text repel parameters (when `add_text_repel = TRUE`):
 
 - `text_repel_force`:
 
-  Force of repulsion between overlapping text. Default is 1.
+  force of repulsion between overlapping text. default is 1.
 
 - `text_repel_max_overlaps`:
 
-  Maximum number of overlaps to tolerate. Default is 10.
+  maximum number of overlaps to tolerate. default is 10.
 
 - `text_repel_box_padding`:
 
-  Padding around text. Default is 0.25.
+  padding around text. default is 0.25.
 
 - `text_repel_point_padding`:
 
-  Padding around points. Default is 0.
+  padding around points. default is 0.
 
 - `text_repel_segment_color`:
 
-  Color of connecting segments. Default is "grey50".
+  color of connecting segments. default is "grey50".
 
-Label repel parameters (when `add_label_repel = TRUE`):
+label repel parameters (when `add_label_repel = TRUE`):
 
-- Similar to text_repel but with `label_repel_` prefix:
+- similar to text_repel but with `label_repel_` prefix:
 
 - `label_repel_label_padding`:
 
-  Padding around label boxes. Default is 0.25.
+  padding around label boxes. default is 0.25.
 
 - `label_repel_label_r`:
 
-  Radius of label box corners. Default is 0.15.
+  radius of label box corners. default is 0.15.
 
-## Scale Labels
+## scale labels
 
-Customize legend titles:
+customize legend titles:
 
 - `node_size_label` or `point_size_label`:
 
-  Legend title for size.
+  legend title for size.
 
 - `node_color_label` or `point_color_label`:
 
-  Legend title for color.
+  legend title for color.
 
 - `edge_alpha_label`:
 
-  Legend title for edge transparency.
+  legend title for edge transparency.
 
 - `edge_color_label`:
 
-  Legend title for edge color.
+  legend title for edge color.
 
-## Highlighting Parameters
+## highlighting parameters
 
 - `highlight`:
 
-  Character vector of node names to highlight with different colors.
-  Non-highlighted nodes will be colored grey. Highlighted nodes can also
+  character vector of node names to highlight with different colors.
+  non-highlighted nodes will be colored grey. highlighted nodes can also
   be automatically enlarged if `highlight_size_increase` is greater than
   1.
 
 - `highlight_color`:
 
-  Named vector of colors for highlighted nodes. If NULL, uses default
+  named vector of colors for highlighted nodes. if NULL, uses default
   distinct colors (red, blue, green for up to 3 nodes, or a color
-  palette for more). Names should match the values in the `highlight`
-  parameter. Example:
-  `c('USA' = 'blue', 'China' = 'red', 'Russia' = 'green')`.
+  palette for more). names should match the values in the `highlight`
+  parameter. example:
+  `c('usa' = 'blue', 'china' = 'red', 'russia' = 'green')`.
 
 - `highlight_label`:
 
-  Title for the highlight legend. Default is "Highlighted".
+  title for the highlight legend. default is "highlighted".
 
 - `highlight_size_increase`:
 
-  Numeric factor(s) to increase size of highlighted nodes. Can be a
+  numeric factor(s) to increase size of highlighted nodes. can be a
   single value (applied to all highlighted nodes) or a vector of length
   `length(highlight) + 1` where each value corresponds to a highlighted
-  node and the last value applies to "Other" nodes. Default is 1 (no
-  size increase). Example: `c(3, 1, 1, 0.5)` for 3 highlighted nodes
+  node and the last value applies to "other" nodes. default is 1 (no
+  size increase). example: `c(3, 1, 1, 0.5)` for 3 highlighted nodes
   where the first is 3x larger, the next two are normal size, and all
   others are half size.
 
 - `show_other_in_legend`:
 
-  Logical. Include "Other" category in legend? Default is FALSE. When
+  logical. include "other" category in legend? default is FALSE. when
   FALSE, only highlighted nodes appear in the legend.
 
-## Ego Layout Parameters
+## ego layout parameters
 
-For ego networks (created with
+for ego networks (created with
 [`ego_netify`](https://netify-dev.github.io/netify/reference/ego_netify.md)),
 additional layout options control the ego-centric visualization:
 
 - `ego_group_by`:
 
-  Character string specifying a nodal attribute to use for grouping
-  alters in ego layouts. For "radial" layout, creates sectors. For
+  character string specifying a nodal attribute to use for grouping
+  alters in ego layouts. for "radial" layout, creates sectors. for
   "concentric" layout, determines ring assignment.
 
 - `ego_order_by`:
 
-  Character string specifying a nodal attribute to use for ordering
-  alters within groups or rings. Common options include "degree_total".
+  character string specifying a nodal attribute to use for ordering
+  alters within groups or rings. common options include "degree_total".
 
 - `ego_weight_to_distance`:
 
-  Logical. For weighted networks with "radial" layout, should edge
-  weights determine distance from ego? Higher weights place alters
-  closer to ego. Default is `FALSE`.
+  logical. for weighted networks with "radial" layout, should edge
+  weights determine distance from ego? higher weights place alters
+  closer to ego. default is `FALSE`.
 
 - `ego_ring_gap`:
 
-  Numeric (0-1). Gap between concentric rings as proportion of radius.
-  Only for "concentric" layout. Default is 0.3.
+  numeric (0-1). gap between concentric rings as proportion of radius.
+  only for "concentric" layout. default is 0.3.
 
 - `ego_size`:
 
-  Numeric. Relative size of central area reserved for ego. Larger values
-  create more space between ego and alters. Default is 0.1.
+  numeric. relative size of central area reserved for ego. larger values
+  create more space between ego and alters. default is 0.1.
 
-## Special Parameters
+## special parameters
 
 - `mutate_weight`:
 
-  Function to transform edge weights before plotting. Example: `log1p`
-  for log(x+1) transformation. Applied before mapping to aesthetics.
+  function to transform edge weights before plotting. example: `log1p`
+  for log(x+1) transformation. applied before mapping to aesthetics.
 
 - `return_components`:
 
-  Logical. Return plot components instead of assembled plot? Useful for
-  manual customization. Default is `FALSE`.
+  logical. return plot components instead of assembled plot? useful for
+  manual customization. default is `FALSE`.
 
 - `style`:
 
-  Either a style function (e.g., `style_budapest`) that applies a
-  complete visual style including colors, shapes, and layout
-  preferences, or the string `"heatmap"` to render the adjacency matrix
-  as a tile plot instead of a node-link diagram. When
-  `style = "heatmap"` and edge weights cross zero (signed network), the
-  fill scale automatically uses a diverging palette centred at zero;
-  otherwise a sequential viridis ramp is used. Optional `low`, `mid`,
-  and `high` arguments override the diverging palette endpoints.
+  either a style function (e.g., `style_rose`) that applies a complete
+  visual style including colors, shapes, and layout preferences, or the
+  string `"heatmap"` to render the adjacency matrix as a tile plot
+  instead of a node-link diagram. when `style = "heatmap"` and edge
+  weights cross zero (signed network), the fill scale automatically uses
+  a diverging palette centred at zero; otherwise a sequential viridis
+  ramp is used. optional `low`, `mid`, and `high` arguments override the
+  diverging palette endpoints.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
-# Load example data
+# load example data
 data(icews)
 
-# Basic cross-sectional network
+# basic cross-sectional network
 icews_10 <- icews[icews$year == 2010, ]
 net_10 <- netify(
     icews_10,
@@ -515,11 +514,11 @@ net_10 <- netify(
     weight = "verbCoop"
 )
 
-# Simple plot with auto-formatting (default)
+# simple plot with auto-formatting (default)
 plot(net_10)
 
 
-# Plot without auto-formatting for full control
+# plot without auto-formatting for full control
 plot(net_10, auto_format = FALSE)
 
 
@@ -527,22 +526,22 @@ plot(net_10, auto_format = FALSE)
 net_10 <- add_node_vars(
     net_10,
     summary_actor(net_10),
-    "actor"
+    actor = "actor"
 )
 
-# Customized plot with new naming convention
+# customized plot with new naming convention
 plot(net_10,
     edge_color = "lightgrey",
-    node_size_by = "degree_total", # Instead of point_size_var
+    node_size_by = "degree_total", # maps degree to node size
     node_color = "steelblue",
-    edge_alpha_by = "verbCoop", # Instead of edge_alpha_var
-    node_size_label = "Degree",
-    edge_alpha_label = "Verbal Cooperation"
+    edge_alpha_by = "verbCoop", # maps edge weight to alpha
+    node_size_label = "degree",
+    edge_alpha_label = "verbal cooperation"
 )
 
 
 # \donttest{
-# Longitudinal network example
+# longitudinal network example
 net_longit <- netify(
     icews,
     actor1 = "i", actor2 = "j",
@@ -552,7 +551,7 @@ net_longit <- netify(
     nodal_vars = c("i_polity2", "i_log_gdp")
 )
 
-# Add network statistics
+# add network statistics
 net_longit <- add_node_vars(
     net_longit,
     summary_actor(net_longit),
@@ -560,27 +559,27 @@ net_longit <- add_node_vars(
     time = "time"
 )
 
-# Plot with multiple aesthetics
+# plot with multiple aesthetics
 plot(net_longit,
-    # Edges
+    # edges
     edge_color = "grey70",
-    mutate_weight = log1p, # Transform weights
-    # Nodes
+    mutate_weight = log1p, # transform weights
+    # nodes
     node_size_by = "degree_total",
     node_color_by = "i_polity2",
-    # Labels
-    node_size_label = "Total Degree",
-    node_color_label = "Polity Score",
-    edge_alpha_label = "Log(Verbal Coop.)",
-    # Layout
-    static_actor_positions = TRUE # Keep positions constant
+    # labels
+    node_size_label = "total degree",
+    node_color_label = "polity score",
+    edge_alpha_label = "log(verbal coop.)",
+    # layout
+    static_actor_positions = TRUE # keep positions constant
 )
 
 
-# Selective labeling example
+# selective labeling example
 plot(net_10,
     node_size_by = "degree_total",
-    select_text = c("United States", "China", "Russian Federation"),
+    select_text = c("united states", "china", "russian federation"),
     text_size = 3,
     text_color = "darkred"
 )
@@ -589,21 +588,21 @@ plot(net_10,
 # choose alternative labels for selected text
 plot(net_10,
     node_size_by = "degree_total",
-    select_text = c("United States", "China", "Russian Federation"),
-    select_text_display = c("USA", "CHN", "RUS"),
+    select_text = c("united states", "china", "russian federation"),
+    select_text_display = c("usa", "chn", "rus"),
     text_size = 3,
     text_color = "darkred"
 )
 
 
-# Time subsetting example
+# time subsetting example
 plot(net_longit,
     time_filter = c("2010", "2011", "2012")
 )
 
 
-# Node subsetting example
-# democracies with high GDP
+# node subsetting example
+# democracies with high gdp
 plot(net_longit, node_filter = ~ i_polity2 > 6 & i_log_gdp > 25)
 
 
@@ -614,14 +613,14 @@ g10 <- plot(
     node_alpha = .8,
     arrow = ggplot2::arrow(length = ggplot2::unit(0.01, "inches")),
     node_size_by = "degree_total",
-    node_size_label = "Log(Degree)",
-    edge_alpha_label = "Log(Verbal Coop.)",
+    node_size_label = "log(degree)",
+    edge_alpha_label = "log(verbal coop.)",
     remove_isolates = TRUE,
     mutate_weight = log1p,
     return_components = TRUE
 )
 
-# Manually assemble with custom modifications
+# manually assemble with custom modifications
 # to scale aesthetics such as edges
 g10$base +
     netify_edge(g10) +

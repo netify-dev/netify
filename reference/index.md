@@ -8,7 +8,7 @@ Functions for constructing netify objects
   : Create network object from various data types
 
 - [`new_netify()`](https://netify-dev.github.io/netify/reference/new_netify.md)
-  : Low-level constructor for netify objects
+  : low-level constructor for netify objects
 
 - [`layer_netify()`](https://netify-dev.github.io/netify/reference/layer_netify.md)
   : Create multilayer networks from multiple netify objects
@@ -19,7 +19,7 @@ Functions for constructing netify objects
 - [`merge(`*`<netify>`*`)`](https://netify-dev.github.io/netify/reference/merge.netify.md)
   :
 
-  Merge method for netify objects (S3 alias for `bind_netifies`)
+  merge method for netify objects (s3 alias for `bind_netifies`)
 
 - [`ego_netify()`](https://netify-dev.github.io/netify/reference/ego_netify.md)
   : Create ego network from a netify object
@@ -31,7 +31,7 @@ Functions for constructing netify objects
   : Pivot a dyadic variable to become the network
 
 - [`netify_workflows`](https://netify-dev.github.io/netify/reference/netify_workflows.md)
-  : Common netify workflows — index of patterns
+  : Common netify workflows – index of patterns
 
 ## Adding Attributes
 
@@ -49,7 +49,7 @@ Add nodal and dyadic attributes
 Subset, transform, reshape, and clean networks
 
 - [`subset_netify()`](https://netify-dev.github.io/netify/reference/subset_netify.md)
-  : Internal subset function for netify objects
+  : internal subset function for netify objects
 - [`subset(`*`<netify>`*`)`](https://netify-dev.github.io/netify/reference/subset.netify.md)
   : Subset netify objects
 - [`mutate_weights()`](https://netify-dev.github.io/netify/reference/mutate_weights.md)
@@ -63,7 +63,7 @@ Subset, transform, reshape, and clean networks
 - [`drop_na_actors()`](https://netify-dev.github.io/netify/reference/drop_na_actors.md)
   : Drop actors with NA covariates from a netify object
 - [`gen_symm_id()`](https://netify-dev.github.io/netify/reference/gen_symm_id.md)
-  : Generate symmetric identifiers for dyadic data
+  : generate symmetric identifiers for dyadic data
 
 ## Analysis
 
@@ -72,7 +72,7 @@ Network statistics and comparisons
 - [`summary(`*`<netify>`*`)`](https://netify-dev.github.io/netify/reference/summary.netify.md)
   : Calculate graph-level statistics for netify objects
 - [`summary(`*`<netify_comparison>`*`)`](https://netify-dev.github.io/netify/reference/summary.netify_comparison.md)
-  : Summary method for netify_comparison objects
+  : summary method for netify_comparison objects
 - [`summary_actor()`](https://netify-dev.github.io/netify/reference/summary_actor.md)
   : Calculate actor-level network statistics
 - [`netify_measurements()`](https://netify-dev.github.io/netify/reference/netify_measurements.md)
@@ -89,7 +89,7 @@ Network statistics and comparisons
 - [`dyad_correlation()`](https://netify-dev.github.io/netify/reference/dyad_correlation.md)
   : Analyze correlations between dyadic attributes and network ties
 - [`attribute_report()`](https://netify-dev.github.io/netify/reference/attribute_report.md)
-  : Comprehensive summary of network-attribute relationships
+  : Summary of network-attribute relationships
 - [`get_actor_time_info()`](https://netify-dev.github.io/netify/reference/get_actor_time_info.md)
   : Extract actor time range information
 
@@ -100,9 +100,9 @@ Bootstrap, null comparison, and simulation
 - [`bootstrap_netlet()`](https://netify-dev.github.io/netify/reference/bootstrap_netlet.md)
   : Bootstrap any user-supplied function of a netify object
 - [`compare_to_null()`](https://netify-dev.github.io/netify/reference/compare_to_null.md)
-  : Test an observed network statistic against a null distribution
+  : Test an observed network statistic against a NULL distribution
 - [`simulate(`*`<netify>`*`)`](https://netify-dev.github.io/netify/reference/simulate.netify.md)
-  : Simulate null-model networks from a netify object
+  : Simulate NULL-model networks from a netify object
 
 ## Visualization
 
@@ -116,8 +116,11 @@ Plot networks and statistics
 
   Plot method for `netify_comparison` objects
 
+- [`plot(`*`<summary.netify>`*`)`](https://netify-dev.github.io/netify/reference/plot.summary.netify.md)
+  : plot graph-level summary statistics
+
 - [`plot(`*`<summary_actor>`*`)`](https://netify-dev.github.io/netify/reference/plot.summary_actor.md)
-  : Plot method for summary_actor output
+  : plot method for summary_actor output
 
 - [`plot_actor_stats()`](https://netify-dev.github.io/netify/reference/plot_actor_stats.md)
   : Visualize actor-level network statistics
@@ -132,7 +135,7 @@ Plot networks and statistics
   : Visualize attribute mixing matrix results
 
 - [`plot_mixing_matrix_facet()`](https://netify-dev.github.io/netify/reference/plot_mixing_matrix_facet.md)
-  : Create a multi-panel mixing matrix visualization
+  : create a multi-panel mixing matrix visualization
 
 - [`animate_netify()`](https://netify-dev.github.io/netify/reference/animate_netify.md)
   : Animate a longitudinal netify object with gganimate
@@ -150,59 +153,59 @@ Plot networks and statistics
   : ggplot theme for netify time-series / stat plots
 
 - [`list_network_styles()`](https://netify-dev.github.io/netify/reference/list_network_styles.md)
-  : List available network styles
+  : list available network styles
 
 - [`list_palettes()`](https://netify-dev.github.io/netify/reference/list_palettes.md)
-  : List available color palettes
+  : list available color palettes
 
 ## Plot Styles
 
 Pre-built visual style presets
 
 - [`style_random()`](https://netify-dev.github.io/netify/reference/style_random.md)
-  : Apply random network style
-- [`style_budapest()`](https://netify-dev.github.io/netify/reference/style_budapest.md)
-  : Wes Anderson-inspired network style (Grand Budapest Hotel)
-- [`style_economist()`](https://netify-dev.github.io/netify/reference/style_economist.md)
-  : Economist-style network style
-- [`style_538()`](https://netify-dev.github.io/netify/reference/style_538.md)
-  : FiveThirtyEight-inspired network style
+  : apply random network style
+- [`style_rose()`](https://netify-dev.github.io/netify/reference/style_rose.md)
+  : rose network style
+- [`style_red_blue()`](https://netify-dev.github.io/netify/reference/style_red_blue.md)
+  : red and blue network style
+- [`style_orange_teal()`](https://netify-dev.github.io/netify/reference/style_orange_teal.md)
+  : orange and teal network style
 - [`style_solarized()`](https://netify-dev.github.io/netify/reference/style_solarized.md)
-  : Solarized-inspired network style
-- [`style_stata()`](https://netify-dev.github.io/netify/reference/style_stata.md)
-  : Stata-inspired network style
-- [`style_nature()`](https://netify-dev.github.io/netify/reference/style_nature.md)
-  : Nature journal-inspired network style
+  : solarized-inspired network style
+- [`style_navy_maroon()`](https://netify-dev.github.io/netify/reference/style_navy_maroon.md)
+  : navy and maroon network style
+- [`style_scientific_blue()`](https://netify-dev.github.io/netify/reference/style_scientific_blue.md)
+  : scientific blue network style
 - [`style_cyberpunk()`](https://netify-dev.github.io/netify/reference/style_cyberpunk.md)
-  : Cyberpunk-inspired network style
+  : cyberpunk-inspired network style
 - [`style_tufte()`](https://netify-dev.github.io/netify/reference/style_tufte.md)
-  : Minimal Tufte-inspired network style
+  : minimal tufte-inspired network style
 - [`style_pastel()`](https://netify-dev.github.io/netify/reference/style_pastel.md)
-  : Pastel rainbow network style
+  : pastel rainbow network style
 - [`style_retro80s()`](https://netify-dev.github.io/netify/reference/style_retro80s.md)
-  : Retro 80s-inspired network style
+  : retro 80s-inspired network style
 - [`style_dark2()`](https://netify-dev.github.io/netify/reference/style_dark2.md)
-  : ColorBrewer Dark2-based network style
+  : colorbrewer dark2-based network style
+- [`style_crimson_silver()`](https://netify-dev.github.io/netify/reference/style_crimson_silver.md)
+  : crimson and silver network style
+- [`style_green_gold()`](https://netify-dev.github.io/netify/reference/style_green_gold.md)
+  : green and gold network style
+- [`style_slate_silver()`](https://netify-dev.github.io/netify/reference/style_slate_silver.md)
+  : slate and silver network style
+- [`style_bronze_block()`](https://netify-dev.github.io/netify/reference/style_bronze_block.md)
+  : bronze block network style
+- [`style_lime_magenta()`](https://netify-dev.github.io/netify/reference/style_lime_magenta.md)
+  : lime and magenta network style
+- [`style_black_yellow()`](https://netify-dev.github.io/netify/reference/style_black_yellow.md)
+  : black and yellow network style
+- [`style_sunburst()`](https://netify-dev.github.io/netify/reference/style_sunburst.md)
+  : sunburst network style
+- [`style_racing_blue()`](https://netify-dev.github.io/netify/reference/style_racing_blue.md)
+  : racing blue network style
 - [`style_bipartite_network()`](https://netify-dev.github.io/netify/reference/style_bipartite_network.md)
-  : Preset style for bipartite networks
+  : preset style for bipartite networks
 - [`style_temporal_network()`](https://netify-dev.github.io/netify/reference/style_temporal_network.md)
-  : Preset style for temporal/longitudinal networks
-- [`style_witcher_feline()`](https://netify-dev.github.io/netify/reference/style_witcher_feline.md)
-  : Witcher 3 Feline School network style
-- [`style_witcher_griffin()`](https://netify-dev.github.io/netify/reference/style_witcher_griffin.md)
-  : Witcher 3 Griffin School network style
-- [`style_witcher_wolven()`](https://netify-dev.github.io/netify/reference/style_witcher_wolven.md)
-  : Witcher 3 Wolven School network style
-- [`style_witcher_ursine()`](https://netify-dev.github.io/netify/reference/style_witcher_ursine.md)
-  : Witcher 3 Ursine School network style
-- [`style_witcher_manticore()`](https://netify-dev.github.io/netify/reference/style_witcher_manticore.md)
-  : Witcher 3 Manticore School network style (bonus)
-- [`style_witcher_viper()`](https://netify-dev.github.io/netify/reference/style_witcher_viper.md)
-  : Witcher 3 Viper School network style (bonus)
-- [`style_pokemon_pikachu()`](https://netify-dev.github.io/netify/reference/style_pokemon_pikachu.md)
-  : Pokemon-style network style (Pikachu)
-- [`style_secretariat()`](https://netify-dev.github.io/netify/reference/style_secretariat.md)
-  : Secretariat-style network style
+  : preset style for temporal/longitudinal networks
 
 ## Plot Components
 
@@ -221,47 +224,47 @@ Low-level plot building blocks
   [`create_ego_centric_layout()`](https://netify-dev.github.io/netify/reference/ego_layouts.md)
   : Create ego-centric layouts for ego networks
 - [`remove_ego_edges()`](https://netify-dev.github.io/netify/reference/remove_ego_edges.md)
-  : Remove ego-alter edges from ego network
+  : remove ego-alter edges from ego network
 - [`assemble_netify_plot()`](https://netify-dev.github.io/netify/reference/assemble_netify_plot.md)
-  : Assemble netify plot from components
+  : assemble netify plot from components
 - [`netify_edge()`](https://netify-dev.github.io/netify/reference/netify_edge.md)
   : Extract edges layer from netify plot components
 - [`netify_node()`](https://netify-dev.github.io/netify/reference/netify_node.md)
-  : Extract nodes layer from netify plot components
+  : extract nodes layer from netify plot components
 - [`netify_text()`](https://netify-dev.github.io/netify/reference/netify_text.md)
-  : Extract text layer from netify plot components
+  : extract text layer from netify plot components
 - [`netify_label()`](https://netify-dev.github.io/netify/reference/netify_label.md)
-  : Extract label layer from netify plot components
+  : extract label layer from netify plot components
 - [`netify_text_repel()`](https://netify-dev.github.io/netify/reference/netify_text_repel.md)
-  : Extract text_repel layer from netify plot components
+  : extract text_repel layer from netify plot components
 - [`netify_label_repel()`](https://netify-dev.github.io/netify/reference/netify_label_repel.md)
-  : Extract label_repel layer from netify plot components
+  : extract label_repel layer from netify plot components
 - [`netify_scale_labels()`](https://netify-dev.github.io/netify/reference/netify_scale_labels.md)
-  : Set scale labels for netify plots
+  : set scale labels for netify plots
 - [`reset_scales()`](https://netify-dev.github.io/netify/reference/reset_scales.md)
-  : Reset aesthetic scales in ggplot
+  : reset aesthetic scales in ggplot
 - [`plot_with_style()`](https://netify-dev.github.io/netify/reference/plot_with_style.md)
   : Apply style to netify plot
 - [`validate_plot_params()`](https://netify-dev.github.io/netify/reference/validate_plot_params.md)
   : Validate plot parameters and warn about common mistakes
 - [`print(`*`<netify_plot_components>`*`)`](https://netify-dev.github.io/netify/reference/print.netify_plot_components.md)
-  : Print netify plot components
+  : print netify plot components
 - [`ggplot_add(`*`<netify_edge>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_edge.md)
-  : Add netify_edge to ggplot
+  : add netify_edge to ggplot
 - [`ggplot_add(`*`<netify_node>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_node.md)
-  : Add netify_node to ggplot
+  : add netify_node to ggplot
 - [`ggplot_add(`*`<netify_text>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_text.md)
-  : Add netify_text to ggplot
+  : add netify_text to ggplot
 - [`ggplot_add(`*`<netify_label>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_label.md)
-  : Add netify_label to ggplot
+  : add netify_label to ggplot
 - [`ggplot_add(`*`<netify_text_repel>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_text_repel.md)
-  : Add netify_text_repel to ggplot
+  : add netify_text_repel to ggplot
 - [`ggplot_add(`*`<netify_label_repel>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_label_repel.md)
-  : Add netify_label_repel to ggplot
+  : add netify_label_repel to ggplot
 - [`ggplot_add(`*`<netify_scale_reset>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_scale_reset.md)
-  : Add scale resets to ggplot
+  : add scale resets to ggplot
 - [`ggplot_add(`*`<netify_labels>`*`)`](https://netify-dev.github.io/netify/reference/ggplot_add.netify_labels.md)
-  : Add netify scale labels to ggplot
+  : add netify scale labels to ggplot
 
 ## Conversion
 
@@ -304,11 +307,11 @@ Convert between netify and other formats
   Melt methods for netify objects
 
 - [`decompose_igraph()`](https://netify-dev.github.io/netify/reference/decompose_igraph.md)
-  : Decompose an igraph object into base R components
+  : decompose an igraph object into base r components
 
 - [`decompose_statnet()`](https://netify-dev.github.io/netify/reference/decompose_statnet.md)
   [`decompose_network()`](https://netify-dev.github.io/netify/reference/decompose_statnet.md)
-  : Decompose a network object into base R components
+  : decompose a network object into base r components
 
 - [`read_graphml()`](https://netify-dev.github.io/netify/reference/read_external.md)
   [`read_pajek()`](https://netify-dev.github.io/netify/reference/read_external.md)
@@ -316,7 +319,7 @@ Convert between netify and other formats
   : Read a network from common file formats into a netify object
 
 - [`as.matrix(`*`<netify>`*`)`](https://netify-dev.github.io/netify/reference/as.matrix.netify.md)
-  : Coerce a netify object to a plain matrix
+  : coerce a netify object to a plain matrix
 
 - [`as.igraph.netify()`](https://netify-dev.github.io/netify/reference/as.igraph.netify.md)
   : as.igraph method for netify objects
@@ -325,7 +328,7 @@ Convert between netify and other formats
   : as.network method for netify objects
 
 - [`as_tibble.netify()`](https://netify-dev.github.io/netify/reference/as_tibble.netify.md)
-  : Convert a netify object to a tibble (long edge frame)
+  : convert a netify object to a tibble (long edge frame)
 
 - [`as_tibble.netify_comparison()`](https://netify-dev.github.io/netify/reference/as_tibble.netify_comparison.md)
   : Convert a netify_comparison to a tibble
@@ -334,7 +337,7 @@ Convert between netify and other formats
   : Tidy a netify object into a long edge data frame
 
 - [`glance.netify()`](https://netify-dev.github.io/netify/reference/glance.netify.md)
-  : One-row-per-network summary of a netify object (broom style)
+  : one-row-per-network summary of a netify object (broom style)
 
 ## Inspection
 
@@ -345,7 +348,7 @@ Examine and query netify objects
 - [`peek()`](https://netify-dev.github.io/netify/reference/peek.md) :
   Preview subsets of network data from netify objects
 - [`get_raw()`](https://netify-dev.github.io/netify/reference/get_raw.md)
-  : Get raw network data without netify attributes
+  : get raw network data without netify attributes
 - [`get_adjacency()`](https://netify-dev.github.io/netify/reference/get_adjacency.md)
   : Create a netify matrix from cross-sectional dyadic data
 - [`get_adjacency_array()`](https://netify-dev.github.io/netify/reference/get_adjacency_array.md)
@@ -353,7 +356,7 @@ Examine and query netify objects
 - [`get_adjacency_list()`](https://netify-dev.github.io/netify/reference/get_adjacency_list.md)
   : Create a netify list from longitudinal dyadic data
 - [`is_netify()`](https://netify-dev.github.io/netify/reference/is_netify.md)
-  : Is this object a netify object?
+  : is this object a netify object?
 - [`is_binary()`](https://netify-dev.github.io/netify/reference/netify_predicates.md)
   [`nodal_data()`](https://netify-dev.github.io/netify/reference/netify_predicates.md)
   [`is_bipartite()`](https://netify-dev.github.io/netify/reference/netify_predicates.md)
@@ -378,8 +381,8 @@ Example datasets
 - [`mexico`](https://netify-dev.github.io/netify/reference/mexico.md) :
   Event data slice from UCDP on Mexico
 - [`myanmar`](https://netify-dev.github.io/netify/reference/myanmar.md)
-  : Event data slice from UCDP on Myanmar
+  : event data slice from ucdp on myanmar
 - [`classroom_edges`](https://netify-dev.github.io/netify/reference/classroom_edges.md)
-  : Synthetic high-school friendship edgelist
+  : synthetic high-school friendship edgelist
 - [`classroom_nodes`](https://netify-dev.github.io/netify/reference/classroom_nodes.md)
   : Synthetic high-school friendship roster (nodes)

@@ -1,8 +1,7 @@
-# Comprehensive summary of network-attribute relationships
+# Summary of network-attribute relationships
 
-Provides comprehensive analysis of how nodal and dyadic attributes
-relate to network structure. Combines multiple analytical approaches
-including homophily analysis, mixing patterns, dyadic correlations, and
+summarizes how nodal and dyadic attributes relate to network structure.
+combines homophily analysis, mixing patterns, dyadic correlations, and
 network position-based attribute summaries.
 
 ## Usage
@@ -28,94 +27,93 @@ attribute_report(
 
 - netlet:
 
-  A netify object containing network data.
+  a netify object containing network data.
 
 - node_vars:
 
-  Character vector of nodal attributes to analyze. If NULL, analyzes all
+  character vector of nodal attributes to analyze. if NULL, analyzes all
   available nodal variables except actor and time.
 
 - dyad_vars:
 
-  Character vector of dyadic attributes to analyze. If NULL, analyzes
+  character vector of dyadic attributes to analyze. if NULL, analyzes
   all available dyadic variables.
 
 - include_centrality:
 
-  Logical. Whether to calculate attribute-centrality relationships.
-  Default TRUE.
+  logical. whether to calculate attribute-centrality relationships.
+  default TRUE.
 
 - include_homophily:
 
-  Logical. Whether to perform homophily analysis. Default TRUE.
+  logical. whether to perform homophily analysis. default TRUE.
 
 - include_mixing:
 
-  Logical. Whether to create mixing matrices for categorical attributes.
-  Default TRUE.
+  logical. whether to create mixing matrices for categorical attributes.
+  default TRUE.
 
 - include_dyadic_correlations:
 
-  Logical. Whether to calculate dyadic correlations. Default TRUE.
+  logical. whether to calculate dyadic correlations. default TRUE.
 
 - centrality_measures:
 
-  Character vector of centrality measures to calculate. Options:
-  "degree", "betweenness", "closeness", "eigenvector". Default
+  character vector of centrality measures to calculate. options:
+  "degree", "betweenness", "closeness", "eigenvector". default
   c("degree", "betweenness").
 
 - categorical_threshold:
 
-  Maximum number of unique values for categorical treatment. Default 10.
+  maximum number of unique values for categorical treatment. default 10.
 
 - significance_test:
 
-  Logical. Whether to perform significance tests. Default TRUE.
+  logical. whether to perform significance tests. default TRUE.
 
 - other_stats:
 
-  Named list of custom functions for additional statistics.
+  named list of custom functions for additional statistics.
 
 - ...:
 
-  Additional arguments passed to component functions.
+  additional arguments passed to component functions.
 
 ## Value
 
-List containing:
+list containing:
 
 - `homophily_analysis`:
 
-  Results from homophily analysis for nodal attributes
+  results from homophily analysis for nodal attributes
 
 - `mixing_analysis`:
 
-  Results from mixing matrix analysis for categorical attributes
+  results from mixing matrix analysis for categorical attributes
 
 - `dyadic_correlations`:
 
-  Results from dyadic correlation analysis
+  results from dyadic correlation analysis
 
 - `centrality_correlations`:
 
-  Correlations between nodal attributes and centrality
+  correlations between nodal attributes and centrality
 
 - `attribute_summaries`:
 
-  Descriptive statistics for attributes
+  descriptive statistics for attributes
 
 - `overall_summary`:
 
-  High-level summary of key findings
+  brief summary of key findings
 
 ## Details
 
-Serves as comprehensive wrapper around exploratory analysis functions.
-Automatically determines appropriate analysis methods based on attribute
-types. For large networks or many attributes, consider setting some
-components to FALSE for faster computation. Centrality measures use
+wraps the exploratory analysis functions and chooses methods based on
+attribute types. for large networks or many attributes, consider setting
+some components to FALSE for faster computation. centrality measures use
 igraph functions.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

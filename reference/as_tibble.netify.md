@@ -1,8 +1,8 @@
-# Convert a netify object to a tibble (long edge frame)
+# convert a netify object to a tibble (long edge frame)
 
-S3 method for
+s3 method for
 [`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html).
-Returns the same long-format frame as
+returns the same long-format frame as
 [`unnetify()`](https://netify-dev.github.io/netify/reference/unnetify.md)
 /
 [`tidy.netify()`](https://netify-dev.github.io/netify/reference/tidy.netify.md),
@@ -18,26 +18,26 @@ as_tibble.netify(x, ...)
 
 - x:
 
-  A netify object.
+  a netify object.
 
 - ...:
 
-  Passed to
+  passed to
   [`unnetify()`](https://netify-dev.github.io/netify/reference/unnetify.md)
   (e.g., `remove_zeros = TRUE`).
 
 ## Value
 
-A tibble (or data.frame if tibble isn't installed) with one row per
-dyad. Includes `from`, `to`, optional `time`/`layer`, the edge weight,
+a tibble (or data.frame if tibble isn't installed) with one row per
+dyad. includes `from`, `to`, optional `time`/`layer`, the edge weight,
 dyadic covariates, and nodal covariates merged in with `_from` / `_to`
 suffixes.
 
 ## Details
 
-Registered against the
+registered against the
 [`tibble::as_tibble`](https://tibble.tidyverse.org/reference/as_tibble.html)
-generic via `.onLoad`, so `tibble` is not a hard dependency. When
+generic via `.onload`, so `tibble` is not a hard dependency. when
 `tibble` isn't installed, a plain data.frame is returned.
 
 ## See also
@@ -49,7 +49,7 @@ for the underlying converter.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

@@ -1,9 +1,8 @@
 # Calculate actor-level network statistics
 
-Computes comprehensive actor-level statistics for netify objects,
-including degree, strength, centrality measures, and custom metrics.
-Handles different network types (directed/undirected,
-weighted/unweighted) appropriately.
+computes actor-level statistics for netify objects, including degree,
+strength, centrality measures, and custom metrics. handles different
+network types (directed/undirected, weighted/unweighted) appropriately.
 
 ## Usage
 
@@ -20,234 +19,251 @@ summary_actor(
 
 - netlet:
 
-  A netify object containing network data
+  a netify object containing network data
 
 - invert_weights_for_igraph:
 
-  Logical. If TRUE (default), inverts edge weights when calculating
+  logical. if TRUE (default), inverts edge weights when calculating
   closeness and betweenness centrality, as igraph interprets weights as
-  distances. Set to FALSE if your weights already represent distances.
+  distances. set to FALSE if your weights already represent distances.
 
 - other_stats:
 
-  Optional named list of custom functions to calculate additional
-  actor-level statistics. Each function should accept a matrix and
+  optional named list of custom functions to calculate additional
+  actor-level statistics. each function should accept a matrix and
   return a vector with one value per actor.
 
 - stats:
 
-  One of `"all"` (default) or `"fast"`. The `"fast"` path returns only
+  one of `"all"` (default) or `"fast"`. the `"fast"` path returns only
   degree- and strength-style columns and skips closeness, betweenness,
-  eigenvector, and HITS. When the user does not pass `stats` explicitly,
+  eigenvector, and hits. when the user does not pass `stats` explicitly,
   the default auto-promotes to `"fast"` once the number of actors
-  reaches `getOption("netify.fast_threshold", 1500L)`; passing
+  reaches `getoption("netify.fast_threshold", 1500l)`; passing
   `stats = "all"` explicitly always honors that request.
 
 ## Value
 
-A data frame with actor-level statistics. Columns always include:
+a data frame with actor-level statistics. columns always include:
 
 - `actor`:
 
-  Actor name/identifier
+  actor name/identifier
 
 - `time`:
 
-  Time period (for longitudinal networks)
+  time period (for longitudinal networks)
 
 - `layer`:
 
-  Layer name (for multilayer networks)
+  layer name (for multilayer networks)
 
-Additional columns depend on network type:
+additional columns depend on network type:
 
-**For undirected networks:**
+**for undirected networks:**
 
 - `degree`:
 
-  Number of connections. Calculated as \\d_i = \sum\_{j=1}^{n}
-  a\_{ij}\\, where \\a\_{ij}\\ is the adjacency matrix element.
+  number of realized non-zero connections. for weighted networks, degree
+  remains a count; use strength columns for sums and moments of edge
+  weights.
 
 - `prop_ties`:
 
-  Proportion of possible ties realized. Calculated as \\p_i =
+  proportion of possible ties realized. calculated as \\p_i =
   \frac{d_i}{n-1}\\, where \\d_i\\ is the degree and \\n\\ is the total
   number of actors.
 
-- `net_share`:
+- `network_share`:
 
-  Actor's share of total network connections. Calculated as \\s_i =
-  \frac{d_i}{\sum\_{j=1}^{n} d_j}\\.
+  actor's share of total network connections. for unweighted networks
+  this is based on degree; for weighted networks this is based on
+  absolute realized tie mass, so signed networks do not produce negative
+  shares.
 
 - `closeness`:
 
-  Closeness centrality. Calculated as \\C_i = \frac{1}{\sum\_{j} d(i,
+  closeness centrality. calculated as \\c_i = \frac{1}{\sum\_{j} d(i,
   j)}\\, where \\d(i, j)\\ is the shortest path distance to every other
   actor \\j\\.
 
 - `betweenness`:
 
-  Betweenness centrality. Calculated as \\B_i = \sum\_{s \neq i \neq t}
+  betweenness centrality. calculated as \\b_i = \sum\_{s \neq i \neq t}
   \frac{\sigma\_{st}(i)}{\sigma\_{st}}\\, where \\\sigma\_{st}\\ is the
   total number of shortest paths from node \\s\\ to node \\t\\ and
   \\\sigma\_{st}(i)\\ is the number of those paths that pass through
   \\i\\.
 
-- `eigen_centrality`:
+- `eigen_vector`:
 
-  Eigenvector centrality, based on the principal eigenvector of the
+  eigenvector centrality, based on the principal eigenvector of the
   adjacency matrix.
 
-**For directed networks:**
+**for directed networks:**
 
-- `in_degree`, `out_degree`:
+- `degree_in`, `degree_out`:
 
-  Incoming and outgoing connections. \\d_i^{in} = \sum\_{j=1}^{n}
-  a\_{ji}\\ and \\d_i^{out} = \sum\_{j=1}^{n} a\_{ij}\\.
+  incoming and outgoing realized non-zero connection counts. for
+  weighted networks, degree columns remain counts and strength columns
+  summarize edge weights.
 
-- `in_prop_ties`, `out_prop_ties`:
+- `prop_ties_in`, `prop_ties_out`, `prop_ties_total`:
 
-  Proportion of possible in/out ties
+  proportion of possible in, out, and total ties.
 
-- `total_degree`:
+- `network_share_in`, `network_share_out`, `network_share_total`:
 
-  Sum of in and out degree
+  actor's share of incoming, outgoing, and total network connections.
+  for weighted networks these shares use absolute realized tie mass.
 
-- `in_closeness`, `out_closeness`:
+- `degree_total`:
 
-  Directed closeness centrality
+  sum of in and out degree
+
+- `closeness_in`, `closeness_out`, `closeness_all`:
+
+  directed closeness centrality
 
 - `betweenness`:
 
-  Betweenness centrality
+  betweenness centrality
 
-- `authority`, `hub`:
+- `authority_score`, `hub_score`:
 
-  Authority and hub scores (asymmetric only)
+  authority and hub scores (asymmetric only)
 
-**For weighted networks, additional columns:**
+**for weighted networks, additional columns:**
 
 - `strength_sum`:
 
-  Sum of edge weights. For undirected: \\s_i^{sum} = \sum\_{j=1}^{n}
-  w\_{ij}\\. For directed: separate in/out sums.
+  sum of edge weights. directed networks return `strength_sum_in`,
+  `strength_sum_out`, and `strength_sum_total`.
 
 - `strength_avg`:
 
-  Average edge weight. Calculated as \\s_i^{avg} =
-  \frac{s_i^{sum}}{d_i}\\.
+  average weight among realized non-zero ties. directed networks return
+  `strength_avg_in`, `strength_avg_out`, and `strength_avg_total`.
 
-- `strength_sd`:
+- `strength_std`:
 
-  Standard deviation of edge weights. Calculated as \\s_i^{sd} =
-  \sqrt{\frac{1}{d_i} \sum\_{j=1}^{n} (w\_{ij} - s_i^{avg})^2}\\.
+  standard deviation of weights among realized non-zero ties. directed
+  networks return `strength_std_in`, `strength_std_out`, and
+  `strength_std_total`.
 
 - `strength_median`:
 
-  Median edge weight
+  median weight among realized non-zero ties. directed networks return
+  `strength_median_in`, `strength_median_out`, and
+  `strength_median_total`.
 
 ## Details
 
-The function automatically adapts calculations based on network
+the function automatically adapts calculations based on network
 properties:
 
-**Centrality Measures:**
+**centrality measures:**
 
-- **Degree**: Count of direct connections. For directed networks,
+- **degree**: count of direct connections. for directed networks,
   calculated separately for incoming (in-degree) and outgoing
   (out-degree) ties.
 
-- **Closeness**: Measures how quickly an actor can reach all others.
-  Based on the inverse of the sum of shortest path distances.
+- **closeness**: measures how quickly an actor can reach all others.
+  based on the inverse of the sum of shortest path distances.
 
-- **Betweenness**: Measures how often an actor lies on shortest paths
+- **betweenness**: measures how often an actor lies on shortest paths
   between other actors, indicating brokerage potential.
 
-- **Eigenvector**: Measures importance based on connections to other
-  important actors. Computed using the principal eigenvector of the
+- **eigenvector**: measures importance based on connections to other
+  important actors. computed using the principal eigenvector of the
   adjacency matrix.
 
-- **Authority/Hub**: For directed networks only. Authority scores
-  measure importance as targets of ties from important sources. Hub
+- **authority/hub**: for directed networks only. authority scores
+  measure importance as targets of ties from important sources. hub
   scores measure importance as sources of ties to important targets.
 
-**Weight Handling:**
+**weight handling:**
 
-By default, the function assumes larger weights indicate stronger
-relationships. When calculating closeness and betweenness centrality,
-weights are inverted (1/weight) because igraph treats edge weights as
-distances. For distance-based networks where larger values already
-represent distances or weaker relationships, set
-`invert_weights_for_igraph = FALSE`.
+by default, the function assumes larger weights indicate stronger
+relationships. when calculating closeness and betweenness centrality,
+weights are shifted to a positive scale when needed and inverted
+(1/weight) because igraph treats edge weights as distances. for
+distance-based networks where larger values already represent distances
+or weaker relationships, set `invert_weights_for_igraph = FALSE`.
+eigenvector, authority, and hub scores use the positive shifted strength
+scale without distance inversion. strength summaries are calculated over
+realized non-zero ties. observed zero non-ties and missing dyads are
+excluded from strength averages, standard deviations, and medians;
+negative signed ties remain part of the realized-tie distribution.
 
-**Custom Statistics:**
+**custom statistics:**
 
-Add custom metrics using the `other_stats` parameter. Each function
+add custom metrics using the `other_stats` parameter. each function
 receives the adjacency matrix and should return a vector with one value
 per actor:
 
 
-    # Example: Maximum tie weight for each actor
+    # example: maximum tie weight for each actor
     max_out <- function(mat) apply(mat, 1, max, na.rm = TRUE)
     max_in <- function(mat) apply(mat, 2, max, na.rm = TRUE)
 
     stats <- summary_actor(net,
       other_stats = list(max_out = max_out, max_in = max_in))
 
-**Mathematical Formulations:**
+**mathematical formulations:**
 
-For symmetric unweighted networks:
+for symmetric unweighted networks:
 
-- Degree: \\d_i = \sum\_{j=1}^{n} a\_{ij}\\
+- degree: \\d_i = \sum\_{j=1}^{n} a\_{ij}\\
 
-- Proportion of ties: \\p_i = \frac{d_i}{n-1}\\
+- proportion of ties: \\p_i = \frac{d_i}{n-1}\\
 
-- Network share: \\s_i = \frac{d_i}{\sum\_{j=1}^{n} d_j}\\
+- network share: \\s_i = \frac{d_i}{\sum\_{j=1}^{n} d_j}\\
 
-- Closeness: \\C_i = \frac{1}{\sum\_{j} d(i, j)}\\
+- closeness: \\c_i = \frac{1}{\sum\_{j} d(i, j)}\\
 
-- Betweenness: \\B_i = \sum\_{s \neq i \neq t}
+- betweenness: \\b_i = \sum\_{s \neq i \neq t}
   \frac{\sigma\_{st}(i)}{\sigma\_{st}}\\
 
-For symmetric weighted networks, additional measures:
+for symmetric weighted networks, additional measures:
 
-- Strength sum: \\s_i^{sum} = \sum\_{j=1}^{n} w\_{ij}\\
+- strength sum: \\s_i^{sum} = \sum\_{j=1}^{n} w\_{ij}\\
 
-- Strength average: \\s_i^{avg} = \frac{s_i^{sum}}{d_i}\\
+- strength average: mean of the actor's realized non-zero tie weights
 
-- Strength standard deviation: \\s_i^{sd} = \sqrt{\frac{1}{d_i}
-  \sum\_{j=1}^{n} (w\_{ij} - s_i^{avg})^2}\\
+- strength standard deviation: standard deviation of the actor's
+  realized non-zero tie weights
 
-For asymmetric networks, statistics are calculated separately for rows
+for asymmetric networks, statistics are calculated separately for rows
 (out) and columns (in), with totals where applicable.
 
 ## Note
 
-For longitudinal networks, statistics are calculated separately for each
-time period. For multilayer networks, statistics are calculated
+for longitudinal networks, statistics are calculated separately for each
+time period. for multilayer networks, statistics are calculated
 separately for each layer unless layers have been aggregated beforehand.
 
-Missing values (NA) in the network are excluded from calculations.
-Isolates (actors with no connections) receive appropriate values (0 for
-degree, NA for some centrality measures).
+missing values (na) in the network are excluded from calculations.
+isolates (actors with no connections) receive appropriate values (0 for
+degree, na for some centrality measures).
 
-The function handles both cross-sectional and longitudinal data
-structures, as well as single-layer and multilayer networks. For ego
+the function handles both cross-sectional and longitudinal data
+structures, as well as single-layer and multilayer networks. for ego
 networks created with netify, the function appropriately handles the
 ego-alter structure.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
 # \donttest{
-# Load example data
+# load example data
 data(icews)
 
-# Basic usage with directed network
+# basic usage with directed network
 net <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
@@ -255,23 +271,23 @@ net <- netify(
     weight = "verbCoop"
 )
 
-# Get actor statistics
+# get actor statistics
 actor_stats <- summary_actor(net)
 head(actor_stats)
 #>         actor time degree_in degree_out degree_total prop_ties_in prop_ties_out
-#> 1 Afghanistan 2002        92         81          173    0.6052632     0.5328947
-#> 2     Albania 2002        46         49           95    0.3026316     0.3223684
-#> 3     Algeria 2002        68         65          133    0.4473684     0.4276316
-#> 4      Angola 2002        64         67          131    0.4210526     0.4407895
-#> 5   Argentina 2002        48         48           96    0.3157895     0.3157895
-#> 6     Armenia 2002        71         66          137    0.4671053     0.4342105
+#> 1 Afghanistan 2002        92         81          173    0.6092715     0.5364238
+#> 2     Albania 2002        46         49           95    0.3046358     0.3245033
+#> 3     Algeria 2002        68         65          133    0.4503311     0.4304636
+#> 4      Angola 2002        64         67          131    0.4238411     0.4437086
+#> 5   Argentina 2002        48         48           96    0.3178808     0.3178808
+#> 6     Armenia 2002        71         66          137    0.4701987     0.4370861
 #>   prop_ties_total network_share_in network_share_out network_share_total
-#> 1               1      0.022594950       0.019334694         0.020964822
-#> 2               1      0.002272838       0.002097149         0.002184994
-#> 3               1      0.002679814       0.002497454         0.002588634
-#> 4               1      0.002915549       0.002470767         0.002693158
-#> 5               1      0.003173523       0.002804354         0.002988938
-#> 6               1      0.005926727       0.005875577         0.005901152
+#> 1       0.5728477      0.022594950       0.019334694         0.020964822
+#> 2       0.3145695      0.002272838       0.002097149         0.002184994
+#> 3       0.4403974      0.002679814       0.002497454         0.002588634
+#> 4       0.4337748      0.002915549       0.002470767         0.002693158
+#> 5       0.3178808      0.003173523       0.002804354         0.002988938
+#> 6       0.4536424      0.005926727       0.005875577         0.005901152
 #>   closeness_in closeness_out closeness_all  betweenness authority_score
 #> 1     71.13409      68.44904      78.06787 1.324503e-02      0.26866096
 #> 2     42.48817      43.64733      47.16201 0.000000e+00      0.01252200
@@ -287,28 +303,28 @@ head(actor_stats)
 #> 5 0.024732267            1427             1261               2688
 #> 6 0.039622725            2665             2642               5307
 #>   strength_avg_in strength_avg_out strength_avg_total strength_std_in
-#> 1       67.284768        57.576159          62.430464       227.24232
-#> 2        6.768212         6.245033           6.506623        22.27089
-#> 3        7.980132         7.437086           7.708609        18.93197
-#> 4        8.682119         7.357616           8.019868        24.29633
-#> 5        9.450331         8.350993           8.900662        45.34294
-#> 6       17.649007        17.496689          17.572848        66.88569
+#> 1       110.43478        107.33333          108.98266       283.37558
+#> 2        22.21739         19.24490           20.68421        36.08934
+#> 3        17.72059         17.27692           17.50376        25.04494
+#> 4        20.48438         16.58209           18.48855        34.05737
+#> 5        29.72917         26.27083           28.00000        77.10996
+#> 6        37.53521         40.03030           38.73723        93.96486
 #>   strength_std_out strength_std_total strength_median_in strength_median_out
-#> 1        198.98323          213.11277                  2                   1
-#> 2         21.17104           21.72096                  0                   0
-#> 3         17.00179           17.96688                  0                   0
-#> 4         20.18988           22.24310                  0                   0
-#> 5         39.54933           42.44614                  0                   0
-#> 6         62.13790           64.51180                  0                   0
+#> 1        262.35853          272.95147                 13                14.0
+#> 2         33.84187           34.79309                  6                 5.0
+#> 3         22.46839           23.73165                  6                 7.0
+#> 4         27.76970           30.94272                  6                 4.0
+#> 5         67.16532           71.94823                  3                 4.5
+#> 6         89.41123           91.47101                 10                13.0
 #>   strength_median_total
-#> 1                   1.5
-#> 2                   0.0
-#> 3                   0.0
-#> 4                   0.0
-#> 5                   0.0
-#> 6                   0.0
+#> 1                    14
+#> 2                     6
+#> 3                     6
+#> 4                     4
+#> 5                     4
+#> 6                    11
 
-# Add custom statistics
+# add custom statistics
 max_out <- function(mat) apply(mat, 1, max, na.rm = TRUE)
 max_in <- function(mat) apply(mat, 2, max, na.rm = TRUE)
 
@@ -321,19 +337,19 @@ actor_stats_custom <- summary_actor(
 )
 head(actor_stats_custom)
 #>         actor time degree_in degree_out degree_total prop_ties_in prop_ties_out
-#> 1 Afghanistan 2002        92         81          173    0.6052632     0.5328947
-#> 2     Albania 2002        46         49           95    0.3026316     0.3223684
-#> 3     Algeria 2002        68         65          133    0.4473684     0.4276316
-#> 4      Angola 2002        64         67          131    0.4210526     0.4407895
-#> 5   Argentina 2002        48         48           96    0.3157895     0.3157895
-#> 6     Armenia 2002        71         66          137    0.4671053     0.4342105
+#> 1 Afghanistan 2002        92         81          173    0.6092715     0.5364238
+#> 2     Albania 2002        46         49           95    0.3046358     0.3245033
+#> 3     Algeria 2002        68         65          133    0.4503311     0.4304636
+#> 4      Angola 2002        64         67          131    0.4238411     0.4437086
+#> 5   Argentina 2002        48         48           96    0.3178808     0.3178808
+#> 6     Armenia 2002        71         66          137    0.4701987     0.4370861
 #>   prop_ties_total network_share_in network_share_out network_share_total
-#> 1               1      0.022594950       0.019334694         0.020964822
-#> 2               1      0.002272838       0.002097149         0.002184994
-#> 3               1      0.002679814       0.002497454         0.002588634
-#> 4               1      0.002915549       0.002470767         0.002693158
-#> 5               1      0.003173523       0.002804354         0.002988938
-#> 6               1      0.005926727       0.005875577         0.005901152
+#> 1       0.5728477      0.022594950       0.019334694         0.020964822
+#> 2       0.3145695      0.002272838       0.002097149         0.002184994
+#> 3       0.4403974      0.002679814       0.002497454         0.002588634
+#> 4       0.4337748      0.002915549       0.002470767         0.002693158
+#> 5       0.3178808      0.003173523       0.002804354         0.002988938
+#> 6       0.4536424      0.005926727       0.005875577         0.005901152
 #>   closeness_in closeness_out closeness_all  betweenness authority_score
 #> 1     71.13409      68.44904      78.06787 1.324503e-02      0.26866096
 #> 2     42.48817      43.64733      47.16201 0.000000e+00      0.01252200
@@ -349,25 +365,25 @@ head(actor_stats_custom)
 #> 5 0.024732267            1427             1261               2688
 #> 6 0.039622725            2665             2642               5307
 #>   strength_avg_in strength_avg_out strength_avg_total strength_std_in
-#> 1       67.284768        57.576159          62.430464       227.24232
-#> 2        6.768212         6.245033           6.506623        22.27089
-#> 3        7.980132         7.437086           7.708609        18.93197
-#> 4        8.682119         7.357616           8.019868        24.29633
-#> 5        9.450331         8.350993           8.900662        45.34294
-#> 6       17.649007        17.496689          17.572848        66.88569
+#> 1       110.43478        107.33333          108.98266       283.37558
+#> 2        22.21739         19.24490           20.68421        36.08934
+#> 3        17.72059         17.27692           17.50376        25.04494
+#> 4        20.48438         16.58209           18.48855        34.05737
+#> 5        29.72917         26.27083           28.00000        77.10996
+#> 6        37.53521         40.03030           38.73723        93.96486
 #>   strength_std_out strength_std_total strength_median_in strength_median_out
-#> 1        198.98323          213.11277                  2                   1
-#> 2         21.17104           21.72096                  0                   0
-#> 3         17.00179           17.96688                  0                   0
-#> 4         20.18988           22.24310                  0                   0
-#> 5         39.54933           42.44614                  0                   0
-#> 6         62.13790           64.51180                  0                   0
+#> 1        262.35853          272.95147                 13                14.0
+#> 2         33.84187           34.79309                  6                 5.0
+#> 3         22.46839           23.73165                  6                 7.0
+#> 4         27.76970           30.94272                  6                 4.0
+#> 5         67.16532           71.94823                  3                 4.5
+#> 6         89.41123           91.47101                 10                13.0
 #>   strength_median_total max_out max_in
-#> 1                   1.5    1516   1847
-#> 2                   0.0     160    157
-#> 3                   0.0      91    114
-#> 4                   0.0     147    176
-#> 5                   0.0     424    469
-#> 6                   0.0     547    609
+#> 1                    14    1516   1847
+#> 2                     6     160    157
+#> 3                     6      91    114
+#> 4                     4     147    176
+#> 5                     4     424    469
+#> 6                    11     547    609
 # }
 ```

@@ -14,96 +14,96 @@ decompose_netify(netlet, remove_zeros = TRUE)
 
 - netlet:
 
-  A netify object (class "netify") to be decomposed.
+  a netify object (class "netify") to be decomposed.
 
 - remove_zeros:
 
-  Logical. If TRUE (default), edges with zero weight values are removed
-  from the edge data frame. If FALSE, zero-weight edges are retained.
+  logical. if TRUE (default), edges with zero weight values are removed
+  from the edge data frame. if FALSE, zero-weight edges are retained.
 
 ## Value
 
-A list containing two data frames:
+a list containing two data frames:
 
-- **edge_data**: A data frame where each row represents an edge with
+- **edge_data**: a data frame where each row represents an edge with
   columns:
 
-  - `from`: Source node identifier
+  - `from`: source node identifier
 
-  - `to`: Target node identifier
+  - `to`: target node identifier
 
-  - `time`: Time period (character; "1" for cross-sectional networks)
+  - `time`: time period (character; "1" for cross-sectional networks)
 
-  - `weight`: Edge weight values (using original weight variable name if
+  - `weight`: edge weight values (using original weight variable name if
     specified)
 
-  - Additional columns for any dyadic variables stored in the netify
+  - additional columns for any dyadic variables stored in the netify
     object
 
-- **nodal_data**: A data frame where each row represents a node-time
+- **nodal_data**: a data frame where each row represents a node-time
   combination with columns:
 
-  - `name`: Node identifier
+  - `name`: node identifier
 
-  - `time`: Time period (character; "1" for cross-sectional networks)
+  - `time`: time period (character; "1" for cross-sectional networks)
 
-  - Additional columns for any nodal variables stored in the netify
+  - additional columns for any nodal variables stored in the netify
     object
 
 ## Details
 
-The function helpful for:
+the function helpful for:
 
-**Edge data processing:**
+**edge data processing:**
 
-- Extracts the adjacency matrix (or array for longitudinal networks)
+- extracts the adjacency matrix (or array for longitudinal networks)
   from the netify object
 
-- Optionally removes zero-weight edges based on the remove_zeros
+- optionally removes zero-weight edges based on the remove_zeros
   parameter
 
-- Merges any dyadic variables stored in the netify object
+- merges any dyadic variables stored in the netify object
 
-- Renames columns to standardized names (from, to, time)
+- renames columns to standardized names (from, to, time)
 
-**Node data processing:**
+**node data processing:**
 
-- Extracts nodal attributes if present, or constructs from actor_pds
+- extracts nodal attributes if present, or constructs from actor_pds
   information
 
-- Ensures consistent time variable across node and edge data
+- ensures consistent time variable across node and edge data
 
-- Renames columns to standardized names (name, time)
+- renames columns to standardized names (name, time)
 
-**Time handling:**
+**time handling:**
 
-- For cross-sectional networks: Sets time to "1" in both data frames
+- for cross-sectional networks: sets time to "1" in both data frames
 
-- For longitudinal networks: Preserves original time periods as
+- for longitudinal networks: preserves original time periods as
   character values
 
-- For ego networks: Extracts time from ego-time concatenated identifiers
+- for ego networks: extracts time from ego-time concatenated identifiers
 
-**Variable preservation:**
+**variable preservation:**
 
-All dyadic and nodal variables stored in the netify object are preserved
-in the output data frames. Dyadic variables are merged with the edge
+all dyadic and nodal variables stored in the netify object are preserved
+in the output data frames. dyadic variables are merged with the edge
 data, while nodal variables remain in the nodal data frame.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
-# Load example data
+# load example data
 data(icews)
 
-# Example 1: Cross-sectional network
+# example 1: cross-sectional network
 icews_10 <- icews[icews$year == 2010, ]
 
-# Create netify object
+# create netify object
 net_cs <- netify(
     icews_10,
     actor1 = "i", actor2 = "j",
@@ -111,10 +111,10 @@ net_cs <- netify(
     weight = "verbCoop"
 )
 
-# Decompose to data frames
+# decompose to data frames
 decomposed_cs <- decompose_netify(net_cs)
 
-# Examine structure
+# examine structure
 str(decomposed_cs)
 #> List of 2
 #>  $ edge_data :'data.frame':  9976 obs. of  4 variables:
@@ -142,21 +142,21 @@ head(decomposed_cs$nodal_data)
 #> 5   Argentina    1
 #> 6     Armenia    1
 
-# Example 2: Keep zero-weight edges
+# example 2: keep zero-weight edges
 decomposed_with_zeros <- decompose_netify(net_cs, remove_zeros = FALSE)
 
-# Compare edge counts
-nrow(decomposed_cs$edge_data) # Without zeros
+# compare edge counts
+nrow(decomposed_cs$edge_data) # without zeros
 #> [1] 9976
-nrow(decomposed_with_zeros$edge_data) # With zeros
+nrow(decomposed_with_zeros$edge_data) # with zeros
 #> [1] 22952
 
-# Example 4: Use for visualization prep
+# example 4: use for visualization prep
 if (FALSE) { # \dontrun{
-# Decompose for use with ggplot2
+# decompose for use with ggplot2
 plot_data <- decompose_netify(net_cs)
 
-# Can now use edge_data and nodal_data separately
+# can now use edge_data and nodal_data separately
 # for network visualization
 } # }
 ```

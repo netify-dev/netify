@@ -1,12 +1,12 @@
 # Convert a netify_comparison to a tibble
 
-S3 method for
+s3 method for
 [`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
-that returns the `$comparisons` data frame directly. The raw
+that returns the `$comparisons` data frame directly. the raw
 `netify_comparison` object is a list with mixed scalar / nested fields,
 which
 [`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
-cannot coerce cleanly. The per-pair comparison table is almost always
+cannot coerce cleanly. the per-pair comparison table is almost always
 what tidyverse users want downstream (filter / arrange / pivot / join
 with metadata).
 
@@ -20,25 +20,25 @@ as_tibble.netify_comparison(x, ...)
 
 - x:
 
-  A `netify_comparison` object from
+  a `netify_comparison` object from
   [`compare_networks()`](https://netify-dev.github.io/netify/reference/compare_networks.md).
 
 - ...:
 
-  Currently unused.
+  currently unused.
 
 ## Value
 
-A tibble of pairwise comparisons (one row per (`net_i`, `net_j`,
-`metric`) triple). If the comparison object has no `$comparisons` slot
+a tibble of pairwise comparisons (one row per (`net_i`, `net_j`,
+`metric`) triple). if the comparison object has no `$comparisons` slot
 (e.g., a single-network input), an empty tibble is returned with a
 one-shot inform.
 
 ## Details
 
-Registered against the
+registered against the
 [`tibble::as_tibble`](https://tibble.tidyverse.org/reference/as_tibble.html)
-generic via `.onLoad`, so `tibble` is not a hard dependency.
+generic via `.onload`, so `tibble` is not a hard dependency.
 
 ## See also
 
@@ -47,4 +47,4 @@ generic via `.onLoad`, so `tibble` is not a hard dependency.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

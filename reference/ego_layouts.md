@@ -1,6 +1,6 @@
 # Create ego-centric layouts for ego networks
 
-These functions create specialized layouts for ego networks that place
+these functions create specialized layouts for ego networks that place
 the ego at the center and arrange alters in meaningful ways around it.
 
 ## Usage
@@ -34,73 +34,73 @@ create_ego_centric_layout(
 
 - netlet:
 
-  A netify object created with ego_netify()
+  a netify object created with ego_netify()
 
 - min_radius:
 
-  Minimum distance from ego to any alter
+  minimum distance from ego to any alter
 
 - max_radius:
 
-  Maximum distance from ego to any alter
+  maximum distance from ego to any alter
 
 - seed:
 
-  Random seed for reproducible layouts
+  random seed for reproducible layouts
 
 - ego_name:
 
-  Name of the ego node (extracted from netlet attributes if not
+  name of the ego node (extracted from netlet attributes if not
   provided)
 
 - n_rings:
 
-  Number of concentric rings for radial layout
+  number of concentric rings for radial layout
 
 - buffer_radius:
 
-  Minimum distance from ego for ego_centric layout
+  minimum distance from ego for ego_centric layout
 
 - transition_zone:
 
-  Smooth transition zone width for ego_centric layout
+  smooth transition zone width for ego_centric layout
 
 ## Value
 
-A list of data frames with x,y coordinates for each time period
+a list of data frames with x,y coordinates for each time period
 
 ## Details
 
-Three layout algorithms are provided:
+three layout algorithms are provided:
 
-**Hierarchical Layout**: Places ego at center and arranges alters in
-concentric circles based on their network centrality. More central
+**hierarchical layout**: places ego at center and arranges alters in
+concentric circles based on their network centrality. more central
 alters are placed closer to the ego.
 
-**Radial Layout**: Places ego at center and arranges alters in
-concentric rings based on connection strength quartiles. Stronger
+**radial layout**: places ego at center and arranges alters in
+concentric rings based on connection strength quartiles. stronger
 connections are placed in inner rings.
 
-**Ego Centric Layout**: Uses force-directed layout but ensures ego
-remains at center with a buffer zone. Preserves natural clustering while
+**ego centric layout**: uses force-directed layout but ensures ego
+remains at center with a buffer zone. preserves natural clustering while
 maintaining ego visibility.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
-# Create ego network
-ego_net <- ego_netify(my_network, ego = "Pakistan")
+# create ego network
+ego_net <- ego_netify(my_network, ego = "pakistan")
 
-# Hierarchical layout
+# hierarchical layout
 layout <- create_hierarchical_ego_layout(ego_net)
 plot(ego_net, point_layout = layout)
 
-# Radial layout with custom rings
+# radial layout with custom rings
 layout <- create_radial_ego_layout(ego_net, n_rings = 5)
 plot(ego_net, point_layout = layout)
 } # }

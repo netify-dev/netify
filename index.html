@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Network Tools • netify</title>
+<title>Tools for Network Data Workflows • netify</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Network Tools">
-<meta name="description" content="Provides functions for building, analyzing, and visualizing network data.">
-<meta property="og:description" content="Provides functions for building, analyzing, and visualizing network data.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Tools for Network Data Workflows">
+<meta name="description" content="Builds, validates, analyzes, and visualizes network data from dyadic, event, matrix, igraph, and network inputs. Supports cross-sectional, longitudinal, bipartite, and multilayer networks, with conversion helpers for common modeling workflows and plotting utilities for exploratory analysis.">
+<meta property="og:description" content="Builds, validates, analyzes, and visualizes network data from dyadic, event, matrix, igraph, and network inputs. Supports cross-sectional, longitudinal, bipartite, and multilayer networks, with conversion helpers for common modeling workflows and plotting utilities for exploratory analysis.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -31,21 +31,22 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/quickstart_inference.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="articles/foundations_lite.html">Quickstart to Inference</a></li>
+    <li><a class="dropdown-item" href="articles/quickstart_inference.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
+    <li><a class="dropdown-item" href="articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="articles/index.html">More articles...</a></li>
   </ul>
@@ -77,120 +78,19 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You have two options for installing <code>netify</code>.</p>
-<div class="section level3">
-<h3 id="wrench-option-1-install-from-github-requires-build-tools">🔧 Option 1: Install from GitHub (requires build tools)<a class="anchor" aria-label="anchor" href="#wrench-option-1-install-from-github-requires-build-tools"></a>
-</h3>
-<blockquote>
-<p>⚠️ Requires R build tools:</p>
-<ul>
-<li>macOS: Xcode Command Line Tools</li>
-<li>Windows: Rtools</li>
-<li>Linux: build-essential and related packages</li>
-</ul>
-</blockquote>
+<p>Install the package from CRAN after release:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Install from GitHub</span></span>
-<span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"netify-dev/netify"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="id_-option-2-pre-built-binaries-no-compilation-needed">🛠 Option 2: Pre-built binaries (no compilation needed)<a class="anchor" aria-label="anchor" href="#id_-option-2-pre-built-binaries-no-compilation-needed"></a>
-</h3>
-<p>If you’re on <strong>macOS</strong> or <strong>Windows</strong> and want to avoid installing developer tools (like compilers, Xcode, or Rtools), you can use our pre-built binaries from the <a href="https://github.com/netify-dev/netify/releases" class="external-link">Releases page</a>:</p>
-<div class="section level4">
-<h4 id="white_check_mark-steps">✅ Steps:<a class="anchor" aria-label="anchor" href="#white_check_mark-steps"></a>
-</h4>
-<ol style="list-style-type: decimal">
-<li>Go to: <a href="https://github.com/netify-dev/netify/releases" class="external-link">https://github.com/netify-dev/netify/releases</a>
-</li>
-<li>Click on the latest release (e.g., <strong>v1.5</strong>)</li>
-<li>Download the file that matches your system</li>
-</ol>
-</div>
-<div class="section level4">
-<h4 id="package-first-install-dependencies-if-needed">📦 First, install dependencies (if needed):<a class="anchor" aria-label="anchor" href="#package-first-install-dependencies-if-needed"></a>
-</h4>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"netify"</span><span class="op">)</span></span></code></pre></div>
+<p>Install the development version from GitHub:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Install required packages if you don't already have them</span></span>
-<span><span class="va">deps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Rcpp"</span>, <span class="st">"stats"</span>, <span class="st">"rlang"</span>, <span class="st">"cli"</span>, <span class="st">"checkmate"</span>, <span class="st">"igraph"</span>, </span>
-<span>          <span class="st">"ggplot2"</span>, <span class="st">"scales"</span>, <span class="st">"ggnewscale"</span>, <span class="st">"ggridges"</span>, </span>
-<span>          <span class="st">"ggbeeswarm"</span>, <span class="st">"patchwork"</span>, <span class="st">"RColorBrewer"</span>, <span class="st">"ggrepel"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Check which packages are not installed</span></span>
-<span><span class="va">missing_deps</span> <span class="op">&lt;-</span> <span class="va">deps</span><span class="op">[</span><span class="op">!</span><span class="va">deps</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span>,<span class="st">"Package"</span><span class="op">]</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co"># Install missing packages</span></span>
-<span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">missing_deps</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="va">missing_deps</span>, repos<span class="op">=</span><span class="st">'https://cloud.r-project.org/'</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
-</div>
-<div class="section level4">
-<h4 id="id_-macos-users">🖥 macOS users:<a class="anchor" aria-label="anchor" href="#id_-macos-users"></a>
-</h4>
-<p>There are several macOS builds — choose the one that fits your system:</p>
-<table class="table">
-<colgroup>
-<col width="18%">
-<col width="81%">
-</colgroup>
-<thead><tr>
-<th>File</th>
-<th>For…</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>macos-arm64.tgz</code></td>
-<td>Macs with Apple Silicon (M1, M2, M3 chips) running recent macOS</td>
-</tr>
-<tr>
-<td><code>macos-intel.tgz</code></td>
-<td>Macs with Intel chips</td>
-</tr>
-<tr>
-<td><code>macos-asan.tgz</code></td>
-<td>Developer/debug version (for advanced users only; includes sanitizer flags)</td>
-</tr>
-</tbody>
-</table>
-<p>Most users can choose based on chip type:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example: Apple Silicon (M1/M2/M3)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
-<span>  <span class="st">"~/Downloads/netify_1.5-macos-arm64.tgz"</span>, </span>
-<span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"mac.binary"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Example: Intel Mac</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
-<span>  <span class="st">"~/Downloads/netify_1.5-macos-intel.tgz"</span>, </span>
-<span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"mac.binary"</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level4">
-<h4 id="window-windows-users">🪟 Windows users:<a class="anchor" aria-label="anchor" href="#window-windows-users"></a>
-</h4>
-<p>Download the <code>.zip</code> file named <code>netify_1.5-windows.zip</code> and install:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
-<span>  <span class="st">"C:/path/to/netify_1.5-windows.zip"</span>, </span>
-<span>  repos <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
-<p>Be sure to replace the file path with where you saved the download.</p>
-</div>
-<div class="section level4">
-<h4 id="penguin-linux-users">🐧 Linux users:<a class="anchor" aria-label="anchor" href="#penguin-linux-users"></a>
-</h4>
-<p>You can use the precompiled <code>.tgz</code> file, or install from source (see Option 1). Example:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
-<span>  <span class="st">"~/Downloads/netify_1.5-linux.tgz"</span>, </span>
-<span>  repos <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="st">"source"</span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"netify-dev/netify"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
 <p>Transform your relational data into a network object with just one function:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/netify/">netify</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span>
 <span></span>
@@ -207,21 +107,21 @@
 <span></span>
 <span><span class="co"># Print the netify object</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">icews_conflict</span><span class="op">)</span></span></code></pre></div>
-<pre><code>✔ Hello, you have created network data, yay!
+<pre><code>✔ Network data created.
 • Unipartite
 • Asymmetric
 • Weights from `matlConf`
 • Longitudinal: 13 Periods
 • # Unique Actors: 152
 Network Summary Statistics (averaged across time):
-          dens miss  mean recip trans
-matlConf 0.113    0 1.471 0.594 0.387
-• Nodal Features: None
+          dens miss   mean recip trans
+matlConf 0.113    0 12.997 0.594 0.387
+• Nodal Features: i_polity2, i_log_gdp, i_region
 • Dyad Features: None</code></pre>
 <div class="section level3">
 <h3 id="quick-visualization">Quick visualization<a class="anchor" aria-label="anchor" href="#quick-visualization"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot the network</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">icews_conflict</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
@@ -229,10 +129,10 @@ matlConf 0.113    0 1.471 0.594 0.387
 </div>
 </div>
 <div class="section level3">
-<h3 id="more-involved-visualization">More involved visualization<a class="anchor" aria-label="anchor" href="#more-involved-visualization"></a>
+<h3 id="add-node-color">Add node color<a class="anchor" aria-label="anchor" href="#add-node-color"></a>
 </h3>
-<p>netify’s plotting system is highly customizable. Here’s how you can create a more sophisticated visualization:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>You can map node attributes to plot aesthetics:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create democracy indicator</span></span>
 <span><span class="va">icews</span><span class="op">$</span><span class="va">i_democ</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">icews</span><span class="op">$</span><span class="va">i_polity2</span> <span class="op">&gt;=</span> <span class="fl">6</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>, </span>
@@ -268,8 +168,8 @@ matlConf 0.113    0 1.471 0.594 0.387
 <span>  node_size_label <span class="op">=</span> <span class="st">'Log(GDP)'</span>,</span>
 <span>  node_shape_label <span class="op">=</span> <span class="st">''</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'right'</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu">scale_color_brewer</span><span class="op">(</span>palette <span class="op">=</span> <span class="st">'Set1'</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">'right'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_color_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">'Set1'</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
 <img src="reference/figures/icews_advanced_plot.png" alt="Advanced ICEWS network plot with node colors, sizes, and shapes"><div class="figcaption">Advanced ICEWS network plot with node colors, sizes, and shapes</div>
 </div>
@@ -281,7 +181,7 @@ matlConf 0.113    0 1.471 0.594 0.387
 <div class="section level3">
 <h3 id="get-network-statistics">Get network statistics<a class="anchor" aria-label="anchor" href="#get-network-statistics"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">icews_conflict</span><span class="op">)</span></span></code></pre></div>
 <p>This returns a data frame with network statistics for each time period:</p>
 <table class="table">
@@ -497,7 +397,7 @@ matlConf 0.113    0 1.471 0.594 0.387
 <td><code>dyad_correlation(net, dyad_vars="geographic_distance")</code></td>
 </tr>
 <tr>
-<td>Comprehensive attribute analysis</td>
+<td>Attribute report</td>
 <td><code><a href="reference/attribute_report.html">attribute_report()</a></code></td>
 <td><code>attribute_report(net, node_vars=c("region", "democracy"), dyad_vars="distance")</code></td>
 </tr>
@@ -588,27 +488,24 @@ matlConf 0.113    0 1.471 0.594 0.387
 <div class="section level2">
 <h2 id="when-you-might-need-something-else">When you might need something else<a class="anchor" aria-label="anchor" href="#when-you-might-need-something-else"></a>
 </h2>
-<p>netify handles a lot, but there’s an awesome world of network packages out there! If you need to venture beyond our walls, we’ve built bridges to get you there:</p>
+<p>netify covers common network data workflows and provides converters for specialized packages when you need methods outside its scope:</p>
 <ul>
 <li>
-<strong>Fancy statistical models</strong>: Use <code><a href="reference/netify_to_amen.html">to_amen()</a></code> for latent factor models or <code><a href="reference/netify_to_statnet.html">to_statnet()</a></code> for ERGMs</li>
+<strong>Statistical models</strong>: Use <code><a href="reference/netify_to_amen.html">to_amen()</a></code> for latent factor models or <code><a href="reference/netify_to_statnet.html">to_statnet()</a></code> for ERGMs</li>
 <li>
-<strong>Graph algorithms we don’t have (yet!)</strong>: Convert with <code><a href="reference/netify_to_igraph.html">to_igraph()</a></code> to access igraph’s vast toolkit</li>
+<strong>Graph algorithms</strong>: Convert with <code><a href="reference/netify_to_igraph.html">to_igraph()</a></code> to use igraph methods</li>
 <li>
-<strong>Roll your own analysis</strong>: Use <code><a href="reference/unnetify.html">unnetify()</a></code> to get back to a data frame and do your own thing</li>
+<strong>Custom analysis</strong>: Use <code><a href="reference/unnetify.html">unnetify()</a></code> to return to a data frame</li>
 </ul>
-<p>We play well with others! 🤝</p>
+<p>These converters let you move between netify and other network-analysis tools without rebuilding the data by hand.</p>
 </div>
 <div class="section level2">
 <h2 id="getting-help">Getting help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
 </h2>
 <ul>
-<li>Browse vignettes for detailed guides: <code>browseVignettes("netify")</code>
-</li>
+<li>Browse installed vignettes with <code>browseVignettes("netify")</code>; additional workflow articles are on the package website.</li>
 <li>Check function documentation: <code><a href="reference/netify.html">?netify</a></code>, <code><a href="reference/plot.netify.html">?plot.netify</a></code>, etc.</li>
 <li>Report bugs: <a href="https://github.com/netify-dev/netify/issues" class="external-link">GitHub Issues</a>
-</li>
-<li>Ask questions: <a href="https://github.com/netify-dev/netify/discussions" class="external-link">GitHub Discussions</a>
 </li>
 </ul>
 </div>
@@ -616,7 +513,7 @@ matlConf 0.113    0 1.471 0.594 0.387
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>If you use netify in your research, please cite:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"netify"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -629,10 +526,10 @@ matlConf 0.113    0 1.471 0.594 0.387
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>MIT License - see <a href="LICENSE">LICENSE</a> file for details.</p>
+<p>GPL-3</p>
 <hr>
 <p align="center">
-Made with ❤️ for the network analysis community
+Made for the network analysis community
 </p>
 </div>
 </div>
@@ -647,9 +544,7 @@ Made with ❤️ for the network analysis community
 <div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li>
-<a href="https://www.r-project.org/Licenses/GPL-3" class="external-link">GPL-3</a> + file <a href="LICENSE-text.html">LICENSE</a>
-</li>
+<li><a href="https://www.r-project.org/Licenses/GPL-3" class="external-link">GPL-3</a></li>
 </ul>
 </div>
 

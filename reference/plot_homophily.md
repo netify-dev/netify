@@ -1,8 +1,8 @@
 # Visualize homophily analysis results
 
-Creates visualizations for homophily analysis results from
+creates visualizations for homophily analysis results from
 [`homophily()`](https://netify-dev.github.io/netify/reference/homophily.md).
-The function can create different types of plots including similarity
+the function can create different types of plots including similarity
 distributions, comparison plots across multiple attributes, and temporal
 evolution plots.
 
@@ -25,75 +25,75 @@ plot_homophily(
 
 - homophily_results:
 
-  Data frame output from
+  data frame output from
   [`homophily()`](https://netify-dev.github.io/netify/reference/homophily.md)
   or a list of such data frames for comparison plots.
 
 - netlet:
 
-  Optional. The netify object used in the analysis. Required for
+  optional. the netify object used in the analysis. required for
   distribution plots to extract actual similarity data.
 
 - type:
 
-  Character string specifying the plot type:
+  character string specifying the plot type:
 
   "distribution"
 
-  :   Shows similarity score distributions for connected vs unconnected
+  :   shows similarity score distributions for connected vs unconnected
       pairs (requires netlet)
 
   "comparison"
 
-  :   Compares homophily across multiple attributes
+  :   compares homophily across multiple attributes
 
   "temporal"
 
-  :   Shows homophily evolution over time (for longitudinal data)
+  :   shows homophily evolution over time (for longitudinal data)
 
 - attribute:
 
-  Character string. For distribution plots, specifies which attribute to
-  visualize. Should match the attribute used in
+  character string. for distribution plots, specifies which attribute to
+  visualize. should match the attribute used in
   [`homophily()`](https://netify-dev.github.io/netify/reference/homophily.md).
 
 - method:
 
-  Character string. For distribution plots, the similarity method used.
-  Should match the method used in
+  character string. for distribution plots, the similarity method used.
+  should match the method used in
   [`homophily()`](https://netify-dev.github.io/netify/reference/homophily.md).
 
 - sample_size:
 
-  Integer. For distribution plots with large networks, the number of
-  dyad pairs to sample for visualization. Default is NULL (use all
+  integer. for distribution plots with large networks, the number of
+  dyad pairs to sample for visualization. default is NULL (use all
   pairs).
 
 - colors:
 
-  Character vector of two colors for connected/unconnected or
-  significant/non-significant pairs. Default uses package theme colors.
+  character vector of two colors for connected/unconnected or
+  significant/non-significant pairs. default uses package theme colors.
 
 - ...:
 
-  Additional arguments passed to ggplot2 functions.
+  additional arguments passed to ggplot2 functions.
 
 ## Value
 
-A ggplot2 object that can be further customized.
+a ggplot2 object that can be further customized.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
-# Load example data
+# load example data
 data(icews)
 
-# Create a network with nodal attributes
+# create a network with nodal attributes
 ntwk <- netify(
     icews,
     actor1 = "i", actor2 = "j",
@@ -103,14 +103,14 @@ ntwk <- netify(
     nodal_vars = "i_polity2"
 )
 
-# Run homophily analysis
+# run homophily analysis
 homophily_result <- homophily(
     ntwk,
     attribute = "i_polity2",
     method = "correlation"
 )
 
-# Create distribution plot
+# create distribution plot
 plot_homophily(
     homophily_result,
     netlet = ntwk,

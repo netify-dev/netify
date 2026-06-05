@@ -1,7 +1,7 @@
-# Reset aesthetic scales in ggplot
+# reset aesthetic scales in ggplot
 
-Creates a scale reset object that can be added to a ggplot to reset
-color, fill, alpha, and size scales. This is necessary when using
+creates a scale reset object that can be added to a ggplot to reset
+color, fill, alpha, and size scales. this is necessary when using
 multiple layers with different aesthetic mappings (e.g., different
 colors for edges vs nodes).
 
@@ -13,13 +13,13 @@ reset_scales()
 
 ## Value
 
-A custom object of class "netify_scale_reset" that can be added to a
+a custom object of class "netify_scale_reset" that can be added to a
 ggplot object using the + operator
 
 ## Details
 
-This function addresses the limitation in ggplot2 where each aesthetic
-can only have one scale. By resetting scales between layers, you can
+this function addresses the limitation in ggplot2 where each aesthetic
+can only have one scale. by resetting scales between layers, you can
 have different color mappings for edges and nodes, for example.
 
 ## See also
@@ -28,7 +28,7 @@ have different color mappings for edges and nodes, for example.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

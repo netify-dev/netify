@@ -9,8 +9,7 @@ color scales that the built-in path doesn’t expose. We cover extracting
 node and edge data, layering them with `ggplot2`, highlighting a single
 actor, layering multiple color scales, applying a ggplot theme, and
 exporting with
-[`ggsave()`](https://ggplot2.tidyverse.org/reference/ggsave.html). Have
-fun!
+[`ggsave()`](https://ggplot2.tidyverse.org/reference/ggsave.html).
 
 This vignette provides an overview of how to create customizable plots
 using `ggplot2` while still using `netify` to prepare the data.
@@ -21,19 +20,29 @@ Let’s load the necessary libraries.
 
 library(netify)
 library(ggplot2)
+library(dplyr)
 ```
 
-The advanced sections also use `dplyr` (for data manipulation) and
-`ggnewscale` (for multiple color legends). If `dplyr` is not installed,
-the core plotting workflow still runs; only the advanced
-edge-information section will be skipped.
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
 
 ``` r
 
 library(ggnewscale)
 ```
 
-## Preparing data
+The advanced sections also use `dplyr` (for data manipulation) and
+`ggnewscale` (for multiple color legends).
+
+## preparing data
 
 First let’s create a `netlet` object from some dyadic data (ICEWS data)
 using the `netify` package.
@@ -86,15 +95,15 @@ netlet <- subset_netify(
 netlet
 ```
 
-    ## ✔ Hello, you have created network data, yay!
+    ## ✔ Network data created.
     ## • Unipartite
     ## • Asymmetric
     ## • Weights from `verbCoop`
     ## • Longitudinal: 13 Periods
     ## • # Unique Actors: 34
     ## Network Summary Statistics (averaged across time):
-    ##           dens miss    mean recip trans
-    ## verbCoop 0.887    0 179.484 0.978 0.928
+    ##           dens miss  mean recip trans
+    ## verbCoop 0.887    0 202.7 0.978 0.928
     ## • Nodal Features: i_polity2, i_log_gdp, i_log_pop
     ## • Dyad Features: matlCoop, verbConf, matlConf
 
@@ -102,7 +111,7 @@ This is a longitudinal, weighted network with nodal and dyadic
 attributes. In a few more steps we will show how to highlight these
 attributes in the plot.
 
-## Quick start: just `plot(net)`
+## quick start: just `plot(net)`
 
 Before reaching for `ggplot2` directly, remember that the fastest path
 to a network plot is the built-in
@@ -120,7 +129,7 @@ set.seed(6886)
 plot(netlet) + theme_publication_netify()
 ```
 
-![](manual_plotting_files/figure-html/unnamed-chunk-5-1.png)
+![](manual_plotting_files/figure-html/unnamed-chunk-3-1.png)
 
 That single call is usually enough for a first look. The rest of this
 vignette shows what to do when you want **finer control** over the
@@ -128,7 +137,7 @@ underlying data and layers — for example, swapping the layout algorithm,
 adding edge-level information that the default plot doesn’t expose, or
 combining multiple color scales with `ggnewscale`.
 
-## Going manual: extract the plot data frames
+## going manual: extract the plot data frames
 
 When you need that finer control, use `net_plot_data` to create a data
 frame for `ggplot2`. `net_plot_data` extracts and sets up node and edge
@@ -222,7 +231,7 @@ The `x` and `y` in `nodal_data` and the `x1`, `y1`, `x2`, and `y2` in
 `edge_data` are the coordinates of the nodes and edges, respectively.
 These are the coordinates that will be used to plot the network.
 
-## Creating a plot
+## creating a plot
 
 Now that we have the data, we can create a plot using `ggplot2`. We’ll
 use `geom_segment` and `geom_point` (or `geom_label`, `geom_text`, and
@@ -260,13 +269,13 @@ ggplot() +
     theme_netify()
 ```
 
-![](manual_plotting_files/figure-html/unnamed-chunk-7-1.png)
+![](manual_plotting_files/figure-html/unnamed-chunk-5-1.png)
 
 Note `scale_color_viridis_c(option = "cividis")` — a colorblind-safe
 perceptually-uniform palette. For continuous variables this is almost
 always a better default than a hand-picked two-color gradient.
 
-### Changing the layout
+### changing the layout
 
 By default layouts for node positions are drawn from the `layout_nicely`
 algorithm in the `igraph` package. Users can specify other layouts as,
@@ -274,7 +283,7 @@ for example, say that you wanted to use the `mds` algorithm instead:
 
 ``` r
 
-# create a df using mds instead
+# build layout data with mds
 set.seed(6886)
 plot_data_mds <- net_plot_data(
     netlet,
@@ -319,7 +328,7 @@ lapply(plot_data_mds$net_dfs, head)
     ## 83 Australia  Australia Australia_2006
     ## 84 Australia  Australia Australia_2007
 
-### Highlighting a single actor
+### highlighting a single actor
 
 A common task: label or visually pop one specific actor in the plot.
 With the built-in
@@ -340,13 +349,7 @@ plot(netlet,
     theme_publication_netify()
 ```
 
-    ## Warning: Non-positive edge weight found, ignoring all weights during
-    ## graph layout.
-
-    ## Warning in betweenness_cutoff_impl(graph = graph, vids = v, directed = directed, : Some weights are smaller than epsilon, calculations may suffer from numerical precision issues.
-    ## Source: centrality/betweenness.c:441
-
-![](manual_plotting_files/figure-html/unnamed-chunk-9-1.png)
+![](manual_plotting_files/figure-html/unnamed-chunk-7-1.png)
 
 If you are assembling the plot manually from
 [`net_plot_data()`](https://netify-dev.github.io/netify/reference/net_plot_data.md),
@@ -387,9 +390,9 @@ ggplot() +
     theme_netify()
 ```
 
-![](manual_plotting_files/figure-html/unnamed-chunk-10-1.png)
+![](manual_plotting_files/figure-html/unnamed-chunk-8-1.png)
 
-### Add Edge Information
+### add edge information
 
 So far, we have focused on using color to convey information about nodal
 attributes in the network (population size and polity score). Now, let’s
@@ -401,23 +404,7 @@ network. First, let’s create the variable in the edge data.
 
 ``` r
 
-library(dplyr)
-```
-
-    ## 
-    ## Attaching package: 'dplyr'
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-
-``` r
-
-# create high_matlConf variable
+# create high_matlconf variable
 net_dfs$edge_data <- net_dfs$edge_data |>
     group_by(time) |>
     mutate(
@@ -490,9 +477,9 @@ ggplot() +
     theme(legend.position = "right")
 ```
 
-![](manual_plotting_files/figure-html/unnamed-chunk-12-1.png)
+![](manual_plotting_files/figure-html/unnamed-chunk-10-1.png)
 
-## Saving and exporting figures
+## saving and exporting figures
 
 Once a plot is laid out the way you want, export it with
 [`ggsave()`](https://ggplot2.tidyverse.org/reference/ggsave.html). The
@@ -510,7 +497,7 @@ p <- plot(netlet, time_filter = "2010") + theme_publication_netify()
 ggsave("icews_2010.png", plot = p, width = 7, height = 6, dpi = 300)
 ```
 
-### Colorblind-safe palette guidance
+### colorblind-safe palette guidance
 
 A quick reference for picking colors that survive both colorblindness
 and grayscale printing:
@@ -531,7 +518,7 @@ and grayscale printing:
 - **Two-class highlights** — pair a strong color with neutral grey, as
   in the United States highlight example above (`#0A3161` vs `grey70`).
 
-## References
+## references
 
 - Boschee, Elizabeth; Lautenschlager, Jennifer; O’Brien, Sean; Shellman,
   Steve; Starz, James; Ward, Michael, 2015, \`\`ICEWS Coded Event

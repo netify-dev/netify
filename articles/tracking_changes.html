@@ -5,12 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Tracking Changes &amp; Comparing Networks • netify</title>
+<title>Tracking Changes in Cooperation and Conflict: Comparing Networks • netify</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Tracking Changes &amp; Comparing Networks">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Tracking Changes in Cooperation and Conflict: Comparing Networks">
+<meta name="description" content="Compare networks across time, relations, and actors using netify comparison tools.">
+<meta property="og:description" content="Compare networks across time, relations, and actors using netify comparison tools.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -29,21 +31,22 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/quickstart_inference.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Quickstart to Inference</a></li>
+    <li><a class="dropdown-item" href="../articles/quickstart_inference.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -68,11 +71,11 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Tracking Changes &amp; Comparing Networks</h1>
+      <h1>Tracking Changes in Cooperation and Conflict: Comparing Networks</h1>
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-05-29</h4>
+            <h4 data-toc-skip class="date">2026-06-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/tracking_changes.Rmd" class="external-link"><code>vignettes/tracking_changes.Rmd</code></a></small>
       <div class="d-none name"><code>tracking_changes.Rmd</code></div>
@@ -81,7 +84,7 @@ Shahryar Minhas</h4>
     
     
 <div class="section level2">
-<h2 id="vignette-summary">Vignette Summary<a class="anchor" aria-label="anchor" href="#vignette-summary"></a>
+<h2 id="vignette-summary">vignette summary<a class="anchor" aria-label="anchor" href="#vignette-summary"></a>
 </h2>
 <p>This vignette demonstrates how to use <strong>netify</strong> to
 analyze changes in international relations over time using data from the
@@ -107,10 +110,8 @@ of international interactions change across years?</li>
 questions:</p>
 <p><strong><code><a href="../reference/compare_networks.html">compare_networks()</a></code>:</strong></p>
 <ul>
-<li><p>Compares networks across multiple dimensions - edges, structure,
-nodes, and attributes. Think of it as running a comprehensive diagnostic
-between any two (or more) networks to understand what’s similar, what’s
-different, and why it matters.</p></li>
+<li><p>Compares networks across edges, structure, nodes, and
+attributes.</p></li>
 <li>
 <p>Function notes:</p>
 <ul>
@@ -122,8 +123,8 @@ Jaccard, Hamming, QAP, spectral distance, or “all”</li>
 to whom), structure (density, clustering), nodes (actor composition), or
 attributes (actor characteristics)</li>
 <li>
-<strong>Statistical rigor</strong>: Built-in permutation tests for
-significance</li>
+<strong>QAP testing</strong>: Optional permutation tests for
+edge-correlation comparisons</li>
 <li>
 <strong>Output</strong>: Returns information on edge changes,
 similarity metrics, and structural differences</li>
@@ -138,7 +139,7 @@ similarity metrics, and structural differences</li>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="understanding-icews-data">Understanding ICEWS Data<a class="anchor" aria-label="anchor" href="#understanding-icews-data"></a>
+<h2 id="understanding-icews-data">understanding icews data<a class="anchor" aria-label="anchor" href="#understanding-icews-data"></a>
 </h2>
 <p>The Integrated Crisis Early Warning System (ICEWS) provides
 event-level data on interactions between international actors. Each
@@ -156,10 +157,10 @@ verbal or material)</li>
 scales</li>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Load ICEWS data</span></span>
+<code class="sourceCode R"><span><span class="co"># load icews data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Take a peek</span></span>
+<span><span class="co"># take a peek</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##             i       j year                       id verbCoop matlCoop verbConf</span></span>
 <span><span class="co">## 2 Afghanistan Albania 2002 AFGHANISTAN_ALBANIA_2002        6        1        0</span></span>
@@ -205,15 +206,15 @@ actions)</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="creating-networks-for-comparison">Creating Networks for Comparison<a class="anchor" aria-label="anchor" href="#creating-networks-for-comparison"></a>
+<h2 id="creating-networks-for-comparison">creating networks for comparison<a class="anchor" aria-label="anchor" href="#creating-networks-for-comparison"></a>
 </h2>
 <p>First, let’s create separate networks for different types of
 interactions in a single year:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create networks for different interaction types in 2002</span></span>
+<code class="sourceCode R"><span><span class="co"># create networks for different interaction types in 2002</span></span>
 <span><span class="va">icews_2002</span> <span class="op">&lt;-</span> <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2002</span>, <span class="op">]</span></span>
 <span></span>
-<span><span class="co"># Verbal cooperation network</span></span>
+<span><span class="co"># verbal cooperation network</span></span>
 <span><span class="va">verb_coop_2002</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews_2002</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
@@ -222,7 +223,7 @@ interactions in a single year:</p>
 <span>    nodal_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'i_polity2'</span>, <span class="st">'i_log_gdp'</span>, <span class="st">'i_region'</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Material cooperation network</span></span>
+<span><span class="co"># material cooperation network</span></span>
 <span><span class="va">matl_coop_2002</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews_2002</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
@@ -231,7 +232,7 @@ interactions in a single year:</p>
 <span>    nodal_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'i_polity2'</span>, <span class="st">'i_log_gdp'</span>, <span class="st">'i_region'</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Verbal conflict network</span></span>
+<span><span class="co"># verbal conflict network</span></span>
 <span><span class="va">verb_conf_2002</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews_2002</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
@@ -240,7 +241,7 @@ interactions in a single year:</p>
 <span>    nodal_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'i_polity2'</span>, <span class="st">'i_log_gdp'</span>, <span class="st">'i_region'</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Material conflict network</span></span>
+<span><span class="co"># material conflict network</span></span>
 <span><span class="va">matl_conf_2002</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews_2002</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
@@ -250,13 +251,13 @@ interactions in a single year:</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="comparing-cooperation-networks-verbal-vs--material">1. Comparing Cooperation Networks: Verbal vs. Material<a class="anchor" aria-label="anchor" href="#comparing-cooperation-networks-verbal-vs--material"></a>
+<h2 id="comparing-cooperation-networks-verbal-vs--material">1. comparing cooperation networks: verbal vs. material<a class="anchor" aria-label="anchor" href="#comparing-cooperation-networks-verbal-vs--material"></a>
 </h2>
 <p>Do countries that cooperate verbally also cooperate materially? Let’s
 use <code><a href="../reference/compare_networks.html">compare_networks()</a></code> with <code>method = "all"</code> to
-get a comprehensive comparison:</p>
+compare the two networks:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compare verbal vs material cooperation</span></span>
+<code class="sourceCode R"><span><span class="co"># compare verbal vs material cooperation</span></span>
 <span><span class="va">coop_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>        verbal <span class="op">=</span> <span class="va">verb_coop_2002</span>,</span>
@@ -265,7 +266,7 @@ get a comprehensive comparison:</p>
 <span>    method <span class="op">=</span> <span class="st">"all"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Render the summary frame as a knitr table</span></span>
+<span><span class="co"># render the summary frame as a knitr table</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="va">coop_comparison</span><span class="op">$</span><span class="va">summary</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"Verbal vs Material Cooperation Comparison Metrics"</span>,</span>
@@ -296,14 +297,14 @@ get a comprehensive comparison:</p>
 <td align="center">verbal vs material</td>
 <td align="center">0.507</td>
 <td align="center">0.19</td>
-<td align="center">0.308</td>
+<td align="center">0.311</td>
 <td align="center">0.507</td>
 <td align="center">0</td>
-<td align="center">91481.76</td>
+<td align="center">90096.66</td>
 </tr></tbody>
 </table>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Display edge changes</span></span>
+<code class="sourceCode R"><span><span class="co"># display edge changes</span></span>
 <span><span class="va">edge_changes_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    Change_Type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Added"</span>, <span class="st">"Removed"</span>, <span class="st">"Maintained"</span><span class="op">)</span>,</span>
 <span>    Count <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -339,7 +340,7 @@ get a comprehensive comparison:</p>
 </tbody>
 </table>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Interpret results</span></span>
+<code class="sourceCode R"><span><span class="co"># interpret results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n**INTERPRETATION**\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## **INTERPRETATION**</span></span></code></pre>
@@ -349,11 +350,11 @@ get a comprehensive comparison:</p>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">coop_comparison</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">correlation</span> <span class="op">&gt;</span> <span class="fl">0.4</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Moderate alignment: Verbal and material cooperation partially overlap\n"</span><span class="op">)</span></span>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Weak alignment: Verbal promises don't strongly translate to material actions\n"</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Weak alignment: Verbal cooperation does not strongly align with material actions\n"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <pre><code><span><span class="co">## Moderate alignment: Verbal and material cooperation partially overlap</span></span></code></pre>
 <div class="section level3">
-<h3 id="the-tidy-comparisons-frame">The tidy <code>$comparisons</code> frame<a class="anchor" aria-label="anchor" href="#the-tidy-comparisons-frame"></a>
+<h3 id="the-tidy-comparisons-frame">the tidy <code>$comparisons</code> frame<a class="anchor" aria-label="anchor" href="#the-tidy-comparisons-frame"></a>
 </h3>
 <p><code><a href="../reference/compare_networks.html">compare_networks()</a></code> also returns a long-format
 <code>$comparisons</code> data frame with one row per (pair, metric).
@@ -398,7 +399,7 @@ a longitudinal netify, a multilayer netify, or used
 <td align="center">verbal</td>
 <td align="center">material</td>
 <td align="center">hamming</td>
-<td align="center">0.308</td>
+<td align="center">0.311</td>
 <td align="center">NA</td>
 </tr>
 <tr class="even">
@@ -412,7 +413,7 @@ a longitudinal netify, a multilayer netify, or used
 <td align="center">verbal</td>
 <td align="center">material</td>
 <td align="center">spectral</td>
-<td align="center">91481.762</td>
+<td align="center">90096.660</td>
 <td align="center">NA</td>
 </tr>
 </tbody>
@@ -423,7 +424,7 @@ by-group), where it’s much easier to filter and plot than the wide
 <code>$summary</code> table.</p>
 </div>
 <div class="section level3">
-<h3 id="understanding-the-output">Understanding the Output<a class="anchor" aria-label="anchor" href="#understanding-the-output"></a>
+<h3 id="understanding-the-output">understanding the output<a class="anchor" aria-label="anchor" href="#understanding-the-output"></a>
 </h3>
 <p>Let’s break down what each metric tells us:</p>
 <p><strong>Network Comparison Results Header:</strong></p>
@@ -456,9 +457,10 @@ handling) differ between the two networks. This measures the proportion
 of comparable country pairs that have different connection
 patterns.</li>
 <li>
-<strong>qap_correlation (0.507) with qap_pvalue (0)</strong>: The
-QAP test confirms the correlation is statistically significant (p &lt;
-1/5000 ≈ 0.0002). This isn’t due to random chance.</li>
+<strong>qap_correlation (0.507) with qap_pvalue &lt; 0.001</strong>:
+The printed zero is a rounding artifact from the permutation test. With
+5,000 permutations, read it as p &lt; 1/5000 (about 0.0002), not as a
+literal zero.</li>
 </ul>
 <p><strong>Edge Changes:</strong></p>
 <ul>
@@ -473,27 +475,27 @@ cooperation but NO material cooperation</li>
 and material cooperation</li>
 </ul>
 <p>This tells us verbal cooperation is much more common than material
-cooperation, and most verbal promises don’t translate into material
-actions.</p>
+cooperation, and verbal cooperation events do not map one-to-one onto
+material actions.</p>
 </div>
 <div class="section level3">
-<h3 id="visualizing-domain-differences">Visualizing Domain Differences<a class="anchor" aria-label="anchor" href="#visualizing-domain-differences"></a>
+<h3 id="visualizing-domain-differences">visualizing domain differences<a class="anchor" aria-label="anchor" href="#visualizing-domain-differences"></a>
 </h3>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Extract edge change information</span></span>
+<code class="sourceCode R"><span><span class="co"># extract edge change information</span></span>
 <span><span class="va">edge_changes</span> <span class="op">&lt;-</span> <span class="va">coop_comparison</span><span class="op">$</span><span class="va">edge_changes</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
-<span><span class="co"># Create summary of changes</span></span>
+<span><span class="co"># create summary of changes</span></span>
 <span><span class="va">change_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    Type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Verbal Only"</span>, <span class="st">"Material Only"</span>, <span class="st">"Both"</span><span class="op">)</span>,</span>
 <span>    Count <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>        <span class="va">edge_changes</span><span class="op">$</span><span class="va">removed</span>, <span class="co"># In verbal but not material</span></span>
-<span>        <span class="va">edge_changes</span><span class="op">$</span><span class="va">added</span>, <span class="co"># In material but not verbal</span></span>
-<span>        <span class="va">edge_changes</span><span class="op">$</span><span class="va">maintained</span> <span class="co"># In both</span></span>
+<span>        <span class="va">edge_changes</span><span class="op">$</span><span class="va">removed</span>, <span class="co"># in verbal but not material</span></span>
+<span>        <span class="va">edge_changes</span><span class="op">$</span><span class="va">added</span>, <span class="co"># in material but not verbal</span></span>
+<span>        <span class="va">edge_changes</span><span class="op">$</span><span class="va">maintained</span> <span class="co"># in both</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Visualize</span></span>
+<span><span class="co"># visualize</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">change_summary</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Type</span>, y <span class="op">=</span> <span class="va">Count</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
@@ -516,23 +518,23 @@ in news sources than material actions.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="cooperation-vs--conflict-testing-network-relationships">2. Cooperation vs. Conflict: Testing Network Relationships<a class="anchor" aria-label="anchor" href="#cooperation-vs--conflict-testing-network-relationships"></a>
+<h2 id="cooperation-vs--conflict-testing-network-relationships">2. cooperation vs. conflict: testing network relationships<a class="anchor" aria-label="anchor" href="#cooperation-vs--conflict-testing-network-relationships"></a>
 </h2>
 <p>Are cooperation and conflict networks related? Let’s use the QAP
 (Quadratic Assignment Procedure) method for statistical testing:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Perform QAP test between cooperation and conflict</span></span>
+<code class="sourceCode R"><span><span class="co"># perform qap test between cooperation and conflict</span></span>
 <span><span class="va">coop_conf_qap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>        cooperation <span class="op">=</span> <span class="va">verb_coop_2002</span>,</span>
 <span>        conflict <span class="op">=</span> <span class="va">verb_conf_2002</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    method <span class="op">=</span> <span class="st">"qap"</span>,</span>
-<span>    n_permutations <span class="op">=</span> <span class="fl">500</span>, <span class="co"># Reduced for vignette speed</span></span>
-<span>    seed <span class="op">=</span> <span class="fl">12345</span> <span class="co"># For reproducibility</span></span>
+<span>    n_permutations <span class="op">=</span> <span class="fl">500</span>, <span class="co"># reduced for vignette speed</span></span>
+<span>    seed <span class="op">=</span> <span class="fl">12345</span> <span class="co"># for reproducibility</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Construct message</span></span>
+<span><span class="co"># construct message</span></span>
 <span><span class="va">qap_msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
 <span>    <span class="st">"**QAP Test Results:**\n\n"</span>,</span>
 <span>    <span class="st">"- Observed correlation: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">coop_conf_qap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_correlation</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span>,</span>
@@ -545,7 +547,7 @@ in news sources than material actions.</p>
 <span>    <span class="st">"\n"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Add interpretation based on significance</span></span>
+<span><span class="co"># add interpretation based on significance</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="va">coop_conf_qap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_pvalue</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="kw">if</span> <span class="op">(</span><span class="va">coop_conf_qap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_correlation</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>        <span class="va">qap_msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
@@ -567,36 +569,40 @@ in news sources than material actions.</p>
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># Print result</span></span>
+<span><span class="co"># print result</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">qap_msg</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## **QAP Test Results:**</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## - Observed correlation: 0.506</span></span>
-<span><span class="co">## - P-value: &lt; 0.002 (1/500 permutations)</span></span>
+<span><span class="co">## - P-value: 0.002</span></span>
 <span><span class="co">## → Cooperation and conflict networks are positively correlated</span></span>
 <span><span class="co">##   (Countries interact through both cooperation AND conflict)</span></span></code></pre>
 <div class="section level3">
-<h3 id="understanding-qap-results">Understanding QAP Results<a class="anchor" aria-label="anchor" href="#understanding-qap-results"></a>
+<h3 id="understanding-qap-results">understanding qap results<a class="anchor" aria-label="anchor" href="#understanding-qap-results"></a>
 </h3>
-<p>The positive correlation (0.506) with p-value &lt; 0.002 tells us
-that countries that cooperate also tend to have conflicts. This
-counterintuitive finding reflects the multiplex nature of international
-relations: countries that appear frequently in international news tend
-to have both cooperative and conflictual interactions. High-interaction
-dyads accumulate both cooperative and conflictual events; the
-correlation therefore captures activity rather than affinity. In
-contrast, countries that rarely interact have neither cooperation nor
-conflict events recorded. This pattern is well-documented in the
-international relations literature as the “interaction density”
-effect.</p>
+<p>The positive correlation (0.506) with a small QAP p-value (about
+0.002 in this run) tells us that countries that cooperate also tend to
+have conflicts. This counterintuitive finding reflects the multiplex
+nature of international relations: countries that appear frequently in
+international news tend to have both cooperative and conflictual
+interactions. High-interaction dyads accumulate both cooperative and
+conflictual events; the correlation therefore captures activity rather
+than affinity. In contrast, countries that rarely interact have neither
+cooperation nor conflict events recorded. This pattern is often
+described in the international relations literature as interaction
+density.</p>
 </div>
 <div class="section level3">
-<h3 id="advanced-qap-options-different-permutation-schemes">Advanced QAP Options: Different Permutation Schemes<a class="anchor" aria-label="anchor" href="#advanced-qap-options-different-permutation-schemes"></a>
+<h3 id="qap-options-classic-and-degree-preserving-permutations">qap options: classic and degree-preserving permutations<a class="anchor" aria-label="anchor" href="#qap-options-classic-and-degree-preserving-permutations"></a>
 </h3>
-<p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function supports multiple
-permutation schemes for more sophisticated hypothesis testing:</p>
+<p>For pairwise network comparisons, <code><a href="../reference/compare_networks.html">compare_networks()</a></code>
+supports classic node-label QAP and a degree-preserving option for
+binary networks:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compare different permutation schemes</span></span>
+<code class="sourceCode R"><span><span class="co"># compare supported permutation schemes</span></span>
+<span><span class="va">verb_coop_bin</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/binarize.html">binarize</a></span><span class="op">(</span><span class="va">verb_coop_2002</span><span class="op">)</span></span>
+<span><span class="va">verb_conf_bin</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/binarize.html">binarize</a></span><span class="op">(</span><span class="va">verb_conf_2002</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">qap_methods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    classic <span class="op">=</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>        <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cooperation <span class="op">=</span> <span class="va">verb_coop_2002</span>, conflict <span class="op">=</span> <span class="va">verb_conf_2002</span><span class="op">)</span>,</span>
@@ -605,42 +611,34 @@ permutation schemes for more sophisticated hypothesis testing:</p>
 <span>        n_permutations <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>        seed <span class="op">=</span> <span class="fl">12345</span></span>
 <span>    <span class="op">)</span>,</span>
-<span>    freedman_lane <span class="op">=</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
-<span>        <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cooperation <span class="op">=</span> <span class="va">verb_coop_2002</span>, conflict <span class="op">=</span> <span class="va">verb_conf_2002</span><span class="op">)</span>,</span>
+<span>    degree_preserving <span class="op">=</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cooperation <span class="op">=</span> <span class="va">verb_coop_bin</span>, conflict <span class="op">=</span> <span class="va">verb_conf_bin</span><span class="op">)</span>,</span>
 <span>        method <span class="op">=</span> <span class="st">"qap"</span>,</span>
-<span>        permutation_type <span class="op">=</span> <span class="st">"freedman_lane"</span>,</span>
-<span>        n_permutations <span class="op">=</span> <span class="fl">500</span>,</span>
-<span>        seed <span class="op">=</span> <span class="fl">12345</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    dsp_mrqap <span class="op">=</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
-<span>        <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cooperation <span class="op">=</span> <span class="va">verb_coop_2002</span>, conflict <span class="op">=</span> <span class="va">verb_conf_2002</span><span class="op">)</span>,</span>
-<span>        method <span class="op">=</span> <span class="st">"qap"</span>,</span>
-<span>        permutation_type <span class="op">=</span> <span class="st">"dsp_mrqap"</span>,</span>
+<span>        permutation_type <span class="op">=</span> <span class="st">"degree_preserving"</span>,</span>
 <span>        n_permutations <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>        seed <span class="op">=</span> <span class="fl">12345</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Compare results</span></span>
+<span><span class="co"># compare results</span></span>
 <span><span class="va">qap_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>    Permutation_Type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Classic"</span>, <span class="st">"Freedman-Lane"</span>, <span class="st">"DSP-MRQAP"</span><span class="op">)</span>,</span>
+<span>    Permutation_Type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Classic"</span>, <span class="st">"Degree-preserving"</span><span class="op">)</span>,</span>
 <span>    Correlation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>        <span class="va">qap_methods</span><span class="op">$</span><span class="va">classic</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_correlation</span>,</span>
-<span>        <span class="va">qap_methods</span><span class="op">$</span><span class="va">freedman_lane</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_correlation</span>,</span>
-<span>        <span class="va">qap_methods</span><span class="op">$</span><span class="va">dsp_mrqap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_correlation</span></span>
+<span>        <span class="va">qap_methods</span><span class="op">$</span><span class="va">degree_preserving</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_correlation</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    P_Value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>        <span class="va">qap_methods</span><span class="op">$</span><span class="va">classic</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_pvalue</span>,</span>
-<span>        <span class="va">qap_methods</span><span class="op">$</span><span class="va">freedman_lane</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_pvalue</span>,</span>
-<span>        <span class="va">qap_methods</span><span class="op">$</span><span class="va">dsp_mrqap</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_pvalue</span></span>
+<span>        <span class="va">qap_methods</span><span class="op">$</span><span class="va">degree_preserving</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">qap_pvalue</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">qap_results</span>, </span>
-<span>             caption <span class="op">=</span> <span class="st">"QAP Results with Different Permutation Schemes"</span>,</span>
+<span>             caption <span class="op">=</span> <span class="st">"QAP Results with Supported Pairwise Permutation Schemes"</span>,</span>
 <span>             digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
-<caption>QAP Results with Different Permutation Schemes</caption>
+<caption>QAP Results with Supported Pairwise Permutation
+Schemes</caption>
 <thead><tr class="header">
 <th align="left">Permutation_Type</th>
 <th align="right">Correlation</th>
@@ -650,45 +648,33 @@ permutation schemes for more sophisticated hypothesis testing:</p>
 <tr class="odd">
 <td align="left">Classic</td>
 <td align="right">0.506</td>
-<td align="right">0.000</td>
+<td align="right">0.002</td>
 </tr>
 <tr class="even">
-<td align="left">Freedman-Lane</td>
-<td align="right">-0.007</td>
-<td align="right">0.112</td>
-</tr>
-<tr class="odd">
-<td align="left">DSP-MRQAP</td>
-<td align="right">-0.007</td>
-<td align="right">0.112</td>
+<td align="left">Degree-preserving</td>
+<td align="right">0.388</td>
+<td align="right">0.002</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Understanding Different Permutation Types:</strong></p>
+<p><strong>Understanding the Permutation Types:</strong></p>
 <ul>
 <li>
 <strong>Classic</strong>: Standard node label permutation. Fast and
 widely used.</li>
 <li>
-<strong>Freedman-Lane</strong>: Controls for network autocorrelation
-by residualizing before permutation.</li>
-<li>
-<strong>DSP-MRQAP</strong>: Double Semi-Partialling - removes mutual
-influence between networks.</li>
+<strong>Degree-preserving</strong>: Rewires a binary network while
+preserving the degree sequence. Use this when degree heterogeneity is a
+central concern.</li>
 </ul>
-<p>Note that MRQAP methods (Freedman-Lane and DSP) often yield higher
-p-values as they account for network dependencies. Because Freedman-Lane
-and DSP residualize the matrices before permutation, the point estimate
-can shrink and occasionally flip sign; what matters is the
-(non-)significance after accounting for structural autocorrelation.</p>
 </div>
 <div class="section level3">
-<h3 id="correlation-types-pearson-vs--spearman">Correlation Types: Pearson vs. Spearman<a class="anchor" aria-label="anchor" href="#correlation-types-pearson-vs--spearman"></a>
+<h3 id="correlation-types-pearson-vs--spearman">correlation types: pearson vs. spearman<a class="anchor" aria-label="anchor" href="#correlation-types-pearson-vs--spearman"></a>
 </h3>
 <p>For networks with skewed weight distributions, Spearman correlation
 may be more appropriate:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compare using different correlation types</span></span>
+<code class="sourceCode R"><span><span class="co"># compare using different correlation types</span></span>
 <span><span class="va">cor_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    Correlation_Type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Pearson"</span>, <span class="st">"Spearman"</span><span class="op">)</span>,</span>
 <span>    Cooperation_Networks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -736,21 +722,21 @@ may be more appropriate:</p>
 </tr>
 </tbody>
 </table>
-<p>Spearman correlation is rank-based and more robust to outliers, which
-is useful when edge weights have extreme values.</p>
+<p>Spearman correlation is rank-based and less sensitive to outliers,
+which is useful when edge weights have extreme values.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="temporal-evolution-tracking-network-changes">3. Temporal Evolution: Tracking Network Changes<a class="anchor" aria-label="anchor" href="#temporal-evolution-tracking-network-changes"></a>
+<h2 id="temporal-evolution-tracking-network-changes">3. temporal evolution: tracking network changes<a class="anchor" aria-label="anchor" href="#temporal-evolution-tracking-network-changes"></a>
 </h2>
 <p>How do international networks evolve over time? When you pass a
 longitudinal netify object to <code><a href="../reference/compare_networks.html">compare_networks()</a></code>, it
 automatically compares consecutive time periods:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create networks for multiple years</span></span>
+<code class="sourceCode R"><span><span class="co"># create networks for multiple years</span></span>
 <span><span class="va">years_to_compare</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">2002</span>, <span class="fl">2014</span>, by <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create cooperation networks for each year</span></span>
+<span><span class="co"># create cooperation networks for each year</span></span>
 <span><span class="va">coop_net_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">years_to_compare</span>, <span class="op">]</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
@@ -760,12 +746,12 @@ automatically compares consecutive time periods:</p>
 <span>    output_format <span class="op">=</span> <span class="st">"longit_list"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Compare across time - automatic pairwise comparisons</span></span>
+<span><span class="co"># compare across time - automatic pairwise comparisons</span></span>
 <span><span class="va">temporal_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="va">coop_net_longit</span>,</span>
 <span>    method <span class="op">=</span> <span class="st">"all"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co"># Render the summary frame as a knitr table</span></span>
+<span><span class="co"># render the summary frame as a knitr table</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="va">temporal_comparison</span><span class="op">$</span><span class="va">summary</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"Temporal Network Comparison Summary"</span>,</span>
@@ -798,10 +784,10 @@ automatically compares consecutive time periods:</p>
 </tr>
 <tr class="odd">
 <td align="center">hamming</td>
-<td align="center">0.217</td>
+<td align="center">0.219</td>
 <td align="center">0.009</td>
-<td align="center">0.200</td>
-<td align="center">0.225</td>
+<td align="center">0.201</td>
+<td align="center">0.227</td>
 </tr>
 <tr class="even">
 <td align="center">qap_correlation</td>
@@ -812,15 +798,15 @@ automatically compares consecutive time periods:</p>
 </tr>
 <tr class="odd">
 <td align="center">spectral</td>
-<td align="center">13325.806</td>
-<td align="center">3718.830</td>
-<td align="center">9436.173</td>
-<td align="center">18155.052</td>
+<td align="center">13240.234</td>
+<td align="center">3756.815</td>
+<td align="center">8847.569</td>
+<td align="center">17658.467</td>
 </tr>
 </tbody>
 </table>
 <div class="section level3">
-<h3 id="understanding-temporal-comparison-output">Understanding Temporal Comparison Output<a class="anchor" aria-label="anchor" href="#understanding-temporal-comparison-output"></a>
+<h3 id="understanding-temporal-comparison-output">understanding temporal comparison output<a class="anchor" aria-label="anchor" href="#understanding-temporal-comparison-output"></a>
 </h3>
 <p><strong>Header Changes:</strong></p>
 <ul>
@@ -859,10 +845,10 @@ years.</p>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="visualizing-temporal-changes">Visualizing Temporal Changes<a class="anchor" aria-label="anchor" href="#visualizing-temporal-changes"></a>
+<h3 id="visualizing-temporal-changes">visualizing temporal changes<a class="anchor" aria-label="anchor" href="#visualizing-temporal-changes"></a>
 </h3>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Extract edge changes over time</span></span>
+<code class="sourceCode R"><span><span class="co"># extract edge changes over time</span></span>
 <span><span class="va">edge_change_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    Comparison <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">temporal_comparison</span><span class="op">$</span><span class="va">edge_changes</span><span class="op">)</span>,</span>
 <span>    Added <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">temporal_comparison</span><span class="op">$</span><span class="va">edge_changes</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">added</span><span class="op">)</span>,</span>
@@ -870,7 +856,7 @@ years.</p>
 <span>    Maintained <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">temporal_comparison</span><span class="op">$</span><span class="va">edge_changes</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">maintained</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Reshape for plotting</span></span>
+<span><span class="co"># reshape for plotting</span></span>
 <span><span class="va">edge_change_long</span> <span class="op">&lt;-</span> <span class="va">edge_change_data</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
 <span>        cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">Added</span>, <span class="va">Removed</span>, <span class="va">Maintained</span><span class="op">)</span>,</span>
@@ -878,7 +864,7 @@ years.</p>
 <span>        values_to <span class="op">=</span> <span class="st">"Count"</span></span>
 <span>    <span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Plot edge changes</span></span>
+<span><span class="co"># plot edge changes</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">edge_change_long</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Comparison</span>, y <span class="op">=</span> <span class="va">Count</span>, fill <span class="op">=</span> <span class="va">Change_Type</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>position <span class="op">=</span> <span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span></span>
@@ -907,23 +893,23 @@ across time periods, confirming the stability we observed in the
 correlation metrics.</p>
 </div>
 <div class="section level3">
-<h3 id="multiple-testing-correction">Multiple Testing Correction<a class="anchor" aria-label="anchor" href="#multiple-testing-correction"></a>
+<h3 id="multiple-testing-correction">multiple testing correction<a class="anchor" aria-label="anchor" href="#multiple-testing-correction"></a>
 </h3>
 <p>When comparing multiple networks, it’s important to adjust p-values
 for multiple comparisons. The <code>p_adjust</code> parameter offers
 several correction methods:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Demonstrate multiple testing correction</span></span>
-<span><span class="co"># Compare all years pairwise with QAP</span></span>
+<code class="sourceCode R"><span><span class="co"># demonstrate multiple testing correction</span></span>
+<span><span class="co"># compare all years pairwise with qap</span></span>
 <span><span class="va">multi_year_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="va">coop_net_longit</span>,</span>
 <span>    method <span class="op">=</span> <span class="st">"qap"</span>,</span>
-<span>    n_permutations <span class="op">=</span> <span class="fl">500</span>,  <span class="co"># Lower for vignette</span></span>
-<span>    p_adjust <span class="op">=</span> <span class="st">"BH"</span>,  <span class="co"># Benjamini-Hochberg correction</span></span>
+<span>    n_permutations <span class="op">=</span> <span class="fl">500</span>,  <span class="co"># lower for vignette</span></span>
+<span>    p_adjust <span class="op">=</span> <span class="st">"BH"</span>,  <span class="co"># benjamini-hochberg correction</span></span>
 <span>    seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Show adjusted p-values</span></span>
+<span><span class="co"># show adjusted p-values</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Number of pairwise comparisons:"</span>, </span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Special.html" class="external-link">choose</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">coop_net_longit</span><span class="op">)</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Number of pairwise comparisons: 6</span></span></code></pre>
@@ -931,7 +917,7 @@ several correction methods:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"P-value adjustment method: Benjamini-Hochberg (FDR)\n\n"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## P-value adjustment method: Benjamini-Hochberg (FDR)</span></span></code></pre>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Display the p-value matrix</span></span>
+<code class="sourceCode R"><span><span class="co"># display the p-value matrix</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">multi_year_comparison</span><span class="op">$</span><span class="va">significance_tests</span><span class="op">$</span><span class="va">qap_pvalues</span>, <span class="fl">4</span><span class="op">)</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"QAP P-values (Adjusted using BH method)"</span>,</span>
@@ -949,31 +935,31 @@ several correction methods:</p>
 <tbody>
 <tr class="odd">
 <td align="left">2002</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
+<td align="center">NA</td>
+<td align="center">0.002</td>
+<td align="center">0.002</td>
+<td align="center">0.002</td>
 </tr>
 <tr class="even">
 <td align="left">2006</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
+<td align="center">0.002</td>
+<td align="center">NA</td>
+<td align="center">0.002</td>
+<td align="center">0.002</td>
 </tr>
 <tr class="odd">
 <td align="left">2010</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
+<td align="center">0.002</td>
+<td align="center">0.002</td>
+<td align="center">NA</td>
+<td align="center">0.002</td>
 </tr>
 <tr class="even">
 <td align="left">2014</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
-<td align="center">0</td>
+<td align="center">0.002</td>
+<td align="center">0.002</td>
+<td align="center">0.002</td>
+<td align="center">NA</td>
 </tr>
 </tbody>
 </table>
@@ -996,18 +982,18 @@ Type I error rates.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="structural-evolution-beyond-individual-edges">4. Structural Evolution: Beyond Individual Edges<a class="anchor" aria-label="anchor" href="#structural-evolution-beyond-individual-edges"></a>
+<h2 id="structural-evolution-beyond-individual-edges">4. structural evolution: beyond individual edges<a class="anchor" aria-label="anchor" href="#structural-evolution-beyond-individual-edges"></a>
 </h2>
 <p>The <code>what = "structure"</code> option compares network-level
 properties rather than individual edges:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compare structural properties across years</span></span>
+<code class="sourceCode R"><span><span class="co"># compare structural properties across years</span></span>
 <span><span class="va">struct_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="va">coop_net_longit</span>,</span>
 <span>    what <span class="op">=</span> <span class="st">"structure"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Display structural comparison</span></span>
+<span><span class="co"># display structural comparison</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">struct_comparison</span><span class="op">$</span><span class="va">summary</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"Structural Properties Across Time Periods"</span>,</span>
 <span>    digits <span class="op">=</span> <span class="fl">3</span>,</span>
@@ -1064,10 +1050,10 @@ properties rather than individual edges:</p>
 <td align="center">0.379</td>
 <td align="center">8692</td>
 <td align="center">0</td>
-<td align="center">19.591</td>
-<td align="center">143.821</td>
-<td align="center">0</td>
-<td align="center">0</td>
+<td align="center">51.732</td>
+<td align="center">230.131</td>
+<td align="center">8</td>
+<td align="center">1</td>
 <td align="center">6003</td>
 <td align="center">0.041</td>
 <td align="center">0.038</td>
@@ -1085,10 +1071,10 @@ properties rather than individual edges:</p>
 <td align="center">0.411</td>
 <td align="center">9429</td>
 <td align="center">0</td>
-<td align="center">21.091</td>
-<td align="center">160.078</td>
-<td align="center">0</td>
-<td align="center">0</td>
+<td align="center">51.340</td>
+<td align="center">246.631</td>
+<td align="center">7</td>
+<td align="center">1</td>
 <td align="center">7579</td>
 <td align="center">0.042</td>
 <td align="center">0.037</td>
@@ -1106,10 +1092,10 @@ properties rather than individual edges:</p>
 <td align="center">0.435</td>
 <td align="center">9976</td>
 <td align="center">0</td>
-<td align="center">18.134</td>
-<td align="center">132.367</td>
-<td align="center">0</td>
-<td align="center">0</td>
+<td align="center">41.721</td>
+<td align="center">198.316</td>
+<td align="center">6</td>
+<td align="center">1</td>
 <td align="center">4937</td>
 <td align="center">0.041</td>
 <td align="center">0.035</td>
@@ -1127,10 +1113,10 @@ properties rather than individual edges:</p>
 <td align="center">0.426</td>
 <td align="center">9774</td>
 <td align="center">0</td>
-<td align="center">18.393</td>
-<td align="center">136.541</td>
-<td align="center">0</td>
-<td align="center">0</td>
+<td align="center">43.192</td>
+<td align="center">206.667</td>
+<td align="center">6</td>
+<td align="center">1</td>
 <td align="center">6327</td>
 <td align="center">0.041</td>
 <td align="center">0.035</td>
@@ -1145,7 +1131,7 @@ properties rather than individual edges:</p>
 </tbody>
 </table>
 <div class="section level3">
-<h3 id="understanding-structural-comparison-output">Understanding Structural Comparison Output<a class="anchor" aria-label="anchor" href="#understanding-structural-comparison-output"></a>
+<h3 id="understanding-structural-comparison-output">understanding structural comparison output<a class="anchor" aria-label="anchor" href="#understanding-structural-comparison-output"></a>
 </h3>
 <p>This table shows how network-wide properties evolve:</p>
 <ul>
@@ -1175,18 +1161,18 @@ country has more partners over time</li>
 interconnectedness in international cooperation.</p>
 </div>
 <div class="section level3">
-<h3 id="visualizing-structural-changes">Visualizing Structural Changes<a class="anchor" aria-label="anchor" href="#visualizing-structural-changes"></a>
+<h3 id="visualizing-structural-changes">visualizing structural changes<a class="anchor" aria-label="anchor" href="#visualizing-structural-changes"></a>
 </h3>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Prepare data for visualization</span></span>
+<code class="sourceCode R"><span><span class="co"># prepare data for visualization</span></span>
 <span><span class="co"># struct_comparison$summary contains a</span></span>
 <span><span class="co"># data.frame with structural metrics over time</span></span>
 <span><span class="va">struct_data</span> <span class="op">&lt;-</span> <span class="va">struct_comparison</span><span class="op">$</span><span class="va">summary</span></span>
 <span></span>
-<span><span class="co"># Calculate percent changes from baseline</span></span>
+<span><span class="co"># calculate percent changes from baseline</span></span>
 <span><span class="va">baseline_year</span> <span class="op">&lt;-</span> <span class="va">struct_data</span><span class="op">$</span><span class="va">network</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">struct_long</span> <span class="op">&lt;-</span> <span class="va">struct_data</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">num_actors</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Remove num_actors since it doesn't change much</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">num_actors</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># remove num_actors since it doesn't change much</span></span>
 <span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="op">-</span><span class="va">network</span>, names_to <span class="op">=</span> <span class="st">"metric"</span>, values_to <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">metric</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
@@ -1195,7 +1181,7 @@ interconnectedness in international cooperation.</p>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create heatmap of changes</span></span>
+<span><span class="co"># create heatmap of changes</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">struct_long</span>, <span class="va">network</span> <span class="op">!=</span> <span class="va">baseline_year</span><span class="op">)</span>,</span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">network</span>, y <span class="op">=</span> <span class="va">metric</span>, fill <span class="op">=</span> <span class="va">percent_change</span><span class="op">)</span></span>
@@ -1218,6 +1204,8 @@ interconnectedness in international cooperation.</p>
 <span>        legend.position <span class="op">=</span> <span class="st">"top"</span>,</span>
 <span>        axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span>    <span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Removed 3 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">## (`geom_text()`).</span></span></code></pre>
 <p><img src="tracking_changes_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="1500"></p>
 <p>The heatmap reveals that density, number of edges, and mean degree
 all increase by about 14-15% from 2002 to 2010 (and remain ~12-13% above
@@ -1225,22 +1213,22 @@ baseline in 2014), while reciprocity stays essentially flat (within 1%
 in either direction) and transitivity shows modest growth (~3-5%).</p>
 <p>Many ways to visualize structural changes … could also just do a line
 plot:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Reshape data for visualization</span></span>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># reshape data for visualization</span></span>
 <span><span class="va">struct_long</span> <span class="op">&lt;-</span> <span class="va">struct_data</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">num_actors</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Remove num_actors since it doesn't change</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">num_actors</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># remove num_actors since it doesn't change</span></span>
 <span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="op">-</span><span class="va">network</span>, names_to <span class="op">=</span> <span class="st">"metric"</span>, values_to <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">metric</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>        <span class="co"># Calculate percent change from first year</span></span>
+<span>        <span class="co"># calculate percent change from first year</span></span>
 <span>        first_value <span class="op">=</span> <span class="va">value</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
 <span>        percent_change <span class="op">=</span> <span class="op">(</span><span class="va">value</span> <span class="op">-</span> <span class="va">first_value</span><span class="op">)</span> <span class="op">/</span> <span class="va">first_value</span> <span class="op">*</span> <span class="fl">100</span>,</span>
-<span>        <span class="co"># Also calculate year-to-year change</span></span>
+<span>        <span class="co"># also calculate year-to-year change</span></span>
 <span>        yoy_change <span class="op">=</span> <span class="op">(</span><span class="va">value</span> <span class="op">-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Visualize structural changes over time</span></span>
+<span><span class="co"># visualize structural changes over time</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">struct_long</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">network</span>, y <span class="op">=</span> <span class="va">value</span>, group <span class="op">=</span> <span class="va">metric</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1258,22 +1246,27 @@ plot:</p>
 <span>        strip.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"black"</span>, color <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span>,</span>
 <span>        strip.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"white"</span>, hjust <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span>    <span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
+<span><span class="co">## <span style="color: #555555;">This warning is displayed once per session.</span></span></span>
+<span><span class="co">## <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
+<span><span class="co">## <span style="color: #555555;">generated.</span></span></span></code></pre>
 <p><img src="tracking_changes_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="1500"></p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="node-composition-tracking-actor-dynamics">5. Node Composition: Tracking Actor Dynamics<a class="anchor" aria-label="anchor" href="#node-composition-tracking-actor-dynamics"></a>
+<h2 id="node-composition-tracking-actor-dynamics">5. node composition: tracking actor dynamics<a class="anchor" aria-label="anchor" href="#node-composition-tracking-actor-dynamics"></a>
 </h2>
 <p>The <code>what = "nodes"</code> option tracks which actors enter and
 exit the network:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compare node composition</span></span>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># compare node composition</span></span>
 <span><span class="va">node_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="va">coop_net_longit</span>,</span>
 <span>    what <span class="op">=</span> <span class="st">"nodes"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Display node comparison</span></span>
+<span><span class="co"># display node comparison</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">node_comparison</span><span class="op">$</span><span class="va">summary</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"Node Composition Across Time Periods"</span>,</span>
 <span>    digits <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -1327,12 +1320,12 @@ include certain countries. In real-world datasets, you might see actors
 entering or exiting the network over time.</p>
 </div>
 <div class="section level2">
-<h2 id="deep-dive-using-return_details-for-comprehensive-analysis">6. Deep Dive: Using return_details for Comprehensive Analysis<a class="anchor" aria-label="anchor" href="#deep-dive-using-return_details-for-comprehensive-analysis"></a>
+<h2 id="using-return_details">6. Using <code>return_details</code><a class="anchor" aria-label="anchor" href="#using-return_details"></a>
 </h2>
 <p>The <code>return_details = TRUE</code> option provides access to full
 comparison matrices:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compare 2002 and 2014 cooperation networks with full details</span></span>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># compare 2002 and 2014 cooperation networks with full details</span></span>
 <span><span class="va">early_late_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="co"># note subset here is</span></span>
 <span>    <span class="co"># subset.netify() function</span></span>
@@ -1342,18 +1335,18 @@ comparison matrices:</p>
 <span>    <span class="op">)</span>,</span>
 <span>    method <span class="op">=</span> <span class="st">"all"</span>,</span>
 <span>    return_details <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    n_permutations <span class="op">=</span> <span class="fl">1000</span> <span class="co"># Lower for vignette speed</span></span>
+<span>    n_permutations <span class="op">=</span> <span class="fl">1000</span> <span class="co"># lower for vignette speed</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Access detailed comparison matrices</span></span>
+<span><span class="co"># access detailed comparison matrices</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">early_late_comp</span><span class="op">$</span><span class="va">details</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "correlation_matrix" "jaccard_matrix"     "hamming_matrix"    </span></span>
 <span><span class="co">## [4] "spectral_matrix"</span></span></code></pre>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Get edge changes</span></span>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># get edge changes</span></span>
 <span><span class="va">changes</span> <span class="op">&lt;-</span> <span class="va">early_late_comp</span><span class="op">$</span><span class="va">edge_changes</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
-<span><span class="co"># Summary of relationship dynamics</span></span>
+<span><span class="co"># summary of relationship dynamics</span></span>
 <span><span class="va">changes_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
 <span>    <span class="st">"**Relationship Dynamics 2002-2014:**\n\n"</span>,</span>
 <span>    <span class="st">"- Stable relationships: "</span>, <span class="va">changes</span><span class="op">$</span><span class="va">maintained</span>, <span class="st">"\n"</span>,</span>
@@ -1393,7 +1386,7 @@ comparison matrices:</p>
 intensities for continuing relationships</li>
 </ul>
 <div class="section level3">
-<h3 id="understanding-detailed-output">Understanding Detailed Output<a class="anchor" aria-label="anchor" href="#understanding-detailed-output"></a>
+<h3 id="understanding-detailed-output">understanding detailed output<a class="anchor" aria-label="anchor" href="#understanding-detailed-output"></a>
 </h3>
 <p>With <code>return_details = TRUE</code>, you get:</p>
 <ul>
@@ -1417,15 +1410,15 @@ time series.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="spectral-distance-comparing-network-structure-through-eigenvalues">7. Spectral Distance: Comparing Network Structure Through
-Eigenvalues<a class="anchor" aria-label="anchor" href="#spectral-distance-comparing-network-structure-through-eigenvalues"></a>
+<h2 id="spectral-distance-comparing-network-structure-through-eigenvalues">7. spectral distance: comparing network structure through
+eigenvalues<a class="anchor" aria-label="anchor" href="#spectral-distance-comparing-network-structure-through-eigenvalues"></a>
 </h2>
 <p>The spectral distance approach provides a way to compare networks
 based on their fundamental structural properties captured by eigenvalues
 (See <a href="https://www.nature.com/articles/srep34944.pdf" class="external-link">Shimada et
 al 2016</a> for a useful introduction):</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compare networks using spectral distance</span></span>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># compare networks using spectral distance</span></span>
 <span><span class="va">spectral_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>        <span class="st">"2002"</span> <span class="op">=</span> <span class="va">coop_net_longit</span><span class="op">[[</span><span class="st">"2002"</span><span class="op">]</span><span class="op">]</span>,</span>
@@ -1434,7 +1427,7 @@ al 2016</a> for a useful introduction):</p>
 <span>    method <span class="op">=</span> <span class="st">"spectral"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Render the spectral summary as a knitr table</span></span>
+<span><span class="co"># render the spectral summary as a knitr table</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="va">spectral_comp</span><span class="op">$</span><span class="va">summary</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"Spectral Distance Results"</span>,</span>
@@ -1449,12 +1442,12 @@ al 2016</a> for a useful introduction):</p>
 </tr></thead>
 <tbody><tr class="odd">
 <td align="center">2002 vs 2014</td>
-<td align="center">14369.14</td>
+<td align="center">15167.86</td>
 </tr></tbody>
 </table>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Interpretation</span></span>
-<span><span class="co"># Build spectral interpretation message</span></span>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># interpretation</span></span>
+<span><span class="co"># build spectral interpretation message</span></span>
 <span><span class="va">spec_dist</span> <span class="op">&lt;-</span> <span class="va">spectral_comp</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">spectral</span></span>
 <span></span>
 <span><span class="va">spec_msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
@@ -1462,24 +1455,22 @@ al 2016</a> for a useful introduction):</p>
 <span>    <span class="st">"- Spectral distance: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">spec_dist</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Add interpretation</span></span>
-<span><span class="co"># Note: Spectral distance should be interpreted relative to other comparisons</span></span>
-<span><span class="co"># in your study, as the scale depends on network size</span></span>
+<span><span class="co"># add scale note</span></span>
 <span><span class="va">interpretation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
 <span>    <span class="st">"→ The spectral distance of "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">spec_dist</span>, <span class="fl">0</span><span class="op">)</span>, </span>
 <span>    <span class="st">" should be interpreted relative to other network comparisons in your study.\n"</span>,</span>
 <span>    <span class="st">"  Larger values indicate greater structural differences."</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Combine and print</span></span>
+<span><span class="co"># combine and print</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">spec_msg</span>, <span class="st">"→ "</span>, <span class="va">interpretation</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## **SPECTRAL DISTANCE INTERPRETATION**</span></span>
 <span><span class="co">## </span></span>
-<span><span class="co">## - Spectral distance: 14369.14</span></span>
-<span><span class="co">## → → The spectral distance of 14369 should be interpreted relative to other network comparisons in your study.</span></span>
+<span><span class="co">## - Spectral distance: 15167.86</span></span>
+<span><span class="co">## → → The spectral distance of 15168 should be interpreted relative to other network comparisons in your study.</span></span>
 <span><span class="co">##   Larger values indicate greater structural differences.</span></span></code></pre>
 <div class="section level3">
-<h3 id="understanding-spectral-distance">Understanding Spectral Distance<a class="anchor" aria-label="anchor" href="#understanding-spectral-distance"></a>
+<h3 id="understanding-spectral-distance">understanding spectral distance<a class="anchor" aria-label="anchor" href="#understanding-spectral-distance"></a>
 </h3>
 <p>Spectral distance measures how different two networks are by
 comparing their eigenvalue spectra. It captures global structural
@@ -1511,29 +1502,29 @@ network classification)</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="performance-optimization-for-large-networks">Performance Optimization for Large Networks<a class="anchor" aria-label="anchor" href="#performance-optimization-for-large-networks"></a>
+<h3 id="performance-optimization-for-large-networks">performance optimization for large networks<a class="anchor" aria-label="anchor" href="#performance-optimization-for-large-networks"></a>
 </h3>
 <p>For large networks (&gt;1000 nodes), computing all eigenvalues can be
 computationally expensive. The <code>spectral_rank</code> parameter
 allows you to use only the top-k eigenvalues.</p>
 <p><em>Example: adapt the code below with your own large network objects
 to run it.</em></p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># For large networks, use spectral_rank to improve performance</span></span>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># for large networks, use spectral_rank to improve performance</span></span>
 <span><span class="va">spectral_comp_fast</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">large_net1</span>, <span class="va">large_net2</span><span class="op">)</span>,</span>
 <span>    method <span class="op">=</span> <span class="st">"spectral"</span>,</span>
-<span>    spectral_rank <span class="op">=</span> <span class="fl">50</span>  <span class="co"># Use only top 50 eigenvalues (rule of thumb: round(sqrt(n)))</span></span>
+<span>    spectral_rank <span class="op">=</span> <span class="fl">50</span>  <span class="co"># use only top 50 eigenvalues (rule of thumb: round(sqrt(n)))</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The top eigenvalues capture the most significant structural features.
 A good rule of thumb is to use <code>round(sqrt(n))</code> eigenvalues,
 where n is the number of nodes.</p>
 </div>
 <div class="section level3">
-<h3 id="combining-with-other-methods">Combining with Other Methods<a class="anchor" aria-label="anchor" href="#combining-with-other-methods"></a>
+<h3 id="combining-with-other-methods">combining with other methods<a class="anchor" aria-label="anchor" href="#combining-with-other-methods"></a>
 </h3>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compare all methods including spectral</span></span>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># compare all methods including spectral</span></span>
 <span><span class="va">full_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>        early <span class="op">=</span> <span class="va">coop_net_longit</span><span class="op">[[</span><span class="st">"2002"</span><span class="op">]</span><span class="op">]</span>,</span>
@@ -1543,7 +1534,7 @@ where n is the number of nodes.</p>
 <span>    return_details <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Extract similarity metrics (0-1 scale) and spectral distance separately</span></span>
+<span><span class="co"># extract similarity metrics (0-1 scale) and spectral distance separately</span></span>
 <span><span class="va">similarity_metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>    Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Correlation"</span>, <span class="st">"Jaccard"</span>, <span class="st">"Hamming"</span><span class="op">)</span>,</span>
 <span>    Value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -1555,7 +1546,7 @@ where n is the number of nodes.</p>
 <span></span>
 <span><span class="va">spectral_distance</span> <span class="op">&lt;-</span> <span class="va">full_comp</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">spectral</span></span>
 <span></span>
-<span><span class="co"># Display similarity metrics table</span></span>
+<span><span class="co"># display similarity metrics table</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
 <span>        <span class="va">similarity_metrics</span>,</span>
@@ -1582,16 +1573,16 @@ where n is the number of nodes.</p>
 </tr>
 <tr class="odd">
 <td align="center">Hamming</td>
-<td align="center">0.225</td>
+<td align="center">0.227</td>
 </tr>
 <tr class="even">
 <td align="center">Spectral Distance</td>
-<td align="center">14369.141</td>
+<td align="center">15167.856</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create visualization for similarity metrics</span></span>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># create visualization for similarity metrics</span></span>
 <span><span class="va">p_similarity</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">similarity_metrics</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Method</span>, y <span class="op">=</span> <span class="va">Value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Value</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span>, hjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span>, size <span class="op">=</span> <span class="fl">3.5</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1608,10 +1599,10 @@ where n is the number of nodes.</p>
 <span>    <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create separate note for spectral distance</span></span>
+<span><span class="co"># create separate note for spectral distance</span></span>
 <span><span class="va">spectral_note</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Spectral Distance:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">spectral_distance</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Combine the plot with spectral distance information</span></span>
+<span><span class="co"># combine the plot with spectral distance information</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
 <span><span class="va">p_similarity</span> <span class="op">+</span> <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_annotation.html" class="external-link">plot_annotation</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">"Network Comparison: Multiple Metrics"</span>,</span>
@@ -1625,17 +1616,17 @@ other spectral distance values rather than in absolute terms.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="multilayer-networks-comparing-different-relationship-types">8. Multilayer Networks: Comparing Different Relationship Types<a class="anchor" aria-label="anchor" href="#multilayer-networks-comparing-different-relationship-types"></a>
+<h2 id="multilayer-networks-comparing-different-relationship-types">8. multilayer networks: comparing different relationship types<a class="anchor" aria-label="anchor" href="#multilayer-networks-comparing-different-relationship-types"></a>
 </h2>
 <p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function automatically handles
 multilayer networks created with <code><a href="../reference/layer_netify.html">layer_netify()</a></code>. This
 allows you to compare different types of relationships (layers) within
 the same set of actors:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create multilayer network for 2010</span></span>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># create multilayer network for 2010</span></span>
 <span><span class="va">icews_2010</span> <span class="op">&lt;-</span> <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span></span>
 <span></span>
-<span><span class="co"># Create individual networks for each layer</span></span>
+<span><span class="co"># create individual networks for each layer</span></span>
 <span><span class="va">verb_coop_2010</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews_2010</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
@@ -1664,7 +1655,7 @@ the same set of actors:</p>
 <span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Combine into multilayer network</span></span>
+<span><span class="co"># combine into multilayer network</span></span>
 <span><span class="va">multilayer_2010</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/layer_netify.html">layer_netify</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>        verbal_coop <span class="op">=</span> <span class="va">verb_coop_2010</span>,</span>
@@ -1674,9 +1665,9 @@ the same set of actors:</p>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Compare layers automatically</span></span>
+<span><span class="co"># compare layers automatically</span></span>
 <span><span class="va">layer_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">multilayer_2010</span>, method <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span>
-<span><span class="co"># Render the layer-comparison summary as a knitr table</span></span>
+<span><span class="co"># render the layer-comparison summary as a knitr table</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="va">layer_comparison</span><span class="op">$</span><span class="va">summary</span>,</span>
 <span>    caption <span class="op">=</span> <span class="st">"Multilayer Network Comparison Summary"</span>,</span>
@@ -1709,10 +1700,10 @@ the same set of actors:</p>
 </tr>
 <tr class="odd">
 <td align="center">hamming</td>
-<td align="center">0.223</td>
-<td align="center">0.129</td>
-<td align="center">0.100</td>
-<td align="center">0.351</td>
+<td align="center">0.224</td>
+<td align="center">0.130</td>
+<td align="center">0.101</td>
+<td align="center">0.353</td>
 </tr>
 <tr class="even">
 <td align="center">qap_correlation</td>
@@ -1723,15 +1714,15 @@ the same set of actors:</p>
 </tr>
 <tr class="odd">
 <td align="center">spectral</td>
-<td align="center">42200.921</td>
-<td align="center">42019.957</td>
-<td align="center">529.314</td>
-<td align="center">84148.029</td>
+<td align="center">40929.781</td>
+<td align="center">40168.876</td>
+<td align="center">1847.796</td>
+<td align="center">81155.371</td>
 </tr>
 </tbody>
 </table>
 <div class="section level3">
-<h3 id="understanding-multilayer-comparison-output">Understanding Multilayer Comparison Output<a class="anchor" aria-label="anchor" href="#understanding-multilayer-comparison-output"></a>
+<h3 id="understanding-multilayer-comparison-output">understanding multilayer comparison output<a class="anchor" aria-label="anchor" href="#understanding-multilayer-comparison-output"></a>
 </h3>
 <p>When you pass a multilayer network to
 <code><a href="../reference/compare_networks.html">compare_networks()</a></code>, it automatically:</p>
@@ -1750,12 +1741,12 @@ these are distinct relationship patterns</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="interpreting-multilayer-results">Interpreting Multilayer Results<a class="anchor" aria-label="anchor" href="#interpreting-multilayer-results"></a>
+<h3 id="interpreting-multilayer-results">interpreting multilayer results<a class="anchor" aria-label="anchor" href="#interpreting-multilayer-results"></a>
 </h3>
 <p>The output shows all six pairwise comparisons between the four
 network layers. To inspect them individually, pull the tidy
 <code>$comparisons</code> frame:</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">layer_comparison</span><span class="op">$</span><span class="va">comparisons</span>, <span class="va">metric</span> <span class="op">==</span> <span class="st">"qap_correlation"</span>,</span>
 <span>        select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">net_i</span>, <span class="va">net_j</span>, <span class="va">value</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -1818,16 +1809,16 @@ correlations involve material cooperation – costly material support is
 the layer that overlaps least with the others</li>
 <li>
 <strong>Range</strong>: correlations span 0.42 to 0.64, all positive
-– interaction density drives a baseline overlap even between cooperation
-and conflict.</li>
+– interaction density creates a baseline overlap even between
+cooperation and conflict.</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="longitudinal-multilayer-networks">Longitudinal Multilayer Networks<a class="anchor" aria-label="anchor" href="#longitudinal-multilayer-networks"></a>
+<h3 id="longitudinal-multilayer-networks">longitudinal multilayer networks<a class="anchor" aria-label="anchor" href="#longitudinal-multilayer-networks"></a>
 </h3>
 <p>You can also compare multilayer networks that evolve over time:</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Create longitudinal multilayer networks</span></span>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># create longitudinal multilayer networks</span></span>
 <span><span class="va">verb_coop_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
@@ -1846,7 +1837,7 @@ and conflict.</li>
 <span>    output_format <span class="op">=</span> <span class="st">"longit_array"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Combine into longitudinal multilayer</span></span>
+<span><span class="co"># combine into longitudinal multilayer</span></span>
 <span><span class="va">longit_multilayer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/layer_netify.html">layer_netify</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>        verbal <span class="op">=</span> <span class="va">verb_coop_longit</span>,</span>
@@ -1854,10 +1845,10 @@ and conflict.</li>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Compare layers across all time periods</span></span>
+<span><span class="co"># compare layers across all time periods</span></span>
 <span><span class="va">longit_layer_comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">longit_multilayer</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Display results cleanly</span></span>
+<span><span class="co"># display results cleanly</span></span>
 <span><span class="va">longit_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
 <span>    <span class="st">"**Longitudinal multilayer comparison:**\n\n"</span>,</span>
 <span>    <span class="st">"- Type: "</span>, <span class="va">longit_layer_comp</span><span class="op">$</span><span class="va">comparison_type</span>, <span class="st">"\n"</span>,</span>
@@ -1882,11 +1873,11 @@ cooperation remains stable or changes over time.</p>
 <p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function is your go-to tool for
 understanding how networks differ and change:</p>
 <p><strong>Basic usage:</strong></p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compare two networks</span></span>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># compare two networks</span></span>
 <span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">net1</span>, <span class="va">net2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Compare longitudinal networks automatically</span></span>
+<span><span class="co"># compare longitudinal networks automatically</span></span>
 <span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span><span class="va">longitudinal_netify_object</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Key parameters to remember:</strong></p>
 <ul>
@@ -1903,11 +1894,11 @@ matrices</li>
 <code>n_permutations</code>: For QAP significance testing (default
 5000)</li>
 <li>
-<code>permutation_type</code>: “classic” (default),
-“degree_preserving”, “freedman_lane”, or “dsp_mrqap”</li>
+<code>permutation_type</code>: “classic” (default) or
+“degree_preserving” for pairwise QAP</li>
 <li>
-<code>correlation_type</code>: “pearson” (default) or
-“spearman”</li>
+<code>correlation_type</code>: “pearson” (default) or “spearman” for
+non-QAP edge correlations</li>
 <li>
 <code>seed</code>: Set for reproducible permutation tests</li>
 <li>
@@ -1941,18 +1932,17 @@ properties</li>
 comparison matrices</li>
 <li>For longitudinal data, just pass your netify object - it handles the
 rest</li>
-<li>Use <code>permutation_type = "freedman_lane"</code> or
-<code>"dsp_mrqap"</code> when comparing networks that may have
-autocorrelation</li>
-<li>Set <code>correlation_type = "spearman"</code> for networks with
-skewed weight distributions</li>
+<li>Use <code>permutation_type = "degree_preserving"</code> for binary
+QAP when degree heterogeneity is central</li>
+<li>Set <code>correlation_type = "spearman"</code> for non-QAP
+comparisons with skewed weight distributions</li>
 <li>Use <code>p_adjust</code> when making multiple comparisons to
 control false discovery rate</li>
 <li>Set <code>spectral_rank = round(sqrt(n))</code> for large networks
 to improve performance</li>
 </ol>
 <div class="section level3">
-<h3 id="when-to-use-advanced-options">When to Use Advanced Options<a class="anchor" aria-label="anchor" href="#when-to-use-advanced-options"></a>
+<h3 id="when-to-use-advanced-options">when to use advanced options<a class="anchor" aria-label="anchor" href="#when-to-use-advanced-options"></a>
 </h3>
 <p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function includes several
 advanced parameters that help tailor the analysis to your specific
@@ -1966,14 +1956,6 @@ permutation. Use for general network comparisons.</li>
 <strong><code>degree_preserving</code></strong>: Maintains degree
 sequences through edge swaps. Essential for sparse, binary networks with
 high degree heterogeneity.</li>
-<li>
-<strong><code>freedman_lane</code></strong>: Residualizes before
-permutation. Use when you suspect network autocorrelation (e.g.,
-geographic networks, social influence).</li>
-<li>
-<strong><code>dsp_mrqap</code></strong>: Double semi-partialling.
-Most conservative option; use for multiple regression-style comparisons
-or when networks have strong mutual dependencies.</li>
 </ul>
 <p><strong>Correlation Types:</strong></p>
 <ul>
@@ -1981,8 +1963,9 @@ or when networks have strong mutual dependencies.</li>
 <strong><code>pearson</code></strong> (default): Standard linear
 correlation. Appropriate for normally distributed edge weights.</li>
 <li>
-<strong><code>spearman</code></strong>: Rank-based correlation. Use
-when edge weights are skewed, zero-inflated, or contain outliers.</li>
+<strong><code>spearman</code></strong>: Rank-based correlation for
+non-QAP edge comparisons. Use when edge weights are skewed,
+zero-inflated, or contain outliers.</li>
 </ul>
 <p><strong>P-value Adjustments:</strong></p>
 <ul>
@@ -2017,14 +2000,13 @@ correlation. Reduces bias from density differences.</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="using-compare_networks-in-your-research-workflow">Using <code>compare_networks()</code> in Your Research Workflow<a class="anchor" aria-label="anchor" href="#using-compare_networks-in-your-research-workflow"></a>
+<h2 id="using-compare_networks-in-your-research-workflow">using <code>compare_networks()</code> in your research workflow<a class="anchor" aria-label="anchor" href="#using-compare_networks-in-your-research-workflow"></a>
 </h2>
 <div class="section level3">
-<h3 id="where-compare_networks-fits-in-network-analysis">Where <code>compare_networks()</code> Fits in Network Analysis<a class="anchor" aria-label="anchor" href="#where-compare_networks-fits-in-network-analysis"></a>
+<h3 id="where-compare_networks-fits-in-network-analysis">where <code>compare_networks()</code> fits in network analysis<a class="anchor" aria-label="anchor" href="#where-compare_networks-fits-in-network-analysis"></a>
 </h3>
-<p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function serves as a
-comprehensive diagnostic tool that should be used throughout your
-network analysis workflow:</p>
+<p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function can be used at several
+points in a network analysis workflow:</p>
 <table class="table">
 <colgroup>
 <col width="24%">
@@ -2049,8 +2031,9 @@ network analysis workflow:</p>
 </tr>
 <tr class="odd">
 <td><strong>Theory building</strong></td>
-<td>Which dimensions matter (time, layer, subgroup)?</td>
-<td>Temporal/multilayer/by-group comparisons highlight mechanisms</td>
+<td>Which dimensions vary most (time, layer, subgroup)?</td>
+<td>Temporal/multilayer/by-group comparisons highlight patterns to
+investigate</td>
 </tr>
 <tr class="even">
 <td><strong>Model specification</strong></td>
@@ -2066,7 +2049,7 @@ network analysis workflow:</p>
 </table>
 </div>
 <div class="section level3">
-<h3 id="recommended-pre-modeling-workflow">Recommended Pre-Modeling Workflow<a class="anchor" aria-label="anchor" href="#recommended-pre-modeling-workflow"></a>
+<h3 id="recommended-pre-modeling-workflow">recommended pre-modeling workflow<a class="anchor" aria-label="anchor" href="#recommended-pre-modeling-workflow"></a>
 </h3>
 <p>Before fitting ERGMs, SAOMs, or latent space models, follow this
 systematic approach:</p>
@@ -2122,7 +2105,7 @@ separately</li>
 </li>
 <li>
 <strong>Statistical Validation</strong>:
-<code>compare_networks(nets, method="qap", permutation_type="...")</code>
+<code>compare_networks(nets, method="qap", permutation_type="degree_preserving")</code>
 <ul>
 <li>Test if correlations are spurious under network constraints</li>
 <li>Guides which controls must enter your model</li>
@@ -2131,7 +2114,7 @@ separately</li>
 </ol>
 </div>
 <div class="section level3">
-<h3 id="interpreting-results-for-model-building">Interpreting Results for Model Building<a class="anchor" aria-label="anchor" href="#interpreting-results-for-model-building"></a>
+<h3 id="interpreting-results-for-model-building">interpreting results for model building<a class="anchor" aria-label="anchor" href="#interpreting-results-for-model-building"></a>
 </h3>
 <p><strong>For ERGMs:</strong></p>
 <ul>
@@ -2156,7 +2139,7 @@ positions</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="computational-considerations">Computational Considerations<a class="anchor" aria-label="anchor" href="#computational-considerations"></a>
+<h3 id="computational-considerations">computational considerations<a class="anchor" aria-label="anchor" href="#computational-considerations"></a>
 </h3>
 <p>For large networks (&gt;1000 nodes):</p>
 <ul>
@@ -2170,38 +2153,45 @@ weight distributions</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="example-complete-pre-modeling-diagnostic">Example: Complete Pre-Modeling Diagnostic<a class="anchor" aria-label="anchor" href="#example-complete-pre-modeling-diagnostic"></a>
+<h3 id="example-complete-pre-modeling-diagnostic">example: complete pre-modeling diagnostic<a class="anchor" aria-label="anchor" href="#example-complete-pre-modeling-diagnostic"></a>
 </h3>
 <p><em>Example: adapt the template below to your own networks to run
 it.</em></p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Comprehensive diagnostic before ERGM fitting</span></span>
-<span><span class="va">diagnostic_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># check edge, structure, and node composition</span></span>
+<span><span class="va">edge_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
 <span>    <span class="va">network_list</span>,</span>
 <span>    method <span class="op">=</span> <span class="st">"all"</span>,</span>
 <span>    what <span class="op">=</span> <span class="st">"edges"</span>,</span>
-<span>    permutation_type <span class="op">=</span> <span class="st">"degree_preserving"</span>,  <span class="co"># For sparse networks</span></span>
-<span>    correlation_type <span class="op">=</span> <span class="st">"spearman"</span>,           <span class="co"># For skewed weights</span></span>
-<span>    n_permutations <span class="op">=</span> <span class="fl">10000</span>,                  <span class="co"># For final analysis</span></span>
-<span>    p_adjust <span class="op">=</span> <span class="st">"BH"</span>,                         <span class="co"># Multiple comparisons</span></span>
-<span>    spectral_rank <span class="op">=</span> <span class="fl">75</span>,                      <span class="co"># Large network optimization</span></span>
-<span>    return_details <span class="op">=</span> <span class="cn">TRUE</span>,                   <span class="co"># For custom analysis</span></span>
-<span>    seed <span class="op">=</span> <span class="fl">12345</span>                             <span class="co"># Reproducibility</span></span>
+<span>    permutation_type <span class="op">=</span> <span class="st">"degree_preserving"</span>,  <span class="co"># for sparse networks</span></span>
+<span>    correlation_type <span class="op">=</span> <span class="st">"spearman"</span>,           <span class="co"># for skewed weights</span></span>
+<span>    n_permutations <span class="op">=</span> <span class="fl">10000</span>,                  <span class="co"># for final analysis</span></span>
+<span>    p_adjust <span class="op">=</span> <span class="st">"BH"</span>,                         <span class="co"># multiple comparisons</span></span>
+<span>    spectral_rank <span class="op">=</span> <span class="fl">75</span>,                      <span class="co"># large network optimization</span></span>
+<span>    return_details <span class="op">=</span> <span class="cn">TRUE</span>,                   <span class="co"># for custom analysis</span></span>
+<span>    seed <span class="op">=</span> <span class="fl">12345</span>                             <span class="co"># reproducibility</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Extract insights for model specification</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="va">diagnostic_results</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">transitivity</span> <span class="op">&gt;</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="co"># High clustering suggests including triadic closure terms</span></span>
+<span><span class="va">structure_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_networks.html">compare_networks</a></span><span class="op">(</span></span>
+<span>    <span class="va">network_list</span>,</span>
+<span>    method <span class="op">=</span> <span class="st">"all"</span>,</span>
+<span>    what <span class="op">=</span> <span class="st">"structure"</span>,</span>
+<span>    return_details <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># extract insights for model specification</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">structure_results</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">transitivity</span> <span class="op">&gt;</span> <span class="fl">0.3</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="co"># high clustering suggests including triadic closure terms</span></span>
 <span>    <span class="va">ergm_formula</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></span><span class="op">(</span><span class="va">net</span> <span class="op">~</span> <span class="va">edges</span> <span class="op">+</span> <span class="fu">gwesp</span><span class="op">(</span><span class="fl">0.5</span>, fixed<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="va">diagnostic_results</span><span class="op">$</span><span class="va">spectral</span> <span class="op">&gt;</span> <span class="fl">100</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="co"># Large spectral distance suggests structural regime change</span></span>
-<span>    <span class="co"># Consider separate models for different periods</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">edge_results</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">spectral</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">100</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="co"># large spectral distance suggests structural regime change</span></span>
+<span>    <span class="co"># consider separate models for different periods</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="metric-interpretation-guidelines">Metric Interpretation Guidelines<a class="anchor" aria-label="anchor" href="#metric-interpretation-guidelines"></a>
+<h3 id="metric-interpretation-guidelines">metric interpretation guidelines<a class="anchor" aria-label="anchor" href="#metric-interpretation-guidelines"></a>
 </h3>
 <p><strong>Edge-level Metrics:</strong></p>
 <ul>
@@ -2253,7 +2243,7 @@ relatively
 </ul>
 </div>
 <div class="section level3">
-<h3 id="computational-performance-guide">Computational Performance Guide<a class="anchor" aria-label="anchor" href="#computational-performance-guide"></a>
+<h3 id="computational-performance-guide">computational performance guide<a class="anchor" aria-label="anchor" href="#computational-performance-guide"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -2305,7 +2295,7 @@ relatively
 edges</p>
 </div>
 <div class="section level3">
-<h3 id="common-pitfalls-and-solutions">Common Pitfalls and Solutions<a class="anchor" aria-label="anchor" href="#common-pitfalls-and-solutions"></a>
+<h3 id="common-pitfalls-and-solutions">common pitfalls and solutions<a class="anchor" aria-label="anchor" href="#common-pitfalls-and-solutions"></a>
 </h3>
 <ol style="list-style-type: decimal">
 <li>
@@ -2343,25 +2333,10 @@ edges</p>
 </ul>
 </li>
 </ol>
-<p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function is your comprehensive
-pre-modeling diagnostic tool. Use it early and often to ensure your
-subsequent modeling choices are well-informed and defensible.</p>
+<p>The <code><a href="../reference/compare_networks.html">compare_networks()</a></code> function is a pre-modeling
+diagnostic tool for checking whether network differences are large
+enough to matter for the next analysis step.</p>
 </div>
-</div>
-<div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h2>
-<ol style="list-style-type: decimal">
-<li><p>Krackhardt, D. (1988). Predicting with networks: Nonparametric
-multiple regression analysis of dyadic data. Social Networks, 10(4),
-359–381</p></li>
-<li><p>Freedman, D., &amp; Lane, D. (1983). A nonstochastic
-interpretation of reported significance levels. Journal of Business
-&amp; Economic Statistics, 1(4), 292–298.</p></li>
-<li><p>Dekker, D., Krackhardt, D., &amp; Snijders, T. A. B. (2007).
-Sensitivity of MRQAP tests to collinearity and autocorrelation
-conditions. Psychometrika, 72(4), 563–581.</p></li>
-</ol>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

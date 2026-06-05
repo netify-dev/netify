@@ -1,7 +1,7 @@
-# Extract label_repel layer from netify plot components
+# extract label_repel layer from netify plot components
 
-Extracts the label_repel layer from a netify plot components object.
-Label repel annotations display actor names with background boxes and
+extracts the label_repel layer from a netify plot components object.
+label repel annotations display actor names with background boxes and
 automatic repositioning to avoid overlaps, providing optimal readability
 in dense networks.
 
@@ -15,13 +15,13 @@ netify_label_repel(comp)
 
 - comp:
 
-  A netify_plot_components object returned from
+  a netify_plot_components object returned from
   `plot(..., return_components = TRUE)`
 
 ## Value
 
-A custom object of class "netify_label_repel" that can be added to a
-ggplot object using the + operator. The object contains the label_repel
+a custom object of class "netify_label_repel" that can be added to a
+ggplot object using the + operator. the object contains the label_repel
 layer with all its aesthetic mappings and data.
 
 ## See also
@@ -32,7 +32,7 @@ layer with all its aesthetic mappings and data.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

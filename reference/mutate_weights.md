@@ -1,7 +1,7 @@
 # Mutate edge weights in a netify object
 
 `mutate_weights` applies mathematical transformations to edge weights in
-a netify object. This is useful for normalizing data, handling skewed
+a netify object. this is useful for normalizing data, handling skewed
 distributions, creating binary networks, or applying any custom
 mathematical transformation to network weights.
 
@@ -21,69 +21,69 @@ mutate_weights(
 
 - netlet:
 
-  A netify object with edge weights to transform
+  a netify object with edge weights to transform
 
 - transform_fn:
 
-  A function to apply to the weights. Can be any function that takes a
+  a function to apply to the weights. can be any function that takes a
   matrix and returns a matrix (e.g., `log`, `sqrt`, `function(x) x^2`).
-  If NULL, only the `add_constant` operation is performed.
+  if NULL, only the `add_constant` operation is performed.
 
 - add_constant:
 
-  Numeric value to add to weights before applying `transform_fn`. Useful
+  numeric value to add to weights before applying `transform_fn`. useful
   for log transformations (e.g., `add_constant = 1` for `log(x + 1)`) or
   shifting distributions.
 
 - new_name:
 
-  Optional new name for the weight variable. If provided, updates the
-  weight attribute and descriptive labels. If NULL, keeps the original
+  optional new name for the weight variable. if provided, updates the
+  weight attribute and descriptive labels. if NULL, keeps the original
   name.
 
 - keep_original:
 
-  Logical. If TRUE (default), preserves the original weights as a dyadic
-  variable. If FALSE, discards original weights to save memory.
+  logical. if TRUE (default), preserves the original weights as a dyadic
+  variable. if FALSE, discards original weights to save memory.
 
 ## Value
 
-A netify object with transformed weights. The original weights are
+a netify object with transformed weights. the original weights are
 optionally preserved as a dyadic variable named "original_weight".
 
 ## Details
 
-The function handles all netify object types:
+the function handles all netify object types:
 
-- **Cross-sectional**: Transforms the single network matrix
+- **cross-sectional**: transforms the single network matrix
 
-- **Longitudinal arrays**: Transforms each time slice
+- **longitudinal arrays**: transforms each time slice
 
-- **Longitudinal lists**: Transforms each time period matrix
+- **longitudinal lists**: transforms each time period matrix
 
-The function automatically updates network attributes:
+the function automatically updates network attributes:
 
-- Updates `is_binary` if transformation results in 0/1 values
+- updates `is_binary` if transformation results in 0/1 values
 
-- Updates `detail_weight` with transformation description
+- updates `detail_weight` with transformation description
 
-- Preserves all other network and nodal attributes
+- preserves all other network and nodal attributes
 
-For longitudinal arrays, original weight preservation is not yet
+for longitudinal arrays, original weight preservation is not yet
 implemented and will show an informational message.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
-# Load example data
+# load example data
 data(icews)
 icews_2010 <- icews[icews$year == 2010, ]
 
-# Create a weighted network
+# create a weighted network
 net <- netify(
     icews_2010,
     actor1 = "i", actor2 = "j",
@@ -91,7 +91,7 @@ net <- netify(
     weight = "verbCoop"
 )
 
-# Example 1: Log transformation (common for skewed data)
+# example 1: log transformation (common for skewed data)
 net_log <- mutate_weights(
     net,
     transform_fn = log,
@@ -99,7 +99,7 @@ net_log <- mutate_weights(
     new_name = "log_verbCoop"
 )
 print(net_log)
-#> ✔ Hello, you have created network data, yay!
+#> ✔ Network data created.
 #> • Unipartite
 #> • Asymmetric
 #> • log_verbCoop (transformed)
@@ -107,18 +107,18 @@ print(net_log)
 #> • # Unique Actors: 152
 #> Network Summary Statistics:
 #>           dens miss  mean recip trans
-#> verbCoop 0.435    0 0.975 0.966 0.639
+#> verbCoop 0.435    0 2.243 0.966 0.639
 #> • Nodal Features: None
 #> • Dyad Features: original_weight
 
-# Example 2: Square root transformation (moderate skewness)
+# example 2: square root transformation (moderate skewness)
 net_sqrt <- mutate_weights(
     net,
     transform_fn = sqrt,
     new_name = "sqrt_verbCoop"
 )
 
-# Example 3: Binarization (convert to presence/absence)
+# example 3: binarization (convert to presence/absence)
 net_binary <- mutate_weights(
     net,
     transform_fn = function(x) ifelse(x > 0, 1, 0),
@@ -126,7 +126,7 @@ net_binary <- mutate_weights(
 )
 #> ℹ network has been binarized through transformation
 
-# Example 4: Standardization (z-scores)
+# example 4: standardization (z-scores)
 net_std <- mutate_weights(
     net,
     transform_fn = function(x) {
@@ -137,21 +137,21 @@ net_std <- mutate_weights(
     new_name = "verbCoop_standardized"
 )
 
-# Example 5: Rank transformation
+# example 5: rank transformation
 net_rank <- mutate_weights(
     net,
     transform_fn = function(x) rank(x, na.last = "keep"),
     new_name = "verbCoop_ranked"
 )
 
-# Example 6: Power transformation
+# example 6: power transformation
 net_power <- mutate_weights(
     net,
-    transform_fn = function(x) x^0.5, # Square root as power
+    transform_fn = function(x) x^0.5, # square root as power
     new_name = "verbCoop_power"
 )
 
-# Example 7: Min-max normalization (scale to 0-1)
+# example 7: min-max normalization (scale to 0-1)
 net_norm <- mutate_weights(
     net,
     transform_fn = function(x) {
@@ -162,24 +162,24 @@ net_norm <- mutate_weights(
     new_name = "verbCoop_normalized"
 )
 
-# Example 8: Winsorization (cap extreme values)
+# example 8: winsorization (cap extreme values)
 net_winsor <- mutate_weights(
     net,
     transform_fn = function(x) {
         q95 <- quantile(x, 0.95, na.rm = TRUE)
-        return(pmin(x, q95)) # Cap at 95th percentile
+        return(pmin(x, q95)) # cap at 95th percentile
     },
     new_name = "verbCoop_winsorized"
 )
 
-# Example 9: Only add constant (no transformation function)
+# example 9: only add constant (no transformation function)
 net_shifted <- mutate_weights(
     net,
     add_constant = 10,
     new_name = "verbCoop_shifted"
 )
 
-# Example 10: Don't keep original weights to save memory
+# example 10: don't keep original weights to save memory
 net_log_compact <- mutate_weights(
     net,
     transform_fn = log1p, # log(1 + x), handles zeros automatically
@@ -187,9 +187,9 @@ net_log_compact <- mutate_weights(
     keep_original = FALSE
 )
 
-# Example 11: Longitudinal network transformation
+# example 11: longitudinal network transformation
 # \donttest{
-# Create longitudinal network
+# create longitudinal network
 net_longit <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
@@ -198,7 +198,7 @@ net_longit <- netify(
     actor_time_uniform = FALSE
 )
 
-# Transform across all time periods
+# transform across all time periods
 net_longit_log <- mutate_weights(
     net_longit,
     transform_fn = log1p,
@@ -206,11 +206,11 @@ net_longit_log <- mutate_weights(
 )
 # }
 
-# Example 12: Custom transformation with multiple operations
+# example 12: custom transformation with multiple operations
 net_custom <- mutate_weights(
     net,
     transform_fn = function(x) {
-        # Complex transformation: log, then standardize
+        # complex transformation: log, then standardize
         x_log <- log(x + 1)
         x_std <- (x_log - mean(x_log, na.rm = TRUE)) / sd(x_log, na.rm = TRUE)
         return(x_std)

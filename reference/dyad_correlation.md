@@ -1,7 +1,7 @@
 # Analyze correlations between dyadic attributes and network ties
 
-Examines relationships between dyadic (pairwise) attributes and network
-connections. Calculates correlations between dyadic variables and edge
+examines relationships between dyadic (pairwise) attributes and network
+connections. calculates correlations between dyadic variables and edge
 weights/presence, with support for multiple correlation methods and
 significance testing.
 
@@ -27,129 +27,134 @@ dyad_correlation(
 
 - netlet:
 
-  A netify object containing network data.
+  a netify object containing network data.
 
 - dyad_vars:
 
-  Character vector of dyadic attribute names to analyze. If NULL,
+  character vector of dyadic attribute names to analyze. if NULL,
   analyzes all available dyadic variables.
 
 - edge_vars:
 
-  Character vector of edge variables to correlate with. If NULL, uses
+  character vector of edge variables to correlate with. if NULL, uses
   the main network matrix.
 
 - method:
 
-  Character string specifying correlation method:
+  character string specifying correlation method:
 
   "pearson"
 
-  :   Pearson product-moment correlation (default)
+  :   pearson product-moment correlation (default)
 
   "spearman"
 
-  :   Spearman rank correlation
+  :   spearman rank correlation
 
   "kendall"
 
-  :   Kendall's tau correlation
+  :   kendall's tau correlation
 
 - binary_network:
 
-  Logical. Whether to convert ties to binary before correlation. Default
+  logical. whether to convert ties to binary before correlation. default
   FALSE.
 
 - remove_diagonal:
 
-  Logical. Whether to exclude diagonal elements. Default TRUE.
+  logical. whether to exclude diagonal elements. default TRUE.
 
 - significance_test:
 
-  Logical. Whether to calculate P-values and confidence intervals.
-  Default TRUE.
+  logical. whether to calculate ordinary correlation p-values and
+  confidence intervals on the dyad vectors. default TRUE.
 
 - alpha:
 
-  Significance level for confidence intervals. Default 0.05.
+  significance level for confidence intervals. default 0.05.
 
 - partial_correlations:
 
-  Logical. Whether to calculate partial correlations controlling for
-  other dyadic variables. Default FALSE.
+  logical. whether to calculate partial correlations controlling for
+  other dyadic variables. default FALSE.
 
 - other_stats:
 
-  Named list of custom functions for additional statistics.
+  named list of custom functions for additional statistics.
 
 - ...:
 
-  Additional arguments passed to custom functions.
+  additional arguments passed to custom functions.
 
 ## Value
 
-Data frame with one row per dyadic variable per network/time period:
+data frame with one row per dyadic variable per network/time period:
 
 - `net`:
 
-  Network/time identifier
+  network/time identifier
 
 - `layer`:
 
-  Layer name
+  layer name
 
 - `dyad_var`:
 
-  Name of dyadic variable
+  name of dyadic variable
 
 - `edge_var`:
 
-  Name of edge variable
+  name of edge variable
 
 - `correlation`:
 
-  Correlation coefficient
+  correlation coefficient
 
 - `p_value`:
 
-  P-value for correlation significance
+  p-value for correlation significance
 
 - `ci_lower`, `ci_upper`:
 
-  Confidence interval bounds
+  confidence interval bounds
 
 - `n_pairs`:
 
-  Number of dyad pairs included
+  number of dyad pairs included
 
 - `method`:
 
-  Correlation method used
+  correlation method used
 
 - `mean_dyad_var`:
 
-  Mean value of dyadic variable
+  mean value of dyadic variable
 
 - `sd_dyad_var`:
 
-  Standard deviation of dyadic variable
+  standard deviation of dyadic variable
 
 - `mean_edge_var`:
 
-  Mean value of edge variable
+  mean value of edge variable
 
 - `sd_edge_var`:
 
-  Standard deviation of edge variable
+  standard deviation of edge variable
 
 ## Details
 
-Extracts dyadic variables from dyad_data attribute and correlates them
-with network ties. For longitudinal networks, correlations are
-calculated separately for each time period. Dyadic variables should be
+extracts dyadic variables from dyad_data attribute and correlates them
+with network ties. for longitudinal networks, correlations are
+calculated separately for each time period. dyadic variables should be
 stored as matrices with rows and columns corresponding to network
-actors. Missing values are handled using pairwise complete observations.
+actors. missing values are handled using pairwise complete observations.
+
+the reported p-values and confidence intervals are the standard tests
+from [`stats::cor.test()`](https://rdrr.io/r/stats/cor.test.html)
+applied to the dyad vectors. they are useful as descriptive screens, but
+they do not model network dependence among dyads.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

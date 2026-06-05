@@ -1,7 +1,7 @@
 # Synthetic high-school friendship roster (nodes)
 
-A small synthetic roster of 30 students intended for examples and
-teaching. Designed to support a typical survey-style workflow: one row
+a small synthetic roster of 30 students intended for examples and
+teaching. designed to support a typical survey-style workflow: one row
 per student, one column per attribute, plus a separate edgelist of
 reported friendship ties
 ([`classroom_edges`](https://netify-dev.github.io/netify/reference/classroom_edges.md)).
@@ -14,38 +14,38 @@ data(classroom_nodes)
 
 ## Format
 
-A data frame with 30 rows and 4 columns:
+a data frame with 30 rows and 4 columns:
 
 - `student`:
 
-  Student identifier, character (e.g. `"s01"` .. `"s30"`). Use this as
+  student identifier, character (e.g. `"s01"` .. `"s30"`). use this as
   the actor column when attaching attributes via
   [`add_node_vars`](https://netify-dev.github.io/netify/reference/add_node_vars.md).
 
 - `gender`:
 
-  Reported gender, character, `"F"` or `"M"`.
+  reported gender, character, `"f"` or `"m"`.
 
 - `grade`:
 
-  Grade level, integer 9-12.
+  grade level, integer 9-12.
 
 - `gpa`:
 
-  Grade point average on the 0-4 scale, numeric.
+  grade point average on the 0-4 scale, numeric.
 
 ## Details
 
-This dataset is **synthetic** – generated to illustrate how netify
-handles standard student/peer survey data. It is not drawn from any real
-classroom. Ties tend to form within the same grade and (more weakly)
+this dataset is **synthetic** – generated to illustrate how netify
+handles standard student/peer survey data. it is not drawn from any real
+classroom. ties tend to form within the same grade and (more weakly)
 within the same gender, so attribute-based analyses such as
 [`homophily`](https://netify-dev.github.io/netify/reference/homophily.md)
 and
 [`mixing_matrix`](https://netify-dev.github.io/netify/reference/mixing_matrix.md)
-produce meaningful (non-null) patterns.
+produce meaningful (non-NULL) patterns.
 
-Pair with
+pair with
 [`classroom_edges`](https://netify-dev.github.io/netify/reference/classroom_edges.md)
 (an undirected friendship edgelist on the same 30 students).
 
@@ -57,7 +57,7 @@ Pair with
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

@@ -1,6 +1,6 @@
-# Extract text layer from netify plot components
+# extract text layer from netify plot components
 
-Extracts the text label layer from a netify plot components object. Text
+extracts the text label layer from a netify plot components object. text
 labels display actor names or other text annotations directly on the
 plot without background boxes.
 
@@ -14,13 +14,13 @@ netify_text(comp)
 
 - comp:
 
-  A netify_plot_components object returned from
+  a netify_plot_components object returned from
   `plot(..., return_components = TRUE)`
 
 ## Value
 
-A custom object of class "netify_text" that can be added to a ggplot
-object using the + operator. The object contains the text layer with all
+a custom object of class "netify_text" that can be added to a ggplot
+object using the + operator. the object contains the text layer with all
 its aesthetic mappings and data.
 
 ## See also
@@ -31,7 +31,7 @@ its aesthetic mappings and data.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

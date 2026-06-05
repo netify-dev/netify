@@ -1,9 +1,10 @@
 # Visualize network-level statistics
 
 `plot_graph_stats` creates line or bar plots to visualize network-level
-statistics across multiple networks, time points, or layers. This
-function is designed to work with output from `summary_net()` or similar
-functions that produce network-level summary statistics.
+statistics across multiple networks, time points, or layers. this
+function is designed to work with output from
+[`summary()`](https://rdrr.io/r/base/summary.html) for netify objects or
+similar functions that produce network-level summary statistics.
 
 ## Usage
 
@@ -15,77 +16,78 @@ plot_graph_stats(summary_df, type = "line", specific_stats = NULL)
 
 - summary_df:
 
-  A data frame containing network-level statistics, typically from
-  `summary_net()`. Must include a "net" column identifying each network
-  or time point. May include a "layer" column for multilayer networks.
-  All other columns should contain numeric statistics to plot.
+  a data frame containing network-level statistics, typically from
+  [`summary()`](https://rdrr.io/r/base/summary.html) for a netify
+  object. must include a "net" column identifying each network or time
+  point. may include a "layer" column for multilayer networks. all other
+  columns should contain numeric statistics to plot.
 
 - type:
 
-  Character string specifying the plot type. Options are:
+  character string specifying the plot type. options are:
 
-  - `"line"`: Line plot with points (default). Best for temporal data
+  - `"line"`: line plot with points (default). best for temporal data
 
-  - `"bar"`: Bar plot with grouped bars. Required for multilayer
+  - `"bar"`: bar plot with grouped bars. required for multilayer
     non-temporal data
 
 - specific_stats:
 
-  Character vector of statistic names to plot. If NULL (default), plots
-  all numeric columns in summary_df. Must match column names exactly.
+  character vector of statistic names to plot. if NULL (default), plots
+  all numeric columns in summary_df. must match column names exactly.
 
 ## Value
 
-A ggplot object displaying the specified statistics. The plot structure
+a ggplot object displaying the specified statistics. the plot structure
 depends on the data:
 
-- **Single time/network**: Returns error (single row not plottable)
+- **single time/network**: returns error (single row not plottable)
 
-- **Multiple times/networks**: Line or bar plot faceted by statistic
+- **multiple times/networks**: line or bar plot faceted by statistic
 
-- **Multilayer temporal**: Line plots colored by layer
+- **multilayer temporal**: line plots colored by layer
 
-- **Multilayer non-temporal**: Grouped bar plots by layer
+- **multilayer non-temporal**: grouped bar plots by layer
 
-All plots are faceted by statistic with free y-axis scales for better
+all plots are faceted by statistic with free y-axis scales for better
 comparison across different value ranges.
 
 ## Details
 
-**Data structure detection:**
+**data structure detection:**
 
-The function automatically detects the structure of your data:
+the function automatically detects the structure of your data:
 
-- **Longitudinal**: Multiple unique values in "net" column
+- **longitudinal**: multiple unique values in "net" column
 
-- **Multilayer**: Multiple unique values in "layer" column
+- **multilayer**: multiple unique values in "layer" column
 
-- **Single network**: Only one row (returns error with suggestion)
+- **single network**: only one row (returns error with suggestion)
 
-**Plot type selection:**
+**plot type selection:**
 
-- Line plots are preferred for temporal data to show trends
+- line plots are preferred for temporal data to show trends
 
-- Bar plots are automatically selected for multilayer non-temporal data
+- bar plots are automatically selected for multilayer non-temporal data
 
-- Bar plots can be useful for comparing discrete time points
+- bar plots can be useful for comparing discrete time points
 
-**Faceting behavior:**
+**faceting behavior:**
 
-Each statistic gets its own facet panel with:
+each statistic gets its own facet panel with:
 
-- Independent y-axis scales (scales = "free_y")
+- independent y-axis scales (scales = "free_y")
 
-- Shared x-axis across all panels
+- shared x-axis across all panels
 
-- Automatic layout based on number of statistics
+- automatic layout based on number of statistics
 
 ## Note
 
-The function requires at least two networks/time points to create a
-meaningful plot. For single network summaries, consider using a table
+the function requires at least two networks/time points to create a
+meaningful plot. for single network summaries, consider using a table
 format instead.
 
 ## Author
 
-Ha Eun Choi, Cassy Dorff, Shahryar Minhas
+ha eun choi, cassy dorff, shahryar minhas

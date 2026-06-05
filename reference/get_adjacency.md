@@ -1,7 +1,7 @@
 # Create a netify matrix from cross-sectional dyadic data
 
 `get_adjacency` converts cross-sectional dyadic data into an adjacency
-matrix of class "netify". This function creates a single network matrix
+matrix of class "netify". this function creates a single network matrix
 representing relationships at one point in time.
 
 ## Usage
@@ -25,8 +25,8 @@ get_adjacency(
 
 - dyad_data:
 
-  A data.frame containing dyadic observations. Will be coerced to
-  data.frame if a tibble or data.table is provided. As a convenience, an
+  a data.frame containing dyadic observations. will be coerced to
+  data.frame if a tibble or data.table is provided. as a convenience, an
   existing netify object is also accepted: in that case
   `get_adjacency()` returns the underlying adjacency as a plain matrix
   (no class / attributes), and for longitudinal inputs returns the first
@@ -35,68 +35,68 @@ get_adjacency(
 
 - actor1:
 
-  Character string specifying the column name for the first actor in
+  character string specifying the column name for the first actor in
   each dyad.
 
 - actor2:
 
-  Character string specifying the column name for the second actor in
+  character string specifying the column name for the second actor in
   each dyad.
 
 - symmetric:
 
-  Logical. If TRUE (default), treats the network as undirected (i.e.,
-  edges have no direction). If FALSE, treats the network as directed.
+  logical. if TRUE (default), treats the network as undirected (i.e.,
+  edges have no direction). if FALSE, treats the network as directed.
 
 - mode:
 
-  Character string specifying network structure. Options are:
+  character string specifying network structure. options are:
 
-  - `"unipartite"`: One set of actors (default)
+  - `"unipartite"`: one set of actors (default)
 
-  - `"bipartite"`: Two distinct sets of actors
+  - `"bipartite"`: two distinct sets of actors
 
 - weight:
 
-  Character string specifying the column name containing edge weights.
-  If NULL (default), edges are treated as unweighted (binary).
+  character string specifying the column name containing edge weights.
+  if NULL (default), edges are treated as unweighted (binary).
 
 - sum_dyads:
 
-  Logical. If TRUE, sums weight values when multiple edges exist between
-  the same actor pair. If FALSE (default), uses the last observed value.
+  logical. if TRUE, sums weight values when multiple edges exist between
+  the same actor pair. if FALSE (default), uses the last observed value.
 
 - diag_to_NA:
 
-  Logical. If TRUE (default), sets diagonal values (self-loops) to NA.
-  Automatically set to FALSE for bipartite networks.
+  logical. if TRUE (default), sets diagonal values (self-loops) to na.
+  automatically set to FALSE for bipartite networks.
 
 - missing_to_zero:
 
-  Logical. If TRUE (default), treats missing edges as zeros. If FALSE,
-  missing edges remain as NA.
+  logical. if TRUE (default), treats missing edges as zeros. if FALSE,
+  missing edges remain as na.
 
 - nodelist:
 
-  Character vector of actor names to include in the network. If
+  character vector of actor names to include in the network. if
   provided, ensures all listed actors appear in the network even if they
-  have no edges (isolates). Useful when working with edgelists that only
+  have no edges (isolates). useful when working with edgelists that only
   contain active dyads.
 
 ## Value
 
-A matrix of class "netify" (a netify matrix) with:
+a matrix of class "netify" (a netify matrix) with:
 
-- **Dimensions**: `[n_actors x n_actors]` for unipartite networks or
+- **dimensions**: `[n_actors x n_actors]` for unipartite networks or
   `[n_actors1 x n_actors2]` for bipartite networks
 
-- **Class**: "netify" - this is a full netify object compatible with all
+- **class**: "netify" - this is a full netify object compatible with all
   netify functions
 
-- **Attributes**: Metadata including network properties and processing
+- **attributes**: metadata including network properties and processing
   parameters
 
-The returned object is a netify matrix that can be used with all netify
+the returned object is a netify matrix that can be used with all netify
 functions such as [`summary()`](https://rdrr.io/r/base/summary.html),
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html),
 [`to_igraph()`](https://netify-dev.github.io/netify/reference/netify_to_igraph.md),
@@ -104,42 +104,42 @@ etc.
 
 ## Details
 
-**Note on usage:**
+**note on usage:**
 
-While this function is exported and available for direct use, the
+while this function is exported and available for direct use, the
 primary and recommended way to create netify objects from dyadic data is
 through the
 [`netify()`](https://netify-dev.github.io/netify/reference/netify.md)
-function. The
+function. the
 [`netify()`](https://netify-dev.github.io/netify/reference/netify.md)
 function:
 
-- Provides a consistent interface for both cross-sectional and
+- provides a consistent interface for both cross-sectional and
   longitudinal data
 
-- Includes additional data validation and preprocessing options
+- includes additional data validation and preprocessing options
 
-- Can incorporate nodal and dyadic attributes during creation
+- can incorporate nodal and dyadic attributes during creation
 
-- Offers more comprehensive parameter checking
+- checks parameters before constructing the matrix
 
-Use `get_adjacency()` directly only when you need a simple adjacency
+use `get_adjacency()` directly only when you need a simple adjacency
 matrix creation without additional features.
 
 ## Author
 
-Ha Eun Choi, Cassy Dorff, Colin Henry, Shahryar Minhas
+ha eun choi, cassy dorff, colin henry, shahryar minhas
 
 ## Examples
 
 ``` r
-# Load example data
+# load example data
 data(icews)
 
-# Subset to one year for cross-sectional analysis
+# subset to one year for cross-sectional analysis
 icews_2010 <- icews[icews$year == 2010, ]
 
-# Create a directed network with verbal cooperation weights
+# create a directed network with verbal cooperation weights
 verbCoop_net <- get_adjacency(
     dyad_data = icews_2010,
     actor1 = "i",
@@ -148,7 +148,7 @@ verbCoop_net <- get_adjacency(
     weight = "verbCoop"
 )
 
-# Create a directed network with material conflict weights
+# create a directed network with material conflict weights
 matlConf_net <- get_adjacency(
     dyad_data = icews_2010,
     actor1 = "i",
@@ -157,11 +157,11 @@ matlConf_net <- get_adjacency(
     weight = "matlConf"
 )
 
-# Verify class
+# verify class
 class(verbCoop_net) # "netify"
 #> [1] "netify"
 
-# Check dimensions
+# check dimensions
 dim(verbCoop_net)
 #> [1] 152 152
 ```

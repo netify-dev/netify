@@ -1,7 +1,7 @@
 # Print method for netify_comparison objects
 
-Provides a clear, formatted output for network comparison results.
-Handles different comparison types (temporal, cross-network, multilayer)
+provides a clear, formatted output for network comparison results.
+handles different comparison types (temporal, cross-network, multilayer)
 with appropriate formatting.
 
 ## Usage
@@ -15,28 +15,28 @@ print(x, ..., n = 20)
 
 - x:
 
-  A netify_comparison object from compare_networks()
+  a netify_comparison object from compare_networks()
 
 - ...:
 
-  Additional arguments (currently unused)
+  additional arguments (currently unused)
 
 - n:
 
-  Maximum number of rows to print for summary tables (default 20)
+  maximum number of rows to print for summary tables (default 20)
 
 ## Value
 
-Invisibly returns the input object
+invisibly returns the input object
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
-# Compare two networks
+# compare two networks
 data(icews)
 net1 <- netify(icews[icews$year == 2010,], actor1 = "i", actor2 = "j")
 net2 <- netify(icews[icews$year == 2011,], actor1 = "i", actor2 = "j")
@@ -51,7 +51,6 @@ print(comp)
 #> Algorithm: correlation
 #> Permutation type: classic
 #> Correlation type: pearson
-#> Random seed: 1378665888
 #> ────────────────────────────────────────────────────────────────────────────────
 #> 
 #> ── Edge Comparison Summary ──

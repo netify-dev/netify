@@ -1,6 +1,6 @@
 # Event data slice from UCDP on Mexico
 
-Event data from UCDP for Mexico
+event data from ucdp for mexico
 
 ## Usage
 
@@ -10,19 +10,29 @@ data(mexico)
 
 ## Format
 
-A data frame with dyadic event observations.
+a data frame with dyadic event observations.
 
 ## Source
 
-[ucdp](https://ucdp.uu.se/)
+ucdp georeferenced event dataset, version 23.1.
+<https://ucdp.uu.se/downloads/>
 
 ## References
 
-add UCDP reference ([ucdp](https://ucdp.uu.se/))
+davies, s., pettersson, t., and oberg, m. (2023). organized violence
+1989-2022, and the return of conflict between states. journal of peace
+research, 60(4), 691-708.
+[doi:10.1177/00223433231185169](https://doi.org/10.1177/00223433231185169)
+.
+
+sundberg, r. and melander, e. (2013). introducing the ucdp georeferenced
+event dataset. journal of peace research, 50(4), 523-532.
+[doi:10.1177/0022343313484347](https://doi.org/10.1177/0022343313484347)
+.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

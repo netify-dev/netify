@@ -1,6 +1,6 @@
-# Minimal Tufte-inspired network style
+# minimal tufte-inspired network style
 
-A minimalist network style inspired by Edward Tufte's data visualization
+a minimalist network style inspired by edward tufte's data visualization
 principles
 
 ## Usage
@@ -11,8 +11,8 @@ style_tufte()
 
 ## Value
 
-List of plot arguments
+list of plot arguments
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

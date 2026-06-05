@@ -1,7 +1,7 @@
 # Preview subsets of network data from netify objects
 
 `peek` provides a convenient way to inspect portions of network data
-stored in netify objects. Rather than displaying entire networks (which
+stored in netify objects. rather than displaying entire networks (which
 can be overwhelming for large datasets), this function allows you to
 examine specific actors, time periods, or layers for data exploration,
 verification, and debugging.
@@ -9,170 +9,183 @@ verification, and debugging.
 ## Usage
 
 ``` r
-peek(netlet, actors = NULL, from = 3, to = 3, time = 1, layers = NULL)
+peek(
+  netlet,
+  actors = NULL,
+  from = 3,
+  to = 3,
+  time = 1,
+  layers = NULL,
+  drop_dimensions = TRUE
+)
 ```
 
 ## Arguments
 
 - netlet:
 
-  A netify object to preview. Can be cross-sectional, longitudinal
+  a netify object to preview. can be cross-sectional, longitudinal
   (array or list format), and/or multilayer.
 
 - actors:
 
-  Character vector of actor names or numeric indices to subset. Selects
+  character vector of actor names or numeric indices to subset. selects
   these actors as both senders and receivers (extracts subgraph among
-  these actors). Overridden by `from` and `to` if specified.
+  these actors). overridden by `from` and `to` if specified.
 
 - from:
 
-  Specifies which actors to display as senders of ties (row actors in
-  the adjacency matrix). Can be:
+  specifies which actors to display as senders of ties (row actors in
+  the adjacency matrix). can be:
 
-  - **Single number**: Shows the first n actors (e.g., `from = 5`
+  - **single number**: shows the first n actors (e.g., `from = 5`
     displays actors 1-5)
 
-  - **Numeric vector**: Shows specific positions (e.g.,
+  - **numeric vector**: shows specific positions (e.g.,
     `from = c(1,3,5)` displays the 1st, 3rd, and 5th actors)
 
-  - **Character vector**: Shows named actors (e.g.,
-    `from = c("USA", "China")` displays these specific countries)
+  - **character vector**: shows named actors (e.g.,
+    `from = c("usa", "china")` displays these specific countries)
 
-  - **NULL**: Shows all row actors (default is 3)
+  - **NULL**: shows all row actors (default is 3)
 
-  In bipartite networks, from represents actors in the first mode.
+  in bipartite networks, from represents actors in the first mode.
 
 - to:
 
-  Specifies which actors to display as receivers of ties (column actors
-  in the adjacency matrix). Accepts the same input types as `from`. In
+  specifies which actors to display as receivers of ties (column actors
+  in the adjacency matrix). accepts the same input types as `from`. in
   bipartite networks, columns represent actors in the second mode.
-  Default is 3.
+  default is 3.
 
 - time:
 
-  For longitudinal networks, specifies which time periods to display.
-  Can be:
+  for longitudinal networks, specifies which time periods to display.
+  can be:
 
-  - **Single number**: Shows the nth time period (e.g., `time = 1` shows
+  - **single number**: shows the nth time period (e.g., `time = 1` shows
     the first time period)
 
-  - **Numeric vector**: Shows specific time indices (e.g.,
+  - **numeric vector**: shows specific time indices (e.g.,
     `time = c(1,5,10)`)
 
-  - **Character vector**: Shows named time periods (e.g.,
+  - **character vector**: shows named time periods (e.g.,
     `time = c("2002", "2006")` displays these specific years)
 
-  - **NULL**: Shows all time periods
+  - **NULL**: shows all time periods
 
-  Default is 1 (first time period only). Ignored for cross-sectional
+  default is 1 (first time period only). ignored for cross-sectional
   networks.
 
 - layers:
 
-  For multilayer networks, specifies which layer(s) to display. Must be
+  for multilayer networks, specifies which layer(s) to display. must be
   a character vector matching layer names in the netify object (e.g.,
-  `layers = c("trade", "alliance")`). For single-layer networks, this
-  parameter is ignored. Default is NULL (shows all layers).
+  `layers = c("trade", "alliance")`). for single-layer networks, this
+  parameter is ignored. default is NULL (shows all layers).
+
+- drop_dimensions:
+
+  logical. whether to drop singleton array dimensions in the returned
+  preview. default TRUE.
 
 ## Value
 
-Returns a subset of the raw network data (without netify attributes):
+returns a subset of the raw network data (without netify attributes):
 
-- **Cross-sectional networks**:
+- **cross-sectional networks**:
 
-  - Single layer: Returns a matrix with selected rows and columns
+  - single layer: returns a matrix with selected rows and columns
 
-  - Multilayer: Returns a 3D array (rows × columns × layers)
+  - multilayer: returns a 3d array (rows x columns x layers)
 
-- **Longitudinal networks**:
+- **longitudinal networks**:
 
-  - Array format: Returns an array with dimensions depending on
+  - array format: returns an array with dimensions depending on
     selection
 
-  - List format: Returns a list of matrices, one per selected time
+  - list format: returns a list of matrices, one per selected time
     period
 
-All returned objects preserve dimension names (actor names, time labels,
-layer names) for easy interpretation. Single dimensions are
+all returned objects preserve dimension names (actor names, time labels,
+layer names) for easy interpretation. single dimensions are
 automatically dropped.
 
 ## Details
 
-**Purpose and Design**
+**purpose and design**
 
-`peek` is designed as a lightweight data exploration tool. Unlike
+`peek` is designed as a lightweight data exploration tool. unlike
 [`subset_netify`](https://netify-dev.github.io/netify/reference/subset_netify.md),
 which creates new netify objects with all attributes preserved, `peek`
-returns only the raw network data for quick inspection. This makes it
+returns only the raw network data for quick inspection. this makes it
 ideal for:
 
-- Verifying data structure and content
+- verifying data structure and content
 
-- Checking specific relationships
+- checking specific relationships
 
-- Debugging data issues
+- debugging data issues
 
-- Quick visual inspection of network patterns
+- quick visual inspection of network patterns
 
-**Understanding Network Directions**
+**understanding network directions**
 
-In directed networks:
+in directed networks:
 
-- **From** represents actors sending ties (out-ties)
+- **from** represents actors sending ties (out-ties)
 
-- **To** represents actors receiving ties (in-ties)
+- **to** represents actors receiving ties (in-ties)
 
-- Cell `[i,j]` contains the tie from actor i to actor j
+- cell `[i,j]` contains the tie from actor i to actor j
 
-For example, if cell `["USA", "China"]` = 5, this means USA sends a tie
-of strength 5 to China.
+for example, if cell `["usa", "china"]` = 5, this means usa sends a tie
+of strength 5 to china.
 
-**Smart Selection Behavior**
+**smart selection behavior**
 
-The function includes several convenience features:
+the function includes several convenience features:
 
-- Single numbers are expanded to ranges (e.g., `from = 5` becomes first
+- single numbers are expanded to ranges (e.g., `from = 5` becomes first
   5 actors)
 
-- Out-of-bounds indices are silently ignored (no errors during
+- out-of-bounds indices are silently ignored (no errors during
   exploration)
 
-- Character names are matched to actor labels
+- character names are matched to actor labels
 
-- Dimension reduction: if only one time period or layer is selected,
+- dimension reduction: if only one time period or layer is selected,
   that dimension is dropped from the output
 
 ## Note
 
-**Important distinctions:**
+**important distinctions:**
 
-- Use `peek` for quick data inspection (returns raw matrices)
+- use `peek` for quick data inspection (returns raw matrices)
 
-- Use
+- use
   [`subset_netify`](https://netify-dev.github.io/netify/reference/subset_netify.md)
   to create new netify objects with attributes
 
-- Use
+- use
   [`get_raw`](https://netify-dev.github.io/netify/reference/get_raw.md)
   to extract all raw data from a netify object
 
-When multiple layers are present and no layer selection is specified,
+when multiple layers are present and no layer selection is specified,
 all layers are returned with a warning message to remind you about the
 multilayer structure.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
-# Load example data
+# load example data
 data(icews)
 
-# Example 1: Basic usage with cross-sectional network
+# example 1: basic usage with cross-sectional network
 icews_10 <- icews[icews$year == 2010, ]
 net <- netify(
     icews_10,
@@ -180,14 +193,14 @@ net <- netify(
     weight = "verbCoop"
 )
 
-# Default: see first 3 actors (both sending and receiving)
+# default: see first 3 actors (both sending and receiving)
 peek(net)
 #>             Afghanistan Albania Algeria
 #> Afghanistan          NA       5       5
 #> Albania               5      NA       1
 #> Algeria               5       1      NA
 
-# See first 5 senders and first 5 receivers
+# see first 5 senders and first 5 receivers
 peek(net, from = 5, to = 5)
 #>             Afghanistan Albania Algeria Angola Argentina
 #> Afghanistan          NA       5       5      0         2
@@ -196,32 +209,28 @@ peek(net, from = 5, to = 5)
 #> Angola                0       0       6     NA         8
 #> Argentina             2       0       0      8        NA
 
-# Example 2: Specific actors by name
-# See ties from US and China to Russia, India, and Brazil
+# example 2: specific actors by name
+# see ties from us and china to russia, india, and brazil
 peek(net,
-    from = c("United States", "China"),
-    to = c("Russia", "India", "Brazil")
+    from = c("united states", "china"),
+    to = c("russia", "india", "brazil")
 )
-#>               India Brazil
-#> United States  3324    369
-#> China          1209    257
+#> <0 x 0 matrix>
 
-# Use actors parameter to see subgraph
+# use actors parameter to see subgraph
 peek(net,
-    actors = c("United States", "China", "Russia")
+    actors = c("united states", "china", "russia")
 )
-#>               United States China
-#> United States            NA  4937
-#> China                  4937    NA
+#> <0 x 0 matrix>
 
-# Example 3: Longitudinal network
+# example 3: longitudinal network
 net_longit <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
     weight = "matlConf"
 )
 
-# See first 5 actors in specific years
+# see first 5 actors in specific years
 peek(net_longit,
     from = 5, to = 5,
     time = c("2002", "2006", "2010")
@@ -251,7 +260,7 @@ peek(net_longit,
 #> Argentina             0       0       0      1        NA
 #> 
 
-# See all actors in year 2010
+# see all actors in year 2010
 peek(net_longit,
     from = NULL, to = NULL,
     time = "2010"
@@ -8215,8 +8224,8 @@ peek(net_longit,
 #> Zimbabwe                                         0     0      1       NA
 #> 
 
-# Example 4: Using numeric indices
-# See specific positions in the network
+# example 4: using numeric indices
+# see specific positions in the network
 peek(net,
     from = c(1, 3, 5, 7), # 1st, 3rd, 5th, 7th senders
     to = 1:10
@@ -8232,23 +8241,21 @@ peek(net,
 #> Argentina         2          7       2
 #> Australia         2          1       4
 
-# Example 5: Quick inspection patterns
-# See who USA interacts with
-peek(net, from = "United States", to = 10) # USA's ties to first 10 countries
-#>               Afghanistan Albania Algeria Angola Argentina Armenia Australia
-#> United States        3718      42      76     68       164     288       927
-#>               Austria Azerbaijan Bahrain
-#> United States      16        457      38
-peek(net, from = 10, to = "United States") # First 10 countries' ties to USA
-#>             United States
-#> Afghanistan          3718
-#> Albania                42
-#> Algeria                76
-#> Angola                 68
-#> Argentina             164
-#> Armenia               288
-#> Australia             927
-#> Austria                16
-#> Azerbaijan            457
-#> Bahrain                38
+# example 5: quick inspection patterns
+# see who usa interacts with
+peek(net, from = "united states", to = 10) # usa's ties to first 10 countries
+#>      Afghanistan Albania Algeria Angola Argentina Armenia Australia Austria
+#>      Azerbaijan Bahrain
+peek(net, from = 10, to = "united states") # first 10 countries' ties to usa
+#>            
+#> Afghanistan
+#> Albania    
+#> Algeria    
+#> Angola     
+#> Argentina  
+#> Armenia    
+#> Australia  
+#> Austria    
+#> Azerbaijan 
+#> Bahrain    
 ```

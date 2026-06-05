@@ -1,9 +1,9 @@
 # Calculate graph-level statistics for netify objects
 
-Computes comprehensive graph-level statistics for netify objects,
-including density, reciprocity, centralization measures, and custom
-metrics. Handles cross-sectional and longitudinal networks, as well as
-multilayer structures.
+computes graph-level statistics for netify objects, including density,
+reciprocity, centralization measures, and custom metrics. handles
+cross-sectional and longitudinal networks, as well as multilayer
+structures.
 
 ## Usage
 
@@ -16,152 +16,154 @@ summary(object, ...)
 
 - object:
 
-  A netify object containing network data
+  a netify object containing network data
 
 - ...:
 
-  Additional arguments, including:
+  additional arguments, including:
 
   `other_stats`
 
-  :   Named list of custom functions to calculate additional graph-level
-      statistics. Each function should accept a matrix and return a
-      named vector of scalar values.
+  :   named list of custom functions to calculate additional graph-level
+      statistics. each function should accept the current netify slice
+      and return a named vector of scalar values.
 
 ## Value
 
-A data frame with one row per network/time period containing:
+a data frame with one row per network/time period containing:
 
-**Basic network properties:**
+**basic network properties:**
 
 - `net`:
 
-  Network/time identifier
+  network/time identifier
 
 - `layer`:
 
-  Layer name (for multilayer networks)
+  layer name (for multilayer networks)
 
 - `num_actors`:
 
-  Number of actors (or `num_row_actors` and `num_col_actors` for
+  number of actors (or `num_row_actors` and `num_col_actors` for
   bipartite networks)
 
 - `density`:
 
-  Proportion of possible ties that exist
+  proportion of possible ties that exist
 
 - `num_edges`:
 
-  Total number of edges (count of every non-zero entry; for signed
+  total number of edges (count of every non-zero entry; for signed
   networks, negative-weight ties are included alongside positive ones)
 
 - `prop_edges_missing`:
 
-  Proportion of potential edge dyads that are NA. Uses the same
+  proportion of potential edge dyads that are na. uses the same
   denominator as `density` (off-diagonal cells for unipartite with
   `diag_to_NA`, halved for symmetric networks, all cells for bipartite),
   so `density + prop_edges_missing + observed_zero_fraction = 1`.
 
 - `prop_unknown_edges`:
 
-  Proportion of potential edges that are NA because they were
+  proportion of potential edges that are na because they were
   *unobserved* at the data-entry stage (as opposed to structurally
-  absent or on-diagonal). Only appears when the netlet was built with
+  absent or on-diagonal). only appears when the netlet was built with
   `missing_to_zero = FALSE`; otherwise unobserved dyads have been filled
   with 0 and the column would be identically zero.
 
-**For weighted networks only:**
+**for weighted networks only:**
 
 - `mean_edge_weight`:
 
-  Average weight of existing edges
+  average weight of realized non-zero edges. signed networks include
+  negative ties; observed zero non-ties and missing dyads are excluded.
 
 - `sd_edge_weight`:
 
-  Standard deviation of edge weights
+  standard deviation of realized non-zero edge weights
 
 - `median_edge_weight`:
 
-  Median edge weight
+  median realized non-zero edge weight
 
 - `min_edge_weight`, `max_edge_weight`:
 
-  Range of edge weights
+  range of realized non-zero edge weights
 
-**Structural measures:**
+**structural measures:**
 
 - `competition` (or `competition_row`/`competition_col`):
 
-  Herfindahl-Hirschman Index measuring concentration of ties. Calculated
+  herfindahl-hirschman index measuring concentration of ties. calculated
   as \\\sum\_{i=1}^{n} (s_i)^2\\ where \\s_i\\ is actor i's share of
-  total ties. Ranges from 1/n (equal distribution) to 1 (one actor has
+  total ties. ranges from 1/n (equal distribution) to 1 (one actor has
   all ties).
 
 - `sd_of_actor_means` (or `sd_of_row_means`/`sd_of_col_means`):
 
-  Standard deviation of actors' average tie strengths, measuring
+  standard deviation of actors' average tie strengths, measuring
   heterogeneity in actor activity levels
 
 - `transitivity`:
 
-  Global clustering coefficient (probability that two neighbors of a
-  node are connected)
+  global clustering coefficient (probability that two neighbors of a
+  node are connected). returns `na` when the coefficient is undefined.
 
-**For directed networks only:**
+**for directed networks only:**
 
 - `covar_of_row_col_means`:
 
-  Covariance between actors' sending and receiving patterns
+  correlation between actors' sending and receiving means. the column
+  name is retained for compatibility.
 
 - `reciprocity`:
 
-  Pearson correlation between the adjacency matrix and its transpose.
-  This measures the linear association between outgoing and incoming tie
+  pearson correlation between the adjacency matrix and its transpose.
+  this measures the linear association between outgoing and incoming tie
   weights for each dyad (i.e., how similar \\a\_{ij}\\ is to \\a\_{ji}\\
-  across all dyads). Values near 1 indicate strong reciprocity, while
-  values near 0 indicate no relationship. Note: this differs from the
+  across all dyads). values near 1 indicate strong reciprocity, while
+  values near 0 indicate no relationship. note: this differs from the
   traditional edge-based reciprocity (proportion of mutual dyads) used
   by igraph and other packages.
 
 - `mutual`:
 
-  Proportion of mutual dyads: the fraction of connected dyad pairs where
-  both directions are present. Ranges from 0 (no mutual ties) to 1 (all
-  ties are reciprocated). This is the traditional edge-based reciprocity
+  proportion of mutual dyads: the fraction of connected dyad pairs where
+  both directions are present. ranges from 0 (no mutual ties) to 1 (all
+  ties are reciprocated). this is the traditional edge-based reciprocity
   measure used by igraph and most network analysis textbooks.
 
 ## Details
 
-The function automatically adapts calculations based on network
+the function automatically adapts calculations based on network
 properties:
 
-- **Bipartite networks**: Reports row and column actors separately
+- **bipartite networks**: reports row and column actors separately
 
-- **Directed networks**: Calculates separate statistics for in/out ties
+- **directed networks**: calculates separate statistics for in/out ties
 
-- **Weighted networks**: Includes weight-based statistics
+- **weighted networks**: includes weight-based statistics
 
-- **Multilayer networks**: Processes each layer independently
+- **multilayer networks**: processes each layer independently
 
-- **Longitudinal networks**: Calculates statistics for each time period
+- **longitudinal networks**: calculates statistics for each time period
 
-**Competition Index Interpretation:**
+**competition index interpretation:**
 
-The competition measure (HHI) captures how concentrated network ties are
-among actors. Low values indicate distributed activity across many
+the competition measure (hhi) captures how concentrated network ties are
+among actors. low values indicate distributed activity across many
 actors (competitive), while high values indicate concentration among few
-actors (monopolistic). This is particularly useful for analyzing power
+actors (monopolistic). this is particularly useful for analyzing power
 dynamics or resource distribution in networks.
 
-**Custom Statistics:**
+**custom statistics:**
 
-Add custom graph-level metrics using the `other_stats` parameter:
+add custom graph-level metrics using the `other_stats` parameter:
 
 
-    # Example: Community detection
-    modularity_stat <- function(mat) {
-      g <- netify_to_igraph(mat)
+    # example: community detection
+    modularity_stat <- function(net) {
+      g <- netify_to_igraph(net)
       comm <- igraph::cluster_walktrap(g)
       c(modularity = igraph::modularity(comm),
         n_communities = length(unique(comm$membership)))
@@ -171,31 +173,32 @@ Add custom graph-level metrics using the `other_stats` parameter:
 
 ## Note
 
-For large longitudinal or multilayer networks, computation can be
-intensive. Consider using
+for large longitudinal or multilayer networks, computation can be
+intensive. consider using
 [`subset_netify`](https://netify-dev.github.io/netify/reference/subset_netify.md)
 to analyze specific time periods or layers.
 
-Missing edges (NA values) are excluded from density calculations but
-tracked in the `prop_edges_missing` statistic.
+density uses the full potential-dyad denominator. missing edges (na
+values) are not counted as present ties; they are reported separately in
+`prop_edges_missing`.
 
 ## References
 
-Dorff, C., Gallop, M., & Minhas, S. (2023). "Networks of violence:
-Predicting conflict in Nigeria." *Journal of Politics*, 85(1).
+dorff, c., gallop, m., & minhas, s. (2023). "networks of violence:
+predicting conflict in nigeria." *journal of politics*, 85(1).
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 
 ``` r
-# Load example data
+# load example data
 data(icews)
 
 # \donttest{
-# Basic usage
+# basic usage
 net <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
@@ -206,33 +209,33 @@ net <- netify(
 # get summary
 summary(net)
 #>     net num_actors   density num_edges prop_edges_missing mean_edge_weight
-#> 1  2002        152 0.3787034      8692                  0         19.59123
-#> 2  2003        152 0.3871994      8887                  0         19.36358
-#> 3  2004        152 0.4145173      9514                  0         19.84986
-#> 4  2005        152 0.4071976      9346                  0         19.79488
-#> 5  2006        152 0.4108139      9429                  0         21.09136
-#> 6  2007        152 0.4243203      9739                  0         21.89753
-#> 7  2008        152 0.4351690      9988                  0         21.03381
-#> 8  2009        152 0.4293308      9854                  0         20.33139
-#> 9  2010        152 0.4346462      9976                  0         18.13393
-#> 10 2011        152 0.4229697      9708                  0         15.79217
-#> 11 2012        152 0.4287644      9841                  0         15.99564
-#> 12 2013        152 0.4318142      9911                  0         17.21301
-#> 13 2014        152 0.4258452      9774                  0         18.39291
+#> 1  2002        152 0.3787034      8692                  0         51.73240
+#> 2  2003        152 0.3871994      8887                  0         50.00934
+#> 3  2004        152 0.4145173      9514                  0         47.88669
+#> 4  2005        152 0.4071976      9346                  0         48.61245
+#> 5  2006        152 0.4108139      9429                  0         51.34044
+#> 6  2007        152 0.4243203      9739                  0         51.60612
+#> 7  2008        152 0.4351690      9988                  0         48.33480
+#> 8  2009        152 0.4293308      9854                  0         47.35600
+#> 9  2010        152 0.4346462      9976                  0         41.72113
+#> 10 2011        152 0.4229697      9708                  0         37.33642
+#> 11 2012        152 0.4287644      9841                  0         37.30637
+#> 12 2013        152 0.4318142      9911                  0         39.86207
+#> 13 2014        152 0.4258452      9774                  0         43.19153
 #>    sd_edge_weight median_edge_weight min_edge_weight max_edge_weight
-#> 1        143.8213                  0               0            6003
-#> 2        144.5982                  0               0            5937
-#> 3        137.7292                  0               0            5141
-#> 4        148.6667                  0               0            6561
-#> 5        160.0782                  0               0            7579
-#> 6        162.4166                  0               0            7125
-#> 7        148.1206                  0               0            6091
-#> 8        156.6702                  0               0            6889
-#> 9        132.3670                  0               0            4937
-#> 10       113.5584                  0               0            5581
-#> 11       107.5946                  0               0            4225
-#> 12       130.4925                  0               0            6320
-#> 13       136.5412                  0               0            6327
+#> 1        230.1314                  8               1            6003
+#> 2        229.0646                  7               1            5937
+#> 3        210.7666                  7               1            5141
+#> 4        229.9569                  6               1            6561
+#> 5        246.6313                  7               1            7579
+#> 6        246.2486                  7               1            7125
+#> 7        221.5845                  7               1            6091
+#> 8        236.4214                  6               1            6889
+#> 9        198.3157                  6               1            4937
+#> 10       172.2944                  5               1            5581
+#> 11       161.8837                  6               1            4225
+#> 12       196.2998                  5               1            6320
+#> 13       206.6673                  6               1            6327
 #>    competition_row competition_col sd_of_row_means sd_of_col_means
 #> 1       0.04093116      0.03813621        44.91530        43.04935
 #> 2       0.04199822      0.03930188        45.07759        43.32783
@@ -264,7 +267,7 @@ summary(net)
 # }
 
 if (FALSE) { # \dontrun{
-# Add custom statistics - community detection
+# add custom statistics - community detection
 comm_stats <- function(mat) {
     g <- netify_to_igraph(mat)
     comm <- igraph::cluster_spinglass(g)
@@ -274,7 +277,7 @@ comm_stats <- function(mat) {
     )
 }
 
-# Apply to subset for efficiency
+# apply to subset for efficiency
 sub_net <- subset_netify(net, time = as.character(2013:2014))
 summary(sub_net, other_stats = list(community = comm_stats))
 } # }

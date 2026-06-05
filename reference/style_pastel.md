@@ -1,6 +1,6 @@
-# Pastel rainbow network style
+# pastel rainbow network style
 
-A soft, cheerful network style using pastel colors
+a soft, cheerful network style using pastel colors
 
 ## Usage
 
@@ -10,8 +10,8 @@ style_pastel()
 
 ## Value
 
-List of plot arguments
+list of plot arguments
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas

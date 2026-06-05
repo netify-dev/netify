@@ -11,6 +11,8 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Pipeline: netify to lame and dbn">
+<meta name="description" content="Prepare netify objects for lame and dbn models.">
+<meta property="og:description" content="Prepare netify objects for lame and dbn models.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -29,21 +31,22 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="../articles/quickstart_inference.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/foundations.html">Foundations</a></li>
-    <li><a class="dropdown-item" href="../articles/foundations_lite.html">Quickstart to Inference</a></li>
+    <li><a class="dropdown-item" href="../articles/quickstart_inference.html">Quickstart to Inference</a></li>
     <li><a class="dropdown-item" href="../articles/event_data.html">Event Data</a></li>
     <li><a class="dropdown-item" href="../articles/ego_networks.html">Ego Networks</a></li>
     <li><a class="dropdown-item" href="../articles/manual_plotting.html">Manual Plotting with ggplot2</a></li>
     <li><a class="dropdown-item" href="../articles/multilayer_networks.html">Multilayer Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes &amp; Comparing Networks</a></li>
-    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Connections: Homophily &amp; Dyadic Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/tracking_changes.html">Tracking Changes in Cooperation and Conflict: Comparing Networks</a></li>
+    <li><a class="dropdown-item" href="../articles/attribute_analysis.html">Measuring Who Connects with Whom: Homophily &amp; Dyadic Analysis</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_netify_ergm.html">Pipeline: netify to ergm (statnet)</a></li>
     <li><a class="dropdown-item" href="../articles/pipeline_lame_dbn.html">Pipeline: netify to lame and dbn</a></li>
-    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; custom extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/internals.html">Internals: object structure &amp; writing custom extensions</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
@@ -72,7 +75,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-05-29</h4>
+            <h4 data-toc-skip class="date">2026-06-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/pipeline_lame_dbn.Rmd" class="external-link"><code>vignettes/pipeline_lame_dbn.Rmd</code></a></small>
       <div class="d-none name"><code>pipeline_lame_dbn.Rmd</code></div>
@@ -80,22 +83,23 @@ Shahryar Minhas</h4>
 
     
     
-<p>Latent space models for network data require carefully structured
-array inputs whose construction is both tedious and error-prone when
-performed manually. The <code>amen</code> package handles
+<p>Latent space models for network data require array inputs that are
+easy to get wrong by hand. The <code>amen</code> package handles
 cross-sectional and single-layer longitudinal networks,
-<code>lame</code> extends this to longitudinal networks with
-time-varying actor compositions, and <code>dbn</code> fits Dynamic
-Bilinear Network models to multilayer longitudinal networks. Each
-package expects a distinct data structure (3D arrays, lists of matrices,
-or 4D arrays, respectively), and <code>netify</code> provides a unified
-pipeline for producing all of them. Users describe their data once with
-<code><a href="../reference/netify.html">netify()</a></code>, optionally combine layers with
-<code><a href="../reference/layer_netify.html">layer_netify()</a></code>, and then call <code><a href="../reference/netify_to_amen.html">to_amen()</a></code> or
-<code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code> to obtain the exact structure each modeling
-package requires.</p>
+<code>lame</code> adds support for longitudinal networks with changing
+actor sets, and <code>dbn</code> fits Dynamic Bilinear Network models to
+multilayer longitudinal networks. Each package expects a different
+shape: 3D arrays, lists of matrices, or 4D arrays. <code><a href="../reference/netify.html">netify()</a></code>
+and <code><a href="../reference/layer_netify.html">layer_netify()</a></code> build the network object;
+<code><a href="../reference/netify_to_amen.html">to_amen()</a></code>, <code><a href="../reference/netify_to_lame.html">to_lame()</a></code>, and
+<code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code> export the shape needed by the modeling
+package.</p>
+<p>The conversion chunks use <code>netify</code>. The model-fitting
+chunks require <code>lame</code> or <code>dbn</code>; install those
+packages before running them. You can still run the conversion chunks to
+inspect the arrays that <code>netify</code> creates.</p>
 <div class="section level2">
-<h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
+<h2 id="setup">setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
 <p>The examples below use ICEWS event data, which captures directed
 interactions between 152 countries from 2002 to 2014 across four
@@ -105,7 +109,7 @@ conflict, and material conflict.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/netify/">netify</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># load the ICEWS event data</span></span>
+<span><span class="co"># load the icews event data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># preview</span></span>
@@ -117,10 +121,10 @@ conflict, and material conflict.</p>
 <span><span class="co">#&gt; 5 Afghanistan Albania 2005        0        0        0        0</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="part-1-single-layer-pipeline-netify-to-amen">Part 1: Single-Layer Pipeline (netify to amen)<a class="anchor" aria-label="anchor" href="#part-1-single-layer-pipeline-netify-to-amen"></a>
+<h2 id="part-1-single-layer-pipeline-netify-to-amen">part 1: single-layer pipeline (netify to amen)<a class="anchor" aria-label="anchor" href="#part-1-single-layer-pipeline-netify-to-amen"></a>
 </h2>
 <div class="section level3">
-<h3 id="step-1-create-the-network">Step 1: Create the network<a class="anchor" aria-label="anchor" href="#step-1-create-the-network"></a>
+<h3 id="step-1-create-the-network">step 1: create the network<a class="anchor" aria-label="anchor" href="#step-1-create-the-network"></a>
 </h3>
 <p>The first step is always <code><a href="../reference/netify.html">netify()</a></code>. We create a single
 directed, weighted network representing verbal cooperation over
@@ -156,7 +160,7 @@ automatically.</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="step-2-inspect-the-network">Step 2: Inspect the network<a class="anchor" aria-label="anchor" href="#step-2-inspect-the-network"></a>
+<h3 id="step-2-inspect-the-network">step 2: inspect the network<a class="anchor" aria-label="anchor" href="#step-2-inspect-the-network"></a>
 </h3>
 <p>Before modeling, it’s worth checking basic properties.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -177,7 +181,7 @@ automatically.</li>
 <p><img src="pipeline_lame_dbn_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 <div class="section level3">
-<h3 id="step-3-convert-to-amen-format">Step 3: Convert to amen format<a class="anchor" aria-label="anchor" href="#step-3-convert-to-amen-format"></a>
+<h3 id="step-3-convert-to-amen-format">step 3: convert to amen format<a class="anchor" aria-label="anchor" href="#step-3-convert-to-amen-format"></a>
 </h3>
 <p><code><a href="../reference/netify_to_amen.html">to_amen()</a></code> converts a single-layer netify object into the
 list structure that <code><a href="https://rdrr.io/pkg/amen/man/ame.html" class="external-link">amen::ame()</a></code> expects.</p>
@@ -235,27 +239,31 @@ covariates</li>
 </div>
 </div>
 <div class="section level2">
-<h2 id="part-2-longitudinal-pipeline-with-lame">Part 2: Longitudinal Pipeline with lame<a class="anchor" aria-label="anchor" href="#part-2-longitudinal-pipeline-with-lame"></a>
+<h2 id="part-2-longitudinal-pipeline-with-lame">part 2: longitudinal pipeline with lame<a class="anchor" aria-label="anchor" href="#part-2-longitudinal-pipeline-with-lame"></a>
 </h2>
-<p>For longitudinal modeling with time-varying actor compositions, use
-<code><a href="../reference/netify_to_lame.html">to_lame()</a></code>. This is a thin specialization of
-<code><a href="../reference/netify_to_amen.html">to_amen()</a></code> that (a) auto-pads ragged per-period matrices
-into a 3D array via <code>lame::list_to_array()</code>, (b) emits a
-ready-to-run <code>lame::lame()</code> snippet, and (c) provides
+<p>For longitudinal modeling workflows that need per-period matrices,
+use <code><a href="../reference/netify_to_lame.html">to_lame()</a></code>. This is a thin specialization of
+<code><a href="../reference/netify_to_amen.html">to_amen()</a></code> that (a) can return ragged per-period matrices
+when actor sets vary, (b) emits a ready-to-run padding +
+<code>lame::lame()</code> snippet, and (c) provides
 <code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code> for round-tripping posterior predictions
-back into a netify for plotting.</p>
+back into a netify for plotting. The ICEWS example below has the same
+actor set in each year, but the format also supports open-cohort
+panels.</p>
 <div class="section level3">
-<h3 id="when-to-use-lame-format">When to use lame format<a class="anchor" aria-label="anchor" href="#when-to-use-lame-format"></a>
+<h3 id="when-to-use-lame-format">when to use lame format<a class="anchor" aria-label="anchor" href="#when-to-use-lame-format"></a>
 </h3>
 <p>Use <code><a href="../reference/netify_to_lame.html">to_lame()</a></code> when:</p>
 <ul>
 <li>Actors enter and exit the network over time (e.g., new states
 forming, organizations dissolving)</li>
-<li>You want to leverage lame’s longitudinal latent space models</li>
+<li>You want to fit longitudinal latent space models with
+<code>lame</code>
+</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="create-a-network-with-varying-actors">Create a network with varying actors<a class="anchor" aria-label="anchor" href="#create-a-network-with-varying-actors"></a>
+<h3 id="create-a-per-period-list-for-lame">create a per-period list for lame<a class="anchor" aria-label="anchor" href="#create-a-per-period-list-for-lame"></a>
 </h3>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># use longit_list format for varying actor compositions</span></span>
@@ -274,7 +282,7 @@ forming, organizations dissolving)</li>
 <span><span class="va">verbal_list</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="convert-to-lame-format">Convert to lame format<a class="anchor" aria-label="anchor" href="#convert-to-lame-format"></a>
+<h3 id="convert-to-lame-format">convert to lame format<a class="anchor" aria-label="anchor" href="#convert-to-lame-format"></a>
 </h3>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nl</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify_to_lame.html">to_lame</a></span><span class="op">(</span><span class="va">verbal_list</span>, lame <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -323,12 +331,14 @@ and then fits <code>lame::lame()</code>:</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="round-tripping-fitted-values-back-to-netify">Round-tripping fitted values back to netify<a class="anchor" aria-label="anchor" href="#round-tripping-fitted-values-back-to-netify"></a>
+<h3 id="round-tripping-fitted-values-back-to-netify">round-tripping fitted values back to netify<a class="anchor" aria-label="anchor" href="#round-tripping-fitted-values-back-to-netify"></a>
 </h3>
 <p>Once a fit is in hand, <code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code> pulls the
 posterior-mean linear predictor (or a residual / probability / per-cell
 quantile) back into a cross-sectional netify so it can be plotted or
-compared against the observed network:</p>
+compared against the observed network. In the example below,
+<code>lame_fit</code> is the object created by running the model-fitting
+snippet above:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># posterior-mean linear predictor</span></span>
 <span><span class="va">pred_net</span> <span class="op">=</span> <span class="fu"><a href="../reference/from_lame_fit.html">from_lame_fit</a></span><span class="op">(</span><span class="va">lame_fit</span>, value <span class="op">=</span> <span class="st">"fitted"</span><span class="op">)</span></span>
@@ -345,14 +355,14 @@ for <code>lame::lame()</code> Gibbs fits, with an explicit
 </div>
 </div>
 <div class="section level2">
-<h2 id="part-3-multilayer-pipeline-netify-to-dbn">Part 3: Multilayer Pipeline (netify to dbn)<a class="anchor" aria-label="anchor" href="#part-3-multilayer-pipeline-netify-to-dbn"></a>
+<h2 id="part-3-multilayer-pipeline-netify-to-dbn">part 3: multilayer pipeline (netify to dbn)<a class="anchor" aria-label="anchor" href="#part-3-multilayer-pipeline-netify-to-dbn"></a>
 </h2>
 <p>The <code>dbn</code> package models multilayer longitudinal networks
 using Dynamic Bilinear Network models. It expects a 4D array with
 dimensions <code>[n, n, p, T]</code> where <code>p</code> is the number
 of relation types (layers).</p>
 <div class="section level3">
-<h3 id="step-1-create-individual-layer-networks">Step 1: Create individual layer networks<a class="anchor" aria-label="anchor" href="#step-1-create-individual-layer-networks"></a>
+<h3 id="step-1-create-individual-layer-networks">step 1: create individual layer networks<a class="anchor" aria-label="anchor" href="#step-1-create-individual-layer-networks"></a>
 </h3>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># verbal cooperation layer (symmetric - mutual diplomatic engagement)</span></span>
@@ -381,7 +391,7 @@ of relation types (layers).</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-2-combine-into-a-multilayer-network">Step 2: Combine into a multilayer network<a class="anchor" aria-label="anchor" href="#step-2-combine-into-a-multilayer-network"></a>
+<h3 id="step-2-combine-into-a-multilayer-network">step 2: combine into a multilayer network<a class="anchor" aria-label="anchor" href="#step-2-combine-into-a-multilayer-network"></a>
 </h3>
 <p><code><a href="../reference/layer_netify.html">layer_netify()</a></code> supports mixed directedness, meaning
 layers can have different symmetry settings. This is common in IR
@@ -398,7 +408,7 @@ status) while others are directed (trade exports).</p>
 layers.</p>
 </div>
 <div class="section level3">
-<h3 id="step-3-convert-to-dbn-format">Step 3: Convert to dbn format<a class="anchor" aria-label="anchor" href="#step-3-convert-to-dbn-format"></a>
+<h3 id="step-3-convert-to-dbn-format">step 3: convert to dbn format<a class="anchor" aria-label="anchor" href="#step-3-convert-to-dbn-format"></a>
 </h3>
 <p><code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code> extracts the multilayer longitudinal netify
 object into the exact 4D array format that <code>dbn</code> expects.</p>
@@ -444,7 +454,7 @@ covariates</li>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="single-layer-networks-work-too">Single-layer networks work too<a class="anchor" aria-label="anchor" href="#single-layer-networks-work-too"></a>
+<h3 id="single-layer-networks-work-too">single-layer networks work too<a class="anchor" aria-label="anchor" href="#single-layer-networks-work-too"></a>
 </h3>
 <p><code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code> also handles single-layer longitudinal networks
 by adding a layer dimension of size 1:</p>
@@ -457,7 +467,7 @@ by adding a layer dimension of size 1:</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="part-4-working-with-mixed-directedness">Part 4: Working with Mixed Directedness<a class="anchor" aria-label="anchor" href="#part-4-working-with-mixed-directedness"></a>
+<h2 id="part-4-working-with-mixed-directedness">part 4: working with mixed directedness<a class="anchor" aria-label="anchor" href="#part-4-working-with-mixed-directedness"></a>
 </h2>
 <p>A common challenge in political science is that data naturally
 includes both symmetric and directed relations. For example:</p>
@@ -471,7 +481,7 @@ transfers</li>
 </ul>
 <p><code>netify</code> now handles this directly.</p>
 <div class="section level3">
-<h3 id="creating-mixed-directedness-multilayer-networks">Creating mixed-directedness multilayer networks<a class="anchor" aria-label="anchor" href="#creating-mixed-directedness-multilayer-networks"></a>
+<h3 id="creating-mixed-directedness-multilayer-networks">creating mixed-directedness multilayer networks<a class="anchor" aria-label="anchor" href="#creating-mixed-directedness-multilayer-networks"></a>
 </h3>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># symmetric layer: average verbal cooperation</span></span>
@@ -519,7 +529,7 @@ preserved:</p>
 <span><span class="co">#&gt; Material layer symmetric: FALSE</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="converting-mixed-directedness-to-dbn">Converting mixed-directedness to dbn<a class="anchor" aria-label="anchor" href="#converting-mixed-directedness-to-dbn"></a>
+<h3 id="converting-mixed-directedness-to-dbn">converting mixed-directedness to dbn<a class="anchor" aria-label="anchor" href="#converting-mixed-directedness-to-dbn"></a>
 </h3>
 <p><code><a href="../reference/netify_to_dbn.html">to_dbn()</a></code> handles mixed-directedness multilayer
 objects:</p>
@@ -534,52 +544,62 @@ call.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="part-5-the-missing_to_zero-decision">Part 5: The missing_to_zero Decision<a class="anchor" aria-label="anchor" href="#part-5-the-missing_to_zero-decision"></a>
+<h2 id="part-5-the-missing_to_zero-decision">part 5: the missing_to_zero decision<a class="anchor" aria-label="anchor" href="#part-5-the-missing_to_zero-decision"></a>
 </h2>
 <p>The <code>missing_to_zero</code> parameter deserves special attention
 for modeling pipelines. By default, <code><a href="../reference/netify.html">netify()</a></code> sets
 <code>missing_to_zero = TRUE</code>, which fills unobserved dyads with
-zeros. This is fine for descriptive analysis but can be problematic for
-statistical models.</p>
+zeros. That is appropriate when an unrecorded dyad means no event
+occurred, but it is not appropriate when unrecorded dyads were never
+observed.</p>
 <div class="section level3">
-<h3 id="why-it-matters">Why it matters<a class="anchor" aria-label="anchor" href="#why-it-matters"></a>
+<h3 id="why-it-matters">why it matters<a class="anchor" aria-label="anchor" href="#why-it-matters"></a>
 </h3>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># compare the two approaches</span></span>
+<code class="sourceCode R"><span><span class="va">observed_contacts</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span><span class="op">)</span>,</span>
+<span>    j <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span>,</span>
+<span>    contacts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">all_people</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span>, <span class="st">"d"</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">net_zeros</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
-<span>    <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span>,</span>
+<span>    <span class="va">observed_contacts</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
 <span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span>,</span>
+<span>    weight <span class="op">=</span> <span class="st">"contacts"</span>,</span>
+<span>    nodelist <span class="op">=</span> <span class="va">all_people</span>,</span>
 <span>    missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">net_na</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
-<span>    <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span>,</span>
+<span>    <span class="va">observed_contacts</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span>
 <span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span>,</span>
+<span>    weight <span class="op">=</span> <span class="st">"contacts"</span>,</span>
+<span>    nodelist <span class="op">=</span> <span class="va">all_people</span>,</span>
 <span>    missing_to_zero <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># count zeros vs NAs</span></span>
+<span><span class="co"># count zeros vs nas</span></span>
 <span><span class="va">raw_zeros</span> <span class="op">=</span> <span class="fu"><a href="../reference/get_raw.html">get_raw</a></span><span class="op">(</span><span class="va">net_zeros</span><span class="op">)</span></span>
 <span><span class="va">raw_na</span> <span class="op">=</span> <span class="fu"><a href="../reference/get_raw.html">get_raw</a></span><span class="op">(</span><span class="va">net_na</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"With missing_to_zero = TRUE:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; With missing_to_zero = TRUE:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Zeros:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">raw_zeros</span> <span class="op">==</span> <span class="fl">0</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Zeros: 12976</span></span>
+<span><span class="co">#&gt;   Zeros: 10</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  NAs:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">raw_zeros</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   NAs: 152</span></span>
+<span><span class="co">#&gt;   NAs: 4</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nWith missing_to_zero = FALSE:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; With missing_to_zero = FALSE:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  Zeros:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">raw_na</span> <span class="op">==</span> <span class="fl">0</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Zeros: 12976</span></span>
+<span><span class="co">#&gt;   Zeros: 0</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"  NAs:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">raw_na</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   NAs: 152</span></span></code></pre></div>
+<span><span class="co">#&gt;   NAs: 14</span></span></code></pre></div>
 <p>For latent space models, the distinction matters:</p>
 <ul>
 <li>
@@ -596,7 +616,7 @@ unobserved dyads represent genuine zeros.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="quick-reference-choosing-your-export-function">Quick Reference: Choosing Your Export Function<a class="anchor" aria-label="anchor" href="#quick-reference-choosing-your-export-function"></a>
+<h2 id="quick-reference-choosing-your-export-function">quick reference: choosing your export function<a class="anchor" aria-label="anchor" href="#quick-reference-choosing-your-export-function"></a>
 </h2>
 <table class="table">
 <colgroup>
@@ -623,7 +643,7 @@ unobserved dyads represent genuine zeros.</p>
 <tr class="odd">
 <td>Single-layer, longitudinal (varying actors)</td>
 <td><code>to_lame(lame=TRUE)</code></td>
-<td>padded 3D arrays + ame_call snippet</td>
+<td>per-period lists + padding / fit snippet</td>
 </tr>
 <tr class="even">
 <td>Round-trip AME/LAME fit back to netify</td>

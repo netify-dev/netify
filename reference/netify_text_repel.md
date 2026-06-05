@@ -1,6 +1,6 @@
-# Extract text_repel layer from netify plot components
+# extract text_repel layer from netify plot components
 
-Extracts the text_repel layer from a netify plot components object. Text
+extracts the text_repel layer from a netify plot components object. text
 repel labels display actor names with automatic repositioning to avoid
 overlaps, making them more readable in dense networks.
 
@@ -14,13 +14,13 @@ netify_text_repel(comp)
 
 - comp:
 
-  A netify_plot_components object returned from
+  a netify_plot_components object returned from
   `plot(..., return_components = TRUE)`
 
 ## Value
 
-A custom object of class "netify_text_repel" that can be added to a
-ggplot object using the + operator. The object contains the text_repel
+a custom object of class "netify_text_repel" that can be added to a
+ggplot object using the + operator. the object contains the text_repel
 layer with all its aesthetic mappings and data.
 
 ## See also
@@ -31,7 +31,7 @@ layer with all its aesthetic mappings and data.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
 
 ## Examples
 

@@ -1,7 +1,7 @@
 # theme_netify function
 
-This function returns a customized theme for netify plots. It is based
-on the `theme_minimal` function from the `ggplot2` package. It removes
+this function returns a customized theme for netify plots. it is based
+on the `theme_minimal` function from the `ggplot2` package. it removes
 axis text and titles from the plot.
 
 ## Usage
@@ -12,8 +12,8 @@ theme_netify()
 
 ## Value
 
-A customized theme object for netify plots.
+a customized theme object for netify plots.
 
 ## Author
 
-Cassy Dorff, Shahryar Minhas
+cassy dorff, shahryar minhas
