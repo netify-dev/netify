@@ -11,9 +11,9 @@
 * New submission.
 * The package specifies C++11. This is intentional: the C++ sources use C++11
   features such as `auto`, `std::unordered_map`, and `std::to_string`.
-* Installed size is 20.5 MB. The largest component is the locally compiled
+* Installed size is 19.6 MB. The largest component is the locally compiled
   shared library built from the package C++ sources (`libs`, 14.9 MB), followed
-  by bundled data (`data`, 2.9 MB). The source package does not ship compiled
+  by bundled data (`data`, 2.0 MB). The source package does not ship compiled
   objects; the local shared object includes debug symbols.
 * CRAN ships the short/core vignettes. Longer workflow articles are excluded
   from the CRAN build and rendered on the package site to keep CRAN build time
