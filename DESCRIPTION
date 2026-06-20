@@ -1,6 +1,6 @@
 Package: netify
 Title: Tools for Network Data Workflows
-Version: 1.5.2
+Version: 1.5.3
 Authors@R: c(
   person("Ha Eun", "Choi", email = "choiha3@msu.edu", role = c("ctb")),
   person("Cassy", "Dorff", email = "cassy.dorff@vanderbilt.edu", role = c("aut")),

@@ -296,124 +296,36 @@ endpoints.}
 }
 
 \examples{
-# load example data
-data(icews)
+data(classroom_edges)
+data(classroom_nodes)
 
-# basic cross-sectional network
-icews_10 <- icews[icews$year == 2010, ]
-net_10 <- netify(
-    icews_10,
-    actor1 = "i", actor2 = "j",
-    symmetric = FALSE,
-    weight = "verbCoop"
+net <- netify(
+    classroom_edges,
+    actor1 = "from", actor2 = "to",
+    symmetric = TRUE,
+    nodal_data = classroom_nodes,
+    missing_to_zero = TRUE
 )
 
-# simple plot with auto-formatting (default)
-plot(net_10)
+plot(net)
 
-# plot without auto-formatting for full control
-plot(net_10, auto_format = FALSE)
-
-# add nodal stats to netlet
-net_10 <- add_node_vars(
-    net_10,
-    summary_actor(net_10),
-    actor = "actor"
+plot(net,
+    node_size_by = "gpa",
+    node_color_by = "gender",
+    node_size_label = "gpa",
+    node_color_label = "gender"
 )
 
-# customized plot with new naming convention
-plot(net_10,
-    edge_color = "lightgrey",
-    node_size_by = "degree_total", # maps degree to node size
-    node_color = "steelblue",
-    edge_alpha_by = "verbCoop", # maps edge weight to alpha
-    node_size_label = "degree",
-    edge_alpha_label = "verbal cooperation"
-)
-
-\donttest{
-# longitudinal network example
-net_longit <- netify(
-    icews,
-    actor1 = "i", actor2 = "j",
-    time = "year",
-    symmetric = FALSE,
-    weight = "verbCoop",
-    nodal_vars = c("i_polity2", "i_log_gdp")
-)
-
-# add network statistics
-net_longit <- add_node_vars(
-    net_longit,
-    summary_actor(net_longit),
-    actor = "actor",
-    time = "time"
-)
-
-# plot with multiple aesthetics
-plot(net_longit,
-    # edges
-    edge_color = "grey70",
-    mutate_weight = log1p, # transform weights
-    # nodes
-    node_size_by = "degree_total",
-    node_color_by = "i_polity2",
-    # labels
-    node_size_label = "total degree",
-    node_color_label = "polity score",
-    edge_alpha_label = "log(verbal coop.)",
-    # layout
-    static_actor_positions = TRUE # keep positions constant
-)
-
-# selective labeling example
-plot(net_10,
-    node_size_by = "degree_total",
-    select_text = c("united states", "china", "russian federation"),
-    text_size = 3,
-    text_color = "darkred"
-)
-
-# choose alternative labels for selected text
-plot(net_10,
-    node_size_by = "degree_total",
-    select_text = c("united states", "china", "russian federation"),
-    select_text_display = c("usa", "chn", "rus"),
-    text_size = 3,
-    text_color = "darkred"
-)
-
-# time subsetting example
-plot(net_longit,
-    time_filter = c("2010", "2011", "2012")
-)
-
-# node subsetting example
-# democracies with high gdp
-plot(net_longit, node_filter = ~ i_polity2 > 6 & i_log_gdp > 25)
-
-# use return_components=TRUE
-# to get back ggplot2 pieces of plot
-g10 <- plot(
-    net_10,
-    node_alpha = .8,
-    arrow = ggplot2::arrow(length = ggplot2::unit(0.01, "inches")),
-    node_size_by = "degree_total",
-    node_size_label = "log(degree)",
-    edge_alpha_label = "log(verbal coop.)",
-    remove_isolates = TRUE,
-    mutate_weight = log1p,
+pieces <- plot(net,
+    node_alpha = 0.8,
+    node_size_by = "gpa",
     return_components = TRUE
 )
 
-# manually assemble with custom modifications
-# to scale aesthetics such as edges
-g10$base +
-    netify_edge(g10) +
-    ggplot2::scale_alpha_continuous(range = c(0.01, 0.2)) +
-    netify_node(g10) +
+pieces$base +
+    netify_edge(pieces) +
+    netify_node(pieces) +
     theme_netify()
-}
 
 }
 \author{

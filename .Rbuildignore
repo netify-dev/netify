@@ -19,6 +19,7 @@
 ^Library$
 ^Outputs$
 ^src/.*[.](o|so|dll|dylib)$
+^Rplots[.]pdf$
 ^tests/testthat/Rplots[.]pdf$
 ^tests/testthat/testthat-problems[.]rds$
 ^vignettes/.*[.]html$

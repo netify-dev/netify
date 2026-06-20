@@ -79,72 +79,53 @@
 #' after creating the network objects.
 #'
 #' @examples
-#' # load example data
-#' data(icews)
+#' data(classroom_edges)
+#' data(classroom_nodes)
 #'
-#' # cross-sectional example
-#' icews_10 <- icews[icews$year == 2010, ]
-#'
-#' # create netify object with attributes
-#' dvars <- c("matlCoop", "verbConf", "matlConf")
-#' nvars <- c("i_polity2", "i_log_gdp", "i_log_pop")
-#'
-#' verbCoop_net <- netify(
-#'     icews_10,
-#'     actor1 = "i", actor2 = "j",
-#'     symmetric = FALSE,
-#'     weight = "verbCoop",
-#'     dyad_vars = dvars,
-#'     dyad_vars_symmetric = rep(FALSE, length(dvars)),
-#'     nodal_vars = nvars
+#' net <- netify(
+#'     classroom_edges,
+#'     actor1 = "from", actor2 = "to",
+#'     symmetric = TRUE,
+#'     nodal_data = classroom_nodes,
+#'     missing_to_zero = TRUE
 #' )
 #'
-#' # convert to statnet network object
-#' ntwk <- netify_to_statnet(verbCoop_net)
+#' ntwk <- netify_to_statnet(net)
 #'
 #' # examine the result
 #' ntwk
 #' network::network.size(ntwk) # number of vertices
 #' network::network.edgecount(ntwk) # number of edges
 #' network::list.vertex.attributes(ntwk) # nodal attributes
-#' network::list.edge.attributes(ntwk) # edge attributes
-#'
-#' # access specific attributes
-#' network::get.vertex.attribute(ntwk, "i_polity2") # polity scores
-#' network::get.edge.attribute(ntwk, "matlCoop_e") # material cooperation on edges
+#' network::get.vertex.attribute(ntwk, "gender") # gender by student
 #'
 #' # check network properties
-#' network::is.directed(ntwk) # TRUE for this example
-#' network::has.loops(ntwk) # FALSE (no self-ties)
+#' network::is.directed(ntwk)
+#' network::has.loops(ntwk)
 #'
-#' \donttest{
 #' # longitudinal example
-#' verbCoop_longit <- netify(
-#'     icews,
-#'     actor1 = "i", actor2 = "j", time = "year",
-#'     symmetric = FALSE,
-#'     weight = "verbCoop",
-#'     dyad_vars = dvars,
-#'     dyad_vars_symmetric = rep(FALSE, length(dvars)),
-#'     nodal_vars = nvars
+#' classroom_panel <- rbind(
+#'     transform(classroom_edges[1:12, ], wave = 1),
+#'     transform(classroom_edges[13:24, ], wave = 2)
 #' )
 #'
-#' # convert to list of network objects
-#' ntwk_list <- netify_to_statnet(verbCoop_longit)
+#' longit_net <- netify(
+#'     classroom_panel,
+#'     actor1 = "from", actor2 = "to", time = "wave",
+#'     symmetric = TRUE,
+#'     missing_to_zero = TRUE
+#' )
+#'
+#' ntwk_list <- netify_to_statnet(longit_net)
 #'
 #' # examine structure
 #' length(ntwk_list) # number of time periods
 #' names(ntwk_list) # time period labels
 #'
-#' # access specific time period
-#' ntwk_2002 <- ntwk_list[["2002"]]
-#' ntwk_2002
-#' }
-#'
 #' \dontrun{
 #' # use with ergm for modeling (requires ergm package)
 #' library(ergm)
-#' model <- ergm(ntwk ~ edges + mutual + nodematch("i_polity2"))
+#' model <- ergm(ntwk ~ edges + nodematch("gender"))
 #' }
 #'
 #' @author ha eun choi, cassy dorff, colin henry, shahryar minhas

@@ -1,3 +1,8 @@
+# netify 1.5.3
+
+* CRAN resubmission: shorten `plot.netify()`, `compare_networks()`, and
+  `netify_to_statnet()` examples so they run quickly on CRAN Windows checks.
+
 # netify 1.5.2
 
 * CRAN resubmission: remove the obsolete C++11 standard request and

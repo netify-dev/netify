@@ -145,71 +145,58 @@
 #' out-degree. symmetric inputs use undirected edge swaps that preserve the
 #' undirected degree sequence.
 #' @examples
-#' # load example data
-#' data(icews)
+#' data(classroom_edges)
+#' data(classroom_nodes)
 #'
-#' # create networks for different years
-#' net_2002 <- netify(icews[icews$year == 2002, ],
-#'     actor1 = "i", actor2 = "j",
-#'     weight = "matlConf"
-#' )
-#' net_2003 <- netify(icews[icews$year == 2003, ],
-#'     actor1 = "i", actor2 = "j",
-#'     weight = "matlConf"
+#' first_half <- classroom_edges[1:35, ]
+#' second_half <- classroom_edges[17:51, ]
+#'
+#' net_a <- netify(
+#'     first_half,
+#'     actor1 = "from", actor2 = "to",
+#'     symmetric = TRUE,
+#'     nodal_data = classroom_nodes,
+#'     missing_to_zero = TRUE
 #' )
 #'
-#' # basic edge comparison
-#' comp <- compare_networks(list("2002" = net_2002, "2003" = net_2003))
+#' net_b <- netify(
+#'     second_half,
+#'     actor1 = "from", actor2 = "to",
+#'     symmetric = TRUE,
+#'     nodal_data = classroom_nodes,
+#'     missing_to_zero = TRUE
+#' )
+#'
+#' comp <- compare_networks(list("first" = net_a, "second" = net_b))
 #' print(comp)
 #'
-#' # structural comparison
 #' struct_comp <- compare_networks(
-#'     list(net_2002, net_2003),
+#'     list("first" = net_a, "second" = net_b),
 #'     what = "structure"
 #' )
 #'
-#' \donttest{
-#' # create longitudinal network for automatic temporal comparison
+#' classroom_panel <- rbind(
+#'     transform(first_half, wave = 1),
+#'     transform(second_half, wave = 2)
+#' )
+#'
 #' longit_net <- netify(
-#'     icews,
-#'     actor1 = "i", actor2 = "j",
-#'     time = "year",
-#'     weight = "verbCoop",
-#'     output_format = "longit_list"
+#'     classroom_panel,
+#'     actor1 = "from", actor2 = "to",
+#'     time = "wave",
+#'     symmetric = TRUE,
+#'     output_format = "longit_list",
+#'     missing_to_zero = TRUE
 #' )
 #'
-#' # automatic temporal comparison
-#' temporal_comp <- compare_networks(longit_net, method = "all")
+#' temporal_comp <- compare_networks(longit_net, method = "hamming")
 #'
-#' # create multilayer network example
-#' verbal_coop <- netify(
-#'     icews[icews$year == 2010, ],
-#'     actor1 = "i", actor2 = "j",
-#'     weight = "verbCoop"
-#' )
-#'
-#' material_coop <- netify(
-#'     icews[icews$year == 2010, ],
-#'     actor1 = "i", actor2 = "j",
-#'     weight = "matlCoop"
-#' )
-#'
-#' # combine into multilayer network
-#' multilayer <- layer_netify(
-#'     list(verbal = verbal_coop, material = material_coop)
-#' )
-#'
-#' # automatic multilayer comparison
-#' layer_comp <- compare_networks(multilayer, method = "all")
-#' print(layer_comp)
-#'
-#' # get detailed matrices
 #' detailed_comp <- compare_networks(
-#'     list(net_2002, net_2003),
+#'     list("first" = net_a, "second" = net_b),
 #'     return_details = TRUE
 #' )
+#'
 #' names(detailed_comp$details) # shows available matrices
-#' }
 #'
 #' # compare with custom statistics
 #' \dontrun{
@@ -225,7 +212,7 @@
 #'
 #' # apply to structural comparison
 #' struct_comp_custom <- compare_networks(
-#'     list("2002" = net_2002, "2003" = net_2003),
+#'     list("first" = net_a, "second" = net_b),
 #'     what = "structure",
 #'     other_stats = list(connectivity = connectivity_stats)
 #' )

@@ -7,6 +7,7 @@ docs
 *.Rproj
 .claude
 Rplots.pdf
+cran-comments.md
 ego_networks.md
 figure/
 minimal_repro.R
