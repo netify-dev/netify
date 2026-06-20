@@ -2,6 +2,7 @@ name: Build Netify Release Binaries
 
 on:
   push:
+    branches: [main, master]
     tags:
       - "v*.*.*"
   workflow_dispatch:
@@ -10,8 +11,54 @@ permissions:
   contents: write
 
 jobs:
+  prepare:
+    name: Prepare release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+      should_release: ${{ steps.release.outputs.should_release }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Read release version
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(awk -F': *' '$1 == "Version" { print $2; exit }' DESCRIPTION)
+          tag="v${version}"
+
+          if [ -z "$version" ]; then
+            echo "Could not read Version from DESCRIPTION." >&2
+            exit 1
+          fi
+
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "$tag" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match DESCRIPTION version ${version}." >&2
+            exit 1
+          fi
+
+          should_release=true
+          if [ "${GITHUB_EVENT_NAME}" = "push" ] && [ "${GITHUB_REF_TYPE}" != "tag" ]; then
+            if gh release view "$tag" >/dev/null 2>&1; then
+              should_release=false
+              echo "Release ${tag} already exists; skipping release build for this branch push."
+            fi
+          fi
+
+          {
+            echo "version=${version}"
+            echo "tag=${tag}"
+            echo "should_release=${should_release}"
+          } >> "$GITHUB_OUTPUT"
+
   build:
     name: Build on ${{ matrix.label }}
+    needs: prepare
+    if: needs.prepare.outputs.should_release == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -37,13 +84,6 @@ jobs:
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
 
-      - name: Extract version from DESCRIPTION
-        id: version
-        run: |
-          version <- read.dcf("DESCRIPTION")[1, "Version"]
-          cat(sprintf("version=%s\n", version), file = Sys.getenv("GITHUB_OUTPUT"), append = TRUE)
-        shell: Rscript {0}
-
       - name: Build source package
         run: R CMD build .
         shell: bash
@@ -66,7 +106,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: netify-${{ matrix.label }}-v${{ steps.version.outputs.version }}
+          name: netify-${{ matrix.label }}-v${{ needs.prepare.outputs.version }}
           path: |
             *.tgz
             *.zip
@@ -75,15 +115,13 @@ jobs:
 
   release:
     name: Create GitHub Release
-    needs: build
+    needs: [prepare, build]
+    if: needs.prepare.outputs.should_release == 'true'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup R
-        uses: r-lib/actions/setup-r@v2
 
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
@@ -92,26 +130,25 @@ jobs:
 
       - name: Move artifacts to root of artifacts directory
         run: |
-          find artifacts -type f \( -name "*.zip" -o -name "*.tgz" -o -name "*.tar.gz" \) -exec mv {} artifacts/ \;
+          mkdir -p release-assets
+          find artifacts -type f \( -name "*.zip" -o -name "*.tgz" -o -name "*.tar.gz" \) -exec cp {} release-assets/ \;
+          ls -lh release-assets
         shell: bash
 
-      - name: Extract version from DESCRIPTION
-        id: version
-        run: |
-          version <- read.dcf("DESCRIPTION")[1, "Version"]
-          cat(sprintf("version=%s\n", version), file = Sys.getenv("GITHUB_OUTPUT"), append = TRUE)
-        shell: Rscript {0}
-
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: "netify v${{ steps.version.outputs.version }}"
-          tag_name: "v${{ steps.version.outputs.version }}"
-          generate_release_notes: true
-          make_latest: true
-          files: |
-            artifacts/*.tgz
-            artifacts/*.zip
-            artifacts/*.tar.gz
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NETIFY_VERSION: ${{ needs.prepare.outputs.version }}
+          NETIFY_TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          if gh release view "$NETIFY_TAG" >/dev/null 2>&1; then
+            gh release upload "$NETIFY_TAG" release-assets/* --clobber
+            gh release edit "$NETIFY_TAG" --title "netify v${NETIFY_VERSION}" --latest
+          else
+            gh release create "$NETIFY_TAG" release-assets/* \
+              --title "netify v${NETIFY_VERSION}" \
+              --generate-notes \
+              --latest \
+              --target "$GITHUB_SHA"
+          fi
+        shell: bash
