@@ -11,7 +11,7 @@ across multiple networks or within subgroups."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -340,21 +340,29 @@ undirected degree sequence.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># load example data</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">classroom_edges</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">classroom_nodes</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># create networks for different years</span></span></span>
-<span class="r-in"><span><span class="va">net_2002</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span><span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2002</span>, <span class="op">]</span>,</span></span>
-<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
-<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"matlConf"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">net_2003</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span><span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2003</span>, <span class="op">]</span>,</span></span>
-<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
-<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"matlConf"</span></span></span>
+<span class="r-in"><span><span class="va">first_half</span> <span class="op">&lt;-</span> <span class="va">classroom_edges</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">35</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">second_half</span> <span class="op">&lt;-</span> <span class="va">classroom_edges</span><span class="op">[</span><span class="fl">17</span><span class="op">:</span><span class="fl">51</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">net_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">first_half</span>,</span></span>
+<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"from"</span>, actor2 <span class="op">=</span> <span class="st">"to"</span>,</span></span>
+<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    nodal_data <span class="op">=</span> <span class="va">classroom_nodes</span>,</span></span>
+<span class="r-in"><span>    missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># basic edge comparison</span></span></span>
-<span class="r-in"><span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"2002"</span> <span class="op">=</span> <span class="va">net_2002</span>, <span class="st">"2003"</span> <span class="op">=</span> <span class="va">net_2003</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">net_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">second_half</span>,</span></span>
+<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"from"</span>, actor2 <span class="op">=</span> <span class="st">"to"</span>,</span></span>
+<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    nodal_data <span class="op">=</span> <span class="va">classroom_nodes</span>,</span></span>
+<span class="r-in"><span>    missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"first"</span> <span class="op">=</span> <span class="va">net_a</span>, <span class="st">"second"</span> <span class="op">=</span> <span class="va">net_b</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Network Comparison Results</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────</span></span>
@@ -369,105 +377,41 @@ undirected degree sequence.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Edge Comparison Summary</span> ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     comparison correlation</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 2002 vs 2003       0.943</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        comparison correlation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 first vs second       0.503</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Edge Changes </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">2002_vs_2003</span>:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Added: <span style="color: #0000BB;">1366</span> | Removed: <span style="color: #0000BB;">1198</span> | Maintained: <span style="color: #0000BB;">1866</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">first_vs_second</span>:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Added: <span style="color: #0000BB;">32</span> | Removed: <span style="color: #0000BB;">32</span> | Maintained: <span style="color: #0000BB;">38</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># structural comparison</span></span></span>
 <span class="r-in"><span><span class="va">struct_comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">net_2002</span>, <span class="va">net_2003</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"first"</span> <span class="op">=</span> <span class="va">net_a</span>, <span class="st">"second"</span> <span class="op">=</span> <span class="va">net_b</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    what <span class="op">=</span> <span class="st">"structure"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="co"># create longitudinal network for automatic temporal comparison</span></span></span>
+<span class="r-in"><span><span class="va">classroom_panel</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">first_half</span>, wave <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">second_half</span>, wave <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">longit_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">icews</span>,</span></span>
-<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
-<span class="r-in"><span>    time <span class="op">=</span> <span class="st">"year"</span>,</span></span>
-<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span>,</span></span>
-<span class="r-in"><span>    output_format <span class="op">=</span> <span class="st">"longit_list"</span></span></span>
+<span class="r-in"><span>    <span class="va">classroom_panel</span>,</span></span>
+<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"from"</span>, actor2 <span class="op">=</span> <span class="st">"to"</span>,</span></span>
+<span class="r-in"><span>    time <span class="op">=</span> <span class="st">"wave"</span>,</span></span>
+<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    output_format <span class="op">=</span> <span class="st">"longit_list"</span>,</span></span>
+<span class="r-in"><span>    missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># automatic temporal comparison</span></span></span>
-<span class="r-in"><span><span class="va">temporal_comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span><span class="va">longit_net</span>, method <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">temporal_comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span><span class="va">longit_net</span>, method <span class="op">=</span> <span class="st">"hamming"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># create multilayer network example</span></span></span>
-<span class="r-in"><span><span class="va">verbal_coop</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span>,</span></span>
-<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
-<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">material_coop</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span>,</span></span>
-<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
-<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"matlCoop"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># combine into multilayer network</span></span></span>
-<span class="r-in"><span><span class="va">multilayer</span> <span class="op">&lt;-</span> <span class="fu"><a href="layer_netify.html">layer_netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>verbal <span class="op">=</span> <span class="va">verbal_coop</span>, material <span class="op">=</span> <span class="va">material_coop</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># automatic multilayer comparison</span></span></span>
-<span class="r-in"><span><span class="va">layer_comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span><span class="va">multilayer</span>, method <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">layer_comp</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Network Comparison Results</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Comparison type: <span style="font-weight: bold;">multilayer</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Number of networks: <span style="color: #0000BB;">2</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Comparison focus: <span style="color: #00BB00;">edges</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Method: <span style="color: #00BB00;">all</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Algorithm: <span style="color: #00BB00;">all</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Permutation type: <span style="color: #00BB00;">classic</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Correlation type: <span style="color: #00BB00;">pearson</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ────────────────────────────────────────────────────────────────────────────────</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Edge Comparison Summary</span> ──</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           comparison correlation jaccard hamming qap_correlation qap_pvalue</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 verbal vs material       0.609   0.264   0.354           0.609      2e-04</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   spectral</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  8.4e+04</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Edge Changes </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">verbal_vs_material</span>:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Added: <span style="color: #0000BB;">188</span> | Removed: <span style="color: #0000BB;">7930</span> | Maintained: <span style="color: #0000BB;">2912</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Statistical Tests</span> ──</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Permutations: <span style="color: #0000BB;">5000</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ── qap_correlations </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             verbal  material</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> verbal   1.0000000 0.6090188</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> material 0.6090188 1.0000000</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ── qap_pvalues </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              verbal   material</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> verbal           NA 0.00019996</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> material 0.00019996         NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"n_perm")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5000</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ── qap_valid_permutations </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          verbal material</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> verbal       NA     5000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> material   5000       NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"n_perm")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5000</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># get detailed matrices</span></span></span>
 <span class="r-in"><span><span class="va">detailed_comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">net_2002</span>, <span class="va">net_2003</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"first"</span> <span class="op">=</span> <span class="va">net_a</span>, <span class="st">"second"</span> <span class="op">=</span> <span class="va">net_b</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    return_details <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">detailed_comp</span><span class="op">$</span><span class="va">details</span><span class="op">)</span> <span class="co"># shows available matrices</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "correlation_matrix" "jaccard_matrix"     "hamming_matrix"    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [4] "spectral_matrix"   </span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># compare with custom statistics</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
@@ -483,7 +427,7 @@ undirected degree sequence.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># apply to structural comparison</span></span></span>
 <span class="r-in"><span><span class="va">struct_comp_custom</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"2002"</span> <span class="op">=</span> <span class="va">net_2002</span>, <span class="st">"2003"</span> <span class="op">=</span> <span class="va">net_2003</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"first"</span> <span class="op">=</span> <span class="va">net_a</span>, <span class="st">"second"</span> <span class="op">=</span> <span class="va">net_b</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    what <span class="op">=</span> <span class="st">"structure"</span>,</span></span>
 <span class="r-in"><span>    other_stats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>connectivity <span class="op">=</span> <span class="va">connectivity_stats</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>

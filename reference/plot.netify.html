@@ -11,7 +11,7 @@ mapping network attributes to visual properties."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -481,133 +481,39 @@ endpoints.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># load example data</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">classroom_edges</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">classroom_nodes</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># basic cross-sectional network</span></span></span>
-<span class="r-in"><span><span class="va">icews_10</span> <span class="op">&lt;-</span> <span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">net_10</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">icews_10</span>,</span></span>
-<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
-<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span></span></span>
+<span class="r-in"><span><span class="va">net</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">classroom_edges</span>,</span></span>
+<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"from"</span>, actor2 <span class="op">=</span> <span class="st">"to"</span>,</span></span>
+<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    nodal_data <span class="op">=</span> <span class="va">classroom_nodes</span>,</span></span>
+<span class="r-in"><span>    missing_to_zero <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># simple plot with auto-formatting (default)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net_10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.netify-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># plot without auto-formatting for full control</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net_10</span>, auto_format <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net</span>,</span></span>
+<span class="r-in"><span>    node_size_by <span class="op">=</span> <span class="st">"gpa"</span>,</span></span>
+<span class="r-in"><span>    node_color_by <span class="op">=</span> <span class="st">"gender"</span>,</span></span>
+<span class="r-in"><span>    node_size_label <span class="op">=</span> <span class="st">"gpa"</span>,</span></span>
+<span class="r-in"><span>    node_color_label <span class="op">=</span> <span class="st">"gender"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.netify-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># add nodal stats to netlet</span></span></span>
-<span class="r-in"><span><span class="va">net_10</span> <span class="op">&lt;-</span> <span class="fu"><a href="add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">net_10</span>,</span></span>
-<span class="r-in"><span>    <span class="fu"><a href="summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">net_10</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    actor <span class="op">=</span> <span class="st">"actor"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># customized plot with new naming convention</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net_10</span>,</span></span>
-<span class="r-in"><span>    edge_color <span class="op">=</span> <span class="st">"lightgrey"</span>,</span></span>
-<span class="r-in"><span>    node_size_by <span class="op">=</span> <span class="st">"degree_total"</span>, <span class="co"># maps degree to node size</span></span></span>
-<span class="r-in"><span>    node_color <span class="op">=</span> <span class="st">"steelblue"</span>,</span></span>
-<span class="r-in"><span>    edge_alpha_by <span class="op">=</span> <span class="st">"verbCoop"</span>, <span class="co"># maps edge weight to alpha</span></span></span>
-<span class="r-in"><span>    node_size_label <span class="op">=</span> <span class="st">"degree"</span>,</span></span>
-<span class="r-in"><span>    edge_alpha_label <span class="op">=</span> <span class="st">"verbal cooperation"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plot.netify-3.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="co"># longitudinal network example</span></span></span>
-<span class="r-in"><span><span class="va">net_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">icews</span>,</span></span>
-<span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>,</span></span>
-<span class="r-in"><span>    time <span class="op">=</span> <span class="st">"year"</span>,</span></span>
-<span class="r-in"><span>    symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span>,</span></span>
-<span class="r-in"><span>    nodal_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"i_polity2"</span>, <span class="st">"i_log_gdp"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># add network statistics</span></span></span>
-<span class="r-in"><span><span class="va">net_longit</span> <span class="op">&lt;-</span> <span class="fu"><a href="add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">net_longit</span>,</span></span>
-<span class="r-in"><span>    <span class="fu"><a href="summary_actor.html">summary_actor</a></span><span class="op">(</span><span class="va">net_longit</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    actor <span class="op">=</span> <span class="st">"actor"</span>,</span></span>
-<span class="r-in"><span>    time <span class="op">=</span> <span class="st">"time"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># plot with multiple aesthetics</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net_longit</span>,</span></span>
-<span class="r-in"><span>    <span class="co"># edges</span></span></span>
-<span class="r-in"><span>    edge_color <span class="op">=</span> <span class="st">"grey70"</span>,</span></span>
-<span class="r-in"><span>    mutate_weight <span class="op">=</span> <span class="va">log1p</span>, <span class="co"># transform weights</span></span></span>
-<span class="r-in"><span>    <span class="co"># nodes</span></span></span>
-<span class="r-in"><span>    node_size_by <span class="op">=</span> <span class="st">"degree_total"</span>,</span></span>
-<span class="r-in"><span>    node_color_by <span class="op">=</span> <span class="st">"i_polity2"</span>,</span></span>
-<span class="r-in"><span>    <span class="co"># labels</span></span></span>
-<span class="r-in"><span>    node_size_label <span class="op">=</span> <span class="st">"total degree"</span>,</span></span>
-<span class="r-in"><span>    node_color_label <span class="op">=</span> <span class="st">"polity score"</span>,</span></span>
-<span class="r-in"><span>    edge_alpha_label <span class="op">=</span> <span class="st">"log(verbal coop.)"</span>,</span></span>
-<span class="r-in"><span>    <span class="co"># layout</span></span></span>
-<span class="r-in"><span>    static_actor_positions <span class="op">=</span> <span class="cn">TRUE</span> <span class="co"># keep positions constant</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plot.netify-4.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># selective labeling example</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net_10</span>,</span></span>
-<span class="r-in"><span>    node_size_by <span class="op">=</span> <span class="st">"degree_total"</span>,</span></span>
-<span class="r-in"><span>    select_text <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"united states"</span>, <span class="st">"china"</span>, <span class="st">"russian federation"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    text_size <span class="op">=</span> <span class="fl">3</span>,</span></span>
-<span class="r-in"><span>    text_color <span class="op">=</span> <span class="st">"darkred"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plot.netify-5.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># choose alternative labels for selected text</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net_10</span>,</span></span>
-<span class="r-in"><span>    node_size_by <span class="op">=</span> <span class="st">"degree_total"</span>,</span></span>
-<span class="r-in"><span>    select_text <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"united states"</span>, <span class="st">"china"</span>, <span class="st">"russian federation"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    select_text_display <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"usa"</span>, <span class="st">"chn"</span>, <span class="st">"rus"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    text_size <span class="op">=</span> <span class="fl">3</span>,</span></span>
-<span class="r-in"><span>    text_color <span class="op">=</span> <span class="st">"darkred"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plot.netify-6.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># time subsetting example</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net_longit</span>,</span></span>
-<span class="r-in"><span>    time_filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2010"</span>, <span class="st">"2011"</span>, <span class="st">"2012"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plot.netify-7.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># node subsetting example</span></span></span>
-<span class="r-in"><span><span class="co"># democracies with high gdp</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net_longit</span>, node_filter <span class="op">=</span> <span class="op">~</span> <span class="va">i_polity2</span> <span class="op">&gt;</span> <span class="fl">6</span> <span class="op">&amp;</span> <span class="va">i_log_gdp</span> <span class="op">&gt;</span> <span class="fl">25</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plot.netify-8.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># use return_components=TRUE</span></span></span>
-<span class="r-in"><span><span class="co"># to get back ggplot2 pieces of plot</span></span></span>
-<span class="r-in"><span><span class="va">g10</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">net_10</span>,</span></span>
-<span class="r-in"><span>    node_alpha <span class="op">=</span> <span class="fl">.8</span>,</span></span>
-<span class="r-in"><span>    arrow <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grid/arrow.html" class="external-link">arrow</a></span><span class="op">(</span>length <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grid/unit.html" class="external-link">unit</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="st">"inches"</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    node_size_by <span class="op">=</span> <span class="st">"degree_total"</span>,</span></span>
-<span class="r-in"><span>    node_size_label <span class="op">=</span> <span class="st">"log(degree)"</span>,</span></span>
-<span class="r-in"><span>    edge_alpha_label <span class="op">=</span> <span class="st">"log(verbal coop.)"</span>,</span></span>
-<span class="r-in"><span>    remove_isolates <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>    mutate_weight <span class="op">=</span> <span class="va">log1p</span>,</span></span>
+<span class="r-in"><span><span class="va">pieces</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">net</span>,</span></span>
+<span class="r-in"><span>    node_alpha <span class="op">=</span> <span class="fl">0.8</span>,</span></span>
+<span class="r-in"><span>    node_size_by <span class="op">=</span> <span class="st">"gpa"</span>,</span></span>
 <span class="r-in"><span>    return_components <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># manually assemble with custom modifications</span></span></span>
-<span class="r-in"><span><span class="co"># to scale aesthetics such as edges</span></span></span>
-<span class="r-in"><span><span class="va">g10</span><span class="op">$</span><span class="va">base</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="netify_edge.html">netify_edge</a></span><span class="op">(</span><span class="va">g10</span><span class="op">)</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>    <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_alpha.html" class="external-link">scale_alpha_continuous</a></span><span class="op">(</span>range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="netify_node.html">netify_node</a></span><span class="op">(</span><span class="va">g10</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span><span class="va">pieces</span><span class="op">$</span><span class="va">base</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="netify_edge.html">netify_edge</a></span><span class="op">(</span><span class="va">pieces</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="netify_node.html">netify_node</a></span><span class="op">(</span><span class="va">pieces</span><span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="theme_netify.html">theme_netify</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plot.netify-9.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-plt img"><img src="plot.netify-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
