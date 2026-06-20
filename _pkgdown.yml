@@ -1,4 +1,5 @@
 url: https://netify-dev.github.io/netify/
+llm-docs: false
 template:
   bootstrap: 5
 

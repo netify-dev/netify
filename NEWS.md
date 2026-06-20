@@ -1,3 +1,9 @@
+# netify 1.5.1
+
+* Fixed `unnetify()` and `plot()` for bipartite networks so ties in
+  same-position row and column entries are kept. These entries are valid
+  cross-mode ties, not diagonal self-ties.
+
 # netify 1.5
 
 * New worked example dataset (`classroom_edges`, `classroom_nodes`) and a

@@ -1105,3 +1105,32 @@ test_that("automatic nodal and imported edge weights use deterministic rules", {
 		"conflicting values"
 	)
 })
+
+test_that("bipartite unnetify and plot keep positional diagonal ties", {
+	ties = data.frame(
+		person = c("peter", "peter", "peter", "mary", "mary", "mary",
+			"sandra", "sandra", "sandra"),
+		city = c("nyc", "san francisco", "miami", "san francisco", "miami",
+			"brussels", "nyc", "miami", "brussels"),
+		tie = 1,
+		stringsAsFactors = FALSE
+	)
+	expected = paste(ties$person, ties$city, sep = " -> ")
+
+	net = netify(ties,
+		actor1 = "person", actor2 = "city",
+		weight = "tie", mode = "bipartite", symmetric = FALSE)
+
+	expect_equal(attr(net, "mode"), "bipartite")
+	expect_false(attr(net, "diag_to_NA"))
+	expect_equal(sum(as.matrix(net) != 0, na.rm = TRUE), length(expected))
+
+	dyads = unnetify(net, remove_zeros = TRUE)
+	dyad_keys = paste(dyads$from, dyads$to, sep = " -> ")
+	expect_setequal(dyad_keys, expected)
+
+	components = plot(net, return_components = TRUE, remove_isolates = FALSE)
+	plot_edges = components$net_dfs$edge_data
+	plot_keys = paste(plot_edges$from, plot_edges$to, sep = " -> ")
+	expect_setequal(plot_keys, expected)
+})
