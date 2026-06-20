@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,6 +50,10 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.5.1" id="netify-151">netify 1.5.1<a class="anchor" aria-label="anchor" href="#netify-151"></a></h2>
+<ul><li>Fixed <code><a href="../reference/unnetify.html">unnetify()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> for bipartite networks so ties in same-position row and column entries are kept. These entries are valid cross-mode ties, not diagonal self-ties.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.5" id="netify-15">netify 1.5<a class="anchor" aria-label="anchor" href="#netify-15"></a></h2>
 <ul><li>New worked example dataset (<code>classroom_edges</code>, <code>classroom_nodes</code>) and a matching short-form vignette (<code>quickstart_inference</code>) for quick onboarding.</li>
 <li>Index of common pipelines available at <code><a href="../reference/netify_workflows.html">?netify_workflows</a></code>, covering unipartite, bipartite, longitudinal, and multilayer setups, plus handoff to <code>statnet</code>, <code>amen</code>, <code>lame</code>, <code>dbn</code>, and <code>igraph</code>.</li>
@@ -64,7 +68,8 @@
 <code><a href="../reference/summary_actor.html">summary_actor()</a></code> gains a <code>stats = "fast"</code> mode (skips the expensive centralities) and auto-promotes for networks above <code>getOption("netify.fast_threshold", 1500)</code>.</li>
 <li>Vignettes expanded and reorganized: <code>pipeline_netify_ergm</code>, <code>pipeline_lame_dbn</code>, <code>multilayer_networks</code>, <code>tracking_changes</code>, <code>attribute_analysis</code>, <code>manual_plotting</code>, and <code>internals</code> are all new or substantially rewritten.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
