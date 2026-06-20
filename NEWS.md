@@ -1,3 +1,8 @@
+# netify 1.5.2
+
+* CRAN resubmission: remove the obsolete C++11 standard request and
+  update DESCRIPTION wording flagged by CRAN incoming checks.
+
 # netify 1.5.1
 
 * Fixed `unnetify()` and `plot()` for bipartite networks so ties in

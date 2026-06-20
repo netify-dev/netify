@@ -1,6 +1,6 @@
 Package: netify
 Title: Tools for Network Data Workflows
-Version: 1.5.1
+Version: 1.5.2
 Authors@R: c(
   person("Ha Eun", "Choi", email = "choiha3@msu.edu", role = c("ctb")),
   person("Cassy", "Dorff", email = "cassy.dorff@vanderbilt.edu", role = c("aut")),
@@ -9,8 +9,8 @@ Authors@R: c(
   person("Tosin", "Salau", email = "tosin.salau@msu.edu", role = c("ctb"))
   )
 Description: Builds, validates, analyzes, and visualizes network data from
-    dyadic, event, matrix, igraph, and network inputs. Supports
-    cross-sectional, longitudinal, bipartite, and multilayer networks, with
+    dyadic, event, matrix, 'igraph', and 'network' inputs. Supports
+    cross-sectional, longitudinal, bipartite, and multi-layer networks, with
     conversion helpers for common modeling workflows and plotting utilities
     for exploratory analysis.
 Depends:
@@ -29,7 +29,6 @@ Imports:
 LinkingTo:
   Rcpp,
   RcppEigen
-SystemRequirements: C++11
 Suggests:
     knitr,
     rmarkdown,
