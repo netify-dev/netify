@@ -1,7 +1,13 @@
 name: Build Netify Release Binaries
 
 on:
+  push:
+    tags:
+      - "v*.*.*"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -102,6 +108,7 @@ jobs:
           name: "netify v${{ steps.version.outputs.version }}"
           tag_name: "v${{ steps.version.outputs.version }}"
           generate_release_notes: true
+          make_latest: true
           files: |
             artifacts/*.tgz
             artifacts/*.zip
