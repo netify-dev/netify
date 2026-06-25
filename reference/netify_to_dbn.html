@@ -160,11 +160,12 @@ expects square actor-by-actor arrays.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dbn_data</span><span class="op">$</span><span class="va">y</span><span class="op">)</span> <span class="co"># [n_actors, n_actors, 2, n_years]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># single-layer also works</span></span></span>
 <span class="r-in"><span><span class="va">dbn_single</span> <span class="op">&lt;-</span> <span class="fu">netify_to_dbn</span><span class="op">(</span><span class="va">verbal_net</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dbn_single</span><span class="op">$</span><span class="va">y</span><span class="op">)</span> <span class="co"># [n_actors, n_actors, 1, n_years]</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

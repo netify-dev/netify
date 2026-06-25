@@ -179,7 +179,7 @@ this function for each ego separately.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> • Nodal Features: gender, grade, gpa</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> • Dyad Features: None</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># longitudinal ego network with a weighted, directed netlet</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">netlet</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span></span></span>
@@ -187,9 +187,51 @@ this function for each ego separately.</p>
 <span class="r-in"><span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>, time <span class="op">=</span> <span class="st">"year"</span>,</span></span>
 <span class="r-in"><span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">pakistan_ego</span> <span class="op">&lt;-</span> <span class="fu">ego_netify</span><span class="op">(</span><span class="va">netlet</span>, ego <span class="op">=</span> <span class="st">"pakistan"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pakistan_ego</span> <span class="op">&lt;-</span> <span class="fu">ego_netify</span><span class="op">(</span><span class="va">netlet</span>, ego <span class="op">=</span> <span class="st">"Pakistan"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pakistan_ego</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     net    layer num_actors   density num_edges prop_edges_missing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  2002 Pakistan         33 0.8049242       425                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2003 Pakistan         28 0.9312169       352                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  2004 Pakistan         49 0.7891156       928                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  2005 Pakistan         44 0.8985201       850                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  2006 Pakistan         40 0.8846154       690                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  2007 Pakistan         39 0.9082321       673                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7  2008 Pakistan         29 0.9334975       379                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8  2009 Pakistan         28 0.9656085       365                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9  2010 Pakistan         37 0.9249249       616                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 2011 Pakistan         33 0.9053030       478                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 2012 Pakistan         40 0.9012821       703                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12 2013 Pakistan         27 0.9686610       340                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13 2014 Pakistan         24 0.9420290       260                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    mean_edge_weight sd_edge_weight median_edge_weight min_edge_weight</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1          227.2941       595.2732                 35               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2          306.7926       740.5199                 51               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3          128.4300       412.2462                 22               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4          154.1388       499.4925                 25               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5          169.6478       561.8834                 25               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6          201.4740       578.2115                 35               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7          245.0343       614.2971                 40               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8          263.0849       732.7934                 42               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9          171.2110       500.5081                 29               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10         183.7594       486.9519                 26               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11         133.3371       379.9686                 24               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12         253.6588       631.8493                 40               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13         339.2654       701.8777                 65               1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    max_edge_weight competition sd_of_actor_means transitivity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1             5760  0.08270328          244.3143    0.8513921</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2             5937  0.08521930          342.5283    0.9417385</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3             5141  0.06014910          142.8899    0.8390159</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4             6561  0.06605279          193.4328    0.9174501</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5             7579  0.07536095          215.7135    0.9116163</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6             6698  0.06860271          239.9547    0.9247124</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7             4590  0.08288226          275.7906    0.9418932</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8             6863  0.09577883          335.4921    0.9683958</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9             4937  0.07634283          216.8612    0.9366962</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10            5581  0.07512401          205.4581    0.9194264</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11            4225  0.06522529          154.3793    0.9187122</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12            6049  0.08525561          285.6972    0.9706418</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13            4374  0.08494759          332.7357    0.9510980</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

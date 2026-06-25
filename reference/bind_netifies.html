@@ -135,7 +135,7 @@ dimension, so <code>as.matrix(x, time = ..., layer = ...)</code>,
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">n1</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span><span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span>,</span></span>
 <span class="r-in"><span>actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>, symmetric <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
@@ -145,7 +145,19 @@ dimension, so <code>as.matrix(x, time = ..., layer = ...)</code>,
 <span class="r-in"><span>weight <span class="op">=</span> <span class="st">"verbCoop"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">combined</span> <span class="op">&lt;-</span> <span class="fu">bind_netifies</span><span class="op">(</span><span class="va">n1</span>, <span class="va">n2</span>, names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2010"</span>, <span class="st">"2011"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">combined</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    net num_actors   density num_edges prop_edges_missing mean_edge_weight</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 2010        152 0.4346462      9976                  0         41.72113</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 2011        152 0.4229697      9708                  0         37.33642</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   sd_edge_weight median_edge_weight min_edge_weight max_edge_weight</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       198.3157                  6               1            4937</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       172.2944                  5               1            5581</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   competition_row competition_col sd_of_row_means sd_of_col_means</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      0.04071163      0.03493156         41.4412        37.76971</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      0.03964994      0.03405077         35.5239        32.37731</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   covar_of_row_col_means reciprocity    mutual transitivity</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1              0.9934913   0.9823385 0.8402509    0.6386063</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2              0.9903188   0.9763723 0.8327355    0.6220630</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

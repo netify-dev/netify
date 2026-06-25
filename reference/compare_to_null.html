@@ -203,16 +203,22 @@ observed stat itself.</p></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">icews</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">net</span> <span class="op">&lt;-</span> <span class="fu"><a href="netify.html">netify</a></span><span class="op">(</span><span class="va">icews</span><span class="op">[</span><span class="va">icews</span><span class="op">$</span><span class="va">year</span> <span class="op">==</span> <span class="fl">2010</span>, <span class="op">]</span>,</span></span>
 <span class="r-in"><span>actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>, symmetric <span class="op">=</span> <span class="cn">FALSE</span>, weight <span class="op">=</span> <span class="st">"verbCoop"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">my_stat</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">net</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span><span class="va">s</span> <span class="op">=</span> <span class="fu">suppressmessages</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">s</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>transitivity <span class="op">=</span> <span class="va">s</span><span class="op">$</span><span class="va">transitivity</span>, reciprocity <span class="op">=</span> <span class="va">s</span><span class="op">$</span><span class="va">reciprocity</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-in"><span><span class="fu">compare_to_null</span><span class="op">(</span><span class="va">net</span>, <span class="va">my_stat</span>, n_sim <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="fu">compare_to_null</span><span class="op">(</span><span class="va">net</span>, <span class="va">my_stat</span>, n_sim <span class="op">=</span> <span class="fl">20</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         metric  observed n_valid    null_mean     null_sd   null_lower</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 transitivity 0.6386063      20 6.798360e-01 0.004246135  0.674381883</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  reciprocity 0.9823385      20 5.998642e-05 0.008271665 -0.007391334</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   null_upper   p_value extreme</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.68919492 0.0952381    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.01832314 0.0952381    TRUE</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
