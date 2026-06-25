@@ -98,7 +98,7 @@ df <- data.frame(
 get_actor_time_info(df, "i", "j", "t")
 
 # netify input: read back the stored roster
-\dontrun{
+\donttest{
 roster <- data.frame(actor = c("a", "b"), min_time = c(1, 1), max_time = c(3, 4))
 net <- netify(df, actor1 = "i", actor2 = "j", time = "t",
               actor_time_uniform = FALSE, actor_pds = roster)

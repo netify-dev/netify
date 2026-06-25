@@ -31,9 +31,13 @@
 #'
 #' @name ego_layouts
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create ego network
-#' ego_net <- ego_netify(my_network, ego = "pakistan")
+#' mat <- matrix(c(NA, 1, 1, 1, NA, 0, 1, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE)
+#' ego_net <- ego_netify(net, ego = "alice")
 #'
 #' # hierarchical layout
 #' layout <- create_hierarchical_ego_layout(ego_net)
@@ -368,8 +372,12 @@ create_ego_centric_layout <- function(netlet, buffer_radius = 1.5, transition_zo
 #'
 #' @export
 #' @examples
-#' \dontrun{
-#' ego_net <- ego_netify(my_network, ego = "alice")
+#' \donttest{
+#' mat <- matrix(c(NA, 1, 1, 1, NA, 0, 1, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE)
+#' ego_net <- ego_netify(net, ego = "alice")
 #' alter_only_net <- remove_ego_edges(ego_net)
 #' plot(alter_only_net)
 #' }

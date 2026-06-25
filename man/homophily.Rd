@@ -153,37 +153,25 @@ net <- netify(
 # do students cluster by gender?
 homophily(net, attribute = "gender", method = "categorical")
 
-\dontrun{
-# basic homophily analysis with default threshold (> 0)
-homophily_default <- homophily(net, attribute = "group")
+\donttest{
+# default method auto-promotes character attributes to categorical
+homophily_default <- homophily(net, attribute = "gender",
+    n_permutations = 100)
 
 # using different similarity metrics for continuous data
 homophily_manhattan <- homophily(
     net,
-    attribute = "age",
-    method = "manhattan" # less sensitive to outliers
-)
-
-# for binary attributes (e.g., gender, membership)
-homophily_jaccard <- homophily(
-    net,
-    attribute = "member",
-    method = "jaccard" # better for binary data than correlation
+    attribute = "gpa",
+    method = "manhattan",
+    n_permutations = 100
 )
 
 # for categorical attributes
-homophily_categorical <- homophily(
+homophily_grade <- homophily(
     net,
-    attribute = "department",
-    method = "categorical"
-)
-
-# combining method and threshold
-homophily_combined <- homophily(
-    net,
-    attribute = "score",
-    method = "manhattan",
-    threshold = function(x) quantile(x, 0.75, na.rm = TRUE)
+    attribute = "grade",
+    method = "categorical",
+    n_permutations = 100
 )
 }
 

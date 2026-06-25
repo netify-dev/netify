@@ -97,7 +97,7 @@ a single core for hours.
 }
 
 \examples{
-\dontrun{
+\donttest{
 data(icews)
 net <- netify(icews[icews$year == 2010, ],
 actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "verbCoop")

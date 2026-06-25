@@ -236,10 +236,11 @@ test_that("NA-valued statistic draws warn and report n_valid", {
 	mat = matrix(c(NA, 1, 0, 1, NA, 1, 0, 1, NA), 3, 3,
 		dimnames = list(letters[1:3], letters[1:3]))
 	net = new_netify(mat, symmetric = FALSE)
-	i = 0L
+	counter = new.env(parent = emptyenv())
+	counter$i = 0L
 	stat = function(x) {
-		i <<- i + 1L
-		c(value = if (i %% 2L == 0L) NA_real_ else sum(get_raw(x), na.rm = TRUE))
+		counter$i = counter$i + 1L
+		c(value = if (counter$i %% 2L == 0L) NA_real_ else sum(get_raw(x), na.rm = TRUE))
 	}
 
 	expect_warning(
@@ -907,6 +908,21 @@ test_that("plotting signed missing-aware networks does not expose layout warning
 		components = plot(net, return_components = TRUE)
 	}, NA)
 	expect_s3_class(components, "netify_plot_components")
+})
+
+test_that("static longitudinal layouts work for unweighted networks", {
+	net = new_netify(list(
+		t1 = matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+			dimnames = list(letters[1:3], letters[1:3])),
+		t2 = matrix(c(NA, 0, 1, 1, NA, 0, 0, 1, NA), 3, 3,
+			dimnames = list(letters[1:3], letters[1:3]))
+	), symmetric = FALSE)
+
+	expect_warning({
+		p = plot(net, static_actor_positions = TRUE)
+	}, NA)
+	expect_s3_class(p, "ggplot")
+	expect_warning(ggplot2::ggplot_build(p), NA)
 })
 
 test_that("bind_netifies handles multilayer actor alignment", {

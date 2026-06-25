@@ -21,16 +21,20 @@ only have one scale. by resetting scales between layers, you can have
 different color mappings for edges and nodes, for example.
 }
 \examples{
-\dontrun{
+\donttest{
 # create a plot with different colors for edges and nodes
+mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+    dimnames = list(c("alice", "bob", "carol"),
+                    c("alice", "bob", "carol")))
+net <- new_netify(mat, symmetric = FALSE)
 comp <- plot(net, return_components = TRUE)
 
-ggplot() +
+ggplot2::ggplot() +
     netify_edge(comp) +
-    scale_color_manual(values = c("gray", "red")) +
+    ggplot2::scale_color_manual(values = c("gray", "red")) +
     reset_scales() + # reset before adding nodes
     netify_node(comp) +
-    scale_color_viridis_c()
+    ggplot2::scale_color_viridis_c()
 }
 
 }

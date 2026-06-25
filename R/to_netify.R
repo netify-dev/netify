@@ -44,19 +44,19 @@
 #' the netify object.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # from igraph
-#' library(igraph)
-#' g <- sample_gnp(10, 0.3)
-#' e(g)$weight <- runif(ecount(g))
-#' v(g)$type <- sample(c("a", "b"), vcount(g), replace = TRUE)
+#' g <- igraph::sample_gnp(10, 0.3)
+#' igraph::E(g)$weight <- runif(igraph::ecount(g))
+#' igraph::V(g)$group <- sample(c("a", "b"), igraph::vcount(g), replace = TRUE)
 #'
 #' net <- to_netify(g, weight = "weight")
 #'
 #' # from network
-#' library(network)
-#' n <- network(rgraph(10, tprob = 0.3))
-#' set.vertex.attribute(n, "group", sample(1:2, 10, replace = TRUE))
+#' adj <- matrix(rbinom(100, size = 1, prob = 0.3), 10, 10)
+#' diag(adj) <- 0
+#' n <- network::network(adj, directed = TRUE, matrix.type = "adjacency")
+#' network::set.vertex.attribute(n, "group", sample(1:2, 10, replace = TRUE))
 #'
 #' net <- to_netify(n)
 #'

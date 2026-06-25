@@ -70,9 +70,13 @@ remains at center with a buffer zone. preserves natural clustering while
 maintaining ego visibility.
 }
 \examples{
-\dontrun{
+\donttest{
 # create ego network
-ego_net <- ego_netify(my_network, ego = "pakistan")
+mat <- matrix(c(NA, 1, 1, 1, NA, 0, 1, 0, NA), 3, 3,
+    dimnames = list(c("alice", "bob", "carol"),
+                    c("alice", "bob", "carol")))
+net <- new_netify(mat, symmetric = FALSE)
+ego_net <- ego_netify(net, ego = "alice")
 
 # hierarchical layout
 layout <- create_hierarchical_ego_layout(ego_net)

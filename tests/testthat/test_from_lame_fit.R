@@ -216,7 +216,7 @@ test_that("to_lame bipartite longit pads rectangular arrays before fitting", {
 
 	snippet_lines = strsplit(snip, "\n", fixed = TRUE)[[1]]
 	pad_env = new.env(parent = baseenv())
-	assign("nl", nl, envir = pad_env)
+	pad_env$nl = nl
 	eval(parse(text = paste(head(snippet_lines, -1), collapse = "\n")), envir = pad_env)
 
 	Y = get("Y", envir = pad_env)

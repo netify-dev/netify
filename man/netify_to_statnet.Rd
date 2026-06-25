@@ -142,7 +142,7 @@ ntwk_list <- netify_to_statnet(longit_net)
 length(ntwk_list) # number of time periods
 names(ntwk_list) # time period labels
 
-\dontrun{
+\donttest{
 # use with ergm for modeling (requires ergm package)
 library(ergm)
 model <- ergm(ntwk ~ edges + nodematch("gender"))

@@ -117,9 +117,19 @@ the function will issue a warning if used on non-ego networks but will
 attempt to proceed by treating the first node as the ego.
 }
 \examples{
-\dontrun{
+\donttest{
 # create an ego network
-ego_net <- ego_netify(my_network, ego = "alice")
+mat <- matrix(c(NA, 1, 1, 1, NA, 0, 1, 0, NA), 3, 3,
+    dimnames = list(c("alice", "bob", "carol"),
+                    c("alice", "bob", "carol")))
+net <- new_netify(mat, symmetric = FALSE)
+nodes <- data.frame(
+    actor = c("alice", "bob", "carol"),
+    department = c("lead", "field", "field"),
+    degree_total = c(2, 1, 1)
+)
+net <- add_node_vars(net, nodes, actor = "actor")
+ego_net <- ego_netify(net, ego = "alice")
 
 # get radial layout with alters grouped by attribute
 layout_radial <- get_ego_layout(ego_net,

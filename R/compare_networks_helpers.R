@@ -1317,22 +1317,27 @@ prepare_by_group_networks <- function(net, by) {
 	}
 
 	# build one sub-network per group
-	dropped_groups <- character(0)
-	nets_list <- lapply(groups, function(g) {
+	group_results <- lapply(groups, function(g) {
 		members <- actors[grp_vals == g]
 		if (length(members) < 2L) {
-			dropped_groups <<- c(dropped_groups, g)
-			return(NULL)
+			return(list(net = NULL, dropped = g, error = NULL))
 		}
 		tryCatch(
-			subset_netify(netlet = net, actors = members),
+			list(net = subset_netify(netlet = net, actors = members),
+				dropped = character(0), error = NULL),
 			error = function(e) {
-				dropped_groups <<- c(dropped_groups, g)
-				cli::cli_warn("Skipping group {.val {g}}: {e$message}")
-				NULL
+				list(net = NULL, dropped = g, error = conditionMessage(e))
 			}
 		)
 	})
+	for (ii in seq_along(group_results)) {
+		if (!is.null(group_results[[ii]]$error)) {
+			cli::cli_warn("Skipping group {.val {groups[[ii]]}}: {group_results[[ii]]$error}")
+		}
+	}
+	dropped_groups <- unlist(lapply(group_results, `[[`, "dropped"),
+		use.names = FALSE)
+	nets_list <- lapply(group_results, `[[`, "net")
 	names(nets_list) <- groups
 
 	# drop unusable groups

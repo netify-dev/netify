@@ -101,15 +101,15 @@ wall-clock by roughly 3.5x.
 }
 
 \examples{
-\dontrun{
+\donttest{
 data(icews)
 net <- netify(icews[icews$year == 2010, ],
 actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "verbCoop")
 my_stat <- function(net) {
-s = suppressmessages(summary(net))
+s = suppressMessages(summary(net))
 c(transitivity = s$transitivity, reciprocity = s$reciprocity)
 }
-compare_to_null(net, my_stat, n_sim = 200, seed = 1)
+compare_to_null(net, my_stat, n_sim = 20, seed = 1)
 }
 
 }

@@ -44,11 +44,20 @@
 #' the fitted-value (or residual) matrix at the same actor ordering.
 #'
 #' @examples
-#' \dontrun{
-#' lm_in <- to_lame(net, fit_method = "als", bootstrap = 200)
-#' fit <- lame::ame_als(y = lm_in$y, mode = "bipartite", family = "binary",
-#' bootstrap = 200)
-#' # round-trip predictions back into a netify for plotting
+#' \donttest{
+#' fitted_values <- matrix(
+#'     c(-1.2, 0.4, 0.8, -0.5),
+#'     nrow = 2,
+#'     dimnames = list(c("alice", "bob"), c("club_a", "club_b"))
+#' )
+#'
+#' fit <- list(
+#'     EZ = fitted_values,
+#'     family = "binary",
+#'     link = "logit",
+#'     mode = "bipartite"
+#' )
+#'
 #' pred_net <- from_lame_fit(fit, value = "prob")
 #' plot(pred_net, style = "heatmap")
 #' }

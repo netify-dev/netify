@@ -6,6 +6,7 @@ docs
 *.rproj
 *.Rproj
 .claude
+.agents
 Rplots.pdf
 cran-comments.md
 ego_networks.md

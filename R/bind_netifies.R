@@ -47,7 +47,7 @@
 #' \code{unnetify()}, and \code{decompose_netify()} can still address layers.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data(icews)
 #' n1 <- netify(icews[icews$year == 2010, ],
 #' actor1 = "i", actor2 = "j", symmetric = FALSE,
@@ -538,7 +538,7 @@ merge.netify <- function(x, y, ...) {
 #' [unnetify()] for the underlying converter.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data(icews)
 #' icews_10 <- icews[icews$year == 2010, ]
 #' net <- netify(icews_10, actor1 = "i", actor2 = "j",

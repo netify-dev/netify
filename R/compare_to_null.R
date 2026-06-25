@@ -58,15 +58,15 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data(icews)
 #' net <- netify(icews[icews$year == 2010, ],
 #' actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "verbCoop")
 #' my_stat <- function(net) {
-#' s = suppressmessages(summary(net))
+#' s = suppressMessages(summary(net))
 #' c(transitivity = s$transitivity, reciprocity = s$reciprocity)
 #' }
-#' compare_to_null(net, my_stat, n_sim = 200, seed = 1)
+#' compare_to_null(net, my_stat, n_sim = 20, seed = 1)
 #' }
 #'
 #' @section parallel execution:
@@ -147,8 +147,14 @@ compare_to_null <- function(netlet, fn, n_sim = 200L,
 	first_err <- NULL
 	n_fail <- 0L
 	for (b in seq_len(n_sim)) {
-		val <- tryCatch(fn(sims[[b]]),
-			error = function(e) { if (is.null(first_err)) first_err <<- e; NULL })
+		val_result <- tryCatch(
+			list(value = fn(sims[[b]]), error = NULL),
+			error = function(e) list(value = NULL, error = e)
+		)
+		if (is.null(first_err) && !is.null(val_result$error)) {
+			first_err <- val_result$error
+		}
+		val <- val_result$value
 		if (is.null(val) || length(val) != length(obs) || !is.numeric(val)) {
 			n_fail <- n_fail + 1L
 		} else {

@@ -35,10 +35,21 @@ presentations / videos where the eye can focus on one period at a
 time).
 }
 \examples{
-\dontrun{
-library(gganimate)
-anim <- animate_netify(longit_net, node_color_by = "polity")
-anim_save("trade_anim.gif", anim, fps = 4)
+\donttest{
+data(classroom_edges)
+classroom_panel <- rbind(
+    transform(classroom_edges[1:12, ], wave = 1),
+    transform(classroom_edges[13:24, ], wave = 2)
+)
+
+longit_net <- netify(
+    classroom_panel,
+    actor1 = "from", actor2 = "to", time = "wave",
+    symmetric = TRUE,
+    missing_to_zero = TRUE
+)
+
+anim <- animate_netify(longit_net)
 }
 
 }

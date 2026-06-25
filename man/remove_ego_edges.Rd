@@ -18,8 +18,12 @@ leaving only the alter-alter connections visible. this is useful for visualizing
 the structure among alters without the clutter of ego connections.
 }
 \examples{
-\dontrun{
-ego_net <- ego_netify(my_network, ego = "alice")
+\donttest{
+mat <- matrix(c(NA, 1, 1, 1, NA, 0, 1, 0, NA), 3, 3,
+    dimnames = list(c("alice", "bob", "carol"),
+                    c("alice", "bob", "carol")))
+net <- new_netify(mat, symmetric = FALSE)
+ego_net <- ego_netify(net, ego = "alice")
 alter_only_net <- remove_ego_edges(ego_net)
 plot(alter_only_net)
 }

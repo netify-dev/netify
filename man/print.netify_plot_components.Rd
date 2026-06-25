@@ -21,9 +21,13 @@ this helps users understand what layers and elements are available for manual
 plot construction.
 }
 \examples{
-\dontrun{
+\donttest{
 # create plot components
-comp <- plot(my_netify_obj, return_components = TRUE)
+mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+    dimnames = list(c("alice", "bob", "carol"),
+                    c("alice", "bob", "carol")))
+net <- new_netify(mat, symmetric = FALSE)
+comp <- plot(net, return_components = TRUE)
 
 # print summary
 print(comp)

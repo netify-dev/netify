@@ -97,7 +97,7 @@ multi_net <- layer_netify(
 dbn_data <- netify_to_dbn(multi_net)
 dim(dbn_data$y) # [n_actors, n_actors, 2, n_years]
 
-\dontrun{
+\donttest{
 # single-layer also works
 dbn_single <- netify_to_dbn(verbal_net)
 dim(dbn_single$y) # [n_actors, n_actors, 1, n_years]

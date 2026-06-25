@@ -10,6 +10,7 @@
 ^pkgdown$
 ^Meta$
 ^\.claude$
+^\.agents$
 ^examples$
 ^test_compare_speedup\.R$
 ^cran-comments[.]md$

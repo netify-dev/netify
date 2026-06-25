@@ -152,7 +152,7 @@ net <- netify(
 summary(net)
 }
 
-\dontrun{
+\donttest{
 # add custom statistics - community detection
 comm_stats <- function(mat) {
     g <- netify_to_igraph(mat)

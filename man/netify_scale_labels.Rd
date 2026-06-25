@@ -36,12 +36,14 @@ this function only works with plots created using netify's plot method.
 it will issue a warning if used with other ggplot objects.
 }
 \examples{
-\dontrun{
+\donttest{
 # set labels for different scales
-plot(my_netify_obj,
-    edge_alpha_var = "weight",
-    point_size_var = "degree"
-) +
+mat <- matrix(c(NA, 2, 0, 0, NA, 1, 3, 0, NA), 3, 3,
+    dimnames = list(c("alice", "bob", "carol"),
+                    c("alice", "bob", "carol")))
+net <- new_netify(mat, symmetric = FALSE, weight = "strength")
+
+plot(net, edge_alpha_var = "strength") +
     netify_scale_labels(
         edge_alpha = "connection strength",
         node_size = "node degree" # node_* is converted to point_*

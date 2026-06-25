@@ -28,7 +28,7 @@ so \code{tibble} is not a hard dependency. when \code{tibble} isn't
 installed, a plain data.frame is returned.
 }
 \examples{
-\dontrun{
+\donttest{
 data(icews)
 icews_10 <- icews[icews$year == 2010, ]
 net <- netify(icews_10, actor1 = "i", actor2 = "j",

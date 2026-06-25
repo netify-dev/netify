@@ -1290,35 +1290,37 @@ plot_netify_heatmap <- function(x, obj_attrs, plot_args = list()) {
 		list(matrix = mat, time = time, layer = layer)
 	}
 	entries <- list()
-	add_entry <- function(mat, time = NA_character_, layer = NA_character_) {
-		entries[[length(entries) + 1L]] <<- make_entry(mat, time, layer)
+	add_entry <- function(entries, mat, time = NA_character_, layer = NA_character_) {
+		c(entries, list(make_entry(mat, time, layer)))
 	}
 
 	raw_x <- get_raw(x)
 	if (netify_type == "cross_sec") {
-		if (is.array(raw_x) && length(dim(raw_x)) == 3L) {
-			layer_names <- dimnames(raw_x)[[3]] %||% as.character(seq_len(dim(raw_x)[3]))
-			for (ll in seq_along(layer_names)) {
-				add_entry(raw_x[, , ll, drop = TRUE], layer = layer_names[ll])
+			if (is.array(raw_x) && length(dim(raw_x)) == 3L) {
+				layer_names <- dimnames(raw_x)[[3]] %||% as.character(seq_len(dim(raw_x)[3]))
+				for (ll in seq_along(layer_names)) {
+					entries <- add_entry(entries, raw_x[, , ll, drop = TRUE],
+						layer = layer_names[ll])
+				}
+			} else {
+				entries <- add_entry(entries, raw_x)
 			}
-		} else {
-			add_entry(raw_x)
 		}
-	}
 	if (netify_type == "longit_array") {
 		if (length(dim(raw_x)) == 4L) {
 			layer_names <- dimnames(raw_x)[[3]] %||% as.character(seq_len(dim(raw_x)[3]))
 			time_names <- dimnames(raw_x)[[4]] %||% as.character(seq_len(dim(raw_x)[4]))
 			for (tt in seq_along(time_names)) {
 				for (ll in seq_along(layer_names)) {
-					add_entry(raw_x[, , ll, tt, drop = TRUE],
+					entries <- add_entry(entries, raw_x[, , ll, tt, drop = TRUE],
 						time = time_names[tt], layer = layer_names[ll])
 				}
 			}
 		} else {
 			time_names <- dimnames(raw_x)[[3]] %||% as.character(seq_len(dim(raw_x)[3]))
 			for (tt in seq_along(time_names)) {
-				add_entry(raw_x[, , tt, drop = TRUE], time = time_names[tt])
+				entries <- add_entry(entries, raw_x[, , tt, drop = TRUE],
+					time = time_names[tt])
 			}
 		}
 	}
@@ -1326,15 +1328,15 @@ plot_netify_heatmap <- function(x, obj_attrs, plot_args = list()) {
 		time_names <- names(raw_x) %||% as.character(seq_along(raw_x))
 		for (tt in seq_along(raw_x)) {
 			mat_t <- raw_x[[tt]]
-			if (is.array(mat_t) && length(dim(mat_t)) == 3L) {
-				layer_names <- dimnames(mat_t)[[3]] %||% as.character(seq_len(dim(mat_t)[3]))
-				for (ll in seq_along(layer_names)) {
-					add_entry(mat_t[, , ll, drop = TRUE],
-						time = time_names[tt], layer = layer_names[ll])
+				if (is.array(mat_t) && length(dim(mat_t)) == 3L) {
+					layer_names <- dimnames(mat_t)[[3]] %||% as.character(seq_len(dim(mat_t)[3]))
+					for (ll in seq_along(layer_names)) {
+						entries <- add_entry(entries, mat_t[, , ll, drop = TRUE],
+							time = time_names[tt], layer = layer_names[ll])
+					}
+				} else {
+					entries <- add_entry(entries, mat_t, time = time_names[tt])
 				}
-			} else {
-				add_entry(mat_t, time = time_names[tt])
-			}
 		}
 	}
 

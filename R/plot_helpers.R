@@ -13,9 +13,12 @@
 #'   its aesthetic mappings and data.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create a netify object
-#' net <- netify(my_data, actor1 = "from", actor2 = "to")
+#' mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE)
 #'
 #' # get plot components
 #' comp <- plot(net, return_components = TRUE)
@@ -91,9 +94,12 @@ ggplot_add.netify_edge <- function(object, plot, ...) {
 #'   its aesthetic mappings and data.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create a netify object
-#' net <- netify(my_data, actor1 = "from", actor2 = "to")
+#' mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE)
 #'
 #' # get plot components
 #' comp <- plot(net, return_components = TRUE)
@@ -169,9 +175,12 @@ ggplot_add.netify_node <- function(object, plot, ...) {
 #'   its aesthetic mappings and data.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create a netify object
-#' net <- netify(my_data, actor1 = "from", actor2 = "to")
+#' mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE)
 #'
 #' # get plot components with text labels
 #' comp <- plot(net, add_text = TRUE, return_components = TRUE)
@@ -245,9 +254,12 @@ ggplot_add.netify_text <- function(object, plot, ...) {
 #'   its aesthetic mappings and data.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create a netify object
-#' net <- netify(my_data, actor1 = "from", actor2 = "to")
+#' mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE)
 #'
 #' # get plot components with labels
 #' comp <- plot(net, add_label = TRUE, return_components = TRUE)
@@ -321,9 +333,12 @@ ggplot_add.netify_label <- function(object, plot, ...) {
 #'   its aesthetic mappings and data.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create a netify object
-#' net <- netify(my_data, actor1 = "from", actor2 = "to")
+#' mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE)
 #'
 #' # get plot components with text_repel
 #' comp <- plot(net, add_text_repel = TRUE, return_components = TRUE)
@@ -397,9 +412,12 @@ ggplot_add.netify_text_repel <- function(object, plot, ...) {
 #'   its aesthetic mappings and data.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create a netify object
-#' net <- netify(my_data, actor1 = "from", actor2 = "to")
+#' mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE)
 #'
 #' # get plot components with label_repel
 #' comp <- plot(net, add_label_repel = TRUE, return_components = TRUE)
@@ -474,16 +492,20 @@ ggplot_add.netify_label_repel <- function(object, plot, ...) {
 #' different color mappings for edges and nodes, for example.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create a plot with different colors for edges and nodes
+#' mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE)
 #' comp <- plot(net, return_components = TRUE)
 #'
-#' ggplot() +
+#' ggplot2::ggplot() +
 #'     netify_edge(comp) +
-#'     scale_color_manual(values = c("gray", "red")) +
+#'     ggplot2::scale_color_manual(values = c("gray", "red")) +
 #'     reset_scales() + # reset before adding nodes
 #'     netify_node(comp) +
-#'     scale_color_viridis_c()
+#'     ggplot2::scale_color_viridis_c()
 #' }
 #'
 #' @seealso \code{\link[ggnewscale]{new_scale_color}}
@@ -542,9 +564,12 @@ ggplot_add.netify_scale_reset <- function(object, plot, ...) {
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create a netify object
-#' net <- netify(my_data, actor1 = "from", actor2 = "to")
+#' mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE)
 #'
 #' # get plot components
 #' comp <- plot(net, return_components = TRUE)
@@ -643,9 +668,13 @@ assemble_netify_plot <- function(comp) {
 #' @return invisibly returns the input object
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create plot components
-#' comp <- plot(my_netify_obj, return_components = TRUE)
+#' mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE)
+#' comp <- plot(net, return_components = TRUE)
 #'
 #' # print summary
 #' print(comp)
@@ -708,12 +737,14 @@ print.netify_plot_components <- function(x, ...) {
 #' it will issue a warning if used with other ggplot objects.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # set labels for different scales
-#' plot(my_netify_obj,
-#'     edge_alpha_var = "weight",
-#'     point_size_var = "degree"
-#' ) +
+#' mat <- matrix(c(NA, 2, 0, 0, NA, 1, 3, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE, weight = "strength")
+#'
+#' plot(net, edge_alpha_var = "strength") +
 #'     netify_scale_labels(
 #'         edge_alpha = "connection strength",
 #'         node_size = "node degree" # node_* is converted to point_*

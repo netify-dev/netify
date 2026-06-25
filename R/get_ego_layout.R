@@ -92,9 +92,19 @@
 #' attempt to proceed by treating the first node as the ego.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create an ego network
-#' ego_net <- ego_netify(my_network, ego = "alice")
+#' mat <- matrix(c(NA, 1, 1, 1, NA, 0, 1, 0, NA), 3, 3,
+#'     dimnames = list(c("alice", "bob", "carol"),
+#'                     c("alice", "bob", "carol")))
+#' net <- new_netify(mat, symmetric = FALSE)
+#' nodes <- data.frame(
+#'     actor = c("alice", "bob", "carol"),
+#'     department = c("lead", "field", "field"),
+#'     degree_total = c(2, 1, 1)
+#' )
+#' net <- add_node_vars(net, nodes, actor = "actor")
+#' ego_net <- ego_netify(net, ego = "alice")
 #'
 #' # get radial layout with alters grouped by attribute
 #' layout_radial <- get_ego_layout(ego_net,
@@ -474,12 +484,24 @@ calculate_concentric_positions <- function(
 		if (is.numeric(group_var)) {
 			# discretize numeric variable into rings
 			# use quantiles to create roughly equal-sized rings
-			n_rings <- min(4, ceiling(sqrt(n_alters)))  # max 4 rings
-			ring_breaks <- quantile(group_var,
-								  probs = seq(0, 1, length.out = n_rings + 1),
-								  na.rm = TRUE)
-			ring_assignment <- cut(group_var, breaks = ring_breaks,
-								 include.lowest = TRUE, labels = FALSE)
+			unique_values <- unique(group_var[!is.na(group_var)])
+			if (length(unique_values) < 2L) {
+				n_rings <- 1L
+				ring_assignment <- ifelse(is.na(group_var), NA_integer_, 1L)
+			} else {
+				n_rings <- min(4, ceiling(sqrt(n_alters)))  # max 4 rings
+				ring_breaks <- unique(as.numeric(quantile(group_var,
+					probs = seq(0, 1, length.out = n_rings + 1),
+					na.rm = TRUE)))
+				if (length(ring_breaks) < 2L) {
+					n_rings <- 1L
+					ring_assignment <- ifelse(is.na(group_var), NA_integer_, 1L)
+				} else {
+					n_rings <- length(ring_breaks) - 1L
+					ring_assignment <- cut(group_var, breaks = ring_breaks,
+						include.lowest = TRUE, labels = FALSE)
+				}
+			}
 		} else {
 			# use factor levels or unique values as rings
 			unique_vals <- unique(group_var[!is.na(group_var)])
@@ -553,8 +575,6 @@ calculate_concentric_positions <- function(
 #' @noRd
 order_alters <- function(alters, order_by, nodal_attrs, seed) {
 	n_alters <- length(alters)
-	restore_rng <- save_rng_state()
-	on.exit(restore_rng(), add = TRUE)
 
 	if (!is.null(order_by) && !is.null(nodal_attrs)) {
 		# get ordering variable
@@ -572,8 +592,7 @@ order_alters <- function(alters, order_by, nodal_attrs, seed) {
 		}
 
 		# create order with tie-breaking
-		set.seed(seed)
-		tie_breaker <- runif(n_alters)
+		tie_breaker <- with_local_seed(seed, runif(n_alters))
 		order_idx <- order(order_var, tie_breaker)
 
 		return(alters[order_idx])

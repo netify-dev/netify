@@ -268,17 +268,15 @@ plot_actor_stats <- function(
 		# get complete vector of actors
 		acts <- unique(summary_df$actor)
 		n_tot <- length(acts)
-		restore_rng <- save_rng_state()
-		on.exit(restore_rng(), add = TRUE)
-
 		# modify colors to highlight selected actors
-		set.seed(6886)
-		if (plus_actors) {
-			cols <- grDevices::colors()[sample(n_actors, replace = FALSE)]
-		} else {
-			assert_dependency("RColorBrewer")
-			cols <- RColorBrewer::brewer.pal(9, "Set1")[sample(n_actors, replace = FALSE)]
-		}
+		cols <- with_local_seed(6886, {
+			if (plus_actors) {
+				grDevices::colors()[sample(n_actors, replace = FALSE)]
+			} else {
+				assert_dependency("RColorBrewer")
+				RColorBrewer::brewer.pal(9, "Set1")[sample(n_actors, replace = FALSE)]
+			}
+		})
 
 		# set up color key for actors
 		col_key <- rep("grey", n_tot)

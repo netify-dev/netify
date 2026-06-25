@@ -28,7 +28,7 @@ want to confirm it's still well-formed before passing to
 \code{to_statnet()} / \code{to_amen()} / \code{plot()}.
 }
 \examples{
-\dontrun{
+\donttest{
 data(icews)
 net <- netify(icews[icews$year == 2010, ],
 actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "verbCoop")

@@ -850,11 +850,6 @@ list_network_styles <- function() {
 #' @export
 
 style_random <- function(seed = NULL) {
-	restore_rng <- save_rng_state()
-	on.exit(restore_rng(), add = TRUE)
-
-	if (!is.null(seed)) set.seed(seed)
-
 	styles <- c(
 		"style_rose", "style_red_blue", "style_orange_teal",
 		"style_solarized", "style_navy_maroon", "style_scientific_blue",
@@ -862,7 +857,7 @@ style_random <- function(seed = NULL) {
 		"style_retro80s", "style_dark2"
 	)
 
-	selected <- sample(styles, 1)
+	selected <- with_local_seed(seed, sample(styles, 1))
 	cli::cli_inform("Using {.fn {selected}}")
 
 	do.call(selected, list())

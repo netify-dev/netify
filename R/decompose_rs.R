@@ -89,7 +89,7 @@
 #' nrow(decomposed_with_zeros$edge_data) # with zeros
 #'
 #' # example 4: use for visualization prep
-#' \dontrun{
+#' \donttest{
 #' # decompose for use with ggplot2
 #' plot_data <- decompose_netify(net_cs)
 #'

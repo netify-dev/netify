@@ -31,21 +31,29 @@ creates a faceted plot showing multiple mixing matrices, useful for comparing
 patterns across time periods or network layers.
 }
 \examples{
-\dontrun{
+\donttest{
 # create temporal network
-data(icews)
+data(classroom_edges)
+data(classroom_nodes)
+classroom_panel <- rbind(
+    transform(classroom_edges[1:20, ], wave = 1),
+    transform(classroom_edges[21:40, ], wave = 2)
+)
+classroom_nodes_panel <- rbind(
+    transform(classroom_nodes, wave = 1),
+    transform(classroom_nodes, wave = 2)
+)
 net_temporal <- netify(
-    icews,
-    actor1 = "i", actor2 = "j",
-    time = "year",
-    symmetric = FALSE,
-    weight = "verbCoop"
+    classroom_panel,
+    actor1 = "from", actor2 = "to", time = "wave",
+    symmetric = TRUE,
+    nodal_data = classroom_nodes_panel
 )
 
 # run mixing matrix analysis across time
 mixing_temporal <- mixing_matrix(
     net_temporal,
-    attribute = "i_polity2_cat"
+    attribute = "gender"
 )
 
 # create faceted visualization

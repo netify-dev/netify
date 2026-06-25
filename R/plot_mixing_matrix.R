@@ -27,21 +27,21 @@
 #' @return a ggplot2 object that can be further customized.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create a network with categorical attributes
-#' data(icews)
-#' icews_10 <- icews[icews$year == 2010, ]
+#' data(classroom_edges)
+#' data(classroom_nodes)
 #' net <- netify(
-#'     icews_10,
-#'     actor1 = "i", actor2 = "j",
-#'     symmetric = FALSE,
-#'     weight = "verbCoop"
+#'     classroom_edges,
+#'     actor1 = "from", actor2 = "to",
+#'     symmetric = TRUE,
+#'     nodal_data = classroom_nodes
 #' )
 #'
 #' # run mixing matrix analysis
 #' mixing_result <- mixing_matrix(
 #'     net,
-#'     attribute = "i_polity2_cat"
+#'     attribute = "gender"
 #' )
 #'
 #' # create visualization
@@ -167,18 +167,26 @@ plot_mixing_matrix <- function(
 
 	# create the base plot using ggplot2
 	p <- ggplot(df_long, aes(x = .data$to, y = .data$from, fill = .data$value)) +
-		geom_tile(color = tile_border_color, size = tile_border_size)
+		do.call(
+			ggplot2::geom_tile,
+			c(list(color = tile_border_color), tile_border_args(tile_border_size))
+		)
 
 	# add emphasis to diagonal cells if requested
 	if (diagonal_emphasis && any(df_long$is_diagonal)) {
 		diag_data <- df_long[df_long$is_diagonal, ]
 		p <- p +
-			geom_tile(
-				data = diag_data,
-				aes(x = .data$to, y = .data$from),
-				color = "black",
-				size = tile_border_size * 2,
-				fill = NA
+			do.call(
+				ggplot2::geom_tile,
+				c(
+					list(
+						data = diag_data,
+						mapping = aes(x = .data$to, y = .data$from),
+						color = "black",
+						fill = NA
+					),
+					tile_border_args(tile_border_size * 2)
+				)
 			)
 	}
 
@@ -270,6 +278,14 @@ plot_mixing_matrix <- function(
 	return(p)
 }
 
+tile_border_args <- function(size) {
+	if (utils::packageVersion("ggplot2") >= "3.4.0") {
+		list(linewidth = size)
+	} else {
+		list(size = size)
+	}
+}
+
 #' create a multi-panel mixing matrix visualization
 #'
 #' creates a faceted plot showing multiple mixing matrices, useful for comparing
@@ -284,21 +300,29 @@ plot_mixing_matrix <- function(
 #' @return a ggplot2 object with faceted mixing matrices
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # create temporal network
-#' data(icews)
+#' data(classroom_edges)
+#' data(classroom_nodes)
+#' classroom_panel <- rbind(
+#'     transform(classroom_edges[1:20, ], wave = 1),
+#'     transform(classroom_edges[21:40, ], wave = 2)
+#' )
+#' classroom_nodes_panel <- rbind(
+#'     transform(classroom_nodes, wave = 1),
+#'     transform(classroom_nodes, wave = 2)
+#' )
 #' net_temporal <- netify(
-#'     icews,
-#'     actor1 = "i", actor2 = "j",
-#'     time = "year",
-#'     symmetric = FALSE,
-#'     weight = "verbCoop"
+#'     classroom_panel,
+#'     actor1 = "from", actor2 = "to", time = "wave",
+#'     symmetric = TRUE,
+#'     nodal_data = classroom_nodes_panel
 #' )
 #'
 #' # run mixing matrix analysis across time
 #' mixing_temporal <- mixing_matrix(
 #'     net_temporal,
-#'     attribute = "i_polity2_cat"
+#'     attribute = "gender"
 #' )
 #'
 #' # create faceted visualization

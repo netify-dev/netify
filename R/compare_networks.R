@@ -199,7 +199,7 @@
 #' names(detailed_comp$details) # shows available matrices
 #'
 #' # compare with custom statistics
-#' \dontrun{
+#' \donttest{
 #' library(igraph)
 #'
 #' # define custom connectivity function
@@ -252,12 +252,6 @@ compare_networks <- function(
 	binary_metric <- match.arg(binary_metric)
 	p_adjust <- match.arg(p_adjust)
 	attr_metric <- match.arg(attr_metric)
-
-	if (!is.null(seed)) {
-		restore_rng <- save_rng_state()
-		on.exit(restore_rng(), add = TRUE)
-		set.seed(seed)
-	}
 
 	# input validation
 	if (!is.list(nets) && !is_netify(nets)) {

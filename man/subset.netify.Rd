@@ -111,8 +111,8 @@ icews_matlConf <- netify(
 icews_subset <- subset(
     icews_matlConf,
     actors = c(
-        "united states", "united kingdom",
-        "russian federation", "china"
+        "United States", "United Kingdom",
+        "Russian Federation", "China"
     )
 )
 
@@ -120,8 +120,8 @@ icews_subset <- subset(
 icews_subset_2 <- subset(
     icews_matlConf,
     actors = c(
-        "united states", "united kingdom",
-        "russian federation", "china"
+        "United States", "United Kingdom",
+        "Russian Federation", "China"
     ),
     time = c("2010", "2011")
 )
@@ -130,8 +130,8 @@ icews_subset_2 <- subset(
 icews_subset_3 <- subset_netify(
     netlet = icews_matlConf,
     actors = c(
-        "united states", "united kingdom",
-        "russian federation", "china"
+        "United States", "United Kingdom",
+        "Russian Federation", "China"
     ),
     time = c("2010", "2011")
 )

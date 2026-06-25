@@ -28,25 +28,25 @@
 #' @return a ggplot2 object that can be further customized.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # load example data
-#' data(icews)
+#' data(classroom_edges)
+#' data(classroom_nodes)
 #'
 #' # create a network with nodal attributes
 #' ntwk <- netify(
-#'     icews,
-#'     actor1 = "i", actor2 = "j",
-#'     time = "year",
-#'     symmetric = FALSE,
-#'     weight = "matlCoop",
-#'     nodal_vars = "i_polity2"
+#'     classroom_edges,
+#'     actor1 = "from", actor2 = "to",
+#'     symmetric = TRUE,
+#'     nodal_data = classroom_nodes
 #' )
 #'
 #' # run homophily analysis
 #' homophily_result <- homophily(
 #'     ntwk,
-#'     attribute = "i_polity2",
-#'     method = "correlation"
+#'     attribute = "gender",
+#'     method = "categorical",
+#'     n_permutations = 100
 #' )
 #'
 #' # create distribution plot
@@ -54,7 +54,8 @@
 #'     homophily_result,
 #'     netlet = ntwk,
 #'     type = "distribution",
-#'     attribute = "i_polity2"
+#'     attribute = "gender",
+#'     method = "categorical"
 #' )
 #' }
 #'

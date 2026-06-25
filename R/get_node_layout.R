@@ -101,9 +101,6 @@ get_node_layout <- function(
 	if (is.null(seed)) {
 		seed <- 6886
 	}
-	restore_rng <- save_rng_state()
-	on.exit(restore_rng(), add = TRUE)
-
 	# cache attributes once
 	obj_attrs <- attributes(netlet)
 	netify_type <- obj_attrs$netify_type
@@ -234,8 +231,7 @@ get_node_layout <- function(
 
 	# handle cross-sectional case first (simpler)
 	if (netify_type == "cross_sec") {
-		set.seed(seed)
-		layout_matrix <- layout_fun(g)
+		layout_matrix <- with_local_seed(seed, layout_fun(g))
 		rownames(layout_matrix) <- igraph::V(g)$name
 
 		# format as data frame
@@ -268,8 +264,7 @@ get_node_layout <- function(
 
 		# compute layout once
 		g_static <- sanitize_layout_graphs(g_static)
-		set.seed(seed)
-		layout_matrix_static <- layout_fun(g_static)
+		layout_matrix_static <- with_local_seed(seed, layout_fun(g_static))
 		rownames(layout_matrix_static) <- igraph::V(g_static)$name
 
 		# create mapping for all actors across time
@@ -302,8 +297,7 @@ get_node_layout <- function(
 	} else {
 		# dynamic layouts for each time period
 		nodes_list <- lapply(seq_along(g), function(i) {
-			set.seed(seed + i - 1) # ensure different but reproducible layouts
-			l_matrix <- layout_fun(g[[i]])
+			l_matrix <- with_local_seed(seed + i - 1, layout_fun(g[[i]]))
 
 			data.frame(
 				index = seq_len(nrow(l_matrix)),
@@ -362,7 +356,8 @@ create_union_graph <- function(g_list, obj_attrs) {
 	# aggregate edges across time periods
 	for (g_t in g_list) {
 		# get adjacency matrix for this time period
-		adj_t <- igraph::as_adjacency_matrix(g_t, attr = "weight", sparse = FALSE)
+		weight_attr <- if ("weight" %in% igraph::edge_attr_names(g_t)) "weight" else NULL
+		adj_t <- igraph::as_adjacency_matrix(g_t, attr = weight_attr, sparse = FALSE)
 
 		# map to union matrix positions
 		actors_t <- rownames(adj_t)

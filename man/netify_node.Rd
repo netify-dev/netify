@@ -21,9 +21,12 @@ for manual plot construction and customization. nodes represent actors in the
 network and can have various aesthetic mappings like size, color, and shape.
 }
 \examples{
-\dontrun{
+\donttest{
 # create a netify object
-net <- netify(my_data, actor1 = "from", actor2 = "to")
+mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+    dimnames = list(c("alice", "bob", "carol"),
+                    c("alice", "bob", "carol")))
+net <- new_netify(mat, symmetric = FALSE)
 
 # get plot components
 comp <- plot(net, return_components = TRUE)

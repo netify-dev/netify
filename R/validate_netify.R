@@ -17,7 +17,7 @@
 #' and the function returns invisibly with the full failure list.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data(icews)
 #' net <- netify(icews[icews$year == 2010, ],
 #' actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "verbCoop")
@@ -48,9 +48,12 @@ validate_netify <- function(netlet, verbose = TRUE) {
 		!anyNA(sym_attr)
 
 	# layers count matches the raw data layout
-	raw_err <- NULL
-	raw <- tryCatch(get_raw(netlet),
-		error = function(e) { raw_err <<- conditionMessage(e); NULL })
+	raw_result <- tryCatch(
+		list(value = get_raw(netlet), error = NULL),
+		error = function(e) list(value = NULL, error = conditionMessage(e))
+	)
+	raw <- raw_result$value
+	raw_err <- raw_result$error
 	checks$raw_extractable <- is.null(raw_err)
 	nlayers <- length(obj_attrs$layers)
 	if (!is.null(raw)) {

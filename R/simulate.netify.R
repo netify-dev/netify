@@ -47,12 +47,6 @@ simulate.netify <- function(object, nsim = 1L, seed = NULL,
 	}
 	nsim <- as.integer(nsim)
 
-	if (!is.null(seed)) {
-		restore_rng <- save_rng_state()
-		on.exit(restore_rng(), add = TRUE)
-		set.seed(seed)
-	}
-
 	obj_attrs <- attributes(object)
 	netlet_type <- obj_attrs$netify_type
 	sym  <- if (length(obj_attrs$symmetric) > 1) obj_attrs$symmetric[1] else obj_attrs$symmetric
@@ -108,9 +102,10 @@ simulate.netify <- function(object, nsim = 1L, seed = NULL,
 		for (m in methods_to_try) {
 			res <- tryCatch(
 				do.call(igraph::sample_degseq, c(args, list(method = m))),
-				error = function(e) { last_err <<- e; NULL }
+				error = function(e) e
 			)
-			if (!is.null(res)) return(res)
+			if (!inherits(res, "error")) return(res)
+			last_err <- res
 		}
 		cli::cli_abort(c(
 			"x" = "Configuration model failed: {conditionMessage(last_err)}",
@@ -201,7 +196,7 @@ simulate.netify <- function(object, nsim = 1L, seed = NULL,
 	# draw nsim independent replicates
 	sim_is_binary <- if (sim_weighted) FALSE else TRUE
 	sim_weight   <- if (sim_weighted) wlab else NULL
-		out <- lapply(seq_len(nsim), function(k) {
+		out <- with_local_seed(seed, lapply(seq_len(nsim), function(k) {
 			sim_list <- lapply(raw_list, simulate_one)
 			# rebuild netlet matching input topology
 			if (netlet_type == "cross_sec") {
@@ -222,7 +217,7 @@ simulate.netify <- function(object, nsim = 1L, seed = NULL,
 			attr(sim_net, "nodal_data") <- obj_attrs$nodal_data
 			attr(sim_net, "dyad_data") <- obj_attrs$dyad_data
 			sim_net
-		})
+		}))
 	# stamp class + metadata
 	class(out) <- c("netify_sim_list", "list")
 	attr(out, "model") <- model

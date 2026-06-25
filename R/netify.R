@@ -114,7 +114,7 @@
 #' net_from_matrix <- netify(adj_matrix)
 #'
 #' # from an igraph object
-#' \dontrun{
+#' \donttest{
 #' library(igraph)
 #' g <- sample_gnp(10, 0.3)
 #' net_from_igraph <- netify(g)

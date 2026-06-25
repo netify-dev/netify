@@ -126,6 +126,27 @@ test_that("get_ego_layout works for concentric layout", {
 	expect_true(length(unique_distances) >= 1)
 })
 
+test_that("concentric ego layout handles duplicate numeric ring breaks", {
+	test_data = data.frame(
+		from = c("ego", "ego"),
+		to = c("alter1", "alter2"),
+		stringsAsFactors = FALSE
+	)
+	nodal_attrs = data.frame(
+		actor = c("ego", "alter1", "alter2"),
+		importance = c(2, 1, 1)
+	)
+	net = netify(test_data, actor1 = "from", actor2 = "to",
+		nodal_data = nodal_attrs)
+	ego_net = ego_netify(net, ego = "ego", threshold = 0)
+
+	layout = get_ego_layout(ego_net, layout = "concentric",
+		group_by = "importance")
+
+	expect_s3_class(layout[[1]], "data.frame")
+	expect_equal(nrow(layout[[1]]), 3)
+})
+
 test_that("get_ego_layout works with weight_to_distance", {
 	# create weighted network
 	test_data = data.frame(

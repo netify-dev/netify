@@ -12,7 +12,10 @@ Description: Builds, validates, analyzes, and visualizes network data from
     dyadic, event, matrix, 'igraph', and 'network' inputs. Supports
     cross-sectional, longitudinal, bipartite, and multi-layer networks, with
     conversion helpers for common modeling workflows and plotting utilities
-    for exploratory analysis.
+    for exploratory analysis. Network methods are described in Wasserman and
+    Faust (1994, ISBN:9780521387071), Cranmer et al. (2021)
+    <doi:10.1017/9781316662915>, and Minhas et al. (2022)
+    <doi:10.1017/psrm.2021.56>.
 Depends:
   R (>= 3.5.0)
 Imports:
@@ -25,7 +28,8 @@ Imports:
     igraph,
     ggplot2 (>= 3.0.0),
     ggnewscale,
-    ggrepel
+    ggrepel,
+    withr
 LinkingTo:
   Rcpp,
   RcppEigen

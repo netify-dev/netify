@@ -74,7 +74,7 @@
 #' a single core for hours.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data(icews)
 #' net <- netify(icews[icews$year == 2010, ],
 #' actor1 = "i", actor2 = "j", symmetric = FALSE, weight = "verbCoop")
@@ -114,11 +114,7 @@ bootstrap_netlet <- function(netlet, fn, n_boot = 200L, alpha = 0.05,
 	}
 
 	# isolate rng from the user's global stream only for explicit seeds
-	if (!is.null(seed)) {
-		restore_rng <- save_rng_state()
-		on.exit(restore_rng(), add = TRUE)
-		set.seed(seed)
-	}
+	with_local_seed(seed, {
 
 	# point estimate on the original netlet
 	point_vec <- tryCatch(fn(netlet),
@@ -217,8 +213,14 @@ bootstrap_netlet <- function(netlet, fn, n_boot = 200L, alpha = 0.05,
 					missing_to_zero = isTRUE(obj_attrs$missing_to_zero))
 			))
 		}
-		val <- tryCatch(fn(boot_net),
-			error = function(e) { if (is.null(first_err)) first_err <<- e; NULL })
+		val_result <- tryCatch(
+			list(value = fn(boot_net), error = NULL),
+			error = function(e) list(value = NULL, error = e)
+		)
+		if (is.null(first_err) && !is.null(val_result$error)) {
+			first_err <- val_result$error
+		}
+		val <- val_result$value
 		if (is.null(val)) {
 			n_err <- n_err + 1L
 		} else {
@@ -282,4 +284,5 @@ bootstrap_netlet <- function(netlet, fn, n_boot = 200L, alpha = 0.05,
 	attr(out, "n_boot") <- n_boot
 	attr(out, "alpha") <- alpha
 	out
+	})
 }

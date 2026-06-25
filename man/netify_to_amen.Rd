@@ -140,7 +140,7 @@ net <- netify(
 amen_data <- netify_to_amen(net)
 names(amen_data) # y, xdyad, xrow, xcol
 
-\dontrun{
+\donttest{
 # for longitudinal data with time-varying composition
 longit_net <- netify(
     icews,

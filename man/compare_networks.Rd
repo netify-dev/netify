@@ -249,7 +249,7 @@ detailed_comp <- compare_networks(
 names(detailed_comp$details) # shows available matrices
 
 # compare with custom statistics
-\dontrun{
+\donttest{
 library(igraph)
 
 # define custom connectivity function

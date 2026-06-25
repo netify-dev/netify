@@ -64,21 +64,21 @@ creates heatmap visualizations for attribute mixing matrices from \code{mixing_m
 the function creates a tile plot showing how different attribute categories interact in the network.
 }
 \examples{
-\dontrun{
+\donttest{
 # create a network with categorical attributes
-data(icews)
-icews_10 <- icews[icews$year == 2010, ]
+data(classroom_edges)
+data(classroom_nodes)
 net <- netify(
-    icews_10,
-    actor1 = "i", actor2 = "j",
-    symmetric = FALSE,
-    weight = "verbCoop"
+    classroom_edges,
+    actor1 = "from", actor2 = "to",
+    symmetric = TRUE,
+    nodal_data = classroom_nodes
 )
 
 # run mixing matrix analysis
 mixing_result <- mixing_matrix(
     net,
-    attribute = "i_polity2_cat"
+    attribute = "gender"
 )
 
 # create visualization

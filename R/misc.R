@@ -433,25 +433,20 @@ list_to_array <- function(list_of_mats) {
 }
 
 
-#' snapshot the global rng and return a restorer
+#' evaluate code with a temporary seed
 #'
-#' captures `.random.seed` from the global environment (if set) so a
-#' caller-supplied `set.seed(...)` inside a function doesn't bleed into
-#' the user's random stream. returns a zero-arg function that puts the
-#' rng back exactly the way it was -- even if no seed existed at entry.
+#' wraps `withr::with_seed()` so functions can provide reproducible seeded
+#' work without directly assigning into the user's global environment.
 #'
-#' @return a function that, when called, restores the global rng state.
+#' @param seed optional integer seed.
+#' @param code expression to evaluate.
+#' @return the result of `code`.
 #' @keywords internal
 #' @noRd
-save_rng_state <- function() {
-	had_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
-	old_seed <- if (had_seed) get(".Random.seed", envir = .GlobalEnv, inherits = FALSE) else NULL
-	function() {
-		if (had_seed) {
-			assign(".Random.seed", old_seed, envir = .GlobalEnv)
-		} else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-			rm(".Random.seed", envir = .GlobalEnv)
-		}
-		invisible(NULL)
+with_local_seed <- function(seed, code) {
+	if (is.null(seed)) {
+		force(code)
+	} else {
+		withr::with_seed(seed, code)
 	}
 }

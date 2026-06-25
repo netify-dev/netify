@@ -21,9 +21,12 @@ actor names or other text annotations with background boxes, making them more
 visible against complex network backgrounds.
 }
 \examples{
-\dontrun{
+\donttest{
 # create a netify object
-net <- netify(my_data, actor1 = "from", actor2 = "to")
+mat <- matrix(c(NA, 1, 0, 0, NA, 1, 1, 0, NA), 3, 3,
+    dimnames = list(c("alice", "bob", "carol"),
+                    c("alice", "bob", "carol")))
+net <- new_netify(mat, symmetric = FALSE)
 
 # get plot components with labels
 comp <- plot(net, add_label = TRUE, return_components = TRUE)
