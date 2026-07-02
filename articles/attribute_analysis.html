@@ -75,7 +75,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-06-25</h4>
+            <h4 data-toc-skip class="date">2026-07-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/attribute_analysis.Rmd" class="external-link"><code>vignettes/attribute_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>attribute_analysis.Rmd</code></div>
@@ -417,13 +417,13 @@ came from independent dyads or that similarity caused ties.</p>
 <td align="center">democracy</td>
 <td align="center">correlation</td>
 <td align="center">0</td>
-<td align="center">0.142</td>
+<td align="center">0.143</td>
 <td align="center">-0.245</td>
 <td align="center">-0.316</td>
-<td align="center">0.07</td>
+<td align="center">0.071</td>
 <td align="center">0.001</td>
-<td align="center">0.127</td>
-<td align="center">0.157</td>
+<td align="center">0.128</td>
+<td align="center">0.158</td>
 <td align="center">3571</td>
 <td align="center">11480</td>
 <td align="center">21</td>
@@ -445,7 +445,7 @@ came from independent dyads or that similarity caused ties.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p><strong>Democracy Homophily Results:</strong></p>
 <ul>
-<li>Homophily correlation: 0.142</li>
+<li>Homophily correlation: 0.143</li>
 <li>Avg similarity among allies: -0.245</li>
 <li>Avg similarity among non-allies: -0.316</li>
 <li>P-value: &lt; 0.001 → Alliance ties are more common among similarly
@@ -544,15 +544,15 @@ stronger claims.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">alliance_net</span>, <span class="st">'nodal_data'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   actor                    region democracy   log_gdp mil_capability</span></span>
-<span><span class="co">## 1   100 Latin America &amp; Caribbean     0.664 13.376060   6.695519e-03</span></span>
-<span><span class="co">## 2   101 Latin America &amp; Caribbean     0.401 13.129611   4.859170e-03</span></span>
+<span><span class="co">## 1   100 Latin America &amp; Caribbean     0.661 13.376060   6.695519e-03</span></span>
+<span><span class="co">## 2   101 Latin America &amp; Caribbean     0.399 13.129611   4.859170e-03</span></span>
 <span><span class="co">## 3   110 Latin America &amp; Caribbean     0.579  8.887165   3.355918e-05</span></span>
-<span><span class="co">## 4   115 Latin America &amp; Caribbean     0.753  8.912825   4.996089e-05</span></span>
-<span><span class="co">## 5   130 Latin America &amp; Caribbean     0.589 12.028537   1.530854e-03</span></span>
-<span><span class="co">## 6   135 Latin America &amp; Caribbean     0.823 12.706243   3.378733e-03</span></span>
+<span><span class="co">## 4   115 Latin America &amp; Caribbean     0.747  8.912825   4.996089e-05</span></span>
+<span><span class="co">## 5   130 Latin America &amp; Caribbean     0.586 12.028537   1.530854e-03</span></span>
+<span><span class="co">## 6   135 Latin America &amp; Caribbean     0.827 12.706243   3.378733e-03</span></span>
 <span><span class="co">##   regime_type development country_name</span></span>
 <span><span class="co">## 1   Democracy        High     Colombia</span></span>
-<span><span class="co">## 2      Hybrid        High    Venezuela</span></span>
+<span><span class="co">## 2   Autocracy        High    Venezuela</span></span>
 <span><span class="co">## 3      Hybrid         Low       Guyana</span></span>
 <span><span class="co">## 4   Democracy         Low     Suriname</span></span>
 <span><span class="co">## 5      Hybrid      Medium      Ecuador</span></span>
@@ -609,8 +609,8 @@ stronger claims.</p>
 <td align="center">categorical</td>
 <td align="center">0</td>
 <td align="center">0.122</td>
-<td align="center">0.394</td>
-<td align="center">0.259</td>
+<td align="center">0.393</td>
+<td align="center">0.258</td>
 <td align="center">0.135</td>
 <td align="center">0.001</td>
 <td align="center">0.107</td>
@@ -640,9 +640,9 @@ stronger claims.</p>
 <p><strong>Regime Type Homophily Results:</strong></p>
 <ul>
 <li>Homophily score: 0.122</li>
-<li>Same-regime alliances: 39.4%</li>
-<li>Different-regime alliances: 60.6%</li>
-<li>Expected if random: 25.9%</li>
+<li>Same-regime alliances: 39.3%</li>
+<li>Different-regime alliances: 60.7%</li>
+<li>Expected if random: 25.8%</li>
 <li>P-value: &lt; 0.001 → Same-regime alliance ties are modestly more
 common in this network</li>
 </ul>
@@ -917,29 +917,29 @@ the mixing matrix (i.e., within the same category).</p>
 <tr class="odd">
 <td align="left">Autocracy</td>
 <td align="center">0.123</td>
-<td align="center">0.091</td>
+<td align="center">0.093</td>
 <td align="center">0.073</td>
-<td align="center">0.006</td>
+<td align="center">0.007</td>
 </tr>
 <tr class="even">
 <td align="left">Democracy</td>
-<td align="center">0.091</td>
+<td align="center">0.093</td>
 <td align="center">0.217</td>
-<td align="center">0.085</td>
+<td align="center">0.083</td>
 <td align="center">0.037</td>
 </tr>
 <tr class="odd">
 <td align="left">Hybrid</td>
 <td align="center">0.073</td>
-<td align="center">0.085</td>
-<td align="center">0.045</td>
-<td align="center">0.011</td>
+<td align="center">0.083</td>
+<td align="center">0.044</td>
+<td align="center">0.010</td>
 </tr>
 <tr class="even">
 <td align="left">Unknown</td>
-<td align="center">0.006</td>
+<td align="center">0.007</td>
 <td align="center">0.037</td>
-<td align="center">0.011</td>
+<td align="center">0.010</td>
 <td align="center">0.008</td>
 </tr>
 </tbody>
@@ -954,9 +954,9 @@ the mixing matrix (i.e., within the same category).</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p><strong>Key Insights from mixing_matrix():</strong></p>
 <ul>
-<li>Assortativity: 0.108 (Positive = similar types connect more;
+<li>Assortativity: 0.105 (Positive = similar types connect more;
 Negative = different types connect more)</li>
-<li>Proportion of within-type alliances: 0.394 (Higher values indicate
+<li>Proportion of within-type alliances: 0.393 (Higher values indicate
 more homophily)</li>
 </ul>
 <div class="section level4">
@@ -1159,9 +1159,9 @@ Regions</caption>
 </tr>
 <tr class="odd">
 <td align="left">Latin America &amp; Caribbean</td>
-<td align="center">0.006</td>
+<td align="center">0.010</td>
 <td align="center">0.071</td>
-<td align="center">0.024</td>
+<td align="center">0.020</td>
 <td align="center">0.031</td>
 </tr>
 <tr class="even">
@@ -1175,7 +1175,7 @@ Regions</caption>
 <td align="left">North America</td>
 <td align="center">0.004</td>
 <td align="center">0.012</td>
-<td align="center">0.005</td>
+<td align="center">0.004</td>
 <td align="center">0.002</td>
 </tr>
 <tr class="even">
@@ -1372,7 +1372,7 @@ attributes are associated with ties</li>
 <td align="left">democracy</td>
 <td align="center">democracy</td>
 <td align="center">correlation</td>
-<td align="center">0.142</td>
+<td align="center">0.143</td>
 <td align="center">0.001</td>
 <td align="center">***</td>
 <td align="center">Very weak (sig. but small)</td>
@@ -1467,7 +1467,7 @@ attributes are associated with ties</li>
 <td align="left">cor2</td>
 <td align="center">democracy</td>
 <td align="center">closeness</td>
-<td align="center">0.318</td>
+<td align="center">0.317</td>
 <td align="center">0.000</td>
 <td align="center">Strongly associated with centrality</td>
 </tr>
@@ -1475,8 +1475,8 @@ attributes are associated with ties</li>
 <td align="left">cor</td>
 <td align="center">democracy</td>
 <td align="center">degree</td>
-<td align="center">0.229</td>
-<td align="center">0.002</td>
+<td align="center">0.227</td>
+<td align="center">0.003</td>
 <td align="center">Moderately associated with centrality</td>
 </tr>
 <tr class="even">
@@ -1491,8 +1491,8 @@ attributes are associated with ties</li>
 <td align="left">cor1</td>
 <td align="center">democracy</td>
 <td align="center">betweenness</td>
-<td align="center">0.070</td>
-<td align="center">0.357</td>
+<td align="center">0.069</td>
+<td align="center">0.364</td>
 <td align="center">Not significantly related to centrality</td>
 </tr>
 <tr class="even">
@@ -1580,7 +1580,7 @@ attributes are associated with ties</li>
 <span><span class="op">)</span></span></code></pre></div>
 <p><strong>Democratic Peace Hypothesis Test:</strong></p>
 <ul>
-<li>Effect size: 0.05</li>
+<li>Effect size: 0.047</li>
 <li>P-value: &lt; 0.001</li>
 <li>Conclusion: Detectable but very small same-regime pattern; the dyad
 count explains the significance flag more than the association size</li>
@@ -1832,23 +1832,23 @@ runs the same analyses across multiple time periods.</p>
 <span></span>
 <span><span class="va">democracy_homophily_longit</span></span></code></pre></div>
 <pre><code><span><span class="co">##    net       layer attribute      method threshold_value homophily_correlation</span></span>
-<span><span class="co">## 1 2010 cooperation democracy correlation               0             0.1544304</span></span>
-<span><span class="co">## 2 2011 cooperation democracy correlation               0             0.1537066</span></span>
-<span><span class="co">## 3 2012 cooperation democracy correlation               0             0.1416613</span></span>
-<span><span class="co">## 4 2013 cooperation democracy correlation               0             0.1292206</span></span>
-<span><span class="co">## 5 2014 cooperation democracy correlation               0             0.1243436</span></span>
+<span><span class="co">## 1 2010 cooperation democracy correlation               0             0.1554805</span></span>
+<span><span class="co">## 2 2011 cooperation democracy correlation               0             0.1551689</span></span>
+<span><span class="co">## 3 2012 cooperation democracy correlation               0             0.1427906</span></span>
+<span><span class="co">## 4 2013 cooperation democracy correlation               0             0.1303260</span></span>
+<span><span class="co">## 5 2014 cooperation democracy correlation               0             0.1253086</span></span>
 <span><span class="co">##   mean_similarity_connected mean_similarity_unconnected similarity_difference</span></span>
-<span><span class="co">## 1                -0.2443592                  -0.3226836            0.07832443</span></span>
-<span><span class="co">## 2                -0.2409122                  -0.3181384            0.07722618</span></span>
-<span><span class="co">## 3                -0.2452764                  -0.3156274            0.07035096</span></span>
-<span><span class="co">## 4                -0.2504444                  -0.3140721            0.06362762</span></span>
-<span><span class="co">## 5                -0.2520272                  -0.3131798            0.06115268</span></span>
+<span><span class="co">## 1                -0.2437901                  -0.3225891            0.07879895</span></span>
+<span><span class="co">## 2                -0.2400669                  -0.3179511            0.07788418</span></span>
+<span><span class="co">## 3                -0.2447670                  -0.3156635            0.07089649</span></span>
+<span><span class="co">## 4                -0.2500252                  -0.3141948            0.06416957</span></span>
+<span><span class="co">## 5                -0.2516377                  -0.3132425            0.06160484</span></span>
 <span><span class="co">##       p_value  ci_lower  ci_upper n_connected_pairs n_unconnected_pairs</span></span>
-<span><span class="co">## 1 0.000999001 0.1395075 0.1700197              3497               11381</span></span>
-<span><span class="co">## 2 0.000999001 0.1383078 0.1682909              3497               11554</span></span>
-<span><span class="co">## 3 0.000999001 0.1270532 0.1562951              3571               11480</span></span>
-<span><span class="co">## 4 0.000999001 0.1137038 0.1437508              3645               11406</span></span>
-<span><span class="co">## 5 0.000999001 0.1089608 0.1399076              3646               11405</span></span>
+<span><span class="co">## 1 0.000999001 0.1404352 0.1713371              3497               11381</span></span>
+<span><span class="co">## 2 0.000999001 0.1397338 0.1698274              3497               11554</span></span>
+<span><span class="co">## 3 0.000999001 0.1282803 0.1576492              3571               11480</span></span>
+<span><span class="co">## 4 0.000999001 0.1149426 0.1448748              3645               11406</span></span>
+<span><span class="co">## 5 0.000999001 0.1096736 0.1408387              3646               11405</span></span>
 <span><span class="co">##   n_missing n_pairs</span></span>
 <span><span class="co">## 1        22   14878</span></span>
 <span><span class="co">## 2        21   15051</span></span>
@@ -1877,27 +1877,27 @@ runs the same analyses across multiple time periods.</p>
 <tbody>
 <tr class="odd">
 <td align="left">2010</td>
-<td align="right">0.154</td>
+<td align="right">0.155</td>
 <td align="left">TRUE</td>
 </tr>
 <tr class="even">
 <td align="left">2011</td>
-<td align="right">0.154</td>
+<td align="right">0.155</td>
 <td align="left">TRUE</td>
 </tr>
 <tr class="odd">
 <td align="left">2012</td>
-<td align="right">0.142</td>
+<td align="right">0.143</td>
 <td align="left">TRUE</td>
 </tr>
 <tr class="even">
 <td align="left">2013</td>
-<td align="right">0.129</td>
+<td align="right">0.130</td>
 <td align="left">TRUE</td>
 </tr>
 <tr class="odd">
 <td align="left">2014</td>
-<td align="right">0.124</td>
+<td align="right">0.125</td>
 <td align="left">TRUE</td>
 </tr>
 </tbody>
@@ -1962,23 +1962,23 @@ can extract that period first:</p>
 </tr>
 <tr class="even">
 <td align="left">2011</td>
-<td align="right">0.120</td>
-<td align="right">0.400</td>
+<td align="right">0.125</td>
+<td align="right">0.401</td>
 </tr>
 <tr class="odd">
 <td align="left">2012</td>
-<td align="right">0.108</td>
-<td align="right">0.394</td>
+<td align="right">0.105</td>
+<td align="right">0.393</td>
 </tr>
 <tr class="even">
 <td align="left">2013</td>
-<td align="right">0.096</td>
-<td align="right">0.392</td>
+<td align="right">0.098</td>
+<td align="right">0.395</td>
 </tr>
 <tr class="odd">
 <td align="left">2014</td>
-<td align="right">0.094</td>
-<td align="right">0.389</td>
+<td align="right">0.096</td>
+<td align="right">0.392</td>
 </tr>
 </tbody>
 </table>
@@ -2088,11 +2088,11 @@ can extract that period first:</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <pre><code><span><span class="co">##              net homophily_correlation     p_value  trend</span></span>
-<span><span class="co">## democracy.1 2010             0.1544304 0.000999001  Start</span></span>
-<span><span class="co">## democracy.2 2011             0.1537066 0.000999001 Middle</span></span>
-<span><span class="co">## democracy.3 2012             0.1416613 0.000999001 Middle</span></span>
-<span><span class="co">## democracy.4 2013             0.1292206 0.000999001 Middle</span></span>
-<span><span class="co">## democracy.5 2014             0.1243436 0.000999001    End</span></span></code></pre>
+<span><span class="co">## democracy.1 2010             0.1554805 0.000999001  Start</span></span>
+<span><span class="co">## democracy.2 2011             0.1551689 0.000999001 Middle</span></span>
+<span><span class="co">## democracy.3 2012             0.1427906 0.000999001 Middle</span></span>
+<span><span class="co">## democracy.4 2013             0.1303260 0.000999001 Middle</span></span>
+<span><span class="co">## democracy.5 2014             0.1253086 0.000999001    End</span></span></code></pre>
 </div>
 </div>
 <div class="section level2">

@@ -75,7 +75,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-06-25</h4>
+            <h4 data-toc-skip class="date">2026-07-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/foundations.Rmd" class="external-link"><code>vignettes/foundations.Rmd</code></a></small>
       <div class="d-none name"><code>foundations.Rmd</code></div>
@@ -331,12 +331,12 @@ selected actors:</p>
 <span><span class="co">## 5   130 1995      1 0.005376344    0.01470588         1           0</span></span>
 <span><span class="co">## 6   135 1995      1 0.005376344    0.01470588         1           0</span></span>
 <span><span class="co">##   eigen_vector</span></span>
-<span><span class="co">## 1 0.000000e+00</span></span>
-<span><span class="co">## 2 1.859766e-17</span></span>
-<span><span class="co">## 3 0.000000e+00</span></span>
-<span><span class="co">## 4 0.000000e+00</span></span>
-<span><span class="co">## 5 2.385219e-18</span></span>
-<span><span class="co">## 6 1.926012e-17</span></span></code></pre>
+<span><span class="co">## 1            0</span></span>
+<span><span class="co">## 2            0</span></span>
+<span><span class="co">## 3            0</span></span>
+<span><span class="co">## 4            0</span></span>
+<span><span class="co">## 5            0</span></span>
+<span><span class="co">## 6            0</span></span></code></pre>
 <p>We can look at the distribution of the statistic for all actors over
 time:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -451,12 +451,12 @@ plot.</p>
 <span>    <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   actor time v2x_polyarchy1 v2x_polyarchy2  pwtrgdp pwtrgdp_log degree</span></span>
-<span><span class="co">## 1     2 1995          0.868      0.4767047 13375583    16.40894      1</span></span>
-<span><span class="co">## 2     2 1996          0.867      0.4741600 14136908    16.46430      3</span></span>
-<span><span class="co">## 3     2 1997          0.866      0.4898562 14480122    16.48829      4</span></span>
-<span><span class="co">## 4     2 1998          0.867      0.4879351 15268303    16.54129      4</span></span>
-<span><span class="co">## 5     2 1999          0.870      0.4921494 16085312    16.59342      3</span></span>
-<span><span class="co">## 6     2 2000          0.868      0.4940449 16191328    16.59999      4</span></span>
+<span><span class="co">## 1     2 1995          0.868      0.4670133 13375583    16.40894      1</span></span>
+<span><span class="co">## 2     2 1996          0.869      0.4712102 14136908    16.46430      3</span></span>
+<span><span class="co">## 3     2 1997          0.871      0.4801139 14480122    16.48829      4</span></span>
+<span><span class="co">## 4     2 1998          0.871      0.4788467 15268303    16.54129      4</span></span>
+<span><span class="co">## 5     2 1999          0.868      0.4815762 16085312    16.59342      3</span></span>
+<span><span class="co">## 6     2 2000          0.867      0.4808235 16191328    16.59999      4</span></span>
 <span><span class="co">##     prop_ties eigen_vector</span></span>
 <span><span class="co">## 1 0.005376344    0.4334163</span></span>
 <span><span class="co">## 2 0.016129032    0.5097062</span></span>
@@ -467,12 +467,12 @@ plot.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">mid_long_network</span><span class="op">)</span><span class="op">$</span><span class="va">nodal_data</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   actor time v2x_polyarchy1 v2x_polyarchy2  pwtrgdp pwtrgdp_log degree</span></span>
-<span><span class="co">## 1     2 1995          0.868      0.4767047 13375583    16.40894      1</span></span>
-<span><span class="co">## 2     2 1996          0.867      0.4741600 14136908    16.46430      3</span></span>
-<span><span class="co">## 3     2 1997          0.866      0.4898562 14480122    16.48829      4</span></span>
-<span><span class="co">## 4     2 1998          0.867      0.4879351 15268303    16.54129      4</span></span>
-<span><span class="co">## 5     2 1999          0.870      0.4921494 16085312    16.59342      3</span></span>
-<span><span class="co">## 6     2 2000          0.868      0.4940449 16191328    16.59999      4</span></span>
+<span><span class="co">## 1     2 1995          0.868      0.4670133 13375583    16.40894      1</span></span>
+<span><span class="co">## 2     2 1996          0.869      0.4712102 14136908    16.46430      3</span></span>
+<span><span class="co">## 3     2 1997          0.871      0.4801139 14480122    16.48829      4</span></span>
+<span><span class="co">## 4     2 1998          0.871      0.4788467 15268303    16.54129      4</span></span>
+<span><span class="co">## 5     2 1999          0.868      0.4815762 16085312    16.59342      3</span></span>
+<span><span class="co">## 6     2 2000          0.867      0.4808235 16191328    16.59999      4</span></span>
 <span><span class="co">##     prop_ties eigen_vector</span></span>
 <span><span class="co">## 1 0.005376344    0.4334163</span></span>
 <span><span class="co">## 2 0.016129032    0.5097062</span></span>
