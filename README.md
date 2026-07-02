@@ -10,13 +10,13 @@ We built netify while doing our own network research in social science. It handl
 
 ## Installation
 
-Install the package from CRAN after release:
+Install netify directly from CRAN:
 
 ```r
 install.packages("netify")
 ```
 
-Install the development version from GitHub:
+If you need the unreleased development version, install it from GitHub:
 
 ```r
 install.packages("devtools")
