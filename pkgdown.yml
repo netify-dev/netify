@@ -1,5 +1,5 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   attribute_analysis: attribute_analysis.html
@@ -14,7 +14,7 @@ articles:
   quickstart_inference: quickstart_inference.html
   resources: resources.html
   tracking_changes: tracking_changes.html
-last_built: 2026-07-02T12:35Z
+last_built: 2026-07-12T14:02Z
 urls:
   reference: https://netify-dev.github.io/netify/reference
   article: https://netify-dev.github.io/netify/articles
