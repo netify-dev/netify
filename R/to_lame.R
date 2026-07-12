@@ -153,7 +153,7 @@ netify_to_lame <- function(
 	if (is.null(family)) {
 		family <- if (is_binary) "binary" else "normal"
 		cli::cli_inform(c(
-			"i" = "{.fn to_lame}: using {.code family = {.val {family}}} ({if (is_binary) 'binary network' else 'weighted network'}). Pass {.arg family} explicitly to override (e.g., {.val ord}, {.val tobit}, {.val rrl})."
+			"i" = "{.fn to_lame}: using {.code family = {.val {family}}} ({if (is_binary) 'binary network' else 'weighted network'}). Pass {.arg family} explicitly to override (e.g., {.val ordinal}, {.val poisson})."
 		),
 		.frequency = "once",
 		.frequency_id = "netify_to_lame_family_choice")

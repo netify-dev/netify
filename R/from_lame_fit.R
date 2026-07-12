@@ -40,8 +40,13 @@
 #' `*_lower` / `*_upper` quantiles. default `0.05` -> 90% interval
 #' (lower = 0.025, upper = 0.975 when interpreted as a two-sided
 #' ci; here we use lower = alpha/2, upper = 1 - alpha/2).
-#' @return a cross-sectional netify object whose underlying matrix is
-#' the fitted-value (or residual) matrix at the same actor ordering.
+#' @return a netify object whose underlying data are the fitted-value
+#' (or residual) values at the same actor ordering. for cross-sectional
+#' fits this is a cross-sectional netify wrapping a single matrix. for
+#' longitudinal `lame::lame()` fits -- where `fitted(fit)` returns one
+#' matrix per time period -- a longitudinal netify object is returned
+#' with one period per list element, reusing the actor names on each
+#' per-period matrix.
 #'
 #' @examples
 #' \donttest{
