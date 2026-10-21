@@ -158,8 +158,11 @@ get_adjacency_array <- function(
 		actor = actors,
 		stringsAsFactors = FALSE
 	)
-	actor_pds$min_time <- time_pds[1]
-	actor_pds$max_time <- time_pds[length(time_pds)]
+	actor_pds$min_time <- numeric_time_to_label(time_pds_num[1], time_info)
+	actor_pds$max_time <- numeric_time_to_label(
+		time_pds_num[length(time_pds_num)],
+		time_info
+	)
 
 	# auto-promote sum_dyads if repeats are present and weight is supplied
 	num_repeat_dyads <- repeat_dyads_check(dyad_data, actor1, actor2, time)
@@ -182,6 +185,11 @@ get_adjacency_array <- function(
 			dyad_data[, weight] <- w_vec
 		}
 		dyad_data <- dyad_data[which(is.na(w_vec) | w_vec != 0), , drop = FALSE]
+	}
+
+	# warn when reverse-direction weights disagree under symmetric = TRUE
+	if (symmetric && mode == "unipartite") {
+		symmetric_conflict_check(dyad_data, actor1, actor2, time, weight)
 	}
 
 	# pre-split data by time periods for faster subsetting
@@ -281,6 +289,54 @@ get_adjacency_array <- function(
 		nodal_data = NULL,
 		dyad_data = NULL
 	))
+
+	return(adj_out)
+}
+
+#' stack a netify list into a netify array
+#'
+#' internal helper that converts a longitudinal netify list into a netify
+#' array over the union of actors. actors that are not present in a
+#' period are `NA` in that period's rows and columns. the list's metadata
+#' (including `actor_pds` and `actor_time_uniform`) is carried over.
+#'
+#' @param adj_list a netify object of type `longit_list`.
+#'
+#' @return a netify object of type `longit_array`.
+#'
+#' @author shahryar minhas
+#'
+#' @keywords internal
+#' @noRd
+
+stack_adjacency_list <- function(adj_list) {
+	list_attrs <- attributes(adj_list)
+	slices <- unclass(adj_list)
+
+	# union of actors across periods
+	actors_rows <- unique_vector(unlist(lapply(slices, rownames)))
+	actors_cols <- unique_vector(unlist(lapply(slices, colnames)))
+	time_pds <- names(slices)
+
+	adj_out <- array(
+		NA_real_,
+		dim = c(length(actors_rows), length(actors_cols), length(time_pds)),
+		dimnames = list(actors_rows, actors_cols, time_pds)
+	)
+
+	# fill each period for the actors present in it
+	for (t_idx in seq_along(slices)) {
+		slice <- slices[[t_idx]]
+		if (length(slice) == 0L) next
+		adj_out[rownames(slice), colnames(slice), t_idx] <- as.vector(slice)
+	}
+
+	# carry over list metadata
+	meta <- list_attrs[setdiff(names(list_attrs), c("names", "class"))]
+	meta$netify_type <- "longit_array"
+
+	class(adj_out) <- "netify"
+	attributes(adj_out) <- c(attributes(adj_out), meta)
 
 	return(adj_out)
 }

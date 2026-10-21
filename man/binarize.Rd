@@ -13,7 +13,10 @@ binarize(netlet, threshold = 0, strict = FALSE, abs = FALSE, new_name = NULL)
 becomes 1) or a function \code{f(x)} that takes the vector of edge
 weights and returns a single numeric threshold (e.g.,
 \code{function(x) median(x, na.rm = TRUE)} or
-\code{function(x) quantile(x, 0.75, na.rm = TRUE)}).}
+\code{function(x) quantile(x, 0.75, na.rm = TRUE)}). for longitudinal and
+multilayer networks, the function is evaluated once on the weights
+pooled across all periods and layers, and the resulting threshold is
+applied to every layer.}
 
 \item{strict}{logical. if \code{TRUE}, edges with weight strictly
 greater than the threshold become 1; if \code{FALSE} (default), the
@@ -29,7 +32,8 @@ negative weights and \code{abs = FALSE}, \code{binarize()} informs once
 that negative ties will be dropped.}
 
 \item{new_name}{optional character. new name for the binarized
-weight column (default keeps the original name).}
+weight column (default keeps the original name). for multilayer
+networks, supply one name per layer.}
 }
 \value{
 a binarized netify object with \code{is_binary = TRUE}.

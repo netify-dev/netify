@@ -211,6 +211,11 @@ get_adjacency <- function(
 		dyad_data <- dyad_data[which(is.na(w_vec) | w_vec != 0), , drop = FALSE]
 	}
 
+	# warn when reverse-direction weights disagree under symmetric = TRUE
+	if (symmetric && mode == "unipartite") {
+		symmetric_conflict_check(dyad_data, actor1, actor2, NULL, weight)
+	}
+
 	# cache frequently accessed columns
 	dyad_actor1 <- dyad_data[, actor1]
 	dyad_actor2 <- dyad_data[, actor2]

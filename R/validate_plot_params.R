@@ -75,8 +75,10 @@ validate_plot_params <- function(plot_args, ...) {
 		"label_alpha", "label_angle", "label_color", "label_family", "label_fill",
 		"label_fontface", "label_hjust", "label_vjust", "label_lineheight", "label_size",
 		# label aesthetics - variable and labels
-		"label_alpha_var", "label_alpha_label", "label_color_var", "label_color_label",
-		"label_fill_var", "label_fill_label", "label_size_var", "label_size_label",
+		"label_alpha_by", "label_alpha_var", "label_alpha_label",
+		"label_color_by", "label_color_var", "label_color_label",
+		"label_fill_by", "label_fill_var", "label_fill_label",
+		"label_size_by", "label_size_var", "label_size_label",
 		# label selection
 		"select_label", "select_label_display",
 		# text repel parameters

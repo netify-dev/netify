@@ -171,3 +171,31 @@ test_that(
 		expect_identical(get_raw(a_matrix), result)
 	}
 )
+
+test_that(
+	"get_adjacency_list: actor_pds with gapped numeric time keeps observed periods",
+	{
+		df = data.frame(
+			i = c("a", "b", "a", "c", "b", "c"),
+			j = c("b", "c", "c", "a", "a", "b"),
+			t = c(2000, 2000, 2005, 2005, 2010, 2010)
+		)
+		ap = data.frame(actor = c("a", "b", "c"), min_time = 2000, max_time = 2010)
+
+		net = get_adjacency_list(df, actor1 = "i", actor2 = "j", time = "t",
+			actor_pds = ap)
+		default_net = get_adjacency_list(df, actor1 = "i", actor2 = "j", time = "t",
+			actor_time_uniform = TRUE)
+
+		expect_equal(names(net), c("2000", "2005", "2010"))
+		expect_equal(names(net), names(default_net))
+		expect_equal(attr(net, "actor_pds")$min_time, rep(2000, 3))
+
+		# a bound named in actor_pds is kept as a period
+		ap$min_time[2] = 2001
+		net_bound = get_adjacency_list(df, actor1 = "i", actor2 = "j", time = "t",
+			actor_pds = ap)
+		expect_equal(names(net_bound), c("2000", "2001", "2005", "2010"))
+		expect_false("b" %in% rownames(net_bound[["2000"]]))
+	}
+)

@@ -85,8 +85,10 @@ estimated for the user based on their choice of \code{actor_time_uniform}}
 \item{diag_to_NA}{logical: whether diagonals should be set to na,
 default is TRUE. for matrix / array / list inputs, the default is
 ignored unless explicitly set: instead, \code{diag_to_NA} is auto-detected
-by inspecting whether the diagonal of the supplied matrix is already
-\code{na}. pass an explicit value to override the auto-detection.}
+from the diagonal of the supplied matrix. a diagonal that is entirely
+\code{na} or entirely zero is read as "no self-loops" and set to \code{na}; any
+other diagonal is kept as data. pass an explicit value to override the
+auto-detection.}
 
 \item{missing_to_zero}{logical: whether missing values should be set to
 zero, default is TRUE. as with \code{diag_to_NA}, this is auto-detected
@@ -96,10 +98,16 @@ already contains off-diagonal \code{na}s.}
 \item{output_format}{character: "cross_sec", "longit_array", or
 "longit_list". if not specified and time is NULL then output_format
 will be "cross_sec" and if time is specified then output_format
-will default to "longit_list". only applies to data.frame inputs.}
+will default to "longit_list". only applies to data.frame inputs.
+for "longit_array" with \code{actor_time_uniform = FALSE} or \code{actor_pds},
+actors outside their active periods are \code{na} in those periods.}
 
 \item{nodal_vars}{character vector: names of the nodal variables in the input
-that should be added as attributes to the netify object (for data.frame inputs)}
+that should be added as attributes to the netify object (for data.frame
+inputs). these columns are read as attributes of \code{actor1}: each actor's
+value is taken from the rows where it appears as \code{actor1}. actors that
+only appear as \code{actor2} get \code{na}; use \code{add_node_vars()} to supply their
+values.}
 
 \item{dyad_vars}{character vector: names of the dyadic variables in the input
 that should be added as attributes to the netify object (for data.frame inputs)}

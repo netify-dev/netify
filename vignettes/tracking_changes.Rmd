@@ -168,7 +168,7 @@ if (coop_comparison$summary$correlation > 0.7) {
 
 ### the tidy `$comparisons` frame
 
-`compare_networks()` also returns a long-format `$comparisons` data frame with one row per (pair, metric). This is the artifact you usually want for downstream filtering and plotting -- the same column layout (`net_i`, `net_j`, `metric`, `value`, `p_value`) shows up regardless of whether you passed a list, a longitudinal netify, a multilayer netify, or used `by=`:
+`compare_networks()` also returns a long-format `$comparisons` data frame with one row per (pair, metric). This is the artifact you usually want for downstream filtering and plotting -- the same column layout (`net_i`, `net_j`, `metric`, `value`, `p_value`) shows up regardless of whether you passed a list, a longitudinal netify, or a multilayer netify:
 
 ```{r}
 knitr::kable(
@@ -195,7 +195,7 @@ Let's break down what each metric tells us:
 
 - **correlation (0.507)**: Measures how similar the edge weights are between networks. A value of 0.507 indicates moderate positive correlation - when verbal cooperation is high between two countries, material cooperation tends to be somewhat higher too, but the relationship isn't perfect.
 - **jaccard (0.190)**: 19% of the dyads that appear in at least one of the two networks appear in both. This low value tells us that most country pairs engage in either verbal OR material cooperation, but not both.
-- **hamming (0.308)**: About 31% of dyads (after NA handling) differ between the two networks. This measures the proportion of comparable country pairs that have different connection patterns.
+- **hamming (0.311)**: About 31% of dyads (after NA handling) differ between the two networks. This measures the proportion of comparable country pairs that have different connection patterns.
 - **qap_correlation (0.507) with qap_pvalue < 0.001**: The printed zero is a rounding artifact from the permutation test. With 5,000 permutations, read it as p < 1/5000 (about 0.0002), not as a literal zero.
 
 **Edge Changes:**

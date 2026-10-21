@@ -88,11 +88,12 @@
 #' print(s07_ego)
 #'
 #' \donttest{
-#' # longitudinal ego network with a weighted, directed netlet
+#' # longitudinal ego network with a weighted netlet
 #' data(icews)
 #' netlet <- netify(
 #'     icews,
 #'     actor1 = "i", actor2 = "j", time = "year",
+#'     sum_dyads = TRUE,
 #'     weight = "verbCoop"
 #' )
 #' pakistan_ego <- ego_netify(netlet, ego = "Pakistan")
@@ -296,7 +297,7 @@ ego_netify <- function(
 		ego_net <- ego_nets[[1]]
 
 		# create new attributes based on original
-		new_attrs <- obj_attrs
+		new_attrs <- subset_ego_attrs(obj_attrs, ego_nets, longitudinal = FALSE)
 		new_attrs$ego_netify <- TRUE
 		new_attrs$threshold <- threshold
 		new_attrs$ngbd_direction <- ngbd_direction
@@ -341,7 +342,12 @@ ego_netify <- function(
 		names(ego_nets_processed) <- names(ego_nets)
 
 		# add top-level attributes
-		list_attrs <- obj_attrs
+		list_attrs <- subset_ego_attrs(
+			obj_attrs,
+			ego_nets,
+			longitudinal = TRUE,
+			time_labels = msrmnts$time
+		)
 		list_attrs$ego_netify <- TRUE
 		list_attrs$threshold <- threshold
 		list_attrs$ngbd_direction <- ngbd_direction

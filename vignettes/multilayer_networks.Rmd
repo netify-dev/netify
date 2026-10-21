@@ -54,6 +54,7 @@ icews_2010 <- icews[icews$year == 2010, ]
 verbal_net <- netify(
     icews_2010,
     actor1 = "i", actor2 = "j",
+    sum_dyads = TRUE,
     weight = "verbCoop"
 )
 
@@ -61,6 +62,7 @@ verbal_net <- netify(
 material_net <- netify(
     icews_2010,
     actor1 = "i", actor2 = "j",
+    sum_dyads = TRUE,
     weight = "matlCoop"
 )
 
@@ -79,15 +81,13 @@ plot(multi_net, add_text = FALSE)
 
 Let's build a more complete multilayer network to study international cooperation patterns during a critical period -- 2002, shortly after 9/11 when cooperation dynamics were rapidly shifting.
 
-Note: ICEWS event counts are directed (i sends X to j). We symmetrize each layer here by summing i→j and j→i counts into a single undirected weight, because the cross-layer mixing, homophily, and regional-clustering analyses below are naturally undirected. For directed analyses (e.g. who initiates cooperation), set `symmetric = FALSE` instead.
+Note: ICEWS event counts are directed (i sends X to j). We build each layer with `symmetric = TRUE` because the cross-layer mixing, homophily, and regional-clustering analyses below are naturally undirected. Since i→j and j→i counts differ, `netify()` warns that it keeps one value per pair. To sum both directions instead, build the layer with `sum_dyads = TRUE` and attach attributes afterwards with `add_node_vars()` and `add_dyad_vars()`. For directed analyses (e.g. who initiates cooperation), set `symmetric = FALSE`.
 
 ```{r}
 # focus on 2002 - post-9/11 cooperation dynamics
 icews_2002 <- icews[icews$year == 2002, ]
 
-# create networks with relevant attributes. symmetric = true collapses
-# i->j and j->i counts into a single undirected weight; appropriate for
-# the undirected mixing / homophily / multiplexity analyses below.
+# create undirected networks with relevant attributes
 verbal_coop_net <- netify(
     icews_2002,
     actor1 = "i", actor2 = "j",
@@ -143,7 +143,7 @@ struct_comp
 **What these numbers mean**:
 
 - **~3.6x density difference**: For roughly every material cooperation relationship, there are about three to four verbal ones
-- **~3.6x degree difference**: The average country verbally cooperates with about 62 others (mean degree ~61.7 in the symmetrized layer) but materially with only about 17 (mean degree ~17.0)
+- **~3.6x degree difference**: The average country verbally cooperates with about 62 others (mean degree ~61.7 in the symmetrized layer) but materially with only about 17 (mean degree ~16.9)
 - **Different clustering**: Higher transitivity in verbal cooperation (0.606 vs 0.311) suggests diplomatic communities form more readily than material support clusters
 
 This structural evidence is consistent with a "cheap talk" interpretation, but it should be read descriptively here: material cooperation follows different patterns than verbal diplomacy in this sample.
@@ -229,7 +229,7 @@ material_specialists <- centrality_comparison |>
 material_specialists[, c("actor", "betweenness_Verbal", "betweenness_Material", "material_bias")]
 ```
 
-The top material brokers in 2002 -- ranked by the ratio of material to verbal betweenness -- are Spain, India, France, the United Kingdom, and the Netherlands. None of these countries has appreciable verbal betweenness in 2002 (all close to zero), yet each accumulates substantial material betweenness, so the `material_bias` ratio is essentially their raw material betweenness. The pattern is consistent with middle-power donor states: Spain and the Netherlands sit on top development-aid pipelines; France and the UK route post-colonial material flows; India is a notable south-south aid hub in 2002. The headline US/China/Russia hegemons drop out of this ranking precisely because their verbal betweenness is high enough to anchor the ratio's denominator -- this filter is designed to surface countries that are *only* important in the material channel, not the overall biggest players.
+The top material brokers in 2002 -- ranked by the ratio of material to verbal betweenness -- are Afghanistan, the United States, Japan, Iraq, and Russia. Because betweenness is normalized to the 0-1 range, the `+ 1` in the denominator dominates: the ratio discounts material betweenness by at most half, so the ranking largely follows raw material betweenness. Afghanistan, Japan, and Iraq fit the specialist profile, with almost no verbal betweenness (all below 0.03) but sizable material betweenness. The pattern is consistent with the post-9/11 setting: Afghanistan sits at the center of reconstruction and security assistance, Japan is a major aid donor, and Iraq's 2002 position plausibly reflects the resumption of weapons inspections, which event coders record as material cooperation. The United States and Russia, by contrast, are central in both layers (verbal betweenness of about 0.79 and 0.46) and appear here because their material betweenness is large enough to survive the discount -- to surface countries that are *only* important in the material channel, rank material betweenness among actors with low verbal betweenness instead.
 
 ### power dynamics across layers
 
@@ -331,7 +331,7 @@ layer_comparison
 
 - **Correlation (0.472)**: Moderate positive relationship -- dyads with more verbal cooperation also tend to have more material cooperation
 - **Jaccard (0.258)**: Only 26% edge overlap -- most relationships exist in just one layer
-- **Hamming (0.305)**: About 30% of possible edges differ between layers
+- **Hamming (0.307)**: About 31% of possible edges differ between layers
 - **QAP test (p < 0.001)**: The observed correlation is larger than expected under the permutation reference distribution
 
 For downstream filtering and plotting, `compare_networks()` also exposes a tidy `$comparisons` data frame with one row per (pair, metric). This is the layout you usually want when you have more than two networks; the project-site tracking-changes article has a fuller example.
@@ -383,6 +383,7 @@ verbal_temporal <- netify(
     actor1 = "i", actor2 = "j",
     time = "year",
     symmetric = TRUE,
+    sum_dyads = TRUE,
     weight = "verbCoop"
 )
 
@@ -391,6 +392,7 @@ material_temporal <- netify(
     actor1 = "i", actor2 = "j",
     time = "year",
     symmetric = TRUE,
+    sum_dyads = TRUE,
     weight = "matlCoop"
 )
 

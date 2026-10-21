@@ -43,9 +43,12 @@ laplacian matrices. useful for detecting fundamental structural changes.}
 \item{"all"}{applies all applicable methods}
 }}
 
-\item{by}{character vector of nodal attributes. if specified, compares networks
-within and between attribute groups rather than across input networks.
-(note: currently not fully implemented)}
+\item{by}{character string naming a nodal attribute. if specified with a
+single netify object, the network is split into one subnetwork per
+attribute value (each holding only that group's actors) and the groups are
+compared with each other. supported for \code{what = "structure"},
+\code{"nodes"}, and \code{"attributes"}; edge comparisons are not available
+because the group subnetworks share no actors.}
 
 \item{what}{character string specifying what to compare:
 \describe{
@@ -120,7 +123,7 @@ input depends on the \code{what} parameter:
 \item{for \code{what = "attributes"}}{functions receive netify objects}
 }
 example: \code{list(connectivity = function(net) \{ g <- to_igraph(net);
-  c(vertex_conn = igraph::vertex_connectivity(g)) \})}}
+c(vertex_conn = igraph::vertex_connectivity(g)) \})}}
 }
 \value{
 a list of class "netify_comparison" containing:
@@ -129,7 +132,9 @@ a list of class "netify_comparison" containing:
 \item{method}{comparison method(s) used}
 \item{n_networks}{number of networks compared}
 \item{summary}{data frame with comparison statistics}
-\item{edge_changes}{list detailing added, removed, and maintained edges (for edge comparisons)}
+\item{edge_changes}{list detailing added, removed, and maintained edges
+(for edge comparisons). each undirected tie is counted once when both
+networks are symmetric.}
 \item{node_changes}{list detailing added, removed, and maintained nodes (for node comparisons)}
 \item{significance_tests}{qap test results when edge qap testing was run}
 \item{details}{detailed comparison matrices if return_details = TRUE}
@@ -157,6 +162,16 @@ the function supports four types of comparisons:
 compares edge patterns between networks using correlation, jaccard similarity,
 hamming distance, spectral distance, or qap permutation tests. returns detailed
 edge changes showing which edges are added, removed, or maintained between networks.
+
+\strong{networks with different actors:}
+when the networks being compared do not contain the same actors, each pair is
+compared in two ways. the similarity metrics (correlation, jaccard, hamming,
+qap, and spectral distance) are computed only on the actors present in both
+networks, so actors who appear in just one network do not count as
+disconnected actors; a message reports how many actors were left out. the
+edge changes, in contrast, cover every actor in either network: an actor
+absent from a network has no ties there, so ties held by actors who enter
+are counted as added and ties held by actors who leave are counted as removed.
 
 \strong{structure comparison (what = "structure"):}
 compares network-level properties like density, reciprocity, transitivity, and

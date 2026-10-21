@@ -625,3 +625,160 @@ test_that(
 		})
 	}
 )
+
+test_that(
+	"mutate_weights: add_constant alone shifts longitudinal arrays",
+	{
+		net_arr = suppressMessages(netify(
+			icews[icews$year %in% c(2010, 2011), ],
+			actor1 = "i", actor2 = "j", time = "year",
+			symmetric = FALSE,
+			weight = "verbCoop",
+			output_format = "longit_array"
+		))
+		net_shift = mutate_weights(net_arr, add_constant = 5, keep_original = FALSE)
+		expect_equal(
+			as.vector(get_raw(net_shift)),
+			as.vector(get_raw(net_arr)) + 5
+		)
+	}
+)
+
+test_that(
+	"mutate_weights: longitudinal lists update attributes on every period",
+	{
+		net_list = suppressMessages(netify(
+			icews[icews$year %in% c(2010, 2011), ],
+			actor1 = "i", actor2 = "j", time = "year",
+			symmetric = FALSE,
+			weight = "verbCoop"
+		))
+		net_log = mutate_weights(
+			net_list,
+			transform_fn = log1p,
+			new_name = "log_verbCoop",
+			keep_original = FALSE
+		)
+
+		# list and periods agree on the renamed weight
+		expect_equal(attr(net_log, "weight"), "log_verbCoop")
+		expect_equal(attr(net_log, "layers"), "log_verbCoop")
+		for (pd in names(net_log)) {
+			expect_equal(attr(net_log[[pd]], "weight"), "log_verbCoop")
+			expect_equal(attr(net_log[[pd]], "layers"), "log_verbCoop")
+			expect_equal(attr(net_log[[pd]], "detail_weight"), "log_verbCoop (transformed)")
+			expect_false(attr(net_log[[pd]], "is_binary"))
+		}
+
+		# binary input gains a per-period weight name
+		net_bin = suppressMessages(netify(
+			icews[icews$year %in% c(2010, 2011), ],
+			actor1 = "i", actor2 = "j", time = "year"
+		))
+		net_bin_log = suppressMessages(mutate_weights(
+			net_bin,
+			transform_fn = log1p,
+			keep_original = FALSE
+		))
+		expect_equal(attr(net_bin_log[["2010"]], "weight"), "edge_value")
+		expect_no_error(plot(net_bin_log))
+		expect_false(anyNA(summary_actor(net_bin_log)$closeness))
+	}
+)
+
+test_that(
+	"mutate_weights: new_name renames a cross-sectional layer",
+	{
+		net = netify(
+			icews_10,
+			actor1 = "i", actor2 = "j",
+			symmetric = FALSE,
+			weight = "verbCoop"
+		)
+		net_sqrt = mutate_weights(net, transform_fn = sqrt, new_name = "sqrt_verbCoop")
+		expect_equal(attr(net_sqrt, "layers"), "sqrt_verbCoop")
+	}
+)
+
+test_that(
+	"mutate_weights and binarize: multilayer networks transform each layer",
+	{
+		df = data.frame(
+			i = c("a", "b", "c", "a", "b", "c", "d"),
+			j = c("b", "c", "a", "c", "a", "b", "a"),
+			t = c(2001, 2001, 2001, 2002, 2002, 2002, 2002),
+			w1 = 1:7,
+			w2 = 7:1
+		)
+		build_layers = function(data, ...) {
+			layer_1 = suppressMessages(netify(
+				data,
+				actor1 = "i", actor2 = "j",
+				weight = "w1", symmetric = FALSE, ...
+			))
+			layer_2 = suppressMessages(netify(
+				data,
+				actor1 = "i", actor2 = "j",
+				weight = "w2", symmetric = FALSE, ...
+			))
+			suppressMessages(layer_netify(list(layer_1, layer_2)))
+		}
+
+		# cross-sectional
+		multi_cs = build_layers(df[df$t == 2001, ])
+		multi_log = mutate_weights(
+			multi_cs,
+			transform_fn = log1p,
+			new_name = c("log_w1", "log_w2")
+		)
+		expect_equal(
+			get_raw(multi_log),
+			log1p(get_raw(multi_cs)),
+			ignore_attr = TRUE
+		)
+		expect_equal(attr(multi_log, "weight"), "log_w1, log_w2")
+		expect_equal(attr(multi_log, "layers"), attr(multi_cs, "layers"))
+		expect_equal(
+			attr(multi_log, "detail_weight"),
+			"log_w1 (transformed) | log_w2 (transformed)"
+		)
+		expect_equal(attr(multi_log, "is_binary"), c(FALSE, FALSE))
+		expect_true(all(
+			c("original_weight_layer1", "original_weight_layer2") %in%
+				names(attr(multi_log, "dyad_data")[["1"]])
+		))
+		expect_error(
+			mutate_weights(multi_cs, new_name = "one_name"),
+			"one name per layer"
+		)
+
+		# longitudinal list
+		multi_list = build_layers(df, time = "t")
+		multi_list_shift = mutate_weights(multi_list, add_constant = 1)
+		expect_equal(
+			get_raw(multi_list_shift)[["2002"]],
+			get_raw(multi_list)[["2002"]] + 1,
+			ignore_attr = TRUE
+		)
+		multi_list_bin = suppressMessages(binarize(multi_list, threshold = 4))
+		expect_equal(attr(multi_list_bin, "is_binary"), c(TRUE, TRUE))
+		expect_equal(attr(multi_list_bin[["2002"]], "is_binary"), c(TRUE, TRUE))
+		expect_true(all(get_raw(multi_list_bin)[["2002"]] %in% c(0, 1, NA)))
+
+		# longitudinal array
+		multi_arr = build_layers(df, time = "t", output_format = "longit_array")
+		multi_arr_scaled = mutate_weights(
+			multi_arr,
+			transform_fn = function(x) x * 10,
+			keep_original = FALSE
+		)
+		expect_equal(
+			get_raw(multi_arr_scaled),
+			get_raw(multi_arr) * 10,
+			ignore_attr = TRUE
+		)
+		multi_arr_bin = suppressMessages(binarize(multi_arr))
+		expect_equal(dim(multi_arr_bin), dim(multi_arr))
+		expect_equal(attr(multi_arr_bin, "is_binary"), c(TRUE, TRUE))
+	}
+)

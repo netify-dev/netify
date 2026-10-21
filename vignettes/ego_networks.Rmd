@@ -263,6 +263,7 @@ conflict_net <- netify(
     icews,
     actor1 = "i", actor2 = "j",
     time = "year",
+    sum_dyads = TRUE,
     weight = "verbConf"
 )
 
@@ -288,7 +289,7 @@ comparison <- tibble(
 knitr::kable(comparison)
 ```
 
-Pakistan's conflict network is smaller but still substantial. The lower average density in conflict (about 0.65 vs 0.90) suggests conflicts are more bilateral while cooperation tends to be multilateral.
+Pakistan's conflict network is smaller but still substantial. The lower average density in conflict (about 0.76 vs 0.90) suggests conflicts are more bilateral while cooperation tends to be multilateral.
 
 ### 9. track network evolution
 
@@ -401,7 +402,7 @@ tibble(
   knitr::kable()
 ```
 
-The very high correlation (0.991) but moderate Jaccard similarity (0.645) tells an interesting story: when both countries engage with a partner, they do so in similar ways, but the US maintains many more unique relationships (2,222 vs 1,104).
+Similarity measures are computed on the actors that appear in both ego networks. Because both ego networks are drawn from the same ICEWS data, ties among shared partners are identical, so the correlation and Jaccard similarity are 1. The difference lies in who each ego network includes: the US ego network holds `r format(edge_changes$removed, big.mark = ",")` ties that China's lacks, China's holds `r format(edge_changes$added, big.mark = ",")` that the US network lacks, and `r format(edge_changes$maintained, big.mark = ",")` ties appear in both.
 
 Finally, who's in these networks?
 

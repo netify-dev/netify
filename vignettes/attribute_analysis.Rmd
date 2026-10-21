@@ -133,6 +133,7 @@ alliance_net <- netify(
   cow_2012,
   actor1 = 'ccode1', actor2 = 'ccode2',
   symmetric = TRUE,
+  sum_dyads = TRUE,
   weight = 'cooperation'
 )
 
@@ -903,6 +904,7 @@ alliance_net_longit <- netify(
   actor2 = 'ccode2',
   time = 'year',
   symmetric = TRUE,
+  sum_dyads = TRUE,
   weight = 'cooperation'
 )
 

@@ -118,3 +118,107 @@ test_that("ego_netify works for longitudinal networks with thresholds", {
 	expect_false("A" %in% actors_no_self)
 	expect_true(all(c("B", "C") %in% actors_no_self))
 })
+
+test_that("ego_netify subsets attributes to the ego network", {
+	df = data.frame(
+		a = c("A", "A", "B", "C", "B", "C", "D"),
+		b = c("B", "C", "C", "D", "D", "D", "E"),
+		t = c(1, 1, 1, 2, 2, 3, 3),
+		x = 1:7
+	)
+	net = suppressMessages(netify(
+		df,
+		actor1 = "a",
+		actor2 = "b",
+		time = "t",
+		actor_time_uniform = FALSE,
+		dyad_vars = "x"
+	))
+	nodes = data.frame(
+		actor = rep(c("A", "B", "C", "D", "E"), 3),
+		t = rep(1:3, each = 5),
+		z = 1:15
+	)
+	net = suppressMessages(add_node_vars(net, nodes, actor = "actor", time = "t"))
+
+	ego_c = suppressMessages(ego_netify(net, ego = "C"))
+	expect_equal(names(ego_c), c("1", "2", "3"))
+
+	# actor periods cover only the ego network actors and periods
+	pds = attr(ego_c, "actor_pds")
+	expect_equal(pds$actor, c("A", "B", "C", "D"))
+	expect_equal(pds$min_time, c(1, 1, 1, 2))
+	expect_equal(pds$max_time, c(1, 1, 3, 3))
+	expect_false(attr(ego_c, "actor_time_uniform"))
+
+	# nodal rows match the actors in each period
+	nodal = attr(ego_c, "nodal_data")
+	for (pd in names(ego_c)) {
+		expect_setequal(
+			nodal$actor[nodal$t == pd],
+			rownames(ego_c[[pd]])
+		)
+	}
+
+	# dyad matrices match each ego network
+	dyad = attr(ego_c, "dyad_data")
+	expect_equal(names(dyad), names(ego_c))
+	for (pd in names(ego_c)) {
+		expect_equal(rownames(dyad[[pd]]$x), rownames(ego_c[[pd]]))
+	}
+
+	# downstream functions work on the ego network
+	expect_no_error(decompose_netify(ego_c))
+	expect_no_error(plot(ego_c))
+	expect_no_error(suppressWarnings(dyad_correlation(ego_c)))
+})
+
+test_that("ego_netify keeps period names when one period remains", {
+	df = data.frame(
+		a = c("A", "A", "B", "C", "B", "C", "D"),
+		b = c("B", "C", "C", "D", "D", "D", "E"),
+		t = c(1, 1, 1, 2, 2, 3, 3)
+	)
+	net = suppressMessages(netify(
+		df,
+		actor1 = "a",
+		actor2 = "b",
+		time = "t",
+		actor_time_uniform = FALSE
+	))
+
+	ego_a = suppressMessages(ego_netify(net, ego = "A"))
+	expect_equal(attr(ego_a, "netify_type"), "longit_list")
+	expect_equal(names(ego_a), "1")
+	expect_equal(attr(ego_a, "actor_pds")$actor, c("A", "B", "C"))
+	expect_no_error(plot(ego_a))
+	expect_no_error(decompose_netify(ego_a))
+	expect_no_error(suppressMessages(add_node_vars(
+		ego_a,
+		data.frame(actor = c("A", "B", "C"), t = 1, z = 1:3),
+		actor = "actor",
+		time = "t"
+	)))
+})
+
+test_that("ego_netify subsets cross-sectional attributes", {
+	df = data.frame(
+		a = c("A", "A", "B", "D"),
+		b = c("B", "C", "C", "E"),
+		x = 1:4
+	)
+	net = suppressMessages(netify(
+		df,
+		actor1 = "a",
+		actor2 = "b",
+		dyad_vars = "x",
+		nodal_data = data.frame(actor = c("A", "B", "C", "D", "E"), z = 1:5)
+	))
+
+	ego_a = ego_netify(net, ego = "A")
+	expect_equal(attr(ego_a, "actor_pds")$actor, c("A", "B", "C"))
+	expect_equal(attr(ego_a, "nodal_data")$actor, c("A", "B", "C"))
+	expect_equal(names(attr(ego_a, "dyad_data")), "1")
+	expect_equal(dim(attr(ego_a, "dyad_data")[["1"]]$x), c(3, 3))
+	expect_no_error(suppressWarnings(dyad_correlation(ego_a)))
+})

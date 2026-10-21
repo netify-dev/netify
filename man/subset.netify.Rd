@@ -34,11 +34,15 @@ one layer must be specified.}
 
 \item{from}{character vector of actor names or numeric indices for actors sending
 ties (row actors). overrides \code{actors}. set to NULL to include all
-sending actors. in bipartite networks, this refers to actors in the first mode.}
+sending actors. in bipartite networks, this refers to actors in the first mode.
+in unipartite networks, the result stays square over the union of \code{from}
+and \code{to} actors, and ties outside the \code{from} x \code{to} block are
+set to NA.}
 
 \item{to}{character vector of actor names or numeric indices for actors receiving
 ties (column actors). overrides \code{actors}. set to NULL to include all
-receiving actors. in bipartite networks, this refers to actors in the second mode.}
+receiving actors. in bipartite networks, this refers to actors in the second mode.
+in unipartite networks, see \code{from} for how the two selections combine.}
 
 \item{...}{additional arguments (currently unused)}
 }
@@ -82,8 +86,15 @@ to include:
 \item use both \code{from} and \code{to} to get ties between specific sets of actors
 }
 
+for unipartite networks, a \code{from}/\code{to} subset keeps a square matrix
+over the union of the selected actors (in their original order), so the result
+remains a valid unipartite network. cells for ties that are not sent by a
+\code{from} actor to a \code{to} actor are set to NA. for symmetric networks,
+ties in either direction between the two sets are kept.
+
 for bipartite networks, \code{from} refers to actors in the first mode (e.g.,
 people) and \code{to} refers to actors in the second mode (e.g., organizations).
+selections must include actors from both modes.
 }
 \note{
 when subsetting longitudinal data to a single time period, the function automatically

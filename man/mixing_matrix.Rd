@@ -48,7 +48,9 @@ list containing:
 \item{\code{entropy}}{shannon entropy of mixing pattern}
 \item{\code{modularity}}{modularity based on attribute groups}
 \item{\code{n_groups}}{number of attribute categories}
-\item{\code{total_ties}}{total number of ties analyzed}
+\item{\code{total_ties}}{total number of ties analyzed (sum of tie
+weights when \code{include_weights = TRUE}). each undirected tie is
+counted once.}
 }
 }
 }
@@ -60,7 +62,10 @@ attribute combinations.
 }
 \details{
 mixing matrix elements represent ties between actors with attribute
-values i and j. for undirected networks, matrices are symmetrized.
+values i and j. for undirected networks, matrices are symmetrized and each
+tie is counted once: a within-group tie adds one to its diagonal cell, and a
+between-group tie adds one half to each of the two mirrored cells, so the raw
+counts sum to the number of ties.
 assortativity ranges from -1 (disassortative) to 1 (assortative).
 }
 \examples{

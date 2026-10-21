@@ -136,7 +136,6 @@ get_adjacency_list <- function(
 
 	# check if user supplied actor_pds
 	user_actor_pds <- !is.null(actor_pds)
-	actor_pds_attr <- NULL
 
 	# convert time to numeric and get labels
 	time_info <- convert_time_to_numeric(dyad_data[[time]], time)
@@ -222,7 +221,6 @@ get_adjacency_list <- function(
 				}
 			}
 		}
-		actor_pds_attr <- actor_pds
 	} else {
 		# make sure actor_pds is a data.frame
 		actor_pds <- df_check(actor_pds)
@@ -236,7 +234,6 @@ get_adjacency_list <- function(
 
 		# rename columns consistently
 		names(actor_pds) <- c("actor", "min_time", "max_time")
-		actor_pds_attr <- actor_pds
 
 		normalise_actor_pds_bound <- function(x, bound_name) {
 			if (time_info$original_class %in% c("numeric", "integer")) {
@@ -265,23 +262,22 @@ get_adjacency_list <- function(
 			as.numeric(out)
 		}
 
-		# work internally on the numeric scale used by dyad_data, while keeping
-		# the user-facing actor_pds labels for the stored netlet attribute.
+		# work internally on the numeric scale used by dyad_data
 		actor_pds$min_time <- normalise_actor_pds_bound(actor_pds$min_time, "min_time")
 		actor_pds$max_time <- normalise_actor_pds_bound(actor_pds$max_time, "max_time")
 		if (any(actor_pds$min_time > actor_pds$max_time)) {
 			cli::cli_abort("{.arg actor_pds$min_time} must not occur after {.arg actor_pds$max_time}.")
 		}
 
-		# expand to every integer period between min and max
+		# keep observed periods and actor_pds bounds within the actor_pds range
 		ap_min <- min(actor_pds$min_time, na.rm = TRUE)
 		ap_max <- max(actor_pds$max_time, na.rm = TRUE)
-		ap_span <- seq(ap_min, ap_max, by = 1)
-		time_pds_num <- sort(unique_vector(
-			ap_span,
+		time_pds_num <- unique_vector(
+			time_pds_num,
 			actor_pds$min_time,
 			actor_pds$max_time
-		))
+		)
+		time_pds_num <- time_pds_num[time_pds_num >= ap_min & time_pds_num <= ap_max]
 		time_pds <- if (time_info$original_class %in% c("numeric", "integer")) {
 			char(time_pds_num)
 		} else {
@@ -354,6 +350,11 @@ get_adjacency_list <- function(
 			dyad_data[, weight] <- w_vec
 		}
 		dyad_data <- dyad_data[which(is.na(w_vec) | w_vec != 0), , drop = FALSE]
+	}
+
+	# warn when reverse-direction weights disagree under symmetric = TRUE
+	if (symmetric && mode == "unipartite") {
+		symmetric_conflict_check(dyad_data, actor1, actor2, time, weight)
 	}
 
 	# pre-compute actor presence matrix for all time periods
@@ -460,19 +461,23 @@ get_adjacency_list <- function(
 	# if user supplied actor_pds then set actor_time_uniform to false
 	if (user_actor_pds) actor_time_uniform <- FALSE
 
+	# store actor period bounds as time labels
+	actor_pds$min_time <- numeric_time_to_label(actor_pds$min_time, time_info)
+	actor_pds$max_time <- numeric_time_to_label(actor_pds$max_time, time_info)
+
 	# get info on binary weights using vectorized operation
 	bin_check <- vapply(adj_out, function(x) attr(x, "is_binary"), logical(1))
 
 	# add attributes to list
 	class(adj_out) <- "netify"
 	attributes(adj_out) <- c(attributes(adj_out), list(
-			netify_type = "longit_list",
-			actor_time_uniform = actor_time_uniform,
-			actor_pds = actor_pds_attr %||% actor_pds,
+		netify_type = "longit_list",
+		actor_time_uniform = actor_time_uniform,
+		actor_pds = actor_pds,
 		weight = weight_final,
 		detail_weight = weight_label,
 		is_binary = all(bin_check),
-			symmetric = symmetric,
+		symmetric = symmetric,
 		mode = mode,
 		layers = layer_label_final,
 		diag_to_NA = diag_to_NA,

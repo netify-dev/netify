@@ -84,8 +84,8 @@
 #' lm_in <- to_lame(net) # auto-picks family from binary/weighted
 #' library(lame)
 #' # copy-paste the printed `lm_in$ame_call`:
-#' fit <- lame::ame(y = lm_in$y, xdyad = lm_in$xdyad,
-#' xrow = lm_in$xrow, xcol = lm_in$xcol,
+#' fit <- lame::ame(Y = lm_in$Y, Xdyad = lm_in$Xdyad,
+#' Xrow = lm_in$Xrow, Xcol = lm_in$Xcol,
 #' family = "binary", nscan = 1000, burn = 500)
 #' }
 #'
@@ -94,8 +94,8 @@
 #' # fast point estimate + parametric bootstrap cis in one call
 #' lm_in <- to_lame(net_bp, fit_method = "als", bootstrap = 200)
 #' library(lame)
-#' fit <- lame::ame_als(y = lm_in$y, mode = "bipartite",
-#' family = "binary", bootstrap = 200l)
+#' fit <- lame::ame_als(Y = lm_in$Y, mode = "bipartite",
+#' family = "binary", bootstrap = 200L)
 #' confint(fit) # bootstrap cis
 #' pred <- from_lame_fit(fit, value = "prob")
 #' plot(pred, style = "heatmap")

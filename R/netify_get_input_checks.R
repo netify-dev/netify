@@ -357,6 +357,78 @@ repeat_dyads_check <- function(dyad_data, actor1, actor2, time = NULL) {
 	return(out)
 }
 
+#' symmetric_conflict_check
+#'
+#' warns when `symmetric = TRUE` and a dyad appears in both directions
+#' within the same time period with different weights. in that case the
+#' adjacency matrix keeps whichever value comes last in the data.
+#'
+#' @param dyad_data a data.frame of dyads as passed to the matrix builder.
+#' @param actor1 character string specifying the column name for actor1.
+#' @param actor2 character string specifying the column name for actor2.
+#' @param time optional character string specifying the column name for time.
+#' @param weight character string specifying the column name for weights.
+#' @return the number of conflicting dyads, invisibly.
+#' @author shahryar minhas
+#'
+#' @keywords internal
+#' @noRd
+
+symmetric_conflict_check <- function(dyad_data, actor1, actor2, time = NULL, weight) {
+	a1 <- as.character(dyad_data[[actor1]])
+	a2 <- as.character(dyad_data[[actor2]])
+	off_diag <- a1 != a2
+	if (!any(off_diag)) {
+		return(invisible(0L))
+	}
+	a1 <- a1[off_diag]
+	a2 <- a2[off_diag]
+	w <- dyad_data[[weight]][off_diag]
+
+	# integer codes for actors and periods
+	actors <- unique(c(a1, a2))
+	id1 <- match(a1, actors) - 1
+	id2 <- match(a2, actors) - 1
+	n_actors <- length(actors)
+	if (is.null(time)) {
+		t_id <- 0
+		n_time <- 1
+	} else {
+		t_vals <- dyad_data[[time]][off_diag]
+		t_levels <- unique(t_vals)
+		t_id <- match(t_vals, t_levels) - 1
+		n_time <- length(t_levels)
+	}
+
+	# match each row to a row for the reverse direction
+	fwd_key <- (id1 * n_actors + id2) * n_time + t_id
+	rev_key <- (id2 * n_actors + id1) * n_time + t_id
+	rev_idx <- match(rev_key, fwd_key)
+
+	# count each unordered pair once
+	has_rev <- !is.na(rev_idx) & id1 < id2
+	if (!any(has_rev)) {
+		return(invisible(0L))
+	}
+	w_fwd <- w[has_rev]
+	w_rev <- w[rev_idx[has_rev]]
+	differs <- xor(is.na(w_fwd), is.na(w_rev)) |
+		(!is.na(w_fwd) & !is.na(w_rev) & w_fwd != w_rev)
+	n_conflict <- sum(differs)
+
+	if (n_conflict > 0L) {
+		ex_a1 <- a1[has_rev][differs][1]
+		ex_a2 <- a2[has_rev][differs][1]
+		cli::cli_warn(c(
+			"!" = "{n_conflict} dyad{?s} {?has/have} different weights in each direction, but {.code symmetric = TRUE} stores one value per pair (e.g. {.val {ex_a1}} and {.val {ex_a2}}).",
+			"i" = "The value from the last matching row in the data is used for each such pair.",
+			"i" = "To combine both directions, aggregate first with {.code aggregate_dyad(..., symmetric = TRUE)} or set {.code sum_dyads = TRUE}; to keep them separate, set {.code symmetric = FALSE}."
+		))
+	}
+
+	invisible(n_conflict)
+}
+
 
 #' edge_value_check
 #'

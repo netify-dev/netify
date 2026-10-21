@@ -10,7 +10,10 @@
 #' becomes 1) or a function `f(x)` that takes the vector of edge
 #' weights and returns a single numeric threshold (e.g.,
 #' `function(x) median(x, na.rm = TRUE)` or
-#' `function(x) quantile(x, 0.75, na.rm = TRUE)`).
+#' `function(x) quantile(x, 0.75, na.rm = TRUE)`). for longitudinal and
+#' multilayer networks, the function is evaluated once on the weights
+#' pooled across all periods and layers, and the resulting threshold is
+#' applied to every layer.
 #' @param strict logical. if `TRUE`, edges with weight strictly
 #' greater than the threshold become 1; if `FALSE` (default), the
 #' threshold itself is included (>=). for `threshold = 0`, the
@@ -23,7 +26,8 @@
 #' negative weights and `abs = FALSE`, `binarize()` informs once
 #' that negative ties will be dropped.
 #' @param new_name optional character. new name for the binarized
-#' weight column (default keeps the original name).
+#' weight column (default keeps the original name). for multilayer
+#' networks, supply one name per layer.
 #' @return a binarized netify object with `is_binary = TRUE`.
 #'
 #' @details na cells (e.g., the diagonal under `diag_to_NA = TRUE`)
@@ -103,7 +107,7 @@ binarize <- function(netlet, threshold = 0, strict = FALSE, abs = FALSE,
 		transform_fn = cmp_fn,
 		new_name = new_name,
 		keep_original = FALSE)
-	# stamp is_binary attribute
-	attr(out, "is_binary") <- TRUE
+	# stamp is_binary attribute for each layer
+	attr(out, "is_binary") <- rep(TRUE, max(length(attr(out, "layers")), 1L))
 	out
 }

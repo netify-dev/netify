@@ -136,3 +136,32 @@ test_that(
 		expect_identical(attributes(add_nodal_result)$nodal_data, node_result)
 	}
 )
+
+test_that(
+	"add_node_vars: POSIXct and Date time join to netlet periods",
+	{
+		df = data.frame(
+			i = c("a", "b", "c", "a", "b", "c"),
+			j = c("b", "c", "a", "c", "a", "b"),
+			x = 1:6
+		)
+		posix_t = as.POSIXct(
+			c(rep("2020-01-01 08:00:00", 3), rep("2020-01-01 09:00:00", 3)),
+			tz = "UTC"
+		)
+		date_t = as.Date(c(rep("2020-01-01", 3), rep("2020-01-08", 3)))
+
+		for (tvals in list(posix_t, date_t)) {
+			df$t = tvals
+			net = netify(df, actor1 = "i", actor2 = "j", time = "t",
+				symmetric = FALSE, nodal_vars = "x")
+			expect_false(anyNA(attr(net, "nodal_data")$x))
+
+			net2 = netify(df, actor1 = "i", actor2 = "j", time = "t",
+				symmetric = FALSE)
+			net2 = add_node_vars(net2, df[, c("i", "t", "x")],
+				actor = "i", time = "t", node_vars = "x")
+			expect_equal(attr(net2, "nodal_data")$x, attr(net, "nodal_data")$x)
+		}
+	}
+)

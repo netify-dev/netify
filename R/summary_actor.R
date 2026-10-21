@@ -24,6 +24,9 @@
 #'     \item{\code{actor}}{actor name/identifier}
 #'     \item{\code{time}}{time period (for longitudinal networks)}
 #'     \item{\code{layer}}{layer name (for multilayer networks)}
+#'     \item{\code{actor_mode}}{\code{"row"} or \code{"col"} (for bipartite networks
+#'       where the same actor name appears in both modes, so that each mode keeps
+#'       its own row)}
 #'   }
 #'
 #'   additional columns depend on network type:
@@ -225,7 +228,8 @@ summary_actor <- function(netlet, invert_weights_for_igraph = TRUE,
 
 	# if bipartite then set symmetric parameter
 	# in obj_attrs to false
-	if (obj_attrs$mode == "bipartite") {
+	is_bipartite <- obj_attrs$mode == "bipartite"
+	if (is_bipartite) {
 		obj_attrs$symmetric <- FALSE
 	}
 
@@ -283,6 +287,19 @@ summary_actor <- function(netlet, invert_weights_for_igraph = TRUE,
 			)
 			stats_df <- as.data.frame(stats_mat, stringsAsFactors = FALSE)
 			stats_df$actor <- rownames(stats_mat)
+
+			# bipartite rows are row actors followed by col actors
+			if (is_bipartite) {
+				row_actors <- rownames(object[[k]])
+				col_actors <- colnames(object[[k]])
+				if (nrow(stats_df) == length(row_actors) + length(col_actors)) {
+					stats_df$actor <- c(row_actors, col_actors)
+					stats_df$actor_mode <- rep(
+						c("row", "col"),
+						c(length(row_actors), length(col_actors))
+					)
+				}
+			}
 			if (is_longit) {
 				stats_df$time <- object_names[k]
 			}
@@ -319,8 +336,16 @@ summary_actor <- function(netlet, invert_weights_for_igraph = TRUE,
 		net_stats_actor$layer <- NULL
 	}
 
+	# keep the mode column only when an actor appears in both modes
+	if ("actor_mode" %in% names(net_stats_actor)) {
+		mode_id_cols <- intersect(c("actor", "layer", "time"), names(net_stats_actor))
+		if (!anyDuplicated(net_stats_actor[, mode_id_cols, drop = FALSE])) {
+			net_stats_actor$actor_mode <- NULL
+		}
+	}
+
 	# reorder columns with id vars first
-	id_vars <- c("actor", "layer", "time")
+	id_vars <- c("actor", "actor_mode", "layer", "time")
 	existing_id_vars <- intersect(id_vars, names(net_stats_actor))
 	stat_vars <- setdiff(names(net_stats_actor), id_vars)
 	net_stats_actor <- net_stats_actor[, c(existing_id_vars, stat_vars)]

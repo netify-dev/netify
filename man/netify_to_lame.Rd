@@ -37,7 +37,7 @@ message naming the choice.}
 \item{pad}{logical. when \code{lame = TRUE} and the per-period list
 is returned (the function never actually pads in place; it
 always returns a list), controls whether the once-per-session
-info message points users at the padding + \code{lame::lame()} snippet
+info message points users at the \code{lame::lame()} call
 baked into \code{nl$ame_call}. default
 \code{TRUE} (emit the message); set \code{FALSE} to silence it.}
 
@@ -64,7 +64,8 @@ this directly to \code{lame::ame(mode = .)}.}
 \item{\code{family}}{character: the suggested family (\code{"binary"} or
 \code{"normal"}). pass to \code{lame::ame(family = .)}.}
 \item{\code{ame_call}}{character: a literal \code{lame::ame()} call
-string the user can copy-paste.}
+(cross-sectional) or \code{lame::lame()} snippet (longitudinal)
+the user can copy-paste.}
 }
 }
 \description{
@@ -78,8 +79,9 @@ two things netify users care about:
 \itemize{
 \item rectangular \code{y} for \strong{bipartite} networks via
 \code{mode = "bipartite"} -- the standard \code{amen::ame()} rejects this.
-\item ragged longitudinal panels via a generated padding snippet --
-\code{amen} requires constant actor composition.
+\item ragged longitudinal panels via \code{lame::lame()}, which aligns
+per-period actor sets by name -- \code{amen} requires constant actor
+composition.
 }
 
 this function wraps \verb{\link{netify_to_amen}} and:
@@ -88,11 +90,11 @@ this function wraps \verb{\link{netify_to_amen}} and:
 (\code{"binary"} for binary nets, \code{"normal"} for weighted),
 \item suggests the correct \code{mode} argument for \code{lame::ame()}
 (\code{"unipartite"} / \code{"bipartite"}),
-\item for \code{lame = TRUE} longitudinal output, emits a copy-paste
-padding + \code{lame::lame()} snippet in the
-returned \code{ame_call} slot. the function itself does \strong{not}
-pad the list -- run the snippet (or the literal call) to do
-that step yourself.
+\item for longitudinal output, emits a copy-paste \code{lame::lame()}
+call in the returned \code{ame_call} slot. with \code{lame = TRUE} the
+per-period lists are passed directly; with \code{lame = FALSE} the
+snippet first splits the \verb{[n, n, t]} arrays into the per-period
+lists that \code{lame::lame()} expects.
 }
 
 \strong{bipartite + binary: the case \code{to_amen()} cannot fit.}
@@ -103,23 +105,22 @@ bp <- netify(df, actor1 = "person", actor2 = "event",
 mode = "bipartite", weight = "attended")
 nl <- to_lame(bp) # auto-detects binary
 fit <- lame::ame(
-y = nl$y, xrow = nl$xrow, xcol = nl$xcol,
+Y = nl$Y, Xrow = nl$Xrow, Xcol = nl$Xcol,
 mode = nl$mode, family = nl$family,
 nscan = 1000, burn = 500
 )
-# uncertainty: posterior intervals are in fit$beta / fit$vc
+# uncertainty: posterior intervals are in fit$BETA / fit$VC
 }
 
 \strong{ragged longitudinal panels.} when \code{lame = TRUE} and
 actors enter / exit the network, this function:
 \enumerate{
 \item builds the per-period list via \code{netify_to_amen(lame=TRUE)},
-\item bakes a pad-then-fit snippet into \code{nl$ame_call} that the
-user runs to materialize the 3d \verb{[n, n, t]} array and fit
-\code{lame::lame()}. unipartite snippets use \code{lame::list_to_array()};
-bipartite snippets pad rectangular row-by-column arrays directly.
+\item bakes a \code{lame::lame()} call into \code{nl$ame_call} that passes
+the per-period lists directly; \code{lame::lame()} aligns actors
+across periods by name, for unipartite and bipartite networks.
 }
-the returned \code{y} / \code{xdyad} / \code{xrow} / \code{xcol} are always the
+the returned \code{Y} / \code{Xdyad} / \code{Xrow} / \code{Xcol} are always the
 per-period list -- \code{pad} only controls whether the once-per-
 session info message reminding the user of the snippet fires.
 }

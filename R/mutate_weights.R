@@ -13,11 +13,13 @@
 #'   shifting distributions.
 #' @param new_name optional new name for the weight variable. if provided, updates
 #'   the weight attribute and descriptive labels. if NULL, keeps the original name.
+#'   for multilayer networks, supply one name per layer.
 #' @param keep_original logical. if TRUE (default), preserves the original weights
 #'   as a dyadic variable. if FALSE, discards original weights to save memory.
 #'
 #' @return a netify object with transformed weights. the original weights are optionally
-#'   preserved as a dyadic variable named "original_weight".
+#'   preserved as a dyadic variable named "original_weight" (or
+#'   "original_weight_<layer>" for each layer of a multilayer network).
 #'
 #' @details
 #' the function handles all netify object types:
@@ -25,6 +27,7 @@
 #'   \item \strong{cross-sectional}: transforms the single network matrix
 #'   \item \strong{longitudinal arrays}: transforms each time slice
 #'   \item \strong{longitudinal lists}: transforms each time period matrix
+#'   \item \strong{multilayer networks}: transforms each layer separately
 #' }
 #'
 #' the function automatically updates network attributes:
@@ -184,127 +187,171 @@ mutate_weights <- function(
 
 	raw_net <- get_raw(netlet)
 	netify_type <- attr(netlet, "netify_type")
-	original_is_binary <- attr(netlet, "is_binary")
+	layer_names <- attr(netlet, "layers")
+	n_layers <- max(length(layer_names), 1L)
+	is_multilayer <- n_layers > 1
+	original_is_binary <- rep_len(attr(netlet, "is_binary") %||% FALSE, n_layers)
 
-	if (netify_type == "cross_sec") {
-		if (keep_original) {
-			orig_data <- data.frame(
-				actor1 = rep(rownames(raw_net), ncol(raw_net)),
-				actor2 = rep(colnames(raw_net), each = nrow(raw_net)),
-				original_weight = as.vector(raw_net)
-			)
-
-			netlet <- add_dyad_vars(
-				netlet,
-				dyad_data = orig_data,
-				actor1 = "actor1",
-				actor2 = "actor2",
-				dyad_vars = "original_weight",
-				dyad_vars_symmetric = all(attr(netlet, "symmetric"))
-			)
-		}
-
-		raw_net <- raw_net + add_constant
-		if (!is.null(transform_fn)) {
-			raw_net <- transform_fn(raw_net)
-		}
-
-		new_is_binary <- all(as.vector(raw_net) %in% c(0, 1, NA))
-
-		netlet[, ] <- raw_net
-		attr(netlet, "is_binary") <- new_is_binary
-	} else if (netify_type == "longit_array") {
-		if (keep_original) {
-			cli::cli_alert_info("keeping original weights for longitudinal arrays not yet implemented")
-		}
-
-		bin_check <- logical(dim(raw_net)[3])
-
-		for (t in 1:dim(raw_net)[3]) {
-			slice <- raw_net[, , t] + add_constant
-			if (!is.null(transform_fn)) {
-				raw_net[, , t] <- transform_fn(slice)
-			}
-			bin_check[t] <- all(as.vector(raw_net[, , t]) %in% c(0, 1, NA))
-		}
-		netlet[, , ] <- raw_net
-
-		attr(netlet, "is_binary") <- all(bin_check)
-	} else if (netify_type == "longit_list") {
-		bin_check <- logical(length(netlet))
-
-		for (i in seq_along(netlet)) {
-			if (keep_original) {
-				mat <- netlet[[i]]
-				orig_data <- data.frame(
-					actor1 = rep(rownames(mat), ncol(mat)),
-					actor2 = rep(colnames(mat), each = nrow(mat)),
-					time = names(netlet)[i],
-					original_weight = as.vector(mat)
-				)
-
-				netlet <- add_dyad_vars(
-					netlet,
-					dyad_data = orig_data,
-					actor1 = "actor1",
-					actor2 = "actor2",
-					time = "time",
-					dyad_vars = "original_weight",
-					dyad_vars_symmetric = all(attr(netlet, "symmetric"))
-				)
-			}
-
-			mat <- get_raw(netlet[[i]]) + add_constant
-			if (!is.null(transform_fn)) {
-				mat <- transform_fn(mat)
-			}
-
-			bin_check[i] <- all(as.vector(mat) %in% c(0, 1, NA))
-
-			# preserve matrix attributes across assignment
-			old_attrs <- attributes(netlet[[i]])
-			netlet[[i]][, ] <- mat
-
-			for (a in names(old_attrs)) {
-				if (!(a %in% c("dim", "dimnames"))) {
-					attr(netlet[[i]], a) <- old_attrs[[a]]
-				}
-			}
-
-			attr(netlet[[i]], "is_binary") <- bin_check[i]
-		}
-
-		attr(netlet, "is_binary") <- all(bin_check)
+	if (!is.null(new_name) && (!is.character(new_name) || length(new_name) != n_layers)) {
+		cli::cli_abort(c(
+			"x" = "{.arg new_name} must be a character vector with one name per layer ({n_layers}).",
+			"i" = "This network has layer{?s} {.val {layer_names}}."
+		))
 	}
 
-	if (!is.null(new_name)) {
-		attr(netlet, "weight") <- new_name
+	# per-layer weight names and labels
+	weight_vec <- strsplit(as.character(weight_var), ", ", fixed = TRUE)[[1]]
+	weight_vec <- rep_len(weight_vec, n_layers)
+	detail_vec <- strsplit(
+		as.character(attr(netlet, "detail_weight") %||% ""),
+		" | ",
+		fixed = TRUE
+	)[[1]]
+	detail_vec <- rep_len(c(detail_vec, ""), n_layers)
 
-		if (attr(netlet, "is_binary")) {
-			if (original_is_binary) {
-				attr(netlet, "detail_weight") <- paste0(new_name, " (transformed binary)")
-			} else {
-				attr(netlet, "detail_weight") <- paste0(new_name, " (binarized)")
-				cli::cli_alert_info("network has been binarized through transformation")
+	mutate_slice <- function(mat) {
+		mat <- mat + add_constant
+		if (!is.null(transform_fn)) {
+			mat <- transform_fn(mat)
+		}
+		mat
+	}
+	is_binary_slice <- function(mat) {
+		all(as.vector(mat) %in% c(0, 1, NA))
+	}
+
+	# store original weights as dyadic variables
+	if (keep_original && netify_type == "longit_array") {
+		cli::cli_alert_info("keeping original weights for longitudinal arrays not yet implemented")
+	} else if (keep_original) {
+		orig_vars <- if (is_multilayer) {
+			paste0("original_weight_", layer_names)
+		} else {
+			"original_weight"
+		}
+		orig_list <- if (netify_type == "cross_sec") list(raw_net) else raw_net
+		orig_data <- do.call(rbind, lapply(seq_along(orig_list), function(tt) {
+			mat <- orig_list[[tt]]
+			pd_data <- data.frame(
+				actor1 = rep(rownames(mat), ncol(mat)),
+				actor2 = rep(colnames(mat), each = nrow(mat))
+			)
+			if (netify_type == "longit_list") {
+				pd_data$time <- names(orig_list)[tt]
+			}
+			n_cells <- nrow(mat) * ncol(mat)
+			for (ll in seq_len(n_layers)) {
+				cells <- seq_len(n_cells) + (ll - 1L) * n_cells
+				pd_data[[orig_vars[ll]]] <- as.vector(mat)[cells]
+			}
+			pd_data
+		}))
+
+		netlet <- add_dyad_vars(
+			netlet,
+			dyad_data = orig_data,
+			actor1 = "actor1",
+			actor2 = "actor2",
+			time = if (netify_type == "longit_list") "time" else NULL,
+			dyad_vars = orig_vars,
+			dyad_vars_symmetric = rep_len(unname(as.logical(attr(netlet, "symmetric"))), n_layers)
+		)
+	}
+
+	# transform each layer slice and track which layers are binary
+	layer_binary <- rep(TRUE, n_layers)
+	if (netify_type == "cross_sec") {
+		if (is_multilayer) {
+			for (ll in seq_len(n_layers)) {
+				raw_net[, , ll] <- mutate_slice(raw_net[, , ll])
+				layer_binary[ll] <- is_binary_slice(raw_net[, , ll])
 			}
 		} else {
-			if (original_is_binary) {
-				attr(netlet, "detail_weight") <- paste0(new_name, " (weighted from binary)")
-				cli::cli_alert_info("binary network has been converted to weighted through transformation")
+			raw_net <- mutate_slice(raw_net)
+			layer_binary <- is_binary_slice(raw_net)
+		}
+		netlet[] <- raw_net
+	} else if (netify_type == "longit_array") {
+		n_time <- dim(raw_net)[length(dim(raw_net))]
+		for (tt in seq_len(n_time)) {
+			if (is_multilayer) {
+				for (ll in seq_len(n_layers)) {
+					raw_net[, , ll, tt] <- mutate_slice(raw_net[, , ll, tt])
+					layer_binary[ll] <- layer_binary[ll] && is_binary_slice(raw_net[, , ll, tt])
+				}
 			} else {
-				attr(netlet, "detail_weight") <- paste0(new_name, " (transformed)")
+				raw_net[, , tt] <- mutate_slice(raw_net[, , tt])
+				layer_binary <- layer_binary && is_binary_slice(raw_net[, , tt])
 			}
 		}
-	} else {
-		if (attr(netlet, "is_binary") != original_is_binary) {
-			current_weight <- attr(netlet, "weight", exact = TRUE) %||% "weight"
-			if (attr(netlet, "is_binary")) {
-				attr(netlet, "detail_weight") <- paste0(current_weight, " (binarized)")
-				cli::cli_alert_info("network has been binarized through transformation")
+		netlet[] <- raw_net
+	} else if (netify_type == "longit_list") {
+		for (tt in seq_along(netlet)) {
+			elem <- netlet[[tt]]
+			mat <- get_raw(elem)
+			if (is_multilayer) {
+				for (ll in seq_len(n_layers)) {
+					mat[, , ll] <- mutate_slice(mat[, , ll])
+					layer_binary[ll] <- layer_binary[ll] && is_binary_slice(mat[, , ll])
+				}
 			} else {
-				attr(netlet, "detail_weight") <- paste0(current_weight, " (weighted from binary)")
-				cli::cli_alert_info("binary network has been converted to weighted through transformation")
+				mat <- mutate_slice(mat)
+				layer_binary <- layer_binary && is_binary_slice(mat)
 			}
+			elem[] <- mat
+			netlet[[tt]] <- elem
+		}
+	}
+
+	# set weight names and labels for each layer
+	new_weight_vec <- new_name %||% weight_vec
+	binarized <- layer_binary & !original_is_binary
+	weighted <- !layer_binary & original_is_binary
+	for (ll in seq_len(n_layers)) {
+		if (!is.null(new_name)) {
+			label <- if (layer_binary[ll] && original_is_binary[ll]) {
+				"transformed binary"
+			} else if (binarized[ll]) {
+				"binarized"
+			} else if (weighted[ll]) {
+				"weighted from binary"
+			} else {
+				"transformed"
+			}
+			detail_vec[ll] <- paste0(new_name[ll], " (", label, ")")
+		} else if (binarized[ll]) {
+			detail_vec[ll] <- paste0(weight_vec[ll], " (binarized)")
+		} else if (weighted[ll]) {
+			detail_vec[ll] <- paste0(weight_vec[ll], " (weighted from binary)")
+		}
+	}
+	if (any(binarized)) {
+		cli::cli_alert_info("network has been binarized through transformation")
+	}
+	if (any(weighted)) {
+		cli::cli_alert_info("binary network has been converted to weighted through transformation")
+	}
+
+	new_attrs <- list(
+		weight = paste(new_weight_vec, collapse = ", "),
+		detail_weight = paste(detail_vec, collapse = " | "),
+		is_binary = layer_binary
+	)
+	if (!is_multilayer && !is.null(new_name)) {
+		new_attrs$layers <- new_name
+	}
+
+	# apply weight attributes to the netlet and each period
+	for (attr_name in names(new_attrs)) {
+		attr(netlet, attr_name) <- new_attrs[[attr_name]]
+	}
+	if (netify_type == "longit_list") {
+		for (tt in seq_along(netlet)) {
+			elem <- netlet[[tt]]
+			for (attr_name in names(new_attrs)) {
+				attr(elem, attr_name) <- new_attrs[[attr_name]]
+			}
+			netlet[[tt]] <- elem
 		}
 	}
 

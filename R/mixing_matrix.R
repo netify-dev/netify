@@ -29,13 +29,18 @@
 #'       \item{\code{entropy}}{shannon entropy of mixing pattern}
 #'       \item{\code{modularity}}{modularity based on attribute groups}
 #'       \item{\code{n_groups}}{number of attribute categories}
-#'       \item{\code{total_ties}}{total number of ties analyzed}
+#'       \item{\code{total_ties}}{total number of ties analyzed (sum of tie
+#'         weights when \code{include_weights = TRUE}). each undirected tie is
+#'         counted once.}
 #'     }
 #'   }
 #'
 #' @details
 #' mixing matrix elements represent ties between actors with attribute
-#' values i and j. for undirected networks, matrices are symmetrized.
+#' values i and j. for undirected networks, matrices are symmetrized and each
+#' tie is counted once: a within-group tie adds one to its diagonal cell, and a
+#' between-group tie adds one half to each of the two mirrored cells, so the raw
+#' counts sum to the number of ties.
 #' assortativity ranges from -1 (disassortative) to 1 (assortative).
 #'
 #' @author cassy dorff, shahryar minhas
@@ -201,6 +206,9 @@ mixing_matrix <- function(
 				} else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
 					# for longitudinal multilayer: 4d array [actors, actors, layers, time]
 					net_matrix <- net_matrix[, , layer_index]
+				} else if (netify_type == "longit_list" && length(dim(net_matrix)) == 3) {
+					# for longitudinal list multilayer: each period is [actors, actors, layers]
+					net_matrix <- net_matrix[, , layer_index]
 				}
 			}
 
@@ -259,10 +267,18 @@ mixing_matrix <- function(
 			row_attrs <- row_attrs[row_keep]
 			col_attrs <- col_attrs[col_keep]
 
+			# undirected ties are counted once
+			layer_symmetric <- obj_attrs$symmetric %||% FALSE
+			if (length(layer_symmetric) > 1) {
+				layer_symmetric <- layer_symmetric[layer_index]
+			}
+			undirected <- isTRUE(layer_symmetric) && !identical(obj_attrs$mode, "bipartite")
+
 			# create mixing matrix
 			mixing_result <- create_mixing_matrix(
 				net_matrix, row_attrs, col_attrs,
-				normalized, by_row, include_weights
+				normalized, by_row, include_weights,
+				undirected = undirected
 			)
 
 			# calculate summary statistics
@@ -321,8 +337,11 @@ mixing_matrix <- function(
 }
 
 # helper function to create mixing matrix
-create_mixing_matrix <- function(net_matrix, row_attrs, col_attrs,
-								 normalized, by_row, include_weights) {
+create_mixing_matrix <- function(
+	net_matrix, row_attrs, col_attrs,
+	normalized, by_row, include_weights,
+	undirected = FALSE
+) {
 	# get unique attribute values
 	row_levels <- sort(unique(row_attrs))
 	col_levels <- sort(unique(col_attrs))
@@ -337,6 +356,7 @@ create_mixing_matrix <- function(net_matrix, row_attrs, col_attrs,
 	# fill mixing matrix iterating over the actual matrix shape (handles bipartite)
 	n_r <- nrow(net_matrix)
 	n_c <- ncol(net_matrix)
+	undirected <- undirected && n_r == n_c
 	for (i in seq_len(n_r)) {
 		for (j in seq_len(n_c)) {
 			if (i != j || !is.na(net_matrix[i, j])) { # allow self-loops if they exist
@@ -347,6 +367,10 @@ create_mixing_matrix <- function(net_matrix, row_attrs, col_attrs,
 					col_level <- as.character(col_attrs[j])
 
 					weight <- ifelse(include_weights, tie_value, 1)
+					# split each undirected tie across its two mirrored cells
+					if (undirected && i != j) {
+						weight <- weight / 2
+					}
 					mixing_matrix[row_level, col_level] <- mixing_matrix[row_level, col_level] + weight
 				}
 			}

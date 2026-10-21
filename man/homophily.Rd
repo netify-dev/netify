@@ -72,7 +72,7 @@ data frame with homophily statistics per network/time period:
 \item{\code{threshold_value}}{threshold used for determining ties (na for binary networks)}
 \item{\code{homophily_correlation}}{correlation between similarity and tie presence (binary: tie/no tie)}
 \item{\code{mean_similarity_connected}}{mean similarity among connected pairs (weight > threshold)}
-\item{\code{mean_similarity_unconnected}}{mean similarity among unconnected pairs (weight <= threshold or missing)}
+\item{\code{mean_similarity_unconnected}}{mean similarity among unconnected pairs (weight <= threshold). pairs with a missing tie value are excluded from both groups.}
 \item{\code{similarity_difference}}{difference between connected and unconnected mean similarities}
 \item{\code{p_value}}{permutation test p-value}
 \item{\code{ci_lower}, \code{ci_upper}}{confidence interval bounds}
@@ -109,7 +109,9 @@ for continuous attributes:
 for categorical/binary attributes:
 \itemize{
 \item \code{categorical}: simple matching (1 if same, 0 if different)
-\item \code{jaccard}: for binary data, emphasizes shared presence over shared absence
+\item \code{jaccard}: for binary data, emphasizes shared presence over shared absence.
+logical attributes use \code{TRUE} as presence; for two-category character or
+factor attributes the second level (alphabetical order for characters) marks presence
 \item \code{hamming}: counts positions where values differ (negated for similarity)
 }
 

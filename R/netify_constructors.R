@@ -83,7 +83,8 @@ netify_check <- function(netlet) {
 #'   \item \strong{symmetry}: checks if matrix equals its transpose
 #'   \item \strong{mode}: infers unipartite/bipartite from dimensions and actor names
 #'   \item \strong{edge weights}: detects binary (0/1) vs. weighted networks
-#'   \item \strong{diagonal treatment}: checks if diagonal contains all nas
+#'   \item \strong{diagonal treatment}: treats a diagonal that is all nas or
+#'     all zeros as having no self-loops and sets it to na
 #'   \item \strong{missing values}: determines if nas exist off-diagonal
 #'   \item \strong{actor composition}: for longitudinal data, detects if actors
 #'     remain constant or vary over time
@@ -630,21 +631,24 @@ check_binary <- function(mat) {
 ####
 
 ####
-#' check if diagonal is entirely na
+#' check if diagonal carries no self-loops
 #'
-#' internal helper that checks whether the diagonal of \code{mat} is fully
-#' \code{na}. used to guess whether \code{diag_to_NA} should be \code{TRUE}.
+#' internal helper that checks whether every diagonal entry of \code{mat}
+#' is \code{na} or zero. used to guess whether \code{diag_to_NA} should be
+#' \code{TRUE}.
 #'
 #' @param mat a matrix to examine.
 #'
-#' @return logical. \code{TRUE} if \code{diag(mat)} is all \code{na}, otherwise \code{FALSE}.
+#' @return logical. \code{TRUE} if \code{diag(mat)} is all \code{na} or
+#'   zero, otherwise \code{FALSE}.
 #'
 #' @author cassy dorff, shahryar minhas
 #'
 #' @keywords internal
 #' @noRd
 guess_diag_to_NA <- function(mat) {
-	return(all(is.na(diag(mat))))
+	d <- diag(mat)
+	return(all(is.na(d) | d == 0))
 }
 ####
 

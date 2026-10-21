@@ -99,7 +99,9 @@ emphasize the stable core structure of the network.
 \strong{bipartite networks:}
 
 for bipartite networks, the default layout arranges the two node sets in separate
-columns.
+columns. when the same actor name appears in both node sets, the \code{actor}
+column prefixes the names with \code{"row:"} and \code{"col:"} so that each
+node set keeps its own position.
 }
 \author{
 cassy dorff, shahryar minhas

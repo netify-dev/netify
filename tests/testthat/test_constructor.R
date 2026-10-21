@@ -308,3 +308,33 @@ test_that("new_netify handles longit_list with varying actor sets (dimensions) a
 		expect_false(is.null(colnames(slice_i)))
 	}
 })
+
+test_that(
+	"new_netify reads an all-zero diagonal as no self-loops",
+	{
+		m = matrix(
+			c(0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0),
+			4, 4,
+			dimnames = list(letters[1:4], letters[1:4])
+		)
+
+		net = netify(m)
+		expect_true(attr(net, "diag_to_NA"))
+		expect_true(all(is.na(diag(as.matrix(net)))))
+		expect_equal(summary(net)$density, 4 / 6)
+
+		# an explicit choice is respected
+		kept = netify(m, diag_to_NA = FALSE)
+		expect_false(attr(kept, "diag_to_NA"))
+		expect_equal(unname(diag(as.matrix(kept))), rep(0, 4))
+
+		# a diagonal with self-loops is kept as data
+		m_loop = m
+		diag(m_loop) = c(1, 0, 0, 0)
+		expect_false(attr(netify(m_loop), "diag_to_NA"))
+
+		# longitudinal lists follow the same rule
+		lst = new_netify(list("1" = m, "2" = m))
+		expect_true(attr(lst, "diag_to_NA"))
+	}
+)

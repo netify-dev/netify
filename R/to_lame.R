@@ -9,8 +9,9 @@
 #' \itemize{
 #' \item rectangular `y` for **bipartite** networks via
 #' `mode = "bipartite"` -- the standard `amen::ame()` rejects this.
-#' \item ragged longitudinal panels via a generated padding snippet --
-#' `amen` requires constant actor composition.
+#' \item ragged longitudinal panels via `lame::lame()`, which aligns
+#' per-period actor sets by name -- `amen` requires constant actor
+#' composition.
 #' }
 #'
 #' this function wraps `\link{netify_to_amen}` and:
@@ -19,11 +20,11 @@
 #' (`"binary"` for binary nets, `"normal"` for weighted),
 #' \item suggests the correct `mode` argument for `lame::ame()`
 #' (`"unipartite"` / `"bipartite"`),
-#' \item for `lame = TRUE` longitudinal output, emits a copy-paste
-#' padding + `lame::lame()` snippet in the
-#' returned `ame_call` slot. the function itself does **not**
-#' pad the list -- run the snippet (or the literal call) to do
-#' that step yourself.
+#' \item for longitudinal output, emits a copy-paste `lame::lame()`
+#' call in the returned `ame_call` slot. with `lame = TRUE` the
+#' per-period lists are passed directly; with `lame = FALSE` the
+#' snippet first splits the `[n, n, t]` arrays into the per-period
+#' lists that `lame::lame()` expects.
 #' }
 #'
 #' @param netlet a netify object.
@@ -36,7 +37,7 @@
 #' @param pad logical. when `lame = TRUE` and the per-period list
 #' is returned (the function never actually pads in place; it
 #' always returns a list), controls whether the once-per-session
-#' info message points users at the padding + `lame::lame()` snippet
+#' info message points users at the `lame::lame()` call
 #' baked into `nl$ame_call`. default
 #' `TRUE` (emit the message); set `FALSE` to silence it.
 #' @param fit_method one of `"gibbs"` (default -- mcmc posterior via
@@ -60,7 +61,8 @@
 #' \item{`family`}{character: the suggested family (`"binary"` or
 #' `"normal"`). pass to `lame::ame(family = .)`.}
 #' \item{`ame_call`}{character: a literal `lame::ame()` call
-#' string the user can copy-paste.}
+#' (cross-sectional) or `lame::lame()` snippet (longitudinal)
+#' the user can copy-paste.}
 #' }
 #'
 #' @details
@@ -72,23 +74,22 @@
 #' mode = "bipartite", weight = "attended")
 #' nl <- to_lame(bp) # auto-detects binary
 #' fit <- lame::ame(
-#' y = nl$y, xrow = nl$xrow, xcol = nl$xcol,
+#' Y = nl$Y, Xrow = nl$Xrow, Xcol = nl$Xcol,
 #' mode = nl$mode, family = nl$family,
 #' nscan = 1000, burn = 500
 #' )
-#' # uncertainty: posterior intervals are in fit$beta / fit$vc
+#' # uncertainty: posterior intervals are in fit$BETA / fit$VC
 #' }
 #'
 #' \strong{ragged longitudinal panels.} when `lame = TRUE` and
 #' actors enter / exit the network, this function:
 #' \enumerate{
 #' \item builds the per-period list via `netify_to_amen(lame=TRUE)`,
-#' \item bakes a pad-then-fit snippet into `nl$ame_call` that the
-#' user runs to materialize the 3d `[n, n, t]` array and fit
-#' `lame::lame()`. unipartite snippets use `lame::list_to_array()`;
-#' bipartite snippets pad rectangular row-by-column arrays directly.
+#' \item bakes a `lame::lame()` call into `nl$ame_call` that passes
+#' the per-period lists directly; `lame::lame()` aligns actors
+#' across periods by name, for unipartite and bipartite networks.
 #' }
-#' the returned `y` / `xdyad` / `xrow` / `xcol` are always the
+#' the returned `Y` / `Xdyad` / `Xrow` / `Xcol` are always the
 #' per-period list -- `pad` only controls whether the once-per-
 #' session info message reminding the user of the snippet fires.
 #'
@@ -187,7 +188,7 @@ enrich_lame <- function(
 	if (isTRUE(lame_arg) && is.list(am$Y) && !is.array(am$Y) && isTRUE(pad)) {
 		cli::cli_inform(c(
 			"i" = "{.fn to_lame}: returning {length(am$Y)} per-period matrices.",
-			"i" = "A ready-to-run padding + {.code lame::lame()} snippet is in {.code nl$ame_call}; use {.code cat(nl$ame_call)} to print it."
+			"i" = "A ready-to-run {.code lame::lame()} call is in {.code nl$ame_call}; use {.code cat(nl$ame_call)} to print it."
 		),
 		.frequency = "once",
 		.frequency_id = "netify_to_lame_no_pad_recipe")
@@ -218,74 +219,52 @@ enrich_lame <- function(
 			", nscan = 1000, burn = 500",
 			", nscan = 1000, burn = 500")
 	}
-	if (isTRUE(lame_arg) && is.list(am$Y)) {
+	is_list_longit <- isTRUE(lame_arg) && is.list(am$Y) && !is.array(am$Y)
+	is_array_longit <- is.array(am$Y) && length(dim(am$Y)) == 3L
+	if (is_list_longit || is_array_longit) {
 		# lame::lame() is the longitudinal unified entry
 		method_arg <- if (use_als) ", method = \"als\"" else ", method = \"mcmc\""
 		long_boot <- if (use_als && bootstrap > 0L) {
 			sprintf(", bootstrap = %dL", bootstrap)
 		} else ""
-		if (mode == "bipartite") {
-			pad_lines <- c(
-				"row_actors <- sort(unique(unlist(lapply(nl$Y, rownames), use.names = FALSE)))",
-				"col_actors <- sort(unique(unlist(lapply(nl$Y, colnames), use.names = FALSE)))",
-				"periods <- names(nl$Y)",
-				"Y <- array(NA_real_, c(length(row_actors), length(col_actors), length(periods)), dimnames = list(row_actors, col_actors, periods))",
-				"for (tt in periods) { yy <- nl$Y[[tt]]; Y[rownames(yy), colnames(yy), tt] <- yy }"
+		mode_arg <- if (mode == "bipartite") ", mode = \"bipartite\"" else ""
+		if (is_list_longit) {
+			# lame::lame() aligns per-period actor sets by name
+			pre_lines <- character(0)
+			fit_args <- arg_block()
+		} else {
+			# split [n, n, t] arrays into the per-period lists lame::lame() expects
+			pre_lines <- c(
+				"periods <- dimnames(nl$Y)[[3]]",
+				"Y <- sapply(periods, function(tt) nl$Y[, , tt], simplify = FALSE)"
 			)
 			fit_args <- "Y = Y"
 			if (has_xdyad) {
-				pad_lines <- c(pad_lines,
-					"dyad_names <- dimnames(nl$Xdyad[[which(!vapply(nl$Xdyad, is.null, logical(1)))[1]]])[[3]]",
-					"Xdyad <- array(NA_real_, c(length(row_actors), length(col_actors), length(dyad_names), length(periods)), dimnames = list(row_actors, col_actors, dyad_names, periods))",
-					"for (tt in periods) { xx <- nl$Xdyad[[tt]]; if (!is.null(xx)) Xdyad[dimnames(xx)[[1]], dimnames(xx)[[2]], dimnames(xx)[[3]], tt] <- xx }"
+				pre_lines <- c(pre_lines,
+					"Xdyad <- sapply(periods, function(tt) array(nl$Xdyad[, , , tt], dim(nl$Xdyad)[1:3], dimnames(nl$Xdyad)[1:3]), simplify = FALSE)"
 				)
 				fit_args <- paste0(fit_args, ", Xdyad = Xdyad")
 			}
 			if (has_xrow) {
-				pad_lines <- c(pad_lines,
-					"row_var_names <- colnames(nl$Xrow[[which(!vapply(nl$Xrow, is.null, logical(1)))[1]]])",
-					"Xrow <- array(NA_real_, c(length(row_actors), length(row_var_names), length(periods)), dimnames = list(row_actors, row_var_names, periods))",
-					"for (tt in periods) { xx <- nl$Xrow[[tt]]; if (!is.null(xx)) Xrow[rownames(xx), colnames(xx), tt] <- xx }"
+				pre_lines <- c(pre_lines,
+					"Xrow <- sapply(periods, function(tt) matrix(nl$Xrow[, , tt], dim(nl$Xrow)[1], dimnames = dimnames(nl$Xrow)[1:2]), simplify = FALSE)"
 				)
 				fit_args <- paste0(fit_args, ", Xrow = Xrow")
 			}
 			if (has_xcol) {
-				pad_lines <- c(pad_lines,
-					"col_var_names <- colnames(nl$Xcol[[which(!vapply(nl$Xcol, is.null, logical(1)))[1]]])",
-					"Xcol <- array(NA_real_, c(length(col_actors), length(col_var_names), length(periods)), dimnames = list(col_actors, col_var_names, periods))",
-					"for (tt in periods) { xx <- nl$Xcol[[tt]]; if (!is.null(xx)) Xcol[rownames(xx), colnames(xx), tt] <- xx }"
+				pre_lines <- c(pre_lines,
+					"Xcol <- sapply(periods, function(tt) matrix(nl$Xcol[, , tt], dim(nl$Xcol)[1], dimnames = dimnames(nl$Xcol)[1:2]), simplify = FALSE)"
 				)
 				fit_args <- paste0(fit_args, ", Xcol = Xcol")
 			}
-			out$ame_call <- paste(
-				c(pad_lines,
-					sprintf("lame::lame(%s, mode = \"bipartite\", family = \"%s\"%s%s, nscan = 1000, burn = 500)",
-						fit_args, family, method_arg, long_boot)
-				),
-				collapse = "\n"
-			)
-		} else {
-			# emit a single list_to_array pad followed by a lame() fit
-			lta_args <- c("actors = U", "Y = nl$Y")
-			if (has_xdyad) lta_args <- c(lta_args, "Xdyad = nl$Xdyad")
-			if (has_xrow)  lta_args <- c(lta_args, "Xrow = nl$Xrow")
-			if (has_xcol)  lta_args <- c(lta_args, "Xcol = nl$Xcol")
-			pad_lines <- c(
-				"U <- unique(unlist(lapply(nl$Y, rownames)))",
-				sprintf("padded <- lame::list_to_array(%s)", paste(lta_args, collapse = ", "))
-			)
-			fit_args <- "Y = padded$Y"
-			if (has_xdyad) fit_args <- paste0(fit_args, ", Xdyad = padded$Xdyad")
-			if (has_xrow)  fit_args <- paste0(fit_args, ", Xrow = padded$Xrow")
-			if (has_xcol)  fit_args <- paste0(fit_args, ", Xcol = padded$Xcol")
-			out$ame_call <- paste(
-				c(pad_lines,
-					sprintf("lame::lame(%s, family = \"%s\"%s%s, nscan = 1000, burn = 500)",
-						fit_args, family, method_arg, long_boot)
-				),
-				collapse = "\n"
-			)
 		}
+		out$ame_call <- paste(
+			c(pre_lines,
+				sprintf("lame::lame(%s%s, family = \"%s\"%s%s, nscan = 1000, burn = 500)",
+					fit_args, mode_arg, family, method_arg, long_boot)
+			),
+			collapse = "\n"
+		)
 	} else if (mode == "bipartite") {
 		out$ame_call <- paste(
 			sprintf(

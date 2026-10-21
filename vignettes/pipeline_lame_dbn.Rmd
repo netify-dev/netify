@@ -130,7 +130,7 @@ ame_fit = ame(
 
 ## part 2: longitudinal pipeline with lame
 
-For longitudinal modeling workflows that need per-period matrices, use `to_lame()`. This is a thin specialization of `to_amen()` that (a) can return ragged per-period matrices when actor sets vary, (b) emits a ready-to-run padding + `lame::lame()` snippet, and (c) provides `from_lame_fit()` for round-tripping posterior predictions back into a netify for plotting. The ICEWS example below has the same actor set in each year, but the format also supports open-cohort panels.
+For longitudinal modeling workflows that need per-period matrices, use `to_lame()`. This is a thin specialization of `to_amen()` that (a) can return ragged per-period matrices when actor sets vary, (b) emits a ready-to-run `lame::lame()` call, and (c) provides `from_lame_fit()` for round-tripping posterior predictions back into a netify for plotting. The ICEWS example below has the same actor set in each year, but the format also supports open-cohort panels.
 
 ### when to use lame format
 
@@ -178,7 +178,7 @@ actor_counts = sapply(nl$Y, nrow)
 actor_counts
 ```
 
-Each element of the list can have a different set of actors. `to_lame()` also bundles a copy-paste-ready snippet that pads the ragged list into a 3D array with `lame::list_to_array()` and then fits `lame::lame()`:
+Each element of the list can have a different set of actors. `to_lame()` also bundles a copy-paste-ready `lame::lame()` call. `lame::lame()` takes the per-period lists directly and aligns actors across periods by name, so no manual padding is needed:
 
 ```{r}
 cat(nl$ame_call)
@@ -189,32 +189,33 @@ Run that snippet to fit the model. Conceptually:
 ```{r, eval = FALSE}
 library(lame)
 
-U <- unique(unlist(lapply(nl$Y, rownames)))
-padded <- lame::list_to_array(actors = U, Y = nl$Y, Xdyad = nl$Xdyad,
-    Xrow = nl$Xrow, Xcol = nl$Xcol)
-
-lame_fit = lame::lame(
-    Y = padded$Y, Xdyad = padded$Xdyad,
-    Xrow = padded$Xrow, Xcol = padded$Xcol,
-    R = 2, family = "normal",
-    method = "mcmc", nscan = 1000, burn = 500
+lame_fit <- lame::lame(
+	Y = nl$Y,
+	Xdyad = nl$Xdyad,
+	Xrow = nl$Xrow,
+	Xcol = nl$Xcol,
+	R = 2,
+	family = "normal",
+	method = "mcmc",
+	nscan = 1000,
+	burn = 500
 )
 ```
 
 ### round-tripping fitted values back to netify
 
-Once a fit is in hand, `from_lame_fit()` pulls the posterior-mean linear predictor (or a residual / probability / per-cell quantile) back into a cross-sectional netify so it can be plotted or compared against the observed network. In the example below, `lame_fit` is the object created by running the model-fitting snippet above:
+Once a fit is in hand, `from_lame_fit()` pulls the posterior-mean prediction (or a residual / probability / per-cell quantile) back into a netify so it can be plotted or compared against the observed network. Longitudinal `lame::lame()` fits come back as a longitudinal netify with one network per period. In the example below, `lame_fit` is the object created by running the model-fitting snippet above:
 
 ```{r, eval = FALSE}
-# posterior-mean linear predictor
-pred_net = from_lame_fit(lame_fit, value = "fitted")
+# posterior-mean prediction for each period
+pred_net <- from_lame_fit(lame_fit, value = "fitted")
 plot(pred_net, style = "heatmap")
 
-# 90% per-cell credible interval bounds on the probability scale
-# (only for binary families; here for illustration)
-lo = from_lame_fit(lame_fit, value = "prob_lower", alpha = 0.05)
-hi = from_lame_fit(lame_fit, value = "prob_upper", alpha = 0.05)
+# observed minus fitted for each period
+resid_net <- from_lame_fit(lame_fit, value = "residual")
 ```
+
+The per-cell quantile values (`"prob_lower"`, `"prob_upper"`, `"fitted_lower"`, `"fitted_upper"`) need a fit that stores per-draw fitted arrays (e.g. `fit$EZ_draws` or `fit$BOOT$EZ`); `from_lame_fit()` reports which slots it looked for when none are present.
 
 `from_lame_fit()` auto-detects the link function: probit for `lame::ame_als()` / `amen::ame()` fits, logit for `lame::lame()` Gibbs fits, with an explicit `link` slot taking precedence.
 
@@ -321,11 +322,12 @@ A common challenge in political science is that data naturally includes both sym
 ### creating mixed-directedness multilayer networks
 
 ```{r}
-# symmetric layer: average verbal cooperation
+# symmetric layer: summed verbal cooperation
 verbal_symm = netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
     symmetric = TRUE,
+    sum_dyads = TRUE,
     weight = "verbCoop",
     missing_to_zero = FALSE,
     output_format = "longit_array"
@@ -434,7 +436,7 @@ For latent space models, the distinction matters:
 |----------|----------|--------|
 | Single-layer, cross-sectional | `to_amen()` | list(Y, Xdyad, Xrow, Xcol) |
 | Single-layer, longitudinal (constant actors) | `to_amen()` | 3D arrays |
-| Single-layer, longitudinal (varying actors) | `to_lame(lame=TRUE)` | per-period lists + padding / fit snippet |
+| Single-layer, longitudinal (varying actors) | `to_lame(lame=TRUE)` | per-period lists + `lame::lame()` call |
 | Round-trip AME/LAME fit back to netify | `from_lame_fit()` | netify (fitted / residual / prob / quantiles) |
 | Multilayer, longitudinal | `to_dbn()` | 4D array `[n, n, p, T]` |
 | Single-layer, longitudinal (dbn format) | `to_dbn()` | 4D array `[n, n, 1, T]` |

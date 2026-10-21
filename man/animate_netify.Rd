@@ -49,7 +49,9 @@ longit_net <- netify(
     missing_to_zero = TRUE
 )
 
-anim <- animate_netify(longit_net)
+if (requireNamespace("gganimate", quietly = TRUE)) {
+    anim <- animate_netify(longit_net)
+}
 }
 
 }

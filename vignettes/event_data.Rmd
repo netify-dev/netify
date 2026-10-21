@@ -90,7 +90,7 @@ summary(net_na)[, c("num_actors", "density", "num_edges",
                     "prop_edges_missing", "prop_unknown_edges")]
 ```
 
-`prop_unknown_edges` only shows up when `missing_to_zero = FALSE` — that is the cue that the netlet is actually carrying NA semantics downstream. Build the same netlet with the default and the NAs are replaced with `0`s and the column disappears; that is fine for UCDP / GED event counts (the rest of this vignette uses the default for exactly that reason) but it is the wrong choice when "we did not measure this dyad" is a meaningful state.
+`prop_unknown_edges` only shows up when `missing_to_zero = FALSE` — that is the cue that the netlet is actually carrying NA semantics downstream. Note that `density` is computed over observed dyads only: all four observed dyads carry a tie, so density is 1 even though 60% of the dyads were never measured. Build the same netlet with the default and the NAs are replaced with `0`s and the column disappears; that is fine for UCDP / GED event counts (the rest of this vignette uses the default for exactly that reason) but it is the wrong choice when "we did not measure this dyad" is a meaningful state.
 
 (2) **Explore**: next we use the basic `plot()` method to visualize the network of violent interactions in Mexico. The simplest call labels every actor:
 

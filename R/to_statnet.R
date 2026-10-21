@@ -418,6 +418,10 @@ add_nodal_to_statnet <- function(
 	cov_cols <- setdiff(names(node_data), skip_cols)
 	for (cv in cov_cols) {
 		vals <- node_data[[cv]][row_idx]
+		# network only accepts plain vectors as vertex attributes
+		if (is.factor(vals) || inherits(vals, c("Date", "POSIXt"))) {
+			vals <- as.character(vals)
+		}
 		network::set.vertex.attribute(statnet_object, cv, vals)
 	}
 

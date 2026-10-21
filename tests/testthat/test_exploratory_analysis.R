@@ -420,13 +420,16 @@ test_that("dyad_correlation works with symmetric and directed networks", {
 		dyad_vars = c("matlCoop", "verbConf")
 	)
 
-	# create symmetric network
-	net_sym = netify(
-		icews_10,
-		actor1 = "i", actor2 = "j",
-		symmetric = TRUE,
-		weight = "verbCoop",
-		dyad_vars = c("matlCoop", "verbConf")
+	# create symmetric network from directed counts
+	expect_warning(
+		net_sym <- netify(
+			icews_10,
+			actor1 = "i", actor2 = "j",
+			symmetric = TRUE,
+			weight = "verbCoop",
+			dyad_vars = c("matlCoop", "verbConf")
+		),
+		"different weights in each direction"
 	)
 
 	result_dir = dyad_correlation(net_dir, dyad_vars = "matlCoop")
@@ -593,6 +596,40 @@ test_that("homophily works with longitudinal networks", {
 
 	expect_s3_class(result, "data.frame")
 	expect_true(nrow(result) >= length(years))
+})
+
+test_that("plot_homophily distribution works with longitudinal networks", {
+	skip_on_cran()
+	data(icews)
+	icews_subset = icews[icews$year %in% 2002:2004, ]
+
+	for (fmt in c("longit_list", "longit_array")) {
+		net_longit = netify(
+			icews_subset,
+			actor1 = "i", actor2 = "j",
+			time = "year",
+			symmetric = FALSE,
+			weight = "verbCoop",
+			nodal_vars = "i_polity2",
+			output_format = fmt
+		)
+		result = homophily(net_longit, attribute = "i_polity2", method = "correlation")
+
+		p = suppressMessages(plot_homophily(
+			result,
+			netlet = net_longit,
+			attribute = "i_polity2",
+			type = "distribution"
+		))
+		expect_s3_class(p, "ggplot")
+		expect_silent(suppressMessages(ggplot2::ggplot_build(p)))
+
+		# similarity data comes from the first time period
+		first_period = subset_netify(net_longit, time = "2002")
+		longit_sim = suppressMessages(extract_similarity_data(net_longit, "i_polity2", "correlation"))
+		cross_sim = suppressMessages(extract_similarity_data(first_period, "i_polity2", "correlation"))
+		expect_equal(longit_sim, cross_sim)
+	}
 })
 
 test_that("mixing_matrix works with longitudinal networks", {

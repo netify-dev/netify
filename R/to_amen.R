@@ -311,42 +311,29 @@ netify_to_amen <- function(netlet, lame = FALSE) {
 				time_periods <- names(Y_list)
 				is_bipartite <- identical(attr(netlet, "mode"), "bipartite")
 
-				# pre-compute row/col actor sets for bipartite mode split
-				row_actor_sets <- if (is_bipartite) {
-					if (is.list(msrmnts$row_actors)) msrmnts$row_actors
-					else rep(list(msrmnts$row_actors), length(time_periods))
-				} else NULL
-				col_actor_sets <- if (is_bipartite) {
-					if (is.list(msrmnts$col_actors)) msrmnts$col_actors
-					else rep(list(msrmnts$col_actors), length(time_periods))
-				} else NULL
-				if (!is.null(row_actor_sets)) names(row_actor_sets) <- time_periods
-				if (!is.null(col_actor_sets)) names(col_actor_sets) <- time_periods
-
-				build_slice <- function(t, keep_actors) {
-					subset_df <- nodal_df[nodal_df$time == t, , drop = FALSE]
-					if (!is.null(keep_actors)) {
-						subset_df <- subset_df[
-							as.character(subset_df$actor) %in% as.character(keep_actors),
-							, drop = FALSE
-						]
-					}
-					mat <- as.matrix(subset_df[, msrmnts$nvars, drop = FALSE])
-					rownames(mat) <- subset_df$actor
+				# build one slice with rows in the given actor order
+				build_slice <- function(t, actors) {
+					subset_df <- nodal_df[
+						as.character(nodal_df$time) == as.character(t), ,
+						drop = FALSE
+					]
+					row_idx <- match(actors, as.character(subset_df$actor))
+					mat <- as.matrix(subset_df[row_idx, msrmnts$nvars, drop = FALSE])
+					rownames(mat) <- actors
 					mat
 				}
 
 				Xrow_list <- lapply(time_periods, function(t) {
-					build_slice(t, if (is_bipartite) row_actor_sets[[t]] else NULL)
+					build_slice(t, rownames(Y_list[[t]]))
 				})
 				names(Xrow_list) <- time_periods
 
 				Xcol_list <- if (is_bipartite) {
-					out <- lapply(time_periods, function(t) {
-						build_slice(t, col_actor_sets[[t]])
+					col_list <- lapply(time_periods, function(t) {
+						build_slice(t, colnames(Y_list[[t]]))
 					})
-					names(out) <- time_periods
-					out
+					names(col_list) <- time_periods
+					col_list
 				} else {
 					Xrow_list
 				}

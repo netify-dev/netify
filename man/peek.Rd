@@ -143,6 +143,7 @@ icews_10 <- icews[icews$year == 2010, ]
 net <- netify(
     icews_10,
     actor1 = "i", actor2 = "j",
+    sum_dyads = TRUE,
     weight = "verbCoop"
 )
 
@@ -155,19 +156,20 @@ peek(net, from = 5, to = 5)
 # example 2: specific actors by name
 # see ties from us and china to russia, india, and brazil
 peek(net,
-    from = c("united states", "china"),
-    to = c("russia", "india", "brazil")
+    from = c("United States", "China"),
+    to = c("Russian Federation", "India", "Brazil")
 )
 
 # use actors parameter to see subgraph
 peek(net,
-    actors = c("united states", "china", "russia")
+    actors = c("United States", "China", "Russian Federation")
 )
 
 # example 3: longitudinal network
 net_longit <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
+    sum_dyads = TRUE,
     weight = "matlConf"
 )
 

@@ -106,8 +106,8 @@ get_edge_layout <- function(
 	}
 
 	# make sure nodes_layout is in the right format
-	if (!is.list(nodes_layout)) {
-		nodes_layout <- list(nodes_layout)
+	if (is.data.frame(nodes_layout) || !is.list(nodes_layout)) {
+		nodes_layout <- rep(list(nodes_layout), length(g))
 	}
 
 	# vectorized path for single time period

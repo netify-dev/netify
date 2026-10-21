@@ -56,7 +56,8 @@ when properties are not explicitly provided, \code{new_netify} intelligently det
 \item \strong{symmetry}: checks if matrix equals its transpose
 \item \strong{mode}: infers unipartite/bipartite from dimensions and actor names
 \item \strong{edge weights}: detects binary (0/1) vs. weighted networks
-\item \strong{diagonal treatment}: checks if diagonal contains all nas
+\item \strong{diagonal treatment}: treats a diagonal that is all nas or
+all zeros as having no self-loops and sets it to na
 \item \strong{missing values}: determines if nas exist off-diagonal
 \item \strong{actor composition}: for longitudinal data, detects if actors
 remain constant or vary over time

@@ -63,10 +63,15 @@ centrality, and downstream fit summaries (e.g., the coefficient of a
 
 resampling is \strong{vertex-level}, not edge-level: actors are
 sampled with replacement and the netlet's adjacency is sliced
-accordingly. for longitudinal netlets, the same resampled index
-set is applied to every period (preserves within-actor
-dependence). multilayer netlets are unsupported -- bootstrap each
-layer independently via \code{subset_netify(layers = ...)} first.
+accordingly. when an actor is drawn more than once, the pairs formed
+by its copies are not observed dyads, so they are set to \code{NA} in the
+resampled netlet; statistics that drop missing dyads (for example, a
+density computed with \code{na.rm = TRUE}) then ignore them. for
+longitudinal netlets, actors are drawn by name from the pooled roster
+of all periods and the same draws are used in every period (preserves
+within-actor dependence); an actor absent from a period is also absent
+from that period's resample. multilayer netlets are unsupported --
+bootstrap each layer independently via \code{subset_netify(layers = ...)} first.
 the resampled netlets contain the resampled adjacency only. statistics
 that require attached nodal or dyadic attributes should recreate those
 attributes inside \code{fn}, or use a NULL-model workflow such as

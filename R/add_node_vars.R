@@ -202,7 +202,7 @@ add_node_vars <- function(
 	}
 	if (!is.null(time)) {
 		node_dataID <- paste(
-			node_data[, actor], node_data[, time],
+			node_data[, actor], time_to_label(node_data[[time]]),
 			sep = "_"
 		)
 		frame_dataID <- paste(

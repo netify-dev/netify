@@ -165,6 +165,9 @@ dyad_correlation <- function(
 				} else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
 					# for longitudinal multilayer: 4d array [actors, actors, layers, time]
 					net_matrix <- net_matrix[, , layer_index]
+				} else if (netify_type == "longit_list" && length(dim(net_matrix)) == 3) {
+					# for longitudinal list multilayer: each period is [actors, actors, layers]
+					net_matrix <- net_matrix[, , layer_index]
 				}
 			}
 
@@ -206,13 +209,20 @@ dyad_correlation <- function(
 					edge_matrix <- binary_edge_matrix
 				}
 
+				# match dyadic matrices to the edge matrix actors by name
+				aligned_dyad_data <- lapply(
+					time_dyad_data,
+					align_dyad_matrix,
+					edge_matrix = edge_matrix
+				)
+
 				# process each dyadic variable
 				for (dyad_var in dyad_vars) {
-					if (!dyad_var %in% names(time_dyad_data)) {
+					if (!dyad_var %in% names(aligned_dyad_data)) {
 						next
 					}
 
-					dyad_matrix <- time_dyad_data[[dyad_var]]
+					dyad_matrix <- aligned_dyad_data[[dyad_var]]
 
 					# require matching dimensions
 					if (!identical(dim(dyad_matrix), dim(edge_matrix))) {
@@ -228,7 +238,7 @@ dyad_correlation <- function(
 							corr_result <- calculate_dyadic_correlation(
 								dyad_matrix, edge_matrix, method, remove_diagonal,
 								significance_test, alpha, partial_correlations,
-								if (partial_correlations) time_dyad_data else NULL,
+								if (partial_correlations) aligned_dyad_data else NULL,
 								dyad_var, is_symmetric = isTRUE(layer_symmetric),
 								is_bipartite = identical(obj_attrs$mode, "bipartite")
 							)
@@ -518,4 +528,23 @@ calculate_partial_correlation <- function(dyad_vec, edge_vec, dyad_matrix,
 			)
 		}
 	)
+}
+
+# reorder a dyadic matrix to the actors of an edge matrix when names allow it
+align_dyad_matrix <- function(dyad_matrix, edge_matrix) {
+	edge_rows <- rownames(edge_matrix)
+	edge_cols <- colnames(edge_matrix)
+	dyad_rows <- rownames(dyad_matrix)
+	dyad_cols <- colnames(dyad_matrix)
+	if (!is.matrix(dyad_matrix) || is.null(edge_rows) || is.null(edge_cols) ||
+		is.null(dyad_rows) || is.null(dyad_cols)) {
+		return(dyad_matrix)
+	}
+	if (identical(edge_rows, dyad_rows) && identical(edge_cols, dyad_cols)) {
+		return(dyad_matrix)
+	}
+	if (!all(edge_rows %in% dyad_rows) || !all(edge_cols %in% dyad_cols)) {
+		return(dyad_matrix)
+	}
+	dyad_matrix[edge_rows, edge_cols, drop = FALSE]
 }

@@ -75,8 +75,9 @@ and others. for ego networks, additional options are available: \code{"radial"}
 alters in rings). see \code{\link{get_node_layout}} and \code{\link{get_ego_layout}}
 for full details.}
 \item{\code{point_layout}}{optional data.frame or list of data.frames containing
-pre-computed node positions with columns 'actor', 'x', and 'y'. overrides
-\code{layout} if provided.}
+pre-computed node positions with columns 'actor', 'x', and 'y'. a single
+data.frame is reused for every time period of a longitudinal network.
+overrides \code{layout} if provided.}
 \item{\code{static_actor_positions}}{logical. for longitudinal networks, should
 node positions remain constant across time? default is \code{FALSE}.}
 \item{\code{which_static}}{integer. when \code{static_actor_positions = TRUE},
@@ -115,17 +116,24 @@ very different weight scales. default is \code{FALSE}.}
 
 \describe{
 \item{\code{node_filter}}{a formula, quoted expression, or function to filter nodes.
-the expression can reference any nodal attribute. for example:
+the expression can reference any nodal attribute attached to the netify object.
+network statistics are not computed automatically, so attach them first, e.g.,
+\code{net <- add_node_vars(net, summary_actor(net), actor = "actor")}, after which
 \code{node_filter = ~ degree_total > 5} shows only nodes with total degree
-greater than 5.}
+greater than 5. for longitudinal networks, the filter is applied within each
+time period, and edges are dropped in the periods where an endpoint is filtered out.}
 \item{\code{edge_filter}}{a formula, quoted expression, or function to filter edges.
 the expression can reference any edge attribute, including 'weight' for weighted
 networks. for example: \code{edge_filter = ~ weight > 0.5} shows only edges
 with weight greater than 0.5.}
 \item{\code{time_filter}}{for longitudinal networks, a vector of time periods to include in the plot.
-can be numeric indices or character labels matching the time dimension. if NULL
-(default), all time periods are plotted. for cross-sectional networks, this
-parameter is ignored.}
+can be numeric indices or character labels matching the time dimension. numeric
+values are treated as indices when they are all valid positions (e.g., \code{1:3});
+otherwise, numeric values that all match time labels are treated as labels
+(e.g., \code{time_filter = 2012}). when numeric values could be read either way,
+they are treated as indices, so pass labels as character (e.g., \code{"2012"}) to
+avoid ambiguity. if NULL (default), all time periods are plotted. for
+cross-sectional networks, this parameter is ignored.}
 }
 }
 

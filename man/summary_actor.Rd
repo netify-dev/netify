@@ -36,6 +36,9 @@ a data frame with actor-level statistics. columns always include:
 \item{\code{actor}}{actor name/identifier}
 \item{\code{time}}{time period (for longitudinal networks)}
 \item{\code{layer}}{layer name (for multilayer networks)}
+\item{\code{actor_mode}}{\code{"row"} or \code{"col"} (for bipartite networks
+where the same actor name appears in both modes, so that each mode keeps
+its own row)}
 }
 
 additional columns depend on network type:

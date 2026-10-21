@@ -164,6 +164,43 @@ compare_edges <- function(
 		all_actors <- get_all_actors(nets_list)
 		aligned_list <- batch_align_matrices_cpp(mats, all_actors, include_diagonal)
 	}
+
+	# actor sets used to restrict similarity metrics to shared actors
+	is_bipartite <- any(net_modes == "bipartite")
+	row_sets <- lapply(mats, function(mat) {
+		if (is_bipartite) {
+			rownames(mat) %||% paste0("r", seq_len(nrow(mat)))
+		} else {
+			unique(c(rownames(mat), colnames(mat)))
+		}
+	})
+	col_sets <- lapply(seq_along(mats), function(k) {
+		if (is_bipartite) {
+			colnames(mats[[k]]) %||% paste0("c", seq_len(ncol(mats[[k]])))
+		} else {
+			row_sets[[k]]
+		}
+	})
+	count_unshared <- function(sets) {
+		length(Reduce(union, sets)) - length(Reduce(intersect, sets))
+	}
+	n_unshared <- count_unshared(row_sets)
+	if (is_bipartite) {
+		n_unshared <- n_unshared + count_unshared(col_sets)
+	}
+	if (n_unshared > 0) {
+		cli::cli_inform(c(
+			"i" = "The networks do not all share the same actors: {n_unshared} actor{?s} not present in every network {?was/were} left out of the similarity metrics.",
+			"i" = "Each pair is compared on the actors common to both networks; {.field edge_changes} still counts ties gained or lost by actors who enter or leave."
+		))
+	}
+	min_common <- if (is_bipartite) 1L else 2L
+	n_no_overlap <- 0L
+
+	# undirected networks contribute each tie once to edge changes
+	symmetric_flags <- vapply(nets_list, function(net) {
+		isTRUE(all(attr(net, "symmetric") %||% FALSE))
+	}, logical(1))
 	
 	# calculate custom statistics if provided
 	custom_stats_list <- NULL
@@ -226,6 +263,31 @@ compare_edges <- function(
 			} else {
 				threshold1 <- threshold2 <- edge_threshold
 			}
+
+			# track edge changes for this pair over all actors in either network
+			change1 <- mat1
+			change2 <- mat2
+			if (symmetric_flags[i] && symmetric_flags[j] && !is_bipartite) {
+				change1[lower.tri(change1)] <- NA
+				change2[lower.tri(change2)] <- NA
+			}
+			edge_key <- paste(net_names[i], net_names[j], sep = "_vs_")
+			edge_changes[[edge_key]] <- calculate_edge_changes_cpp(
+				change1,
+				change2,
+				threshold1,
+				threshold2
+			)
+
+			# similarity metrics use the actors common to both networks
+			common_rows <- intersect(row_sets[[i]], row_sets[[j]])
+			common_cols <- intersect(col_sets[[i]], col_sets[[j]])
+			if (length(common_rows) < min_common || length(common_cols) < min_common) {
+				n_no_overlap <- n_no_overlap + 1L
+				next
+			}
+			mat1 <- mat1[common_rows, common_cols, drop = FALSE]
+			mat2 <- mat2[common_rows, common_cols, drop = FALSE]
 
 			# calculate similarity metrics based on method
 			if (method %in% c("correlation", "all")) {
@@ -301,11 +363,12 @@ compare_edges <- function(
 				spectral_mat[i, j] <- spectral_mat[j, i] <-
 					calculate_spectral_distance_cpp(mat1, mat2, spectral_rank)
 			}
-
-			# track edge changes for this pair
-			edge_key <- paste(net_names[i], net_names[j], sep = "_vs_")
-			edge_changes[[edge_key]] <- calculate_edge_changes_cpp(mat1, mat2, threshold1, threshold2)
 		}
+	}
+	if (n_no_overlap > 0) {
+		cli::cli_warn(c(
+			"!" = "{n_no_overlap} network pair{?s} {?shares/share} too few actors to compare; {?its/their} similarity metrics are {.val NA}."
+		))
 	}
 
 	# fill in diagonals
@@ -1359,13 +1422,13 @@ prepare_by_group_networks <- function(net, by) {
 
 #' analyze network comparisons by group
 #'
-#' `analyze_by_group` performs additional analysis on comparison results when networks are grouped by nodal attributes (currently not fully implemented).
+#' `analyze_by_group` summarizes the group sizes behind a by-group comparison.
 #'
 #' @param results a netify_comparison object from compare_networks.
 #' @param nets_list the original list of networks being compared.
 #' @param by character string specifying the grouping attribute.
 #'
-#' @return a list containing by-group analysis results (currently returns placeholder).
+#' @return a list with the grouping attribute, the group names, and the number of actors per group.
 #'
 #' @author cassy dorff, shahryar minhas
 #'
@@ -1373,14 +1436,15 @@ prepare_by_group_networks <- function(net, by) {
 #' @noRd
 
 analyze_by_group <- function(results, nets_list, by) {
-	# count actors per group so callers can see how each subset was sized
+	# count each group's actors across all periods
 	n_actors_per_group <- vapply(nets_list, function(n) {
-		mst <- tryCatch(netify_measurements(n), error = function(e) NULL)
-		if (is.null(mst)) return(NA_integer_)
-		# unipartite networks have matching row/col actor counts
-		val <- mst$n_row_actors %||% mst$n_actors
-		if (is.null(val)) return(NA_integer_)
-		as.integer(val)
+		group_actors <- if (identical(attr(n, "netify_type"), "longit_list")) {
+			unlist(lapply(n, rownames), use.names = FALSE)
+		} else {
+			rownames(n)
+		}
+		if (is.null(group_actors)) return(NA_integer_)
+		length(unique(group_actors))
 	}, integer(1))
 
 	# pull pairwise similarity matrix if available, for downstream plots

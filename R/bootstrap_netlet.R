@@ -42,10 +42,15 @@
 #' @details
 #' resampling is **vertex-level**, not edge-level: actors are
 #' sampled with replacement and the netlet's adjacency is sliced
-#' accordingly. for longitudinal netlets, the same resampled index
-#' set is applied to every period (preserves within-actor
-#' dependence). multilayer netlets are unsupported -- bootstrap each
-#' layer independently via `subset_netify(layers = ...)` first.
+#' accordingly. when an actor is drawn more than once, the pairs formed
+#' by its copies are not observed dyads, so they are set to `NA` in the
+#' resampled netlet; statistics that drop missing dyads (for example, a
+#' density computed with `na.rm = TRUE`) then ignore them. for
+#' longitudinal netlets, actors are drawn by name from the pooled roster
+#' of all periods and the same draws are used in every period (preserves
+#' within-actor dependence); an actor absent from a period is also absent
+#' from that period's resample. multilayer netlets are unsupported --
+#' bootstrap each layer independently via `subset_netify(layers = ...)` first.
 #' the resampled netlets contain the resampled adjacency only. statistics
 #' that require attached nodal or dyadic attributes should recreate those
 #' attributes inside `fn`, or use a NULL-model workflow such as
@@ -179,8 +184,16 @@ bootstrap_netlet <- function(netlet, fn, n_boot = 200L, alpha = 0.05,
 			"i" = "Bipartite vertex bootstrap requires separate row/column-mode resampling and is not implemented."
 		))
 	}
-	n <- nrow(first)
-	actors <- rownames(first) %||% paste0("a", seq_len(n))
+	# label every period's actors and pool them into one roster
+	raw_list <- lapply(raw_list, function(mat) {
+		if (is.null(rownames(mat))) {
+			rownames(mat) <- colnames(mat) <- paste0("a", seq_len(nrow(mat)))
+		}
+		mat
+	})
+	actors <- unique(unlist(lapply(raw_list, rownames), use.names = FALSE))
+	n <- length(actors)
+	synth <- paste0("b", seq_len(n))
 
 	# resample and rebuild loop
 	draws <- matrix(NA_real_, nrow = n_boot, ncol = length(point_vec))
@@ -190,12 +203,20 @@ bootstrap_netlet <- function(netlet, fn, n_boot = 200L, alpha = 0.05,
 	n_ragged <- 0L
 	for (b in seq_len(n_boot)) {
 		idx <- sample.int(n, n, replace = TRUE)
-		synth <- paste0("b", seq_len(n))
-		# resampled matrices keyed like raw_list
+		drawn <- actors[idx]
+		# flag pairs formed by two copies of the same actor
+		dup_pair <- outer(idx, idx, "==")
+		diag(dup_pair) <- FALSE
+		# resampled matrices keyed like raw_list, using the same draws in every period
 		resamp_list <- lapply(raw_list, function(mat) {
-			m <- mat[idx, idx, drop = FALSE]
-			rownames(m) <- colnames(m) <- synth
+			present <- drawn %in% rownames(mat)
+			m <- mat[drawn[present], drawn[present], drop = FALSE]
+			rownames(m) <- colnames(m) <- synth[present]
 			m
+		})
+		dup_list <- lapply(raw_list, function(mat) {
+			present <- drawn %in% rownames(mat)
+			dup_pair[present, present, drop = FALSE]
 		})
 		# rebuild netlet with original topology
 		if (netlet_type == "cross_sec") {
@@ -205,6 +226,7 @@ bootstrap_netlet <- function(netlet, fn, n_boot = 200L, alpha = 0.05,
 					diag_to_NA = isTRUE(obj_attrs$diag_to_NA),
 					missing_to_zero = isTRUE(obj_attrs$missing_to_zero))
 			))
+			boot_net[dup_list[[1]]] <- NA
 		} else {
 			boot_net <- suppressMessages(suppressWarnings(
 				new_netify(resamp_list, mode = obj_attrs$mode,
@@ -212,6 +234,7 @@ bootstrap_netlet <- function(netlet, fn, n_boot = 200L, alpha = 0.05,
 					diag_to_NA = isTRUE(obj_attrs$diag_to_NA),
 					missing_to_zero = isTRUE(obj_attrs$missing_to_zero))
 			))
+			boot_net <- set_dup_pairs_na(boot_net, dup_list)
 		}
 		val_result <- tryCatch(
 			list(value = fn(boot_net), error = NULL),
@@ -285,4 +308,15 @@ bootstrap_netlet <- function(netlet, fn, n_boot = 200L, alpha = 0.05,
 	attr(out, "alpha") <- alpha
 	out
 	})
+}
+
+#' mark duplicated-actor pairs as missing in a resampled longitudinal netlet
+#'
+#' @keywords internal
+#' @noRd
+set_dup_pairs_na <- function(boot_net, dup_list) {
+	for (t in seq_along(dup_list)) {
+		boot_net[[t]][dup_list[[t]]] <- NA
+	}
+	boot_net
 }

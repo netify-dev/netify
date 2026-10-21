@@ -505,3 +505,35 @@ test_that(
 		expect_false("actor2" %in% names(dyad_data[["1"]]))
 	}
 )
+
+test_that(
+	"add_dyad_vars: POSIXct and Date time join to netlet periods",
+	{
+		df = data.frame(
+			i = c("a", "b", "c", "a", "b", "c"),
+			j = c("b", "c", "a", "c", "a", "b"),
+			dv = 11:16
+		)
+		posix_t = as.POSIXct(
+			c(rep("2020-01-01 08:00:00", 3), rep("2020-01-01 09:00:00", 3)),
+			tz = "UTC"
+		)
+		date_t = as.Date(c(rep("2020-01-01", 3), rep("2020-01-08", 3)))
+
+		for (tvals in list(posix_t, date_t)) {
+			df$t = tvals
+			net = netify(df, actor1 = "i", actor2 = "j", time = "t",
+				symmetric = FALSE, dyad_vars = "dv",
+				dyad_vars_symmetric = FALSE)
+			dd = attr(net, "dyad_data")
+			expect_equal(dd[[1]]$dv["a", "b"], 11)
+			expect_equal(dd[[2]]$dv["c", "b"], 16)
+
+			net2 = netify(df, actor1 = "i", actor2 = "j", time = "t",
+				symmetric = FALSE)
+			net2 = add_dyad_vars(net2, df, actor1 = "i", actor2 = "j", time = "t",
+				dyad_vars = "dv", dyad_vars_symmetric = FALSE)
+			expect_equal(attr(net2, "dyad_data"), dd)
+		}
+	}
+)

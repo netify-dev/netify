@@ -51,6 +51,7 @@ test_that("summary.netify works for symmetric networks", {
 		icews_10,
 		actor1 = "i", actor2 = "j",
 		symmetric = TRUE,
+		sum_dyads = TRUE,
 		weight = "verbCoop"
 	)
 
@@ -91,8 +92,8 @@ test_that("summary.netify works for multilayer networks", {
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
-	net1 = netify(icews_10, actor1 = "i", actor2 = "j", weight = "verbCoop")
-	net2 = netify(icews_10, actor1 = "i", actor2 = "j", weight = "matlCoop")
+	net1 = netify(icews_10, actor1 = "i", actor2 = "j", weight = "verbCoop", sum_dyads = TRUE)
+	net2 = netify(icews_10, actor1 = "i", actor2 = "j", weight = "matlCoop", sum_dyads = TRUE)
 
 	multi_net = layer_netify(
 		list(net1, net2),
@@ -112,6 +113,7 @@ test_that("summary.netify handles custom statistics correctly", {
 	net = netify(
 		icews_10,
 		actor1 = "i", actor2 = "j",
+		sum_dyads = TRUE,
 		weight = "verbCoop"
 	)
 
@@ -182,6 +184,7 @@ test_that("summary.netify handles missing data correctly", {
 	net_missing = netify(
 		icews_10,
 		actor1 = "i", actor2 = "j",
+		sum_dyads = TRUE,
 		weight = "verbCoop",
 		missing_to_zero = FALSE
 	)
@@ -244,6 +247,7 @@ test_that("summary.netify handles ego networks", {
 	net = netify(
 		icews,
 		actor1 = "i", actor2 = "j", time = "year",
+		sum_dyads = TRUE,
 		weight = "verbCoop"
 	)
 

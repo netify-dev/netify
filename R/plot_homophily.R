@@ -563,24 +563,16 @@ extract_similarity_data <- function(netlet, attribute, method) {
 		cli::cli_alert_warning("Distribution plots currently only support cross-sectional networks. Using first time period.")
 
 		# extract first time period if it's longitudinal
+		first_time <- as.character(netify_measurements(netlet)$time[1])
 		if (netify_type == "longit_array") {
 			netlet <- netlet[, , 1]
-			# also extract nodal data for first time period
-			if (!is.null(nodal_data) && is.list(nodal_data)) {
-				time_names <- names(nodal_data)
-				if (length(time_names) > 0) {
-					nodal_data <- nodal_data[[1]]
-				}
-			}
 		} else if (netify_type == "longit_list") {
 			netlet <- netlet[[1]]
-			# also extract nodal data for first time period
-			if (!is.null(nodal_data) && is.list(nodal_data)) {
-				time_names <- names(nodal_data)
-				if (length(time_names) > 0) {
-					nodal_data <- nodal_data[[1]]
-				}
-			}
+		}
+
+		# keep nodal rows for the first time period
+		if (is.data.frame(nodal_data) && "time" %in% names(nodal_data)) {
+			nodal_data <- nodal_data[as.character(nodal_data$time) == first_time, , drop = FALSE]
 		}
 	}
 

@@ -505,3 +505,71 @@ test_that("to_netify error handling", {
 		to_netify(g, nodal_data = "not a dataframe")
 	)
 })
+
+test_that("to_netify marks the diagonal NA for statnet networks without loops", {
+	m = matrix(0, 4, 4, dimnames = list(letters[1:4], letters[1:4]))
+	m[cbind(1:3, 2:4)] = 1
+	m = m + t(m)
+
+	n = network::network(m, directed = FALSE)
+	net = suppressMessages(to_netify(n))
+	expect_true(attr(net, "diag_to_NA"))
+	expect_true(all(is.na(diag(get_raw(net)))))
+	# matches sna::gden / igraph edge density for a 4-node path
+	expect_equal(summary(net)$density, 0.5)
+
+	# explicit diag_to_NA is respected
+	net_keep = suppressMessages(to_netify(n, diag_to_NA = FALSE))
+	expect_false(attr(net_keep, "diag_to_NA"))
+	expect_equal(unname(diag(get_raw(net_keep))), rep(0, 4))
+
+	# networks with self-loops keep their diagonal
+	m_loops = m
+	m_loops["a", "a"] = 1
+	n_loops = network::network(m_loops, directed = FALSE, loops = TRUE)
+	net_loops = suppressMessages(to_netify(n_loops))
+	expect_false(attr(net_loops, "diag_to_NA"))
+	expect_equal(unname(diag(get_raw(net_loops))), c(1, 0, 0, 0))
+})
+
+test_that("to_netify statnet round trip preserves density", {
+	m = matrix(0, 4, 4, dimnames = list(letters[1:4], letters[1:4]))
+	m[cbind(1:3, 2:4)] = 1
+	m = m + t(m)
+	net = suppressMessages(netify(m, diag_to_NA = TRUE))
+
+	back = suppressMessages(to_netify(netify_to_statnet(net)))
+	expect_true(attr(back, "diag_to_NA"))
+	expect_equal(summary(back)$density, summary(net)$density)
+})
+
+test_that("to_netify marks the diagonal NA for lists of statnet networks", {
+	m = matrix(0, 4, 4, dimnames = list(letters[1:4], letters[1:4]))
+	m[cbind(1:3, 2:4)] = 1
+	m = m + t(m)
+	n = network::network(m, directed = FALSE)
+
+	net = suppressMessages(to_netify(list("2001" = n, "2002" = n)))
+	expect_true(attr(net, "diag_to_NA"))
+	expect_equal(summary(net)$density, c(0.5, 0.5))
+
+	net_keep = suppressMessages(
+		to_netify(list("2001" = n, "2002" = n), diag_to_NA = FALSE)
+	)
+	expect_false(attr(net_keep, "diag_to_NA"))
+})
+
+test_that("to_netify leaves bipartite statnet networks without a diagonal", {
+	b = matrix(
+		c(1, 0, 1, 1, 0, 1, 0, 0, 1),
+		3,
+		3,
+		dimnames = list(c("r1", "r2", "r3"), c("c1", "c2", "c3"))
+	)
+	bn = network::network(b, bipartite = 3, directed = FALSE)
+	net = suppressMessages(to_netify(bn))
+
+	expect_equal(attr(net, "mode"), "bipartite")
+	expect_false(anyNA(get_raw(net)))
+	expect_equal(unname(unclass(get_raw(net))[1:3, 1:3]), unname(b))
+})

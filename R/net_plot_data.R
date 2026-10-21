@@ -330,6 +330,15 @@ net_plot_data <- function(netlet, plot_args = list()) {
 		))
 	} else {
 		nodes_list <- plot_args$point_layout
+
+		# reuse a single layout data frame across all time periods
+		if (is.data.frame(nodes_list)) {
+			n_slices <- if (igraph::is_igraph(g_list)) 1L else length(g_list)
+			nodes_list <- rep(list(nodes_list), n_slices)
+			if (!igraph::is_igraph(g_list)) {
+				names(nodes_list) <- names(g_list)
+			}
+		}
 	}
 
 	edges_list <- get_edge_layout(
@@ -369,6 +378,12 @@ net_plot_data <- function(netlet, plot_args = list()) {
 
 		to_keep$id <- with(to_keep, paste(actor, time, sep = "_"))
 		net_dfs$nodal_data$id <- with(net_dfs$nodal_data, paste(name, time, sep = "_"))
+
+		# distinguish bipartite actors that appear in both modes
+		if ("actor_mode" %in% names(to_keep) && "actor_mode" %in% names(net_dfs$nodal_data)) {
+			to_keep$id <- paste(to_keep$id, to_keep$actor_mode, sep = "_")
+			net_dfs$nodal_data$id <- paste(net_dfs$nodal_data$id, net_dfs$nodal_data$actor_mode, sep = "_")
+		}
 
 		net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$id %in% to_keep$id, ]
 	}

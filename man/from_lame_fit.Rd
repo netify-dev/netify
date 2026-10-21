@@ -49,8 +49,13 @@ reads from the fit's stored \code{mode}/\code{y}.}
 ci; here we use lower = alpha/2, upper = 1 - alpha/2).}
 }
 \value{
-a cross-sectional netify object whose underlying matrix is
-the fitted-value (or residual) matrix at the same actor ordering.
+a netify object whose underlying data are the fitted-value
+(or residual) values at the same actor ordering. for cross-sectional
+fits this is a cross-sectional netify wrapping a single matrix. for
+longitudinal \code{lame::lame()} fits -- where \code{fitted(fit)} returns one
+matrix per time period -- a longitudinal netify object is returned
+with one period per list element, reusing the actor names on each
+per-period matrix.
 }
 \description{
 takes the posterior-mean (or point-estimate) prediction matrix

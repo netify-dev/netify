@@ -84,6 +84,7 @@ to_netify <- function(
 	other_args <- list(...)
 	user_ndata <- other_args$nodal_data
 	user_ddata <- other_args$dyad_data
+	user_diag_to_NA <- other_args[["diag_to_NA"]]
 
 	# placeholders for final adjacency data, plus nodal/dyadic
 	adj_data <- NULL
@@ -136,6 +137,10 @@ to_netify <- function(
 		dyad_data <- drop_statnet_auxiliary_edge_attrs(dyad_data, weight)
 		# get symmetry directly from network
 		is_symmetric <- !network::is.directed(net_obj)
+		# mark absent self-loops on unipartite networks
+		if (is.null(user_diag_to_NA) && !statnet_allows_loops(net_obj)) {
+			diag(adj_data) <- NA
+		}
 
 		# single matrix
 	} else if (is.matrix(net_obj)) {
@@ -164,7 +169,11 @@ to_netify <- function(
 		# list of networks, type detected downstream
 	} else if (is.list(net_obj) && length(net_obj) > 0) {
 		# determine list type and process accordingly
-		list_result <- process_network_list(net_obj, weight)
+		list_result <- process_network_list(
+			net_obj,
+			weight,
+			mark_statnet_diag = is.null(user_diag_to_NA)
+		)
 
 		adj_data <- list_result$adj_data
 		nodal_data <- list_result$nodal_data
@@ -249,6 +258,8 @@ to_netify <- function(
 #'
 #' @param net_obj a list of network objects (igraph, network, or matrix)
 #' @param weight optional weight attribute name
+#' @param mark_statnet_diag logical. whether to set the diagonal of
+#'   unipartite network slices without self-loops to na
 #'
 #' @return a list containing processed components
 #'
@@ -256,7 +267,10 @@ to_netify <- function(
 #'
 #' @keywords internal
 #' @noRd
-process_network_list <- function(net_obj, weight = NULL) {
+process_network_list <- function(
+	net_obj,
+	weight = NULL,
+	mark_statnet_diag = TRUE) {
 	# initialize return values
 	result <- list(
 		adj_data = NULL,
@@ -296,6 +310,14 @@ process_network_list <- function(net_obj, weight = NULL) {
 		# process network inputs
 		processed_list <- lapply(net_obj, decompose_statnet, weight = weight)
 		result$is_symmetric <- !network::is.directed(net_obj[[1]])
+		# mark absent self-loops on unipartite slices
+		if (mark_statnet_diag) {
+			for (k in seq_along(processed_list)) {
+				if (!statnet_allows_loops(net_obj[[k]])) {
+					diag(processed_list[[k]]$adj_mat) <- NA
+				}
+			}
+		}
 	} else if (all(vapply(net_obj, is.matrix, logical(1)))) {
 		# list of matrices - simple case
 		result$adj_data <- net_obj
@@ -382,6 +404,17 @@ is_logical_bipartite_igraph <- function(grph) {
 	}
 	vertex_types <- igraph::V(grph)$type
 	!is.null(vertex_types) && is.logical(vertex_types)
+}
+
+#' check whether a unipartite network permits self-loops
+#'
+#' bipartite networks have no diagonal and are treated as permitting
+#' loops so their biadjacency matrix is left untouched.
+#'
+#' @keywords internal
+#' @noRd
+statnet_allows_loops <- function(ntwk) {
+	network::is.bipartite(ntwk) || isTRUE(network::has.loops(ntwk))
 }
 
 #' drop statnet system attributes from auxiliary dyad variables

@@ -485,3 +485,50 @@ test_that("as.network.netify dispatches via the network generic", {
 	# generic dispatch
 	expect_s3_class(network::as.network(net), "network")
 })
+
+test_that("netify_to_statnet converts factor and date nodal attributes", {
+	skip_if_not_installed("network")
+	m = matrix(0, 4, 4, dimnames = list(letters[1:4], letters[1:4]))
+	m[cbind(1:3, 2:4)] = 1
+	m = m + t(m)
+	net = suppressMessages(netify(m))
+	nodes = data.frame(
+		actor = c("d", "c", "b", "a"),
+		grp = factor(c("z", "x", "y", "x")),
+		when = as.Date("2020-01-01") + 0:3,
+		stringsAsFactors = FALSE
+	)
+	net = add_node_vars(net, nodes, actor = "actor")
+
+	sn = suppressMessages(netify_to_statnet(net))
+	expect_s3_class(sn, "network")
+	vn = network::get.vertex.attribute(sn, "vertex.names")
+	expect_equal(
+		network::get.vertex.attribute(sn, "grp"),
+		as.character(nodes$grp[match(vn, nodes$actor)])
+	)
+	expect_equal(
+		network::get.vertex.attribute(sn, "when"),
+		as.character(nodes$when[match(vn, nodes$actor)])
+	)
+})
+
+test_that("netify_to_statnet converts factor nodal attributes for longitudinal netify", {
+	skip_if_not_installed("network")
+	m = matrix(0, 4, 4, dimnames = list(letters[1:4], letters[1:4]))
+	m[cbind(1:3, 2:4)] = 1
+	m = m + t(m)
+	net = suppressMessages(to_netify(list("1" = m, "2" = m)))
+	nodes = data.frame(
+		actor = rep(letters[1:4], 2),
+		time = rep(c("1", "2"), each = 4),
+		grp = factor(c("x", "y", "x", "z", "z", "y", "x", "x"))
+	)
+	net = add_node_vars(net, nodes, actor = "actor", time = "time")
+
+	sn = suppressMessages(netify_to_statnet(net))
+	expect_equal(
+		network::get.vertex.attribute(sn[[2]], "grp"),
+		c("z", "y", "x", "x")
+	)
+})

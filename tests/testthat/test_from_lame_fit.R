@@ -106,7 +106,7 @@ test_that("from_lame_fit explicit link slot wins over class-based inference", {
 # to_lame(lame=true) longit emitter shape
 # ---------------------------------------------------------------------------
 
-test_that("to_lame longit emits single list_to_array call destructuring padded slots", {
+test_that("to_lame longit emits a single lame::lame call on the per-period lists", {
 	df = data.frame(
 		i = sample(letters[1:6], 60, TRUE),
 		j = sample(letters[1:6], 60, TRUE),
@@ -127,16 +127,16 @@ test_that("to_lame longit emits single list_to_array call destructuring padded s
 	nl = suppressMessages(to_lame(net_l, lame = TRUE, pad = TRUE))
 
 	snip = nl$ame_call
-	# exactly one list_to_array call
-	expect_equal(length(gregexpr("list_to_array\\(", snip, perl = TRUE)[[1]]), 1L)
+	# no manual padding step
+	expect_false(grepl("list_to_array", snip, fixed = TRUE))
 	# exactly one lame::lame() fit call
 	expect_equal(length(gregexpr("lame::lame\\(", snip, perl = TRUE)[[1]]), 1L)
-	# the fit call uses padded$<slot> rather than nl$<slot>
-	expect_true(grepl("padded\\$Y", snip))
-	expect_true(grepl("padded\\$Xdyad", snip))
+	# the fit call passes the per-period lists
+	expect_true(grepl("Y = nl$Y", snip, fixed = TRUE))
+	expect_true(grepl("Xdyad = nl$Xdyad", snip, fixed = TRUE))
 })
 
-test_that("to_lame longit no-covariate snippet omits X slots and still emits one pad call", {
+test_that("to_lame longit no-covariate snippet omits X slots", {
 	df = data.frame(
 		i = sample(letters[1:6], 60, TRUE),
 		j = sample(letters[1:6], 60, TRUE),
@@ -154,11 +154,10 @@ test_that("to_lame longit no-covariate snippet omits X slots and still emits one
 	nl = suppressMessages(to_lame(net_l, lame = TRUE, pad = TRUE))
 
 	snip = nl$ame_call
-	expect_equal(length(gregexpr("list_to_array\\(", snip, perl = TRUE)[[1]]), 1L)
 	expect_false(grepl("Xdyad", snip))
 	expect_false(grepl("Xrow",  snip))
 	expect_false(grepl("Xcol",  snip))
-	expect_true(grepl("padded\\$Y", snip))
+	expect_true(grepl("lame::lame(Y = nl$Y,", snip, fixed = TRUE))
 })
 
 test_that("to_lame longit fit_method = als adds bootstrap and method args", {
@@ -182,7 +181,7 @@ test_that("to_lame longit fit_method = als adds bootstrap and method args", {
 	expect_true(grepl("bootstrap = 200L", snip, fixed = TRUE))
 })
 
-test_that("to_lame bipartite longit pads rectangular arrays before fitting", {
+test_that("to_lame bipartite longit passes per-period lists to lame::lame", {
 	rows = paste0("firm_", 1:4)
 	cols = paste0("event_", 1:3)
 	years = 2020:2022
@@ -209,23 +208,18 @@ test_that("to_lame bipartite longit pads rectangular arrays before fitting", {
 	snip = nl$ame_call
 	expect_equal(nl$mode, "bipartite")
 	expect_false(grepl("lame::ame(", snip, fixed = TRUE))
-	expect_false(grepl("lame::list_to_array(", snip, fixed = TRUE))
-	expect_true(grepl("array(NA_real_", snip, fixed = TRUE))
+	expect_false(grepl("list_to_array", snip, fixed = TRUE))
 	expect_true(grepl('mode = "bipartite"', snip, fixed = TRUE))
-	expect_true(grepl("Y[rownames(yy), colnames(yy), tt]", snip, fixed = TRUE))
+	expect_true(
+		grepl("lame::lame(Y = nl$Y, Xrow = nl$Xrow, Xcol = nl$Xcol", snip, fixed = TRUE)
+	)
 
-	snippet_lines = strsplit(snip, "\n", fixed = TRUE)[[1]]
-	pad_env = new.env(parent = baseenv())
-	pad_env$nl = nl
-	eval(parse(text = paste(head(snippet_lines, -1), collapse = "\n")), envir = pad_env)
-
-	Y = get("Y", envir = pad_env)
-	Xrow = get("Xrow", envir = pad_env)
-	Xcol = get("Xcol", envir = pad_env)
-	expect_equal(dim(Y), c(length(rows), length(cols), length(years)))
-	expect_equal(dim(Xrow), c(length(rows), 1L, length(years)))
-	expect_equal(dim(Xcol), c(length(cols), 1L, length(years)))
-	expect_true(all(is.na(Y["firm_4", , "2022"])))
+	# per-period covariate rows line up with the matching Y slice
+	for (tt in names(nl$Y)) {
+		expect_equal(rownames(nl$Xrow[[tt]]), rownames(nl$Y[[tt]]))
+		expect_equal(rownames(nl$Xcol[[tt]]), colnames(nl$Y[[tt]]))
+	}
+	expect_false("firm_4" %in% rownames(nl$Y[["2022"]]))
 })
 
 test_that("to_lame bipartite cross-sectional call includes dyadic covariates", {
@@ -276,4 +270,145 @@ test_that("to_lame recurses over multilayer netify inputs", {
 	expect_equal(out$verbal$mode, "unipartite")
 	expect_equal(out$material$family, "binary")
 	expect_true(grepl("lame::ame", out$verbal$ame_call, fixed = TRUE))
+})
+
+test_that("to_lame longit array snippet splits arrays into per-period lists", {
+	actors = letters[1:5]
+	df = expand.grid(
+		i = actors,
+		j = actors,
+		t = 2001:2003,
+		stringsAsFactors = FALSE
+	)
+	df = df[df$i != df$j, ]
+	df$w = rnorm(nrow(df))
+	df$x1 = runif(nrow(df))
+	df$x2 = runif(nrow(df))
+	df$p = rnorm(nrow(df))
+
+	net = suppressWarnings(suppressMessages(
+		netify(
+			df,
+			actor1 = "i",
+			actor2 = "j",
+			time = "t",
+			weight = "w",
+			symmetric = FALSE,
+			dyad_vars = c("x1", "x2"),
+			dyad_vars_symmetric = c(FALSE, FALSE),
+			nodal_vars = "p"
+		)
+	))
+	nl = suppressMessages(to_lame(net))
+	snip = nl$ame_call
+	expect_true(grepl("lame::lame(Y = Y, Xdyad = Xdyad, Xrow = Xrow, Xcol = Xcol", snip, fixed = TRUE))
+	expect_false(grepl("lame::ame(", snip, fixed = TRUE))
+
+	# run everything but the fit call
+	snippet_lines = strsplit(snip, "\n", fixed = TRUE)[[1]]
+	pre_env = new.env(parent = baseenv())
+	pre_env$nl = nl
+	eval(parse(text = paste(head(snippet_lines, -1), collapse = "\n")), envir = pre_env)
+
+	Y = get("Y", envir = pre_env)
+	Xdyad = get("Xdyad", envir = pre_env)
+	Xrow = get("Xrow", envir = pre_env)
+	expect_type(Y, "list")
+	expect_equal(names(Y), c("2001", "2002", "2003"))
+	expect_equal(Y[["2002"]], nl$Y[, , "2002"])
+	expect_equal(dim(Xdyad[["2003"]]), c(5L, 5L, 2L))
+	expect_equal(dimnames(Xdyad[["2003"]])[[3]], c("x1", "x2"))
+	expect_equal(Xdyad[["2003"]][, , "x2"], nl$Xdyad[, , "x2", "2003"])
+	expect_true(is.matrix(Xrow[["2001"]]))
+	expect_equal(Xrow[["2001"]][, "p"], nl$Xrow[, "p", "2001"])
+})
+
+test_that("to_lame generated snippets run against lame", {
+	skip_on_cran()
+	skip_if_not_installed("lame")
+	actors = letters[1:6]
+	df = expand.grid(
+		i = actors,
+		j = actors,
+		t = 2001:2003,
+		stringsAsFactors = FALSE
+	)
+	df = df[df$i != df$j, ]
+	# drop one actor from the last period
+	df = df[!(df$t == 2003 & (df$i == "f" | df$j == "f")), ]
+	df$w = rnorm(nrow(df))
+	df$x = runif(nrow(df))
+	df$p = rnorm(nrow(df))
+
+	net = suppressWarnings(suppressMessages(
+		netify(
+			df,
+			actor1 = "i",
+			actor2 = "j",
+			time = "t",
+			weight = "w",
+			symmetric = FALSE,
+			actor_time_uniform = FALSE,
+			dyad_vars = "x",
+			dyad_vars_symmetric = FALSE,
+			nodal_vars = "p"
+		)
+	))
+	run_snippet = function(nl) {
+		code = gsub(
+			"nscan = 1000, burn = 500",
+			"nscan = 10, burn = 2, odens = 1, gof = FALSE",
+			nl$ame_call,
+			fixed = TRUE
+		)
+		fit_env = new.env()
+		fit_env$nl = nl
+		suppressWarnings(suppressMessages(
+			eval(parse(text = code), envir = fit_env)
+		))
+	}
+
+	fit_list = run_snippet(suppressMessages(to_lame(net, lame = TRUE)))
+	expect_s3_class(fit_list, "lame")
+	fit_arr = run_snippet(suppressMessages(to_lame(net, lame = FALSE)))
+	expect_s3_class(fit_arr, "lame")
+
+	# fitted values come back as a longitudinal netify
+	pred = from_lame_fit(fit_list, value = "fitted")
+	expect_s3_class(pred, "netify")
+	expect_equal(attr(pred, "netify_type"), "longit_list")
+	expect_equal(names(get_raw(pred)), c("2001", "2002", "2003"))
+})
+
+test_that("from_lame_fit returns a longitudinal netify for per-period fits", {
+	actors = c("a", "b", "c")
+	periods = c("t1", "t2")
+	ez = list(
+		t1 = matrix(1:9, 3, 3, dimnames = list(actors, actors)),
+		t2 = matrix(11:14, 2, 2, dimnames = list(c("c", "a"), c("c", "a")))
+	)
+	y = array(
+		100,
+		dim = c(3, 3, 2),
+		dimnames = list(actors, actors, periods)
+	)
+	fit = list(
+		EZ = ez,
+		Y = y,
+		family = "normal",
+		mode = "unipartite",
+		symmetric = FALSE
+	)
+	class(fit) = c("lame_mock", "list")
+
+	pred = suppressMessages(from_lame_fit(fit, value = "fitted"))
+	expect_equal(attr(pred, "netify_type"), "longit_list")
+	raw = get_raw(pred)
+	expect_equal(names(raw), periods)
+	expect_equal(raw[["t2"]]["c", "a"], 13)
+
+	resid = suppressMessages(from_lame_fit(fit, value = "residual"))
+	resid_raw = get_raw(resid)
+	expect_equal(resid_raw[["t1"]]["b", "a"], 100 - 2)
+	expect_equal(resid_raw[["t2"]]["c", "a"], 100 - 13)
 })

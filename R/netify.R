@@ -50,8 +50,10 @@
 #' @param diag_to_NA logical: whether diagonals should be set to na,
 #'   default is TRUE. for matrix / array / list inputs, the default is
 #'   ignored unless explicitly set: instead, `diag_to_NA` is auto-detected
-#'   by inspecting whether the diagonal of the supplied matrix is already
-#'   `na`. pass an explicit value to override the auto-detection.
+#'   from the diagonal of the supplied matrix. a diagonal that is entirely
+#'   `na` or entirely zero is read as "no self-loops" and set to `na`; any
+#'   other diagonal is kept as data. pass an explicit value to override the
+#'   auto-detection.
 #' @param missing_to_zero logical: whether missing values should be set to
 #'   zero, default is TRUE. as with `diag_to_NA`, this is auto-detected
 #'   for matrix / array / list inputs based on whether the supplied data
@@ -60,8 +62,14 @@
 #'   "longit_list". if not specified and time is NULL then output_format
 #'   will be "cross_sec" and if time is specified then output_format
 #'   will default to "longit_list". only applies to data.frame inputs.
+#'   for "longit_array" with `actor_time_uniform = FALSE` or `actor_pds`,
+#'   actors outside their active periods are `na` in those periods.
 #' @param nodal_vars character vector: names of the nodal variables in the input
-#'   that should be added as attributes to the netify object (for data.frame inputs)
+#'   that should be added as attributes to the netify object (for data.frame
+#'   inputs). these columns are read as attributes of `actor1`: each actor's
+#'   value is taken from the rows where it appears as `actor1`. actors that
+#'   only appear as `actor2` get `na`; use `add_node_vars()` to supply their
+#'   values.
 #' @param dyad_vars character vector: names of the dyadic variables in the input
 #'   that should be added as attributes to the netify object (for data.frame inputs)
 #' @param dyad_vars_symmetric logical vector: whether ties are symmetric, default is
@@ -340,14 +348,29 @@ netify <- function(
 	}
 
 	if (output_format == "longit_array") {
-		netlet <- get_adjacency_array(
-			dyad_data = dyad_data,
-			actor1 = actor1, actor2 = actor2, time = time,
-			symmetric = symmetric, mode = mode,
-			weight = weight, sum_dyads = sum_dyads,
-			diag_to_NA = diag_to_NA, missing_to_zero = missing_to_zero,
-			nodelist = nodelist
-		)
+		if (is.null(actor_pds) && actor_time_uniform) {
+			netlet <- get_adjacency_array(
+				dyad_data = dyad_data,
+				actor1 = actor1, actor2 = actor2, time = time,
+				symmetric = symmetric, mode = mode,
+				weight = weight, sum_dyads = sum_dyads,
+				diag_to_NA = diag_to_NA, missing_to_zero = missing_to_zero,
+				nodelist = nodelist
+			)
+		} else {
+			# build per-period actor sets, then stack with NA for absent actors
+			netlet <- get_adjacency_list(
+				dyad_data = dyad_data,
+				actor1 = actor1, actor2 = actor2, time = time,
+				symmetric = symmetric, mode = mode,
+				weight = weight, sum_dyads = sum_dyads,
+				actor_time_uniform = actor_time_uniform,
+				actor_pds = actor_pds,
+				diag_to_NA = diag_to_NA, missing_to_zero = missing_to_zero,
+				nodelist = nodelist
+			)
+			netlet <- stack_adjacency_list(netlet)
+		}
 	}
 
 	if (output_format == "longit_list") {
@@ -378,6 +401,20 @@ netify <- function(
 			actor = actor1, time = time,
 			node_vars = nodal_vars
 		)
+
+		# flag actors that never appear as actor1 and so have no nodal values
+		time_key <- if (is.null(time)) "" else time_to_label(dyad_data[[time]])
+		a1_key <- paste(dyad_data[[actor1]], time_key, sep = "\r")
+		a2_key <- paste(dyad_data[[actor2]], time_key, sep = "\r")
+		only_a2 <- unique(dyad_data[[actor2]][!a2_key %in% a1_key])
+		if (length(only_a2) > 0L) {
+			period_txt <- if (is.null(time)) "" else " in some periods"
+			cli::cli_inform(c(
+				"i" = "{.arg nodal_vars} are read from rows where an actor is {.arg actor1}, so actors that only appear as {.arg actor2}{period_txt} get {.code NA} values.",
+				"*" = "Affected actor{?s}: {.val {only_a2}}.",
+				"i" = "Use {.fn add_node_vars} to supply values for these actors."
+			))
+		}
 	}
 
 	# attach user-supplied dyad vars

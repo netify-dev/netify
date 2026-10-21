@@ -30,8 +30,9 @@
 #'     alters in rings). see \code{\link{get_node_layout}} and \code{\link{get_ego_layout}}
 #'     for full details.}
 #'   \item{\code{point_layout}}{optional data.frame or list of data.frames containing
-#'     pre-computed node positions with columns 'actor', 'x', and 'y'. overrides
-#'     \code{layout} if provided.}
+#'     pre-computed node positions with columns 'actor', 'x', and 'y'. a single
+#'     data.frame is reused for every time period of a longitudinal network.
+#'     overrides \code{layout} if provided.}
 #'   \item{\code{static_actor_positions}}{logical. for longitudinal networks, should
 #'     node positions remain constant across time? default is \code{FALSE}.}
 #'   \item{\code{which_static}}{integer. when \code{static_actor_positions = TRUE},
@@ -66,17 +67,24 @@
 #' @section subsetting parameters:
 #' \describe{
 #'   \item{\code{node_filter}}{a formula, quoted expression, or function to filter nodes.
-#'     the expression can reference any nodal attribute. for example:
+#'     the expression can reference any nodal attribute attached to the netify object.
+#'     network statistics are not computed automatically, so attach them first, e.g.,
+#'     \code{net <- add_node_vars(net, summary_actor(net), actor = "actor")}, after which
 #'     \code{node_filter = ~ degree_total > 5} shows only nodes with total degree
-#'     greater than 5.}
+#'     greater than 5. for longitudinal networks, the filter is applied within each
+#'     time period, and edges are dropped in the periods where an endpoint is filtered out.}
 #'   \item{\code{edge_filter}}{a formula, quoted expression, or function to filter edges.
 #'     the expression can reference any edge attribute, including 'weight' for weighted
 #'     networks. for example: \code{edge_filter = ~ weight > 0.5} shows only edges
 #'     with weight greater than 0.5.}
 #'   \item{\code{time_filter}}{for longitudinal networks, a vector of time periods to include in the plot.
-#'     can be numeric indices or character labels matching the time dimension. if NULL
-#'     (default), all time periods are plotted. for cross-sectional networks, this
-#'     parameter is ignored.}
+#'     can be numeric indices or character labels matching the time dimension. numeric
+#'     values are treated as indices when they are all valid positions (e.g., \code{1:3});
+#'     otherwise, numeric values that all match time labels are treated as labels
+#'     (e.g., \code{time_filter = 2012}). when numeric values could be read either way,
+#'     they are treated as indices, so pass labels as character (e.g., \code{"2012"}) to
+#'     avoid ambiguity. if NULL (default), all time periods are plotted. for
+#'     cross-sectional networks, this parameter is ignored.}
 #' }
 #'
 #' @section node aesthetics:
@@ -338,6 +346,12 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 
 		# check if it's a longitudinal network
 		if (obj_attrs$netify_type != "cross_sec") {
+			# resolve indices versus time labels
+			time_subset <- resolve_time_filter(
+				time_subset,
+				as.character(netify_measurements(x)$time)
+			)
+
 			# subset the netify object for the specified time periods
 			x <- subset(x, time = time_subset)
 
@@ -415,11 +429,15 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 
 			# update edge data to remove edges connected to filtered nodes
 			if (nrow(net_dfs$edge_data) > 0) {
-				remaining_nodes <- net_dfs$nodal_data$name
+				plot_ids <- plot_node_edge_ids(
+					net_dfs$nodal_data,
+					net_dfs$edge_data,
+					id_cols = c("time", "layer")
+				)
 
 				# keep only edges where both endpoints are in remaining nodes
-				edges_to_keep <- net_dfs$edge_data$from %in% remaining_nodes &
-					net_dfs$edge_data$to %in% remaining_nodes
+				edges_to_keep <- plot_ids$from %in% plot_ids$node &
+					plot_ids$to %in% plot_ids$node
 
 				net_dfs$edge_data <- net_dfs$edge_data[edges_to_keep, , drop = FALSE]
 			}
@@ -441,30 +459,17 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 
 			# remove orphaned node rows
 			if (plot_args$remove_isolates && nrow(net_dfs$edge_data) > 0) {
-				# get nodes that still have edges after filtering
-				remaining_nodes <- unique(c(net_dfs$edge_data$from, net_dfs$edge_data$to))
+				# match nodes to remaining edges by name and time period
+				id_cols <- if (obj_attrs$netify_type != "cross_sec") "time" else character(0)
+				plot_ids <- plot_node_edge_ids(
+					net_dfs$nodal_data,
+					net_dfs$edge_data,
+					id_cols = id_cols
+				)
 
-				# add time dimension if longitudinal
-				if (obj_attrs$netify_type != "cross_sec") {
-					remaining_node_time <- unique(net_dfs$edge_data[, c("from", "to", "time")])
-					remaining_combos <- unique(rbind(
-						data.frame(name = remaining_node_time$from, time = remaining_node_time$time),
-						data.frame(name = remaining_node_time$to, time = remaining_node_time$time)
-					))
-
-					# create matching id
-					remaining_combos$id <- paste(remaining_combos$name, remaining_combos$time, sep = "_")
-					net_dfs$nodal_data$id <- paste(net_dfs$nodal_data$name, net_dfs$nodal_data$time, sep = "_")
-
-					# keep only nodes that still have connections
-					net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$id %in% remaining_combos$id, ]
-
-					# remove temporary id column
-					net_dfs$nodal_data$id <- NULL
-				} else {
-					# cross-sectional case
-					net_dfs$nodal_data <- net_dfs$nodal_data[net_dfs$nodal_data$name %in% remaining_nodes, ]
-				}
+				# keep only nodes that still have connections
+				has_edges <- plot_ids$node %in% c(plot_ids$from, plot_ids$to)
+				net_dfs$nodal_data <- net_dfs$nodal_data[has_edges, ]
 			}
 		}
 	}
@@ -1130,6 +1135,71 @@ plot.netify <- function(x, auto_format = TRUE, ...) {
 
 	# return the final assembled plot
 	return(viz)
+}
+
+#' resolve a time_filter value against the available time labels
+#'
+#' numeric values are treated as indices when they are all valid positions,
+#' otherwise as time labels when they all match a label.
+#'
+#' @param time_filter numeric or character vector supplied by the user
+#' @param time_labels character vector of time labels in the network
+#'
+#' @return the value to pass to `subset_netify(time = )`
+#'
+#' @keywords internal
+#' @noRd
+
+resolve_time_filter <- function(time_filter, time_labels) {
+	if (is.numeric(time_filter)) {
+		is_index <- all(time_filter %in% seq_along(time_labels))
+		is_label <- all(as.character(time_filter) %in% time_labels)
+		if (is_index) {
+			return(time_filter)
+		}
+		if (is_label) {
+			return(as.character(time_filter))
+		}
+	} else if (any(as.character(time_filter) %in% time_labels)) {
+		return(time_filter)
+	}
+
+	cli::cli_abort(c(
+		"x" = "{.arg time_filter} does not match any time period in this network.",
+		"i" = "Use positions 1 to {length(time_labels)} or time labels.",
+		"i" = "Available time periods: {.val {time_labels}}."
+	))
+}
+
+#' build matching ids for plotted nodes and edge endpoints
+#'
+#' @param nodal_data data frame containing node information
+#' @param edge_data data frame containing edge information
+#' @param id_cols columns besides the actor name to match on, used when
+#'   present in both data frames
+#'
+#' @return list with `node`, `from`, and `to` id vectors
+#'
+#' @keywords internal
+#' @noRd
+
+plot_node_edge_ids <- function(nodal_data, edge_data, id_cols) {
+	id_cols <- intersect(id_cols, intersect(names(nodal_data), names(edge_data)))
+	build_ids <- function(actor, df) {
+		do.call(paste, c(list(actor), unname(as.list(df[id_cols])), sep = "__|__"))
+	}
+	node_ids <- build_ids(nodal_data$name, nodal_data)
+	from_ids <- build_ids(edge_data$from, edge_data)
+	to_ids <- build_ids(edge_data$to, edge_data)
+
+	# bipartite edges run from row actors to col actors
+	if ("actor_mode" %in% names(nodal_data)) {
+		node_ids <- paste(node_ids, nodal_data$actor_mode, sep = "__|__")
+		from_ids <- paste(from_ids, "row", sep = "__|__")
+		to_ids <- paste(to_ids, "col", sep = "__|__")
+	}
+
+	list(node = node_ids, from = from_ids, to = to_ids)
 }
 
 #' apply edge filter expression to edge data

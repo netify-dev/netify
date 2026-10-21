@@ -113,19 +113,11 @@ graph_stats_for_netlet <- function(mat, obj_attrs, summary_args) {
 	} else {
 		num_edges <- raw_nonzero
 	}
-	if (obj_attrs$diag_to_NA && n_row == n_col) {
-		max_possible <- if (is_symm) {
-			n_row * (n_row - 1) / 2
-		} else {
-			n_row * (n_row - 1)
-		}
-		density <- num_edges / max(max_possible, 1)
-	} else if (is_symm && n_row == n_col) {
-		# symmetric with diag included: self-loops count as potential edges
-		max_possible <- n_row * (n_row + 1) / 2
-		density <- num_edges / max(max_possible, 1)
+	# density over potential edges with an observed value
+	if (n_row == n_col) {
+		density <- num_edges / max(poss - na_count, 1)
 	} else {
-		density <- mean(vec_bin_mat)
+		density <- num_edges / max(length(vec_mat) - n_na, 1)
 	}
 
 	# competition measures - vectorized

@@ -19,9 +19,13 @@
 #' @param from character vector of actor names or numeric indices for actors sending
 #'   ties (row actors). overrides \code{actors}. set to NULL to include all
 #'   sending actors. in bipartite networks, this refers to actors in the first mode.
+#'   in unipartite networks, the result stays square over the union of \code{from}
+#'   and \code{to} actors, and ties outside the \code{from} x \code{to} block are
+#'   set to NA.
 #' @param to character vector of actor names or numeric indices for actors receiving
 #'   ties (column actors). overrides \code{actors}. set to NULL to include all
 #'   receiving actors. in bipartite networks, this refers to actors in the second mode.
+#'   in unipartite networks, see \code{from} for how the two selections combine.
 #' @param ... additional arguments (currently unused)
 #'
 #' @return a netify object containing the requested subset with:
@@ -59,8 +63,15 @@
 #'   \item use both \code{from} and \code{to} to get ties between specific sets of actors
 #' }
 #'
+#' for unipartite networks, a \code{from}/\code{to} subset keeps a square matrix
+#' over the union of the selected actors (in their original order), so the result
+#' remains a valid unipartite network. cells for ties that are not sent by a
+#' \code{from} actor to a \code{to} actor are set to NA. for symmetric networks,
+#' ties in either direction between the two sets are kept.
+#'
 #' for bipartite networks, \code{from} refers to actors in the first mode (e.g.,
 #' people) and \code{to} refers to actors in the second mode (e.g., organizations).
+#' selections must include actors from both modes.
 #'
 #' @note
 #' when subsetting longitudinal data to a single time period, the function automatically
@@ -212,17 +223,18 @@ subset_netify <- function(
 		if (is.null(time)) {
 			time_values <- msrmnts$time
 		} else if (is.numeric(time)) {
-			time_idx <- time[time >= 1 & time <= length(msrmnts$time)]
-			if (length(time_idx) == 0L) {
+			# keep requested periods in netlet order
+			time_idx <- seq_along(msrmnts$time) %in% time
+			if (!any(time_idx)) {
 				cli::cli_abort("No valid time periods selected.")
 			}
 			time_values <- msrmnts$time[time_idx]
 		} else {
-			time_values <- msrmnts$time[match(as.character(time), as.character(msrmnts$time))]
-			time_values <- time_values[!is.na(time_values)]
-			if (length(time_values) == 0L) {
+			time_idx <- as.character(msrmnts$time) %in% as.character(time)
+			if (!any(time_idx)) {
 				cli::cli_abort("No valid time periods selected.")
 			}
+			time_values <- msrmnts$time[time_idx]
 		}
 		n_time_out <- length(time_values)
 		is_longit_out <- n_time_out > 1
@@ -230,15 +242,69 @@ subset_netify <- function(
 		is_longit_out <- FALSE
 	}
 
+	# unipartite from/to selections keep a square actor set
+	is_bipartite_in <- identical(obj_attrs$mode, "bipartite")
+	square_from_to <- !is_bipartite_in && !identical(from, to)
+
 	# use peek to subset data with new parameter names
 	sub_net <- peek(
 		netlet,
-		from = from,
-		to = to,
+		from = if (square_from_to) NULL else from,
+		to = if (square_from_to) NULL else to,
 		time = time_values %||% time,
 		layers = layers,
 		drop_dimensions = !is_multilayer_out
 	)
+
+	# restrict to the union of from and to actors and mask other cells
+	if (square_from_to) {
+		symmetric_mask <- isTRUE(all(obj_attrs$symmetric))
+		if (is.list(sub_net)) {
+			sub_net <- lapply(
+				sub_net,
+				mask_from_to,
+				from = from,
+				to = to,
+				symmetric = symmetric_mask
+			)
+		} else {
+			sub_net <- mask_from_to(
+				sub_net,
+				from = from,
+				to = to,
+				symmetric = symmetric_mask
+			)
+		}
+	}
+
+	# stop when a bipartite selection leaves one mode empty
+	if (is_bipartite_in) {
+		sub_list <- if (is.list(sub_net)) sub_net else list(sub_net)
+		no_rows <- all(vapply(sub_list, NROW, integer(1)) == 0L)
+		no_cols <- all(vapply(sub_list, NCOL, integer(1)) == 0L)
+		if (no_rows || no_cols) {
+			empty_mode <- if (no_rows) "row (first-mode)" else "column (second-mode)"
+			fix_hint <- if (!is.null(actors)) {
+				"Include actors from both modes in {.arg actors}, or use {.arg from} for row actors and {.arg to} for column actors."
+			} else {
+				"Check that {.arg from} lists row actors and {.arg to} lists column actors."
+			}
+			cli::cli_abort(c(
+				"x" = "The selection leaves no {empty_mode} actors in this bipartite network.",
+				"i" = fix_hint
+			))
+		}
+	}
+
+	# drop the time dimension of a single-period multilayer array
+	if (netify_type == "longit_array" && is_multilayer_out && !is_longit_out) {
+		sub_dims <- dim(sub_net)
+		sub_net <- array(
+			sub_net,
+			dim = sub_dims[1:3],
+			dimnames = dimnames(sub_net)[1:3]
+		)
+	}
 
 	# rebuild the netify structure on top of peek's raw matrices
 	if (netify_type == "longit_list" && is.list(sub_net)) {
@@ -401,16 +467,18 @@ subset_netify <- function(
 		actor_pds <- new_attrs$actor_pds
 		actor_pds_subset <- actor_pds[actor_pds$actor %in% all_actors, , drop = FALSE]
 
-			if (is_longit && !is_longit_out) {
-				# update time bounds
-				if (is.numeric(time)) {
-					time_val <- time_values
-				} else {
-					time_val <- time_values
-				}
-				actor_pds_subset$min_time <- time_val[1]
-				actor_pds_subset$max_time <- time_val[length(time_val)]
-			}
+		if (is_longit && !is_longit_out) {
+			# set bounds to the single retained period
+			actor_pds_subset$min_time <- time_values[1]
+			actor_pds_subset$max_time <- time_values[length(time_values)]
+		} else if (is_longit && nrow(actor_pds_subset) > 0L) {
+			# clip actor windows to the retained periods
+			actor_pds_subset <- clip_actor_pds_to_time(
+				actor_pds_subset,
+				orig_labels = msrmnts$time,
+				kept_labels = time_values
+			)
+		}
 		new_attrs$actor_pds <- actor_pds_subset
 	}
 
@@ -446,6 +514,11 @@ subset_netify <- function(
 			dyad_data <- dyad_data[as.character(time_values)]
 		}
 
+		# cross-sectional dyad data is keyed by "1"
+		if (is_longit && !is_longit_out) {
+			names(dyad_data) <- "1"
+		}
+
 		# process each time period
 		new_attrs$dyad_data <- lapply(dyad_data, function(time_data) {
 			# process each variable matrix
@@ -475,4 +548,45 @@ subset_netify <- function(
 	}
 
 	return(sub_net)
+}
+
+#' restrict a unipartite slice to the union of from and to actors
+#'
+#' keeps rows and columns for every actor in \code{from} or \code{to}
+#' (in original order) and sets cells outside \code{from} x \code{to}
+#' to NA. for symmetric networks the transposed block is kept as well.
+#' extra dimensions (layers, time) are carried through unchanged.
+#'
+#' @param arr matrix or array with actors on the first two dimensions
+#' @param from row actor selection passed to \code{process_actor_selection}
+#' @param to column actor selection passed to \code{process_actor_selection}
+#' @param symmetric logical, keep the transposed block as well
+#'
+#' @return matrix or array over the union of selected actors
+#'
+#' @keywords internal
+#' @noRd
+mask_from_to <- function(arr, from, to, symmetric = FALSE) {
+	actor_names <- dimnames(arr)[[1]]
+	n_actors <- length(actor_names)
+	from_idx <- process_actor_selection(from, actor_names, n_actors)
+	to_idx <- process_actor_selection(to, actor_names, n_actors)
+	keep <- sort(unique(c(from_idx, to_idx)))
+
+	# mark cells between from and to actors
+	in_block <- matrix(FALSE, n_actors, n_actors)
+	in_block[from_idx, to_idx] <- TRUE
+	if (symmetric) {
+		in_block <- in_block | t(in_block)
+	}
+	in_block <- in_block[keep, keep, drop = FALSE]
+
+	# subset the actor dimensions and keep the rest
+	extra_dims <- rep(list(TRUE), length(dim(arr)) - 2L)
+	out <- do.call(
+		`[`,
+		c(list(arr, keep, keep), extra_dims, list(drop = FALSE))
+	)
+	out[rep(!as.vector(in_block), length.out = length(out))] <- NA
+	out
 }

@@ -88,3 +88,15 @@ test_that("plot network-statistic hint includes time for longitudinal networks",
 		regexp = "add_node_vars.*time = \"time\""
 	)
 })
+
+test_that("label aesthetic mappings do not trigger unknown parameter warnings", {
+	data(classroom_edges)
+	net = suppressMessages(netify(classroom_edges, actor1 = "from", actor2 = "to"))
+	net = add_node_vars(net, summary_actor(net), actor = "actor")
+
+	for (arg in c("label_size_by", "label_color_by", "label_fill_by", "label_alpha_by")) {
+		args = list(net, add_label = TRUE, return_components = TRUE)
+		args[[arg]] = "degree"
+		expect_no_warning(do.call(plot, args), message = "Unknown parameter")
+	}
+})

@@ -76,7 +76,9 @@
 #' \strong{bipartite networks:}
 #'
 #' for bipartite networks, the default layout arranges the two node sets in separate
-#' columns.
+#' columns. when the same actor name appears in both node sets, the \code{actor}
+#' column prefixes the names with \code{"row:"} and \code{"col:"} so that each
+#' node set keeps its own position.
 #'
 #' @author cassy dorff, shahryar minhas
 #'
@@ -207,6 +209,7 @@ get_node_layout <- function(
 	}
 
 	# get the actual layout function from igraph
+	layout_name <- layout_fun
 	layout_fun <- switch(layout_fun,
 		nicely = igraph::layout_nicely,
 		bipartite = igraph::layout_as_bipartite,
@@ -228,6 +231,13 @@ get_node_layout <- function(
 		gem = igraph::layout_with_gem,
 		mds = igraph::layout_with_mds
 	)
+
+	# sugiyama returns a list; keep only the vertex coordinates
+	if (layout_name == "sugiyama") {
+		layout_fun <- function(graph) {
+			igraph::layout_with_sugiyama(graph)$layout
+		}
+	}
 
 	# handle cross-sectional case first (simpler)
 	if (netify_type == "cross_sec") {
@@ -377,10 +387,25 @@ create_union_graph <- function(g_list, obj_attrs) {
 	}
 
 	# create igraph object from union
-	igraph::graph_from_adjacency_matrix(
+	is_bipartite <- identical(obj_attrs$mode, "bipartite")
+	union_mode <- if (is_bipartite || all(obj_attrs$symmetric)) "undirected" else "directed"
+	g_union <- igraph::graph_from_adjacency_matrix(
 		union_adj,
-		mode = ifelse(all(obj_attrs$symmetric), "undirected", "directed"),
+		mode = union_mode,
 		weighted = TRUE,
 		diag = FALSE
 	)
+
+	# carry over vertex types for bipartite layouts
+	if (is_bipartite) {
+		vertex_names <- unlist(lapply(g_list, function(x) igraph::V(x)$name))
+		vertex_types <- unlist(lapply(g_list, function(x) igraph::V(x)$type))
+		g_union <- igraph::set_vertex_attr(
+			g_union,
+			name = "type",
+			value = vertex_types[match(igraph::V(g_union)$name, vertex_names)]
+		)
+	}
+
+	g_union
 }

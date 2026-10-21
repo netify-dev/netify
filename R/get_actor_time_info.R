@@ -273,6 +273,63 @@ actor_time_range <- function(min_time, max_time, time_labels = NULL) {
 	))
 }
 
+#' Clip actor periods to a subset of time periods
+#'
+#' Resolves each actor's window against the original time labels and sets
+#' `min_time` and `max_time` to the first and last retained period in that
+#' window. Actors with no retained periods are dropped.
+#'
+#' @param actor_pds The `actor_pds` data.frame from the original netlet.
+#' @param orig_labels Time labels of the original netlet.
+#' @param kept_labels Time labels of the subsetted netlet, in its order.
+#' @return An `actor_pds` data.frame whose bounds are valid against
+#'   `kept_labels`.
+#' @author shahryar minhas
+#' @keywords internal
+#' @noRd
+
+clip_actor_pds_to_time <- function(actor_pds, orig_labels, kept_labels) {
+	orig_labels <- as.character(orig_labels)
+	kept_labels <- as.character(kept_labels)
+
+	# find first and last retained period for each actor
+	n_actors <- nrow(actor_pds)
+	first_pos <- last_pos <- rep(NA_integer_, n_actors)
+	for (ii in seq_len(n_actors)) {
+		active <- actor_time_range(
+			actor_pds$min_time[ii],
+			actor_pds$max_time[ii],
+			orig_labels
+		)
+		pos <- which(kept_labels %in% as.character(active))
+		if (length(pos) > 0L) {
+			first_pos[ii] <- pos[1]
+			last_pos[ii] <- pos[length(pos)]
+		}
+	}
+
+	# keep label bounds as labels and index bounds as indices
+	by_label <- as.character(actor_pds$min_time) %in% orig_labels &
+		as.character(actor_pds$max_time) %in% orig_labels
+	set_bound <- function(col, pos) {
+		vals <- kept_labels[pos[by_label]]
+		if (is.numeric(col)) {
+			vals <- as.numeric(vals)
+		} else if (inherits(col, "Date")) {
+			vals <- as.Date(vals)
+		}
+		col[by_label] <- vals
+		col[!by_label] <- pos[!by_label]
+		col
+	}
+	actor_pds$min_time <- set_bound(actor_pds$min_time, first_pos)
+	actor_pds$max_time <- set_bound(actor_pds$max_time, last_pos)
+
+	actor_pds <- actor_pds[!is.na(first_pos), , drop = FALSE]
+	rownames(actor_pds) <- NULL
+	actor_pds
+}
+
 #' derive actor periods attribute from netlet
 #'
 #' @param netlet multilayer netlet object

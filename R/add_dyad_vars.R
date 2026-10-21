@@ -248,7 +248,10 @@ add_dyad_vars <- function(
 
 	# pre-split dyad_data by time
 	if (!is.null(time) & attributes(netlet)$netify_type != "cross_sec") {
-		time_indices <- split(seq_len(nrow(dyad_data)), dyad_data[, time])
+		time_indices <- split(
+			seq_len(nrow(dyad_data)),
+			time_to_label(dyad_data[[time]])
+		)
 		dyad_actor1 <- dyad_data[, actor1]
 		dyad_actor2 <- dyad_data[, actor2]
 	}

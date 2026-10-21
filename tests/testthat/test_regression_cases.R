@@ -589,7 +589,7 @@ test_that("subset_netify preserves attributes for numeric time selections", {
 	expect_equal(dim(out), c(2L, 2L))
 	expect_equal(attr(out, "actor_pds")$min_time, rep("2002", 2))
 	expect_equal(attr(out, "nodal_data")$nv, c(30, 40))
-	expect_equal(names(attr(out, "dyad_data")), "2002")
+	expect_equal(names(attr(out, "dyad_data")), "1")
 	expect_true("cov" %in% names(attr(out, "dyad_data")[[1]]))
 })
 
@@ -1149,4 +1149,141 @@ test_that("bipartite unnetify and plot keep positional diagonal ties", {
 	plot_edges = components$net_dfs$edge_data
 	plot_keys = paste(plot_edges$from, plot_edges$to, sep = " -> ")
 	expect_setequal(plot_keys, expected)
+})
+
+test_that("symmetric = TRUE warns when reverse-direction weights differ", {
+	df = data.frame(a = c("A", "B"), b = c("B", "A"), w = c(5, 1))
+
+	expect_warning(
+		netify(df, actor1 = "a", actor2 = "b", weight = "w"),
+		"1 dyad has different weights"
+	)
+
+	# agreeing weights, directed input, and unweighted input stay silent
+	same = data.frame(a = c("A", "B"), b = c("B", "A"), w = c(5, 5))
+	expect_no_warning(netify(same, actor1 = "a", actor2 = "b", weight = "w"))
+	expect_no_warning(
+		netify(df, actor1 = "a", actor2 = "b", weight = "w", symmetric = FALSE)
+	)
+	expect_no_warning(netify(df, actor1 = "a", actor2 = "b"))
+
+	# summing both directions resolves the conflict
+	summed = expect_no_warning(
+		netify(df, actor1 = "a", actor2 = "b", weight = "w", sum_dyads = TRUE)
+	)
+	expect_equal(as.matrix(summed)["A", "B"], 6)
+})
+
+test_that("symmetric conflict warning fires once per longitudinal call", {
+	df = data.frame(
+		a = c("A", "B", "A", "B"),
+		b = c("B", "A", "B", "A"),
+		t = c(1, 1, 2, 2),
+		w = c(5, 1, 2, 3)
+	)
+
+	for (fmt in c("longit_list", "longit_array")) {
+		warns = character(0)
+		withCallingHandlers(
+			netify(df, actor1 = "a", actor2 = "b", time = "t", weight = "w",
+				output_format = fmt),
+			warning = function(w) {
+				warns <<- c(warns, conditionMessage(w))
+				invokeRestart("muffleWarning")
+			}
+		)
+		expect_length(warns, 1)
+		expect_match(warns, "2 dyads have different weights")
+	}
+
+	# the same pair in different periods is not a conflict
+	split_df = data.frame(a = c("A", "B"), b = c("B", "A"), t = c(1, 2), w = c(5, 1))
+	expect_no_warning(
+		netify(split_df, actor1 = "a", actor2 = "b", time = "t", weight = "w")
+	)
+})
+
+test_that("longit_array honours actor_pds and actor_time_uniform = FALSE", {
+	df = data.frame(
+		i = c("a", "b", "c", "a", "d", "b"),
+		j = c("b", "c", "a", "d", "b", "c"),
+		t = c(2000, 2000, 2000, 2010, 2010, 2010)
+	)
+	ap = data.frame(
+		actor = c("a", "b", "c", "d"),
+		min_time = c(2000, 2000, 2000, 2010),
+		max_time = c(2010, 2010, 2000, 2010)
+	)
+
+	arr = netify(df, actor1 = "i", actor2 = "j", time = "t",
+		output_format = "longit_array", actor_pds = ap)
+	lst = netify(df, actor1 = "i", actor2 = "j", time = "t", actor_pds = ap)
+
+	expect_equal(attr(arr, "netify_type"), "longit_array")
+	expect_false(attr(arr, "actor_time_uniform"))
+	expect_equal(attr(arr, "actor_pds"), attr(lst, "actor_pds"))
+	expect_true(all(is.na(arr["d", , "2000"])))
+	expect_true(all(is.na(arr[, "d", "2000"])))
+	expect_true(all(is.na(arr["c", , "2010"])))
+	expect_equal(arr["a", "b", "2000"], 1)
+	expect_equal(summary(arr)$density, summary(lst)$density)
+	expect_equal(summary(arr)$num_actors, summary(lst)$num_actors)
+
+	# data-driven actor windows
+	arr_auto = netify(df, actor1 = "i", actor2 = "j", time = "t",
+		output_format = "longit_array", actor_time_uniform = FALSE)
+	expect_false(attr(arr_auto, "actor_time_uniform"))
+	expect_true(all(is.na(arr_auto["d", , "2000"])))
+
+	# default array keeps every actor in every period
+	arr_unif = netify(df, actor1 = "i", actor2 = "j", time = "t",
+		output_format = "longit_array")
+	expect_true(attr(arr_unif, "actor_time_uniform"))
+	expect_equal(arr_unif["d", "a", "2000"], 0)
+})
+
+test_that("stored actor_pds uses time labels for non-numeric time", {
+	df = data.frame(
+		i = c("a", "b", "a", "c", "b", "c"),
+		j = c("b", "c", "c", "a", "a", "b"),
+		t = c("x", "x", "y", "y", "z", "z")
+	)
+
+	for (atu in c(TRUE, FALSE)) {
+		net = netify(df, actor1 = "i", actor2 = "j", time = "t",
+			actor_time_uniform = atu)
+		pds = get_actor_time_info(net)
+		expect_type(pds$min_time, "character")
+		expect_true(all(c(pds$min_time, pds$max_time) %in% names(net)))
+	}
+
+	# integer positions supplied for character time are stored as labels
+	ap = data.frame(actor = c("a", "b", "c"), min_time = c(1, 2, 1), max_time = 3)
+	net = netify(df, actor1 = "i", actor2 = "j", time = "t", actor_pds = ap)
+	expect_equal(attr(net, "actor_pds")$min_time, c("x", "y", "x"))
+	expect_equal(attr(net, "actor_pds")$max_time, rep("z", 3))
+
+	# date time is stored as Date and array bounds match the time class
+	date_df = df
+	date_df$t = as.Date("2020-01-01") + c(0, 0, 7, 7, 14, 14)
+	date_net = netify(date_df, actor1 = "i", actor2 = "j", time = "t",
+		actor_time_uniform = FALSE)
+	expect_s3_class(attr(date_net, "actor_pds")$min_time, "Date")
+	num_df = df
+	num_df$t = c(2000, 2000, 2001, 2001, 2002, 2002)
+	num_arr = netify(num_df, actor1 = "i", actor2 = "j", time = "t",
+		output_format = "longit_array")
+	expect_equal(unique(attr(num_arr, "actor_pds")$min_time), 2000)
+})
+
+test_that("nodal_vars notes actors that only appear as actor2", {
+	df = data.frame(i = c("a", "b", "c"), j = c("b", "c", "d"), xi = c(1, 2, 3))
+
+	expect_message(
+		net <- netify(df, actor1 = "i", actor2 = "j", nodal_vars = "xi"),
+		"only appear as"
+	)
+	nd = attr(net, "nodal_data")
+	expect_equal(nd$xi[nd$actor == "a"], 1)
+	expect_true(is.na(nd$xi[nd$actor == "d"]))
 })

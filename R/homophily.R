@@ -48,7 +48,7 @@
 #'     \item{\code{threshold_value}}{threshold used for determining ties (na for binary networks)}
 #'     \item{\code{homophily_correlation}}{correlation between similarity and tie presence (binary: tie/no tie)}
 #'     \item{\code{mean_similarity_connected}}{mean similarity among connected pairs (weight > threshold)}
-#'     \item{\code{mean_similarity_unconnected}}{mean similarity among unconnected pairs (weight <= threshold or missing)}
+#'     \item{\code{mean_similarity_unconnected}}{mean similarity among unconnected pairs (weight <= threshold). pairs with a missing tie value are excluded from both groups.}
 #'     \item{\code{similarity_difference}}{difference between connected and unconnected mean similarities}
 #'     \item{\code{p_value}}{permutation test p-value}
 #'     \item{\code{ci_lower}, \code{ci_upper}}{confidence interval bounds}
@@ -80,7 +80,9 @@
 #' for categorical/binary attributes:
 #' \itemize{
 #'   \item \code{categorical}: simple matching (1 if same, 0 if different)
-#'   \item \code{jaccard}: for binary data, emphasizes shared presence over shared absence
+#'   \item \code{jaccard}: for binary data, emphasizes shared presence over shared absence.
+#'     logical attributes use \code{TRUE} as presence; for two-category character or
+#'     factor attributes the second level (alphabetical order for characters) marks presence
 #'   \item \code{hamming}: counts positions where values differ (negated for similarity)
 #' }
 #'
@@ -318,6 +320,9 @@ homophily <- function(
 					net_matrix <- netlet[, , layer_index]
 				} else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
 					# for longit multilayer: 4d array [actors, actors, layers, time]
+					net_matrix <- net_matrix[, , layer_index]
+				} else if (netify_type == "longit_list" && length(dim(net_matrix)) == 3) {
+					# for longit list multilayer: each period is [actors, actors, layers]
 					net_matrix <- net_matrix[, , layer_index]
 				}
 			}
@@ -559,14 +564,28 @@ homophily <- function(
 #' @keywords internal
 #' @noRd
 calculate_similarity_matrix <- function(attributes, method) {
-	# convert factors/characters to numeric for categorical method
-	if (method == "categorical" && !is.numeric(attributes)) {
-		attributes <- as.numeric(as.factor(attributes))
+	# encode non-numeric attributes for the categorical-style methods
+	if (!is.numeric(attributes) && method %in% c("categorical", "hamming", "jaccard")) {
+		if (is.logical(attributes)) {
+			attributes <- as.numeric(attributes)
+		} else if (method == "jaccard") {
+			# first level marks absence, second level marks presence
+			attr_factor <- if (is.factor(attributes)) attributes else factor(attributes)
+			if (nlevels(droplevels(attr_factor)) > 2) {
+				cli::cli_abort(c(
+					"x" = "{.code method = \"jaccard\"} needs a binary (two-category) attribute.",
+					"i" = "Use {.code method = \"categorical\"} or {.code method = \"hamming\"} for attributes with more than two categories."
+				))
+			}
+			attributes <- as.numeric(attr_factor) - 1
+		} else {
+			attributes <- as.numeric(as.factor(attributes))
+		}
 	}
 
 	# require numeric attributes
 	if (!is.numeric(attributes)) {
-		stop("Attributes must be numeric or convertible to numeric")
+		cli::cli_abort("Attributes must be numeric or convertible to numeric.")
 	}
 
 	# call the cpp version

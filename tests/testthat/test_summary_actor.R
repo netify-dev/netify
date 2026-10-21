@@ -62,6 +62,7 @@ test_that("summary_actor works for symmetric networks", {
 		icews_10,
 		actor1 = "i", actor2 = "j",
 		symmetric = TRUE,
+		sum_dyads = TRUE,
 		weight = "verbCoop"
 	)
 
@@ -165,8 +166,8 @@ test_that("summary_actor works for multilayer networks", {
 	data(icews)
 	icews_10 = icews[icews$year == 2010, ]
 
-	net1 = netify(icews_10, actor1 = "i", actor2 = "j", weight = "verbCoop")
-	net2 = netify(icews_10, actor1 = "i", actor2 = "j", weight = "matlCoop")
+	net1 = netify(icews_10, actor1 = "i", actor2 = "j", weight = "verbCoop", sum_dyads = TRUE)
+	net2 = netify(icews_10, actor1 = "i", actor2 = "j", weight = "matlCoop", sum_dyads = TRUE)
 
 	multi_net = layer_netify(
 		list(net1, net2),
@@ -188,6 +189,7 @@ test_that("summary_actor handles custom statistics correctly", {
 	net = netify(
 		icews_10,
 		actor1 = "i", actor2 = "j",
+		sum_dyads = TRUE,
 		weight = "verbCoop"
 	)
 
@@ -235,6 +237,38 @@ test_that("summary_actor handles bipartite networks", {
 	expect_equal(nrow(actor_stats), 8) # 5 + 3 actors
 
 	expect_true("degree_total" %in% names(actor_stats))
+	expect_false("actor_mode" %in% names(actor_stats))
+})
+
+test_that("summary_actor returns plain names for actors in both bipartite modes", {
+	bip_data = data.frame(
+		a = c("p1", "p1", "p2", "x"),
+		b = c("o1", "x", "o2", "o3"),
+		w = 1:4
+	)
+	net_bip = netify(bip_data, actor1 = "a", actor2 = "b", mode = "bipartite", weight = "w")
+
+	actor_stats = summary_actor(net_bip)
+
+	expect_false(any(grepl("^(row|col):", actor_stats$actor)))
+	expect_equal(names(actor_stats)[1:2], c("actor", "actor_mode"))
+	expect_equal(nrow(actor_stats), 7)
+	expect_equal(sum(actor_stats$actor == "x"), 2)
+	expect_equal(
+		actor_stats$actor_mode[actor_stats$actor == "x"],
+		c("row", "col")
+	)
+	expect_false(anyDuplicated(actor_stats[, c("actor", "actor_mode")]) > 0)
+
+	# row-mode x has one tie worth 4, col-mode x has one tie worth 2
+	x_row = actor_stats[actor_stats$actor == "x" & actor_stats$actor_mode == "row", ]
+	x_col = actor_stats[actor_stats$actor == "x" & actor_stats$actor_mode == "col", ]
+	expect_equal(x_row$strength_sum_total, 4)
+	expect_equal(x_col$strength_sum_total, 2)
+
+	fast_stats = summary_actor(net_bip, stats = "fast")
+	expect_equal(fast_stats$actor, actor_stats$actor)
+	expect_equal(fast_stats$actor_mode, actor_stats$actor_mode)
 })
 
 test_that("summary_actor handles ego networks", {
@@ -244,6 +278,7 @@ test_that("summary_actor handles ego networks", {
 	net = netify(
 		icews,
 		actor1 = "i", actor2 = "j", time = "year",
+		sum_dyads = TRUE,
 		weight = "verbCoop"
 	)
 
@@ -274,7 +309,7 @@ test_that("summary_actor produces consistent output structure", {
 	expect_true(nrow(stats_directed) > 0)
 
 	# test undirected network
-	net_undirected = netify(icews_10, "i", "j", symmetric = TRUE, weight = "verbCoop")
+	net_undirected = netify(icews_10, "i", "j", symmetric = TRUE, weight = "verbCoop", sum_dyads = TRUE)
 	stats_undirected = summary_actor(net_undirected)
 
 	expect_s3_class(stats_undirected, "data.frame")

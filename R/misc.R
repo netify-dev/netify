@@ -177,7 +177,7 @@ convert_time_to_numeric <- function(time_data, time_col = "time") {
 
 		return(list(
 			numeric_time = time_mapping[time_keys],
-			time_labels = format(unique_times, "%Y-%m-%d %H:%M:%S %Z"),
+			time_labels = time_to_label(unique_times),
 			original_class = original_class
 		))
 	}
@@ -203,6 +203,52 @@ convert_time_to_numeric <- function(time_data, time_col = "time") {
 
 	# this shouldn't happen if time_check is working correctly
 	cli::cli_abort("Unsupported time variable type: {original_class}")
+}
+
+#' format time values as netlet time labels
+#'
+#' internal helper that formats raw time values the same way
+#' `convert_time_to_numeric()` formats time labels, so that attribute data
+#' can be joined to a netlet by time.
+#'
+#' @param x vector of time values
+#'
+#' @return character vector of time labels
+#'
+#' @keywords internal
+#' @noRd
+
+time_to_label <- function(x) {
+	if (inherits(x, c("POSIXct", "POSIXlt"))) {
+		return(format(as.POSIXct(x), "%Y-%m-%d %H:%M:%S %Z"))
+	}
+	char(x)
+}
+
+#' map internal numeric time values back to time labels
+#'
+#' internal helper that converts values on the numeric time scale returned
+#' by `convert_time_to_numeric()` back to labels. numeric time stays
+#' numeric, date time is returned as `Date`, and all other classes are
+#' returned as character labels.
+#'
+#' @param x numeric vector on the internal time scale
+#' @param time_info list returned by `convert_time_to_numeric()`
+#'
+#' @return vector of time labels
+#'
+#' @keywords internal
+#' @noRd
+
+numeric_time_to_label <- function(x, time_info) {
+	if (time_info$original_class %in% c("numeric", "integer")) {
+		return(as.numeric(x))
+	}
+	labels <- time_info$time_labels[x]
+	if (identical(time_info$original_class, "Date")) {
+		return(as.Date(labels))
+	}
+	labels
 }
 
 #' unique_vector
@@ -371,6 +417,30 @@ array_to_list <- function(arr, preserveAttr = TRUE) {
 	})
 	names(l) <- dimnames(arr)[[3]]
 
+	# drop actors outside their active periods
+	time_labels <- dimnames(arr)[[3]]
+	if (isFALSE(attr(arr, "actor_time_uniform")) &&
+		!is.null(attr(arr, "actor_pds")) && !is.null(time_labels)) {
+		active <- actor_pds_to_frame(attr(arr, "actor_pds"), time_labels)
+		active_by_time <- split(
+			active$actor,
+			factor(active$time, levels = time_labels)
+		)
+		row_actors <- dimnames(arr)[[1]]
+		col_actors <- dimnames(arr)[[2]]
+		for (ii in seq_along(l)) {
+			keep_rows <- row_actors %in% active_by_time[[ii]]
+			keep_cols <- col_actors %in% active_by_time[[ii]]
+			slice <- unclass(arr)[keep_rows, keep_cols, ii, drop = FALSE]
+			l[[ii]] <- matrix(
+				slice,
+				nrow = sum(keep_rows),
+				ncol = sum(keep_cols),
+				dimnames = list(row_actors[keep_rows], col_actors[keep_cols])
+			)
+		}
+	}
+
 	# if we want to preserve attrs and keep netify object
 	if (preserveAttr) {
 		# add back in netify attribs to top level list
@@ -390,7 +460,12 @@ array_to_list <- function(arr, preserveAttr = TRUE) {
 
 		# add attributes to every element in list
 		for (ii in seq_along(l)) {
-			attributes(l[[ii]]) <- arr_attr_cross
+			slice_attr <- arr_attr_cross
+			if (is.matrix(l[[ii]])) {
+				slice_attr$dim <- dim(l[[ii]])
+				slice_attr$dimnames <- dimnames(l[[ii]])
+			}
+			attributes(l[[ii]]) <- slice_attr
 		}
 	}
 

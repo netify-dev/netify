@@ -95,12 +95,15 @@ from_lame_fit <- function(fit,
 	if (methods::existsMethod("fitted", class(fit)[1]) ||
 		!is.null(utils::getS3method("fitted", class(fit)[1], optional = TRUE))) {
 		fitted_mat <- tryCatch(stats::fitted(fit), error = function(e) NULL)
+		if (!is.matrix(fitted_mat) && !is_matrix_list(fitted_mat)) {
+			fitted_mat <- NULL
+		}
 	}
 	if (is.null(fitted_mat)) {
 		for (slot in c("EZ", "ZpostMean", "Y_hat", "fitted", "mu")) {
 			cand <- fit[[slot]]
 			if (is.null(cand)) next
-			if (is.matrix(cand)) {
+			if (is.matrix(cand) || is_matrix_list(cand)) {
 				fitted_mat <- cand
 				break
 			}
@@ -187,13 +190,17 @@ from_lame_fit <- function(fit,
 		if (is.null(Y)) {
 			cli::cli_abort("Cannot compute residuals: {.arg fit} doesn't store the observed Y.")
 		}
-		if (is.array(Y) && length(dim(Y)) == 3L && !is.null(fitted_time_slice)) {
-			Y <- Y[, , fitted_time_slice, drop = TRUE]
+		if (is_matrix_list(fitted_mat)) {
+			fitted_mat <- residual_slices(Y, fitted_mat)
+		} else {
+			if (is.array(Y) && length(dim(Y)) == 3L && !is.null(fitted_time_slice)) {
+				Y <- Y[, , fitted_time_slice, drop = TRUE]
+			}
+			if (!identical(dim(Y), dim(fitted_mat))) {
+				cli::cli_abort("Y / fitted dimensions disagree: {dim(Y)} vs {dim(fitted_mat)}.")
+			}
+			fitted_mat <- Y - fitted_mat
 		}
-		if (!identical(dim(Y), dim(fitted_mat))) {
-			cli::cli_abort("Y / fitted dimensions disagree: {dim(Y)} vs {dim(fitted_mat)}.")
-		}
-		fitted_mat <- Y - fitted_mat
 	} else if (value == "prob") {
 		family <- fit$family %||% fit$control$family %||% "normal"
 		# pick link by explicit slot, then class, with logit fallback
@@ -219,10 +226,11 @@ from_lame_fit <- function(fit,
 			}
 		}
 		if (identical(family, "binary") || identical(family, "bin")) {
-			fitted_mat <- if (identical(link, "probit")) {
-				stats::pnorm(fitted_mat)
+			link_fn <- if (identical(link, "probit")) stats::pnorm else stats::plogis
+			fitted_mat <- if (is_matrix_list(fitted_mat)) {
+				lapply(fitted_mat, link_fn)
 			} else {
-				stats::plogis(fitted_mat)
+				link_fn(fitted_mat)
 			}
 		} else {
 			cli::cli_warn(c(
@@ -235,15 +243,26 @@ from_lame_fit <- function(fit,
 	if (is.null(symmetric)) {
 		symmetric <- fit$symmetric %||% FALSE
 	}
-	if (is.null(rownames(fitted_mat))) {
-		rownames(fitted_mat) <- paste0("a", seq_len(nrow(fitted_mat)))
-	}
-	if (is.null(colnames(fitted_mat))) {
-		colnames(fitted_mat) <- if (identical(mode_attr, "bipartite")) {
-			paste0("c", seq_len(ncol(fitted_mat)))
-		} else {
-			rownames(fitted_mat)
+	fill_dimnames <- function(mat) {
+		if (is.null(rownames(mat))) {
+			rownames(mat) <- paste0("a", seq_len(nrow(mat)))
 		}
+		if (is.null(colnames(mat))) {
+			colnames(mat) <- if (identical(mode_attr, "bipartite")) {
+				paste0("c", seq_len(ncol(mat)))
+			} else {
+				rownames(mat)
+			}
+		}
+		mat
+	}
+	if (is_matrix_list(fitted_mat)) {
+		fitted_mat <- lapply(fitted_mat, fill_dimnames)
+		if (is.null(names(fitted_mat))) {
+			names(fitted_mat) <- as.character(seq_along(fitted_mat))
+		}
+	} else {
+		fitted_mat <- fill_dimnames(fitted_mat)
 	}
 	# weight column name keyed on original value type
 	weight_name <- switch(original_value,
@@ -263,3 +282,44 @@ from_lame_fit <- function(fit,
 				diag_to_NA = !identical(mode_attr, "bipartite"))
 		))
 	}
+
+#' check for a non-empty list of per-period matrices
+#'
+#' @keywords internal
+#' @noRd
+is_matrix_list <- function(x) {
+	is.list(x) && !is.data.frame(x) && length(x) > 0L &&
+		all(vapply(x, is.matrix, logical(1)))
+}
+
+#' observed minus fitted for each period of a longitudinal fit
+#'
+#' @param Y observed outcomes as an \code{[n, n, t]} array or a list of
+#'   per-period matrices.
+#' @param fitted_list list of per-period fitted matrices.
+#'
+#' @keywords internal
+#' @noRd
+residual_slices <- function(Y, fitted_list) {
+	if (!is.list(Y) && !(is.array(Y) && length(dim(Y)) == 3L)) {
+		cli::cli_abort("Cannot compute residuals: {.arg fit} must store the observed Y per period.")
+	}
+	periods <- names(fitted_list)
+	y_periods <- if (is.list(Y)) names(Y) else dimnames(Y)[[3]]
+	out <- lapply(seq_along(fitted_list), function(tt) {
+		fm <- fitted_list[[tt]]
+		idx <- if (!is.null(periods) && periods[tt] %in% y_periods) periods[tt] else tt
+		y_t <- if (is.list(Y)) Y[[idx]] else Y[, , idx]
+		# align observed values to the fitted actor order
+		if (all(rownames(fm) %in% rownames(y_t)) &&
+			all(colnames(fm) %in% colnames(y_t))) {
+			y_t <- y_t[rownames(fm), colnames(fm), drop = FALSE]
+		}
+		if (!identical(dim(y_t), dim(fm))) {
+			cli::cli_abort("Y / fitted dimensions disagree: {dim(y_t)} vs {dim(fm)}.")
+		}
+		y_t - fm
+	})
+	names(out) <- periods
+	out
+}

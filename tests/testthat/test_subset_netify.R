@@ -1304,3 +1304,288 @@ test_that(
 		expect_true(inherits(netlet_subset, "netify"))
 	}
 )
+
+test_that(
+	"subset_netify: time subsets clip actor_pds to the retained periods",
+	{
+		df = data.frame(
+			i = c("a", "a", "b", "c", "a", "d", "e"),
+			j = c("b", "c", "c", "a", "d", "a", "a"),
+			t = c(2001, 2004, 2004, 2007, 2007, 2007, 2010)
+		)
+		pds = data.frame(
+			actor = c("a", "b", "c", "d", "e"),
+			min_time = c(2001, 2001, 2003, 2005, 2008),
+			max_time = c(2010, 2006, 2009, 2010, 2010)
+		)
+		netlet = suppressMessages(netify(
+			df,
+			actor1 = "i",
+			actor2 = "j",
+			time = "t",
+			actor_time_uniform = FALSE,
+			actor_pds = pds
+		))
+
+		# subset to non-contiguous periods without either endpoint
+		netlet_subset = subset_netify(netlet, time = c("2004", "2007"))
+		sub_pds = attr(netlet_subset, "actor_pds")
+		expect_equal(sub_pds$actor, c("a", "b", "c", "d"))
+		expect_equal(sub_pds$min_time, c(2004, 2004, 2004, 2007))
+		expect_equal(sub_pds$max_time, c(2007, 2004, 2007, 2007))
+
+		# run functions that expand actor_pds
+		expect_no_error(decompose_netify(netlet_subset))
+		nvars = data.frame(
+			actor = rep(c("a", "b", "c", "d"), 2),
+			time = rep(c(2004, 2007), each = 4),
+			x = 1:8
+		)
+		expect_no_error(suppressMessages(add_node_vars(
+			netlet_subset,
+			node_data = nvars,
+			actor = "actor",
+			time = "time"
+		)))
+
+		# plot a gapped time filter on a uniform panel
+		uni = suppressMessages(netify(
+			df,
+			actor1 = "i",
+			actor2 = "j",
+			time = "t"
+		))
+		expect_no_error(plot(uni, time_filter = c("2004", "2007")))
+	}
+)
+
+test_that(
+	"subset_netify: multilayer arrays keep actor_pds and time order is chronological",
+	{
+		df = data.frame(
+			i = c("a", "b", "c", "a", "b", "c"),
+			j = c("b", "c", "a", "c", "a", "b"),
+			t = c(2001, 2002, 2003, 2004, 2005, 2005),
+			w1 = 1:6,
+			w2 = 6:1
+		)
+		layer_1 = suppressMessages(netify(
+			df,
+			actor1 = "i",
+			actor2 = "j",
+			time = "t",
+			weight = "w1",
+			output_format = "longit_array"
+		))
+		layer_2 = suppressMessages(netify(
+			df,
+			actor1 = "i",
+			actor2 = "j",
+			time = "t",
+			weight = "w2",
+			output_format = "longit_array"
+		))
+		multi = suppressMessages(layer_netify(list(layer_1, layer_2)))
+
+		# subset by actors on a four dimensional array
+		multi_actors = subset_netify(multi, actors = c("a", "b"))
+		expect_equal(attr(multi_actors, "actor_pds")$actor, c("a", "b"))
+
+		# subset by non-contiguous periods on a four dimensional array
+		multi_time = subset_netify(multi, time = c("2002", "2004"))
+		multi_pds = attr(multi_time, "actor_pds")
+		expect_equal(nrow(multi_pds), 3)
+		expect_true(all(multi_pds$min_time == 2002))
+		expect_true(all(multi_pds$max_time == 2004))
+
+		# requested periods follow netlet order without duplicates
+		reordered = subset_netify(layer_1, time = c("2004", "2002", "2004"))
+		expect_equal(dimnames(reordered)[[3]], c("2002", "2004"))
+		reordered_idx = subset_netify(layer_1, time = c(4, 2, 4))
+		expect_equal(dimnames(reordered_idx)[[3]], c("2002", "2004"))
+	}
+)
+
+test_that(
+	"subset_netify: single period keeps cross-sectional dyad data usable",
+	{
+		netlet = suppressMessages(netify(
+			icews,
+			actor1 = "i",
+			actor2 = "j",
+			time = "year",
+			symmetric = FALSE,
+			weight = "verbCoop",
+			nodal_vars = "i_polity2",
+			dyad_vars = "matlCoop",
+			dyad_vars_symmetric = FALSE
+		))
+		netlet_2010 = subset(netlet, time = "2010")
+
+		# dyad data is keyed like a cross-sectional netlet
+		expect_equal(attr(netlet_2010, "netify_type"), "cross_sec")
+		expect_equal(names(attr(netlet_2010, "dyad_data")), "1")
+		expect_false("time" %in% names(attr(netlet_2010, "nodal_data")))
+
+		# downstream consumers find the dyad variable
+		corrs = dyad_correlation(netlet_2010)
+		expect_equal(corrs$dyad_var, "matlCoop")
+		pivoted = suppressMessages(pivot_dyad_to_network(
+			netlet_2010,
+			dyad_var = "matlCoop"
+		))
+		expect_equal(attr(pivoted, "weight"), "matlCoop")
+		mutated = suppressMessages(mutate_weights(netlet_2010, transform_fn = log1p))
+		expect_true(all(
+			c("matlCoop", "original_weight") %in% names(attr(mutated, "dyad_data")[["1"]])
+		))
+	}
+)
+
+test_that(
+	"subset_netify: single period of a multilayer array drops the time dimension",
+	{
+		df = data.frame(
+			i = c("a", "b", "c", "a", "b", "c"),
+			j = c("b", "c", "a", "c", "a", "b"),
+			t = c(2001, 2002, 2003, 2004, 2005, 2005),
+			w1 = 1:6,
+			w2 = 6:1
+		)
+		layer_1 = suppressMessages(netify(
+			df,
+			actor1 = "i",
+			actor2 = "j",
+			time = "t",
+			weight = "w1",
+			output_format = "longit_array"
+		))
+		layer_2 = suppressMessages(netify(
+			df,
+			actor1 = "i",
+			actor2 = "j",
+			time = "t",
+			weight = "w2",
+			output_format = "longit_array"
+		))
+		multi = suppressMessages(layer_netify(list(layer_1, layer_2)))
+
+		multi_2002 = suppressMessages(subset(multi, time = "2002"))
+		expect_equal(attr(multi_2002, "netify_type"), "cross_sec")
+		expect_equal(dim(multi_2002), c(3, 3, 2))
+		expect_equal(dimnames(multi_2002)[[3]], attr(multi, "layers"))
+		expect_equal(
+			unclass(multi_2002)[, , 1],
+			unclass(multi)[, , 1, "2002"],
+			ignore_attr = TRUE
+		)
+		expect_no_error(capture.output(print(multi_2002)))
+		expect_no_error(summary(multi_2002))
+		expect_no_error(plot(multi_2002))
+	}
+)
+
+test_that(
+	"subset_netify: unipartite from/to subsets stay square",
+	{
+		df = data.frame(
+			i = c("a", "a", "b", "c", "d", "a", "b", "d"),
+			j = c("b", "c", "c", "d", "a", "d", "d", "c"),
+			t = c(1, 1, 1, 1, 2, 2, 2, 2),
+			w = 1:8
+		)
+
+		# cross-sectional directed network
+		cross = suppressMessages(netify(
+			df[df$t == 1, ],
+			actor1 = "i",
+			actor2 = "j",
+			weight = "w",
+			symmetric = FALSE
+		))
+		cross_sub = subset(cross, from = "a", to = c("c", "b"))
+		expect_equal(attr(cross_sub, "mode"), "unipartite")
+		expect_equal(rownames(cross_sub), c("a", "b", "c"))
+		expect_equal(colnames(cross_sub), c("a", "b", "c"))
+		expect_equal(unclass(cross_sub)["a", "b"], 1)
+		expect_equal(unclass(cross_sub)["a", "c"], 2)
+		expect_true(is.na(unclass(cross_sub)["b", "c"]))
+		expect_true(is.na(unclass(cross_sub)["b", "a"]))
+		expect_equal(attr(cross_sub, "actor_pds")$actor, c("a", "b", "c"))
+		expect_true(summary(cross_sub)$density <= 1)
+
+		# symmetric networks keep both directions of the block
+		sym = suppressMessages(netify(
+			df[df$t == 1, ],
+			actor1 = "i",
+			actor2 = "j",
+			weight = "w"
+		))
+		sym_sub = subset(sym, from = "a", to = "c")
+		expect_equal(unclass(sym_sub)["c", "a"], unclass(sym_sub)["a", "c"])
+
+		# longitudinal list with unequal from and to sizes
+		longit = suppressMessages(netify(
+			df,
+			actor1 = "i",
+			actor2 = "j",
+			time = "t",
+			weight = "w",
+			symmetric = FALSE
+		))
+		longit_sub = subset(longit, from = c("a", "b"), to = "d")
+		expect_equal(attr(longit_sub, "netify_type"), "longit_list")
+		for (pd in names(longit_sub)) {
+			expect_equal(rownames(longit_sub[[pd]]), colnames(longit_sub[[pd]]))
+			expect_equal(rownames(longit_sub[[pd]]), c("a", "b", "d"))
+		}
+		expect_equal(unclass(longit_sub[["2"]])["b", "d"], 7)
+		expect_true(is.na(unclass(longit_sub[["2"]])["d", "a"]))
+		expect_no_error(summary(longit_sub))
+
+		# longitudinal array keeps the time dimension
+		longit_arr = suppressMessages(netify(
+			df,
+			actor1 = "i",
+			actor2 = "j",
+			time = "t",
+			weight = "w",
+			symmetric = FALSE,
+			output_format = "longit_array"
+		))
+		arr_sub = subset(longit_arr, from = c("a", "b"), to = "d")
+		expect_equal(dim(arr_sub), c(3, 3, 2))
+
+		# multilayer arrays mask every layer
+		multi = suppressMessages(layer_netify(list(cross, cross)))
+		multi_sub = suppressMessages(subset(multi, from = "a", to = "c"))
+		expect_equal(dim(multi_sub), c(2, 2, 2))
+		expect_equal(unclass(multi_sub)["a", "c", 2], 2)
+		expect_true(is.na(unclass(multi_sub)["c", "a", 2]))
+	}
+)
+
+test_that(
+	"subset_netify: bipartite actors from a single mode give a clear error",
+	{
+		df = data.frame(
+			person = c("x", "y", "z", "x"),
+			org = c("o1", "o1", "o2", "o2")
+		)
+		bip = suppressMessages(netify(
+			df,
+			actor1 = "person",
+			actor2 = "org",
+			mode = "bipartite"
+		))
+		expect_error(
+			subset(bip, actors = c("x", "y")),
+			"column \\(second-mode\\) actors"
+		)
+		expect_error(
+			subset(bip, actors = c("o1", "o2")),
+			"row \\(first-mode\\) actors"
+		)
+		expect_equal(dim(subset(bip, actors = c("x", "o1"))), c(1, 1))
+	}
+)

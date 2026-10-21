@@ -269,3 +269,63 @@ test_that("to_amen unipartite longit keeps Xcol = Xrow shortcut", {
 	out_arr = to_amen(net, lame = FALSE)
 	expect_identical(out_arr$Xrow, out_arr$Xcol)
 })
+
+test_that("to_amen(lame=TRUE) aligns Xrow / Xcol rows with Y actor order", {
+	acts = c("c", "a", "b")
+	mats = lapply(1:2, function(ii) {
+		matrix(
+			rnorm(9),
+			3,
+			3,
+			dimnames = list(acts, acts)
+		)
+	})
+	names(mats) = c("2001", "2002")
+	net = suppressMessages(to_netify(mats))
+	nodes = data.frame(
+		actor = rep(c("a", "b", "c"), 2),
+		time = rep(c("2001", "2002"), each = 3),
+		v = c(1, 2, 3, 10, 20, 30)
+	)
+	net = add_node_vars(net, nodes, actor = "actor", time = "time")
+
+	out = netify_to_amen(net, lame = TRUE)
+	for (tt in names(out$Y)) {
+		expect_equal(rownames(out$Xrow[[tt]]), rownames(out$Y[[tt]]))
+		expect_equal(rownames(out$Xcol[[tt]]), colnames(out$Y[[tt]]))
+	}
+	expect_equal(unname(out$Xrow[["2002"]][, "v"]), c(30, 10, 20))
+
+	# array output is aligned by name as well
+	arr = netify_to_amen(net)
+	expect_equal(dimnames(arr$Xrow)[[1]], dimnames(arr$Y)[[1]])
+	expect_equal(unname(arr$Xrow[, "v", "2002"]), c(30, 10, 20))
+})
+
+test_that("to_amen(lame=TRUE) pads Xrow with NA for actors lacking nodal rows", {
+	acts = c("c", "a", "b")
+	mats = lapply(1:2, function(ii) {
+		matrix(
+			rnorm(9),
+			3,
+			3,
+			dimnames = list(acts, acts)
+		)
+	})
+	names(mats) = c("2001", "2002")
+	net = suppressMessages(to_netify(mats))
+	nodes = data.frame(
+		actor = c("a", "b", "c", "a", "b", "c"),
+		time = rep(c("2001", "2002"), each = 3),
+		v = c(1, 2, 3, 10, 20, 30)
+	)
+	net = add_node_vars(net, nodes, actor = "actor", time = "time")
+	nd = attr(net, "nodal_data")
+	attr(net, "nodal_data") = nd[!(nd$actor == "a" & nd$time == "2002"), ]
+
+	out = netify_to_amen(net, lame = TRUE)
+	expect_equal(nrow(out$Xrow[["2002"]]), nrow(out$Y[["2002"]]))
+	expect_equal(rownames(out$Xrow[["2002"]]), acts)
+	expect_true(is.na(out$Xrow[["2002"]]["a", "v"]))
+	expect_equal(unname(out$Xrow[["2002"]][c("c", "b"), "v"]), c(30, 20))
+})

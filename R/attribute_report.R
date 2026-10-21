@@ -304,6 +304,8 @@ calculate_centrality_correlations <- function(netlet, node_vars, centrality_meas
 					net_matrix <- netlet[, , layer_index]
 				} else if (netify_type == "longit_array" && length(dim(netlet)) == 4) {
 					net_matrix <- net_matrix[, , layer_index]
+				} else if (netify_type == "longit_list" && length(dim(net_matrix)) == 3) {
+					net_matrix <- net_matrix[, , layer_index]
 				}
 			}
 

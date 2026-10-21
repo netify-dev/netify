@@ -79,8 +79,13 @@ test_that("compare_networks aligns bipartite row and column actors separately", 
 	net1 = new_netify(mat1, mode = "bipartite")
 	net2 = new_netify(mat2, mode = "bipartite")
 
-	comp = compare_networks(list(net1, net2), method = "hamming")
-	expect_equal(comp$summary$hamming, 2 / 9)
+	comp = suppressMessages(compare_networks(list(net1, net2), method = "hamming"))
+	# similarity uses the shared r2-c2 cell only
+	expect_equal(comp$summary$hamming, 0)
+	# edge changes span all row and column actors
+	expect_equal(comp$edge_changes[[1]]$added, 1)
+	expect_equal(comp$edge_changes[[1]]$removed, 1)
+	expect_equal(comp$edge_changes[[1]]$maintained, 1)
 	expect_error(
 		compare_networks(list(net1, net2), method = "qap", test = TRUE),
 		"QAP edge comparison"
@@ -420,7 +425,7 @@ test_that("compare_networks handles self-loops correctly", {
 	diag(mat2) = 0
 
 	net1 = new_netify(mat1, loops = TRUE)
-	net2 = new_netify(mat2, loops = FALSE)
+	net2 = new_netify(mat2, loops = FALSE, diag_to_NA = FALSE)
 
 	comp = suppressWarnings(compare_networks(list(net1, net2)))
 
@@ -780,6 +785,7 @@ test_that("compare_networks handles temporal multilayer networks (longit_list)",
 		actor1 = "i", actor2 = "j",
 		time = "year",
 		symmetric = TRUE,
+		sum_dyads = TRUE,
 		weight = "verbCoop"
 	)
 
@@ -788,6 +794,7 @@ test_that("compare_networks handles temporal multilayer networks (longit_list)",
 		actor1 = "i", actor2 = "j",
 		time = "year",
 		symmetric = TRUE,
+		sum_dyads = TRUE,
 		weight = "matlCoop"
 	)
 
@@ -1554,4 +1561,107 @@ test_that("compare_networks preserves all summary statistics in multilayer", {
 		expect_true(stat %in% names(comp$summary),
 				   info = paste("Missing stat in multilayer comparison:", stat))
 	}
+})
+
+test_that("compare_networks counts each undirected edge change once", {
+	skip_on_cran()
+	mat1 = matrix(0, 4, 4, dimnames = list(letters[1:4], letters[1:4]))
+	mat1["a", "b"] = mat1["b", "a"] = 1
+	mat1["b", "c"] = mat1["c", "b"] = 1
+	mat2 = mat1
+	mat2["a", "d"] = mat2["d", "a"] = 1
+
+	net1 = new_netify(mat1, symmetric = TRUE)
+	net2 = new_netify(mat2, symmetric = TRUE)
+	comp = compare_networks(list(one = net1, two = net2), method = "all", test = FALSE)
+	expect_equal(comp$edge_changes$one_vs_two$added, 1)
+	expect_equal(comp$edge_changes$one_vs_two$removed, 0)
+	expect_equal(comp$edge_changes$one_vs_two$maintained, 2)
+
+	# directed networks still count each direction
+	dnet1 = new_netify(mat1, symmetric = FALSE)
+	dnet2 = new_netify(mat2, symmetric = FALSE)
+	dcomp = compare_networks(list(one = dnet1, two = dnet2), method = "all", test = FALSE)
+	expect_equal(dcomp$edge_changes$one_vs_two$added, 2)
+})
+
+test_that("compare_networks computes similarity on the actors shared by both networks", {
+	skip_on_cran()
+	set.seed(6886)
+	n = 15
+	mat = matrix(rbinom(n * n, 1, 0.3), n, n)
+	mat[lower.tri(mat)] = t(mat)[lower.tri(mat)]
+	diag(mat) = 0
+	dimnames(mat) = list(paste0("a", 1:n), paste0("a", 1:n))
+	full = new_netify(mat, symmetric = TRUE)
+	keep = paste0("a", 1:8)
+	sub = new_netify(mat[keep, keep], symmetric = TRUE)
+
+	expect_message(
+		comp <- compare_networks(
+			list(full = full, sub = sub),
+			method = "all",
+			n_permutations = 50,
+			seed = 1
+		),
+		"7 actors"
+	)
+	expect_equal(comp$summary$correlation, 1)
+	expect_equal(comp$summary$jaccard, 1)
+	expect_equal(comp$summary$hamming, 0)
+	expect_equal(comp$summary$qap_correlation, 1)
+	expect_equal(comp$summary$spectral, 0, tolerance = 1e-8)
+
+	# edge changes count ties held by actors who leave
+	ut = upper.tri(mat)
+	n_full = sum(mat[ut])
+	n_sub = sum(mat[keep, keep][upper.tri(mat[keep, keep])])
+	changes = comp$edge_changes$full_vs_sub
+	expect_equal(changes$maintained, n_sub)
+	expect_equal(changes$removed, n_full - n_sub)
+	expect_equal(changes$added, 0)
+
+	# identical rosters stay silent
+	expect_no_message(compare_networks(list(full = full, again = full), test = FALSE))
+})
+
+test_that("compare_networks by-group comparisons work for structure and abort for edges", {
+	skip_on_cran()
+	data(classroom_edges)
+	data(classroom_nodes)
+	net = suppressMessages(netify(
+		classroom_edges,
+		actor1 = "from", actor2 = "to",
+		symmetric = TRUE,
+		nodal_data = classroom_nodes
+	))
+	expect_error(
+		compare_networks(net, by = "gender", what = "edges"),
+		"share no dyads"
+	)
+
+	# default what compares groups on structure
+	expect_message(
+		comp_default <- compare_networks(net, by = "gender"),
+		"structure"
+	)
+	expect_equal(comp_default$comparison_type, "by_group")
+
+	comp = compare_networks(net, by = "gender", what = "structure")
+	expect_equal(comp$comparison_type, "by_group")
+	expect_equal(unname(comp$by_group$n_actors_per_group), c(9L, 21L))
+
+	data(icews)
+	longit = suppressMessages(netify(
+		icews[icews$year %in% 2010:2011, ],
+		actor1 = "i", actor2 = "j", time = "year",
+		symmetric = FALSE, weight = "verbCoop",
+		nodal_vars = "i_region"
+	))
+	lcomp = suppressWarnings(suppressMessages(
+		compare_networks(longit, by = "i_region", what = "structure")
+	))
+	expect_s3_class(lcomp, "netify_comparison")
+	expect_type(lcomp$by_group$n_actors_per_group, "integer")
+	expect_length(lcomp$by_group$n_actors_per_group, 7)
 })

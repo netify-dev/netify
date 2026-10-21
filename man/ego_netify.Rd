@@ -105,11 +105,12 @@ s07_ego <- ego_netify(net, ego = "s07")
 print(s07_ego)
 
 \donttest{
-# longitudinal ego network with a weighted, directed netlet
+# longitudinal ego network with a weighted netlet
 data(icews)
 netlet <- netify(
     icews,
     actor1 = "i", actor2 = "j", time = "year",
+    sum_dyads = TRUE,
     weight = "verbCoop"
 )
 pakistan_ego <- ego_netify(netlet, ego = "Pakistan")

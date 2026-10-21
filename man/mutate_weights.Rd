@@ -24,14 +24,16 @@ useful for log transformations (e.g., \code{add_constant = 1} for \code{log(x + 
 shifting distributions.}
 
 \item{new_name}{optional new name for the weight variable. if provided, updates
-the weight attribute and descriptive labels. if NULL, keeps the original name.}
+the weight attribute and descriptive labels. if NULL, keeps the original name.
+for multilayer networks, supply one name per layer.}
 
 \item{keep_original}{logical. if TRUE (default), preserves the original weights
 as a dyadic variable. if FALSE, discards original weights to save memory.}
 }
 \value{
 a netify object with transformed weights. the original weights are optionally
-preserved as a dyadic variable named "original_weight".
+preserved as a dyadic variable named "original_weight" (or
+"original_weight_\if{html}{\out{<layer>}}" for each layer of a multilayer network).
 }
 \description{
 \code{mutate_weights} applies mathematical transformations to edge weights in a netify object.
@@ -44,6 +46,7 @@ the function handles all netify object types:
 \item \strong{cross-sectional}: transforms the single network matrix
 \item \strong{longitudinal arrays}: transforms each time slice
 \item \strong{longitudinal lists}: transforms each time period matrix
+\item \strong{multilayer networks}: transforms each layer separately
 }
 
 the function automatically updates network attributes:
