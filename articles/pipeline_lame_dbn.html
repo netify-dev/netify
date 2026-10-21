@@ -368,25 +368,45 @@ of relation types (layers).</p>
 <div class="section level3">
 <h3 id="step-1-create-individual-layer-networks">step 1: create individual layer networks<a class="anchor" aria-label="anchor" href="#step-1-create-individual-layer-networks"></a>
 </h3>
+<p>The verbal cooperation layer is symmetric, so we first sum
+<code>verbCoop</code> and <code>verbConf</code> over both directions of
+each country pair in each year. Nodal covariates are then attached with
+<code><a href="../reference/add_node_vars.html">add_node_vars()</a></code> from a table with one row per
+country-year.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># verbal cooperation layer (symmetric - mutual diplomatic engagement)</span></span>
+<code class="sourceCode R"><span><span class="co"># one row per country pair and year, summed over both directions</span></span>
+<span><span class="va">verbal_dyads</span> <span class="op">=</span> <span class="va">icews</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"year"</span>, <span class="st">"verbCoop"</span>, <span class="st">"verbConf"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">verbal_dyads</span><span class="op">$</span><span class="va">i</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="va">icews</span><span class="op">$</span><span class="va">i</span>, <span class="va">icews</span><span class="op">$</span><span class="va">j</span><span class="op">)</span></span>
+<span><span class="va">verbal_dyads</span><span class="op">$</span><span class="va">j</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">icews</span><span class="op">$</span><span class="va">i</span>, <span class="va">icews</span><span class="op">$</span><span class="va">j</span><span class="op">)</span></span>
+<span><span class="va">verbal_dyads</span> <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">verbCoop</span>, <span class="va">verbConf</span><span class="op">)</span> <span class="op">~</span> <span class="va">i</span> <span class="op">+</span> <span class="va">j</span> <span class="op">+</span> <span class="va">year</span>,</span>
+<span>    data <span class="op">=</span> <span class="va">verbal_dyads</span>,</span>
+<span>    FUN <span class="op">=</span> <span class="va">sum</span>,</span>
+<span>    na.action <span class="op">=</span> <span class="va">na.pass</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># one row per country-year</span></span>
+<span><span class="va">node_data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">icews</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"i"</span>, <span class="st">"year"</span>, <span class="st">"i_polity2"</span>, <span class="st">"i_log_gdp"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># verbal cooperation layer (symmetric - mutual diplomatic engagement)</span></span>
 <span><span class="va">verbal_coop</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
-<span>    <span class="va">icews</span>,</span>
+<span>    <span class="va">verbal_dyads</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>, time <span class="op">=</span> <span class="st">"year"</span>,</span>
 <span>    symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span>,</span>
 <span>    missing_to_zero <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>    output_format <span class="op">=</span> <span class="st">"longit_array"</span>,</span>
-<span>    nodal_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"i_polity2"</span>, <span class="st">"i_log_gdp"</span><span class="op">)</span>,</span>
 <span>    dyad_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"verbConf"</span><span class="op">)</span>,</span>
 <span>    dyad_vars_symmetric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: <span style="color: #BBBB00;">!</span> 53400 dyads have different weights in each direction, but `symmetric = TRUE`</span></span>
-<span><span class="co">#&gt;   stores one value per pair (e.g. <span style="color: #0000BB;">"Afghanistan"</span> and <span style="color: #0000BB;">"Albania"</span>).</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The value from the last matching row in the data is used for each such pair.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> To combine both directions, aggregate first with `aggregate_dyad(...,</span></span>
-<span><span class="co">#&gt;   symmetric = TRUE)` or set `sum_dyads = TRUE`; to keep them separate, set</span></span>
-<span><span class="co">#&gt;   `symmetric = FALSE`.</span></span>
+<span></span>
+<span><span class="co"># add nodal covariates</span></span>
+<span><span class="va">verbal_coop</span> <span class="op">=</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span></span>
+<span>    <span class="va">verbal_coop</span>,</span>
+<span>    <span class="va">node_data</span>,</span>
+<span>    actor <span class="op">=</span> <span class="st">"i"</span>,</span>
+<span>    time <span class="op">=</span> <span class="st">"year"</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># material cooperation layer (directed - trade/aid flows)</span></span>
 <span><span class="va">material_coop</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
