@@ -141,7 +141,7 @@ jobs:
         run: |
           if gh release view "$NETIFY_TAG" >/dev/null 2>&1; then
             gh release upload "$NETIFY_TAG" release-assets/* --clobber
-            gh release edit "$NETIFY_TAG" --title "netify v${NETIFY_VERSION}" --latest
+            gh release edit "$NETIFY_TAG" --title "netify v${NETIFY_VERSION}" --draft=false --latest
           else
             gh release create "$NETIFY_TAG" release-assets/* \
               --title "netify v${NETIFY_VERSION}" \
