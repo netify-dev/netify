@@ -18,8 +18,8 @@
 #'   as a dyadic variable. if FALSE, discards original weights to save memory.
 #'
 #' @return a netify object with transformed weights. the original weights are optionally
-#'   preserved as a dyadic variable named "original_weight" (or
-#'   "original_weight_<layer>" for each layer of a multilayer network).
+#'   preserved as a dyadic variable named `original_weight` (or
+#'   `original_weight_<layer>` for each layer of a multilayer network).
 #'
 #' @details
 #' the function handles all netify object types:

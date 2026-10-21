@@ -32,3 +32,4 @@
 ^vignettes/multilayer_networks[.]Rmd$
 ^vignettes/pipeline_lame_dbn[.]Rmd$
 ^vignettes/tracking_changes[.]Rmd$
+^figure$

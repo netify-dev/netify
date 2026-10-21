@@ -47,7 +47,8 @@ laplacian matrices. useful for detecting fundamental structural changes.}
 single netify object, the network is split into one subnetwork per
 attribute value (each holding only that group's actors) and the groups are
 compared with each other. supported for \code{what = "structure"},
-\code{"nodes"}, and \code{"attributes"}; edge comparisons are not available
+\code{"nodes"}, and \code{"attributes"}; when \code{what} is not supplied,
+groups are compared on structure. edge comparisons are not available
 because the group subnetworks share no actors.}
 
 \item{what}{character string specifying what to compare:

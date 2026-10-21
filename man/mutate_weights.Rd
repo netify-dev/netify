@@ -32,8 +32,8 @@ as a dyadic variable. if FALSE, discards original weights to save memory.}
 }
 \value{
 a netify object with transformed weights. the original weights are optionally
-preserved as a dyadic variable named "original_weight" (or
-"original_weight_\if{html}{\out{<layer>}}" for each layer of a multilayer network).
+preserved as a dyadic variable named \code{original_weight} (or
+\verb{original_weight_<layer>} for each layer of a multilayer network).
 }
 \description{
 \code{mutate_weights} applies mathematical transformations to edge weights in a netify object.
