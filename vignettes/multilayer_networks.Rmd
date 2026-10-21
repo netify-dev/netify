@@ -81,29 +81,53 @@ plot(multi_net, add_text = FALSE)
 
 Let's build a more complete multilayer network to study international cooperation patterns during a critical period -- 2002, shortly after 9/11 when cooperation dynamics were rapidly shifting.
 
-Note: ICEWS event counts are directed (i sends X to j). We build each layer with `symmetric = TRUE` because the cross-layer mixing, homophily, and regional-clustering analyses below are naturally undirected. Since i→j and j→i counts differ, `netify()` warns that it keeps one value per pair. To sum both directions instead, build the layer with `sum_dyads = TRUE` and attach attributes afterwards with `add_node_vars()` and `add_dyad_vars()`. For directed analyses (e.g. who initiates cooperation), set `symmetric = FALSE`.
+Note: ICEWS event counts are directed (i sends X to j). The cross-layer mixing, homophily, and regional-clustering analyses below are naturally undirected, so we first sum the i→j and j→i counts for each country pair and then build each layer with `symmetric = TRUE`. Because the summed table lists each pair once, nodal attributes are attached afterwards with `add_node_vars()`. For directed analyses (e.g. who initiates cooperation), use the raw data with `symmetric = FALSE`.
 
 ```{r}
 # focus on 2002 - post-9/11 cooperation dynamics
 icews_2002 <- icews[icews$year == 2002, ]
 
+# sum event counts over both directions of each country pair
+icews_2002_undirected <- icews_2002 |>
+    mutate(
+        actor_a = pmin(i, j),
+        actor_b = pmax(i, j)
+    ) |>
+    group_by(actor_a, actor_b) |>
+    summarize(
+        across(c(verbCoop, matlCoop, verbConf, matlConf), sum),
+        .groups = "drop"
+    )
+
+# one row of attributes per country
+actor_attributes <- icews_2002 |>
+    distinct(i, i_polity2, i_log_gdp, i_log_pop, i_region)
+
 # create undirected networks with relevant attributes
 verbal_coop_net <- netify(
-    icews_2002,
-    actor1 = "i", actor2 = "j",
+    icews_2002_undirected,
+    actor1 = "actor_a", actor2 = "actor_b",
     symmetric = TRUE,
     weight = "verbCoop",
-    nodal_vars = c("i_polity2", "i_log_gdp", "i_log_pop", "i_region"),
     dyad_vars = c("verbConf", "matlConf")
+)
+verbal_coop_net <- add_node_vars(
+    verbal_coop_net,
+    actor_attributes,
+    actor = "i"
 )
 
 material_coop_net <- netify(
-    icews_2002,
-    actor1 = "i", actor2 = "j",
+    icews_2002_undirected,
+    actor1 = "actor_a", actor2 = "actor_b",
     symmetric = TRUE,
     weight = "matlCoop",
-    nodal_vars = c("i_polity2", "i_log_gdp", "i_log_pop", "i_region"),
     dyad_vars = c("verbConf", "matlConf")
+)
+material_coop_net <- add_node_vars(
+    material_coop_net,
+    actor_attributes,
+    actor = "i"
 )
 
 # combine into multilayer network
@@ -201,7 +225,7 @@ cross_layer_corr |>
     filter(row_number() <= 4) # show first 4 unique combinations
 ```
 
-Verbal conflict and verbal cooperation are moderately correlated (r = 0.456) -- countries that talk also argue. Material conflict shows lower correlations with both cooperation layers (~0.27-0.28), suggesting material interactions follow different dynamics than diplomatic ones.
+Verbal conflict and verbal cooperation are moderately correlated (r = 0.543) -- countries that talk also argue. Material conflict shows lower correlations with both cooperation layers (~0.34-0.39), suggesting material interactions follow different dynamics than diplomatic ones.
 
 ## identifying strategic actors
 
@@ -218,18 +242,25 @@ centrality_comparison <- actor_stats |>
     select(actor, layer, degree, betweenness, strength_sum) |>
     pivot_wider(names_from = layer, values_from = c(degree, betweenness, strength_sum))
 
+# compare percentile ranks of betweenness within each layer
 material_specialists <- centrality_comparison |>
     mutate(
-        material_bias = betweenness_Material / (betweenness_Verbal + 1)
+        verbal_pct = percent_rank(betweenness_Verbal),
+        material_pct = percent_rank(betweenness_Material),
+        rank_gap = material_pct - verbal_pct
     ) |>
-    filter(betweenness_Material > quantile(betweenness_Material, 0.75, na.rm = TRUE)) |>
-    arrange(desc(material_bias)) |>
+    filter(material_pct >= 0.75) |>
+    arrange(desc(rank_gap)) |>
     head(5)
 
-material_specialists[, c("actor", "betweenness_Verbal", "betweenness_Material", "material_bias")]
+knitr::kable(
+    material_specialists[, c("actor", "verbal_pct", "material_pct", "rank_gap")],
+    col.names = c("Actor", "Verbal percentile", "Material percentile", "Rank gap"),
+    digits = 2
+)
 ```
 
-The top material brokers in 2002 -- ranked by the ratio of material to verbal betweenness -- are Afghanistan, the United States, Japan, Iraq, and Russia. Because betweenness is normalized to the 0-1 range, the `+ 1` in the denominator dominates: the ratio discounts material betweenness by at most half, so the ranking largely follows raw material betweenness. Afghanistan, Japan, and Iraq fit the specialist profile, with almost no verbal betweenness (all below 0.03) but sizable material betweenness. The pattern is consistent with the post-9/11 setting: Afghanistan sits at the center of reconstruction and security assistance, Japan is a major aid donor, and Iraq's 2002 position plausibly reflects the resumption of weapons inspections, which event coders record as material cooperation. The United States and Russia, by contrast, are central in both layers (verbal betweenness of about 0.79 and 0.46) and appear here because their material betweenness is large enough to survive the discount -- to surface countries that are *only* important in the material channel, rank material betweenness among actors with low verbal betweenness instead.
+Ranking actors in the top quartile of material betweenness by the gap between their material and verbal percentiles surfaces Colombia, Bosnia and Herzegovina, Germany, Georgia, and Italy. All five have zero verbal betweenness -- the shortest weighted paths of the diplomatic network run through hubs such as the United States, Russia, and China -- yet each ranks above 85% of countries in material brokerage. Several fit the 2002 setting: Colombia was a major recipient of U.S. security assistance under Plan Colombia, Bosnia and Herzegovina hosted international peacekeeping and reconstruction missions, and Georgia began a U.S. military train-and-equip program. Germany and Italy have many ties in both layers, but their brokerage appears only in the material channel, plausibly reflecting contributions to multinational security and aid missions. Because most actors have zero verbal betweenness, the verbal percentile mainly separates actors with any diplomatic brokerage from those with none: Afghanistan, the second-ranked material broker overall, drops out because even its small verbal betweenness puts it in the top 15% of the verbal layer.
 
 ### power dynamics across layers
 
@@ -265,6 +296,8 @@ edge_comparison <- merge(
     by = c("Var1", "Var2"),
     suffixes = c("_verbal", "_material")
 ) |>
+    # keep each country pair once
+    filter(Var1 < Var2) |>
     filter(value_verbal > 0 | value_material > 0)
 
 # categorize relationships
@@ -299,8 +332,8 @@ ggplot(multiplexity_summary, aes(x = relationship_type)) +
 **Multiplexity Insights**:
 
 - Only 26% of relationships are multiplex (involving both verbal and material cooperation)
-- 124 "material only" relationships deserve attention -- these might represent covert cooperation or technical assistance below the diplomatic radar
-- The 2,452 multiplex relationships form the stable core of international cooperation
+- 62 "material only" relationships deserve attention -- these might represent covert cooperation or technical assistance below the diplomatic radar
+- The 1,226 multiplex relationships form the stable core of international cooperation
 
 ### who has multiplex relationships?
 
@@ -312,7 +345,11 @@ multiplex_pairs <- multiplexity_summary |>
     arrange(desc(total_coop)) |>
     head(10)
 
-multiplex_pairs[, c("Var1", "Var2", "value_verbal", "value_material")]
+knitr::kable(
+    multiplex_pairs[, c("Var1", "Var2", "value_verbal", "value_material")],
+    col.names = c("Country 1", "Country 2", "Verbal cooperation", "Material cooperation"),
+    row.names = FALSE
+)
 ```
 
 US-Russia tops the list despite tensions, showing how former adversaries maintain multiple channels. US relationships with allies (Israel, Japan) and strategic competitors (China) also show high multiplexity, indicating relationship importance transcends simple friend/foe categories.
@@ -329,7 +366,7 @@ layer_comparison
 
 **Key Metrics Explained**:
 
-- **Correlation (0.472)**: Moderate positive relationship -- dyads with more verbal cooperation also tend to have more material cooperation
+- **Correlation (0.575)**: Moderate positive relationship -- dyads with more verbal cooperation also tend to have more material cooperation
 - **Jaccard (0.258)**: Only 26% edge overlap -- most relationships exist in just one layer
 - **Hamming (0.307)**: About 31% of possible edges differ between layers
 - **QAP test (p < 0.001)**: The observed correlation is larger than expected under the permutation reference distribution

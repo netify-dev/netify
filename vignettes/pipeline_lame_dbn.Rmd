@@ -225,18 +225,41 @@ The `dbn` package models multilayer longitudinal networks using Dynamic Bilinear
 
 ### step 1: create individual layer networks
 
+The verbal cooperation layer is symmetric, so we first sum `verbCoop` and `verbConf` over both directions of each country pair in each year. Nodal covariates are then attached with `add_node_vars()` from a table with one row per country-year.
+
 ```{r}
+# one row per country pair and year, summed over both directions
+verbal_dyads = icews[, c("year", "verbCoop", "verbConf")]
+verbal_dyads$i = pmin(icews$i, icews$j)
+verbal_dyads$j = pmax(icews$i, icews$j)
+verbal_dyads = stats::aggregate(
+    cbind(verbCoop, verbConf) ~ i + j + year,
+    data = verbal_dyads,
+    FUN = sum,
+    na.action = na.pass
+)
+
+# one row per country-year
+node_data = unique(icews[, c("i", "year", "i_polity2", "i_log_gdp")])
+
 # verbal cooperation layer (symmetric - mutual diplomatic engagement)
 verbal_coop = netify(
-    icews,
+    verbal_dyads,
     actor1 = "i", actor2 = "j", time = "year",
     symmetric = TRUE,
     weight = "verbCoop",
     missing_to_zero = FALSE,
     output_format = "longit_array",
-    nodal_vars = c("i_polity2", "i_log_gdp"),
     dyad_vars = c("verbConf"),
     dyad_vars_symmetric = c(TRUE)
+)
+
+# add nodal covariates
+verbal_coop = add_node_vars(
+    verbal_coop,
+    node_data,
+    actor = "i",
+    time = "year"
 )
 
 # material cooperation layer (directed - trade/aid flows)

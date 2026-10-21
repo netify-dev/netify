@@ -58,20 +58,33 @@ library(ggplot2)
 
 ## getting started: extract an ego network
 
-We'll use data from the Integrated Crisis Early Warning System (ICEWS) to demonstrate:
+We'll use data from the Integrated Crisis Early Warning System (ICEWS) to demonstrate. ICEWS records events from each sender to each target, so we sum both directions to get one undirected tie per country pair and year:
 
 ```{r}
 data(icews)
 
+# one row per country pair and year, summing both directions
+icews_undirected <- icews |>
+    group_by(actor_a = pmin(i, j), actor_b = pmax(i, j), year) |>
+    summarize(
+        across(c(verbCoop, matlCoop, verbConf), sum),
+        .groups = "drop"
+    )
+
+# one row per country and year
+nodal_data <- icews |>
+    distinct(i, year, i_polity2, i_log_gdp, i_region)
+
 # verbal cooperation between countries
 netlet <- netify(
-    icews,
-    actor1 = "i", actor2 = "j",
+    icews_undirected,
+    actor1 = "actor_a", actor2 = "actor_b",
     time = "year",
     weight = "verbCoop",
-    nodal_vars = c("i_polity2", "i_log_gdp", 'i_region'),
     dyad_vars = c("matlCoop", "verbConf")
 )
+
+netlet <- add_node_vars(netlet, nodal_data, actor = "i", time = "year")
 ```
 
 ### extract your first ego network
@@ -97,7 +110,7 @@ ngbd_summ <- summary(pakistan_ego_net)
 head(ngbd_summ)
 ```
 
-Pakistan's network shows high density (0.79-0.97)—most countries that interact with Pakistan also interact with each other. The network size fluctuates between 24-49 actors across years, but that high density persists. This isn't a hub-and-spoke pattern where Pakistan connects otherwise isolated actors; it's a dense web where multilateral dynamics likely matter.
+Pakistan's network shows high density (0.79-0.97)—most countries that interact with Pakistan also interact with each other. The network size fluctuates between 26-49 actors across years, but that high density persists. This isn't a hub-and-spoke pattern where Pakistan connects otherwise isolated actors; it's a dense web where multilateral dynamics likely matter.
 
 ```{r}
 plot_graph_stats(ngbd_summ) +
@@ -118,7 +131,7 @@ ngbd_actor_summ <- summary_actor(pakistan_ego_net)
 head(ngbd_actor_summ)
 ```
 
-Beyond degree (number of connections), look at eigenvector centrality—it captures importance based on connections to other important actors. China's high and growing eigenvector centrality reflects not just bilateral ties with Pakistan but its connections to other key players in Pakistan's neighborhood.
+Beyond degree (number of connections), look at eigenvector centrality—it captures importance based on connections to other important actors. The US has the highest eigenvector centrality in Pakistan's neighborhood every year, reflecting not just bilateral ties with Pakistan but its connections to other key players in the region.
 
 ```{r}
 plot_actor_stats(ngbd_actor_summ,
@@ -133,7 +146,7 @@ plot_actor_stats(ngbd_actor_summ,
     )
 ```
 
-The diverging trajectories are striking. China's rising centrality measures show growing connectedness in Pakistan's neighborhood, while the US shows more variable engagement despite maintaining presence.
+Both powers are tied to every other actor in Pakistan's neighborhood in every year, so the differences lie in intensity. The US consistently leads, with roughly twice China's cooperation volume (strength), while China's eigenvector centrality rose through the mid-2000s and then fluctuated at lower levels.
 
 ### 3. visualization
 
@@ -213,7 +226,7 @@ ggplot(comparison_df,
     )
 ```
 
-Pakistan and India maintain the highest density—their partners are highly interconnected. The US shows lower density, suggesting more of a hub-and-spoke pattern. Russia's volatile pattern may reflect shifting alliances during this period.
+Pakistan and India maintain the highest density—their partners are highly interconnected. The US and China show the lowest density, suggesting partners drawn from many regions that interact less with each other. Russia sits in between and stays fairly stable (roughly 0.70-0.78) across the period.
 
 ### 6. test for homophily
 
@@ -289,7 +302,7 @@ comparison <- tibble(
 knitr::kable(comparison)
 ```
 
-Pakistan's conflict network is smaller but still substantial. The lower average density in conflict (about 0.76 vs 0.90) suggests conflicts are more bilateral while cooperation tends to be multilateral.
+Pakistan's conflict network is smaller but still substantial. The lower average density in conflict (about 0.76 vs 0.91) suggests conflicts are more bilateral while cooperation tends to be multilateral.
 
 ### 9. track network evolution
 
@@ -315,7 +328,7 @@ tibble(
   knitr::kable()
 ```
 
-A stability ratio of 0.416 indicates moderate turnover -- about 58% of relationships don't persist year-to-year.
+A stability ratio of `r stability_ratio` indicates moderate turnover -- about `r round(100 * (1 - stability_ratio))`% of the 2010 relationships don't persist into 2011.
 
 ### 10. compare network structures: rising vs established powers
 
@@ -325,14 +338,16 @@ How do the US and China structure their diplomatic neighborhoods differently?
 us_ego <- ego_netify(netlet, ego = "United States")
 china_ego <- ego_netify(netlet, ego = "China")
 
-structural_comp <- compare_networks(
-    list("US" = us_ego, "China" = china_ego),
-    what = 'structure'
-)
+us_summary <- summary(us_ego)
+china_summary <- summary(china_ego)
 
-comp_summary <- structural_comp$summary
-avg_props <- comp_summary |>
-    group_by(network) |>
+# average yearly statistics for each ego network
+avg_props <- bind_rows(
+    "US" = us_summary,
+    "China" = china_summary,
+    .id = "Network"
+) |>
+    group_by(Network) |>
     summarise(
         `Avg. Nodes` = round(mean(num_actors), 0),
         `Avg. Density` = round(mean(density), 3),
@@ -343,14 +358,11 @@ avg_props <- comp_summary |>
 knitr::kable(avg_props)
 ```
 
-The US maintains a larger but less dense network—more of a hub-and-spoke pattern. China's denser network suggests its partners are more interconnected, potentially reflecting regional concentration.
+Averaged across years, the US maintains a larger network than China, but the two are structured similarly: density and transitivity are close, with China's only slightly higher. The difference between the two powers lies more in the reach of their neighborhoods than in how interconnected their partners are.
 
 Let's look at the temporal patterns:
 
 ```{r}
-us_summary <- summary(us_ego)
-china_summary <- summary(china_ego)
-
 temporal_comparison <- bind_rows(
     us_summary |> mutate(network = "US"),
     china_summary |> mutate(network = "China")
@@ -407,16 +419,26 @@ Similarity measures are computed on the actors that appear in both ego networks.
 Finally, who's in these networks?
 
 ```{r}
-# compare node composition
+# compare node composition in 2012
 node_comp <- compare_networks(
-    list("US" = us_ego, "China" = china_ego),
+    list(
+        "US" = subset(us_ego, time = "2012"),
+        "China" = subset(china_ego, time = "2012")
+    ),
     what = "nodes"
 )
 
-# the 75% overlap reflects shared major partners
-# but the us's 24 unique partners vs china's 8 shows its broader global reach
-knitr::kable(node_comp$summary)
+knitr::kable(
+    node_comp$summary,
+    col.names = c(
+        "Comparison", "US actors", "China actors", "Shared actors",
+        "Jaccard similarity", "Unique to China", "Unique to US"
+    ),
+    digits = 2
+)
 ```
+
+The two neighborhoods overlap heavily (Jaccard similarity of `r round(node_comp$summary$jaccard_similarity, 2)`), reflecting shared major partners, but the US network includes `r node_comp$summary$nodes_removed` actors absent from China's, while China's includes only `r node_comp$summary$nodes_added` absent from the US network, consistent with broader US global reach.
 
 ## tl;dr
 
