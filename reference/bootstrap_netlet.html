@@ -13,7 +13,7 @@ percentile confidence intervals."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -145,10 +145,15 @@ centrality, and downstream fit summaries (e.g., the coefficient of a
 <code>to_igraph</code> -&gt; <code>igraph::cluster_*</code> -&gt; modularity pipeline).</p>
 <p>resampling is <strong>vertex-level</strong>, not edge-level: actors are
 sampled with replacement and the netlet's adjacency is sliced
-accordingly. for longitudinal netlets, the same resampled index
-set is applied to every period (preserves within-actor
-dependence). multilayer netlets are unsupported – bootstrap each
-layer independently via <code>subset_netify(layers = ...)</code> first.
+accordingly. when an actor is drawn more than once, the pairs formed
+by its copies are not observed dyads, so they are set to <code>NA</code> in the
+resampled netlet; statistics that drop missing dyads (for example, a
+density computed with <code>na.rm = TRUE</code>) then ignore them. for
+longitudinal netlets, actors are drawn by name from the pooled roster
+of all periods and the same draws are used in every period (preserves
+within-actor dependence); an actor absent from a period is also absent
+from that period's resample. multilayer netlets are unsupported –
+bootstrap each layer independently via <code>subset_netify(layers = ...)</code> first.
 the resampled netlets contain the resampled adjacency only. statistics
 that require attached nodal or dyadic attributes should recreate those
 attributes inside <code>fn</code>, or use a NULL-model workflow such as

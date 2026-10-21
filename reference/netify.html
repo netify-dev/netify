@@ -9,7 +9,7 @@ arrays, lists, igraph objects, or network objects) and outputs a netify object."
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -163,8 +163,10 @@ estimated for the user based on their choice of <code>actor_time_uniform</code><
 <dd><p>logical: whether diagonals should be set to na,
 default is TRUE. for matrix / array / list inputs, the default is
 ignored unless explicitly set: instead, <code>diag_to_NA</code> is auto-detected
-by inspecting whether the diagonal of the supplied matrix is already
-<code>na</code>. pass an explicit value to override the auto-detection.</p></dd>
+from the diagonal of the supplied matrix. a diagonal that is entirely
+<code>na</code> or entirely zero is read as "no self-loops" and set to <code>na</code>; any
+other diagonal is kept as data. pass an explicit value to override the
+auto-detection.</p></dd>
 
 
 <dt id="arg-missing-to-zero">missing_to_zero<a class="anchor" aria-label="anchor" href="#arg-missing-to-zero"></a></dt>
@@ -178,12 +180,18 @@ already contains off-diagonal <code>na</code>s.</p></dd>
 <dd><p>character: "cross_sec", "longit_array", or
 "longit_list". if not specified and time is NULL then output_format
 will be "cross_sec" and if time is specified then output_format
-will default to "longit_list". only applies to data.frame inputs.</p></dd>
+will default to "longit_list". only applies to data.frame inputs.
+for "longit_array" with <code>actor_time_uniform = FALSE</code> or <code>actor_pds</code>,
+actors outside their active periods are <code>na</code> in those periods.</p></dd>
 
 
 <dt id="arg-nodal-vars">nodal_vars<a class="anchor" aria-label="anchor" href="#arg-nodal-vars"></a></dt>
 <dd><p>character vector: names of the nodal variables in the input
-that should be added as attributes to the netify object (for data.frame inputs)</p></dd>
+that should be added as attributes to the netify object (for data.frame
+inputs). these columns are read as attributes of <code>actor1</code>: each actor's
+value is taken from the rows where it appears as <code>actor1</code>. actors that
+only appear as <code>actor2</code> get <code>na</code>; use <code><a href="add_node_vars.html">add_node_vars()</a></code> to supply their
+values.</p></dd>
 
 
 <dt id="arg-dyad-vars">dyad_vars<a class="anchor" aria-label="anchor" href="#arg-dyad-vars"></a></dt>

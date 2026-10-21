@@ -9,7 +9,7 @@ and/or layers while preserving all netify attributes and structure."></head><bod
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,13 +101,17 @@ one layer must be specified.</p></dd>
 <dt id="arg-from">from<a class="anchor" aria-label="anchor" href="#arg-from"></a></dt>
 <dd><p>character vector of actor names or numeric indices for actors sending
 ties (row actors). overrides <code>actors</code>. set to NULL to include all
-sending actors. in bipartite networks, this refers to actors in the first mode.</p></dd>
+sending actors. in bipartite networks, this refers to actors in the first mode.
+in unipartite networks, the result stays square over the union of <code>from</code>
+and <code>to</code> actors, and ties outside the <code>from</code> x <code>to</code> block are
+set to NA.</p></dd>
 
 
 <dt id="arg-to">to<a class="anchor" aria-label="anchor" href="#arg-to"></a></dt>
 <dd><p>character vector of actor names or numeric indices for actors receiving
 ties (column actors). overrides <code>actors</code>. set to NULL to include all
-receiving actors. in bipartite networks, this refers to actors in the second mode.</p></dd>
+receiving actors. in bipartite networks, this refers to actors in the second mode.
+in unipartite networks, see <code>from</code> for how the two selections combine.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -137,8 +141,14 @@ to include:</p><ul><li><p>use <code>actors</code> to get all ties among a set of
 <li><p>use <code>from</code> to get all ties sent by specific actors</p></li>
 <li><p>use <code>to</code> to get all ties received by specific actors</p></li>
 <li><p>use both <code>from</code> and <code>to</code> to get ties between specific sets of actors</p></li>
-</ul><p>for bipartite networks, <code>from</code> refers to actors in the first mode (e.g.,
-people) and <code>to</code> refers to actors in the second mode (e.g., organizations).</p>
+</ul><p>for unipartite networks, a <code>from</code>/<code>to</code> subset keeps a square matrix
+over the union of the selected actors (in their original order), so the result
+remains a valid unipartite network. cells for ties that are not sent by a
+<code>from</code> actor to a <code>to</code> actor are set to NA. for symmetric networks,
+ties in either direction between the two sets are kept.</p>
+<p>for bipartite networks, <code>from</code> refers to actors in the first mode (e.g.,
+people) and <code>to</code> refers to actors in the second mode (e.g., organizations).
+selections must include actors from both modes.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>

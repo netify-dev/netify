@@ -13,7 +13,7 @@ attribute combinations."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -139,7 +139,10 @@ default TRUE.</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>mixing matrix elements represent ties between actors with attribute
-values i and j. for undirected networks, matrices are symmetrized.
+values i and j. for undirected networks, matrices are symmetrized and each
+tie is counted once: a within-group tie adds one to its diagonal cell, and a
+between-group tie adds one half to each of the two mirrored cells, so the raw
+counts sum to the number of ties.
 assortativity ranges from -1 (disassortative) to 1 (assortative).</p>
     </div>
     <div class="section level2">
@@ -167,7 +170,7 @@ assortativity ranges from -1 (disassortative) to 1 (assortative).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   net   layer attribute assortativity diagonal_proportion  entropy modularity</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   1 weight1    gender    0.09922078           0.6666667 1.109037 0.03671665</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   n_groups total_ties</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1        2        102</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        2         51</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

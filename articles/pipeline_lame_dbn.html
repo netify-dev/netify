@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-07-12</h4>
+            <h4 data-toc-skip class="date">2026-10-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/pipeline_lame_dbn.Rmd" class="external-link"><code>vignettes/pipeline_lame_dbn.Rmd</code></a></small>
       <div class="d-none name"><code>pipeline_lame_dbn.Rmd</code></div>
@@ -244,12 +244,11 @@ covariates</li>
 <p>For longitudinal modeling workflows that need per-period matrices,
 use <code><a href="../reference/netify_to_lame.html">to_lame()</a></code>. This is a thin specialization of
 <code><a href="../reference/netify_to_amen.html">to_amen()</a></code> that (a) can return ragged per-period matrices
-when actor sets vary, (b) emits a ready-to-run padding +
-<code>lame::lame()</code> snippet, and (c) provides
-<code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code> for round-tripping posterior predictions
-back into a netify for plotting. The ICEWS example below has the same
-actor set in each year, but the format also supports open-cohort
-panels.</p>
+when actor sets vary, (b) emits a ready-to-run <code>lame::lame()</code>
+call, and (c) provides <code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code> for round-tripping
+posterior predictions back into a netify for plotting. The ICEWS example
+below has the same actor set in each year, but the format also supports
+open-cohort panels.</p>
 <div class="section level3">
 <h3 id="when-to-use-lame-format">when to use lame format<a class="anchor" aria-label="anchor" href="#when-to-use-lame-format"></a>
 </h3>
@@ -307,47 +306,52 @@ forming, organizations dissolving)</li>
 <span><span class="co">#&gt; 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 </span></span>
 <span><span class="co">#&gt;  152  152  152  152  152  152  152  152  152  152  152  152  152</span></span></code></pre></div>
 <p>Each element of the list can have a different set of actors.
-<code><a href="../reference/netify_to_lame.html">to_lame()</a></code> also bundles a copy-paste-ready snippet that pads
-the ragged list into a 3D array with <code>lame::list_to_array()</code>
-and then fits <code>lame::lame()</code>:</p>
+<code><a href="../reference/netify_to_lame.html">to_lame()</a></code> also bundles a copy-paste-ready
+<code>lame::lame()</code> call. <code>lame::lame()</code> takes the
+per-period lists directly and aligns actors across periods by name, so
+no manual padding is needed:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">nl</span><span class="op">$</span><span class="va">ame_call</span><span class="op">)</span></span>
-<span><span class="co">#&gt; U &lt;- unique(unlist(lapply(nl$Y, rownames)))</span></span>
-<span><span class="co">#&gt; padded &lt;- lame::list_to_array(actors = U, Y = nl$Y, Xdyad = nl$Xdyad, Xrow = nl$Xrow, Xcol = nl$Xcol)</span></span>
-<span><span class="co">#&gt; lame::lame(Y = padded$Y, Xdyad = padded$Xdyad, Xrow = padded$Xrow, Xcol = padded$Xcol, family = "normal", method = "mcmc", nscan = 1000, burn = 500)</span></span></code></pre></div>
+<span><span class="co">#&gt; lame::lame(Y = nl$Y, Xdyad = nl$Xdyad, Xrow = nl$Xrow, Xcol = nl$Xcol, family = "normal", method = "mcmc", nscan = 1000, burn = 500)</span></span></code></pre></div>
 <p>Run that snippet to fit the model. Conceptually:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">lame</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/lame/" class="external-link">lame</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">U</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">nl</span><span class="op">$</span><span class="va">Y</span>, <span class="va">rownames</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">padded</span> <span class="op">&lt;-</span> <span class="fu">lame</span><span class="fu">::</span><span class="fu">list_to_array</span><span class="op">(</span>actors <span class="op">=</span> <span class="va">U</span>, Y <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Y</span>, Xdyad <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Xdyad</span>,</span>
-<span>    Xrow <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Xrow</span>, Xcol <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Xcol</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">lame_fit</span> <span class="op">=</span> <span class="fu">lame</span><span class="fu">::</span><span class="fu">lame</span><span class="op">(</span></span>
-<span>    Y <span class="op">=</span> <span class="va">padded</span><span class="op">$</span><span class="va">Y</span>, Xdyad <span class="op">=</span> <span class="va">padded</span><span class="op">$</span><span class="va">Xdyad</span>,</span>
-<span>    Xrow <span class="op">=</span> <span class="va">padded</span><span class="op">$</span><span class="va">Xrow</span>, Xcol <span class="op">=</span> <span class="va">padded</span><span class="op">$</span><span class="va">Xcol</span>,</span>
-<span>    R <span class="op">=</span> <span class="fl">2</span>, family <span class="op">=</span> <span class="st">"normal"</span>,</span>
-<span>    method <span class="op">=</span> <span class="st">"mcmc"</span>, nscan <span class="op">=</span> <span class="fl">1000</span>, burn <span class="op">=</span> <span class="fl">500</span></span>
+<span><span class="va">lame_fit</span> <span class="op">&lt;-</span> <span class="fu">lame</span><span class="fu">::</span><span class="fu">lame</span><span class="op">(</span></span>
+<span>    Y <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Y</span>,</span>
+<span>    Xdyad <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Xdyad</span>,</span>
+<span>    Xrow <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Xrow</span>,</span>
+<span>    Xcol <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Xcol</span>,</span>
+<span>    R <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    family <span class="op">=</span> <span class="st">"normal"</span>,</span>
+<span>    method <span class="op">=</span> <span class="st">"mcmc"</span>,</span>
+<span>    nscan <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>    burn <span class="op">=</span> <span class="fl">500</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="round-tripping-fitted-values-back-to-netify">round-tripping fitted values back to netify<a class="anchor" aria-label="anchor" href="#round-tripping-fitted-values-back-to-netify"></a>
 </h3>
 <p>Once a fit is in hand, <code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code> pulls the
-posterior-mean linear predictor (or a residual / probability / per-cell
-quantile) back into a cross-sectional netify so it can be plotted or
-compared against the observed network. In the example below,
-<code>lame_fit</code> is the object created by running the model-fitting
-snippet above:</p>
+posterior-mean prediction (or a residual / probability / per-cell
+quantile) back into a netify so it can be plotted or compared against
+the observed network. Longitudinal <code>lame::lame()</code> fits come
+back as a longitudinal netify with one network per period. In the
+example below, <code>lame_fit</code> is the object created by running
+the model-fitting snippet above:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># posterior-mean linear predictor</span></span>
-<span><span class="va">pred_net</span> <span class="op">=</span> <span class="fu"><a href="../reference/from_lame_fit.html">from_lame_fit</a></span><span class="op">(</span><span class="va">lame_fit</span>, value <span class="op">=</span> <span class="st">"fitted"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># posterior-mean prediction for each period</span></span>
+<span><span class="va">pred_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/from_lame_fit.html">from_lame_fit</a></span><span class="op">(</span><span class="va">lame_fit</span>, value <span class="op">=</span> <span class="st">"fitted"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pred_net</span>, style <span class="op">=</span> <span class="st">"heatmap"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 90% per-cell credible interval bounds on the probability scale</span></span>
-<span><span class="co"># (only for binary families; here for illustration)</span></span>
-<span><span class="va">lo</span> <span class="op">=</span> <span class="fu"><a href="../reference/from_lame_fit.html">from_lame_fit</a></span><span class="op">(</span><span class="va">lame_fit</span>, value <span class="op">=</span> <span class="st">"prob_lower"</span>, alpha <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span>
-<span><span class="va">hi</span> <span class="op">=</span> <span class="fu"><a href="../reference/from_lame_fit.html">from_lame_fit</a></span><span class="op">(</span><span class="va">lame_fit</span>, value <span class="op">=</span> <span class="st">"prob_upper"</span>, alpha <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># observed minus fitted for each period</span></span>
+<span><span class="va">resid_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/from_lame_fit.html">from_lame_fit</a></span><span class="op">(</span><span class="va">lame_fit</span>, value <span class="op">=</span> <span class="st">"residual"</span><span class="op">)</span></span></code></pre></div>
+<p>The per-cell quantile values (<code>"prob_lower"</code>,
+<code>"prob_upper"</code>, <code>"fitted_lower"</code>,
+<code>"fitted_upper"</code>) need a fit that stores per-draw fitted
+arrays (e.g. <code>fit$EZ_draws</code> or <code>fit$BOOT$EZ</code>);
+<code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code> reports which slots it looked for when none
+are present.</p>
 <p><code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code> auto-detects the link function: probit
 for <code>lame::ame_als()</code> / <code><a href="https://rdrr.io/pkg/amen/man/ame.html" class="external-link">amen::ame()</a></code> fits, logit
 for <code>lame::lame()</code> Gibbs fits, with an explicit
@@ -377,6 +381,12 @@ of relation types (layers).</p>
 <span>    dyad_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"verbConf"</span><span class="op">)</span>,</span>
 <span>    dyad_vars_symmetric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: <span style="color: #BBBB00;">!</span> 53400 dyads have different weights in each direction, but `symmetric = TRUE`</span></span>
+<span><span class="co">#&gt;   stores one value per pair (e.g. <span style="color: #0000BB;">"Afghanistan"</span> and <span style="color: #0000BB;">"Albania"</span>).</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The value from the last matching row in the data is used for each such pair.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> To combine both directions, aggregate first with `aggregate_dyad(...,</span></span>
+<span><span class="co">#&gt;   symmetric = TRUE)` or set `sum_dyads = TRUE`; to keep them separate, set</span></span>
+<span><span class="co">#&gt;   `symmetric = FALSE`.</span></span>
 <span></span>
 <span><span class="co"># material cooperation layer (directed - trade/aid flows)</span></span>
 <span><span class="va">material_coop</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
@@ -484,11 +494,12 @@ transfers</li>
 <h3 id="creating-mixed-directedness-multilayer-networks">creating mixed-directedness multilayer networks<a class="anchor" aria-label="anchor" href="#creating-mixed-directedness-multilayer-networks"></a>
 </h3>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># symmetric layer: average verbal cooperation</span></span>
+<code class="sourceCode R"><span><span class="co"># symmetric layer: summed verbal cooperation</span></span>
 <span><span class="va">verbal_symm</span> <span class="op">=</span> <span class="fu"><a href="../reference/netify.html">netify</a></span><span class="op">(</span></span>
 <span>    <span class="va">icews</span>,</span>
 <span>    actor1 <span class="op">=</span> <span class="st">"i"</span>, actor2 <span class="op">=</span> <span class="st">"j"</span>, time <span class="op">=</span> <span class="st">"year"</span>,</span>
 <span>    symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    sum_dyads <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    weight <span class="op">=</span> <span class="st">"verbCoop"</span>,</span>
 <span>    missing_to_zero <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>    output_format <span class="op">=</span> <span class="st">"longit_array"</span></span>
@@ -643,7 +654,7 @@ unobserved dyads represent genuine zeros.</p>
 <tr class="odd">
 <td>Single-layer, longitudinal (varying actors)</td>
 <td><code>to_lame(lame=TRUE)</code></td>
-<td>per-period lists + padding / fit snippet</td>
+<td>per-period lists + <code>lame::lame()</code> call</td>
 </tr>
 <tr class="even">
 <td>Round-trip AME/LAME fit back to netify</td>

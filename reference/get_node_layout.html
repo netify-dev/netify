@@ -13,7 +13,7 @@ suitable for plotting."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -157,7 +157,9 @@ that appear more frequently are given higher weight, producing layouts that
 emphasize the stable core structure of the network.</p>
 <p><strong>bipartite networks:</strong></p>
 <p>for bipartite networks, the default layout arranges the two node sets in separate
-columns.</p>
+columns. when the same actor name appears in both node sets, the <code>actor</code>
+column prefixes the names with <code>"row:"</code> and <code>"col:"</code> so that each
+node set keeps its own position.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>

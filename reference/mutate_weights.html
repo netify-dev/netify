@@ -11,7 +11,7 @@ or applying any custom mathematical transformation to network weights."></head><
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,7 +93,8 @@ shifting distributions.</p></dd>
 
 <dt id="arg-new-name">new_name<a class="anchor" aria-label="anchor" href="#arg-new-name"></a></dt>
 <dd><p>optional new name for the weight variable. if provided, updates
-the weight attribute and descriptive labels. if NULL, keeps the original name.</p></dd>
+the weight attribute and descriptive labels. if NULL, keeps the original name.
+for multilayer networks, supply one name per layer.</p></dd>
 
 
 <dt id="arg-keep-original">keep_original<a class="anchor" aria-label="anchor" href="#arg-keep-original"></a></dt>
@@ -104,13 +105,15 @@ as a dyadic variable. if FALSE, discards original weights to save memory.</p></d
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>a netify object with transformed weights. the original weights are optionally
-preserved as a dyadic variable named "original_weight".</p>
+preserved as a dyadic variable named "original_weight" (or
+"original_weight_<layer>" for each layer of a multilayer network).</layer></p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>the function handles all netify object types:</p><ul><li><p><strong>cross-sectional</strong>: transforms the single network matrix</p></li>
 <li><p><strong>longitudinal arrays</strong>: transforms each time slice</p></li>
 <li><p><strong>longitudinal lists</strong>: transforms each time period matrix</p></li>
+<li><p><strong>multilayer networks</strong>: transforms each layer separately</p></li>
 </ul><p>the function automatically updates network attributes:</p><ul><li><p>updates <code>is_binary</code> if transformation results in 0/1 values</p></li>
 <li><p>updates <code>detail_weight</code> with transformation description</p></li>
 <li><p>preserves all other network and nodal attributes</p></li>
@@ -151,8 +154,8 @@ and will show an informational message.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> • Cross-Sectional</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> • # Unique Actors: 152</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Network Summary Statistics:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>           dens miss  mean recip trans</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> verbCoop 0.435    0 2.243 0.966 0.639</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>               dens miss  mean recip trans</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> log_verbCoop 0.435    0 2.243 0.966 0.639</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> • Nodal Features: None</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> • Dyad Features: original_weight</span>
 <span class="r-in"><span></span></span>

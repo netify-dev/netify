@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-07-12</h4>
+            <h4 data-toc-skip class="date">2026-10-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/tracking_changes.Rmd" class="external-link"><code>vignettes/tracking_changes.Rmd</code></a></small>
       <div class="d-none name"><code>tracking_changes.Rmd</code></div>
@@ -362,8 +362,7 @@ This is the artifact you usually want for downstream filtering and
 plotting – the same column layout (<code>net_i</code>,
 <code>net_j</code>, <code>metric</code>, <code>value</code>,
 <code>p_value</code>) shows up regardless of whether you passed a list,
-a longitudinal netify, a multilayer netify, or used
-<code>by=</code>:</p>
+a longitudinal netify, or a multilayer netify:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>    <span class="va">coop_comparison</span><span class="op">$</span><span class="va">comparisons</span>,</span>
@@ -452,7 +451,7 @@ least one of the two networks appear in both. This low value tells us
 that most country pairs engage in either verbal OR material cooperation,
 but not both.</li>
 <li>
-<strong>hamming (0.308)</strong>: About 31% of dyads (after NA
+<strong>hamming (0.311)</strong>: About 31% of dyads (after NA
 handling) differ between the two networks. This measures the proportion
 of comparable country pairs that have different connection
 patterns.</li>

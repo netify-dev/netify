@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-07-12</h4>
+            <h4 data-toc-skip class="date">2026-10-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/attribute_analysis.Rmd" class="external-link"><code>vignettes/attribute_analysis.Rmd</code></a></small>
       <div class="d-none name"><code>attribute_analysis.Rmd</code></div>
@@ -260,8 +260,8 @@ countries, and alliance commitments from the ATOP dataset.</p>
 <span>    alliance_score <span class="op">=</span> <span class="va">atop_defense</span> <span class="op">+</span> <span class="va">atop_offense</span> <span class="op">+</span> <span class="va">atop_neutral</span> <span class="op">+</span> <span class="va">atop_nonagg</span> <span class="op">+</span> <span class="va">atop_consul</span>,</span>
 <span>    alliance_norm <span class="op">=</span> <span class="va">alliance_score</span> <span class="op">/</span> <span class="fl">5</span>,</span>
 <span>    cooperation <span class="op">=</span> <span class="va">alliance_norm</span>,</span>
-<span>    region1 <span class="op">=</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">ccode1</span>, <span class="st">"cown"</span>, <span class="st">"region"</span><span class="op">)</span>,</span>
-<span>    region2 <span class="op">=</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">ccode2</span>, <span class="st">"cown"</span>, <span class="st">"region"</span><span class="op">)</span>,</span>
+<span>    region1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">ccode1</span>, <span class="st">"cown"</span>, <span class="st">"region"</span><span class="op">)</span>,</span>
+<span>    region2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">ccode2</span>, <span class="st">"cown"</span>, <span class="st">"region"</span><span class="op">)</span>,</span>
 <span>    log_gdp1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">pwtrgdp1</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>    log_gdp2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">pwtrgdp2</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>    log_capdist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">capdist</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span>,</span>
@@ -278,6 +278,7 @@ countries, and alliance commitments from the ATOP dataset.</p>
 <span>  <span class="va">cow_2012</span>,</span>
 <span>  actor1 <span class="op">=</span> <span class="st">'ccode1'</span>, actor2 <span class="op">=</span> <span class="st">'ccode2'</span>,</span>
 <span>  symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  sum_dyads <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  weight <span class="op">=</span> <span class="st">'cooperation'</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -314,7 +315,7 @@ variables.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="va">nodal_data</span><span class="op">$</span><span class="va">country_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">nodal_data</span><span class="op">$</span><span class="va">actor</span>, <span class="st">"cown"</span>, <span class="st">"country.name"</span><span class="op">)</span></span>
+<span><span class="va">nodal_data</span><span class="op">$</span><span class="va">country_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">nodal_data</span><span class="op">$</span><span class="va">actor</span>, <span class="st">"cown"</span>, <span class="st">"country.name"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">alliance_net</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_node_vars.html">add_node_vars</a></span><span class="op">(</span><span class="va">alliance_net</span>, <span class="va">nodal_data</span>, actor <span class="op">=</span> <span class="st">"actor"</span><span class="op">)</span></span></code></pre></div>
 <p>Add dyadic (relationship-level) variables. A <strong>dyad</strong> is
@@ -846,13 +847,13 @@ another example of categorical homophily:</p>
 <td align="center">region</td>
 <td align="center">categorical</td>
 <td align="center">0</td>
-<td align="center">0.783</td>
+<td align="center">0.778</td>
 <td align="center">0.793</td>
-<td align="center">0.034</td>
-<td align="center">0.759</td>
+<td align="center">0.036</td>
+<td align="center">0.756</td>
 <td align="center">0.001</td>
-<td align="center">0.772</td>
-<td align="center">0.794</td>
+<td align="center">0.767</td>
+<td align="center">0.79</td>
 <td align="center">4046</td>
 <td align="center">14869</td>
 <td align="center">0</td>
@@ -868,9 +869,9 @@ another example of categorical homophily:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p><strong>Regional Clustering Results:</strong></p>
 <ul>
-<li>Homophily score: 0.783</li>
+<li>Homophily score: 0.778</li>
 <li>Within-region alliances: 0.793</li>
-<li>Cross-region alliances: 0.034</li>
+<li>Cross-region alliances: 0.036</li>
 </ul>
 </div>
 <div class="section level2">
@@ -995,21 +996,22 @@ type</li>
 <table class="table">
 <caption>Regional Alliance Matrix (row-normalized)</caption>
 <colgroup>
-<col width="15%">
+<col width="22%">
+<col width="9%">
+<col width="10%">
 <col width="12%">
-<col width="13%">
-<col width="15%">
-<col width="16%">
-<col width="8%">
+<col width="23%">
 <col width="6%">
-<col width="11%">
+<col width="5%">
+<col width="9%">
 </colgroup>
 <thead><tr class="header">
 <th align="left"></th>
 <th align="center">East Asia &amp; Pacific</th>
 <th align="center">Europe &amp; Central Asia</th>
 <th align="center">Latin America &amp; Caribbean</th>
-<th align="center">Middle East &amp; North Africa</th>
+<th align="center">Middle East, North Africa, Afghanistan &amp;
+Pakistan</th>
 <th align="center">North America</th>
 <th align="center">South Asia</th>
 <th align="center">Sub-Saharan Africa</th>
@@ -1020,9 +1022,9 @@ type</li>
 <td align="center">0.549</td>
 <td align="center">0.221</td>
 <td align="center">0.032</td>
-<td align="center">0.005</td>
+<td align="center">0.035</td>
 <td align="center">0.063</td>
-<td align="center">0.123</td>
+<td align="center">0.093</td>
 <td align="center">0.008</td>
 </tr>
 <tr class="even">
@@ -1030,9 +1032,9 @@ type</li>
 <td align="center">0.047</td>
 <td align="center">0.882</td>
 <td align="center">0.004</td>
-<td align="center">0.022</td>
+<td align="center">0.024</td>
 <td align="center">0.035</td>
-<td align="center">0.006</td>
+<td align="center">0.005</td>
 <td align="center">0.004</td>
 </tr>
 <tr class="odd">
@@ -1040,39 +1042,40 @@ type</li>
 <td align="center">0.019</td>
 <td align="center">0.012</td>
 <td align="center">0.931</td>
-<td align="center">0.000</td>
+<td align="center">0.001</td>
 <td align="center">0.031</td>
-<td align="center">0.004</td>
+<td align="center">0.003</td>
 <td align="center">0.003</td>
 </tr>
 <tr class="even">
-<td align="left">Middle East &amp; North Africa</td>
-<td align="center">0.005</td>
-<td align="center">0.111</td>
-<td align="center">0.000</td>
-<td align="center">0.411</td>
-<td align="center">0.005</td>
+<td align="left">Middle East, North Africa, Afghanistan &amp;
+Pakistan</td>
+<td align="center">0.035</td>
+<td align="center">0.112</td>
 <td align="center">0.002</td>
-<td align="center">0.467</td>
+<td align="center">0.394</td>
+<td align="center">0.009</td>
+<td align="center">0.005</td>
+<td align="center">0.444</td>
 </tr>
 <tr class="odd">
 <td align="left">North America</td>
 <td align="center">0.208</td>
 <td align="center">0.542</td>
 <td align="center">0.172</td>
-<td align="center">0.016</td>
+<td align="center">0.031</td>
 <td align="center">0.010</td>
-<td align="center">0.047</td>
+<td align="center">0.031</td>
 <td align="center">0.005</td>
 </tr>
 <tr class="even">
 <td align="left">South Asia</td>
-<td align="center">0.639</td>
-<td align="center">0.148</td>
+<td align="center">0.648</td>
+<td align="center">0.154</td>
 <td align="center">0.033</td>
-<td align="center">0.008</td>
-<td align="center">0.074</td>
-<td align="center">0.098</td>
+<td align="center">0.033</td>
+<td align="center">0.066</td>
+<td align="center">0.066</td>
 <td align="center">0.000</td>
 </tr>
 <tr class="odd">
@@ -1135,6 +1138,13 @@ regions:</strong></p>
 <table class="table">
 <caption>Cross-dimensional Analysis: Regime Types Across
 Regions</caption>
+<colgroup>
+<col width="56%">
+<col width="12%">
+<col width="12%">
+<col width="8%">
+<col width="10%">
+</colgroup>
 <thead><tr class="header">
 <th align="left"></th>
 <th align="center">Autocracy</th>
@@ -1165,11 +1175,12 @@ Regions</caption>
 <td align="center">0.031</td>
 </tr>
 <tr class="even">
-<td align="left">Middle East &amp; North Africa</td>
-<td align="center">0.043</td>
-<td align="center">0.014</td>
-<td align="center">0.017</td>
-<td align="center">0.000</td>
+<td align="left">Middle East, North Africa, Afghanistan &amp;
+Pakistan</td>
+<td align="center">0.044</td>
+<td align="center">0.016</td>
+<td align="center">0.018</td>
+<td align="center">0.001</td>
 </tr>
 <tr class="odd">
 <td align="left">North America</td>
@@ -1180,8 +1191,8 @@ Regions</caption>
 </tr>
 <tr class="even">
 <td align="left">South Asia</td>
+<td align="center">0.004</td>
 <td align="center">0.005</td>
-<td align="center">0.006</td>
 <td align="center">0.003</td>
 <td align="center">0.000</td>
 </tr>
@@ -1271,7 +1282,7 @@ pairs. (Negative correlation = shorter distance, more alliances)</p>
 P-value: &lt; 0.001</p>
 <p><strong>alliance_intensity:</strong> - Correlation: 1 - P-value: &lt;
 0.001</p>
-<p><strong>defense_alliance:</strong> - Correlation: 0.892 - P-value:
+<p><strong>defense_alliance:</strong> - Correlation: 0.891 - P-value:
 &lt; 0.001</p>
 </div>
 </div>
@@ -1354,7 +1365,7 @@ attributes are associated with ties</li>
 <td align="left">region</td>
 <td align="center">region</td>
 <td align="center">categorical</td>
-<td align="center">0.783</td>
+<td align="center">0.778</td>
 <td align="center">0.001</td>
 <td align="center">***</td>
 <td align="center">Strong homophily</td>
@@ -1532,7 +1543,7 @@ attributes are associated with ties</li>
 </tr>
 <tr class="odd">
 <td align="center">defense_alliance</td>
-<td align="center">0.892</td>
+<td align="center">0.891</td>
 <td align="center">0</td>
 </tr>
 </tbody>
@@ -1763,6 +1774,7 @@ runs the same analyses across multiple time periods.</p>
 <span>  actor2 <span class="op">=</span> <span class="st">'ccode2'</span>,</span>
 <span>  time <span class="op">=</span> <span class="st">'year'</span>,</span>
 <span>  symmetric <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  sum_dyads <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  weight <span class="op">=</span> <span class="st">'cooperation'</span></span>
 <span><span class="op">)</span></span>
 <span></span>

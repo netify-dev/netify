@@ -11,7 +11,7 @@ mapping network attributes to visual properties."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -129,8 +129,9 @@ for full details.</p></dd>
 
 <dt><code>point_layout</code></dt>
 <dd><p>optional data.frame or list of data.frames containing
-pre-computed node positions with columns 'actor', 'x', and 'y'. overrides
-<code>layout</code> if provided.</p></dd>
+pre-computed node positions with columns 'actor', 'x', and 'y'. a single
+data.frame is reused for every time period of a longitudinal network.
+overrides <code>layout</code> if provided.</p></dd>
 
 <dt><code>static_actor_positions</code></dt>
 <dd><p>logical. for longitudinal networks, should
@@ -201,9 +202,12 @@ very different weight scales. default is <code>FALSE</code>.</p></dd>
 
 <dl><dt><code>node_filter</code></dt>
 <dd><p>a formula, quoted expression, or function to filter nodes.
-the expression can reference any nodal attribute. for example:
+the expression can reference any nodal attribute attached to the netify object.
+network statistics are not computed automatically, so attach them first, e.g.,
+<code>net &lt;- add_node_vars(net, summary_actor(net), actor = "actor")</code>, after which
 <code>node_filter = ~ degree_total &gt; 5</code> shows only nodes with total degree
-greater than 5.</p></dd>
+greater than 5. for longitudinal networks, the filter is applied within each
+time period, and edges are dropped in the periods where an endpoint is filtered out.</p></dd>
 
 <dt><code>edge_filter</code></dt>
 <dd><p>a formula, quoted expression, or function to filter edges.
@@ -213,9 +217,13 @@ with weight greater than 0.5.</p></dd>
 
 <dt><code>time_filter</code></dt>
 <dd><p>for longitudinal networks, a vector of time periods to include in the plot.
-can be numeric indices or character labels matching the time dimension. if NULL
-(default), all time periods are plotted. for cross-sectional networks, this
-parameter is ignored.</p></dd>
+can be numeric indices or character labels matching the time dimension. numeric
+values are treated as indices when they are all valid positions (e.g., <code>1:3</code>);
+otherwise, numeric values that all match time labels are treated as labels
+(e.g., <code>time_filter = 2012</code>). when numeric values could be read either way,
+they are treated as indices, so pass labels as character (e.g., <code>"2012"</code>) to
+avoid ambiguity. if NULL (default), all time periods are plotted. for
+cross-sectional networks, this parameter is ignored.</p></dd>
 
 
 </dl></div>

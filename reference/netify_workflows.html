@@ -13,7 +13,7 @@ constructor; opening this topic sees the recipes.'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -158,10 +158,10 @@ col-mode covariates separately.</p><div class="sourceCode"><pre><code><span></sp
 
 <div class="sourceCode"><pre><code><span></span>
 <span><span class="va">lm_in</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_lame.html">to_lame</a></span><span class="op">(</span><span class="va">net</span><span class="op">)</span> <span class="co"># auto-picks family from binary/weighted</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">lame</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/lame/" class="external-link">lame</a></span><span class="op">)</span></span>
 <span><span class="co"># copy-paste the printed `lm_in$ame_call`:</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">lame</span><span class="fu">::</span><span class="fu">ame</span><span class="op">(</span>y <span class="op">=</span> <span class="va">lm_in</span><span class="op">$</span><span class="va">y</span>, xdyad <span class="op">=</span> <span class="va">lm_in</span><span class="op">$</span><span class="va">xdyad</span>,</span>
-<span>xrow <span class="op">=</span> <span class="va">lm_in</span><span class="op">$</span><span class="va">xrow</span>, xcol <span class="op">=</span> <span class="va">lm_in</span><span class="op">$</span><span class="va">xcol</span>,</span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">lame</span><span class="fu">::</span><span class="fu">ame</span><span class="op">(</span>Y <span class="op">=</span> <span class="va">lm_in</span><span class="op">$</span><span class="va">Y</span>, Xdyad <span class="op">=</span> <span class="va">lm_in</span><span class="op">$</span><span class="va">Xdyad</span>,</span>
+<span>Xrow <span class="op">=</span> <span class="va">lm_in</span><span class="op">$</span><span class="va">Xrow</span>, Xcol <span class="op">=</span> <span class="va">lm_in</span><span class="op">$</span><span class="va">Xcol</span>,</span>
 <span>family <span class="op">=</span> <span class="st">"binary"</span>, nscan <span class="op">=</span> <span class="fl">1000</span>, burn <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></code></pre></div>
 
     </div>
@@ -169,16 +169,15 @@ col-mode covariates separately.</p><div class="sourceCode"><pre><code><span></sp
     <h2 id="to-ame-binary-bipartite-als-bootstrap-uncertainty-">to ame (binary bipartite + als + bootstrap uncertainty)<a class="anchor" aria-label="anchor" href="#to-ame-binary-bipartite-als-bootstrap-uncertainty-"></a></h2>
 
 
-<div class="sourceCode"><pre><code>
-# fast point estimate + parametric bootstrap cis in one call
-lm_in &lt;- to_lame(net_bp, fit_method = "als", bootstrap = 200)
-library(lame)
-fit &lt;- lame::ame_als(y = lm_in$y, mode = "bipartite",
-family = "binary", bootstrap = 200l)
-confint(fit) # bootstrap cis
-pred &lt;- from_lame_fit(fit, value = "prob")
-plot(pred, style = "heatmap")
-</code></pre></div>
+<div class="sourceCode"><pre><code><span></span>
+<span><span class="co"># fast point estimate + parametric bootstrap cis in one call</span></span>
+<span><span class="va">lm_in</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_lame.html">to_lame</a></span><span class="op">(</span><span class="va">net_bp</span>, fit_method <span class="op">=</span> <span class="st">"als"</span>, bootstrap <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://netify-dev.github.io/lame/" class="external-link">lame</a></span><span class="op">)</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">lame</span><span class="fu">::</span><span class="fu">ame_als</span><span class="op">(</span>Y <span class="op">=</span> <span class="va">lm_in</span><span class="op">$</span><span class="va">Y</span>, mode <span class="op">=</span> <span class="st">"bipartite"</span>,</span>
+<span>family <span class="op">=</span> <span class="st">"binary"</span>, bootstrap <span class="op">=</span> <span class="fl">200L</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="co"># bootstrap cis</span></span>
+<span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/from_lame_fit.html">from_lame_fit</a></span><span class="op">(</span><span class="va">fit</span>, value <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pred</span>, style <span class="op">=</span> <span class="st">"heatmap"</span><span class="op">)</span></span></code></pre></div>
 
     </div>
     <div class="section level2">

@@ -13,7 +13,7 @@ making it useful for converting existing network data into the netify format."><
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -108,7 +108,8 @@ for network properties, making them ready for use with netify functions.</p>
 <p>when properties are not explicitly provided, <code>new_netify</code> intelligently detects:</p><ul><li><p><strong>symmetry</strong>: checks if matrix equals its transpose</p></li>
 <li><p><strong>mode</strong>: infers unipartite/bipartite from dimensions and actor names</p></li>
 <li><p><strong>edge weights</strong>: detects binary (0/1) vs. weighted networks</p></li>
-<li><p><strong>diagonal treatment</strong>: checks if diagonal contains all nas</p></li>
+<li><p><strong>diagonal treatment</strong>: treats a diagonal that is all nas or
+all zeros as having no self-loops and sets it to na</p></li>
 <li><p><strong>missing values</strong>: determines if nas exist off-diagonal</p></li>
 <li><p><strong>actor composition</strong>: for longitudinal data, detects if actors
 remain constant or vary over time</p></li>

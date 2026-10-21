@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,6 +49,107 @@
       <small>Source: <a href="https://github.com/netify-dev/netify/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.5.4" id="netify-154">netify 1.5.4<a class="anchor" aria-label="anchor" href="#netify-154"></a></h2>
+<div class="section level3">
+<h3 id="behavior-changes-1-5-4">Behavior changes<a class="anchor" aria-label="anchor" href="#behavior-changes-1-5-4"></a></h3>
+<p>These fixes change numbers that earlier versions reported.</p>
+<ul><li>
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> density excludes dyads with missing values from the denominator, matching <code><a href="https://rdrr.io/pkg/sna/man/gden.html" class="external-link">sna::gden()</a></code>. Networks without missing dyads are unaffected.</li>
+<li>Matrix, array, and list inputs whose diagonal is entirely zero are now read as having no self-loops (<code>diag_to_NA = TRUE</code>), matching the igraph import path. Pass <code>diag_to_NA = FALSE</code> to keep self-loop cells in density and <code><a href="../reference/summary_actor.html">summary_actor()</a></code> <code>prop_ties</code>.</li>
+<li>
+<code><a href="../reference/to_netify.html">to_netify()</a></code> sets the diagonal of imported statnet <code>network</code> objects that do not allow loops to <code>NA</code>, matching the igraph import. Density for these networks now agrees with <code><a href="https://rdrr.io/pkg/sna/man/gden.html" class="external-link">sna::gden()</a></code>, and netify to statnet to netify round trips keep their density.</li>
+<li>
+<code>netify(..., output_format = "longit_array")</code> respects <code>actor_pds</code> and <code>actor_time_uniform = FALSE</code>. Actors outside their active periods are <code>NA</code> in those periods.</li>
+<li>Supplying <code>actor_pds</code> with gapped numeric time no longer creates empty periods for every integer in the range.</li>
+<li>The stored <code>actor_pds</code> (and <code>get_actor_time_info(net)</code>) uses time labels in the class of the time variable rather than integer positions.</li>
+<li>
+<code><a href="../reference/mixing_matrix.html">mixing_matrix()</a></code> counts each undirected tie once, so <code>total_ties</code> is halved for symmetric networks and raw between-group cells hold half a tie in each mirrored cell. Proportions, assortativity, and modularity are unchanged.</li>
+<li>
+<code><a href="../reference/compare_networks.html">compare_networks()</a></code> counts each undirected edge once in <code>edge_changes</code>. For networks with different actors, correlation, Jaccard, Hamming, QAP, and spectral distance are computed on the shared actors, with a message saying how many actors were left out.</li>
+<li>
+<code><a href="../reference/bootstrap_netlet.html">bootstrap_netlet()</a></code> resamples longitudinal netlets by actor name, so the same actors are drawn in every period. Pairs formed by two copies of the same actor are <code>NA</code> rather than 0, removing a downward bias in density.</li>
+<li>
+<code>subset(from =, to =)</code> on unipartite networks returns a square matrix over the union of the selected actors, with ties outside the <code>from</code> x <code>to</code> block set to <code>NA</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-warnings-and-messages-1-5-4">New warnings and messages<a class="anchor" aria-label="anchor" href="#new-warnings-and-messages-1-5-4"></a></h3>
+<ul><li>
+<code><a href="../reference/netify.html">netify()</a></code> warns when <code>symmetric = TRUE</code> and a dyad appears in both directions within a period with different weights. The value from the last row is still used; use <code>sum_dyads = TRUE</code>, <code>aggregate_dyad(..., symmetric = TRUE)</code>, or <code>symmetric = FALSE</code> to resolve it.</li>
+<li>
+<code>nodal_vars</code> is documented as describing <code>actor1</code>, and <code><a href="../reference/netify.html">netify()</a></code> reports actors that only appear as <code>actor2</code>, since they receive <code>NA</code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-1-5-4">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-5-4"></a></h3>
+<div class="section level4">
+<h4 id="subsetting-and-transformations-1-5-4">Subsetting and transformations<a class="anchor" aria-label="anchor" href="#subsetting-and-transformations-1-5-4"></a></h4>
+<ul><li>
+<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> / <code><a href="../reference/subset_netify.html">subset_netify()</a></code> on longitudinal networks clips actor period bounds to the retained periods. Subsetting to several periods without both endpoints previously made <code>plot(x, time_filter = ...)</code>, <code><a href="../reference/decompose_netify.html">decompose_netify()</a></code>, and <code><a href="../reference/add_node_vars.html">add_node_vars()</a></code> fail with “Actor period bounds are not in the netlet time labels.”</li>
+<li>
+<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> returns requested periods in netlet order without duplicates.</li>
+<li>
+<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> down to a single period keys dyadic data as cross-sectional, so <code><a href="../reference/dyad_correlation.html">dyad_correlation()</a></code>, <code><a href="../reference/attribute_report.html">attribute_report()</a></code>, <code><a href="../reference/add_dyad_vars.html">add_dyad_vars()</a></code>, <code><a href="../reference/mutate_weights.html">mutate_weights()</a></code>, and <code><a href="../reference/pivot_dyad_to_network.html">pivot_dyad_to_network()</a></code> find existing dyadic variables.</li>
+<li>
+<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> of a multilayer longitudinal array to one period returns a cross-sectional <code>[actor, actor, layer]</code> array.</li>
+<li>
+<code><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset()</a></code> on a bipartite network gives a clear error when the selected actors come from only one mode.</li>
+<li>
+<code><a href="../reference/ego_netify.html">ego_netify()</a></code> subsets <code>actor_pds</code>, nodal, and dyadic attributes to the ego network’s actors and periods, and keeps the period name when only one period remains.</li>
+<li>
+<code><a href="../reference/mutate_weights.html">mutate_weights()</a></code> with only <code>add_constant</code> changes longitudinal arrays, updates weight attributes on every period of a longitudinal list, renames the layer of single-layer networks with <code>new_name</code>, and works on multilayer networks. <code><a href="../reference/binarize.html">binarize()</a></code> also works on multilayer networks.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="construction-and-attributes-1-5-4">Construction and attributes<a class="anchor" aria-label="anchor" href="#construction-and-attributes-1-5-4"></a></h4>
+<ul><li>
+<code>nodal_vars</code>, <code>dyad_vars</code>, <code><a href="../reference/add_node_vars.html">add_node_vars()</a></code>, and <code><a href="../reference/add_dyad_vars.html">add_dyad_vars()</a></code> work with POSIXct time.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="plotting-1-5-4">Plotting<a class="anchor" aria-label="anchor" href="#plotting-1-5-4"></a></h4>
+<ul><li>
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws each tie once in undirected networks.</li>
+<li>
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> works for bipartite networks where an actor appears in both modes (for example <code>mexico</code>). <code><a href="../reference/summary_actor.html">summary_actor()</a></code> returns plain actor names for these networks with an <code>actor_mode</code> column.</li>
+<li>
+<code>plot(..., static_actor_positions = TRUE)</code> works for longitudinal bipartite networks.</li>
+<li>
+<code>layout = "sugiyama"</code> works in <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="../reference/get_node_layout.html">get_node_layout()</a></code>.</li>
+<li>
+<code>point_layout</code> accepts a single data.frame reused across periods.</li>
+<li>
+<code>plot_homophily(type = "distribution")</code> works for longitudinal networks.</li>
+<li>
+<code>label_size_by</code>, <code>label_color_by</code>, <code>label_fill_by</code>, and <code>label_alpha_by</code> no longer trigger an “Unknown parameter” warning.</li>
+<li>
+<code>node_filter</code> in longitudinal plots removes edges only in the periods where an endpoint is filtered out.</li>
+<li>
+<code>time_filter</code> accepts numeric time labels such as <code>time_filter = 2012</code> when they are not valid indices, and lists the available periods when nothing matches.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="analysis-1-5-4">Analysis<a class="anchor" aria-label="anchor" href="#analysis-1-5-4"></a></h4>
+<ul><li>
+<code><a href="../reference/homophily.html">homophily()</a></code>, <code><a href="../reference/mixing_matrix.html">mixing_matrix()</a></code>, <code><a href="../reference/attribute_report.html">attribute_report()</a></code>, and <code><a href="../reference/dyad_correlation.html">dyad_correlation()</a></code> work on multilayer longitudinal netlets stored as lists.</li>
+<li>
+<code>homophily(method = "hamming")</code> and <code>method = "jaccard"</code> accept character, factor, and logical attributes.</li>
+<li>
+<code><a href="../reference/dyad_correlation.html">dyad_correlation()</a></code> aligns dyadic covariates to network actors by name.</li>
+<li>
+<code>compare_networks(by = ...)</code> works for <code>what = "structure"</code>, <code>"nodes"</code>, and <code>"attributes"</code>, and gives a clear error for edge comparisons.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="converters-1-5-4">Converters<a class="anchor" aria-label="anchor" href="#converters-1-5-4"></a></h4>
+<ul><li>
+<code><a href="../reference/netify_to_statnet.html">netify_to_statnet()</a></code> accepts factor and Date nodal attributes.</li>
+<li>
+<code>netify_to_amen(lame = TRUE)</code> and <code>to_lame(lame = TRUE)</code> order <code>Xrow</code> and <code>Xcol</code> rows to match each period’s actors.</li>
+<li>The <code>to_lame()$ame_call</code> snippet runs with current lame, and <code><a href="../reference/from_lame_fit.html">from_lame_fit()</a></code> returns a longitudinal netify for longitudinal <code>lame::lame()</code> fits.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="documentation-1-5-4">Documentation<a class="anchor" aria-label="anchor" href="#documentation-1-5-4"></a></h4>
+<ul><li>The <code><a href="../reference/animate_netify.html">animate_netify()</a></code> example runs only when gganimate is installed.</li>
+<li>The <code><a href="../reference/peek.html">peek()</a></code> example uses actor names that exist in <code>icews</code>.</li>
+</ul></div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.5.3" id="netify-153">netify 1.5.3<a class="anchor" aria-label="anchor" href="#netify-153"></a></h2><p class="text-muted">CRAN release: 2026-06-30</p>
 <ul><li>CRAN resubmission: shorten <code><a href="../reference/plot.netify.html">plot.netify()</a></code>, <code><a href="../reference/compare_networks.html">compare_networks()</a></code>, and <code><a href="../reference/netify_to_statnet.html">netify_to_statnet()</a></code> examples so they run quickly on CRAN Windows checks.</li>

@@ -11,7 +11,7 @@ multiple similarity metrics and significance testing."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -185,7 +185,7 @@ permutation test. default TRUE.</p></dd>
 <dd><p>mean similarity among connected pairs (weight &gt; threshold)</p></dd>
 
 <dt><code>mean_similarity_unconnected</code></dt>
-<dd><p>mean similarity among unconnected pairs (weight &lt;= threshold or missing)</p></dd>
+<dd><p>mean similarity among unconnected pairs (weight &lt;= threshold). pairs with a missing tie value are excluded from both groups.</p></dd>
 
 <dt><code>similarity_difference</code></dt>
 <dd><p>difference between connected and unconnected mean similarities</p></dd>
@@ -220,7 +220,9 @@ explicit choice) to silence the message.</p>
 <li><p><code>manhattan</code>: less sensitive to outliers than euclidean</p></li>
 <li><p><code>cosine</code>: useful for normalized data or when sign matters</p></li>
 </ul><p>for categorical/binary attributes:</p><ul><li><p><code>categorical</code>: simple matching (1 if same, 0 if different)</p></li>
-<li><p><code>jaccard</code>: for binary data, emphasizes shared presence over shared absence</p></li>
+<li><p><code>jaccard</code>: for binary data, emphasizes shared presence over shared absence.
+logical attributes use <code>TRUE</code> as presence; for two-category character or
+factor attributes the second level (alphabetical order for characters) marks presence</p></li>
 <li><p><code>hamming</code>: counts positions where values differ (negated for similarity)</p></li>
 </ul><p><strong>threshold parameter:</strong></p>
 <p>for weighted networks, the <code>threshold</code> parameter determines what edge weights

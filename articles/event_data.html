@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-07-12</h4>
+            <h4 data-toc-skip class="date">2026-10-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/event_data.Rmd" class="external-link"><code>vignettes/event_data.Rmd</code></a></small>
       <div class="d-none name"><code>event_data.Rmd</code></div>
@@ -199,14 +199,17 @@ individuals; the remaining dyads were never asked about:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">net_na</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"num_actors"</span>, <span class="st">"density"</span>, <span class="st">"num_edges"</span>,</span>
 <span>                    <span class="st">"prop_edges_missing"</span>, <span class="st">"prop_unknown_edges"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 <pre><code><span><span class="co">##   num_actors density num_edges prop_edges_missing prop_unknown_edges</span></span>
-<span><span class="co">## 1          5     0.4         4                0.6                0.6</span></span></code></pre>
+<span><span class="co">## 1          5       1         4                0.6                0.6</span></span></code></pre>
 <p><code>prop_unknown_edges</code> only shows up when
 <code>missing_to_zero = FALSE</code> — that is the cue that the netlet
-is actually carrying NA semantics downstream. Build the same netlet with
-the default and the NAs are replaced with <code>0</code>s and the column
-disappears; that is fine for UCDP / GED event counts (the rest of this
-vignette uses the default for exactly that reason) but it is the wrong
-choice when “we did not measure this dyad” is a meaningful state.</p>
+is actually carrying NA semantics downstream. Note that
+<code>density</code> is computed over observed dyads only: all four
+observed dyads carry a tie, so density is 1 even though 60% of the dyads
+were never measured. Build the same netlet with the default and the NAs
+are replaced with <code>0</code>s and the column disappears; that is
+fine for UCDP / GED event counts (the rest of this vignette uses the
+default for exactly that reason) but it is the wrong choice when “we did
+not measure this dyad” is a meaningful state.</p>
 <ol start="2" style="list-style-type: decimal">
 <li>
 <strong>Explore</strong>: next we use the basic <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>

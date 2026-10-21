@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,7 @@
                         <h4 data-toc-skip class="author">Cassy Dorff and
 Shahryar Minhas</h4>
             
-            <h4 data-toc-skip class="date">2026-07-12</h4>
+            <h4 data-toc-skip class="date">2026-10-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/netify-dev/netify/blob/main/vignettes/foundations.Rmd" class="external-link"><code>vignettes/foundations.Rmd</code></a></small>
       <div class="d-none name"><code>foundations.Rmd</code></div>
@@ -331,12 +331,12 @@ selected actors:</p>
 <span><span class="co">## 5   130 1995      1 0.005376344    0.01470588         1           0</span></span>
 <span><span class="co">## 6   135 1995      1 0.005376344    0.01470588         1           0</span></span>
 <span><span class="co">##   eigen_vector</span></span>
-<span><span class="co">## 1            0</span></span>
-<span><span class="co">## 2            0</span></span>
-<span><span class="co">## 3            0</span></span>
-<span><span class="co">## 4            0</span></span>
-<span><span class="co">## 5            0</span></span>
-<span><span class="co">## 6            0</span></span></code></pre>
+<span><span class="co">## 1 0.000000e+00</span></span>
+<span><span class="co">## 2 1.859766e-17</span></span>
+<span><span class="co">## 3 0.000000e+00</span></span>
+<span><span class="co">## 4 0.000000e+00</span></span>
+<span><span class="co">## 5 2.385219e-18</span></span>
+<span><span class="co">## 6 1.926012e-17</span></span></code></pre>
 <p>We can look at the distribution of the statistic for all actors over
 time:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -511,14 +511,14 @@ work identically if you prefer that style.</p>
 <p>We might also prefer to add labels, but only a select few:</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vincentarelbundock.github.io/countrycode/" class="external-link">countrycode</a></span><span class="op">)</span></span>
-<span><span class="va">cowns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span></span>
+<span><span class="va">cowns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>        <span class="st">"United States"</span>, <span class="st">"China"</span>, <span class="st">"Russia"</span>,</span>
 <span>        <span class="st">"France"</span>, <span class="st">"Germany"</span>, <span class="st">"United Kingdom"</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    <span class="st">"country.name"</span>, <span class="st">"cown"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">cabbs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://vincentarelbundock.github.io/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">cowns</span>, <span class="st">"cown"</span>, <span class="st">"iso3c"</span><span class="op">)</span></span>
+<span><span class="va">cabbs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/countrycode/man/countrycode.html" class="external-link">countrycode</a></span><span class="op">(</span><span class="va">cowns</span>, <span class="st">"cown"</span>, <span class="st">"iso3c"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">mid_long_network</span>,</span>

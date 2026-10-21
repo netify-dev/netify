@@ -13,7 +13,7 @@ threshold (or threshold function).'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,7 +81,10 @@ threshold (or threshold function).</p>
 becomes 1) or a function <code>f(x)</code> that takes the vector of edge
 weights and returns a single numeric threshold (e.g.,
 <code>function(x) median(x, na.rm = TRUE)</code> or
-<code>function(x) quantile(x, 0.75, na.rm = TRUE)</code>).</p></dd>
+<code>function(x) quantile(x, 0.75, na.rm = TRUE)</code>). for longitudinal and
+multilayer networks, the function is evaluated once on the weights
+pooled across all periods and layers, and the resulting threshold is
+applied to every layer.</p></dd>
 
 
 <dt id="arg-strict">strict<a class="anchor" aria-label="anchor" href="#arg-strict"></a></dt>
@@ -103,7 +106,8 @@ that negative ties will be dropped.</p></dd>
 
 <dt id="arg-new-name">new_name<a class="anchor" aria-label="anchor" href="#arg-new-name"></a></dt>
 <dd><p>optional character. new name for the binarized
-weight column (default keeps the original name).</p></dd>
+weight column (default keeps the original name). for multilayer
+networks, supply one name per layer.</p></dd>
 
 </dl></div>
     <div class="section level2">

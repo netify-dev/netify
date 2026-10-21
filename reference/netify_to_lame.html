@@ -15,7 +15,7 @@ two things netify users care about:"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -111,7 +111,7 @@ message naming the choice.</p></dd>
 <dd><p>logical. when <code>lame = TRUE</code> and the per-period list
 is returned (the function never actually pads in place; it
 always returns a list), controls whether the once-per-session
-info message points users at the padding + <code>lame::lame()</code> snippet
+info message points users at the <code>lame::lame()</code> call
 baked into <code>nl$ame_call</code>. default
 <code>TRUE</code> (emit the message); set <code>FALSE</code> to silence it.</p></dd>
 
@@ -147,7 +147,8 @@ this directly to <code>lame::ame(mode = .)</code>.</p></dd>
 
 <dt><code>ame_call</code></dt>
 <dd><p>character: a literal <code>lame::ame()</code> call
-string the user can copy-paste.</p></dd>
+(cross-sectional) or <code>lame::lame()</code> snippet (longitudinal)
+the user can copy-paste.</p></dd>
 
 
 </dl></div>
@@ -156,17 +157,18 @@ string the user can copy-paste.</p></dd>
 
 <ul><li><p>rectangular <code>y</code> for <strong>bipartite</strong> networks via
 <code>mode = "bipartite"</code> – the standard <code><a href="https://rdrr.io/pkg/amen/man/ame.html" class="external-link">amen::ame()</a></code> rejects this.</p></li>
-<li><p>ragged longitudinal panels via a generated padding snippet –
-<code>amen</code> requires constant actor composition.</p></li>
+<li><p>ragged longitudinal panels via <code>lame::lame()</code>, which aligns
+per-period actor sets by name – <code>amen</code> requires constant actor
+composition.</p></li>
 </ul><p>this function wraps <code>\link{netify_to_amen}</code> and:</p><ol><li><p>picks a <code>family</code> default appropriate to the netify
 (<code>"binary"</code> for binary nets, <code>"normal"</code> for weighted),</p></li>
 <li><p>suggests the correct <code>mode</code> argument for <code>lame::ame()</code>
 (<code>"unipartite"</code> / <code>"bipartite"</code>),</p></li>
-<li><p>for <code>lame = TRUE</code> longitudinal output, emits a copy-paste
-padding + <code>lame::lame()</code> snippet in the
-returned <code>ame_call</code> slot. the function itself does <strong>not</strong>
-pad the list – run the snippet (or the literal call) to do
-that step yourself.</p></li>
+<li><p>for longitudinal output, emits a copy-paste <code>lame::lame()</code>
+call in the returned <code>ame_call</code> slot. with <code>lame = TRUE</code> the
+per-period lists are passed directly; with <code>lame = FALSE</code> the
+snippet first splits the <code>[n, n, t]</code> arrays into the per-period
+lists that <code>lame::lame()</code> expects.</p></li>
 </ol><p><strong>bipartite + binary: the case <code><a href="netify_to_amen.html">to_amen()</a></code> cannot fit.</strong>
 for a bipartite weighted-binary netify (e.g., person x event
 attendance, 0/1), this is the exact pipeline:</p><div class="sourceCode"><pre><code><span></span>
@@ -174,19 +176,18 @@ attendance, 0/1), this is the exact pipeline:</p><div class="sourceCode"><pre><c
 <span>mode <span class="op">=</span> <span class="st">"bipartite"</span>, weight <span class="op">=</span> <span class="st">"attended"</span><span class="op">)</span></span>
 <span><span class="va">nl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/netify_to_lame.html">to_lame</a></span><span class="op">(</span><span class="va">bp</span><span class="op">)</span> <span class="co"># auto-detects binary</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">lame</span><span class="fu">::</span><span class="fu">ame</span><span class="op">(</span></span>
-<span>y <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">y</span>, xrow <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">xrow</span>, xcol <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">xcol</span>,</span>
+<span>Y <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Y</span>, Xrow <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Xrow</span>, Xcol <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">Xcol</span>,</span>
 <span>mode <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">mode</span>, family <span class="op">=</span> <span class="va">nl</span><span class="op">$</span><span class="va">family</span>,</span>
 <span>nscan <span class="op">=</span> <span class="fl">1000</span>, burn <span class="op">=</span> <span class="fl">500</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co"># uncertainty: posterior intervals are in fit$beta / fit$vc</span></span></code></pre></div>
+<span><span class="co"># uncertainty: posterior intervals are in fit$BETA / fit$VC</span></span></code></pre></div>
 
 <p><strong>ragged longitudinal panels.</strong> when <code>lame = TRUE</code> and
 actors enter / exit the network, this function:</p><ol><li><p>builds the per-period list via <code>netify_to_amen(lame=TRUE)</code>,</p></li>
-<li><p>bakes a pad-then-fit snippet into <code>nl$ame_call</code> that the
-user runs to materialize the 3d <code>[n, n, t]</code> array and fit
-<code>lame::lame()</code>. unipartite snippets use <code>lame::list_to_array()</code>;
-bipartite snippets pad rectangular row-by-column arrays directly.</p></li>
-</ol><p>the returned <code>y</code> / <code>xdyad</code> / <code>xrow</code> / <code>xcol</code> are always the
+<li><p>bakes a <code>lame::lame()</code> call into <code>nl$ame_call</code> that passes
+the per-period lists directly; <code>lame::lame()</code> aligns actors
+across periods by name, for unipartite and bipartite networks.</p></li>
+</ol><p>the returned <code>Y</code> / <code>Xdyad</code> / <code>Xrow</code> / <code>Xcol</code> are always the
 per-period list – <code>pad</code> only controls whether the once-per-
 session info message reminding the user of the snippet fires.</p>
     </div>

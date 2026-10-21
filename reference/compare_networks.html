@@ -11,7 +11,7 @@ across multiple networks or within subgroups."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">netify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -121,9 +121,12 @@ laplacian matrices. useful for detecting fundamental structural changes.</p></dd
 
 
 <dt id="arg-by">by<a class="anchor" aria-label="anchor" href="#arg-by"></a></dt>
-<dd><p>character vector of nodal attributes. if specified, compares networks
-within and between attribute groups rather than across input networks.
-(note: currently not fully implemented)</p></dd>
+<dd><p>character string naming a nodal attribute. if specified with a
+single netify object, the network is split into one subnetwork per
+attribute value (each holding only that group's actors) and the groups are
+compared with each other. supported for <code>what = "structure"</code>,
+<code>"nodes"</code>, and <code>"attributes"</code>; edge comparisons are not available
+because the group subnetworks share no actors.</p></dd>
 
 
 <dt id="arg-what">what<a class="anchor" aria-label="anchor" href="#arg-what"></a></dt>
@@ -256,7 +259,7 @@ input depends on the <code>what</code> parameter:</p><dl><dt>for <code>what = "e
 
 
 </dl><p>example: <code>list(connectivity = function(net) { g &lt;- to_igraph(net);
-  c(vertex_conn = igraph::vertex_connectivity(g)) })</code></p></dd>
+c(vertex_conn = igraph::vertex_connectivity(g)) })</code></p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -274,7 +277,9 @@ input depends on the <code>what</code> parameter:</p><dl><dt>for <code>what = "e
 <dd><p>data frame with comparison statistics</p></dd>
 
 <dt>edge_changes</dt>
-<dd><p>list detailing added, removed, and maintained edges (for edge comparisons)</p></dd>
+<dd><p>list detailing added, removed, and maintained edges
+(for edge comparisons). each undirected tie is counted once when both
+networks are symmetric.</p></dd>
 
 <dt>node_changes</dt>
 <dd><p>list detailing added, removed, and maintained nodes (for node comparisons)</p></dd>
@@ -306,6 +311,15 @@ returns this frame directly).</p></dd>
 compares edge patterns between networks using correlation, jaccard similarity,
 hamming distance, spectral distance, or qap permutation tests. returns detailed
 edge changes showing which edges are added, removed, or maintained between networks.</p>
+<p><strong>networks with different actors:</strong>
+when the networks being compared do not contain the same actors, each pair is
+compared in two ways. the similarity metrics (correlation, jaccard, hamming,
+qap, and spectral distance) are computed only on the actors present in both
+networks, so actors who appear in just one network do not count as
+disconnected actors; a message reports how many actors were left out. the
+edge changes, in contrast, cover every actor in either network: an actor
+absent from a network has no ties there, so ties held by actors who enter
+are counted as added and ties held by actors who leave are counted as removed.</p>
 <p><strong>structure comparison (what = "structure"):</strong>
 compares network-level properties like density, reciprocity, transitivity, and
 mean degree. for two networks, also provides percent change calculations.</p>
@@ -363,6 +377,10 @@ undirected degree sequence.</p>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"first"</span> <span class="op">=</span> <span class="va">net_a</span>, <span class="st">"second"</span> <span class="op">=</span> <span class="va">net_b</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The networks do not all share the same actors: 9 actors not present in every</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   network were left out of the similarity metrics.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Each pair is compared on the actors common to both networks; <span style="color: #00BB00;">edge_changes</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   still counts ties gained or lost by actors who enter or leave.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Network Comparison Results</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────</span></span>
@@ -378,10 +396,10 @@ undirected degree sequence.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Edge Comparison Summary</span> ──</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        comparison correlation</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 first vs second       0.503</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 first vs second        0.72</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Edge Changes </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">first_vs_second</span>:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Added: <span style="color: #0000BB;">32</span> | Removed: <span style="color: #0000BB;">32</span> | Maintained: <span style="color: #0000BB;">38</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Added: <span style="color: #0000BB;">16</span> | Removed: <span style="color: #0000BB;">16</span> | Maintained: <span style="color: #0000BB;">19</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">struct_comp</span> <span class="op">&lt;-</span> <span class="fu">compare_networks</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"first"</span> <span class="op">=</span> <span class="va">net_a</span>, <span class="st">"second"</span> <span class="op">=</span> <span class="va">net_b</span><span class="op">)</span>,</span></span>
@@ -408,6 +426,10 @@ undirected degree sequence.</p>
 <span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"first"</span> <span class="op">=</span> <span class="va">net_a</span>, <span class="st">"second"</span> <span class="op">=</span> <span class="va">net_b</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    return_details <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The networks do not all share the same actors: 9 actors not present in every</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   network were left out of the similarity metrics.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Each pair is compared on the actors common to both networks; <span style="color: #00BB00;">edge_changes</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   still counts ties gained or lost by actors who enter or leave.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">detailed_comp</span><span class="op">$</span><span class="va">details</span><span class="op">)</span> <span class="co"># shows available matrices</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "correlation_matrix" "jaccard_matrix"     "hamming_matrix"    </span>
